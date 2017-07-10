@@ -1,0 +1,10 @@
+version: "2"
+
+services:
+  app:
+    build: .
+    volumes:
+      - "$PWD:/data/app"
+    user: 1000:1000
+    working_dir: "/data/app"
+    command: sleep 99999

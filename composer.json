@@ -1,0 +1,29 @@
+{
+    "name": "messaging/messaging",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Dariusz Gafka",
+            "email": "dgafka.mail@gmail.com"
+        }
+    ],
+    "keywords": ["messages", "clean code", "asynchronous"],
+    "autoload": {
+        "psr-4": {
+            "Messaging\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "Messaging\\": "tests"
+    },
+    "require": {
+        "php": ">=7.1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.2.3"
+    },
+    "config": {
+        "bin-dir": "bin/"
+    }
+}

@@ -9,5 +9,8 @@ namespace Messaging\Message;
  */
 interface Message
 {
-
+    /**
+     * @return object|string|array
+     */
+    public function getPayload();
 }

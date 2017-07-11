@@ -3,6 +3,8 @@
 namespace Messaging\Message;
 
 use Messaging\Exception\Message\InvalidMessageHeaderException;
+use Messaging\Registry\DumbClock;
+use Messaging\Registry\DumbUuidGenerator;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -12,9 +14,16 @@ use PHPUnit\Framework\TestCase;
  */
 class MessageHeaderTest extends TestCase
 {
-    public function test_creating_empty_headers()
+    public function test_creating_with_generated_headers()
     {
-        $this->assertEquals([], MessageHeaders::createEmpty()->headers());
+        $messageId = '2d996892-72c7-40ba-b20b-ccdd07221167';
+        $timestamp = 1000;
+
+        $this->assertEquals([
+            MessageHeaders::MESSAGE_ID => $messageId,
+            MessageHeaders::MESSAGE_CORRELATION_ID => $messageId,
+            MessageHeaders::TIMESTAMP => $timestamp
+        ], MessageHeaders::createEmpty(DumbUuidGenerator::create($messageId), DumbClock::create($timestamp))->headers());
     }
 
     public function test_throwing_exception_if_creating_with_empty_header()

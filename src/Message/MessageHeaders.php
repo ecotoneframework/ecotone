@@ -224,6 +224,30 @@ final class MessageHeaders
     }
 
     /**
+     * @return string
+     */
+    public function getReplyChannel() : string
+    {
+        if (!$this->containsKey(self::REPLY_CHANNEL)) {
+            return NullableMessageChannel::CHANNEL_NAME;
+        }
+
+        return $this->get(self::REPLY_CHANNEL);
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorChannel() : string
+    {
+        if (!$this->containsKey(self::ERROR_CHANNEL)) {
+            return NullableMessageChannel::CHANNEL_NAME;
+        }
+
+        return $this->get(self::ERROR_CHANNEL);
+    }
+
+    /**
      * @param array $headers
      * @param $correlationId
      * @param $timestamp

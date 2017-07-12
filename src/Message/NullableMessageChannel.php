@@ -9,6 +9,8 @@ namespace Messaging\Message;
  */
 final class NullableMessageChannel implements MessageChannel
 {
+    const CHANNEL_NAME = 'nullableChannel';
+
     /**
      * @return NullableMessageChannel
      */

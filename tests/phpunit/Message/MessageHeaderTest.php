@@ -5,7 +5,6 @@ namespace Messaging\Message;
 use Messaging\Exception\Message\InvalidMessageHeaderException;
 use Messaging\Exception\Message\MessageHeaderDoesNotExistsException;
 use Messaging\Registry\DumbClock;
-use Messaging\Registry\DumbUuidGenerator;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -28,6 +27,8 @@ class MessageHeaderTest extends TestCase
         $this->assertTrue(Uuid::isValid($headers->get(MessageHeaders::MESSAGE_ID)));
         $this->assertTrue(Uuid::isValid($headers->get(MessageHeaders::MESSAGE_CORRELATION_ID)));
         $this->assertEquals($timestamp, $headers->get(MessageHeaders::TIMESTAMP));
+        $this->assertEquals(NullableMessageChannel::CHANNEL_NAME, $headers->getReplyChannel());
+        $this->assertEquals(NullableMessageChannel::CHANNEL_NAME, $headers->getErrorChannel());
     }
 
     public function test_throwing_exception_if_creating_with_empty_header()
@@ -127,6 +128,19 @@ class MessageHeaderTest extends TestCase
         $this->assertEquals($oldMessageHeaders->get(MessageHeaders::MESSAGE_ID), $newMessageHeaders->get(MessageHeaders::CAUSATION_MESSAGE_ID));
     }
 
+    public function test_creating_with_channels()
+    {
+        $replyChannel = 'replyCh';
+        $errorChannel = 'errorCh';
+        $oldMessageHeaders = MessageHeaders::createWithCustomHeadersAndTimestamp(1000, [
+            MessageHeaders::REPLY_CHANNEL => $replyChannel,
+            MessageHeaders::ERROR_CHANNEL => $errorChannel
+        ]);
+
+        $this->assertEquals($replyChannel, $oldMessageHeaders->getReplyChannel());
+        $this->assertEquals($errorChannel, $oldMessageHeaders->getErrorChannel());
+    }
+    
     /**
      * @param $currentTimestamp
      * @param $headers

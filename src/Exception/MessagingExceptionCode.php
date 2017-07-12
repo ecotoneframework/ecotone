@@ -10,6 +10,7 @@ namespace Messaging\Exception;
 interface MessagingExceptionCode
 {
     const INVALID_MESSAGE_HEADER = 100;
+    const MESSAGE_HEADER_DOES_NOT_EXISTS = 101;
 
     const MESSAGE_SEND_EXCEPTION = 200;
 }

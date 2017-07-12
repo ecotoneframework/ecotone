@@ -206,24 +206,6 @@ final class MessageHeaders
     }
 
     /**
-     * @param array|string[] $headers
-     * @throws \Messaging\Exception\MessagingException
-     */
-    private function initialize(array $headers) : void
-    {
-        foreach ($headers as $headerName => $headerValue) {
-            if (!$headerName) {
-                throw InvalidMessageHeaderException::create("Passed empty header name");
-            }
-            if (!is_scalar($headerValue)) {
-                throw InvalidMessageHeaderException::create("Passed header value {$headerName} is not correct type. It should be scalar");
-            }
-        }
-
-        $this->headers = $headers;
-    }
-
-    /**
      * @return string
      */
     public function getReplyChannel() : string
@@ -245,6 +227,24 @@ final class MessageHeaders
         }
 
         return $this->get(self::ERROR_CHANNEL);
+    }
+
+    /**
+     * @param array|string[] $headers
+     * @throws \Messaging\Exception\MessagingException
+     */
+    private function initialize(array $headers) : void
+    {
+        foreach ($headers as $headerName => $headerValue) {
+            if (!$headerName) {
+                throw InvalidMessageHeaderException::create("Passed empty header name");
+            }
+            if (!is_scalar($headerValue)) {
+                throw InvalidMessageHeaderException::create("Passed header value {$headerName} is not correct type. It should be scalar");
+            }
+        }
+
+        $this->headers = $headers;
     }
 
     /**

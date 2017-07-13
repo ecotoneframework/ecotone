@@ -1,16 +1,16 @@
 <?php
 
-namespace Messaging\Message;
+namespace Messaging;
 
 use Messaging\Clock;
-use Messaging\Exception\Message\InvalidMessageHeaderException;
-use Messaging\Exception\Message\MessageHeaderDoesNotExistsException;
+use Messaging\Exception\InvalidMessageHeaderException;
+use Messaging\Exception\MessageHeaderDoesNotExistsException;
 use Messaging\UuidGenerator;
 use Ramsey\Uuid\Uuid;
 
 /**
  * Class MessageHeaders
- * @package Messaging\Message
+ * @package Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessageHeaders
@@ -177,7 +177,7 @@ final class MessageHeaders
     /**
      * @param string $headerName
      * @return string
-     * @throws \Messaging\Exception\MessagingException
+     * @throws \Messaging\MessagingException
      */
     public function get(string $headerName) : string
     {
@@ -231,7 +231,7 @@ final class MessageHeaders
 
     /**
      * @param array|string[] $headers
-     * @throws \Messaging\Exception\MessagingException
+     * @throws \Messaging\MessagingException
      */
     private function initialize(array $headers) : void
     {

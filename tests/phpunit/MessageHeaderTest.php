@@ -1,9 +1,9 @@
 <?php
 
-namespace Messaging\Message;
+namespace Messaging;
 
-use Messaging\Exception\Message\InvalidMessageHeaderException;
-use Messaging\Exception\Message\MessageHeaderDoesNotExistsException;
+use Messaging\Exception\InvalidMessageHeaderException;
+use Messaging\Exception\MessageHeaderDoesNotExistsException;
 use Messaging\Registry\DumbClock;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -11,7 +11,7 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * Class MessageHeaderTest
- * @package Messaging\Message
+ * @package Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageHeaderTest extends TestCase

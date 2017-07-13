@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Exception\Message;
+namespace Messaging\Exception;
 
-use Messaging\Exception\MessagingException;
+use Messaging\MessagingException;
 
 /**
  * Class InvalidMessageHeaderException
- * @package Messaging\Exception\Message
+ * @package Messaging\Exception
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InvalidMessageHeaderException extends MessagingException

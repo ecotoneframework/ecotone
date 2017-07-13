@@ -1,6 +1,6 @@
 <?php
 
-namespace Messaging\Exception;
+namespace Messaging;
 
 /**
  * Interface ContainsMessagingExceptionCode

@@ -1,10 +1,10 @@
 <?php
 
-namespace Messaging\Message;
+namespace Messaging;
 
 /**
  * Interface Message
- * @package Messaging\Message
+ * @package Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface Message

@@ -1,10 +1,10 @@
 <?php
 
-namespace Messaging\Message;
+namespace Messaging;
 
 /**
  * Class NullableMessageChannel
- * @package Messaging\Message
+ * @package Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class NullableMessageChannel implements MessageChannel

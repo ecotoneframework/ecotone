@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Message;
+namespace Messaging;
 
-use Messaging\Exception\Message\MessageSendException;
+use Messaging\Exception\MessageDeliveryException;
 
 /**
  * Interface MessageChannel
- * @package Messaging\Message
+ * @package Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageChannel
@@ -16,7 +16,7 @@ interface MessageChannel
      *
      * @param Message $message
      * @return void
-     * @throws MessageSendException
+     * @throws MessageDeliveryException
      */
     public function send(Message $message) : void;
 }

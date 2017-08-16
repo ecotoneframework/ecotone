@@ -1,8 +1,8 @@
 <?php
 
-namespace Messaging\Registry;
+namespace Messaging\Support\Clock;
 
-use Messaging\Clock;
+use Messaging\Support\Clock;
 
 /**
  * Class DumbClock

@@ -10,6 +10,11 @@ namespace Messaging;
 interface Message
 {
     /**
+     * @return MessageHeaders
+     */
+    public function getHeaders() : MessageHeaders;
+
+    /**
      * @return object|string|array
      */
     public function getPayload();

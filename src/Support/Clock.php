@@ -1,6 +1,6 @@
 <?php
 
-namespace Messaging;
+namespace Messaging\Support;
 
 /**
  * Interface Clock

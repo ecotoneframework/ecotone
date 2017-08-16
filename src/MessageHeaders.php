@@ -2,10 +2,8 @@
 
 namespace Messaging;
 
-use Messaging\Clock;
 use Messaging\Exception\InvalidMessageHeaderException;
 use Messaging\Exception\MessageHeaderDoesNotExistsException;
-use Messaging\UuidGenerator;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -13,7 +11,7 @@ use Ramsey\Uuid\Uuid;
  * @package Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class MessageHeaders
+class MessageHeaders
 {
     /**
      * An identifier for this message instance. Changes each time a message is mutated.
@@ -74,84 +72,63 @@ final class MessageHeaders
      * MessageHeaders constructor.
      * @param array $headers
      */
-    private function __construct(array $headers)
+    final private function __construct(array $headers)
     {
         $this->initialize($headers);
     }
 
     /**
-     * @param Clock $clock
-     * @return MessageHeaders
-     */
-    public static function createEmpty(Clock $clock) : self
-    {
-        return self::createWithCustomHeaders($clock, []);
-    }
-
-    /**
      * @param int $timestamp
-     * @return MessageHeaders
+     * @return MessageHeaders|static
      */
-    public static function createWithTimestamp(int $timestamp) : self
+    final public static function create(int $timestamp) : self
     {
         $headers = [];
         $correlationId = Uuid::uuid4()->toString();
 
-        return self::createMessageHeadersWith($headers, $correlationId, $timestamp);
-    }
-
-    /**
-     * @param Clock $clock
-     * @param array|string[] $headers
-     * @return MessageHeaders
-     */
-    public static function createWithCustomHeaders(Clock $clock, array $headers) : self
-    {
-        $timestamp = $clock->getCurrentTimestamp();
-        $correlationId = Uuid::uuid4()->toString();
-        return self::createMessageHeadersWith($headers, $correlationId, $timestamp);
+        return static::createMessageHeadersWith($headers, $correlationId, $timestamp);
     }
 
     /**
      * @param int $timestamp
      * @param array|string[] $headers
-     * @return MessageHeaders
+     * @return MessageHeaders|static
      */
-    public static function createWithCustomHeadersAndTimestamp(int $timestamp, array $headers) : self
+    final public static function createWithHeaders(int $timestamp, array $headers) : self
     {
         $correlationId = Uuid::uuid4()->toString();
-        return self::createMessageHeadersWith($headers, $correlationId, $timestamp);
+        return static::createMessageHeadersWith($headers, $correlationId, $timestamp);
     }
 
     /**
-     * @param Clock $clock
+     * @param int $timestamp
      * @param array $headers
      * @param MessageHeaders $correlatedMessage
-     * @return MessageHeaders
+     * @return MessageHeaders|static
      */
-    public static function createWithCorrelated(Clock $clock, array $headers, MessageHeaders $correlatedMessage) : self
+    final public static function createWithCorrelated(int $timestamp, array $headers, MessageHeaders $correlatedMessage) : self
     {
-        return self::createMessageHeadersWith($headers, $correlatedMessage->get(self::MESSAGE_CORRELATION_ID), $clock->getCurrentTimestamp());
+        return static::createMessageHeadersWith($headers, $correlatedMessage->get(self::MESSAGE_CORRELATION_ID), $timestamp);
     }
 
     /**
-     * @param Clock $clock
+     * @param int $timestamp
      * @param array $headers
      * @param MessageHeaders $causationMessage
-     * @return MessageHeaders
+     * @return MessageHeaders|static
      */
-    public static function createWithCausation(Clock $clock, array $headers, MessageHeaders $causationMessage) : self
+    final public static function createWithCausation(int $timestamp, array $headers, MessageHeaders $causationMessage) : self
     {
         $headersWithCausationId = $headers;
         $headersWithCausationId[self::CAUSATION_MESSAGE_ID] = $causationMessage->get(self::MESSAGE_ID);
 
-        return self::createMessageHeadersWith($headersWithCausationId, $causationMessage->get(self::MESSAGE_CORRELATION_ID), $clock->getCurrentTimestamp());
+        return static::createMessageHeadersWith($headersWithCausationId, $causationMessage->get(self::MESSAGE_CORRELATION_ID), $timestamp);
     }
 
     /**
      * @return array|string[]
      */
-    public function headers() : array
+    final public function headers() : array
     {
         return $this->headers;
     }
@@ -160,7 +137,7 @@ final class MessageHeaders
      * @param string $headerName
      * @return bool
      */
-    public function containsKey(string $headerName) : bool
+    final public function containsKey(string $headerName) : bool
     {
         return array_key_exists($headerName, $this->headers);
     }
@@ -169,7 +146,7 @@ final class MessageHeaders
      * @param string $value
      * @return bool
      */
-    public function containsValue(string $value) : bool
+    final public function containsValue(string $value) : bool
     {
         return in_array($value, $this->headers);
     }
@@ -179,7 +156,7 @@ final class MessageHeaders
      * @return string
      * @throws \Messaging\MessagingException
      */
-    public function get(string $headerName) : string
+    final public function get(string $headerName) : string
     {
         if (!$this->containsKey($headerName)) {
             throw MessageHeaderDoesNotExistsException::create("Header with name {$headerName} does not exists");
@@ -191,7 +168,7 @@ final class MessageHeaders
     /**
      * @return int
      */
-    public function size() : int
+    final public function size() : int
     {
         return count($this->headers());
     }
@@ -200,7 +177,7 @@ final class MessageHeaders
      * @param MessageHeaders $messageHeaders
      * @return bool
      */
-    public function equals(MessageHeaders $messageHeaders) : bool
+    final public function equals(MessageHeaders $messageHeaders) : bool
     {
         return $this == $messageHeaders;
     }
@@ -208,7 +185,7 @@ final class MessageHeaders
     /**
      * @return string
      */
-    public function getReplyChannel() : string
+    final public function getReplyChannel() : string
     {
         if (!$this->containsKey(self::REPLY_CHANNEL)) {
             return NullableMessageChannel::CHANNEL_NAME;
@@ -220,7 +197,7 @@ final class MessageHeaders
     /**
      * @return string
      */
-    public function getErrorChannel() : string
+    final public function getErrorChannel() : string
     {
         if (!$this->containsKey(self::ERROR_CHANNEL)) {
             return NullableMessageChannel::CHANNEL_NAME;
@@ -230,10 +207,19 @@ final class MessageHeaders
     }
 
     /**
+     * @param string $headerName
+     * @param $headerValue
+     */
+    final protected function changeHeader(string $headerName, $headerValue) : void
+    {
+        $this->headers[$headerName] = $headerValue;
+    }
+
+    /**
      * @param array|string[] $headers
      * @throws \Messaging\MessagingException
      */
-    private function initialize(array $headers) : void
+    final private function initialize(array $headers) : void
     {
         foreach ($headers as $headerName => $headerValue) {
             if (!$headerName) {
@@ -253,9 +239,9 @@ final class MessageHeaders
      * @param $timestamp
      * @return MessageHeaders
      */
-    private static function createMessageHeadersWith(array $headers, $correlationId, $timestamp): MessageHeaders
+    final private static function createMessageHeadersWith(array $headers, $correlationId, $timestamp): MessageHeaders
     {
-        return new self(array_merge($headers, [
+        return new static(array_merge($headers, [
             self::MESSAGE_ID => Uuid::uuid4()->toString(),
             self::MESSAGE_CORRELATION_ID => $correlationId,
             self::TIMESTAMP => $timestamp

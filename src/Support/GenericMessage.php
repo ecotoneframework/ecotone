@@ -66,7 +66,7 @@ final class GenericMessage implements Message
      */
     public static function createWithArrayHeaders(Clock $clock, $payload, array $headers): Message
     {
-        return new self($payload, MessageHeaders::createWithHeaders($clock->getCurrentTimestamp(), $headers));
+        return new self($payload, MessageHeaders::create($clock->getCurrentTimestamp(), $headers));
     }
 
     /**
@@ -76,6 +76,6 @@ final class GenericMessage implements Message
      */
     public static function createWithEmptyHeaders(Clock $clock, $payload): Message
     {
-        return new self($payload, MessageHeaders::create($clock->getCurrentTimestamp()));
+        return new self($payload, MessageHeaders::createEmpty($clock->getCurrentTimestamp()));
     }
 }

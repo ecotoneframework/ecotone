@@ -124,4 +124,17 @@ class MessageBuilderTest extends TestCase
             $message->getHeaders()->get(MessageHeaders::ERROR_CHANNEL)
         );
     }
+
+    public function test_creating_message_with_header()
+    {
+        $headerName = 'some';
+        $message = MessageBuilder::withPayload('somePayload')
+                    ->setHeader($headerName, new \stdClass())
+                    ->build();
+
+        $this->assertEquals(
+            $message->getHeaders()->get($headerName),
+            new \stdClass()
+        );
+    }
 }

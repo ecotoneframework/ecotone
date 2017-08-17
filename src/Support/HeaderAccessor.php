@@ -54,10 +54,10 @@ final class HeaderAccessor
 
     /**
      * @param string $headerName
-     * @return string
+     * @return mixed
      * @throws MessagingException
      */
-    public function getHeader(string $headerName) : string
+    public function getHeader(string $headerName)
     {
         if (!$this->hasHeader($headerName)) {
             throw MessageHeaderDoesNotExistsException::create("Header with name {$headerName} does not exists");

@@ -117,7 +117,7 @@ final class MessageBuilder
      */
     public function build() : Message
     {
-        $messageHeaders = MutableMessageHeaders::createWithHeaders(
+        $messageHeaders = MutableMessageHeaders::create(
             $this->clock->getCurrentTimestamp(),
             $this->headerAccessor->headers()
         );

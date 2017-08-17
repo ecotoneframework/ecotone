@@ -30,7 +30,7 @@ final class EmptyMessage implements Message
      */
     public function getHeaders(): MessageHeaders
     {
-        return MessageHeaders::create(0);
+        return MessageHeaders::createEmpty(0);
     }
 
     /**

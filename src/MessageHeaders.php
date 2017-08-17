@@ -81,7 +81,7 @@ class MessageHeaders
      * @param int $timestamp
      * @return MessageHeaders|static
      */
-    final public static function create(int $timestamp) : self
+    final public static function createEmpty(int $timestamp) : self
     {
         $headers = [];
         $correlationId = Uuid::uuid4()->toString();
@@ -94,7 +94,7 @@ class MessageHeaders
      * @param array|string[] $headers
      * @return MessageHeaders|static
      */
-    final public static function createWithHeaders(int $timestamp, array $headers) : self
+    final public static function create(int $timestamp, array $headers) : self
     {
         $correlationId = Uuid::uuid4()->toString();
         return static::createMessageHeadersWith($headers, $correlationId, $timestamp);
@@ -153,10 +153,10 @@ class MessageHeaders
 
     /**
      * @param string $headerName
-     * @return string
+     * @return mixed
      * @throws \Messaging\MessagingException
      */
-    final public function get(string $headerName) : string
+    final public function get(string $headerName)
     {
         if (!$this->containsKey($headerName)) {
             throw MessageHeaderDoesNotExistsException::create("Header with name {$headerName} does not exists");
@@ -224,9 +224,6 @@ class MessageHeaders
         foreach ($headers as $headerName => $headerValue) {
             if (!$headerName) {
                 throw InvalidMessageHeaderException::create("Passed empty header name");
-            }
-            if (!is_scalar($headerValue)) {
-                throw InvalidMessageHeaderException::create("Passed header value {$headerName} is not correct type. It should be scalar");
             }
         }
 

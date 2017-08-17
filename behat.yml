@@ -1,0 +1,12 @@
+default:
+    autoload:
+        '': %paths.base%/tests
+    translation:
+        locale: en
+    formatters:
+        pretty: true
+    suites:
+      default:
+          paths:    [ %paths.base%/tests/Behat/features ]
+          contexts: [ Behat\Bootstrap\DomainContext ]
+

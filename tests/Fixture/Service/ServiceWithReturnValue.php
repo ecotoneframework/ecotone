@@ -1,0 +1,33 @@
+<?php
+
+namespace Fixture\Service;
+
+/**
+ * Class ServiceWithReturnValue
+ * @package Fixture\Service
+ * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ */
+class ServiceWithReturnValue implements CallableService
+{
+    /**
+     * @var bool
+     */
+    private $wasCalled = false;
+
+    /**
+     * @return string
+     */
+    public function getName() : string
+    {
+        $this->wasCalled = true;
+        return 'johny';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function wasCalled(): bool
+    {
+        return $this->wasCalled;
+    }
+}

@@ -9,7 +9,7 @@ use Messaging\MessagingException;
  * Class HeaderAccessor
  * @package Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @internal class intent to be used with {@link MessageBu}
+ * @internal class intent to be used with {@link Message}
  */
 final class HeaderAccessor
 {

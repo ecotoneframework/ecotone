@@ -2,16 +2,15 @@
 
 namespace Messaging\Handler;
 
-
 use Messaging\Message;
 use Messaging\MessageHandler;
 
 /**
- * Class ServiceActivatingHandler - Responsible for activating chosen service
+ * Class ServiceActivator
  * @package Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ServiceActivatingHandler implements MessageHandler
+final class ServiceActivatingHandler implements MessageHandler
 {
     /**
      * @inheritDoc

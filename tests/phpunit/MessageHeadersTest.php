@@ -2,8 +2,8 @@
 
 namespace Messaging;
 
-use Messaging\Exception\InvalidMessageHeaderException;
-use Messaging\Exception\MessageHeaderDoesNotExistsException;
+use Messaging\InvalidMessageHeaderException;
+use Messaging\MessageHeaderDoesNotExistsException;
 use Messaging\Support\Clock\DumbClock;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -22,13 +22,14 @@ class MessageHeadersTest extends TestCase
 
         $headers = MessageHeaders::createEmpty($timestamp);
 
-        $this->assertEquals(3, $headers->size());
-        $this->assertTrue($headers->containsKey(MessageHeaders::MESSAGE_CORRELATION_ID));
+        $this->assertEquals(2, $headers->size());
         $this->assertTrue(Uuid::isValid($headers->get(MessageHeaders::MESSAGE_ID)));
-        $this->assertTrue(Uuid::isValid($headers->get(MessageHeaders::MESSAGE_CORRELATION_ID)));
         $this->assertEquals($timestamp, $headers->get(MessageHeaders::TIMESTAMP));
         $this->assertEquals(NullableMessageChannel::CHANNEL_NAME, $headers->getReplyChannel());
         $this->assertEquals(NullableMessageChannel::CHANNEL_NAME, $headers->getErrorChannel());
+
+        $this->assertFalse($headers->hasMessageId('2db4db21-e3f1-492a-af98-a61468bb03e9'));
+        $this->assertTrue($headers->hasMessageId($headers->get(MessageHeaders::MESSAGE_ID)));
     }
 
     public function test_creating_with_custom_headers_and_timestamp()
@@ -39,11 +40,11 @@ class MessageHeadersTest extends TestCase
         ];
         $messageHeaders = MessageHeaders::create($currentTimestamp, $headers);
 
-        $this->assertEquals(4, $messageHeaders->size());
+        $this->assertEquals(3, $messageHeaders->size());
         $this->assertEquals($currentTimestamp, $messageHeaders->get(MessageHeaders::TIMESTAMP));
     }
 
-    public function test_throwing_exception_is_asking_for_not_existing_header()
+    public function test_throwing_exception_when_asking_for_not_existing_header()
     {
         $messageHeaders = MessageHeaders::createEmpty(1500);
 
@@ -65,23 +66,6 @@ class MessageHeadersTest extends TestCase
         $messageHeaders = MessageHeaders::createEmpty(100);
         $this->assertFalse(MessageHeaders::createEmpty(100)->equals($messageHeaders));
         $this->assertTrue($messageHeaders->equals($messageHeaders));
-    }
-
-    public function test_creating_correlated_message_headers_from_old_message_headers()
-    {
-        $oldMessageHeaders = MessageHeaders::createEmpty(1000);
-        $newMessageHeaders = MessageHeaders::createWithCorrelated(1001, [], $oldMessageHeaders);
-
-        $this->assertEquals($oldMessageHeaders->get(MessageHeaders::MESSAGE_CORRELATION_ID), $newMessageHeaders->get(MessageHeaders::MESSAGE_CORRELATION_ID));
-    }
-
-    public function test_creating_with_causation_message()
-    {
-        $oldMessageHeaders = MessageHeaders::createEmpty(1000);
-        $newMessageHeaders = MessageHeaders::createWithCausation(1001, [], $oldMessageHeaders);
-
-        $this->assertEquals($oldMessageHeaders->get(MessageHeaders::MESSAGE_CORRELATION_ID), $newMessageHeaders->get(MessageHeaders::MESSAGE_CORRELATION_ID));
-        $this->assertEquals($oldMessageHeaders->get(MessageHeaders::MESSAGE_ID), $newMessageHeaders->get(MessageHeaders::CAUSATION_MESSAGE_ID));
     }
 
     public function test_creating_with_channels()

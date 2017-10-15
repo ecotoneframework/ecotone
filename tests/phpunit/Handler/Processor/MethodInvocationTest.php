@@ -1,0 +1,80 @@
+<?php
+
+namespace Messaging\Handler\Processor;
+
+use Fixture\Service\ServiceExpectingOneArgument;
+use Fixture\Service\ServiceExpectingTwoArguments;
+use Fixture\Service\ServiceWithoutAnyMethods;
+use Messaging\Support\InvalidArgumentException;
+use Messaging\Support\MessageBuilder;
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Class MethodInvocationTest
+ * @package Messaging\Handler\Processor
+ * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ */
+class MethodInvocationTest extends TestCase
+{
+    public function test_throwing_exception_if_class_has_no_defined_method()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        MethodInvocation::createWith(ServiceWithoutAnyMethods::create(), 'getName', []);
+    }
+
+    public function test_throwing_exception_if_not_enough_arguments_provided()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        MethodInvocation::createWith(ServiceExpectingTwoArguments::create(), 'withoutReturnValue', []);
+    }
+
+    public function test_invoking_service()
+    {
+        $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();
+
+        $methodInvocation = MethodInvocation::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
+            PayloadArgument::create()
+        ]);
+
+        $methodInvocation->processMessage(MessageBuilder::withPayload('some')->build());
+
+        $this->assertTrue($serviceExpectingOneArgument->wasCalled(), "Method was not called");
+    }
+
+    public function test_invoking_service_with_return_value_from_header()
+    {
+        $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();
+        $headerName = 'token';
+        $headerValue = '123X';
+
+        $methodInvocation = MethodInvocation::createWith($serviceExpectingOneArgument, 'withReturnValue', [
+            HeaderArgument::createWith($headerName)
+        ]);
+
+        $this->assertEquals($headerValue,
+            $methodInvocation->processMessage(
+                MessageBuilder::withPayload('some')
+                    ->setHeader($headerName, $headerValue)
+                    ->build()
+            )
+        );
+    }
+
+    public function test_if_method_requires_one_argument_and_there_was_not_passed_any_then_use_payload_one_as_default()
+    {
+        $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();
+
+        $methodInvocation = MethodInvocation::createWith($serviceExpectingOneArgument, 'withReturnValue', []);
+
+        $payload = 'some';
+
+        $this->assertEquals($payload,
+            $methodInvocation->processMessage(
+                MessageBuilder::withPayload($payload)
+                    ->build()
+            )
+        );
+    }
+}

@@ -1,6 +1,6 @@
 <?php
 
-namespace Messaging\Exception;
+namespace Messaging;
 
 use Messaging\MessagingException;
 use Messaging\MessagingExceptionCode;

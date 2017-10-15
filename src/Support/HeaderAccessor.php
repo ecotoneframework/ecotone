@@ -1,7 +1,7 @@
 <?php
 
 namespace Messaging\Support;
-use Messaging\Exception\MessageHeaderDoesNotExistsException;
+use Messaging\MessageHeaderDoesNotExistsException;
 use Messaging\MessageHeaders;
 use Messaging\MessagingException;
 

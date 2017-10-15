@@ -25,22 +25,16 @@ final class MessageBuilder
      * @var Clock
      */
     private $clock;
-    /**
-     * @var bool
-     */
-    private $isMutable;
 
     /**
      * MessageBuilder constructor.
      * @param $payload
      * @param HeaderAccessor $headerAccessor
-     * @param bool $isMutable
      */
-    private function __construct($payload, HeaderAccessor $headerAccessor, bool $isMutable)
+    private function __construct($payload, HeaderAccessor $headerAccessor)
     {
         $this->payload = $payload;
         $this->headerAccessor = $headerAccessor;
-        $this->isMutable = $isMutable;
         $this->initialize();
     }
 
@@ -117,23 +111,10 @@ final class MessageBuilder
      */
     public function build() : Message
     {
-        $messageHeaders = MutableMessageHeaders::create(
+        $messageHeaders = MessageHeaders::create(
             $this->clock->getCurrentTimestamp(),
             $this->headerAccessor->headers()
         );
-
-        if ($this->areHeadersMutable() && $this->headerAccessor->hasHeader(MessageHeaders::MESSAGE_CORRELATION_ID)) {
-            $messageHeaders->withCorrelationMessage(
-                $this->headerAccessor->getHeader(MessageHeaders::MESSAGE_CORRELATION_ID)
-            );
-        }
-
-        if ($this->areHeadersMutable() && $this->headerAccessor->hasHeader(MessageHeaders::CAUSATION_MESSAGE_ID)) {
-            $messageHeaders->withCausationMessage(
-                $this->headerAccessor->getHeader(MessageHeaders::MESSAGE_CORRELATION_ID),
-                $this->headerAccessor->getHeader(MessageHeaders::CAUSATION_MESSAGE_ID)
-            );
-        }
 
         return GenericMessage::create(
             $this->payload,
@@ -147,40 +128,7 @@ final class MessageBuilder
      */
     public static function withPayload($payload) : self
     {
-        return new self($payload, HeaderAccessor::create(), false);
-    }
-
-    /**
-     * @param Message $message
-     * @return MessageBuilder
-     */
-    public static function fromCorrelatedMessage(Message $message) : self
-    {
-        $headerAccessor = HeaderAccessor::create();
-        $headerAccessor->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID));
-
-        return new self($message->getPayload(), $headerAccessor, true);
-    }
-
-    /**
-     * @param Message $message
-     * @return MessageBuilder
-     */
-    public static function fromCausationMessage(Message $message) : self
-    {
-        $headerAccessor = HeaderAccessor::create();
-        $headerAccessor->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID));
-        $headerAccessor->setHeader(MessageHeaders::CAUSATION_MESSAGE_ID, $message->getHeaders()->get(MessageHeaders::MESSAGE_ID));
-
-        return new self($message->getPayload(), $headerAccessor, true);
-    }
-
-    /**
-     * @return bool
-     */
-    private function areHeadersMutable() : bool
-    {
-        return $this->isMutable;
+        return new self($payload, HeaderAccessor::create());
     }
 
     private function initialize() : void

@@ -15,9 +15,11 @@
         }
     },
     "autoload-dev": {
-        "Messaging\\": "tests",
-        "Behat\\Bootstrap\\": "tests",
-        "Fixture\\": "tests/Fixture"
+        "psr-4": {
+            "Messaging\\": "tests/phpunit",
+            "Behat\\Bootstrap\\": "tests/Behat/Bootstrap",
+            "Fixture\\": "tests/Fixture"
+        }
     },
     "require": {
         "php": ">=7.1.0",

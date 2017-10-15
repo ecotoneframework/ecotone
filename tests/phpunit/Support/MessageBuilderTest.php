@@ -38,40 +38,6 @@ class MessageBuilderTest extends TestCase
         );
     }
 
-    public function test_creating_from_causation_message()
-    {
-        $causationMessage = MessageBuilder::withPayload('somePayload')
-                        ->build();
-
-        $message = MessageBuilder::fromCausationMessage($causationMessage)
-                        ->build();
-
-        $this->assertEquals(
-            $causationMessage->getHeaders()->get(MessageHeaders::MESSAGE_ID),
-            $message->getHeaders()->get(MessageHeaders::CAUSATION_MESSAGE_ID)
-        );
-        $this->assertEquals(
-            $causationMessage->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID),
-            $message->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID)
-        );
-    }
-
-    public function test_creating_from_correlated_message()
-    {
-        $correlatedMessage = MessageBuilder::withPayload('somePayload')
-            ->build();
-
-        $message = MessageBuilder::fromCorrelatedMessage($correlatedMessage)
-            ->build();
-
-        $this->assertFalse($message->getHeaders()->containsKey(MessageHeaders::CAUSATION_MESSAGE_ID));
-
-        $this->assertEquals(
-            $correlatedMessage->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID),
-            $message->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID)
-        );
-    }
-
     public function test_setting_header_if_absent()
     {
         $headerName = 'new_header';

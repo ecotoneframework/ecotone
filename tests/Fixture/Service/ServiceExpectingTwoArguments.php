@@ -3,15 +3,12 @@
 namespace Fixture\Service;
 
 /**
- * Class ServiceWithoutReturnValue
+ * Class ServiceExpectingTwoArguments
  * @package Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ServiceWithoutReturnValue implements CallableService
+class ServiceExpectingTwoArguments
 {
-    /**
-     * @var bool
-     */
     private $wasCalled = false;
 
     public static function create() : self
@@ -19,10 +16,15 @@ class ServiceWithoutReturnValue implements CallableService
         return new self();
     }
 
-    public function setName(string $name) : void
+    public function withReturnValue(string $name, string $surname) : string
     {
         $this->wasCalled = true;
-        return;
+        return $name . $surname;
+    }
+
+    public function withoutReturnValue(string $name, string $surname) : void
+    {
+        $this->wasCalled = true;
     }
 
     /**

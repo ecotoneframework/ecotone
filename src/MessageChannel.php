@@ -2,8 +2,6 @@
 
 namespace Messaging;
 
-use Messaging\Exception\MessageDeliveryException;
-
 /**
  * Interface MessageChannel
  * @package Messaging
@@ -16,7 +14,6 @@ interface MessageChannel
      *
      * @param Message $message
      * @return void
-     * @throws MessageDeliveryException
      */
     public function send(Message $message) : void;
 }

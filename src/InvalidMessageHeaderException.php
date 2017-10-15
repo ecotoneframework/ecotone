@@ -1,8 +1,6 @@
 <?php
 
-namespace Messaging\Exception;
-
-use Messaging\MessagingException;
+namespace Messaging;
 
 /**
  * Class InvalidMessageHeaderException

@@ -154,26 +154,18 @@ class MessageHeaders
     }
 
     /**
-     * @return string
+     * @return mixed
      */
-    final public function getReplyChannel() : string
+    final public function getReplyChannel()
     {
-        if (!$this->containsKey(self::REPLY_CHANNEL)) {
-            return NullableMessageChannel::CHANNEL_NAME;
-        }
-
         return $this->get(self::REPLY_CHANNEL);
     }
 
     /**
-     * @return string
+     * @return mixed
      */
-    final public function getErrorChannel() : string
+    final public function getErrorChannel()
     {
-        if (!$this->containsKey(self::ERROR_CHANNEL)) {
-            return NullableMessageChannel::CHANNEL_NAME;
-        }
-
         return $this->get(self::ERROR_CHANNEL);
     }
 

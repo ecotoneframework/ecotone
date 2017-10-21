@@ -2,17 +2,16 @@
 
 namespace Fixture\Handler;
 
+use Messaging\Handler\MessageProcessor;
 use Messaging\Message;
-use Messaging\MessageHandler;
 
 /**
- * Class DumbMessageHandler
+ * Class NoReplyMessageProducer
  * @package Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class NoReturnMessageHandler implements MessageHandler
+class NoReplyMessageProducer implements MessageProcessor
 {
-    /** @var  bool */
     private $wasCalled = false;
 
     public static function create() : self
@@ -23,9 +22,10 @@ class NoReturnMessageHandler implements MessageHandler
     /**
      * @inheritDoc
      */
-    public function handle(Message $message): void
+    public function processMessage(Message $message)
     {
         $this->wasCalled = true;
+        return null;
     }
 
     public function wasCalled() : bool

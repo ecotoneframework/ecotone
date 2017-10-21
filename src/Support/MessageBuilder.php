@@ -3,6 +3,7 @@
 namespace Messaging\Support;
 
 use Messaging\Message;
+use Messaging\MessageChannel;
 use Messaging\MessageHeaders;
 use Messaging\Support\Clock\ServerClock;
 
@@ -35,7 +36,8 @@ final class MessageBuilder
     {
         $this->payload = $payload;
         $this->headerAccessor = $headerAccessor;
-        $this->initialize();
+
+        $this->initialize($payload);
     }
 
     /**
@@ -85,23 +87,34 @@ final class MessageBuilder
     }
 
     /**
-     * @param string $channelName
+     * @param MessageChannel $messageChannel
      * @return MessageBuilder
      */
-    public function setReplyChannelName(string $channelName) : self
+    public function setReplyChannel(MessageChannel $messageChannel) : self
     {
-        $this->setHeader(MessageHeaders::REPLY_CHANNEL, $channelName);
+        $this->setHeader(MessageHeaders::REPLY_CHANNEL, $messageChannel);
 
         return $this;
     }
 
     /**
-     * @param string $channelName
+     * @param MessageChannel $messageChannel
      * @return MessageBuilder
      */
-    public function setErrorChannelName(string $channelName) : self
+    public function setErrorChannelName(MessageChannel $messageChannel) : self
     {
-        $this->setHeader(MessageHeaders::ERROR_CHANNEL, $channelName);
+        $this->setHeader(MessageHeaders::ERROR_CHANNEL, $messageChannel);
+
+        return $this;
+    }
+
+    /**
+     * @param $payload
+     * @return MessageBuilder
+     */
+    public function setPayload($payload) : self
+    {
+        $this->payload = $payload;
 
         return $this;
     }
@@ -131,8 +144,19 @@ final class MessageBuilder
         return new self($payload, HeaderAccessor::create());
     }
 
-    private function initialize() : void
+    /**
+     * @param Message $message
+     * @return MessageBuilder
+     */
+    public static function fromMessage(Message $message) : self
     {
+        return new self($message->getPayload(), HeaderAccessor::createFrom($message->getHeaders()));
+    }
+
+    private function initialize($payload) : void
+    {
+        Assert::notNullAndEmpty($payload, "Message payload can't be empty");
+
         $this->clock = ServerClock::create();
     }
 }

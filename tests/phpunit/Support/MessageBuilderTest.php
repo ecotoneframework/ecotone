@@ -2,7 +2,9 @@
 
 namespace Messaging\Support;
 
+use Messaging\Channel\QueueChannel;
 use Messaging\MessageHeaders;
+use Messaging\MessagingTest;
 use Messaging\Support\Clock\DumbClock;
 use PHPUnit\Framework\TestCase;
 
@@ -11,7 +13,7 @@ use PHPUnit\Framework\TestCase;
  * @package Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MessageBuilderTest extends TestCase
+class MessageBuilderTest extends MessagingTest
 {
     public function test_creating_from_payload()
     {
@@ -67,9 +69,9 @@ class MessageBuilderTest extends TestCase
 
     public function test_setting_reply_channel_directly()
     {
-        $replyChannel = 'some_reply_channel';
+        $replyChannel = new QueueChannel();
         $message = MessageBuilder::withPayload('somePayload')
-            ->setReplyChannelName($replyChannel)
+            ->setReplyChannel($replyChannel)
             ->build();
 
         $this->assertEquals(
@@ -80,7 +82,7 @@ class MessageBuilderTest extends TestCase
 
     public function test_setting_error_channel_directly()
     {
-        $errorChannel = 'some_error_channel';
+        $errorChannel = new QueueChannel();
         $message = MessageBuilder::withPayload('somePayload')
             ->setErrorChannelName($errorChannel)
             ->build();
@@ -101,6 +103,31 @@ class MessageBuilderTest extends TestCase
         $this->assertEquals(
             $message->getHeaders()->get($headerName),
             new \stdClass()
+        );
+    }
+
+    public function test_creating_from_different_message()
+    {
+        $message = MessageBuilder::withPayload('somePayload')
+            ->setHeader('some', new \stdClass())
+            ->setHeader('token', 'johny')
+            ->setReplyChannel(new QueueChannel())
+            ->build();
+
+        $messageToCompare = MessageBuilder::fromMessage($message)
+            ->setClock(DumbClock::create(12))
+            ->build();
+        $this->assertMessages(
+            $message,
+            $messageToCompare
+        );
+        $this->assertNotEquals(
+            $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
+            $messageToCompare->getHeaders()->get(MessageHeaders::MESSAGE_ID)
+        );
+        $this->assertNotEquals(
+            $message->getHeaders()->get(MessageHeaders::TIMESTAMP),
+            $messageToCompare->getHeaders()->get(MessageHeaders::TIMESTAMP)
         );
     }
 }

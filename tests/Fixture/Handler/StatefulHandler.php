@@ -6,14 +6,16 @@ use Messaging\Message;
 use Messaging\MessageHandler;
 
 /**
- * Class DumbMessageHandler
+ * Class StatefulHandler
  * @package Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class NoReturnMessageHandler implements MessageHandler
+class StatefulHandler implements MessageHandler
 {
-    /** @var  bool */
-    private $wasCalled = false;
+    /**
+     * @var Message|null
+     */
+    private $message;
 
     public static function create() : self
     {
@@ -25,16 +27,11 @@ class NoReturnMessageHandler implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $this->wasCalled = true;
+        $this->message = $message;
     }
 
-    public function wasCalled() : bool
+    public function message() : ?Message
     {
-        return $this->wasCalled;
-    }
-
-    public function __toString()
-    {
-        return self::class;
+        return $this->message;
     }
 }

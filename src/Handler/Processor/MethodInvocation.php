@@ -142,4 +142,11 @@ final class MethodInvocation implements MessageProcessor
     {
         return $requiredArgumentsCount === 1 && $passedArgumentsCount === 0;
     }
+
+    public function __toString()
+    {
+        $objectToInvokeOn = get_class($this->objectToInvokeOn);
+
+        return "Object {$objectToInvokeOn}, method {$this->objectMethodName}";
+    }
 }

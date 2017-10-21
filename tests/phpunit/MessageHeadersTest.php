@@ -2,6 +2,7 @@
 
 namespace Messaging;
 
+use Messaging\Channel\QueueChannel;
 use Messaging\InvalidMessageHeaderException;
 use Messaging\MessageHeaderDoesNotExistsException;
 use Messaging\Support\Clock\DumbClock;
@@ -25,8 +26,6 @@ class MessageHeadersTest extends TestCase
         $this->assertEquals(2, $headers->size());
         $this->assertTrue(Uuid::isValid($headers->get(MessageHeaders::MESSAGE_ID)));
         $this->assertEquals($timestamp, $headers->get(MessageHeaders::TIMESTAMP));
-        $this->assertEquals(NullableMessageChannel::CHANNEL_NAME, $headers->getReplyChannel());
-        $this->assertEquals(NullableMessageChannel::CHANNEL_NAME, $headers->getErrorChannel());
 
         $this->assertFalse($headers->hasMessageId('2db4db21-e3f1-492a-af98-a61468bb03e9'));
         $this->assertTrue($headers->hasMessageId($headers->get(MessageHeaders::MESSAGE_ID)));
@@ -70,8 +69,8 @@ class MessageHeadersTest extends TestCase
 
     public function test_creating_with_channels()
     {
-        $replyChannel = 'replyCh';
-        $errorChannel = 'errorCh';
+        $replyChannel = new QueueChannel();
+        $errorChannel = new QueueChannel();
         $oldMessageHeaders = MessageHeaders::create(1000, [
             MessageHeaders::REPLY_CHANNEL => $replyChannel,
             MessageHeaders::ERROR_CHANNEL => $errorChannel

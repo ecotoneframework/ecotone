@@ -1,8 +1,6 @@
 <?php
 
-namespace Messaging\Exception;
-
-use Messaging\MessagingException;
+namespace Messaging;
 
 /**
  * Class MessageSendException
@@ -16,6 +14,6 @@ class MessageDeliveryException extends MessagingException
      */
     protected static function errorCode(): int
     {
-        return self::MESSAGE_SEND_EXCEPTION;
+        return self::MESSAGE_DELIVERY_EXCEPTION;
     }
 }

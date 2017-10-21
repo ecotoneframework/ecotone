@@ -78,4 +78,9 @@ final class GenericMessage implements Message
     {
         return new self($payload, MessageHeaders::createEmpty($clock->getCurrentTimestamp()));
     }
+
+    public function __toString()
+    {
+        return "Message with id " . (string)$this->getHeaders()->get(MessageHeaders::MESSAGE_ID);
+    }
 }

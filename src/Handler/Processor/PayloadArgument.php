@@ -11,13 +11,23 @@ use Messaging\Message;
  */
 class PayloadArgument implements MethodArgument
 {
-    private function __construct()
+    /**
+     * @var string
+     */
+    private $argumentName;
+
+    /**
+     * PayloadArgument constructor.
+     * @param string $argumentName
+     */
+    private function __construct(string $argumentName)
     {
+        $this->argumentName = $argumentName;
     }
 
-    public static function create()
+    public static function create(string $argumentName)
     {
-        return new self();
+        return new self($argumentName);
     }
 
     /**
@@ -26,5 +36,13 @@ class PayloadArgument implements MethodArgument
     public function getFrom(Message $message)
     {
         return $message->getPayload();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getName(): string
+    {
+        return $this->argumentName;
     }
 }

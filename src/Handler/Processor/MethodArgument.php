@@ -18,4 +18,9 @@ interface MethodArgument
      * @throws InvalidMessageHeaderException
      */
     public function getFrom(Message $message);
+
+    /**
+     * @return string
+     */
+    public function getName() : string;
 }

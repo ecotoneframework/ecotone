@@ -30,14 +30,14 @@ final class MethodInvocation implements MessageProcessor
      * MethodInvocation constructor.
      * @param $objectToInvokeOn
      * @param string $objectMethodName
-     * @param array|MethodArgument[] $orderedMethodArguments
+     * @param array|MethodArgument[] $methodArguments
      */
-    private function __construct($objectToInvokeOn, string $objectMethodName, array $orderedMethodArguments)
+    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodArguments)
     {
         Assert::isObject($objectToInvokeOn, "Passed value for invocation is not an object");
-        Assert::allInstanceOfType($orderedMethodArguments, MethodArgument::class);
+        Assert::allInstanceOfType($methodArguments, MethodArgument::class);
 
-        $this->init($objectToInvokeOn, $objectMethodName, $orderedMethodArguments);
+        $this->init($objectToInvokeOn, $objectMethodName, $methodArguments);
     }
 
     /**
@@ -62,26 +62,32 @@ final class MethodInvocation implements MessageProcessor
     /**
      * @param $objectToInvokeOn
      * @param string $objectMethodName
-     * @param array $orderedMethodArguments
+     * @param array|MethodArgument[] $methodArguments
      * @throws \Messaging\MessagingException
      */
-    private function init($objectToInvokeOn, string $objectMethodName, array $orderedMethodArguments) : void
+    private function init($objectToInvokeOn, string $objectMethodName, array $methodArguments) : void
     {
         if (!$this->hasObjectMethod($objectToInvokeOn, $objectMethodName)) {
             throw InvalidArgumentException::create("Object {$this->objectToClassName($objectToInvokeOn)} does not contain method {$objectMethodName}");
         }
 
-        $objectReflection = new \ReflectionMethod($objectToInvokeOn, $objectMethodName);
-        $passedArgumentsCount = count($orderedMethodArguments);
-        $requiredArgumentsCount = count($objectReflection->getParameters());
+        $objectToInvokeReflection = new \ReflectionMethod($objectToInvokeOn, $objectMethodName);
+        $objectToInvokeArguments = $objectToInvokeReflection->getParameters();
+        $passedArgumentsCount = count($methodArguments);
+        $requiredArgumentsCount = count($objectToInvokeReflection->getParameters());
 
         if ($this->canBeInvokedWithDefaultPayloadArgument($passedArgumentsCount, $requiredArgumentsCount)) {
-            $orderedMethodArguments = [PayloadArgument::create()];
+            $methodArguments = [PayloadArgument::create($objectToInvokeArguments[0]->getName())];
             $passedArgumentsCount = 1;
         }
 
         if (!$this->hasEnoughArguments($passedArgumentsCount, $requiredArgumentsCount)) {
             throw InvalidArgumentException::create("Object {$this->objectToClassName($objectToInvokeOn)} requires {$requiredArgumentsCount}, but passed {$passedArgumentsCount}");
+        }
+
+        $orderedMethodArguments = [];
+        foreach ($objectToInvokeArguments as $invokeArgument) {
+            $orderedMethodArguments[] = $this->getMethodArgumentForInvokedOne($this->objectToClassName($objectToInvokeOn), $objectMethodName, $invokeArgument, $methodArguments);
         }
 
         $this->objectToInvokeOn = $objectToInvokeOn;
@@ -141,6 +147,27 @@ final class MethodInvocation implements MessageProcessor
     private function canBeInvokedWithDefaultPayloadArgument(int $passedArgumentsCount, int $requiredArgumentsCount): bool
     {
         return $requiredArgumentsCount === 1 && $passedArgumentsCount === 0;
+    }
+
+    /**
+     * @param string $invokedClass
+     * @param string $methodToInvoke
+     * @param \ReflectionParameter $invokeArgument
+     * @param array|MethodArgument[] $methodArguments
+     * @return MethodArgument
+     * @throws \Messaging\MessagingException
+     */
+    private function getMethodArgumentForInvokedOne(string $invokedClass, string $methodToInvoke, \ReflectionParameter $invokeArgument, array $methodArguments): MethodArgument
+    {
+        $lastArgumentName = '';
+        foreach ($methodArguments as $methodArgument) {
+            $lastArgumentName = $methodArgument->getName();
+            if ($invokeArgument->getName() == $lastArgumentName) {
+                return $methodArgument;
+            }
+        }
+
+        throw InvalidArgumentException::create("Invoked object {$invokedClass} with method {$methodToInvoke} does not have argument with name {$lastArgumentName}");
     }
 
     public function __toString()

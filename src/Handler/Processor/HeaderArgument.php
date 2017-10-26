@@ -15,23 +15,30 @@ class HeaderArgument implements MethodArgument
      * @var string
      */
     private $headerName;
+    /**
+     * @var string
+     */
+    private $argumentName;
 
     /**
      * HeaderArgument constructor.
+     * @param string $argumentName
      * @param string $headerName
      */
-    private function __construct(string $headerName)
+    private function __construct(string $argumentName, string $headerName)
     {
+        $this->argumentName = $argumentName;
         $this->headerName = $headerName;
     }
 
     /**
+     * @param string $argumentName
      * @param string $headerName
      * @return HeaderArgument
      */
-    public static function createWith(string $headerName) : self
+    public static function create(string $argumentName, string $headerName) : self
     {
-        return new self($headerName);
+        return new self($argumentName, $headerName);
     }
 
     /**
@@ -40,5 +47,13 @@ class HeaderArgument implements MethodArgument
     public function getFrom(Message $message)
     {
         return $message->getHeaders()->get($this->headerName);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getName(): string
+    {
+        return $this->argumentName;
     }
 }

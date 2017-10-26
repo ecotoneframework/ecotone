@@ -3,8 +3,10 @@
 namespace Messaging\Handler\Processor;
 
 use Fixture\Service\ServiceExpectingOneArgument;
+use Fixture\Service\ServiceExpectingThreeArguments;
 use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutAnyMethods;
+use Messaging\MessageHeaders;
 use Messaging\Support\InvalidArgumentException;
 use Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
@@ -35,7 +37,7 @@ class MethodInvocationTest extends TestCase
         $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();
 
         $methodInvocation = MethodInvocation::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
-            PayloadArgument::create()
+            PayloadArgument::create('name')
         ]);
 
         $methodInvocation->processMessage(MessageBuilder::withPayload('some')->build());
@@ -50,7 +52,7 @@ class MethodInvocationTest extends TestCase
         $headerValue = '123X';
 
         $methodInvocation = MethodInvocation::createWith($serviceExpectingOneArgument, 'withReturnValue', [
-            HeaderArgument::createWith($headerName)
+            HeaderArgument::create('name', $headerName)
         ]);
 
         $this->assertEquals($headerValue,
@@ -73,6 +75,37 @@ class MethodInvocationTest extends TestCase
         $this->assertEquals($payload,
             $methodInvocation->processMessage(
                 MessageBuilder::withPayload($payload)
+                    ->build()
+            )
+        );
+    }
+
+    public function test_throwing_exception_if_passed_wrong_argument_names()
+    {
+        $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();
+
+        $this->expectException(InvalidArgumentException::class);
+
+        MethodInvocation::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
+            PayloadArgument::create('wrongName')
+        ]);
+    }
+
+    public function test_invoking_service_with_multiple_not_ordered_arguments()
+    {
+        $serviceExpectingThreeArgument = ServiceExpectingThreeArguments::create();
+
+        $methodInvocation = MethodInvocation::createWith($serviceExpectingThreeArgument, 'withReturnValue', [
+            HeaderArgument::create('surname', 'personSurname'),
+            HeaderArgument::create('age', 'personAge'),
+            PayloadArgument::create('name'),
+        ]);
+
+        $this->assertEquals("johnybilbo13",
+            $methodInvocation->processMessage(
+                MessageBuilder::withPayload('johny')
+                    ->setHeader('personSurname', 'bilbo')
+                    ->setHeader('personAge', 13)
                     ->build()
             )
         );

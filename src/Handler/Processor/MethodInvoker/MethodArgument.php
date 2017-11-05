@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Handler\Processor;
+namespace Messaging\Handler\Processor\MethodInvoker;
 
 use Messaging\InvalidMessageHeaderException;
 use Messaging\Message;
 
 /**
  * Class MethodArgument
- * @package Messaging\Handler\Processor
+ * @package Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MethodArgument

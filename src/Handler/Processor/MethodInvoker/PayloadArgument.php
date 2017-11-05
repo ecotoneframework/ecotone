@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Handler\Processor;
+namespace Messaging\Handler\Processor\MethodInvoker;
 
 use Messaging\Message;
 
 /**
  * Class PayloadArgument
- * @package Messaging\Handler\Processor
+ * @package Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PayloadArgument implements MethodArgument

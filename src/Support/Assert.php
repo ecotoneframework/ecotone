@@ -30,9 +30,32 @@ class Assert
     {
         foreach ($arrayToCheck as $element) {
             $classToCompare = get_class($element);
-            if ($classToCompare !== $className && !is_subclass_of($element, $className)) {
-                throw InvalidArgumentException::create("Passed argument should be of type {$className} and got {$classToCompare}");
-            }
+            Assert::isSubclassOf($classToCompare, $className, "");
+        }
+    }
+
+    /**
+     * @param $objectToCheck
+     * @param string $className
+     * @param string $message
+     * @throws \Messaging\MessagingException
+     */
+    public static function isSubclassOf($objectToCheck, string $className, string $message) : void
+    {
+        if ($objectToCheck !== $className && !is_subclass_of($objectToCheck, $className)) {
+            throw InvalidArgumentException::create("{$message}. Passed argument should be of type {$className} and got {$message}.");
+        }
+    }
+
+    /**
+     * @param string $interfaceToCheck
+     * @param string $message
+     * @throws \Messaging\MessagingException
+     */
+    public static function isInterface(string $interfaceToCheck, string $message) : void
+    {
+        if (!interface_exists($interfaceToCheck)) {
+            throw InvalidArgumentException::create($message);
         }
     }
 

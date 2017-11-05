@@ -20,3 +20,20 @@ $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class implements \P
 $orderingService = $factory->createProxy(OrderingService::class);
 
 $orderingService->placeOrder('some');
+
+
+class Proxy
+{
+    public function callGatewayMethod(...$tmp) {
+        print_r($tmp);
+    }
+}
+
+
+$proxy = new Proxy();
+
+$proxy->callGatewayMethod('test', 'test2', 'test3');
+$proxy->callGatewayMethod(['test', 'test2', 'test3']);
+
+
+

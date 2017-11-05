@@ -2,6 +2,7 @@
 
 namespace Messaging;
 
+use Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -10,7 +10,7 @@ namespace Messaging;
 interface MessagingRegistry
 {
     /**
-     * @param string|MessageChannel $messageChannel if object is passed, it should return same object, otherwise it should retrieve it from container
+     * @param string|MessageChannel $messageChannel if object is passed, it should return same object, otherwise it should retrieve it from registry
      * @return MessageChannel
      * @throws MessagingServiceIsNotAvailable if not found message channel
      */

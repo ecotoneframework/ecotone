@@ -13,7 +13,7 @@ interface MessageProcessor
 {
     /**
      * @param Message $message
-     * @return mixed
+     * @return mixed can return everything from null to object, string etc.
      */
     public function processMessage(Message $message);
 }

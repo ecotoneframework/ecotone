@@ -1,6 +1,6 @@
 <?php
 
-namespace Messaging\Handler\Processor;
+namespace Messaging\Handler\Processor\MethodInvoker;
 
 use Fixture\Service\ServiceExpectingOneArgument;
 use Fixture\Service\ServiceExpectingThreeArguments;
@@ -13,30 +13,30 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Class MethodInvocationTest
- * @package Messaging\Handler\Processor
+ * @package Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MethodInvocationTest extends TestCase
+class MethodInvokerTest extends TestCase
 {
     public function test_throwing_exception_if_class_has_no_defined_method()
     {
         $this->expectException(InvalidArgumentException::class);
 
-        MethodInvocation::createWith(ServiceWithoutAnyMethods::create(), 'getName', []);
+        MethodInvoker::createWith(ServiceWithoutAnyMethods::create(), 'getName', []);
     }
 
     public function test_throwing_exception_if_not_enough_arguments_provided()
     {
         $this->expectException(InvalidArgumentException::class);
 
-        MethodInvocation::createWith(ServiceExpectingTwoArguments::create(), 'withoutReturnValue', []);
+        MethodInvoker::createWith(ServiceExpectingTwoArguments::create(), 'withoutReturnValue', []);
     }
 
     public function test_invoking_service()
     {
         $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();
 
-        $methodInvocation = MethodInvocation::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
+        $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
             PayloadArgument::create('name')
         ]);
 
@@ -51,7 +51,7 @@ class MethodInvocationTest extends TestCase
         $headerName = 'token';
         $headerValue = '123X';
 
-        $methodInvocation = MethodInvocation::createWith($serviceExpectingOneArgument, 'withReturnValue', [
+        $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withReturnValue', [
             HeaderArgument::create('name', $headerName)
         ]);
 
@@ -68,7 +68,7 @@ class MethodInvocationTest extends TestCase
     {
         $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();
 
-        $methodInvocation = MethodInvocation::createWith($serviceExpectingOneArgument, 'withReturnValue', []);
+        $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withReturnValue', []);
 
         $payload = 'some';
 
@@ -86,7 +86,7 @@ class MethodInvocationTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        MethodInvocation::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
+        MethodInvoker::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
             PayloadArgument::create('wrongName')
         ]);
     }
@@ -95,7 +95,7 @@ class MethodInvocationTest extends TestCase
     {
         $serviceExpectingThreeArgument = ServiceExpectingThreeArguments::create();
 
-        $methodInvocation = MethodInvocation::createWith($serviceExpectingThreeArgument, 'withReturnValue', [
+        $methodInvocation = MethodInvoker::createWith($serviceExpectingThreeArgument, 'withReturnValue', [
             HeaderArgument::create('surname', 'personSurname'),
             HeaderArgument::create('age', 'personAge'),
             PayloadArgument::create('name'),

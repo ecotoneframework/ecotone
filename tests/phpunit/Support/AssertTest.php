@@ -2,6 +2,7 @@
 
 namespace Messaging\Support;
 
+use Messaging\Message;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -51,6 +52,37 @@ class AssertTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         Assert::isObject([new \stdClass()], '');
+    }
+
+    public function test_testing_if_subclass_of()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        Assert::isSubclassOf(new \stdClass(), \stdClass::class, "");
+        Assert::isSubclassOf(new ExtendedStdClass(), \stdClass::class, "");
+
+        $this->assertTrue(true);
+    }
+
+    public function test_throwing_exception_if_wrong_subclass_passed()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        Assert::isSubclassOf(new \stdClass(), Assert::class, "");
+    }
+
+    public function test_throwing_exception_if_no_interface_passed()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        Assert::isInterface(\stdClass::class, "");
+    }
+
+    public function test_asserting_if_is_interface()
+    {
+        Assert::isInterface(Message::class, '');
+
+        $this->assertTrue(true);
     }
 }
 

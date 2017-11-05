@@ -1,17 +1,19 @@
 <?php
 
-namespace Messaging\Handler\Processor;
+namespace Messaging\Handler\Processor\MethodInvoker;
+
 use Messaging\Handler\MessageProcessor;
+use Messaging\Handler\MethodDescription;
 use Messaging\Message;
 use Messaging\Support\Assert;
 use Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodInvocation
- * @package Messaging\Handler\Processor
+ * @package Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class MethodInvocation implements MessageProcessor
+final class MethodInvoker implements MessageProcessor
 {
     /**
      * @var object
@@ -44,7 +46,7 @@ final class MethodInvocation implements MessageProcessor
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array $methodArguments
-     * @return MethodInvocation
+     * @return self
      */
     public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodArguments) : self
     {

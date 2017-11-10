@@ -2,6 +2,7 @@
 
 namespace Messaging\Handler\Gateway;
 
+use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithThreeArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
@@ -170,6 +171,32 @@ class MethodCallToMessageConverterTest extends MessagingTest
             PayloadMethodArgumentMessageParameter::create("number"), [
                 HeaderMessageArgumentConverter::create("multiplyBy", "multiply")
             ]
+        );
+    }
+
+    public function test_throwing_exception_if_there_are_more_converters_than_parameters()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new MethodCallToMessageConverter(
+            ServiceInterfaceSendOnly::class, 'sendMail',
+            PayloadMethodArgumentMessageParameter::create("content"), [
+                HeaderMessageArgumentConverter::create("multiplyBy", "multiply")
+            ]
+        );
+    }
+
+    public function test_creating_empty_default_message_when_no_parameters_required_for_method()
+    {
+        $methodCallToMessageConverter = new MethodCallToMessageConverter(
+            ServiceInterfaceReceiveOnly::class, 'sendMail',
+            null, []
+        );
+
+        $this->assertMessages(
+            MessageBuilder::withPayload('empty')
+                ->build(),
+            $methodCallToMessageConverter->convertFor([])
         );
     }
 }

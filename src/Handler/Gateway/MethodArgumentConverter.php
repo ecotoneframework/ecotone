@@ -8,19 +8,8 @@ use Messaging\Support\MessageBuilder;
  * @package Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface MethodArgumentConverter extends NamedParameterConverter
+interface MethodArgumentConverter extends NamedParameter
 {
-    /**
-     * @return string
-     */
-    public function parameterName(): string;
-
-    /**
-     * @param MethodArgument $methodArgument
-     * @return bool
-     */
-    public function hasParameterNameAs(MethodArgument $methodArgument) : bool;
-
     /**
      * @param MethodArgument $methodArgument
      * @param MessageBuilder $messageBuilder

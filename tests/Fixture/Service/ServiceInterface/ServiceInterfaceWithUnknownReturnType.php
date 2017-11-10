@@ -7,7 +7,7 @@ namespace Fixture\Service\ServiceInterface;
  * @package Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface ServiceInterfaceReceiveOnly
+interface ServiceInterfaceWithUnknownReturnType
 {
-    public function sendMail() : string;
+    public function sendMail();
 }

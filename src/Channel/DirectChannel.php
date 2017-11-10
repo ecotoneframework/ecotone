@@ -30,6 +30,14 @@ class DirectChannel implements SubscribableChannel
     }
 
     /**
+     * @return DirectChannel
+     */
+    public static function create() : self
+    {
+        return new self(new UnicastingDispatcher());
+    }
+
+    /**
      * @inheritDoc
      */
     public function send(Message $message): void

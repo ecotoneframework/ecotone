@@ -9,7 +9,7 @@ use Messaging\Support\MessageBuilder;
  * @package Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface PayloadMethodArgumentConverter extends NamedParameterConverter
+interface PayloadMethodArgumentConverter extends NamedParameter
 {
     /**
      * @param MethodArgument $methodArgument

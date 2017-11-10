@@ -7,7 +7,7 @@ namespace Messaging\Handler\Gateway;
  * @package Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface NamedParameterConverter
+interface NamedParameter
 {
     /**
      * @param MethodArgument $methodArgument

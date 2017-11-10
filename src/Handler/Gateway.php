@@ -2,39 +2,45 @@
 
 namespace Messaging\Handler;
 
+use Messaging\Channel\DirectChannel;
 use Messaging\Message;
-use Messaging\MessageChannel;
-use Messaging\MessagingRegistry;
+use Messaging\MessageHandler;
+use Messaging\PollableChannel;
 
 /**
  * Class Gateway
  * @package Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class Gateway
+class Gateway implements MessageHandler
 {
     /**
-     * @var MessagingRegistry
+     * @var DirectChannel
      */
-    private $messagingRegistry;
+    private $requestChannel;
+    /**
+     * @var ReplySender
+     */
+    private $replySender;
 
     /**
      * Gateway constructor.
-     * @param MessagingRegistry $messagingRegistry
+     * @param DirectChannel $requestChannel
+     * @param ReplySender $replySender
      */
-    public function __construct(MessagingRegistry $messagingRegistry)
+    public function __construct(DirectChannel $requestChannel, ReplySender $replySender)
     {
-        $this->messagingRegistry = $messagingRegistry;
+        $this->requestChannel = $requestChannel;
+        $this->replySender = $replySender;
     }
 
     /**
-     * @param Message $message
-     * @param MessageChannel $requestChannel
+     * @inheritDoc
      */
-    public function sendAndReceive(Message $message, MessageChannel $requestChannel)
+    public function handle(Message $message): void
     {
+        $this->requestChannel->send($message);
 
-
-//        $replyChannel = $this->messagingRegistry->getMessageChannel($message->);
+        $this->replySender->receiveReply();
     }
 }

@@ -9,7 +9,7 @@ use Messaging\Support\MessageBuilder;
 
 /**
  * Class PayloadMessageParameter
- * @package Messaging\Handler\Gateway\MethodParameterConverter
+ * @package Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PayloadMethodArgumentMessageParameter implements PayloadMethodArgumentConverter

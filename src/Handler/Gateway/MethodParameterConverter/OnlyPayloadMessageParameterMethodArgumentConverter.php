@@ -8,7 +8,7 @@ use Messaging\Support\MessageBuilder;
 
 /**
  * Class OnlyPayloadMessageParameterConverter
- * @package Messaging\Handler\Gateway\MethodParameterConverter
+ * @package Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OnlyPayloadMessageParameterMethodArgumentConverter implements PayloadMethodArgumentConverter

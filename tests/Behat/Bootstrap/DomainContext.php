@@ -24,34 +24,5 @@ class DomainContext implements Context
     {
     }
 
-    private $service;
 
-
-    /**
-     * @Given I activate service :arg1 with method :arg2 to listen on :arg3 channel
-     * @param string $serviceName
-     * @param string $methodName
-     * @param string $channelName
-     */
-    public function iActivateServiceWithMethodToListenOnChannel(string $serviceName, string $methodName, string $channelName)
-    {
-        $directChannel = DirectChannel::create();
-        $directChannel->subscribe();
-    }
-
-    /**
-     * @When message with payload :arg1 comes to :arg2 channel
-     */
-    public function messageWithPayloadComesToChannel($arg1, $arg2)
-    {
-        throw new PendingException();
-    }
-
-    /**
-     * @Then booking request should be processed
-     */
-    public function bookingRequestShouldBeProcessed()
-    {
-        throw new PendingException();
-    }
 }

@@ -11,7 +11,7 @@ use Messaging\Support\MessageBuilder;
 
 /**
  * Class MethodCallToMessageConverter
- * @package Messaging\Handler\Gateway
+ * @package Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodCallToMessageConverter
@@ -42,7 +42,7 @@ class MethodCallToMessageConverter
     }
 
     /**
-     * @param array|MethodArgument[] $methodArguments
+     * @param array|mixed[] $methodArguments
      * @return Message
      */
     public function convertFor(array $methodArguments) : Message

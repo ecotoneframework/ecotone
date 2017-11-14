@@ -5,15 +5,15 @@ use Messaging\Support\MessageBuilder;
 
 /**
  * Interface ParameterDefinition
- * @package Messaging\Handler\Gateway
+ * @package Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MethodArgumentConverter extends NamedParameter
 {
     /**
-     * @param MethodArgument $methodArgument
+     * @param mixed $argumentValue
      * @param MessageBuilder $messageBuilder
      * @return MessageBuilder
      */
-    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder) : MessageBuilder;
+    public function convertToMessage($argumentValue, MessageBuilder $messageBuilder) : MessageBuilder;
 }

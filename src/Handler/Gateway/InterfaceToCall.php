@@ -6,7 +6,7 @@ use Messaging\Support\InvalidArgumentException;
 
 /**
  * Class InterfaceToCall
- * @package Messaging\Handler\Gateway
+ * @package Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceToCall

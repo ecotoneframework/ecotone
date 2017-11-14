@@ -60,4 +60,9 @@ class DirectChannel implements SubscribableChannel
     {
         $this->messageDispatcher->removeHandler($messageHandler);
     }
+
+    public function __toString()
+    {
+        return "direct channel";
+    }
 }

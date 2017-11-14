@@ -8,7 +8,7 @@ use Messaging\Support\MessageBuilder;
 
 /**
  * Class HeaderMessageParameter
- * @package Messaging\Handler\Gateway\MethodParameterConverter
+ * @package Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class HeaderMessageArgumentConverter implements MethodArgumentConverter
@@ -70,9 +70,9 @@ class HeaderMessageArgumentConverter implements MethodArgumentConverter
     /**
      * @inheritDoc
      */
-    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
+    public function convertToMessage($value, MessageBuilder $messageBuilder): MessageBuilder
     {
         return $messageBuilder
-                    ->setHeader($this->headerName, $methodArgument->value());
+                    ->setHeader($this->headerName, $value);
     }
 }

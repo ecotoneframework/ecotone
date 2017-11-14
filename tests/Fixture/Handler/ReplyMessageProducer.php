@@ -2,7 +2,7 @@
 
 namespace Fixture\Handler;
 
-use Messaging\Handler\MessageProcessor;
+use Messaging\Handler\ServiceActivator\MessageProcessor;
 use Messaging\Message;
 
 /**
@@ -10,7 +10,7 @@ use Messaging\Message;
  * @package Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ReplyMessageProducer implements MessageProcessor
+class ReplyMessageProducer implements \Messaging\Handler\ServiceActivator\MessageProcessor
 {
     private $replyData;
 

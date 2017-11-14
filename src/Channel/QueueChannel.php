@@ -32,4 +32,9 @@ class QueueChannel implements PollableChannel
     {
         return array_pop($this->queue);
     }
+
+    public function __toString()
+    {
+        return "queue channel";
+    }
 }

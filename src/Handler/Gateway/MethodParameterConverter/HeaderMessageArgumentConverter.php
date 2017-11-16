@@ -70,9 +70,9 @@ class HeaderMessageArgumentConverter implements MethodArgumentConverter
     /**
      * @inheritDoc
      */
-    public function convertToMessage($value, MessageBuilder $messageBuilder): MessageBuilder
+    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
         return $messageBuilder
-                    ->setHeader($this->headerName, $value);
+                    ->setHeader($this->headerName, $methodArgument->value());
     }
 }

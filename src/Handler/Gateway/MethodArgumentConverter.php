@@ -11,9 +11,9 @@ use Messaging\Support\MessageBuilder;
 interface MethodArgumentConverter extends NamedParameter
 {
     /**
-     * @param mixed $argumentValue
+     * @param MethodArgument $methodArgument
      * @param MessageBuilder $messageBuilder
      * @return MessageBuilder
      */
-    public function convertToMessage($argumentValue, MessageBuilder $messageBuilder) : MessageBuilder;
+    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder) : MessageBuilder;
 }

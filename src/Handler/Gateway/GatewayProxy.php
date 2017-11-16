@@ -23,14 +23,34 @@ class GatewayProxy
      * @param MethodCallToMessageConverter $methodCallToMessageConverter
      * @param Gateway $gateway
      */
-    public function __construct(MethodCallToMessageConverter $methodCallToMessageConverter, Gateway $gateway)
+    private function __construct(MethodCallToMessageConverter $methodCallToMessageConverter, Gateway $gateway)
     {
         $this->methodCallToMessageConverter = $methodCallToMessageConverter;
         $this->gateway = $gateway;
     }
 
-    public function execute(array $methodArguments) : void
+    public static function create() : self
     {
-//        $message = $this->methodCallToMessageConverter->convertFor()
+
+    }
+
+    /**
+     * @param string $className
+     * @param string $methodName
+     * @param array|mixed[] $methodArgumentValues
+     */
+    public function execute(string $className, string $methodName, array $methodArgumentValues) : void
+    {
+        $methodArguments = [];
+        $reflectionMethod = new \ReflectionMethod($className, $methodName);
+
+        $parameters = $reflectionMethod->getParameters();
+        $countArguments = count($methodArgumentValues);
+        for ($index = 0; $index < $countArguments; $index++) {
+            $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
+        }
+
+        $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
+        $this->gateway->handle($message);
     }
 }

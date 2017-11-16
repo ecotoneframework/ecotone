@@ -42,7 +42,7 @@ class MethodCallToMessageConverter
     }
 
     /**
-     * @param array|mixed[] $methodArguments
+     * @param array|MethodArgument[] $methodArguments
      * @return Message
      */
     public function convertFor(array $methodArguments) : Message

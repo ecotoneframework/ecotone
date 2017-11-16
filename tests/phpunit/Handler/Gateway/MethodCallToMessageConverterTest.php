@@ -32,7 +32,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
             MessageBuilder::withPayload($argumentValue)
                 ->build(),
             $methodCallToMessageConverter->convertFor([
-                $argumentValue
+                MethodArgument::createWith($parameterName, $argumentValue)
             ])
         );
     }
@@ -57,8 +57,8 @@ class MethodCallToMessageConverterTest extends MessagingTest
                 ->setHeader($personIdName, $personIdValue)
                 ->build(),
             $methodCallToMessageConverter->convertFor([
-                $payloadArgumentValue,
-                $personIdValue
+                MethodArgument::createWith($payloadParameterName, $payloadArgumentValue),
+                MethodArgument::createWith($personIdName, $personIdValue)
             ])
         );
     }
@@ -94,9 +94,9 @@ class MethodCallToMessageConverterTest extends MessagingTest
                 ->setHeader($percentageHeaderName, $percentageValue)
                 ->build(),
             $methodCallToMessageConverter->convertFor([
-                $numberArgumentValue,
-                $multiplyValue,
-                $percentageValue
+                MethodArgument::createWith($numberParameterName, $numberArgumentValue),
+                MethodArgument::createWith($multiplyParameterName, $multiplyValue),
+                MethodArgument::createWith($percentageParameterName, $percentageValue)
             ])
         );
     }
@@ -125,7 +125,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
             MessageBuilder::withPayload($contentArgumentValue)
                 ->build(),
             $methodCallToMessageConverter->convertFor([
-                $contentArgumentValue
+                MethodArgument::createWith($contentParameterName, $contentArgumentValue)
             ])
         );
     }
@@ -156,7 +156,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
             MessageBuilder::withPayload($contentArgumentValue)
                 ->build(),
             $methodCallToMessageConverter->convertFor([
-                $contentArgumentValue
+                MethodArgument::createWith($contentParameterName, $contentArgumentValue)
             ])
         );
     }

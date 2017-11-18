@@ -24,7 +24,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
         $parameterName = 'content';
         $methodCallToMessageConverter = new MethodCallToMessageConverter(
             ServiceInterfaceSendOnly::class, 'sendMail',
-            PayloadMethodArgumentMessageParameter::create($parameterName), []
+            [PayloadMethodArgumentMessageParameter::create($parameterName)]
         );
 
         $argumentValue = "Hello Johny";
@@ -45,7 +45,8 @@ class MethodCallToMessageConverterTest extends MessagingTest
         $personIdValue = 123;
         $methodCallToMessageConverter = new MethodCallToMessageConverter(
             ServiceInterfaceSendOnlyWithTwoArguments::class, 'sendMail',
-            PayloadMethodArgumentMessageParameter::create($payloadParameterName), [
+            [
+                PayloadMethodArgumentMessageParameter::create($payloadParameterName),
                 HeaderMessageArgumentConverter::create(
                     $personIdName, $personIdName
                 )
@@ -78,7 +79,8 @@ class MethodCallToMessageConverterTest extends MessagingTest
 
         $methodCallToMessageConverter = new MethodCallToMessageConverter(
             ServiceInterfaceSendOnlyWithThreeArguments::class, 'calculate',
-            PayloadMethodArgumentMessageParameter::create($numberParameterName), [
+            [
+                PayloadMethodArgumentMessageParameter::create($numberParameterName),
                 HeaderMessageArgumentConverter::create(
                     $multiplyParameterName, $multiplyHeaderName
                 ),
@@ -107,7 +109,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
 
         new MethodCallToMessageConverter(
             ServiceInterfaceSendOnly::class, 'wrongMethodName',
-            PayloadMethodArgumentMessageParameter::create('some'), []
+            [PayloadMethodArgumentMessageParameter::create('some')]
         );
     }
 
@@ -117,8 +119,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
         $contentArgumentValue = "Hello mr johny";
 
         $methodCallToMessageConverter = new MethodCallToMessageConverter(
-            ServiceInterfaceSendOnly::class, 'sendMail',
-            null, []
+            ServiceInterfaceSendOnly::class, 'sendMail', []
         );
 
         $this->assertMessages(
@@ -135,29 +136,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
         $this->expectException(InvalidArgumentException::class);
 
         new MethodCallToMessageConverter(
-            ServiceInterfaceSendOnlyWithTwoArguments::class, 'sendMail',
-            null, []
-        );
-    }
-
-    public function test_converting_only_with_method_argument_converters()
-    {
-        $contentParameterName = "content";
-        $contentArgumentValue = "Hello mr johny";
-
-        $methodCallToMessageConverter = new MethodCallToMessageConverter(
-            ServiceInterfaceSendOnly::class, 'sendMail',
-            null, [
-
-            ]
-        );
-
-        $this->assertMessages(
-            MessageBuilder::withPayload($contentArgumentValue)
-                ->build(),
-            $methodCallToMessageConverter->convertFor([
-                MethodArgument::createWith($contentParameterName, $contentArgumentValue)
-            ])
+            ServiceInterfaceSendOnlyWithTwoArguments::class, 'sendMail', []
         );
     }
 
@@ -167,7 +146,8 @@ class MethodCallToMessageConverterTest extends MessagingTest
 
         new MethodCallToMessageConverter(
             ServiceInterfaceSendOnlyWithThreeArguments::class, 'calculate',
-            PayloadMethodArgumentMessageParameter::create("number"), [
+            [
+                PayloadMethodArgumentMessageParameter::create("number"),
                 HeaderMessageArgumentConverter::create("multiplyBy", "multiply")
             ]
         );
@@ -179,7 +159,8 @@ class MethodCallToMessageConverterTest extends MessagingTest
 
         new MethodCallToMessageConverter(
             ServiceInterfaceSendOnly::class, 'sendMail',
-            PayloadMethodArgumentMessageParameter::create("content"), [
+            [
+                PayloadMethodArgumentMessageParameter::create("content"),
                 HeaderMessageArgumentConverter::create("multiplyBy", "multiply")
             ]
         );
@@ -188,8 +169,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
     public function test_creating_empty_default_message_when_no_parameters_required_for_method()
     {
         $methodCallToMessageConverter = new MethodCallToMessageConverter(
-            ServiceInterfaceReceiveOnly::class, 'sendMail',
-            null, []
+            ServiceInterfaceReceiveOnly::class, 'sendMail', []
         );
 
         $this->assertMessages(

@@ -60,7 +60,7 @@ class InterfaceToCall
     public function checkCompatibilityWithMethodParameters(array $namedParameterConverters) : void
     {
         $converterCount = count($namedParameterConverters);
-        if ($this->hasNoArguments() && $converterCount == 1) {
+        if ($this->hasSingleArguments() && $converterCount == 1) {
             return;
         }
 
@@ -86,9 +86,9 @@ class InterfaceToCall
     /**
      * @return bool
      */
-    public function hasNoArguments() : bool
+    public function hasSingleArguments() : bool
     {
-        return $this->parameterAmount() == 0;
+        return $this->parameterAmount() == 1;
     }
 
     private function parameterAmount() : int

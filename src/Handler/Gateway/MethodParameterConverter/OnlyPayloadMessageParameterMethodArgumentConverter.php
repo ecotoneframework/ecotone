@@ -3,6 +3,7 @@
 namespace Messaging\Handler\Gateway\MethodParameterConverter;
 
 use Messaging\Handler\Gateway\MethodArgument;
+use Messaging\Handler\Gateway\MethodArgumentConverter;
 use Messaging\Handler\Gateway\PayloadMethodArgumentConverter;
 use Messaging\Support\MessageBuilder;
 
@@ -11,7 +12,7 @@ use Messaging\Support\MessageBuilder;
  * @package Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class OnlyPayloadMessageParameterMethodArgumentConverter implements PayloadMethodArgumentConverter
+class OnlyPayloadMessageParameterMethodArgumentConverter implements MethodArgumentConverter
 {
     /**
      * @inheritDoc
@@ -32,8 +33,8 @@ class OnlyPayloadMessageParameterMethodArgumentConverter implements PayloadMetho
     /**
      * @inheritDoc
      */
-    public function createFrom(MethodArgument $methodArgument): MessageBuilder
+    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
-        return MessageBuilder::withPayload($methodArgument->value());
+        return $messageBuilder->setPayload($methodArgument->value());
     }
 }

@@ -12,7 +12,7 @@ use Messaging\Support\MessageBuilder;
  * @package Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PayloadMethodArgumentMessageParameter implements PayloadMethodArgumentConverter
+class PayloadMethodArgumentMessageParameter implements MethodArgumentConverter
 {
     /**
      * @var string
@@ -56,8 +56,8 @@ class PayloadMethodArgumentMessageParameter implements PayloadMethodArgumentConv
     /**
      * @inheritDoc
      */
-    public function createFrom(MethodArgument $methodArgument): MessageBuilder
+    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
-        return MessageBuilder::withPayload($methodArgument->value());
+        return $messageBuilder->setPayload($methodArgument->value());
     }
 }

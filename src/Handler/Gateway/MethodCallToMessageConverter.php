@@ -2,7 +2,6 @@
 
 namespace Messaging\Handler\Gateway;
 
-use Messaging\Handler\Gateway\MethodParameterConverter\DefaultPayloadArgumentConverter;
 use Messaging\Handler\Gateway\MethodParameterConverter\OnlyPayloadMessageParameterMethodArgumentConverter;
 use Messaging\Message;
 use Messaging\Support\Assert;
@@ -21,10 +20,6 @@ class MethodCallToMessageConverter
      */
     private $interfaceToCall;
     /**
-     * @var PayloadMethodArgumentConverter
-     */
-    private $payloadConverter;
-    /**
      * @var array|MethodArgumentConverter[]
      */
     private $methodArgumentConverters;
@@ -33,12 +28,11 @@ class MethodCallToMessageConverter
      * MethodCallToMessageConverter constructor.
      * @param string $interfaceToCall
      * @param string $methodName
-     * @param PayloadMethodArgumentConverter|null $payloadMethodArgumentConverter
      * @param array|MethodArgumentConverter[] $methodArgumentConverters
      */
-    public function __construct(string $interfaceToCall, string $methodName, ?PayloadMethodArgumentConverter $payloadMethodArgumentConverter, array $methodArgumentConverters)
+    public function __construct(string $interfaceToCall, string $methodName, array $methodArgumentConverters)
     {
-        $this->initialize($interfaceToCall, $methodName, $payloadMethodArgumentConverter, $methodArgumentConverters);
+        $this->initialize($interfaceToCall, $methodName, $methodArgumentConverters);
     }
 
     /**
@@ -48,22 +42,11 @@ class MethodCallToMessageConverter
     public function convertFor(array $methodArguments) : Message
     {
         Assert::allInstanceOfType($methodArguments, MethodArgument::class);
-        $messageBuilder = null;
-
-        if ($this->interfaceToCall->hasNoArguments()) {
-            $messageBuilder = MessageBuilder::withPayload("empty");
-        }
-
-        foreach ($methodArguments as $methodArgument) {
-            if ($this->payloadConverter->hasParameterNameAs($methodArgument)) {
-                $messageBuilder = $this->payloadConverter->createFrom($methodArgument);
-                break;
-            }
-        }
+        $messageBuilder = MessageBuilder::withPayload("empty");
 
         foreach ($methodArguments as $methodArgument) {
             foreach ($this->methodArgumentConverters as $methodParameterConverter) {
-                if ($methodArgument->getParameterName() == $methodParameterConverter->parameterName()) {
+                if ($methodParameterConverter->hasParameterNameAs($methodArgument)) {
                     $messageBuilder = $methodParameterConverter->convertToMessage($methodArgument, $messageBuilder);
                     break;
                 }
@@ -77,27 +60,24 @@ class MethodCallToMessageConverter
     /**
      * @param string $interfaceToCall
      * @param string $methodName
-     * @param PayloadMethodArgumentConverter|null $payloadMethodArgumentConverter
      * @param array|MethodArgumentConverter[] $methodArgumentConverters
      * @throws \Messaging\MessagingException
      */
-    private function initialize(string $interfaceToCall, string $methodName, ?PayloadMethodArgumentConverter $payloadMethodArgumentConverter, array $methodArgumentConverters) : void
+    private function initialize(string $interfaceToCall, string $methodName, array $methodArgumentConverters) : void
     {
         Assert::allInstanceOfType($methodArgumentConverters, MethodArgumentConverter::class);
 
         $this->interfaceToCall = InterfaceToCall::create($interfaceToCall, $methodName);
-        $this->methodArgumentConverters = $methodArgumentConverters;
-        $this->payloadConverter = $payloadMethodArgumentConverter;
 
-        if (is_null($payloadMethodArgumentConverter) && $this->interfaceToCall->hasMoreThanOneParameter()) {
+        if (empty($methodArgumentConverters) && $this->interfaceToCall->hasMoreThanOneParameter()) {
             throw InvalidArgumentException::create("You need to pass method argument converts for {$this->interfaceToCall}");
         }
-        if (is_null($payloadMethodArgumentConverter) && !$this->interfaceToCall->hasNoArguments()) {
-            $this->payloadConverter = new OnlyPayloadMessageParameterMethodArgumentConverter();
+
+        if (empty($methodArgumentConverters) && $this->interfaceToCall->hasSingleArguments()) {
+            $methodArgumentConverters = [new OnlyPayloadMessageParameterMethodArgumentConverter()];
         }
 
-        $methodArgumentConvertersPlusPayloadConverter = $methodArgumentConverters;
-        $methodArgumentConvertersPlusPayloadConverter[] = $this->payloadConverter;
-        $this->interfaceToCall->checkCompatibilityWithMethodParameters($methodArgumentConvertersPlusPayloadConverter);
+        $this->interfaceToCall->checkCompatibilityWithMethodParameters($methodArgumentConverters);
+        $this->methodArgumentConverters = $methodArgumentConverters;
     }
 }

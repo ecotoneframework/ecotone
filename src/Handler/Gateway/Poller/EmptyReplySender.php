@@ -15,8 +15,16 @@ class EmptyReplySender implements ReplySender
     /**
      * @inheritDoc
      */
-    public function receiveAndForwardReply(): void
+    public function receiveReply(): ?Message
     {
-        return;
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasReply(): bool
+    {
+        return false;
     }
 }

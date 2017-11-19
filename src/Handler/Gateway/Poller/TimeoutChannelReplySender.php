@@ -4,6 +4,8 @@ namespace Messaging\Handler\Gateway\Poller;
 
 use Messaging\Handler\Gateway\GatewayReply;
 use Messaging\Handler\Gateway\ReplySender;
+use Messaging\Message;
+use Messaging\PollableChannel;
 
 /**
  * Class TimeoutChannelReplySender
@@ -14,9 +16,9 @@ class TimeoutChannelReplySender implements ReplySender
 {
     const MICROSECOND_TO_MILLI_SECOND = 1000;
     /**
-     * @var \Messaging\Handler\Gateway\GatewayReply
+     * @var PollableChannel
      */
-    private $gatewayReply;
+    private $replyChannel;
     /**
      * @var int
      */
@@ -24,30 +26,28 @@ class TimeoutChannelReplySender implements ReplySender
 
     /**
      * ReceivePoller constructor.
-     * @param \Messaging\Handler\Gateway\GatewayReply $gatewayReply
+     * @param PollableChannel $replyChannel
      * @param int $millisecondsTimeout
      */
-    public function __construct(GatewayReply $gatewayReply, int $millisecondsTimeout)
+    public function __construct(PollableChannel $replyChannel, int $millisecondsTimeout)
     {
-        $this->gatewayReply = $gatewayReply;
+        $this->replyChannel = $replyChannel;
         $this->millisecondsTimeout = $millisecondsTimeout;
     }
 
     /**
      * @inheritDoc
      */
-    public function receiveAndForwardReply(): void
+    public function receiveReply(): ?Message
     {
         $message = null;
         $startingTimestamp = $this->currentMillisecond();
 
         while (($this->currentMillisecond() - $startingTimestamp) <= $this->millisecondsTimeout && is_null($message)) {
-            $message = $this->gatewayReply->replyChannel()->receive();
-
-            if ($message) {
-                $this->gatewayReply->responseChannel()->send($message);
-            }
+            $message = $this->replyChannel->receive();
         }
+
+        return $message;
     }
 
     /**
@@ -56,5 +56,13 @@ class TimeoutChannelReplySender implements ReplySender
     private function currentMillisecond(): float
     {
         return microtime(true) * self::MICROSECOND_TO_MILLI_SECOND;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasReply(): bool
+    {
+        return true;
     }
 }

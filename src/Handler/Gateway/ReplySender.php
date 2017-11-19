@@ -2,8 +2,10 @@
 
 namespace Messaging\Handler\Gateway;
 
+use Messaging\Message;
+
 /**
- * Interface Poller - Receive reply after sending message to request channel and forward it internally
+ * Interface Poller - Receive reply from request channel and forward it internally
  * @package Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
@@ -12,5 +14,10 @@ interface ReplySender
     /**
      * Receives reply after sending message to request channel and forward it internally
      */
-    public function receiveAndForwardReply() : void;
+    public function receiveReply() : ?Message;
+
+    /**
+     * @return bool
+     */
+    public function hasReply() : bool;
 }

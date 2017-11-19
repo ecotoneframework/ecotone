@@ -4,6 +4,8 @@ namespace Messaging\Handler\Gateway\Poller;
 
 use Messaging\Handler\Gateway\GatewayReply;
 use Messaging\Handler\Gateway\ReplySender;
+use Messaging\Message;
+use Messaging\PollableChannel;
 
 /**
  * Class ReceivePoller
@@ -13,31 +15,38 @@ use Messaging\Handler\Gateway\ReplySender;
 class ChannelReplySender implements ReplySender
 {
     /**
-     * @var GatewayReply
+     * @var PollableChannel
      */
-    private $gatewayReply;
+    private $replyChannel;
 
     /**
      * ReceivePoller constructor.
-     * @param GatewayReply $gatewayReply
+     * @param PollableChannel $replyChannel
+     * @internal param GatewayReply $gatewayReply
      */
-    public function __construct(GatewayReply $gatewayReply)
+    public function __construct(PollableChannel $replyChannel)
     {
-        $this->gatewayReply = $gatewayReply;
+        $this->replyChannel = $replyChannel;
     }
 
     /**
      * @inheritDoc
      */
-    public function receiveAndForwardReply(): void
+    public function receiveReply(): ?Message
     {
         $message = null;
         while (!$message) {
-            $message = $this->gatewayReply->replyChannel()->receive();
-
-            if ($message) {
-                $this->gatewayReply->responseChannel()->send($message);
-            }
+            $message = $this->replyChannel->receive();
         }
+
+        return $message;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasReply(): bool
+    {
+        return true;
     }
 }

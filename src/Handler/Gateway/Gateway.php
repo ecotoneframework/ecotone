@@ -35,6 +35,11 @@ class Gateway implements MessageHandler
         $this->replySender = $replySender;
     }
 
+    public function hasReply() : bool
+    {
+        return $this->replySender->hasReply();
+    }
+
     /**
      * @inheritDoc
      */
@@ -42,6 +47,6 @@ class Gateway implements MessageHandler
     {
         $this->requestChannel->send($message);
 
-        $this->replySender->receiveAndForwardReply();
+        $this->replySender->receiveReply();
     }
 }

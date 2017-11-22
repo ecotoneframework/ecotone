@@ -64,10 +64,6 @@ class InterfaceToCall
             return;
         }
 
-        if ($converterCount > $this->parameterAmount()) {
-            throw new InvalidArgumentException("There are more converters than parameters for {$this}");
-        }
-
         foreach ($this->parameters() as $parameter) {
             if (!$this->hasConverterWithName($parameter, $namedParameterConverters)) {
                 throw new InvalidArgumentException("Missing argument converter for {$this} for parameter with name {$parameter->name}");

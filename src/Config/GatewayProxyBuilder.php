@@ -1,6 +1,7 @@
 <?php
 
 namespace Messaging\Config;
+
 use Messaging\Channel\DirectChannel;
 use Messaging\Handler\Gateway\Gateway;
 use Messaging\Handler\Gateway\GatewayProxy;
@@ -12,6 +13,7 @@ use Messaging\Handler\Gateway\Poller\EmptyReplySender;
 use Messaging\Handler\Gateway\Poller\TimeoutChannelReplySender;
 use Messaging\Handler\Gateway\ReplySender;
 use Messaging\PollableChannel;
+use Messaging\Support\Assert;
 
 /**
  * Class GatewayProxySpec
@@ -72,6 +74,16 @@ class GatewayProxyBuilder
     public function withMillisecondTimeout(int $millisecondsTimeout) : void
     {
         $this->milliSecondsTimeout = $millisecondsTimeout;
+    }
+
+    /**
+     * @param array $methodArgumentConverters
+     */
+    public function withMethodArgumentConverters(array $methodArgumentConverters) : void
+    {
+        Assert::allInstanceOfType($methodArgumentConverters, MethodArgumentConverter::class);
+
+        $this->methodArgumentConverters = $methodArgumentConverters;
     }
 
     /**

@@ -10,16 +10,10 @@ https://www.javacodegeeks.com/2014/12/message-processing-with-spring-integration
 
 # TODO
 
-1. Service Activator
-- Running service with payload of message
-- Running service with passing message headers
-2. Method invocator
-3. Gateway
- - impement pollableWithTimeout or something that gets poll as argument and polls with timeout 
- - rethink async and sync gateway
- - implement proxy
- - implement trigger
-
+1. Add transformer before service activator, so it transforms reply channel (string), to MessageChannel
+2. Check how replyChannel works in spring
+3. create builder for service activator
+4. create pollable consumer and event driven consumer
 
 
 interface 

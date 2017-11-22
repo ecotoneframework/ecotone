@@ -2,14 +2,23 @@
 
 namespace Messaging\Config;
 
+use Fixture\Handler\ForwardMessageHandler;
 use Fixture\Handler\NoReturnMessageHandler;
+use Fixture\Handler\StatefulHandler;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
+use Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceive;
+use Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceiveWithTwoArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
+use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceWithUnknownReturnType;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
 use Messaging\Handler\Gateway\GatewayFactory;
 use Messaging\Handler\Gateway\GatewayReply;
+use Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageArgumentConverter;
+use Messaging\Handler\Gateway\MethodParameterConverter\PayloadMethodArgumentMessageParameter;
+use Messaging\Handler\Gateway\MethodParameterConverter\StaticHeaderMessageArgumentConverter;
+use Messaging\MessageHeaders;
 use Messaging\MessagingTest;
 use Messaging\Support\InvalidArgumentException;
 use Messaging\Support\MessageBuilder;
@@ -116,6 +125,57 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals(
             $payload,
             $gatewayProxy->execute([])
+        );
+    }
+
+    public function test_executing_with_method_argument_converters()
+    {
+        $requestChannel = DirectChannel::create();
+        $messageHandler = StatefulHandler::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $personId = '123';
+        $content = 'some bla content';
+        $gatewayProxyBuilder = GatewayProxyBuilder::create(ServiceInterfaceSendOnlyWithTwoArguments::class, 'sendMail', $requestChannel);
+        $gatewayProxyBuilder->withMethodArgumentConverters([
+            HeaderMessageArgumentConverter::create('personId', 'personId'),
+            PayloadMethodArgumentMessageParameter::create('content')
+        ]);
+
+        $gatewayProxy = $gatewayProxyBuilder->build();
+        $gatewayProxy->execute([$personId, $content]);
+        $this->assertMessages(
+            MessageBuilder::withPayload($content)
+                ->setHeader('personId', $personId)
+                ->build(),
+            $messageHandler->message()
+        );
+    }
+
+    public function test_executing_with_multiple_converters_for_single_parameter_interface()
+    {
+        $requestChannel = DirectChannel::create();
+        $messageHandler = StatefulHandler::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $personId = '123';
+        $personName = 'Johny';
+        $content = 'some bla content';
+        $gatewayProxyBuilder = GatewayProxyBuilder::create(ServiceInterfaceSendOnly::class, 'sendMail', $requestChannel);
+        $gatewayProxyBuilder->withMethodArgumentConverters([
+            StaticHeaderMessageArgumentConverter::create('personId', $personId),
+            PayloadMethodArgumentMessageParameter::create('content'),
+            StaticHeaderMessageArgumentConverter::create('personName', $personName)
+        ]);
+
+        $gatewayProxy = $gatewayProxyBuilder->build();
+        $gatewayProxy->execute([$content]);
+        $this->assertMessages(
+            MessageBuilder::withPayload($content)
+                ->setHeader('personId', $personId)
+                ->setHeader('personName', $personName)
+                ->build(),
+            $messageHandler->message()
         );
     }
 }

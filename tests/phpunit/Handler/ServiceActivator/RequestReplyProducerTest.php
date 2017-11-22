@@ -2,24 +2,14 @@
 
 namespace Messaging\Handler\ServiceActivator;
 
-use Fixture\InMemoryMessagingRegistry;
 use Fixture\Handler\NoReplyMessageProducer;
 use Fixture\Handler\ReplyMessageProducer;
-use Fixture\Handler\StatefulHandler;
-use Messaging\Channel\DirectChannel;
-use Messaging\Channel\Dispatcher\UnicastingDispatcher;
 use Messaging\Channel\QueueChannel;
-use Messaging\Handler\ServiceActivator\MessageProcessor;
-use Messaging\Handler\ServiceActivator\RequestReplyProducer;
 use Messaging\Message;
 use Messaging\MessageChannel;
 use Messaging\MessageDeliveryException;
-use Messaging\MessageHeaders;
-use Messaging\MessagingRegistry;
 use Messaging\MessagingTest;
-use Messaging\NullableMessageChannel;
 use Messaging\Support\MessageBuilder;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Class RequestReplyProducerTest
@@ -36,6 +26,42 @@ class RequestReplyProducerTest extends MessagingTest
         $this->handleReplyWith($requestReplyProducer, $messageProcessor);
 
         $this->assertTrue($messageProcessor->wasCalled(), "Service was not called");
+    }
+
+    /**
+     * @param MessageChannel $messageChannel
+     * @param bool $requireReply
+     * @return \Messaging\Handler\ServiceActivator\RequestReplyProducer
+     */
+    private function createRequestReplyProducer(MessageChannel $messageChannel = null, bool $requireReply = false): RequestReplyProducer
+    {
+        return new RequestReplyProducer($messageChannel, $requireReply);
+    }
+
+    /**
+     * @param $requestReplyProducer
+     * @param $messageProcessor
+     */
+    private function handleReplyWith(RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor): void
+    {
+        $this->handleReplyWithMessage(
+            MessageBuilder::withPayload('a')->build(),
+            $requestReplyProducer,
+            $messageProcessor
+        );
+    }
+
+    /**
+     * @param Message $message
+     * @param RequestReplyProducer $requestReplyProducer
+     * @param MessageProcessor $messageProcessor
+     */
+    private function handleReplyWithMessage(Message $message, RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor): void
+    {
+        $requestReplyProducer->handleWithReply(
+            $message,
+            $messageProcessor
+        );
     }
 
     public function test_processing_message_with_reply()
@@ -73,8 +99,8 @@ class RequestReplyProducerTest extends MessagingTest
         $this->handleReplyWithMessage($message, $requestReplyProducer, $messageProcessor);
 
         $this->assertMessages(MessageBuilder::fromMessage($message)
-                                ->setPayload($replyData)
-                                ->build(), $replyChannel->receive());
+            ->setPayload($replyData)
+            ->build(), $replyChannel->receive());
     }
 
     public function test_throwing_exception_if_there_is_reply_data_but_no_output_channel()
@@ -109,78 +135,5 @@ class RequestReplyProducerTest extends MessagingTest
                 ->build(),
             $outputChannel->receive()
         );
-    }
-
-    public function test_retrieving_message_channel_from_registry_if_reply_channel_header_is_string()
-    {
-        $replyChannel = new QueueChannel();
-        $replyChannelName = "payment-output";
-        $requestReplyProducer = $this->createRequestReplyProducer();
-
-        $message = MessageBuilder::withPayload('a')
-            ->setHeader(MessageHeaders::REPLY_CHANNEL, $replyChannelName)
-            ->build();
-
-        $replyData = "some result";
-        $messageProcessor = ReplyMessageProducer::create($replyData);
-        $this->handleReplyWithMessageAndRegistry($message, $requestReplyProducer, $messageProcessor, new InMemoryMessagingRegistry([
-            $replyChannelName => $replyChannel
-        ]));
-
-        $this->assertMessages(MessageBuilder::fromMessage($message)
-            ->setPayload($replyData)
-            ->build(), $replyChannel->receive());
-    }
-
-    /**
-     * @param $requestReplyProducer
-     * @param $messageProcessor
-     */
-    private function handleReplyWith(RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor): void
-    {
-        $this->handleReplyWithMessage(
-            MessageBuilder::withPayload('a')->build(),
-            $requestReplyProducer,
-            $messageProcessor
-        );
-    }
-
-    /**
-     * @param Message $message
-     * @param RequestReplyProducer $requestReplyProducer
-     * @param MessageProcessor $messageProcessor
-     */
-    private function handleReplyWithMessage(Message $message, RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor): void
-    {
-        $requestReplyProducer->handleWithReply(
-            $message,
-            $messageProcessor,
-            new InMemoryMessagingRegistry()
-        );
-    }
-
-    /**
-     * @param Message $message
-     * @param RequestReplyProducer $requestReplyProducer
-     * @param MessageProcessor $messageProcessor
-     * @param MessagingRegistry $messagingRegistry
-     */
-    private function handleReplyWithMessageAndRegistry(Message $message, RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor, MessagingRegistry $messagingRegistry): void
-    {
-        $requestReplyProducer->handleWithReply(
-            $message,
-            $messageProcessor,
-            $messagingRegistry
-        );
-    }
-
-    /**
-     * @param MessageChannel $messageChannel
-     * @param bool $requireReply
-     * @return \Messaging\Handler\ServiceActivator\RequestReplyProducer
-     */
-    private function createRequestReplyProducer(MessageChannel $messageChannel = null, bool $requireReply = false): RequestReplyProducer
-    {
-        return new RequestReplyProducer($messageChannel, $requireReply);
     }
 }

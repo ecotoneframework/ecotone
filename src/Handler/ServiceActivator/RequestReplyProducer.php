@@ -2,13 +2,11 @@
 
 namespace Messaging\Handler\ServiceActivator;
 
-use Messaging\Handler\ServiceActivator\MessageProcessor;
 use Messaging\Message;
 use Messaging\MessageChannel;
 use Messaging\MessageDeliveryException;
-use Messaging\MessageHandler;
 use Messaging\MessageHeaders;
-use Messaging\MessagingRegistry;
+use Messaging\Support\Assert;
 use Messaging\Support\MessageBuilder;
 
 /**
@@ -39,13 +37,12 @@ class RequestReplyProducer
     }
 
     /**
-     * @param MessagingRegistry $messagingRegistry
      * @param Message $message
      * @param MessageProcessor $messageProcessor
      * @throws MessageDeliveryException
      * @throws \Messaging\MessagingException
      */
-    public function handleWithReply(Message $message, MessageProcessor $messageProcessor, MessagingRegistry $messagingRegistry) : void
+    public function handleWithReply(Message $message, MessageProcessor $messageProcessor): void
     {
         $replyData = $messageProcessor->processMessage($message);
 
@@ -58,13 +55,32 @@ class RequestReplyProducer
                 throw new MessageDeliveryException("Can't process {$message}, no output channel during delivery using {$messageProcessor}");
             }
 
-            $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : $messagingRegistry->getMessageChannel($message->getHeaders()->getReplyChannel());
+            $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : $message->getHeaders()->getReplyChannel();
+            Assert::isSubclassOf($replyChannel, MessageChannel::class, "Reply channel for service activator must be MessageChannel");
+
             $replyChannel->send(
                 MessageBuilder::fromMessage($message)
                     ->setPayload($replyData)
                     ->build()
             );
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isReplyRequired(): bool
+    {
+        return $this->isReplyRequired;
+    }
+
+    /**
+     * @param mixed $replyData
+     * @return bool
+     */
+    private function isReplyDataEmpty($replyData): bool
+    {
+        return !(bool)$replyData;
     }
 
     /**
@@ -81,22 +97,5 @@ class RequestReplyProducer
     private function getOutputChannel(): MessageChannel
     {
         return $this->outputChannel;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    private function isReplyRequired(): bool
-    {
-        return $this->isReplyRequired;
-    }
-
-    /**
-     * @param mixed $replyData
-     * @return bool
-     */
-    private function isReplyDataEmpty($replyData) : bool
-    {
-        return !(bool)$replyData;
     }
 }

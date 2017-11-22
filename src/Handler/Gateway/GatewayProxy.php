@@ -64,7 +64,7 @@ class GatewayProxy
         $parameters = $interfaceToCall->parameters();
         $countArguments = count($methodArgumentValues);
         for ($index = 0; $index < $countArguments; $index++) {
-            $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
+            $methodArguments[] = MethodArgument::createWith($parameters[$index]->getName(), $methodArgumentValues[$index]);
         }
 
         $message = $this->methodCallToMessageConverter->convertFor($methodArguments);

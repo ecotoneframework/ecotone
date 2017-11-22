@@ -48,7 +48,6 @@ class MethodCallToMessageConverter
             foreach ($this->methodArgumentConverters as $methodParameterConverter) {
                 if ($methodParameterConverter->hasParameterNameAs($methodArgument)) {
                     $messageBuilder = $methodParameterConverter->convertToMessage($methodArgument, $messageBuilder);
-                    break;
                 }
             }
         }

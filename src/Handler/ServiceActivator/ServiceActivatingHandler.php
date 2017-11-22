@@ -2,12 +2,8 @@
 
 namespace Messaging\Handler\ServiceActivator;
 
-use Messaging\Handler\ServiceActivator\MessageProcessor;
-use Messaging\Handler\ServiceActivator\RequestReplyProducer;
 use Messaging\Message;
-use Messaging\MessageChannel;
 use Messaging\MessageHandler;
-use Messaging\MessagingRegistry;
 
 /**
  * Class ServiceActivator
@@ -24,22 +20,16 @@ final class ServiceActivatingHandler implements MessageHandler
      * @var MessageProcessor
      */
     private $messageProcessor;
-    /**
-     * @var MessagingRegistry
-     */
-    private $messagingRegistry;
 
     /**
      * ServiceActivatingHandler constructor.
      * @param RequestReplyProducer $requestReplyProducer
      * @param MessageProcessor $messageProcessor
-     * @param MessagingRegistry $messagingRegistry
      */
-    public function __construct(RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor, MessagingRegistry $messagingRegistry)
+    public function __construct(RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor)
     {
         $this->requestReplyProducer = $requestReplyProducer;
         $this->messageProcessor = $messageProcessor;
-        $this->messagingRegistry = $messagingRegistry;
     }
 
     /**
@@ -47,6 +37,6 @@ final class ServiceActivatingHandler implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $this->requestReplyProducer->handleWithReply($message, $this->messageProcessor, $this->messagingRegistry);
+        $this->requestReplyProducer->handleWithReply($message, $this->messageProcessor);
     }
 }

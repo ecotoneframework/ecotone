@@ -20,7 +20,7 @@ class EventDrivenConsumerTest extends MessagingTest
     {
         $directChannel = DirectChannel::create();
         $handler = NoReturnMessageHandler::create();
-        $eventDrivenConsumer = new EventDrivenConsumer($directChannel, $handler);
+        $eventDrivenConsumer = new EventDrivenConsumer('some', $directChannel, $handler);
 
         $eventDrivenConsumer->start();
 
@@ -34,7 +34,7 @@ class EventDrivenConsumerTest extends MessagingTest
     {
         $directChannel = DirectChannel::create();
         $handler = NoReturnMessageHandler::create();
-        $eventDrivenConsumer = new EventDrivenConsumer($directChannel, $handler);
+        $eventDrivenConsumer = new EventDrivenConsumer('some', $directChannel, $handler);
 
         $eventDrivenConsumer->start();
         $eventDrivenConsumer->stop();
@@ -49,10 +49,10 @@ class EventDrivenConsumerTest extends MessagingTest
     {
         $directChannel = DirectChannel::create();
         $handler = NoReturnMessageHandler::create();
-        $eventDrivenConsumer = new EventDrivenConsumer($directChannel, $handler);
+        $eventDrivenConsumer = new EventDrivenConsumer('some', $directChannel, $handler);
 
-        $this->assertEquals("Event Driven Consumer", $eventDrivenConsumer->getComponentName());
+        $this->assertEquals("some", $eventDrivenConsumer->getConsumerName());
         $this->assertEquals("", $eventDrivenConsumer->getMissingConfiguration());
-        $this->assertFalse($eventDrivenConsumer->canBeRun(), "Configuration should not be missing");
+        $this->assertFalse($eventDrivenConsumer->isMissingConfiguration(), "Configuration should not be missing");
     }
 }

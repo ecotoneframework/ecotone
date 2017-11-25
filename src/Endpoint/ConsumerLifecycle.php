@@ -20,6 +20,11 @@ interface ConsumerLifecycle
     public function stop() : void;
 
     /**
+     * @return bool
+     */
+    public function isPollable() : bool;
+
+    /**
      * Is component running
      *
      * @return bool
@@ -31,7 +36,7 @@ interface ConsumerLifecycle
      *
      * @return bool
      */
-    public function canBeRun() : bool;
+    public function isMissingConfiguration() : bool;
 
     /**
      * Returns information about what configuration is missing
@@ -43,5 +48,5 @@ interface ConsumerLifecycle
     /**
      * @return string
      */
-    public function getComponentName() : string;
+    public function getConsumerName() : string;
 }

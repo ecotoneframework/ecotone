@@ -2,46 +2,28 @@
 
 namespace Messaging\Endpoint;
 
+use Messaging\Handler\MessageHandlerBuilder;
 use Messaging\MessageChannel;
 use Messaging\MessageHandler;
 use Messaging\SubscribableChannel;
 
 /**
- * Class ConsumerEndpointFactory
+ * Class ConsumerEndpointFactory - Responsible for creating consumers from builders
  * @package Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ConsumerEndpointFactory
 {
     /**
-     * @var MessageHandler
+     * @param MessageHandlerBuilder $messageHandlerBuilder
+     * @return ConsumerLifecycle
      */
-    private $messageHandler;
-    /**
-     * @var MessageChannel
-     */
-    private $messageChannel;
-
-    /**
-     * @param MessageHandler $messageHandler
-     */
-    public function setMessageHandler(MessageHandler $messageHandler) : void
+    public function create(MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle
     {
-        $this->messageHandler = $messageHandler;
-    }
+        $messageChannel = $messageHandlerBuilder->getInputMessageChannel();
 
-    /**
-     * @param MessageChannel $messageChannel
-     */
-    public function setMessageChannel(MessageChannel $messageChannel) : void
-    {
-        $this->messageChannel = $messageChannel;
-    }
-
-    public function create() : ConsumerLifecycle
-    {
-        if ($this->messageChannel instanceof SubscribableChannel) {
-            return new EventDrivenConsumer($this->messageChannel, $this->messageHandler);
+        if ($messageChannel instanceof SubscribableChannel) {
+            return new EventDrivenConsumer($messageHandlerBuilder->messageHandlerName(), $messageChannel, $messageHandlerBuilder->build());
         }
     }
 }

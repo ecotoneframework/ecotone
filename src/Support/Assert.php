@@ -28,8 +28,7 @@ class Assert
      */
     public static function allInstanceOfType(array $arrayToCheck, string $className) : void
     {
-        foreach ($arrayToCheck as $element) {
-            $classToCompare = get_class($element);
+        foreach ($arrayToCheck as $classToCompare) {
             Assert::isSubclassOf($classToCompare, $className, "");
         }
     }
@@ -42,8 +41,9 @@ class Assert
      */
     public static function isSubclassOf($objectToCheck, string $className, string $message) : void
     {
-        if ($objectToCheck !== $className && !is_subclass_of($objectToCheck, $className)) {
-            throw InvalidArgumentException::create("{$message}. Passed argument should be of type {$className} and got {$message}.");
+        $classToCheck = get_class($objectToCheck);
+        if ($classToCheck !== $className && !is_subclass_of($objectToCheck, $className)) {
+            throw InvalidArgumentException::create("{$message}. Passed argument should be of type {$className} and got {$classToCheck}.");
         }
     }
 

@@ -14,6 +14,8 @@ https://www.javacodegeeks.com/2014/12/message-processing-with-spring-integration
 2. Check how replyChannel works in spring
 3. create builder for service activator
 4. create pollable consumer and event driven consumer
+5. gateway proxy throw exception if calling not described method
+6. throw exception, if gateway reply channel returned null, but interface expects value
 
 
 interface 

@@ -2,18 +2,20 @@
 
 namespace Messaging\Config;
 
+use Messaging\Handler\MessageHandlerBuilder;
 use Messaging\Handler\ServiceActivator\MethodArgument;
 use Messaging\Handler\ServiceActivator\MethodInvoker;
 use Messaging\Handler\ServiceActivator\RequestReplyProducer;
 use Messaging\Handler\ServiceActivator\ServiceActivatingHandler;
 use Messaging\MessageChannel;
+use Messaging\MessageHandler;
 
 /**
  * Class ServiceActivatorFactory
  * @package Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ServiceActivatorBuilder
+class ServiceActivatorBuilder implements MessageHandlerBuilder
 {
     /**
      * @var object
@@ -35,6 +37,14 @@ class ServiceActivatorBuilder
      * @var array|MethodArgument[]
      */
     private $methodArguments = [];
+    /**
+     * @var MessageChannel
+     */
+    private $inputMessageChannel;
+    /**
+     * @var string
+     */
+    private $messageHandlerName;
 
     /**
      * ServiceActivatorBuilder constructor.
@@ -52,7 +62,7 @@ class ServiceActivatorBuilder
      * @param string $methodName
      * @return ServiceActivatorBuilder
      */
-    public static function create($objectToInvokeOn, string $methodName) : self
+    public static function create($objectToInvokeOn, string $methodName): self
     {
         return new self($objectToInvokeOn, $methodName);
     }
@@ -61,7 +71,7 @@ class ServiceActivatorBuilder
      * @param bool $isReplyRequired
      * @return ServiceActivatorBuilder
      */
-    public function withRequiredReply(bool $isReplyRequired) : self
+    public function withRequiredReply(bool $isReplyRequired): self
     {
         $this->isReplyRequired = $isReplyRequired;
 
@@ -72,7 +82,7 @@ class ServiceActivatorBuilder
      * @param MessageChannel $messageChannel
      * @return ServiceActivatorBuilder
      */
-    public function withOutputChannel(MessageChannel $messageChannel) : self
+    public function withOutputChannel(MessageChannel $messageChannel): self
     {
         $this->outputChannel = $messageChannel;
 
@@ -83,7 +93,7 @@ class ServiceActivatorBuilder
      * @param array|MethodArgument[] $methodArguments
      * @return ServiceActivatorBuilder
      */
-    public function withMethodArguments(array $methodArguments) : self
+    public function withMethodArguments(array $methodArguments): self
     {
         $this->methodArguments = $methodArguments;
 
@@ -91,9 +101,47 @@ class ServiceActivatorBuilder
     }
 
     /**
-     * @return ServiceActivatingHandler
+     * @param MessageChannel $inputMessageChannel
+     * @return ServiceActivatorBuilder
      */
-    public function build() : ServiceActivatingHandler
+    public function withInputMessageChannel(MessageChannel $inputMessageChannel) : self
+    {
+        $this->inputMessageChannel = $inputMessageChannel;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInputMessageChannel(): MessageChannel
+    {
+        return $this->inputMessageChannel;
+    }
+
+    /**
+     * @param string $name
+     * @return ServiceActivatorBuilder
+     */
+    public function withName(string $name) : self
+    {
+        $this->messageHandlerName = $name;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function messageHandlerName(): string
+    {
+        return $this->messageHandlerName;
+    }
+
+    /**
+     * @return MessageHandler
+     */
+    public function build(): MessageHandler
     {
         return new ServiceActivatingHandler(
             new RequestReplyProducer(

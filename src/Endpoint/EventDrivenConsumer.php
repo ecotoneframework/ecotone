@@ -24,14 +24,20 @@ class EventDrivenConsumer implements ConsumerLifecycle
      * @var bool
      */
     private $isRunning;
+    /**
+     * @var string
+     */
+    private $consumerName;
 
     /**
      * EventDrivenConsumer constructor.
+     * @param string $consumerName
      * @param SubscribableChannel $subscribableChannel
      * @param MessageHandler $messageHandler
      */
-    public function __construct(SubscribableChannel $subscribableChannel, MessageHandler $messageHandler)
+    public function __construct(string $consumerName, SubscribableChannel $subscribableChannel, MessageHandler $messageHandler)
     {
+        $this->consumerName = $consumerName;
         $this->subscribableChannel = $subscribableChannel;
         $this->messageHandler = $messageHandler;
 
@@ -58,7 +64,7 @@ class EventDrivenConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function canBeRun(): bool
+    public function isMissingConfiguration(): bool
     {
         return false;
     }
@@ -74,9 +80,17 @@ class EventDrivenConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function getComponentName(): string
+    public function isPollable(): bool
     {
-        return "Event Driven Consumer";
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getConsumerName(): string
+    {
+        return $this->consumerName;
     }
 
     private function initialize() : void

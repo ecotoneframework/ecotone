@@ -17,6 +17,11 @@ class QueueChannel implements PollableChannel
      */
     private $queue = [];
 
+    public static function create() : self
+    {
+        return new self();
+    }
+
     /**
      * @inheritDoc
      */

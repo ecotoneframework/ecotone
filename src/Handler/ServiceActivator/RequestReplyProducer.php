@@ -50,7 +50,7 @@ class RequestReplyProducer
             throw MessageDeliveryException::create("Requires response but got none. {$messageProcessor}");
         }
 
-        if ($replyData) {
+        if (!is_null($replyData)) {
             if (!$this->hasOutputChannel() && !$message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
                 throw new MessageDeliveryException("Can't process {$message}, no output channel during delivery using {$messageProcessor}");
             }
@@ -80,7 +80,7 @@ class RequestReplyProducer
      */
     private function isReplyDataEmpty($replyData): bool
     {
-        return !(bool)$replyData;
+        return is_null($replyData);
     }
 
     /**

@@ -73,7 +73,7 @@ class GatewayProxy
 
         $replyMessage = $this->replySender->receiveReply();
 
-        if (!$replyMessage) {
+        if (is_null($replyMessage)) {
             return null;
         }
 

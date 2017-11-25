@@ -2,6 +2,7 @@
 
 namespace Messaging\Endpoint;
 
+use Fixture\Handler\DumbMessageHandlerBuilder;
 use Fixture\Handler\NoReturnMessageHandler;
 use Messaging\Channel\DirectChannel;
 use Messaging\MessagingTest;
@@ -17,13 +18,17 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     {
         $consumerEndpointFactory = new ConsumerEndpointFactory();
 
-        $consumerEndpointFactory->setMessageChannel(DirectChannel::create());
-        $consumerEndpointFactory->setMessageHandler(new NoReturnMessageHandler());
-
-        $this->assertInstanceOf(EventDrivenConsumer::class, $consumerEndpointFactory->create());
+        $this->assertInstanceOf(EventDrivenConsumer::class,
+            $consumerEndpointFactory->create(
+                DumbMessageHandlerBuilder::create(
+            "some",
+                new NoReturnMessageHandler(),
+                DirectChannel::create()
+            ))
+        );
     }
 
-    public function test_creating_pollable_consumer()
+    public function future_test_creating_pollable_consumer()
     {
 
     }

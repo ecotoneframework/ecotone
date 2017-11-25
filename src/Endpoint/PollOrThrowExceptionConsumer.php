@@ -2,6 +2,7 @@
 
 namespace Messaging\Endpoint;
 
+use Messaging\MessageDeliveryException;
 use Messaging\MessageHandler;
 use Messaging\PollableChannel;
 
@@ -10,7 +11,7 @@ use Messaging\PollableChannel;
  * @package Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class SingleReceivePollingConsumer implements ConsumerLifecycle
+class PollOrThrowExceptionConsumer implements ConsumerLifecycle
 {
     /**
      * @var PollableChannel
@@ -35,7 +36,7 @@ class SingleReceivePollingConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function canBeRun(): bool
+    public function isMissingConfiguration(): bool
     {
         return false;
     }
@@ -53,7 +54,19 @@ class SingleReceivePollingConsumer implements ConsumerLifecycle
      */
     public function start(): void
     {
+        if ($this->pollableChannel->receive()) {
+            throw MessageDeliveryException::create("Message was not delivered to " . self::class);
+        }
+
         $this->messageHandler->handle($this->pollableChannel->receive());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isPollable(): bool
+    {
+        return true;
     }
 
     /**
@@ -75,7 +88,7 @@ class SingleReceivePollingConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function getComponentName(): string
+    public function getConsumerName(): string
     {
         return "single receive polling consumer";
     }

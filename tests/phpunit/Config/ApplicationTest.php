@@ -2,14 +2,14 @@
 
 namespace Messaging\Config;
 
+use Messaging\MessagingTest;
+
 /**
- * Class Application
+ * Class ApplicationTest
  * @package Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class Application
+class ApplicationTest extends MessagingTest
 {
-    public function __construct()
-    {
-    }
+
 }

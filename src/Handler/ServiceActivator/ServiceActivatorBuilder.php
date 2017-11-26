@@ -1,12 +1,8 @@
 <?php
 
-namespace Messaging\Config;
+namespace Messaging\Handler\ServiceActivator;
 
 use Messaging\Handler\MessageHandlerBuilder;
-use Messaging\Handler\ServiceActivator\MethodArgument;
-use Messaging\Handler\ServiceActivator\MethodInvoker;
-use Messaging\Handler\ServiceActivator\RequestReplyProducer;
-use Messaging\Handler\ServiceActivator\ServiceActivatingHandler;
 use Messaging\MessageChannel;
 use Messaging\MessageHandler;
 

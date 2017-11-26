@@ -2,19 +2,16 @@
 
 namespace Behat\Bootstrap;
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
-use Behat\Gherkin\Node\PyStringNode;
-use Behat\Gherkin\Node\TableNode;
 use Fixture\Behat\Booking\BookingService;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
-use Messaging\Config\GatewayProxyBuilder;
 use Messaging\Config\MessagingSystem;
-use Messaging\Config\ServiceActivatorBuilder;
 use Messaging\Endpoint\ConsumerEndpointFactory;
 use Messaging\Endpoint\ConsumerLifecycle;
 use Messaging\Handler\Gateway\GatewayProxy;
+use Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Messaging\MessageChannel;
 use Messaging\PollableChannel;
 use Messaging\Support\Assert;
@@ -223,7 +220,7 @@ class DomainContext implements Context
      * @param string $interfaceName
      * @param string $methodName
      * @param string $requestChannel
-     * @return GatewayProxyBuilder
+     * @return \Messaging\Handler\Gateway\GatewayProxyBuilder
      */
     private function createGatewayBuilder(string $interfaceName, string $methodName, string $requestChannel): GatewayProxyBuilder
     {
@@ -240,7 +237,7 @@ class DomainContext implements Context
      * @param string $className
      * @param string $methodName
      * @param string $channelName
-     * @return ServiceActivatorBuilder
+     * @return \Messaging\Handler\ServiceActivator\ServiceActivatorBuilder
      */
     private function createServiceActivatorBuilder(string $handlerName, string $className, string $methodName, string $channelName): ServiceActivatorBuilder
     {

@@ -56,8 +56,6 @@ class AssertTest extends TestCase
 
     public function test_testing_if_subclass_of()
     {
-        $this->expectException(InvalidArgumentException::class);
-
         Assert::isSubclassOf(new \stdClass(), \stdClass::class, "");
         Assert::isSubclassOf(new ExtendedStdClass(), \stdClass::class, "");
 

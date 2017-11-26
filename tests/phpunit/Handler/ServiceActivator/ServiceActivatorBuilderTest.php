@@ -1,6 +1,6 @@
 <?php
 
-namespace Messaging\Config;
+namespace Messaging\Handler\ServiceActivator;
 use Fixture\Service\ServiceExpectingOneArgument;
 use Messaging\MessagingTest;
 use Messaging\Support\InvalidArgumentException;

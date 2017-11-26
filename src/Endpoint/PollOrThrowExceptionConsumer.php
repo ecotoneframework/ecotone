@@ -14,6 +14,10 @@ use Messaging\PollableChannel;
 class PollOrThrowExceptionConsumer implements ConsumerLifecycle
 {
     /**
+     * @var string
+     */
+    private $consumerName;
+    /**
      * @var PollableChannel
      */
     private $pollableChannel;
@@ -24,13 +28,25 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
 
     /**
      * PollingConsumer constructor.
+     * @param string $consumerName
      * @param PollableChannel $pollableChannel
      * @param MessageHandler $messageHandler
      */
-    public function __construct(PollableChannel $pollableChannel, MessageHandler $messageHandler)
+    public function __construct(string $consumerName, PollableChannel $pollableChannel, MessageHandler $messageHandler)
     {
+        $this->consumerName = $consumerName;
         $this->pollableChannel = $pollableChannel;
         $this->messageHandler = $messageHandler;
+    }
+
+    public static function createWithoutName(PollableChannel $pollableChannel, MessageHandler $messageHandler) : self
+    {
+        return new self("some random name", $pollableChannel, $messageHandler);
+    }
+
+    public static function create(string $consumerName, PollableChannel $pollableChannel, MessageHandler $messageHandler) : self
+    {
+        return new self($consumerName, $pollableChannel, $messageHandler);
     }
 
     /**
@@ -54,11 +70,12 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
      */
     public function start(): void
     {
-        if ($this->pollableChannel->receive()) {
+        $message = $this->pollableChannel->receive();
+        if (is_null($message)) {
             throw MessageDeliveryException::create("Message was not delivered to " . self::class);
         }
 
-        $this->messageHandler->handle($this->pollableChannel->receive());
+        $this->messageHandler->handle($message);
     }
 
     /**
@@ -90,6 +107,6 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
      */
     public function getConsumerName(): string
     {
-        return "single receive polling consumer";
+        return $this->consumerName;
     }
 }

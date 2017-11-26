@@ -1,11 +1,8 @@
 <?php
 
-namespace Messaging\Config;
+namespace Messaging\Handler\Gateway;
 
 use Messaging\Channel\DirectChannel;
-use Messaging\Handler\Gateway\GatewayProxy;
-use Messaging\Handler\Gateway\MethodArgumentConverter;
-use Messaging\Handler\Gateway\MethodCallToMessageConverter;
 use Messaging\Handler\Gateway\Poller\ChannelReplySender;
 use Messaging\Handler\Gateway\Poller\EmptyReplySender;
 use Messaging\Handler\Gateway\Poller\TimeoutChannelReplySender;

@@ -5,6 +5,7 @@ namespace Messaging\Config;
 use Messaging\Endpoint\ConsumerEndpointFactory;
 use Messaging\Endpoint\ConsumerLifecycle;
 use Messaging\Support\Assert;
+use Messaging\Support\InvalidArgumentException;
 
 /**
  * Class Application
@@ -46,10 +47,26 @@ final class MessagingSystem
         }
     }
 
+    public function stopEventDrivenConsumers() : void
+    {
+        foreach ($this->consumers as $consumer) {
+            if (!$consumer->isPollable()) {
+                $consumer->stop();
+            }
+        }
+    }
+
+    /**
+     * @param string $consumerName
+     * @throws \Messaging\MessagingException
+     */
     public function runPollableByName(string $consumerName) : void
     {
         foreach ($this->consumers as $consumer) {
             if ($consumer->getConsumerName() === $consumerName) {
+                if (!$consumer->isPollable()) {
+                    throw InvalidArgumentException::create("Can't run event driven consumer with name {$consumerName} as pollable");
+                }
                 $consumer->start();
             }
         }

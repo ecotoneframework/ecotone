@@ -4,9 +4,12 @@ namespace Messaging\Handler\Transformer;
 
 use Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Fixture\Service\ServiceExpectingOneArgument;
+use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutReturnValue;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
+use Messaging\Handler\Processor\MethodInvoker\HeaderArgument;
+use Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
 use Messaging\MessagingTest;
 use Messaging\Support\InvalidArgumentException;
 use Messaging\Support\MessageBuilder;
@@ -105,14 +108,24 @@ class TransformerBuilderTest extends MessagingTest
     public function test_transforming_with_custom_method_arguments_converters()
     {
         $payload = 'someBigPayload';
+        $headerValue = 'abc';
         $outputChannel = QueueChannel::create();
-        $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannel,ServiceExpectingOneArgument::create(), 'withReturnValue', 'test')
+        $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannel, ServiceExpectingTwoArguments::create(), 'withReturnValue', 'test')
+            ->withMethodArguments([
+                PayloadArgument::create('name'),
+                HeaderArgument::create('surname', 'token')
+            ])
             ->build();
 
-        $transformer->handle(MessageBuilder::withPayload($payload)->build());
+        $transformer->handle(
+            MessageBuilder::withPayload($payload)
+                ->setHeader('token', $headerValue)
+                ->build()
+        );
 
         $this->assertMessages(
-            MessageBuilder::withPayload($payload)
+            MessageBuilder::withPayload($payload . $headerValue)
+                ->setHeader('token', $headerValue)
                 ->build(),
             $outputChannel->receive()
         );

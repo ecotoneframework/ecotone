@@ -4,6 +4,7 @@ namespace Messaging\Handler\Transformer;
 use Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Messaging\Handler\InterfaceToCall;
 use Messaging\Handler\MessageHandlerBuilder;
+use Messaging\Handler\MethodArgument;
 use Messaging\Handler\Processor\MethodInvoker\MessageArgument;
 use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
@@ -35,6 +36,10 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      * @var string
      */
     private $methodName;
+    /**
+     * @var MethodArgument[]|array
+     */
+    private $methodArguments;
 
     /**
      * TransformerBuilder constructor.
@@ -68,27 +73,40 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     }
 
     /**
+     * @param array|MethodArgument[] $methodArguments
+     * @return TransformerBuilder
+     */
+    public function withMethodArguments(array $methodArguments) : self
+    {
+       $this->methodArguments = $methodArguments;
+
+       return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function build(): MessageHandler
     {
         $interfaceToCall = InterfaceToCall::createFromObject($this->objectToInvoke, $this->methodName);
         $firstParameterName = $interfaceToCall->getFirstParameterName();
-        $messageArguments = [];
+        $methodArguments = $this->methodArguments;
 
         if ($interfaceToCall->isVoid()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
-        if ($interfaceToCall->hasFirstParameterMessageTypeHint()) {
-            $messageArguments[] = MessageArgument::create($firstParameterName);
-        }else {
-            $messageArguments[] = PayloadArgument::create($firstParameterName);
+        if (empty($methodArguments)) {
+            if ($interfaceToCall->hasFirstParameterMessageTypeHint()) {
+                $methodArguments[] = MessageArgument::create($firstParameterName);
+            }else {
+                $methodArguments[] = PayloadArgument::create($firstParameterName);
+            }
         }
 
         return new Transformer(
             $this->outputChannel,
-            MethodInvoker::createWith($this->objectToInvoke, $this->methodName, $messageArguments)
+            MethodInvoker::createWith($this->objectToInvoke, $this->methodName, $methodArguments)
         );
     }
 }

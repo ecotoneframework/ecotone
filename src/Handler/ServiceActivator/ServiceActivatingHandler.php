@@ -2,6 +2,7 @@
 
 namespace Messaging\Handler\ServiceActivator;
 
+use Messaging\Handler\MessageProcessor;
 use Messaging\Message;
 use Messaging\MessageHandler;
 

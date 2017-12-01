@@ -2,6 +2,7 @@
 
 namespace Messaging\Handler\ServiceActivator;
 
+use Messaging\Handler\MessageProcessor;
 use Messaging\Message;
 use Messaging\MessageChannel;
 use Messaging\MessageDeliveryException;
@@ -27,7 +28,7 @@ class RequestReplyProducer
 
     /**
      * RequestReplyProducer constructor.
-     * @param MessageChannel $outputChannel
+     * @param MessageChannel|null $outputChannel
      * @param bool $isReplyRequired
      */
     public function __construct(?MessageChannel $outputChannel, bool $isReplyRequired)

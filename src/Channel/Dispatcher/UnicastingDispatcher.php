@@ -16,7 +16,7 @@ use Messaging\MessageHandler;
 class UnicastingDispatcher implements MessageDispatcher
 {
     /**
-     * @var MessageHandler
+     * @var MessageHandler|null
      */
     private $messageHandler;
 

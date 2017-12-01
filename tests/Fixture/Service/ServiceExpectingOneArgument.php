@@ -27,6 +27,21 @@ class ServiceExpectingOneArgument
         $this->wasCalled = true;
     }
 
+    public function withNullReturnValue(string $name) : ?string
+    {
+        return null;
+    }
+
+    public function withArrayReturnValue(string $name) : array
+    {
+        return [$name];
+    }
+
+    public function withArrayTypeHintAndArrayReturnValue(array $values) : array
+    {
+        return $values;
+    }
+
     /**
      * @inheritDoc
      */

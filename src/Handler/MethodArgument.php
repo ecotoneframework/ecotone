@@ -1,6 +1,6 @@
 <?php
 
-namespace Messaging\Handler\ServiceActivator;
+namespace Messaging\Handler;
 
 use Messaging\InvalidMessageHeaderException;
 use Messaging\Message;

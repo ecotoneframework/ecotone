@@ -5,6 +5,7 @@ namespace Messaging\Handler\ServiceActivator;
 use Fixture\Handler\NoReplyMessageProducer;
 use Fixture\Handler\ReplyMessageProducer;
 use Messaging\Channel\QueueChannel;
+use Messaging\Handler\MessageProcessor;
 use Messaging\Message;
 use Messaging\MessageChannel;
 use Messaging\MessageDeliveryException;
@@ -29,7 +30,7 @@ class RequestReplyProducerTest extends MessagingTest
     }
 
     /**
-     * @param MessageChannel $messageChannel
+     * @param MessageChannel|null $messageChannel
      * @param bool $requireReply
      * @return \Messaging\Handler\ServiceActivator\RequestReplyProducer
      */

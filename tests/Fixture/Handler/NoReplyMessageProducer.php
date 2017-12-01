@@ -2,7 +2,7 @@
 
 namespace Fixture\Handler;
 
-use Messaging\Handler\ServiceActivator\MessageProcessor;
+use Messaging\Handler\MessageProcessor;
 use Messaging\Message;
 
 /**

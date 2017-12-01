@@ -2,6 +2,8 @@
 
 namespace Messaging\Handler\Gateway;
 use Messaging\Channel\DirectChannel;
+use Messaging\Handler\InterfaceToCall;
+use Messaging\Support\Assert;
 use Messaging\Support\InvalidArgumentException;
 
 /**
@@ -58,6 +60,7 @@ class GatewayProxy
      */
     public function execute(array $methodArgumentValues)
     {
+        Assert::isInterface($this->className, "Gateway should point to interface instead of got {$this->className}");
         $methodArguments = [];
         $interfaceToCall = InterfaceToCall::create($this->className, $this->methodName);
 

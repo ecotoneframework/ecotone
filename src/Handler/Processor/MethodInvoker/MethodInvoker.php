@@ -1,9 +1,9 @@
 <?php
 
-namespace Messaging\Handler\ServiceActivator;
+namespace Messaging\Handler\Processor\MethodInvoker;
 
-use Messaging\Handler\ServiceActivator\MessageProcessor;
-use Messaging\Handler\MethodDescription;
+use Messaging\Handler\MessageProcessor;
+use Messaging\Handler\MethodArgument;
 use Messaging\Message;
 use Messaging\Support\Assert;
 use Messaging\Support\InvalidArgumentException;
@@ -79,7 +79,8 @@ final class MethodInvoker implements MessageProcessor
         $requiredArgumentsCount = count($objectToInvokeReflection->getParameters());
 
         if ($this->canBeInvokedWithDefaultPayloadArgument($passedArgumentsCount, $requiredArgumentsCount)) {
-            $methodArguments = [PayloadArgument::create($objectToInvokeArguments[0]->getName())];
+            $firstArgument = $objectToInvokeArguments[0];
+            $methodArguments = [PayloadArgument::create($firstArgument->getName())];
             $passedArgumentsCount = 1;
         }
 

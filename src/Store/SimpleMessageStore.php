@@ -84,7 +84,8 @@ final class SimpleMessageStore implements MessageStore, MessageGroupStore
      */
     public function messageGroupSize(string $groupId): int
     {
-        // TODO: Implement messageGroupSize() method.
+        /** @TODO */
+        return 0;
     }
 
     /**
@@ -100,7 +101,8 @@ final class SimpleMessageStore implements MessageStore, MessageGroupStore
      */
     public function pollMessageFromGroup(string $groupId): ?Message
     {
-        // TODO: Implement pollMessageFromGroup() method.
+        /** @TODO */
+        return null;
     }
 
     /**
@@ -108,7 +110,8 @@ final class SimpleMessageStore implements MessageStore, MessageGroupStore
      */
     public function getMessageForGroup(string $groupId): array
     {
-        // TODO: Implement getMessageForGroup() method.
+        /** @TODO */
+        return [];
     }
 
     /**

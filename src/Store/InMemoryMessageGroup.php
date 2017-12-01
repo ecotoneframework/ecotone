@@ -37,7 +37,7 @@ final class InMemoryMessageGroup implements MessageGroup
      */
     public static function createEmpty() : MessageGroup
     {
-        return new self(Uuid::uuid4(), []);
+        return new self(Uuid::uuid4()->toString(), []);
     }
 
     /**

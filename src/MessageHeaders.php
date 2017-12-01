@@ -114,10 +114,10 @@ class MessageHeaders
     }
 
     /**
-     * @param string $value
+     * @param mixed $value
      * @return bool
      */
-    final public function containsValue(string $value) : bool
+    final public function containsValue($value) : bool
     {
         return in_array($value, $this->headers);
     }
@@ -194,7 +194,7 @@ class MessageHeaders
     final private function initialize(array $headers) : void
     {
         foreach ($headers as $headerName => $headerValue) {
-            if (!$headerName) {
+            if (is_null($headerName) || $headerName === '') {
                 throw InvalidMessageHeaderException::create("Passed empty header name");
             }
         }

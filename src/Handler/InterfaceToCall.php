@@ -1,6 +1,9 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace Messaging\Handler;
+
+use Messaging\Handler\Gateway\NamedParameter;
+use Messaging\Message;
 use Messaging\Support\Assert;
 use Messaging\Support\InvalidArgumentException;
 
@@ -40,6 +43,11 @@ class InterfaceToCall
         return new self($interfaceName, $methodName);
     }
 
+    public static function createFromObject($object, string $methodName) : self
+    {
+        return new self(get_class($object), $methodName);
+    }
+
     public function isVoid() : bool
     {
         return $this->getReturnType() == 'void';
@@ -51,6 +59,37 @@ class InterfaceToCall
     public function parameters() : array
     {
         return $this->reflectionMethod()->getParameters();
+    }
+
+    /**
+     * @return string
+     */
+    public function getFirstParameterName() : string
+    {
+        return $this->getFirstParameter()->getName();
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasFirstParameterMessageTypeHint() : bool
+    {
+        $firstParameter = $this->getFirstParameter();
+
+        return (string)$firstParameter->getType() == Message::class;
+    }
+
+    /**
+     * @return \ReflectionParameter
+     * @throws \Messaging\MessagingException
+     */
+    private function getFirstParameter() : \ReflectionParameter
+    {
+        if ($this->parameterAmount() < 1) {
+            throw InvalidArgumentException::create("Expecting {$this} to have at least one parameter, but got none");
+        }
+
+        return $this->parameters()[0];
     }
 
     /**
@@ -87,6 +126,9 @@ class InterfaceToCall
         return $this->parameterAmount() == 1;
     }
 
+    /**
+     * @return int
+     */
     private function parameterAmount() : int
     {
         return count($this->parameters());
@@ -115,11 +157,9 @@ class InterfaceToCall
      */
     private function initialize(string $interfaceName, string $methodName) : void
     {
-        Assert::isInterface($interfaceName, "Gateway should point to interface instead of got {$interfaceName}");
-
         $interfaceReflection = new \ReflectionClass($interfaceName);
         if (!$interfaceReflection->hasMethod($methodName)) {
-            throw InvalidArgumentException::create("Interface for gateway {$interfaceName} has no method {$methodName}");
+            throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
         }
 
         $this->interfaceName = $interfaceName;

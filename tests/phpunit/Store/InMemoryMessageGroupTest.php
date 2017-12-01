@@ -33,7 +33,7 @@ class InMemoryMessageGroupTest extends TestCase
     {
         $message = MessageBuilder::withPayload('some')
             ->build();
-        $groupId = Uuid::fromString('3d6cdcc8-8b72-4ef8-a652-566899d37d39');
+        $groupId = Uuid::fromString('3d6cdcc8-8b72-4ef8-a652-566899d37d39')->toString();
 
         $messageGroup = InMemoryMessageGroup::createEmptyWithId($groupId);
 

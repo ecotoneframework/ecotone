@@ -1,12 +1,16 @@
 <?php
 
-namespace Messaging\Handler\ServiceActivator;
+namespace Messaging\Handler\Processor;
 
+use Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Fixture\Service\ServiceExpectingOneArgument;
 use Fixture\Service\ServiceExpectingThreeArguments;
 use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutAnyMethods;
-use Messaging\MessageHeaders;
+use Messaging\Handler\Processor\MethodInvoker\HeaderArgument;
+use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
+use Messaging\MessagingTest;
 use Messaging\Support\InvalidArgumentException;
 use Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
@@ -16,7 +20,7 @@ use PHPUnit\Framework\TestCase;
  * @package Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MethodInvokerTest extends TestCase
+class MethodInvokerTest extends MessagingTest
 {
     public function test_throwing_exception_if_class_has_no_defined_method()
     {

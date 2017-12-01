@@ -53,6 +53,19 @@ final class MessageBuilder
     }
 
     /**
+     * @param array|string[] $headers
+     * @return MessageBuilder
+     */
+    public function setMultipleHeaders(array $headers) : self
+    {
+        foreach ($headers as $headerName => $header) {
+            $this->headerAccessor->setHeader($headerName, $header);
+        }
+
+        return $this;
+    }
+
+    /**
      * @param string $headerName
      * @return MessageBuilder
      */

@@ -116,8 +116,8 @@ class DomainContext implements Context
      */
     public function iSetGatewayForAndWithRequestChannel(string $interfaceName, string $methodName, string $requestChannel)
     {
-        $messageChannel = $this->getChannelByName($requestChannel);
         /** @var DirectChannel $messageChannel */
+        $messageChannel = $this->getChannelByName($requestChannel);
         Assert::isSubclassOf($messageChannel, DirectChannel::class, "Request Channel for Direct Channel");
 
         $this->gateways = GatewayProxyBuilder::create($interfaceName, $methodName, $messageChannel);

@@ -3,6 +3,7 @@
 namespace Messaging\Handler\Gateway;
 
 use Messaging\Handler\Gateway\MethodParameterConverter\OnlyPayloadMessageParameterMethodArgumentConverter;
+use Messaging\Handler\InterfaceToCall;
 use Messaging\Message;
 use Messaging\Support\Assert;
 use Messaging\Support\InvalidArgumentException;

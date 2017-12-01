@@ -1,7 +1,8 @@
 <?php
 
-namespace Messaging\Handler\ServiceActivator;
+namespace Messaging\Handler\Processor\MethodInvoker;
 
+use Messaging\Handler\MethodArgument;
 use Messaging\Message;
 
 /**

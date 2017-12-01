@@ -22,7 +22,6 @@ class ChannelReplySender implements ReplySender
     /**
      * ReceivePoller constructor.
      * @param PollableChannel $replyChannel
-     * @internal param GatewayReply $gatewayReply
      */
     public function __construct(PollableChannel $replyChannel)
     {

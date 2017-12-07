@@ -2,39 +2,37 @@
 
 namespace Messaging\Handler\Transformer;
 
-use Messaging\Handler\InterfaceToCall;
-use Messaging\Handler\Processor\MethodInvoker\MessageArgument;
-use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Messaging\Handler\RequestReplyProducer;
 use Messaging\Message;
 use Messaging\MessageChannel;
 use Messaging\MessageHandler;
-use Messaging\Support\MessageBuilder;
 
 /**
  * Class TransformerHandler
  * @package Messaging\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @internal
  */
 class Transformer implements MessageHandler
 {
     /**
-     * @var MessageChannel
+     * @var TransformerMessageProcessor
      */
-    private $outputChannel;
+    private $messageProcessor;
     /**
-     * @var MethodInvoker
+     * @var RequestReplyProducer
      */
-    private $methodInvoker;
+    private $requestReplyProducer;
 
     /**
      * Transformer constructor.
      * @param MessageChannel $outputChannel
-     * @param MethodInvoker $methodInvoker
+     * @param TransformerMessageProcessor $messageProcessor
      */
-    public function __construct(MessageChannel $outputChannel, MethodInvoker $methodInvoker)
+    public function __construct(MessageChannel $outputChannel, TransformerMessageProcessor $messageProcessor)
     {
-        $this->outputChannel = $outputChannel;
-        $this->methodInvoker = $methodInvoker;
+        $this->requestReplyProducer = RequestReplyProducer::createWithNotRequiredReply($outputChannel);
+        $this->messageProcessor = $messageProcessor;
     }
 
     /**
@@ -42,29 +40,6 @@ class Transformer implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $reply = $this->methodInvoker->processMessage($message);
-        $replyBuilder = MessageBuilder::fromMessage($message);
-
-        if (is_null($reply)) {
-            return;
-        }
-
-        if (is_array($reply)) {
-            if (is_array($message->getPayload())) {
-                $reply = $replyBuilder
-                            ->setPayload($reply)
-                            ->build();
-            }else {
-                $reply = $replyBuilder
-                    ->setMultipleHeaders($reply)
-                    ->build();
-            }
-        }else if (!($reply instanceof Message)) {
-            $reply = $replyBuilder
-                        ->setPayload($reply)
-                        ->build();
-        }
-
-        $this->outputChannel->send($reply);
+        $this->requestReplyProducer->handleWithReply($message, $this->messageProcessor);
     }
 }

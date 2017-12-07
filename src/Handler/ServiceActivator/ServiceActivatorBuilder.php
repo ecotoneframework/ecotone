@@ -5,6 +5,7 @@ namespace Messaging\Handler\ServiceActivator;
 use Messaging\Handler\MessageHandlerBuilder;
 use Messaging\Handler\MethodArgument;
 use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Messaging\Handler\RequestReplyProducer;
 use Messaging\MessageChannel;
 use Messaging\MessageHandler;
 

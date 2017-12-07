@@ -3,6 +3,7 @@
 namespace Messaging\Handler\ServiceActivator;
 
 use Messaging\Handler\MessageProcessor;
+use Messaging\Handler\RequestReplyProducer;
 use Messaging\Message;
 use Messaging\MessageHandler;
 

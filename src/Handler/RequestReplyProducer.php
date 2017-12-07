@@ -1,8 +1,7 @@
 <?php
 
-namespace Messaging\Handler\ServiceActivator;
+namespace Messaging\Handler;
 
-use Messaging\Handler\MessageProcessor;
 use Messaging\Message;
 use Messaging\MessageChannel;
 use Messaging\MessageDeliveryException;
@@ -38,6 +37,15 @@ class RequestReplyProducer
     }
 
     /**
+     * @param MessageChannel|null $messageChannel
+     * @return RequestReplyProducer
+     */
+    public static function createWithNotRequiredReply(?MessageChannel $messageChannel) : self
+    {
+        return new self($messageChannel, false);
+    }
+
+    /**
      * @param Message $message
      * @param MessageProcessor $messageProcessor
      * @throws MessageDeliveryException
@@ -58,6 +66,11 @@ class RequestReplyProducer
 
             $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : $message->getHeaders()->getReplyChannel();
             Assert::isSubclassOf($replyChannel, MessageChannel::class, "Reply channel for service activator must be MessageChannel");
+
+            if ($replyData instanceof Message) {
+                $replyChannel->send($replyData);
+                return;
+            }
 
             $replyChannel->send(
                 MessageBuilder::fromMessage($message)

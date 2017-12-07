@@ -106,7 +106,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
 
         return new Transformer(
             $this->outputChannel,
-            MethodInvoker::createWith($this->objectToInvoke, $this->methodName, $methodArguments)
+            TransformerMessageProcessor::createFrom(MethodInvoker::createWith($this->objectToInvoke, $this->methodName, $methodArguments))
         );
     }
 }

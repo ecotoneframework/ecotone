@@ -5,6 +5,6 @@ default:
         pretty: true
     suites:
       default:
-          paths:    [ %paths.base%/tests/Behat/features ]
+          paths:    [ tests/Behat/features ]
           contexts: [ Behat\Bootstrap\DomainContext ]
 

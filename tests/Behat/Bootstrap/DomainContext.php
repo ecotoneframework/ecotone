@@ -2,8 +2,11 @@
 
 namespace Behat\Bootstrap;
 
+use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Fixture\Behat\Booking\BookingService;
+use Fixture\Behat\Shopping\BookWasReserved;
+use Fixture\Behat\Shopping\ShoppingService;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
 use Messaging\Config\MessagingSystem;
@@ -12,6 +15,7 @@ use Messaging\Endpoint\ConsumerLifecycle;
 use Messaging\Handler\Gateway\GatewayProxy;
 use Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Messaging\Handler\Transformer\TransformerBuilder;
 use Messaging\MessageChannel;
 use Messaging\PollableChannel;
 use Messaging\Support\Assert;
@@ -187,6 +191,16 @@ class DomainContext implements Context
     }
 
     /**
+     * @Given I run messaging system
+     */
+    public function iRunMessagingSystem()
+    {
+        $this->messagingSystem = MessagingSystem::create($this->consumers);
+
+        $this->messagingSystem->runEventDrivenConsumers();
+    }
+
+    /**
      * @param string $channelName
      * @return MessageChannel
      */
@@ -241,13 +255,7 @@ class DomainContext implements Context
      */
     private function createServiceActivatorBuilder(string $handlerName, string $className, string $methodName, string $channelName): ServiceActivatorBuilder
     {
-        $object = null;
-        if (array_key_exists($className, $this->serviceObjects)) {
-            $object = $this->serviceObjects[$className];
-        }else {
-            $object = new $className();
-            $this->serviceObjects[$className] = $object;
-        }
+        $object = $this->createObject($className);
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::create($object, $methodName);
         $serviceActivatorBuilder->withInputMessageChannel($this->getChannelByName($channelName));
@@ -257,12 +265,50 @@ class DomainContext implements Context
     }
 
     /**
-     * @Given I run messaging system
+     * @Given I activate transformer with name :name for :className and :methodName with request channel :requestChannelName and output channel :responseChannelName
+     * @param string $name
+     * @param string $className
+     * @param string $methodName
+     * @param string $requestChannelName
+     * @param string $responseChannelName
      */
-    public function iRunMessagingSystem()
+    public function iActivateTransformerWithNameForAndWithRequestChannelAndOutputChannel(string $name, string $className, string $methodName, string $requestChannelName, string $responseChannelName)
     {
-        $this->messagingSystem = MessagingSystem::create($this->consumers);
+        $inputChannel = $this->getChannelByName($requestChannelName);
+        $outputChannel = $this->getChannelByName($responseChannelName);
+        $object = $this->createObject($className);
 
-        $this->messagingSystem->runEventDrivenConsumers();
+        $this->consumers[] = $this->consumerEndpointFactory->create(TransformerBuilder::create($inputChannel, $outputChannel, $object, $methodName, $name));
+    }
+
+    /**
+     * @When I reserve book named :bookName using gateway :gatewayName
+     * @param string $bookName
+     * @param string $gatewayName
+     */
+    public function iReserveBookNamedUsingGateway(string $bookName, string $gatewayName)
+    {
+        /** @var ShoppingService $gateway */
+        $gateway = $this->getGatewayByName($gatewayName);
+
+        $bookWasReserved = $gateway->reserve($bookName);
+
+        \PHPUnit\Framework\Assert::assertInstanceOf(BookWasReserved::class, $bookWasReserved, "Book must be reserved");
+    }
+
+    /**
+     * @param string $className
+     * @return null|object
+     */
+    private function createObject(string $className)
+    {
+        $object = null;
+        if (array_key_exists($className, $this->serviceObjects)) {
+            $object = $this->serviceObjects[$className];
+        } else {
+            $object = new $className();
+            $this->serviceObjects[$className] = $object;
+        }
+        return $object;
     }
 }

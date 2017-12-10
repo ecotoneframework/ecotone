@@ -21,14 +21,6 @@ use Messaging\Support\MessageBuilder;
 class TransformerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
 {
     /**
-     * @var MessageChannel
-     */
-    private $inputChannel;
-    /**
-     * @var MessageChannel
-     */
-    private $outputChannel;
-    /**
      * @var object
      */
     private $objectToInvoke;
@@ -51,11 +43,11 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     public function __construct(MessageChannel $inputChannel, MessageChannel $outputChannel, $objectToInvoke, string $methodName, string $handlerName)
     {
-        $this->inputChannel = $inputChannel;
-        $this->outputChannel = $outputChannel;
         $this->objectToInvoke = $objectToInvoke;
         $this->methodName = $methodName;
 
+        $this->withInputMessageChannel($inputChannel);
+        $this->withOutputMessageChannel($outputChannel);
         $this->withName($handlerName);
     }
 
@@ -105,7 +97,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         }
 
         return new Transformer(
-            $this->outputChannel,
+            $this->outputMessageChannel,
             TransformerMessageProcessor::createFrom(MethodInvoker::createWith($this->objectToInvoke, $this->methodName, $methodArguments))
         );
     }

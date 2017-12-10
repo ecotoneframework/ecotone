@@ -1,7 +1,6 @@
-Feature: As a user of the system I want to manage flow
+Feature: Service activator
 
-  Scenario: Registering flat.
-      Testing connection between service activator and gateway. Where gateway use only default payload transformer
+  Scenario: Connection between service activator and gateway. Where gateway use only default payload transformer
     Given I register "bookingRequest" as "Direct Channel"
     And I register "bookingConfirmation" as "Direct Channel"
     And I register "bookingConfirmationResponse" as "Pollable Channel"

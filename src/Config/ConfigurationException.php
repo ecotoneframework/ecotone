@@ -16,6 +16,6 @@ class ConfigurationException extends MessagingException
      */
     protected static function errorCode(): int
     {
-        return self::CONFIGURATION_IS_WRONG;
+        return self::CONFIGURATION_EXCEPTION;
     }
 }

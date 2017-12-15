@@ -78,9 +78,15 @@ final class MethodInvoker implements MessageProcessor
         $passedArgumentsCount = count($methodArguments);
         $requiredArgumentsCount = count($objectToInvokeReflection->getParameters());
 
-        if ($this->canBeInvokedWithDefaultPayloadArgument($passedArgumentsCount, $requiredArgumentsCount)) {
+        if ($this->canBeInvokedWithDefaultArgument($passedArgumentsCount, $requiredArgumentsCount)) {
             $firstArgument = $objectToInvokeArguments[0];
-            $methodArguments = [PayloadArgument::create($firstArgument->getName())];
+
+            if ((string)$firstArgument->getType() === Message::class) {
+                $methodArguments = [MessageArgument::create($firstArgument->getName())];
+            }else {
+                $methodArguments = [PayloadArgument::create($firstArgument->getName())];
+            }
+
             $passedArgumentsCount = 1;
         }
 
@@ -147,7 +153,7 @@ final class MethodInvoker implements MessageProcessor
      * @param $passedArgumentsCount
      * @return bool
      */
-    private function canBeInvokedWithDefaultPayloadArgument(int $passedArgumentsCount, int $requiredArgumentsCount): bool
+    private function canBeInvokedWithDefaultArgument(int $passedArgumentsCount, int $requiredArgumentsCount): bool
     {
         return $requiredArgumentsCount === 1 && $passedArgumentsCount === 0;
     }

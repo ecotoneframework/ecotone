@@ -14,6 +14,6 @@ class MessagingServiceIsNotAvailable extends MessagingException
      */
     protected static function errorCode(): int
     {
-        return self::MESSAGING_SERVICE_IS_NOT_AVAILABLE;
+        return self::MESSAGING_SERVICE_NOT_AVAILABLE_EXCEPTION;
     }
 }

@@ -69,8 +69,8 @@ class MessageHeadersTest extends TestCase
 
     public function test_creating_with_channels()
     {
-        $replyChannel = new QueueChannel();
-        $errorChannel = new QueueChannel();
+        $replyChannel = QueueChannel::create();
+        $errorChannel = QueueChannel::create();
         $oldMessageHeaders = MessageHeaders::create(1000, [
             MessageHeaders::REPLY_CHANNEL => $replyChannel,
             MessageHeaders::ERROR_CHANNEL => $errorChannel

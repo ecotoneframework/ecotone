@@ -23,6 +23,10 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      * @var string
      */
     protected $messageHandlerName;
+    /**
+     * @var ChannelResolver
+     */
+    protected $channelResolver;
 
     /**
      * @param string $name
@@ -71,5 +75,15 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     public function getInputMessageChannel(): MessageChannel
     {
         return $this->inputMessageChannel;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
+    {
+        $this->channelResolver = $channelResolver;
+
+        return $this;
     }
 }

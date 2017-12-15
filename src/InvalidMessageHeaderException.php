@@ -14,6 +14,6 @@ class InvalidMessageHeaderException extends MessagingException
      */
     protected static function errorCode(): int
     {
-        return self::INVALID_MESSAGE_HEADER;
+        return self::INVALID_MESSAGE_HEADER_EXCEPTION;
     }
 }

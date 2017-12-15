@@ -2,6 +2,7 @@
 
 namespace Fixture\Handler;
 
+use Messaging\Handler\ChannelResolver;
 use Messaging\Handler\MessageHandlerBuilder;
 use Messaging\MessageChannel;
 use Messaging\MessageHandler;
@@ -72,5 +73,13 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
     public function messageHandlerName(): string
     {
         return $this->messageHandlerName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
+    {
+        // TODO: Implement setChannelResolver() method.
     }
 }

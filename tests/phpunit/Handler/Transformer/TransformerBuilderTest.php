@@ -130,4 +130,29 @@ class TransformerBuilderTest extends MessagingTest
             $outputChannel->receive()
         );
     }
+
+    public function test_transforming_with_header_enricher()
+    {
+        $payload = 'someBigPayload';
+        $headerValue = 'abc';
+        $outputChannel = QueueChannel::create();
+        $transformer = TransformerBuilder::createHeaderEnricher('test', DirectChannel::create(), $outputChannel, [
+            "token" => $headerValue,
+            "correlation-id" => 1
+        ]
+        )->build();
+
+        $transformer->handle(
+            MessageBuilder::withPayload($payload)
+                ->build()
+        );
+
+        $this->assertMessages(
+            MessageBuilder::withPayload($payload)
+                ->setHeader('token', $headerValue)
+                ->setHeader('correlation-id', 1)
+                ->build(),
+            $outputChannel->receive()
+        );
+    }
 }

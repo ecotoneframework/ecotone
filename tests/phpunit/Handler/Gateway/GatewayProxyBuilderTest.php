@@ -47,7 +47,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder =  GatewayProxyBuilder::create(ServiceInterfaceSendOnly::class, 'sendMail', $requestChannel);
 
-        $gatewayProxyBuilder->withReplyChannel(new QueueChannel());
+        $gatewayProxyBuilder->withReplyChannel(QueueChannel::create());
 
         $this->expectException(InvalidArgumentException::class);
 
@@ -61,7 +61,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel->subscribe($messageHandler);
 
         $payload = 'replyData';
-        $replyChannel = new QueueChannel();
+        $replyChannel = QueueChannel::create();
         $replyMessage = MessageBuilder::withPayload($payload)->build();
         $replyChannel->send($replyMessage);
 
@@ -109,7 +109,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel->subscribe($messageHandler);
 
         $payload = 'replyData';
-        $replyChannel = new QueueChannel();
+        $replyChannel = QueueChannel::create();
         $replyMessage = MessageBuilder::withPayload($payload)->build();
         $replyChannel->send($replyMessage);
 
@@ -179,4 +179,6 @@ class GatewayProxyBuilderTest extends MessagingTest
             $messageHandler->message()
         );
     }
+
+
 }

@@ -68,7 +68,7 @@ class RequestReplyProducerTest extends MessagingTest
 
     public function test_processing_message_with_reply()
     {
-        $outputChannel = new QueueChannel();
+        $outputChannel = QueueChannel::create();
         $requestReplyProducer = $this->createRequestReplyProducer($outputChannel);
 
         $replyData = "some result";
@@ -91,7 +91,7 @@ class RequestReplyProducerTest extends MessagingTest
     public function test_sending_reply_to_message_channel_if_there_is_nonone_in_producer()
     {
         $requestReplyProducer = $this->createRequestReplyProducer();
-        $replyChannel = new QueueChannel();
+        $replyChannel = QueueChannel::create();
         $message = MessageBuilder::withPayload('a')
             ->setReplyChannel($replyChannel)
             ->build();
@@ -117,12 +117,12 @@ class RequestReplyProducerTest extends MessagingTest
 
     public function test_propagating_message_headers()
     {
-        $outputChannel = new QueueChannel();
+        $outputChannel = QueueChannel::create();
         $requestReplyProducer = $this->createRequestReplyProducer($outputChannel);
 
         $replyData = "some result";
         $messageProcessor = ReplyMessageProducer::create($replyData);
-        $replyChannelFromMessage = new QueueChannel();
+        $replyChannelFromMessage = QueueChannel::create();
         $this->handleReplyWithMessage(
             MessageBuilder::withPayload('some')
                 ->setHeader('token', "abcd")

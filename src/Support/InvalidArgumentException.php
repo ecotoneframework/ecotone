@@ -16,6 +16,6 @@ class InvalidArgumentException extends MessagingException
      */
     protected static function errorCode(): int
     {
-        return self::INVALID_ARGUMENT;
+        return self::INVALID_ARGUMENT_EXCEPTION;
     }
 }

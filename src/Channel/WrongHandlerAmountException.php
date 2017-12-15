@@ -16,6 +16,6 @@ class WrongHandlerAmountException extends MessagingException
      */
     protected static function errorCode(): int
     {
-        return self::WRONG_HANDLER_AMOUNT;
+        return self::WRONG_HANDLER_AMOUNT_EXCEPTION;
     }
 }

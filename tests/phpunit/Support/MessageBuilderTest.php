@@ -69,7 +69,7 @@ class MessageBuilderTest extends MessagingTest
 
     public function test_setting_reply_channel_directly()
     {
-        $replyChannel = new QueueChannel();
+        $replyChannel = QueueChannel::create();
         $message = MessageBuilder::withPayload('somePayload')
             ->setReplyChannel($replyChannel)
             ->build();
@@ -82,7 +82,7 @@ class MessageBuilderTest extends MessagingTest
 
     public function test_setting_error_channel_directly()
     {
-        $errorChannel = new QueueChannel();
+        $errorChannel = QueueChannel::create();
         $message = MessageBuilder::withPayload('somePayload')
             ->setErrorChannelName($errorChannel)
             ->build();
@@ -111,7 +111,7 @@ class MessageBuilderTest extends MessagingTest
         $message = MessageBuilder::withPayload('somePayload')
             ->setHeader('some', new \stdClass())
             ->setHeader('token', 'johny')
-            ->setReplyChannel(new QueueChannel())
+            ->setReplyChannel(QueueChannel::create())
             ->build();
 
         $messageToCompare = MessageBuilder::fromMessage($message)

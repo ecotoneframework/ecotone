@@ -2,6 +2,7 @@
 
 namespace Messaging\Handler\ServiceActivator;
 
+use Messaging\Handler\ChannelResolver;
 use Messaging\Handler\MessageHandlerBuilder;
 use Messaging\Handler\MethodArgument;
 use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -108,6 +109,14 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
         $this->inputMessageChannel = $inputMessageChannel;
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
+    {
+        // TODO: Implement setChannelResolver() method.
     }
 
     /**

@@ -17,6 +17,6 @@ class MessageHeaderDoesNotExistsException extends MessagingException
      */
     protected static function errorCode(): int
     {
-        return MessagingExceptionCode::MESSAGE_HEADER_DOES_NOT_EXISTS;
+        return MessagingExceptionCode::MESSAGE_HEADER_NOT_AVAILABLE_EXCEPTION;
     }
 }

@@ -3,6 +3,7 @@
 namespace Messaging\Handler\Router;
 
 use Messaging\Handler\ChannelResolver;
+use Messaging\Handler\DestinationResolutionException;
 use Messaging\Handler\MethodArgument;
 use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Messaging\Message;
@@ -15,7 +16,7 @@ use Messaging\MessageHandler;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class Router implements MessageHandler
+final class Router implements MessageHandler
 {
     /**
      * @var string
@@ -33,6 +34,10 @@ class Router implements MessageHandler
      * @var MethodInvoker
      */
     private $methodInvoker;
+    /**
+     * @var bool
+     */
+    private $isResolutionRequired;
 
     /**
      * RouterBuilder constructor.
@@ -40,13 +45,15 @@ class Router implements MessageHandler
      * @param ChannelResolver $channelResolver
      * @param MessageChannel $inputChannel
      * @param MethodInvoker $methodInvoker
+     * @param bool $isResolutionRequired
      */
-    private function __construct(string $handlerName, ChannelResolver $channelResolver, MessageChannel $inputChannel, MethodInvoker $methodInvoker)
+    private function __construct(string $handlerName, ChannelResolver $channelResolver, MessageChannel $inputChannel, MethodInvoker $methodInvoker, bool $isResolutionRequired)
     {
         $this->handlerName = $handlerName;
         $this->channelResolver = $channelResolver;
         $this->inputChannel = $inputChannel;
         $this->methodInvoker = $methodInvoker;
+        $this->isResolutionRequired = $isResolutionRequired;
     }
 
     /**
@@ -55,12 +62,13 @@ class Router implements MessageHandler
      * @param MessageChannel $inputChannel
      * @param $objectToInvoke
      * @param string $methodName
+     * @param bool $isResolutionRequired
      * @param array|MethodArgument[] $methodArguments
      * @return Router
      */
-    public static function create(string $handlerName, ChannelResolver $channelResolver, MessageChannel $inputChannel, $objectToInvoke, string $methodName, array $methodArguments) : self
+    public static function create(string $handlerName, ChannelResolver $channelResolver, MessageChannel $inputChannel, $objectToInvoke, string $methodName, bool $isResolutionRequired, array $methodArguments) : self
     {
-        return new self($handlerName, $channelResolver, $inputChannel, MethodInvoker::createWith($objectToInvoke, $methodName, $methodArguments));
+        return new self($handlerName, $channelResolver, $inputChannel, MethodInvoker::createWith($objectToInvoke, $methodName, $methodArguments), $isResolutionRequired);
     }
 
     /**
@@ -68,10 +76,20 @@ class Router implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $resultChannel = $this->methodInvoker->processMessage($message);
+        $resolutionChannels = $this->methodInvoker->processMessage($message);
 
-        $outputChannel = $this->channelResolver->resolve($resultChannel);
+        if (!is_array($resolutionChannels)) {
+            $resolutionChannels = [$resolutionChannels];
+        }
 
-        $outputChannel->send($message);
+        if (empty($resolutionChannels) && $this->isResolutionRequired) {
+            throw DestinationResolutionException::create("Can't resolve destination, because there are no channels to send message to.");
+        }
+
+        foreach ($resolutionChannels as $resolutionChannel) {
+            $outputChannel = $this->channelResolver->resolve($resolutionChannel);
+
+            $outputChannel->send($message);
+        }
     }
 }

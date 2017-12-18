@@ -7,6 +7,7 @@ use Behat\Behat\Context\Context;
 use Fixture\Behat\Booking\BookingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
+use Fixture\Handler\DumbChannelResolver;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
 use Messaging\Config\MessagingSystem;
@@ -34,10 +35,6 @@ class DomainContext implements Context
      */
     private $consumers = [];
     /**
-     * @var ConsumerEndpointFactory
-     */
-    private $consumerEndpointFactory;
-    /**
      * @var GatewayProxy[]
      */
     private $gateways;
@@ -50,19 +47,6 @@ class DomainContext implements Context
      * @var object[]
      */
     private $serviceObjects = [];
-
-
-    /**
-     * Initializes context.
-     *
-     * Every scenario gets its own context instance.
-     * You can also pass arbitrary arguments to the
-     * context constructor through behat.yml.
-     */
-    public function __construct()
-    {
-        $this->consumerEndpointFactory = new ConsumerEndpointFactory();
-    }
 
     /**
      * @Given I register :bookingRequestName as :type
@@ -93,7 +77,7 @@ class DomainContext implements Context
     {
         $serviceActivatorBuilder = $this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName);
 
-        $this->consumers[] = $this->consumerEndpointFactory->create($serviceActivatorBuilder);
+        $this->consumers[] = $this->consumerEndpointFactory()->create($serviceActivatorBuilder);
     }
 
     /**
@@ -109,7 +93,7 @@ class DomainContext implements Context
         $serviceActivatorBuilder = $this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName)
                                         ->withOutputChannel($this->getChannelByName($outputChannel));
 
-        $this->consumers[] = $this->consumerEndpointFactory->create($serviceActivatorBuilder);
+        $this->consumers[] = $this->consumerEndpointFactory()->create($serviceActivatorBuilder);
     }
 
     /**
@@ -278,7 +262,7 @@ class DomainContext implements Context
         $outputChannel = $this->getChannelByName($responseChannelName);
         $object = $this->createObject($className);
 
-        $this->consumers[] = $this->consumerEndpointFactory->create(TransformerBuilder::create($inputChannel, $outputChannel, $object, $methodName, $name));
+        $this->consumers[] = $this->consumerEndpointFactory()->create(TransformerBuilder::create($inputChannel, $outputChannel, $object, $methodName, $name));
     }
 
     /**
@@ -311,4 +295,10 @@ class DomainContext implements Context
         }
         return $object;
     }
+
+    private function consumerEndpointFactory() : ConsumerEndpointFactory
+    {
+        return new ConsumerEndpointFactory(DumbChannelResolver::create($this->messageChannels));
+    }
+
 }

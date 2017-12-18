@@ -39,6 +39,10 @@ class RouterBuilder implements MessageHandlerBuilder
      * @var array|MethodArgument[]
      */
     private $methodArguments = [];
+    /**
+     * @var bool
+     */
+    private $resolutionRequired = true;
 
     /**
      * RouterBuilder constructor.
@@ -68,6 +72,29 @@ class RouterBuilder implements MessageHandlerBuilder
     }
 
     /**
+     * @param string $handlerName
+     * @param MessageChannel $inputChannel
+     * @param array $typeToChannelMapping
+     * @return RouterBuilder
+     */
+    public static function createPayloadTypeRouter(string $handlerName, MessageChannel $inputChannel, array $typeToChannelMapping) : self
+    {
+        return self::create($handlerName, $inputChannel, PayloadTypeRouter::create($typeToChannelMapping), 'route');
+    }
+
+    /**
+     * @param string $handlerName
+     * @param MessageChannel $inputChannel
+     * @param string $headerName
+     * @param array $headerValueToChannelMapping
+     * @return RouterBuilder
+     */
+    public static function createHeaderValueRouter(string $handlerName, MessageChannel $inputChannel, string $headerName, array $headerValueToChannelMapping) : self
+    {
+        return self::create($handlerName, $inputChannel, HeaderValueRouter::create($headerName, $headerValueToChannelMapping), 'route');
+    }
+
+    /**
      * @inheritDoc
      */
     public function build(): MessageHandler
@@ -78,8 +105,20 @@ class RouterBuilder implements MessageHandlerBuilder
             $this->inputChannel,
             $this->objectToInvoke,
             $this->methodName,
+            $this->resolutionRequired,
             $this->methodArguments
         );
+    }
+
+    /**
+     * @param bool $resolutionRequired
+     * @return RouterBuilder
+     */
+    public function setResolutionRequired(bool $resolutionRequired) : self
+    {
+        $this->resolutionRequired = $resolutionRequired;
+
+        return $this;
     }
 
     /**

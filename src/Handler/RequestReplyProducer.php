@@ -30,10 +30,20 @@ class RequestReplyProducer
      * @param MessageChannel|null $outputChannel
      * @param bool $isReplyRequired
      */
-    public function __construct(?MessageChannel $outputChannel, bool $isReplyRequired)
+    private function __construct(?MessageChannel $outputChannel, bool $isReplyRequired)
     {
         $this->outputChannel = $outputChannel;
         $this->isReplyRequired = $isReplyRequired;
+    }
+
+    /**
+     * @param MessageChannel|null $messageChannel
+     * @param bool $isReplyRequired
+     * @return RequestReplyProducer
+     */
+    public static function create(?MessageChannel $messageChannel, bool $isReplyRequired) : self
+    {
+        return new self($messageChannel, $isReplyRequired);
     }
 
     /**

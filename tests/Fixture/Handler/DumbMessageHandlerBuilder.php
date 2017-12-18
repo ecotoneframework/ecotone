@@ -80,6 +80,6 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
      */
     public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
     {
-        // TODO: Implement setChannelResolver() method.
+        return $this;
     }
 }

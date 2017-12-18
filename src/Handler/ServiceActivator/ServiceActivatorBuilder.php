@@ -45,6 +45,10 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
      * @var string
      */
     private $messageHandlerName;
+    /**
+     * @var ChannelResolver
+     */
+    private $channelResolver;
 
     /**
      * ServiceActivatorBuilder constructor.
@@ -116,7 +120,9 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
      */
     public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
     {
-        // TODO: Implement setChannelResolver() method.
+        $this->channelResolver = $channelResolver;
+
+        return $this;
     }
 
     /**
@@ -152,7 +158,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     public function build(): MessageHandler
     {
         return new ServiceActivatingHandler(
-            new RequestReplyProducer(
+            RequestReplyProducer::create(
                 $this->outputChannel,
                 $this->isReplyRequired
             ),

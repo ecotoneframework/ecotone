@@ -37,7 +37,7 @@ class RequestReplyProducerTest extends MessagingTest
      */
     private function createRequestReplyProducer(MessageChannel $messageChannel = null, bool $requireReply = false): RequestReplyProducer
     {
-        return new RequestReplyProducer($messageChannel, $requireReply);
+        return RequestReplyProducer::create($messageChannel, $requireReply);
     }
 
     /**

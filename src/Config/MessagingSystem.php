@@ -71,9 +71,4 @@ final class MessagingSystem
             }
         }
     }
-
-    public function checkConfiguration() : void
-    {
-
-    }
 }

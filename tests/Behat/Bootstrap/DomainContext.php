@@ -2,9 +2,13 @@
 
 namespace Behat\Bootstrap;
 
+use Behat\Gherkin\Node\TableNode;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Fixture\Behat\Booking\BookingService;
+use Fixture\Behat\Ordering\Order;
+use Fixture\Behat\Ordering\OrderConfirmation;
+use Fixture\Behat\Ordering\OrderingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
 use Fixture\Handler\DumbChannelResolver;
@@ -13,12 +17,18 @@ use Messaging\Channel\QueueChannel;
 use Messaging\Config\MessagingSystem;
 use Messaging\Endpoint\ConsumerEndpointFactory;
 use Messaging\Endpoint\ConsumerLifecycle;
+use Messaging\Endpoint\PollOrThrowPollableFactory;
+use Messaging\Future;
 use Messaging\Handler\Gateway\GatewayProxy;
 use Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Messaging\Handler\Router\RouterBuilder;
 use Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Messaging\Handler\Transformer\TransformerBuilder;
 use Messaging\MessageChannel;
+use Messaging\MessageHandler;
+use Messaging\MessagingException;
 use Messaging\PollableChannel;
+use Messaging\RunTimeMessagingException;
 use Messaging\Support\Assert;
 
 /**
@@ -47,21 +57,25 @@ class DomainContext implements Context
      * @var object[]
      */
     private $serviceObjects = [];
+    /**
+     * @var Future
+     */
+    private $future;
 
     /**
      * @Given I register :bookingRequestName as :type
-     * @param string $bookingRequestName
+     * @param string $channelName
      * @param string $type
      */
-    public function iRegisterAs(string $bookingRequestName, string $type)
+    public function iRegisterAs(string $channelName, string $type)
     {
         switch ($type) {
             case "Direct Channel": {
-                $this->messageChannels[$bookingRequestName] = DirectChannel::create();
+                $this->messageChannels[$channelName] = DirectChannel::create();
                 break;
             }
             case "Pollable Channel": {
-                $this->messageChannels[$bookingRequestName] = QueueChannel::create();
+                $this->messageChannels[$channelName] = QueueChannel::create();
             }
         }
     }
@@ -298,7 +312,108 @@ class DomainContext implements Context
 
     private function consumerEndpointFactory() : ConsumerEndpointFactory
     {
-        return new ConsumerEndpointFactory(DumbChannelResolver::create($this->messageChannels));
+        return new ConsumerEndpointFactory(DumbChannelResolver::create($this->messageChannels), new PollOrThrowPollableFactory());
     }
 
+
+    /**
+     * @Given I activate header router with name :handlerName and input Channel :inputChannelName for header :headerName with mapping:
+     * @param string $handlerName
+     * @param string $inputChannelName
+     * @param string $headerName
+     * @param TableNode $mapping
+     */
+    public function iActivateHeaderRouterWithNameAndInputChannelForHeaderWithMapping(string $handlerName, string $inputChannelName, string $headerName, TableNode $mapping)
+    {
+        $channelToValue = [];
+        foreach ($mapping->getHash() as $headerValue) {
+            $channelToValue[$headerValue['value']] = $headerValue['target_channel'];
+        }
+
+        $this->consumers[] = $this->consumerEndpointFactory()->create(
+            RouterBuilder::createHeaderValueRouter($handlerName, $this->getChannelByName($inputChannelName), $headerName, $channelToValue)
+        );
+    }
+
+    /**
+     * @When I send order request with id :orderId product name :productName using gateway :gatewayName
+     * @param int $orderId
+     * @param string $productName
+     * @param string $gatewayName
+     */
+    public function iSendOrderRequestWithIdProductNameUsingGateway(int $orderId, string $productName, string $gatewayName)
+    {
+        /** @var OrderingService $gateway */
+        $gateway = $this->getGatewayByName($gatewayName);
+
+        $this->future = $gateway->processOrder(Order::create($orderId, $productName));
+    }
+
+    /**
+     * @When I expect exception when sending order request with id :orderId product name :productName using gateway :gatewayName
+     * @param int $orderId
+     * @param string $productName
+     * @param string $gatewayName
+     */
+    public function iExpectExceptionWhenSendingOrderRequestWithIdProductNameUsingGateway(int $orderId, string $productName, string $gatewayName)
+    {
+        /** @var OrderingService $gateway */
+        $gateway = $this->getGatewayByName($gatewayName);
+
+
+        try {
+            $gateway->processOrder(Order::create($orderId, $productName));
+            \PHPUnit\Framework\Assert::assertTrue(false, "Expect exception got none");
+        }catch (\Exception $e) {}
+    }
+
+    /**
+     * @Then I should receive confirmation
+     */
+    public function iShouldReceiveConfirmation()
+    {
+        \PHPUnit\Framework\Assert::assertInstanceOf(OrderConfirmation::class, $this->future->resolve());
+    }
+
+    /**
+     * @Then I expect exception during confirmation receiving
+     */
+    public function iExpectExceptionDuringConfirmationReceiving()
+    {
+        try {
+            $this->future->resolve();
+            \PHPUnit\Framework\Assert::assertTrue(false, "Expect exception got none");
+        }catch (RunTimeMessagingException $e) {}
+    }
+
+    /**
+     * @Given I activate header enricher transformer with name :handlerName with request channel :requestChannelName and output channel :outputChannelName with headers:
+     * @param string $handlerName
+     * @param string $requestChannelName
+     * @param string $outputChannelName
+     * @param TableNode $headers
+     */
+    public function iActivateHeaderEnricherTransformerWithNameWithRequestChannelAndOutputChannelWithHeaders(string $handlerName, string $requestChannelName, string $outputChannelName, TableNode $headers)
+    {
+        $keyValues = [];
+        foreach ($headers->getHash() as $keyValue) {
+            $keyValues[$keyValue['key']] = $keyValue['value'];
+        }
+
+        $this->consumers[] = $this->consumerEndpointFactory()->create(TransformerBuilder::createHeaderEnricher(
+            $handlerName,
+            $this->getChannelByName($requestChannelName),
+            $this->getChannelByName($outputChannelName),
+            $keyValues
+        ));
+    }
+
+    /**
+     * @When :consumerName handles message
+     * @param string $consumerName
+     */
+    public function handlesMessage(string $consumerName)
+    {
+        $this->messagingSystem->runPollableByName($consumerName);
+    }
 }

@@ -10,6 +10,7 @@ use Messaging\Support\InvalidArgumentException;
  * Class GatewayProxy
  * @package Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @internal
  */
 class GatewayProxy
 {
@@ -73,6 +74,10 @@ class GatewayProxy
         $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
 
         $this->requestChannel->send($message);
+
+        if ($interfaceToCall->doesItReturnFuture()) {
+            return FutureReplySender::create($this->replySender);
+        }
 
         $replyMessage = $this->replySender->receiveReply();
 

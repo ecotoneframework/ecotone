@@ -39,11 +39,22 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
         $this->messageHandler = $messageHandler;
     }
 
+    /**
+     * @param PollableChannel $pollableChannel
+     * @param MessageHandler $messageHandler
+     * @return PollOrThrowExceptionConsumer
+     */
     public static function createWithoutName(PollableChannel $pollableChannel, MessageHandler $messageHandler) : self
     {
         return new self("some random name", $pollableChannel, $messageHandler);
     }
 
+    /**
+     * @param string $consumerName
+     * @param PollableChannel $pollableChannel
+     * @param MessageHandler $messageHandler
+     * @return PollOrThrowExceptionConsumer
+     */
     public static function create(string $consumerName, PollableChannel $pollableChannel, MessageHandler $messageHandler) : self
     {
         return new self($consumerName, $pollableChannel, $messageHandler);

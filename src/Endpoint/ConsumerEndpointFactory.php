@@ -6,6 +6,7 @@ use Messaging\Handler\ChannelResolver;
 use Messaging\Handler\MessageHandlerBuilder;
 use Messaging\MessageChannel;
 use Messaging\MessageHandler;
+use Messaging\PollableChannel;
 use Messaging\SubscribableChannel;
 
 /**
@@ -19,14 +20,20 @@ class ConsumerEndpointFactory
      * @var ChannelResolver
      */
     private $channelResolver;
+    /**
+     * @var PollableFactory
+     */
+    private $pollableFactory;
 
     /**
      * ConsumerEndpointFactory constructor.
      * @param ChannelResolver $channelResolver
+     * @param PollableFactory $pollableFactory
      */
-    public function __construct(ChannelResolver $channelResolver)
+    public function __construct(ChannelResolver $channelResolver, PollableFactory $pollableFactory)
     {
         $this->channelResolver = $channelResolver;
+        $this->pollableFactory = $pollableFactory;
     }
 
     /**
@@ -40,6 +47,8 @@ class ConsumerEndpointFactory
 
         if ($messageChannel instanceof SubscribableChannel) {
             return new EventDrivenConsumer($messageHandlerBuilder->messageHandlerName(), $messageChannel, $messageHandlerBuilder->build());
+        }elseif ($messageChannel instanceof PollableChannel) {
+            return $this->pollableFactory->create($messageHandlerBuilder->messageHandlerName(), $messageChannel, $messageHandlerBuilder->build());
         }
     }
 }

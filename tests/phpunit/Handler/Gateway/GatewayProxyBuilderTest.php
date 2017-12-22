@@ -7,6 +7,7 @@ use Fixture\Handler\StatefulHandler;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
+use Fixture\Service\ServiceInterface\ServiceInterfaceWithFutureReceive;
 use Fixture\Service\ServiceInterface\ServiceInterfaceWithUnknownReturnType;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
@@ -180,5 +181,25 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
+    public function test_resolving_response_in_future()
+    {
+        $requestChannel = DirectChannel::create();
+        $messageHandler = NoReturnMessageHandler::create();
+        $requestChannel->subscribe($messageHandler);
 
+        $payload = 'replyData';
+        $replyChannel = QueueChannel::create();
+        $replyMessage = MessageBuilder::withPayload($payload)->build();
+        $replyChannel->send($replyMessage);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create(ServiceInterfaceWithFutureReceive::class, 'someLongRunningWork', $requestChannel);
+        $gatewayProxyBuilder->withReplyChannel($replyChannel);
+
+        /** @var ServiceInterfaceWithFutureReceive $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build();
+        $this->assertEquals(
+            $payload,
+            $gatewayProxy->someLongRunningWork()->resolve()
+        );
+    }
 }

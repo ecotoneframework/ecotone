@@ -52,7 +52,7 @@ final class HeaderValueRouter
 
         $channelsToRoute = [];
         foreach ($this->headerValueToChannelMapping as $type => $channelName) {
-            if ($header === $type) {
+            if ($header == $type) {
                 $channelsToRoute[] = $channelName;
             }
         }

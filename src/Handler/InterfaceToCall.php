@@ -2,9 +2,9 @@
 
 namespace Messaging\Handler;
 
+use Messaging\Future;
 use Messaging\Handler\Gateway\NamedParameter;
 use Messaging\Message;
-use Messaging\Support\Assert;
 use Messaging\Support\InvalidArgumentException;
 
 /**
@@ -77,6 +77,14 @@ class InterfaceToCall
         $firstParameter = $this->getFirstParameter();
 
         return (string)$firstParameter->getType() == Message::class;
+    }
+
+    /**
+     * @return bool
+     */
+    public function doesItReturnFuture() : bool
+    {
+        return $this->getReturnType() == Future::class;
     }
 
     /**

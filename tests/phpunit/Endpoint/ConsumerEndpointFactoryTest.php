@@ -17,7 +17,7 @@ class ConsumerEndpointFactoryTest extends MessagingTest
 {
     public function test_creating_event_driven_consumer()
     {
-        $consumerEndpointFactory = new ConsumerEndpointFactory(DumbChannelResolver::create([]));
+        $consumerEndpointFactory = new ConsumerEndpointFactory(DumbChannelResolver::create([]), new PollOrThrowPollableFactory());
 
         $this->assertInstanceOf(EventDrivenConsumer::class,
             $consumerEndpointFactory->create(
@@ -27,10 +27,5 @@ class ConsumerEndpointFactoryTest extends MessagingTest
                 DirectChannel::create()
             ))
         );
-    }
-
-    public function future_test_creating_pollable_consumer()
-    {
-
     }
 }

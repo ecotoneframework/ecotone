@@ -33,7 +33,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
                 ->build(),
             $methodCallToMessageConverter->convertFor([
                 MethodArgument::createWith($parameterName, $argumentValue)
-            ])
+            ])->build()
         );
     }
 
@@ -60,7 +60,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
             $methodCallToMessageConverter->convertFor([
                 MethodArgument::createWith($payloadParameterName, $payloadArgumentValue),
                 MethodArgument::createWith($personIdName, $personIdValue)
-            ])
+            ])->build()
         );
     }
 
@@ -100,6 +100,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
                 MethodArgument::createWith($multiplyParameterName, $multiplyValue),
                 MethodArgument::createWith($percentageParameterName, $percentageValue)
             ])
+                ->build()
         );
     }
 
@@ -128,6 +129,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
             $methodCallToMessageConverter->convertFor([
                 MethodArgument::createWith($contentParameterName, $contentArgumentValue)
             ])
+                ->build()
         );
     }
 
@@ -163,6 +165,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
             MessageBuilder::withPayload('empty')
                 ->build(),
             $methodCallToMessageConverter->convertFor([])
+                ->build()
         );
     }
 }

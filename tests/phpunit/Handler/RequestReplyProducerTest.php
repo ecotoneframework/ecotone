@@ -3,14 +3,15 @@
 namespace Messaging\Handler;
 
 use Fixture\Handler\NoReplyMessageProducer;
+use Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
 use Fixture\Handler\ReplyMessageProducer;
 use Messaging\Channel\QueueChannel;
-use Messaging\Handler\MessageProcessor;
-use Messaging\Handler\RequestReplyProducer;
+use Messaging\Config\InMemoryChannelResolver;
 use Messaging\Message;
 use Messaging\MessageChannel;
 use Messaging\MessageDeliveryException;
 use Messaging\MessagingTest;
+use Messaging\Support\ErrorMessage;
 use Messaging\Support\MessageBuilder;
 
 /**
@@ -22,113 +23,106 @@ class RequestReplyProducerTest extends MessagingTest
 {
     public function test_processing_message_without_reply()
     {
-        $requestReplyProducer = $this->createRequestReplyProducer();
-
         $messageProcessor = NoReplyMessageProducer::create();
-        $this->handleReplyWith($requestReplyProducer, $messageProcessor);
+        $requestReplyProducer = $this->createRequestReplyProducer($messageProcessor);
 
+        $this->handleReplyWith($requestReplyProducer);
         $this->assertTrue($messageProcessor->wasCalled(), "Service was not called");
     }
 
     /**
+     * @param \Messaging\Handler\MessageProcessor $replyMessageProducer
      * @param MessageChannel|null $messageChannel
      * @param bool $requireReply
      * @return \Messaging\Handler\RequestReplyProducer
      */
-    private function createRequestReplyProducer(MessageChannel $messageChannel = null, bool $requireReply = false): RequestReplyProducer
+    private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, MessageChannel $messageChannel = null, bool $requireReply = false): RequestReplyProducer
     {
-        return RequestReplyProducer::create($messageChannel, $requireReply);
+        return RequestReplyProducer::createFrom($messageChannel, $replyMessageProducer, InMemoryChannelResolver::createEmpty(), $requireReply);
     }
 
     /**
      * @param $requestReplyProducer
-     * @param $messageProcessor
      */
-    private function handleReplyWith(RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor): void
+    private function handleReplyWith(RequestReplyProducer $requestReplyProducer): void
     {
         $this->handleReplyWithMessage(
             MessageBuilder::withPayload('a')->build(),
-            $requestReplyProducer,
-            $messageProcessor
+            $requestReplyProducer
         );
     }
 
     /**
      * @param Message $message
      * @param RequestReplyProducer $requestReplyProducer
-     * @param MessageProcessor $messageProcessor
      */
-    private function handleReplyWithMessage(Message $message, RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor): void
+    private function handleReplyWithMessage(Message $message, RequestReplyProducer $requestReplyProducer): void
     {
-        $requestReplyProducer->handleWithReply(
-            $message,
-            $messageProcessor
-        );
+        $requestReplyProducer->handleWithReply($message);
     }
 
     public function test_processing_message_with_reply()
     {
         $outputChannel = QueueChannel::create();
-        $requestReplyProducer = $this->createRequestReplyProducer($outputChannel);
-
         $replyData = "some result";
-        $messageProcessor = ReplyMessageProducer::create($replyData);
-        $this->handleReplyWith($requestReplyProducer, $messageProcessor);
+        $requestReplyProducer = $this->createRequestReplyProducer(ReplyMessageProducer::create($replyData), $outputChannel);
+
+        $this->handleReplyWith($requestReplyProducer);
 
         $this->assertMessages(MessageBuilder::withPayload($replyData)->build(), $outputChannel->receive());
     }
 
     public function test_throwing_exception_if_required_reply_and_got_none()
     {
-        $requestReplyProducer = $this->createRequestReplyProducer(null, true);
+        $requestReplyProducer = $this->createRequestReplyProducer(NoReplyMessageProducer::create(), null, true);
 
         $this->expectException(MessageDeliveryException::class);
 
-        $messageProcessor = NoReplyMessageProducer::create();
-        $this->handleReplyWith($requestReplyProducer, $messageProcessor);
+        $this->handleReplyWith($requestReplyProducer);
     }
 
     public function test_sending_reply_to_message_channel_if_there_is_nonone_in_producer()
     {
-        $requestReplyProducer = $this->createRequestReplyProducer();
+        $replyData = "some result";
+        $requestReplyProducer = $this->createRequestReplyProducer(ReplyMessageProducer::create($replyData));
+
         $replyChannel = QueueChannel::create();
         $message = MessageBuilder::withPayload('a')
             ->setReplyChannel($replyChannel)
             ->build();
 
-        $replyData = "some result";
-        $messageProcessor = ReplyMessageProducer::create($replyData);
-        $this->handleReplyWithMessage($message, $requestReplyProducer, $messageProcessor);
+        $this->handleReplyWithMessage($message, $requestReplyProducer);
 
-        $this->assertMessages(MessageBuilder::fromMessage($message)
-            ->setPayload($replyData)
-            ->build(), $replyChannel->receive());
+        $this->assertMessages(
+            MessageBuilder::fromMessage($message)
+                ->setPayload($replyData)
+                ->build(),
+            $replyChannel->receive()
+        );
     }
 
     public function test_throwing_exception_if_there_is_reply_data_but_no_output_channel()
     {
-        $requestReplyProducer = $this->createRequestReplyProducer();
+        $requestReplyProducer = $this->createRequestReplyProducer(ReplyMessageProducer::create("some payload"));
 
         $this->expectException(MessageDeliveryException::class);
 
-        $messageProcessor = ReplyMessageProducer::create("some payload");
-        $this->handleReplyWith($requestReplyProducer, $messageProcessor);
+        $this->handleReplyWith($requestReplyProducer);
     }
 
     public function test_propagating_message_headers()
     {
         $outputChannel = QueueChannel::create();
-        $requestReplyProducer = $this->createRequestReplyProducer($outputChannel);
-
         $replyData = "some result";
-        $messageProcessor = ReplyMessageProducer::create($replyData);
+        $requestReplyProducer = $this->createRequestReplyProducer(ReplyMessageProducer::create($replyData), $outputChannel);
+
         $replyChannelFromMessage = QueueChannel::create();
         $this->handleReplyWithMessage(
             MessageBuilder::withPayload('some')
                 ->setHeader('token', "abcd")
                 ->setReplyChannel($replyChannelFromMessage)
                 ->build(),
-            $requestReplyProducer, $messageProcessor);
+            $requestReplyProducer);
 
         $this->assertMessages(
             MessageBuilder::withPayload($replyData)
@@ -137,5 +131,19 @@ class RequestReplyProducerTest extends MessagingTest
                 ->build(),
             $outputChannel->receive()
         );
+    }
+
+    public function test_routing_to_error_channel_if_exception_has_been_thrown()
+    {
+        $errorChannel = QueueChannel::create();
+        $this->handleReplyWithMessage(
+            MessageBuilder::withPayload('some')
+                ->build(),
+            RequestReplyProducer::createFrom(QueueChannel::create(), ThrowExceptionMessageProcessor::create(new \InvalidArgumentException()), InMemoryChannelResolver::createFromAssociativeArray([
+                "errorChannel" => $errorChannel
+            ]), false)
+        );
+
+        $this->assertInstanceOf(ErrorMessage::class, $errorChannel->receive());
     }
 }

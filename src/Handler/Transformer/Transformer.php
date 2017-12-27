@@ -16,23 +16,16 @@ use Messaging\MessageHandler;
 class Transformer implements MessageHandler
 {
     /**
-     * @var TransformerMessageProcessor
-     */
-    private $messageProcessor;
-    /**
      * @var RequestReplyProducer
      */
     private $requestReplyProducer;
-
     /**
      * Transformer constructor.
-     * @param MessageChannel $outputChannel
-     * @param TransformerMessageProcessor $messageProcessor
+     * @param RequestReplyProducer $requestReplyProducer
      */
-    public function __construct(MessageChannel $outputChannel, TransformerMessageProcessor $messageProcessor)
+    public function __construct(RequestReplyProducer $requestReplyProducer)
     {
-        $this->requestReplyProducer = RequestReplyProducer::createWithNotRequiredReply($outputChannel);
-        $this->messageProcessor = $messageProcessor;
+        $this->requestReplyProducer = $requestReplyProducer;
     }
 
     /**
@@ -40,6 +33,6 @@ class Transformer implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $this->requestReplyProducer->handleWithReply($message, $this->messageProcessor);
+        $this->requestReplyProducer->handleWithReply($message);
     }
 }

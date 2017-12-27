@@ -97,6 +97,14 @@ class MessageHeaders
     }
 
     /**
+     * @return MessageHeaders
+     */
+    final public static function createEmptyWithCurrentTimestamp() : self
+    {
+        return static::createMessageHeadersWith([], time());
+    }
+
+    /**
      * @return array|string[]
      */
     final public function headers() : array

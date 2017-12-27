@@ -171,5 +171,6 @@ final class MessageBuilder
         Assert::notNullAndEmpty($payload, "Message payload can't be empty");
 
         $this->clock = ServerClock::create();
+        $this->headerAccessor->setHeaderIfAbsent(MessageHeaders::ERROR_CHANNEL, "errorChannel");
     }
 }

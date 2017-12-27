@@ -100,7 +100,6 @@ class RouterBuilder implements MessageHandlerBuilder
     public function build(): MessageHandler
     {
         return Router::create(
-            $this->messageHandlerName(),
             $this->channelResolver,
             $this->inputChannel,
             $this->objectToInvoke,

@@ -8,6 +8,7 @@ use Messaging\Handler\MethodArgument;
 use Messaging\Handler\Processor\MethodInvoker\MessageArgument;
 use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
+use Messaging\Handler\RequestReplyProducer;
 use Messaging\MessageChannel;
 use Messaging\MessageHandler;
 use Messaging\Support\InvalidArgumentException;
@@ -109,8 +110,14 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         }
 
         return new Transformer(
-            $this->outputMessageChannel,
-            TransformerMessageProcessor::createFrom(MethodInvoker::createWith($this->objectToInvoke, $this->methodName, $methodArguments))
+            RequestReplyProducer::createFrom(
+                $this->outputMessageChannel,
+                TransformerMessageProcessor::createFrom(
+                    MethodInvoker::createWith($this->objectToInvoke, $this->methodName, $methodArguments)
+                ),
+                $this->channelResolver,
+                false
+            )
         );
     }
 }

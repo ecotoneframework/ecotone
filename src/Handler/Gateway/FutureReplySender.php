@@ -40,6 +40,8 @@ class FutureReplySender implements Future
      */
     public function resolve()
     {
-        return $this->replySender->receiveReply()->getPayload();
+        $message = $this->replySender->receiveReply();
+
+        return $message ? $message->getPayload() : null;
     }
 }

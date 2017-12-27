@@ -11,9 +11,9 @@ use Fixture\Behat\Ordering\OrderConfirmation;
 use Fixture\Behat\Ordering\OrderingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
-use Fixture\Handler\DumbChannelResolver;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
+use Messaging\Config\InMemoryChannelResolver;
 use Messaging\Config\MessagingSystem;
 use Messaging\Endpoint\ConsumerEndpointFactory;
 use Messaging\Endpoint\ConsumerLifecycle;
@@ -312,7 +312,7 @@ class DomainContext implements Context
 
     private function consumerEndpointFactory() : ConsumerEndpointFactory
     {
-        return new ConsumerEndpointFactory(DumbChannelResolver::create($this->messageChannels), new PollOrThrowPollableFactory());
+        return new ConsumerEndpointFactory(InMemoryChannelResolver::createFromAssociativeArray($this->messageChannels), new PollOrThrowPollableFactory());
     }
 
 

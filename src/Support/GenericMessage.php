@@ -10,7 +10,7 @@ use Messaging\MessageHeaders;
  * @package Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class GenericMessage implements Message
+class GenericMessage implements Message
 {
     /**
      * @var mixed
@@ -43,19 +43,11 @@ final class GenericMessage implements Message
     /**
      * @param mixed $payload
      * @param MessageHeaders $messageHeaders
-     * @return GenericMessage
+     * @return GenericMessage|static
      */
     public static function create($payload, MessageHeaders $messageHeaders) : self
     {
-        return new self($payload, $messageHeaders);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getPayload()
-    {
-        return $this->payload;
+        return new static($payload, $messageHeaders);
     }
 
     /**
@@ -66,7 +58,7 @@ final class GenericMessage implements Message
      */
     public static function createWithArrayHeaders(Clock $clock, $payload, array $headers): Message
     {
-        return new self($payload, MessageHeaders::create($clock->getCurrentTimestamp(), $headers));
+        return new static($payload, MessageHeaders::create($clock->getCurrentTimestamp(), $headers));
     }
 
     /**
@@ -76,7 +68,15 @@ final class GenericMessage implements Message
      */
     public static function createWithEmptyHeaders(Clock $clock, $payload): Message
     {
-        return new self($payload, MessageHeaders::createEmpty($clock->getCurrentTimestamp()));
+        return new static($payload, MessageHeaders::createEmpty($clock->getCurrentTimestamp()));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPayload()
+    {
+        return $this->payload;
     }
 
     public function __toString()

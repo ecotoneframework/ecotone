@@ -12,10 +12,10 @@ use Messaging\MessageChannel;
 interface ChannelResolver
 {
     /**
-     * @param string $channelName
+     * @param string|MessageChannel $channelName
      * @return MessageChannel
      *
      * @throws DestinationResolutionException
      */
-    public function resolve(string $channelName) : MessageChannel;
+    public function resolve($channelName) : MessageChannel;
 }

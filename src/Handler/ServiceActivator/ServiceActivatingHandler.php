@@ -18,20 +18,14 @@ final class ServiceActivatingHandler implements MessageHandler
      * @var RequestReplyProducer
      */
     private $requestReplyProducer;
-    /**
-     * @var MessageProcessor
-     */
-    private $messageProcessor;
 
     /**
      * ServiceActivatingHandler constructor.
      * @param RequestReplyProducer $requestReplyProducer
-     * @param MessageProcessor $messageProcessor
      */
-    public function __construct(RequestReplyProducer $requestReplyProducer, MessageProcessor $messageProcessor)
+    public function __construct(RequestReplyProducer $requestReplyProducer)
     {
         $this->requestReplyProducer = $requestReplyProducer;
-        $this->messageProcessor = $messageProcessor;
     }
 
     /**
@@ -39,6 +33,6 @@ final class ServiceActivatingHandler implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $this->requestReplyProducer->handleWithReply($message, $this->messageProcessor);
+        $this->requestReplyProducer->handleWithReply($message);
     }
 }

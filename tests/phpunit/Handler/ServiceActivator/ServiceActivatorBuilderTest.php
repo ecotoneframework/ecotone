@@ -2,6 +2,7 @@
 
 namespace Messaging\Handler\ServiceActivator;
 use Fixture\Service\ServiceExpectingOneArgument;
+use Messaging\Config\InMemoryChannelResolver;
 use Messaging\MessagingTest;
 use Messaging\Support\InvalidArgumentException;
 use Messaging\Support\MessageBuilder;
@@ -17,6 +18,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
     {
         $objectToInvokeOn = ServiceExpectingOneArgument::create();
         $serviceActivatorBuilder = ServiceActivatorBuilder::create($objectToInvokeOn, 'withoutReturnValue');
+        $serviceActivatorBuilder->setChannelResolver(InMemoryChannelResolver::createEmpty());
 
         $serviceActivator = $serviceActivatorBuilder->build();
 
@@ -29,6 +31,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
     {
         $objectToInvokeOn = ServiceExpectingOneArgument::create();
         $serviceActivatorBuilder = ServiceActivatorBuilder::create($objectToInvokeOn, 'withoutReturnValue');
+        $serviceActivatorBuilder->setChannelResolver(InMemoryChannelResolver::createEmpty());
         $serviceActivatorBuilder->withRequiredReply(true);
 
         $this->expectException(InvalidArgumentException::class);

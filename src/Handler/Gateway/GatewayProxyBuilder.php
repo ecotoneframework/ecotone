@@ -121,7 +121,7 @@ class GatewayProxyBuilder
             new MethodCallToMessageConverter(
                 $this->interfaceName, $this->methodName, $this->methodArgumentConverters
             ),
-            $replySender,
+            ErrorReplySender::create($replySender),
             $this->requestChannel
         );
 

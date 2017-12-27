@@ -8,6 +8,7 @@ use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutReturnValue;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
+use Messaging\Config\InMemoryChannelResolver;
 use Messaging\Handler\Processor\MethodInvoker\HeaderArgument;
 use Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
 use Messaging\MessagingTest;
@@ -26,6 +27,7 @@ class TransformerBuilderTest extends MessagingTest
         $payload = 'some';
         $outputChannel = QueueChannel::create();
         $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannel,ServiceExpectingMessageAndReturningMessage::create($payload), 'send', 'test')
+                            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
                             ->build();
 
         $transformer->handle(MessageBuilder::withPayload('some123')->build());
@@ -42,7 +44,8 @@ class TransformerBuilderTest extends MessagingTest
         $payload = 'someBigPayload';
         $outputChannel = QueueChannel::create();
         $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannel,ServiceExpectingOneArgument::create(), 'withReturnValue', 'test')
-            ->build();
+                            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
+                            ->build();
 
         $transformer->handle(MessageBuilder::withPayload($payload)->build());
 
@@ -58,14 +61,16 @@ class TransformerBuilderTest extends MessagingTest
         $this->expectException(InvalidArgumentException::class);
 
         TransformerBuilder::create(DirectChannel::create(), QueueChannel::create(), ServiceWithoutReturnValue::create(), 'setName', 'test')
-            ->build();
+                            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
+                            ->build();
     }
 
     public function test_not_sending_message_to_output_channel_if_transforming_method_returns_null()
     {
         $outputChannel = QueueChannel::create();
         $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannel, ServiceExpectingOneArgument::create(), 'withNullReturnValue', 'test')
-            ->build();
+                        ->setChannelResolver(InMemoryChannelResolver::createEmpty())
+                        ->build();
 
         $transformer->handle(MessageBuilder::withPayload('some')->build());
 
@@ -77,7 +82,8 @@ class TransformerBuilderTest extends MessagingTest
         $payload = 'someBigPayload';
         $outputChannel = QueueChannel::create();
         $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannel,ServiceExpectingOneArgument::create(), 'withArrayReturnValue', 'test')
-            ->build();
+                            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
+                            ->build();
 
         $transformer->handle(MessageBuilder::withPayload($payload)->build());
 
@@ -94,7 +100,8 @@ class TransformerBuilderTest extends MessagingTest
         $payload = ["some payload"];
         $outputChannel = QueueChannel::create();
         $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannel,ServiceExpectingOneArgument::create(), 'withArrayTypeHintAndArrayReturnValue', 'test')
-            ->build();
+                        ->setChannelResolver(InMemoryChannelResolver::createEmpty())
+                        ->build();
 
         $transformer->handle(MessageBuilder::withPayload($payload)->build());
 
@@ -115,6 +122,7 @@ class TransformerBuilderTest extends MessagingTest
                 PayloadArgument::create('name'),
                 HeaderArgument::create('surname', 'token')
             ])
+            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
             ->build();
 
         $transformer->handle(
@@ -139,8 +147,9 @@ class TransformerBuilderTest extends MessagingTest
         $transformer = TransformerBuilder::createHeaderEnricher('test', DirectChannel::create(), $outputChannel, [
             "token" => $headerValue,
             "correlation-id" => 1
-        ]
-        )->build();
+        ])
+            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
+            ->build();
 
         $transformer->handle(
             MessageBuilder::withPayload($payload)

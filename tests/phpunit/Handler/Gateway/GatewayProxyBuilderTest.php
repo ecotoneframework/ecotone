@@ -5,6 +5,7 @@ namespace Messaging\Handler\Gateway;
 use Fixture\Handler\NoReturnMessageHandler;
 use Fixture\Handler\StatefulHandler;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
+use Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceive;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceWithFutureReceive;
@@ -14,7 +15,11 @@ use Messaging\Channel\QueueChannel;
 use Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageArgumentConverter;
 use Messaging\Handler\Gateway\MethodParameterConverter\PayloadMethodArgumentMessageParameter;
 use Messaging\Handler\Gateway\MethodParameterConverter\StaticHeaderMessageArgumentConverter;
+use Messaging\Handler\MessageHandlingException;
+use Messaging\MessageHeaders;
+use Messaging\MessagingException;
 use Messaging\MessagingTest;
+use Messaging\Support\ErrorMessage;
 use Messaging\Support\InvalidArgumentException;
 use Messaging\Support\MessageBuilder;
 
@@ -90,7 +95,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxyBuilder->build();
     }
 
-    public function test_throwing_exception_if_return_type_is_not_defined()
+    public function test_throwing_exception_if_service_has_no_return_type()
     {
         $requestChannel = DirectChannel::create();
         $messageHandler = NoReturnMessageHandler::create();
@@ -147,6 +152,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertMessages(
             MessageBuilder::withPayload($content)
                 ->setHeader('personId', $personId)
+                ->setHeader("errorChannel", $requestChannel)
                 ->build(),
             $messageHandler->message()
         );
@@ -176,6 +182,7 @@ class GatewayProxyBuilderTest extends MessagingTest
             MessageBuilder::withPayload($content)
                 ->setHeader('personId', $personId)
                 ->setHeader('personName', $personName)
+                ->setHeader(MessageHeaders::ERROR_CHANNEL, $requestChannel)
                 ->build(),
             $messageHandler->message()
         );
@@ -201,5 +208,45 @@ class GatewayProxyBuilderTest extends MessagingTest
             $payload,
             $gatewayProxy->someLongRunningWork()->resolve()
         );
+    }
+
+    public function test_throwing_exception_when_received_error_message()
+    {
+        $requestChannel = DirectChannel::create();
+        $messageHandler = NoReturnMessageHandler::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $replyChannel = QueueChannel::create();
+        $errorMessage = ErrorMessage::create(new \Exception("error occurred"), MessageHeaders::createEmptyWithCurrentTimestamp());
+        $replyChannel->send($errorMessage);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create(ServiceInterfaceSendAndReceive::class, 'getById', $requestChannel);
+        $gatewayProxyBuilder->withReplyChannel($replyChannel);
+        /** @var ServiceInterfaceSendAndReceive $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build();
+
+        $this->expectException(MessageHandlingException::class);
+
+        $gatewayProxy->getById(1);
+    }
+
+    public function test_throwing_exception_when_received_error_message_for_future_reply_sender()
+    {
+        $requestChannel = DirectChannel::create();
+        $messageHandler = NoReturnMessageHandler::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $replyChannel = QueueChannel::create();
+        $errorMessage = ErrorMessage::create(new \Exception("error occurred"), MessageHeaders::createEmptyWithCurrentTimestamp());
+        $replyChannel->send($errorMessage);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create(ServiceInterfaceWithFutureReceive::class, 'someLongRunningWork', $requestChannel);
+        $gatewayProxyBuilder->withReplyChannel($replyChannel);
+        /** @var ServiceInterfaceWithFutureReceive $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build();
+
+        $this->expectException(MessageHandlingException::class);
+
+        $gatewayProxy->someLongRunningWork()->resolve();
     }
 }

@@ -3,7 +3,11 @@
 namespace Messaging\Handler\Gateway;
 use Messaging\Channel\DirectChannel;
 use Messaging\Handler\InterfaceToCall;
+use Messaging\Handler\MessageHandlingException;
+use Messaging\MessageHeaders;
+use Messaging\MessagingException;
 use Messaging\Support\Assert;
+use Messaging\Support\ErrorMessage;
 use Messaging\Support\InvalidArgumentException;
 
 /**
@@ -71,7 +75,9 @@ class GatewayProxy
             $methodArguments[] = MethodArgument::createWith($parameters[$index]->getName(), $methodArgumentValues[$index]);
         }
 
-        $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
+        $message = $this->methodCallToMessageConverter->convertFor($methodArguments)
+                        ->setHeader(MessageHeaders::ERROR_CHANNEL, $this->requestChannel)
+                        ->build();
 
         $this->requestChannel->send($message);
 
@@ -81,11 +87,7 @@ class GatewayProxy
 
         $replyMessage = $this->replySender->receiveReply();
 
-        if (is_null($replyMessage)) {
-            return null;
-        }
-
-        return $replyMessage->getPayload();
+        return $replyMessage ? $replyMessage->getPayload() : null;
     }
 
     /**

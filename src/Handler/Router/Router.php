@@ -19,10 +19,6 @@ use Messaging\MessageHandler;
 final class Router implements MessageHandler
 {
     /**
-     * @var string
-     */
-    private $handlerName;
-    /**
      * @var MessageChannel
      */
     private $inputChannel;
@@ -41,15 +37,13 @@ final class Router implements MessageHandler
 
     /**
      * RouterBuilder constructor.
-     * @param string $handlerName
      * @param ChannelResolver $channelResolver
      * @param MessageChannel $inputChannel
      * @param MethodInvoker $methodInvoker
      * @param bool $isResolutionRequired
      */
-    private function __construct(string $handlerName, ChannelResolver $channelResolver, MessageChannel $inputChannel, MethodInvoker $methodInvoker, bool $isResolutionRequired)
+    private function __construct(ChannelResolver $channelResolver, MessageChannel $inputChannel, MethodInvoker $methodInvoker, bool $isResolutionRequired)
     {
-        $this->handlerName = $handlerName;
         $this->channelResolver = $channelResolver;
         $this->inputChannel = $inputChannel;
         $this->methodInvoker = $methodInvoker;
@@ -57,7 +51,6 @@ final class Router implements MessageHandler
     }
 
     /**
-     * @param string $handlerName
      * @param ChannelResolver $channelResolver
      * @param MessageChannel $inputChannel
      * @param $objectToInvoke
@@ -66,9 +59,9 @@ final class Router implements MessageHandler
      * @param array|MethodArgument[] $methodArguments
      * @return Router
      */
-    public static function create(string $handlerName, ChannelResolver $channelResolver, MessageChannel $inputChannel, $objectToInvoke, string $methodName, bool $isResolutionRequired, array $methodArguments) : self
+    public static function create(ChannelResolver $channelResolver, MessageChannel $inputChannel, $objectToInvoke, string $methodName, bool $isResolutionRequired, array $methodArguments) : self
     {
-        return new self($handlerName, $channelResolver, $inputChannel, MethodInvoker::createWith($objectToInvoke, $methodName, $methodArguments), $isResolutionRequired);
+        return new self($channelResolver, $inputChannel, MethodInvoker::createWith($objectToInvoke, $methodName, $methodArguments), $isResolutionRequired);
     }
 
     /**

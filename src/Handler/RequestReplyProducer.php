@@ -2,11 +2,13 @@
 
 namespace Messaging\Handler;
 
+use Messaging\Config\InMemoryChannelResolver;
 use Messaging\Message;
 use Messaging\MessageChannel;
 use Messaging\MessageDeliveryException;
 use Messaging\MessageHeaders;
 use Messaging\Support\Assert;
+use Messaging\Support\ErrorMessage;
 use Messaging\Support\MessageBuilder;
 
 /**
@@ -24,54 +26,65 @@ class RequestReplyProducer
      * @var bool
      */
     private $isReplyRequired;
+    /**
+     * @var ChannelResolver
+     */
+    private $channelResolver;
+    /**
+     * @var MessageProcessor
+     */
+    private $messageProcessor;
 
     /**
      * RequestReplyProducer constructor.
      * @param MessageChannel|null $outputChannel
+     * @param MessageProcessor $messageProcessor
+     * @param ChannelResolver $channelResolver
      * @param bool $isReplyRequired
      */
-    private function __construct(?MessageChannel $outputChannel, bool $isReplyRequired)
+    private function __construct(?MessageChannel $outputChannel, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
     {
         $this->outputChannel = $outputChannel;
         $this->isReplyRequired = $isReplyRequired;
+        $this->channelResolver = $channelResolver;
+        $this->messageProcessor = $messageProcessor;
     }
 
     /**
-     * @param MessageChannel|null $messageChannel
+     * @param MessageChannel|null $outputChannel
+     * @param MessageProcessor $messageProcessor
+     * @param ChannelResolver $channelResolver
      * @param bool $isReplyRequired
      * @return RequestReplyProducer
      */
-    public static function create(?MessageChannel $messageChannel, bool $isReplyRequired) : self
+    public static function createFrom(?MessageChannel $outputChannel, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
     {
-        return new self($messageChannel, $isReplyRequired);
-    }
-
-    /**
-     * @param MessageChannel|null $messageChannel
-     * @return RequestReplyProducer
-     */
-    public static function createWithNotRequiredReply(?MessageChannel $messageChannel) : self
-    {
-        return new self($messageChannel, false);
+        return new self($outputChannel, $messageProcessor, $channelResolver, $isReplyRequired);
     }
 
     /**
      * @param Message $message
-     * @param MessageProcessor $messageProcessor
      * @throws MessageDeliveryException
      * @throws \Messaging\MessagingException
      */
-    public function handleWithReply(Message $message, MessageProcessor $messageProcessor): void
+    public function handleWithReply(Message $message): void
     {
-        $replyData = $messageProcessor->processMessage($message);
+        try {
+            $replyData = $this->messageProcessor->processMessage($message);
+        }catch (\Throwable $e) {
+            $errorChannel = $this->channelResolver->resolve($message->getHeaders()->getErrorChannel());
+            $errorChannel->send(ErrorMessage::createWithOriginalMessage($e, $message));
+
+            return;
+        }
 
         if ($this->isReplyRequired() && $this->isReplyDataEmpty($replyData)) {
-            throw MessageDeliveryException::create("Requires response but got none. {$messageProcessor}");
+            throw MessageDeliveryException::create("Requires response but got none. {$this->messageProcessor}");
         }
 
         if (!is_null($replyData)) {
             if (!$this->hasOutputChannel() && !$message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
-                throw new MessageDeliveryException("Can't process {$message}, no output channel during delivery using {$messageProcessor}");
+                throw new MessageDeliveryException("Can't process {$message}, no output channel during delivery using {$this->messageProcessor}");
             }
 
             $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : $message->getHeaders()->getReplyChannel();

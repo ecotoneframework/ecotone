@@ -3,7 +3,7 @@
 namespace Messaging;
 
 use Messaging\MessagingException;
-use Messaging\MessagingExceptionCode;
+use Messaging\MessagingExceptionInterface;
 
 /**
  * Class MessageHeaderDoesNotExistsException
@@ -17,6 +17,6 @@ class MessageHeaderDoesNotExistsException extends MessagingException
      */
     protected static function errorCode(): int
     {
-        return MessagingExceptionCode::MESSAGE_HEADER_NOT_AVAILABLE_EXCEPTION;
+        return MessagingException::MESSAGE_HEADER_NOT_AVAILABLE_EXCEPTION;
     }
 }

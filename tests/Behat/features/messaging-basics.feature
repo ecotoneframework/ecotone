@@ -23,6 +23,9 @@ Feature: Service activator
     And I run messaging system
     When I reserve book named "Harry Potter" using gateway "reserveGateway"
 
+
+
+
   Scenario: Application consist of order service. It receives and order and return confirmation.
       Gateway is entry point to the messaging system, it will receive the order and send it to request channel.
       At request channel message will be transformed to contain isAsync header
@@ -90,7 +93,7 @@ Feature: Service activator
       |     0 | syncChannel    |
     And I activate service with name "orderProcessor" for "Fixture\Behat\Ordering\OrderProcessor" with method "processOrder" to listen on "syncChannel" channel and output channel "responseChannel"
     And I run messaging system
-    When I expect exception when sending order request with id 3 product name "incorrect" using gateway "orderingService"
+    When I expect exception when sending order request with id 3 product name "INCORRECT" using gateway "orderingService"
 
   Scenario: Application consist of order service. It receives and order and return confirmation.
   Gateway is entry point to the messaging system, it will receive the order and send it to request channel.
@@ -112,6 +115,6 @@ Feature: Service activator
       |     0 | syncChannel    |
     And I activate service with name "orderProcessor" for "Fixture\Behat\Ordering\OrderProcessor" with method "processOrder" to listen on "asyncChannel" channel and output channel "responseChannel"
     And I run messaging system
-    When I send order request with id 3 product name "correct" using gateway "orderingService"
+    When I send order request with id 3 product name "INCORRECT" using gateway "orderingService"
     And "orderProcessor" handles message
     Then I expect exception during confirmation receiving

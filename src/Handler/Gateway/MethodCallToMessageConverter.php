@@ -38,9 +38,9 @@ class MethodCallToMessageConverter
 
     /**
      * @param array|MethodArgument[] $methodArguments
-     * @return Message
+     * @return MessageBuilder
      */
-    public function convertFor(array $methodArguments) : Message
+    public function convertFor(array $methodArguments) : MessageBuilder
     {
         Assert::allInstanceOfType($methodArguments, MethodArgument::class);
         $messageBuilder = MessageBuilder::withPayload("empty");
@@ -53,8 +53,7 @@ class MethodCallToMessageConverter
             }
         }
 
-        return $messageBuilder
-                ->build();
+        return $messageBuilder;
     }
 
     /**

@@ -9,6 +9,7 @@ use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Messaging\Handler\RequestReplyProducer;
 use Messaging\MessageChannel;
 use Messaging\MessageHandler;
+use Messaging\Support\Assert;
 
 /**
  * Class ServiceActivatorFactory
@@ -157,15 +158,18 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
      */
     public function build(): MessageHandler
     {
+        Assert::notNullAndEmpty($this->channelResolver, "You must pass channel resolver to Service Activator Builder");
+
         return new ServiceActivatingHandler(
-            RequestReplyProducer::create(
+            RequestReplyProducer::createFrom(
                 $this->outputChannel,
+                MethodInvoker::createWith(
+                    $this->objectToInvokeOn,
+                    $this->methodName,
+                    $this->methodArguments
+                ),
+                $this->channelResolver,
                 $this->isReplyRequired
-            ),
-            MethodInvoker::createWith(
-                $this->objectToInvokeOn,
-                $this->methodName,
-                $this->methodArguments
             )
         );
     }

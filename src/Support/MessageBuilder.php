@@ -22,10 +22,6 @@ final class MessageBuilder
      * @var HeaderAccessor
      */
     private $headerAccessor;
-    /**
-     * @var Clock
-     */
-    private $clock;
 
     /**
      * MessageBuilder constructor.
@@ -89,17 +85,6 @@ final class MessageBuilder
     }
 
     /**
-     * @param Clock $clock
-     * @return MessageBuilder
-     */
-    public function setClock(Clock $clock) : self
-    {
-        $this->clock = $clock;
-
-        return $this;
-    }
-
-    /**
      * @param MessageChannel $messageChannel
      * @return MessageBuilder
      */
@@ -138,7 +123,6 @@ final class MessageBuilder
     public function build() : Message
     {
         $messageHeaders = MessageHeaders::create(
-            $this->clock->getCurrentTimestamp(),
             $this->headerAccessor->headers()
         );
 
@@ -170,7 +154,6 @@ final class MessageBuilder
     {
         Assert::notNullAndEmpty($payload, "Message payload can't be empty");
 
-        $this->clock = ServerClock::create();
         $this->headerAccessor->setHeaderIfAbsent(MessageHeaders::ERROR_CHANNEL, "errorChannel");
     }
 }

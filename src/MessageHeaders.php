@@ -78,30 +78,20 @@ class MessageHeaders
     }
 
     /**
-     * @param int $timestamp
      * @return MessageHeaders|static
      */
-    final public static function createEmpty(int $timestamp) : self
+    final public static function createEmpty() : self
     {
-        return static::createMessageHeadersWith([], $timestamp);
+        return static::createMessageHeadersWith([]);
     }
 
     /**
-     * @param int $timestamp
      * @param array|string[] $headers
      * @return MessageHeaders|static
      */
-    final public static function create(int $timestamp, array $headers) : self
+    final public static function create(array $headers) : self
     {
-        return static::createMessageHeadersWith($headers, $timestamp);
-    }
-
-    /**
-     * @return MessageHeaders
-     */
-    final public static function createEmptyWithCurrentTimestamp() : self
-    {
-        return static::createMessageHeadersWith([], time());
+        return static::createMessageHeadersWith($headers);
     }
 
     /**
@@ -212,14 +202,13 @@ class MessageHeaders
 
     /**
      * @param array $headers
-     * @param $timestamp
      * @return MessageHeaders
      */
-    final private static function createMessageHeadersWith(array $headers, $timestamp): MessageHeaders
+    final private static function createMessageHeadersWith(array $headers): MessageHeaders
     {
         return new static(array_merge($headers, [
             self::MESSAGE_ID => Uuid::uuid4()->toString(),
-            self::TIMESTAMP => $timestamp
+            self::TIMESTAMP => time()
         ]));
     }
 }

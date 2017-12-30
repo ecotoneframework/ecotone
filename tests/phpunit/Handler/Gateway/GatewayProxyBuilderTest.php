@@ -218,7 +218,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel->subscribe($messageHandler);
 
         $replyChannel = QueueChannel::create();
-        $errorMessage = ErrorMessage::create(new \Exception("error occurred"), MessageHeaders::createEmptyWithCurrentTimestamp());
+        $errorMessage = ErrorMessage::create(new \Exception("error occurred"), MessageHeaders::createEmpty());
         $replyChannel->send($errorMessage);
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create(ServiceInterfaceSendAndReceive::class, 'getById', $requestChannel);
@@ -238,7 +238,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel->subscribe($messageHandler);
 
         $replyChannel = QueueChannel::create();
-        $errorMessage = ErrorMessage::create(new \Exception("error occurred"), MessageHeaders::createEmptyWithCurrentTimestamp());
+        $errorMessage = ErrorMessage::create(new \Exception("error occurred"), MessageHeaders::createEmpty());
         $replyChannel->send($errorMessage);
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create(ServiceInterfaceWithFutureReceive::class, 'someLongRunningWork', $requestChannel);

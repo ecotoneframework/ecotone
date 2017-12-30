@@ -25,7 +25,7 @@ final class ErrorMessage extends GenericMessage
     public static function createWithOriginalMessage(\Throwable $exception, Message $originalMessage) : self
     {
         /** @var ErrorMessage $errorMessage */
-        $errorMessage = self::create($exception, MessageHeaders::createEmptyWithCurrentTimestamp());
+        $errorMessage = self::create($exception, MessageHeaders::createEmpty());
         $errorMessage->setOriginalMessage($originalMessage);
 
         return $errorMessage;

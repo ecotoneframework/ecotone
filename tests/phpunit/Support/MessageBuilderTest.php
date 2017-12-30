@@ -18,18 +18,12 @@ class MessageBuilderTest extends MessagingTest
     public function test_creating_from_payload()
     {
         $payload = 'somePayload';
-        $currentTimestamp = 3000;
         $headerName = 'token';
         $headerValue = 'abc';
         $message = MessageBuilder::withPayload($payload)
-                    ->setClock(DumbClock::create($currentTimestamp))
                     ->setHeader($headerName, $headerValue)
                     ->build();
 
-        $this->assertEquals(
-            $currentTimestamp,
-            $message->getHeaders()->get(MessageHeaders::TIMESTAMP)
-        );
         $this->assertEquals(
             $payload,
             $message->getPayload()
@@ -115,7 +109,6 @@ class MessageBuilderTest extends MessagingTest
             ->build();
 
         $messageToCompare = MessageBuilder::fromMessage($message)
-            ->setClock(DumbClock::create(12))
             ->build();
         $this->assertMessages(
             $message,
@@ -124,10 +117,6 @@ class MessageBuilderTest extends MessagingTest
         $this->assertNotEquals(
             $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
             $messageToCompare->getHeaders()->get(MessageHeaders::MESSAGE_ID)
-        );
-        $this->assertNotEquals(
-            $message->getHeaders()->get(MessageHeaders::TIMESTAMP),
-            $messageToCompare->getHeaders()->get(MessageHeaders::TIMESTAMP)
         );
     }
 }

@@ -51,24 +51,22 @@ class GenericMessage implements Message
     }
 
     /**
-     * @param Clock $clock
      * @param mixed $payload
      * @param array|string[]|object[]|int[] $headers
      * @return Message
      */
-    public static function createWithArrayHeaders(Clock $clock, $payload, array $headers): Message
+    public static function createWithArrayHeaders($payload, array $headers): Message
     {
-        return new static($payload, MessageHeaders::create($clock->getCurrentTimestamp(), $headers));
+        return new static($payload, MessageHeaders::create($headers));
     }
 
     /**
-     * @param Clock $clock
      * @param mixed $payload
      * @return Message
      */
-    public static function createWithEmptyHeaders(Clock $clock, $payload): Message
+    public static function createWithEmptyHeaders($payload): Message
     {
-        return new static($payload, MessageHeaders::createEmpty($clock->getCurrentTimestamp()));
+        return new static($payload, MessageHeaders::createEmpty());
     }
 
     /**

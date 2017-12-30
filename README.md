@@ -11,7 +11,6 @@ https://www.javacodegeeks.com/2014/12/message-processing-with-spring-integration
 
 # TODO
 
-2. throw exception, if gateway reply channel returned null, but interface expects value
 3*. ReplyChannel
 4*. Exceptions and transactions
 

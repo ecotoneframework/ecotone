@@ -19,7 +19,7 @@ final class MessageHandlingException extends MessagingException
      */
     public static function fromErrorMessage(ErrorMessage $errorMessage) : self
     {
-        return new self($errorMessage->getPayload(), $errorMessage->getOriginalMessage());
+        return self::fromOtherException($errorMessage->getPayload(), $errorMessage->getOriginalMessage());
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Messaging\Support;
 use Messaging\Message;
+use Messaging\MessagingTest;
 use Messaging\Support\Clock\DumbClock;
 use PHPUnit\Framework\TestCase;
 
@@ -10,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  * @package Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class GenericMessageTest extends TestCase
+class GenericMessageTest extends MessagingTest
 {
     public function test_creating_generic_message_with_headers_as_key_value()
     {
@@ -18,7 +19,7 @@ class GenericMessageTest extends TestCase
         $headerName = "token";
         $headerValue = '123';
 
-        $message = GenericMessage::createWithArrayHeaders(DumbClock::create(1000), $payload, [$headerName => $headerValue]);
+        $message = GenericMessage::createWithArrayHeaders($payload, [$headerName => $headerValue]);
 
         $this->assertEquals(
             $headerValue,
@@ -30,7 +31,7 @@ class GenericMessageTest extends TestCase
     public function test_creating_without_headers()
     {
         $payload = 'somePayload';
-        $message = GenericMessage::createWithEmptyHeaders(DumbClock::create(1000), $payload);
+        $message = GenericMessage::createWithEmptyHeaders($payload);
 
         $this->assertEquals(
             $message->getPayload(),

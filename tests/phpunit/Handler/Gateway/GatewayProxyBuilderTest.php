@@ -5,6 +5,7 @@ namespace Messaging\Handler\Gateway;
 use Fixture\Handler\NoReturnMessageHandler;
 use Fixture\Handler\StatefulHandler;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
+use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceive;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
@@ -248,5 +249,45 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->expectException(MessageHandlingException::class);
 
         $gatewayProxy->someLongRunningWork()->resolve();
+    }
+
+    public function test_returning_null_when_no_reply_received_for_nullable_interface()
+    {
+        $requestChannel = DirectChannel::create();
+        $messageHandler = NoReturnMessageHandler::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $replyChannel = QueueChannel::create();
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create(ServiceInterfaceReceiveOnlyWithNull::class, 'sendMail', $requestChannel);
+        $gatewayProxyBuilder->withMillisecondTimeout(1);
+        $gatewayProxyBuilder->withReplyChannel($replyChannel);
+
+        /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build();
+
+        $this->assertNull(
+            $gatewayProxy->sendMail()
+        );
+    }
+
+    public function test_throwing_exception_when_reply_is_null_but_interface_expect_value()
+    {
+        $requestChannel = DirectChannel::create();
+        $messageHandler = NoReturnMessageHandler::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $replyChannel = QueueChannel::create();
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create(ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannel);
+        $gatewayProxyBuilder->withMillisecondTimeout(1);
+        $gatewayProxyBuilder->withReplyChannel($replyChannel);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build();
+
+        $gatewayProxy->sendMail();
     }
 }

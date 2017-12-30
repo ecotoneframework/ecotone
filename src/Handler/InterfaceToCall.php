@@ -48,7 +48,7 @@ class InterfaceToCall
         return new self(get_class($object), $methodName);
     }
 
-    public function isVoid() : bool
+    public function doesItReturnValue() : bool
     {
         return $this->getReturnType() == 'void';
     }
@@ -85,6 +85,14 @@ class InterfaceToCall
     public function doesItReturnFuture() : bool
     {
         return $this->getReturnType() == Future::class;
+    }
+
+    /**
+     * @return bool
+     */
+    public function canItReturnNull() : bool
+    {
+        return $this->reflectionMethod()->getReturnType()->allowsNull();
     }
 
     /**

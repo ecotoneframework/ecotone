@@ -8,6 +8,7 @@ use Fixture\Router\Order;
 use Fixture\Router\SingleChannelRouter;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
+use Messaging\Config\InMemoryChannelResolver;
 use Messaging\Handler\DestinationResolutionException;
 use Messaging\MessagingTest;
 use Messaging\Support\MessageBuilder;
@@ -26,7 +27,7 @@ class RouterBuilderTest extends MessagingTest
         $targetChannel = QueueChannel::create();
 
         $router = RouterBuilder::create('test', $directChannel, SingleChannelRouter::createWithChosenChannelName($chanelName), 'pick')
-                    ->setChannelResolver(DumbChannelResolver::create([
+                    ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                         $chanelName => $targetChannel
                     ]))
                     ->build();
@@ -49,7 +50,7 @@ class RouterBuilderTest extends MessagingTest
             'channel1',
             'channel2'
         ]), 'pick')
-            ->setChannelResolver(DumbChannelResolver::create([
+            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                 'channel1' => $targetChannel1,
                 'channel2' => $targetChannel2
             ]))
@@ -69,7 +70,7 @@ class RouterBuilderTest extends MessagingTest
         $directChannel = DirectChannel::create();
 
         $router = RouterBuilder::create('test', $directChannel, MultipleChannelRouter::createWithChosenChannelName([]), 'pick')
-            ->setChannelResolver(DumbChannelResolver::create([]))
+            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
             ->build();
 
         $message = MessageBuilder::withPayload('some')
@@ -86,7 +87,7 @@ class RouterBuilderTest extends MessagingTest
 
         $router = RouterBuilder::create('test', $directChannel, MultipleChannelRouter::createWithChosenChannelName([]), 'pick')
             ->setResolutionRequired(false)
-            ->setChannelResolver(DumbChannelResolver::create([]))
+            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
             ->build();
 
         $message = MessageBuilder::withPayload('some')
@@ -107,7 +108,7 @@ class RouterBuilderTest extends MessagingTest
             \stdClass::class => 'channel1',
             Order::class => 'channel2'
         ])
-            ->setChannelResolver(DumbChannelResolver::create([
+            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                 'channel1' => $targetChannel1,
                 'channel2' => $targetChannel2
             ]))
@@ -132,7 +133,7 @@ class RouterBuilderTest extends MessagingTest
             'private' => 'channel1',
             'public' => 'channel2'
         ])
-            ->setChannelResolver(DumbChannelResolver::create([
+            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                 'channel1' => $targetChannel1,
                 'channel2' => $targetChannel2
             ]))

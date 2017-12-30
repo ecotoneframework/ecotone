@@ -97,7 +97,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         $firstParameterName = $interfaceToCall->getFirstParameterName();
         $methodArguments = $this->methodArguments;
 
-        if ($interfaceToCall->isVoid()) {
+        if ($interfaceToCall->doesItReturnValue()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 

@@ -6,6 +6,7 @@ use Fixture\Handler\DumbChannelResolver;
 use Fixture\Handler\DumbMessageHandlerBuilder;
 use Fixture\Handler\NoReturnMessageHandler;
 use Messaging\Channel\DirectChannel;
+use Messaging\Config\InMemoryChannelResolver;
 use Messaging\MessagingTest;
 
 /**
@@ -17,7 +18,7 @@ class ConsumerEndpointFactoryTest extends MessagingTest
 {
     public function test_creating_event_driven_consumer()
     {
-        $consumerEndpointFactory = new ConsumerEndpointFactory(DumbChannelResolver::create([]), new PollOrThrowPollableFactory());
+        $consumerEndpointFactory = new ConsumerEndpointFactory(InMemoryChannelResolver::createEmpty(), new PollOrThrowPollableFactory());
 
         $this->assertInstanceOf(EventDrivenConsumer::class,
             $consumerEndpointFactory->create(

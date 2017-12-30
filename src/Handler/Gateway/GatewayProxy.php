@@ -75,8 +75,9 @@ class GatewayProxy
             $methodArguments[] = MethodArgument::createWith($parameters[$index]->getName(), $methodArgumentValues[$index]);
         }
 
-        $message = $this->methodCallToMessageConverter->convertFor($methodArguments)
-                        ->setHeader(MessageHeaders::ERROR_CHANNEL, $this->requestChannel)
+        $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
+        $message = $this->replySender
+                        ->addErrorChannel($message)
                         ->build();
 
         $this->requestChannel->send($message);

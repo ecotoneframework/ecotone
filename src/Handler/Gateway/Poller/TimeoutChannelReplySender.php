@@ -6,6 +6,7 @@ use Messaging\Handler\Gateway\GatewayReply;
 use Messaging\Handler\Gateway\ReplySender;
 use Messaging\Message;
 use Messaging\PollableChannel;
+use Messaging\Support\MessageBuilder;
 
 /**
  * Class TimeoutChannelReplySender
@@ -33,6 +34,15 @@ class TimeoutChannelReplySender implements ReplySender
     {
         $this->replyChannel = $replyChannel;
         $this->millisecondsTimeout = $millisecondsTimeout;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addErrorChannel(MessageBuilder $messageBuilder): MessageBuilder
+    {
+        return $messageBuilder
+                    ->setErrorChannel($this->replyChannel);
     }
 
     /**

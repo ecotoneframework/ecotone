@@ -4,6 +4,7 @@ namespace Messaging\Handler\Gateway\Poller;
 
 use Messaging\Handler\Gateway\ReplySender;
 use Messaging\Message;
+use Messaging\Support\MessageBuilder;
 
 /**
  * Class EmptyPoller
@@ -12,6 +13,14 @@ use Messaging\Message;
  */
 class EmptyReplySender implements ReplySender
 {
+    /**
+     * @inheritDoc
+     */
+    public function addErrorChannel(MessageBuilder $messageBuilder): MessageBuilder
+    {
+        return $messageBuilder;
+    }
+
     /**
      * @inheritDoc
      */

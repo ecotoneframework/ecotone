@@ -5,6 +5,7 @@ namespace Messaging\Handler\Gateway;
 use Messaging\Handler\MessageHandlingException;
 use Messaging\Message;
 use Messaging\Support\ErrorMessage;
+use Messaging\Support\MessageBuilder;
 
 /**
  * Class ErrorReplySender
@@ -18,6 +19,14 @@ class ErrorReplySender implements ReplySender
      * @var ReplySender
      */
     private $replySender;
+
+    /**
+     * @inheritDoc
+     */
+    public function addErrorChannel(MessageBuilder $messageBuilder): MessageBuilder
+    {
+        return $this->replySender->addErrorChannel($messageBuilder);
+    }
 
     /**
      * ErrorReplySender constructor.

@@ -153,7 +153,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertMessages(
             MessageBuilder::withPayload($content)
                 ->setHeader('personId', $personId)
-                ->setHeader("errorChannel", $requestChannel)
+                ->setHeader("errorChannel", "errorChannel")
                 ->build(),
             $messageHandler->message()
         );
@@ -183,7 +183,7 @@ class GatewayProxyBuilderTest extends MessagingTest
             MessageBuilder::withPayload($content)
                 ->setHeader('personId', $personId)
                 ->setHeader('personName', $personName)
-                ->setHeader(MessageHeaders::ERROR_CHANNEL, $requestChannel)
+                ->setHeader(MessageHeaders::ERROR_CHANNEL, "errorChannel")
                 ->build(),
             $messageHandler->message()
         );

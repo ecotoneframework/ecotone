@@ -33,7 +33,7 @@ abstract class MessagingException extends \Exception
 
     /**
      * @param string $message
-     * @return MessagingException
+     * @return MessagingException|static
      */
     public static function create(string $message) : self
     {
@@ -43,11 +43,11 @@ abstract class MessagingException extends \Exception
     /**
      * @param string $message
      * @param Message $failedMessage
-     * @return MessagingException
+     * @return MessagingException|static
      */
     public static function createWithFailedMessage(string $message, Message $failedMessage) : self
     {
-        $exception = self::create($message);
+        $exception = static::create($message);
         $exception->setFailedMessage($failedMessage);
 
         return $exception;

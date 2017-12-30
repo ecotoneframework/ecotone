@@ -78,7 +78,7 @@ class MessageBuilderTest extends MessagingTest
     {
         $errorChannel = QueueChannel::create();
         $message = MessageBuilder::withPayload('somePayload')
-            ->setErrorChannelName($errorChannel)
+            ->setErrorChannel($errorChannel)
             ->build();
 
         $this->assertEquals(

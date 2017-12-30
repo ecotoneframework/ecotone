@@ -6,6 +6,7 @@ use Messaging\Handler\Gateway\GatewayReply;
 use Messaging\Handler\Gateway\ReplySender;
 use Messaging\Message;
 use Messaging\PollableChannel;
+use Messaging\Support\MessageBuilder;
 
 /**
  * Class ReceivePoller
@@ -18,6 +19,15 @@ class ChannelReplySender implements ReplySender
      * @var PollableChannel
      */
     private $replyChannel;
+
+    /**
+     * @inheritDoc
+     */
+    public function addErrorChannel(MessageBuilder $messageBuilder): MessageBuilder
+    {
+        return $messageBuilder
+                ->setErrorChannel($this->replyChannel);
+    }
 
     /**
      * ReceivePoller constructor.

@@ -19,18 +19,31 @@ final class MessageHandlingException extends MessagingException
      */
     public static function fromErrorMessage(ErrorMessage $errorMessage) : self
     {
+        if (!$errorMessage->getOriginalMessage()) {
+            /** @var \Throwable $throwable */
+            $throwable = $errorMessage->getPayload();
+
+            $messagingException = self::create($throwable->getMessage());
+            $messagingException->setCausationException($errorMessage->getPayload());
+
+            return $messagingException;
+        }
+
         return self::fromOtherException($errorMessage->getPayload(), $errorMessage->getOriginalMessage());
     }
 
     /**
      * @param \Throwable $cause
      * @param Message $errorMessage
+     * @return MessageHandlingException|static
      */
-    public static function fromOtherException(\Throwable $cause, Message $errorMessage)
+    public static function fromOtherException(\Throwable $cause, Message $errorMessage) : self
     {
         $messageHandlingException = self::createWithFailedMessage($cause->getMessage(), $errorMessage);
 
         $messageHandlingException->setCausationException($cause);
+
+        return $messageHandlingException;
     }
 
     /**

@@ -21,6 +21,7 @@ use Messaging\Endpoint\PollOrThrowPollableFactory;
 use Messaging\Future;
 use Messaging\Handler\Gateway\GatewayProxy;
 use Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Messaging\Handler\MessageHandlingException;
 use Messaging\Handler\Router\RouterBuilder;
 use Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Messaging\Handler\Transformer\TransformerBuilder;
@@ -381,9 +382,9 @@ class DomainContext implements Context
     public function iExpectExceptionDuringConfirmationReceiving()
     {
         try {
-            $this->future->resolve();
+            $message = $this->future->resolve();
             \PHPUnit\Framework\Assert::assertTrue(false, "Expect exception got none");
-        }catch (RunTimeMessagingException $e) {}
+        }catch (MessageHandlingException $e) {}
     }
 
     /**

@@ -99,7 +99,7 @@ final class MessageBuilder
      * @param MessageChannel $messageChannel
      * @return MessageBuilder
      */
-    public function setErrorChannelName(MessageChannel $messageChannel) : self
+    public function setErrorChannel(MessageChannel $messageChannel) : self
     {
         $this->setHeader(MessageHeaders::ERROR_CHANNEL, $messageChannel);
 

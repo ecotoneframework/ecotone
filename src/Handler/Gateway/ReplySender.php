@@ -3,6 +3,7 @@
 namespace Messaging\Handler\Gateway;
 
 use Messaging\Message;
+use Messaging\Support\MessageBuilder;
 
 /**
  * Interface Poller - Receive reply from request channel and forward it internally
@@ -11,6 +12,12 @@ use Messaging\Message;
  */
 interface ReplySender
 {
+    /**
+     * @param MessageBuilder $messageBuilder
+     * @return MessageBuilder
+     */
+    public function addErrorChannel(MessageBuilder $messageBuilder) : MessageBuilder;
+
     /**
      * Receives reply after sending message to request channel and forward it internally
      */

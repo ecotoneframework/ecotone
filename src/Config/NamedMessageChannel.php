@@ -9,7 +9,7 @@ use Messaging\MessageChannel;
  * @package Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ResolvableChannel
+class NamedMessageChannel
 {
     /**
      * @var string
@@ -34,7 +34,7 @@ class ResolvableChannel
     /**
      * @param string $channelName
      * @param MessageChannel $messageChannel
-     * @return ResolvableChannel
+     * @return NamedMessageChannel
      */
     public static function create(string $channelName, MessageChannel $messageChannel) : self
     {

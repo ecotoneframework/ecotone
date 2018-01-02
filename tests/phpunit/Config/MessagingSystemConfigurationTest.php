@@ -2,12 +2,14 @@
 
 namespace Messaging\Config;
 
+use Fixture\Handler\DumbMessageHandlerBuilder;
 use Fixture\Handler\NoReturnMessageHandler;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\MessageDispatchingException;
 use Messaging\Channel\QueueChannel;
 use Messaging\Endpoint\EventDrivenConsumer;
 use Messaging\Endpoint\PollOrThrowExceptionConsumer;
+use Messaging\Endpoint\PollOrThrowPollableConsumerFactory;
 use Messaging\MessagingTest;
 use Messaging\Support\InvalidArgumentException;
 use Messaging\Support\MessageBuilder;
@@ -17,14 +19,17 @@ use Messaging\Support\MessageBuilder;
  * @package Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MessagingSystemTest extends MessagingTest
+class MessagingSystemConfigurationTest extends MessagingTest
 {
     public function test_run_event_driven_consumer()
     {
         $subscribableChannel = DirectChannel::create();
         $messageHandler = NoReturnMessageHandler::create();
-        $eventDrivenConsumer = new EventDrivenConsumer('consumer-a', $subscribableChannel, $messageHandler);
-        $messagingSystem = MessagingSystem::create([$eventDrivenConsumer]);
+
+        $messagingSystem = MessagingSystemConfiguration::prepare()
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create('test', $messageHandler, $subscribableChannel))
+            ->setPollableFactory(new PollOrThrowPollableConsumerFactory())
+            ->buildMessagingSystemFromConfiguration();
 
         $messagingSystem->runEventDrivenConsumers();
         $subscribableChannel->send(MessageBuilder::withPayload("a")->build());
@@ -36,8 +41,11 @@ class MessagingSystemTest extends MessagingTest
     {
         $subscribableChannel = DirectChannel::create();
         $messageHandler = NoReturnMessageHandler::create();
-        $eventDrivenConsumer = new EventDrivenConsumer('consumer-a', $subscribableChannel, $messageHandler);
-        $messagingSystem = MessagingSystem::create([$eventDrivenConsumer]);
+
+        $messagingSystem = MessagingSystemConfiguration::prepare()
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create('test', $messageHandler, $subscribableChannel))
+            ->setPollableFactory(new PollOrThrowPollableConsumerFactory())
+            ->buildMessagingSystemFromConfiguration();
 
         $messagingSystem->runEventDrivenConsumers();
         $messagingSystem->stopEventDrivenConsumers();
@@ -49,10 +57,13 @@ class MessagingSystemTest extends MessagingTest
 
     public function test_not_running_pollable_consumers_for_event_driven()
     {
-        $messageHandler = NoReturnMessageHandler::create();
         $pollableChannel = QueueChannel::create();
-        $pollableConsumer = PollOrThrowExceptionConsumer::createWithoutName($pollableChannel, $messageHandler);
-        $messagingSystem = MessagingSystem::create([$pollableConsumer]);
+        $messageHandler = NoReturnMessageHandler::create();
+
+        $messagingSystem = MessagingSystemConfiguration::prepare()
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create('test', $messageHandler, $pollableChannel))
+            ->setPollableFactory(new PollOrThrowPollableConsumerFactory())
+            ->buildMessagingSystemFromConfiguration();
 
         $messagingSystem->runEventDrivenConsumers();
 
@@ -64,16 +75,19 @@ class MessagingSystemTest extends MessagingTest
 
     public function test_running_pollable_consumer()
     {
-        $messageHandler = NoReturnMessageHandler::create();
         $pollableChannel = QueueChannel::create();
-        $consumerName = 'poller';
-        $pollableConsumer = PollOrThrowExceptionConsumer::create($consumerName, $pollableChannel, $messageHandler);
-        $messagingSystem = MessagingSystem::create([$pollableConsumer]);
+        $messageHandler = NoReturnMessageHandler::create();
+
+        $pollableName = 'test';
+        $messagingSystem = MessagingSystemConfiguration::prepare()
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($pollableName, $messageHandler, $pollableChannel))
+            ->setPollableFactory(new PollOrThrowPollableConsumerFactory())
+            ->buildMessagingSystemFromConfiguration();
 
         $message = MessageBuilder::withPayload("a")->build();
         $pollableChannel->send($message);
 
-        $messagingSystem->runPollableByName($consumerName);
+        $messagingSystem->runPollableByName($pollableName);
 
         $this->assertTrue($messageHandler->wasCalled());
     }
@@ -82,12 +96,15 @@ class MessagingSystemTest extends MessagingTest
     {
         $subscribableChannel = DirectChannel::create();
         $messageHandler = NoReturnMessageHandler::create();
-        $consumerName = 'consumer-a';
-        $eventDrivenConsumer = new EventDrivenConsumer($consumerName, $subscribableChannel, $messageHandler);
-        $messagingSystem = MessagingSystem::create([$eventDrivenConsumer]);
+
+        $messageHandlerName = 'test';
+        $messagingSystem = MessagingSystemConfiguration::prepare()
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandlerName, $messageHandler, $subscribableChannel))
+            ->setPollableFactory(new PollOrThrowPollableConsumerFactory())
+            ->buildMessagingSystemFromConfiguration();
 
         $this->expectException(InvalidArgumentException::class);
 
-        $messagingSystem->runPollableByName($consumerName);
+        $messagingSystem->runPollableByName($messageHandlerName);
     }
 }

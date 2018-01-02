@@ -15,17 +15,26 @@ use Messaging\Support\Assert;
 class InMemoryChannelResolver implements ChannelResolver
 {
     /**
-     * @var array|ResolvableChannel[]
+     * @var array|NamedMessageChannel[]
      */
     private $resolvableChannels;
 
     /**
      * InMemoryChannelResolver constructor.
-     * @param array|ResolvableChannel[] $resolvableChannels
+     * @param array|NamedMessageChannel[] $resolvableChannels
      */
     private function __construct(array $resolvableChannels)
     {
-        $this->resolvableChannels = $resolvableChannels;
+        $this->initialize($resolvableChannels);
+    }
+
+    /**
+     * @param array|NamedMessageChannel[] $namedMessageChannels
+     * @return InMemoryChannelResolver
+     */
+    public static function create(array $namedMessageChannels) : self
+    {
+        return new self($namedMessageChannels);
     }
 
     /**
@@ -39,7 +48,7 @@ class InMemoryChannelResolver implements ChannelResolver
         foreach ($resolvableChannelsArray as $channelName => $messageChannel) {
             Assert::isSubclassOf($messageChannel, MessageChannel::class, "Exepected Message Channel got " . get_class($messageChannel));
 
-            $resolvableChannels[] = ResolvableChannel::create($channelName, $messageChannel);
+            $resolvableChannels[] = NamedMessageChannel::create($channelName, $messageChannel);
         }
 
         return new self($resolvableChannels);
@@ -69,5 +78,15 @@ class InMemoryChannelResolver implements ChannelResolver
         }
 
         throw DestinationResolutionException::create("Channel with name {$channelName} can't be resolved");
+    }
+
+    /**
+     * @param array|NamedMessageChannel[] $namedMessageChannels
+     */
+    private function initialize($namedMessageChannels) : void
+    {
+        Assert::allInstanceOfType($namedMessageChannels, NamedMessageChannel::class);
+
+        $this->resolvableChannels = $namedMessageChannels;
     }
 }

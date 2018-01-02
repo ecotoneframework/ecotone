@@ -10,7 +10,7 @@ use Messaging\PollableChannel;
  * @package Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PollOrThrowPollableFactory implements PollableFactory
+class PollOrThrowPollableConsumerFactory implements PollableConsumerFactory
 {
     public function __construct()
     {

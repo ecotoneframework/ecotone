@@ -18,7 +18,7 @@ class ConsumerEndpointFactoryTest extends MessagingTest
 {
     public function test_creating_event_driven_consumer()
     {
-        $consumerEndpointFactory = new ConsumerEndpointFactory(InMemoryChannelResolver::createEmpty(), new PollOrThrowPollableFactory());
+        $consumerEndpointFactory = new ConsumerEndpointFactory(InMemoryChannelResolver::createEmpty(), new PollOrThrowPollableConsumerFactory());
 
         $this->assertInstanceOf(EventDrivenConsumer::class,
             $consumerEndpointFactory->create(

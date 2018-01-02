@@ -24,8 +24,6 @@ Feature: Service activator
     When I reserve book named "Harry Potter" using gateway "reserveGateway"
 
 
-
-
   Scenario: Application consist of order service. It receives and order and return confirmation.
       Gateway is entry point to the messaging system, it will receive the order and send it to request channel.
       At request channel message will be transformed to contain isAsync header

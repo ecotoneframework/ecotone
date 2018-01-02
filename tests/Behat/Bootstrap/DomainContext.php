@@ -15,9 +15,11 @@ use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
 use Messaging\Config\InMemoryChannelResolver;
 use Messaging\Config\MessagingSystem;
+use Messaging\Config\MessagingSystemConfiguration;
+use Messaging\Config\NamedMessageChannel;
 use Messaging\Endpoint\ConsumerEndpointFactory;
 use Messaging\Endpoint\ConsumerLifecycle;
-use Messaging\Endpoint\PollOrThrowPollableFactory;
+use Messaging\Endpoint\PollOrThrowPollableConsumerFactory;
 use Messaging\Future;
 use Messaging\Handler\Gateway\GatewayProxy;
 use Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -42,18 +44,17 @@ class DomainContext implements Context
      */
     private $messageChannels = [];
     /**
-     * @var array|ConsumerLifecycle
-     */
-    private $consumers = [];
-    /**
      * @var GatewayProxy[]
      */
     private $gateways;
     /**
+     * @var MessagingSystemConfiguration
+     */
+    private $messagingSystemConfiguration;
+    /**
      * @var MessagingSystem
      */
     private $messagingSystem;
-
     /**
      * @var object[]
      */
@@ -62,6 +63,11 @@ class DomainContext implements Context
      * @var Future
      */
     private $future;
+
+    public function __construct()
+    {
+        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare();
+    }
 
     /**
      * @Given I register :bookingRequestName as :type
@@ -73,10 +79,15 @@ class DomainContext implements Context
         switch ($type) {
             case "Direct Channel": {
                 $this->messageChannels[$channelName] = DirectChannel::create();
+                $this->getMessagingSystemConfiguration()
+                    ->registerMessageChannel($channelName, $this->messageChannels[$channelName]);
                 break;
             }
             case "Pollable Channel": {
                 $this->messageChannels[$channelName] = QueueChannel::create();
+                $this->getMessagingSystemConfiguration()
+                    ->registerMessageChannel($channelName, $this->messageChannels[$channelName]);
+                break;
             }
         }
     }
@@ -90,9 +101,8 @@ class DomainContext implements Context
      */
     public function iActivateServiceWithNameForWithMethodToListenOnChannel(string $handlerName, string $className, string $methodName, string $channelName)
     {
-        $serviceActivatorBuilder = $this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName);
-
-        $this->consumers[] = $this->consumerEndpointFactory()->create($serviceActivatorBuilder);
+        $this->getMessagingSystemConfiguration()
+                ->registerMessageHandler($this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName));
     }
 
     /**
@@ -105,10 +115,10 @@ class DomainContext implements Context
      */
     public function iActivateServiceWithNameForWithMethodToListenOnChannelAndOutputChannel(string $handlerName, string $className, string $methodName, string $channelName, string $outputChannel)
     {
-        $serviceActivatorBuilder = $this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName)
-                                        ->withOutputChannel($this->getChannelByName($outputChannel));
-
-        $this->consumers[] = $this->consumerEndpointFactory()->create($serviceActivatorBuilder);
+        $this->getMessagingSystemConfiguration()->registerMessageHandler(
+            $this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName)
+                ->withOutputChannel($this->getChannelByName($outputChannel))
+        );
     }
 
     /**
@@ -194,9 +204,12 @@ class DomainContext implements Context
      */
     public function iRunMessagingSystem()
     {
-        $this->messagingSystem = MessagingSystem::create($this->consumers);
+        $this->messagingSystem = $this->getMessagingSystemConfiguration()
+                                    ->setPollableFactory(new PollOrThrowPollableConsumerFactory())
+                                    ->buildMessagingSystemFromConfiguration();
 
-        $this->messagingSystem->runEventDrivenConsumers();
+        $this->messagingSystem
+            ->runEventDrivenConsumers();
     }
 
     /**
@@ -256,9 +269,9 @@ class DomainContext implements Context
     {
         $object = $this->createObject($className);
 
-        $serviceActivatorBuilder = ServiceActivatorBuilder::create($object, $methodName);
-        $serviceActivatorBuilder->withInputMessageChannel($this->getChannelByName($channelName));
-        $serviceActivatorBuilder->withName($handlerName);
+        $serviceActivatorBuilder = ServiceActivatorBuilder::create($object, $methodName)
+                                        ->withInputMessageChannel($this->getChannelByName($channelName))
+                                        ->withName($handlerName);
 
         return $serviceActivatorBuilder;
     }
@@ -277,7 +290,8 @@ class DomainContext implements Context
         $outputChannel = $this->getChannelByName($responseChannelName);
         $object = $this->createObject($className);
 
-        $this->consumers[] = $this->consumerEndpointFactory()->create(TransformerBuilder::create($inputChannel, $outputChannel, $object, $methodName, $name));
+        $this->getMessagingSystemConfiguration()
+            ->registerMessageHandler(TransformerBuilder::create($inputChannel, $outputChannel, $object, $methodName, $name));
     }
 
     /**
@@ -311,12 +325,6 @@ class DomainContext implements Context
         return $object;
     }
 
-    private function consumerEndpointFactory() : ConsumerEndpointFactory
-    {
-        return new ConsumerEndpointFactory(InMemoryChannelResolver::createFromAssociativeArray($this->messageChannels), new PollOrThrowPollableFactory());
-    }
-
-
     /**
      * @Given I activate header router with name :handlerName and input Channel :inputChannelName for header :headerName with mapping:
      * @param string $handlerName
@@ -331,9 +339,8 @@ class DomainContext implements Context
             $channelToValue[$headerValue['value']] = $headerValue['target_channel'];
         }
 
-        $this->consumers[] = $this->consumerEndpointFactory()->create(
-            RouterBuilder::createHeaderValueRouter($handlerName, $this->getChannelByName($inputChannelName), $headerName, $channelToValue)
-        );
+        $this->getMessagingSystemConfiguration()
+            ->registerMessageHandler(RouterBuilder::createHeaderValueRouter($handlerName, $this->getChannelByName($inputChannelName), $headerName, $channelToValue));
     }
 
     /**
@@ -382,7 +389,7 @@ class DomainContext implements Context
     public function iExpectExceptionDuringConfirmationReceiving()
     {
         try {
-            $message = $this->future->resolve();
+            $this->future->resolve();
             \PHPUnit\Framework\Assert::assertTrue(false, "Expect exception got none");
         }catch (MessageHandlingException $e) {}
     }
@@ -401,11 +408,12 @@ class DomainContext implements Context
             $keyValues[$keyValue['key']] = $keyValue['value'];
         }
 
-        $this->consumers[] = $this->consumerEndpointFactory()->create(TransformerBuilder::createHeaderEnricher(
-            $handlerName,
-            $this->getChannelByName($requestChannelName),
-            $this->getChannelByName($outputChannelName),
-            $keyValues
+        $this->getMessagingSystemConfiguration()
+                ->registerMessageHandler(TransformerBuilder::createHeaderEnricher(
+                    $handlerName,
+                    $this->getChannelByName($requestChannelName),
+                    $this->getChannelByName($outputChannelName),
+                    $keyValues
         ));
     }
 
@@ -416,5 +424,13 @@ class DomainContext implements Context
     public function handlesMessage(string $consumerName)
     {
         $this->messagingSystem->runPollableByName($consumerName);
+    }
+
+    /**
+     * @return MessagingSystemConfiguration
+     */
+    private function getMessagingSystemConfiguration(): MessagingSystemConfiguration
+    {
+        return $this->messagingSystemConfiguration;
     }
 }

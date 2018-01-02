@@ -9,7 +9,7 @@ use Messaging\PollableChannel;
  * @package Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface PollableFactory
+interface PollableConsumerFactory
 {
     /**
      * @param string $consumerName

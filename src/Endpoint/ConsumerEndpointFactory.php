@@ -21,16 +21,16 @@ class ConsumerEndpointFactory
      */
     private $channelResolver;
     /**
-     * @var PollableFactory
+     * @var PollableConsumerFactory
      */
     private $pollableFactory;
 
     /**
      * ConsumerEndpointFactory constructor.
      * @param ChannelResolver $channelResolver
-     * @param PollableFactory $pollableFactory
+     * @param PollableConsumerFactory $pollableFactory
      */
-    public function __construct(ChannelResolver $channelResolver, PollableFactory $pollableFactory)
+    public function __construct(ChannelResolver $channelResolver, PollableConsumerFactory $pollableFactory)
     {
         $this->channelResolver = $channelResolver;
         $this->pollableFactory = $pollableFactory;

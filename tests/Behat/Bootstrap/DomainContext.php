@@ -13,6 +13,7 @@ use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
 use Messaging\Channel\DirectChannel;
 use Messaging\Channel\QueueChannel;
+use Messaging\Channel\SimpleMessageChannelBuilder;
 use Messaging\Config\InMemoryChannelResolver;
 use Messaging\Config\MessagingSystem;
 use Messaging\Config\MessagingSystemConfiguration;
@@ -80,13 +81,13 @@ class DomainContext implements Context
             case "Direct Channel": {
                 $this->messageChannels[$channelName] = DirectChannel::create();
                 $this->getMessagingSystemConfiguration()
-                    ->registerMessageChannel($channelName, $this->messageChannels[$channelName]);
+                    ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $this->messageChannels[$channelName]));
                 break;
             }
             case "Pollable Channel": {
                 $this->messageChannels[$channelName] = QueueChannel::create();
                 $this->getMessagingSystemConfiguration()
-                    ->registerMessageChannel($channelName, $this->messageChannels[$channelName]);
+                    ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $this->messageChannels[$channelName]));
                 break;
             }
         }

@@ -19,7 +19,7 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
      */
     private $messageHandler;
     /**
-     * @var MessageChannel
+     * @var string
      */
     private $messageChannel;
     /**
@@ -31,24 +31,24 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
      * DumbMessageHandlerBuilder constructor.
      * @param string $messageHandlerName
      * @param MessageHandler $messageHandler
-     * @param MessageChannel $messageChannel
+     * @param string $inputMessageChannelName
      */
-    private function __construct(string $messageHandlerName, MessageHandler $messageHandler, MessageChannel $messageChannel)
+    private function __construct(string $messageHandlerName, MessageHandler $messageHandler, string $inputMessageChannelName)
     {
         $this->messageHandlerName = $messageHandlerName;
         $this->messageHandler = $messageHandler;
-        $this->messageChannel = $messageChannel;
+        $this->messageChannel = $inputMessageChannelName;
     }
 
     /**
      * @param string $messageHandlerName
      * @param MessageHandler $messageHandler
-     * @param MessageChannel $messageChannel
+     * @param string $inputMessageChannelName
      * @return DumbMessageHandlerBuilder
      */
-    public static function create(string $messageHandlerName, MessageHandler $messageHandler, MessageChannel $messageChannel) : self
+    public static function create(string $messageHandlerName, MessageHandler $messageHandler, string $inputMessageChannelName) : self
     {
-        return new self($messageHandlerName, $messageHandler, $messageChannel);
+        return new self($messageHandlerName, $messageHandler, $inputMessageChannelName);
     }
 
     /**
@@ -62,7 +62,7 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getInputMessageChannel(): MessageChannel
+    public function getInputMessageChannelName(): string
     {
         return $this->messageChannel;
     }

@@ -36,45 +36,45 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
 
     /**
      * TransformerBuilder constructor.
-     * @param MessageChannel $inputChannel
-     * @param MessageChannel $outputChannel
+     * @param string $inputChannelName
+     * @param string $outputChannelName
      * @param $objectToInvoke
      * @param string $methodName
      * @param string $handlerName
      */
-    private function __construct(MessageChannel $inputChannel, MessageChannel $outputChannel, $objectToInvoke, string $methodName, string $handlerName)
+    private function __construct(string $inputChannelName, string $outputChannelName, $objectToInvoke, string $methodName, string $handlerName)
     {
         $this->objectToInvoke = $objectToInvoke;
         $this->methodName = $methodName;
 
-        $this->withInputMessageChannel($inputChannel);
-        $this->withOutputMessageChannel($outputChannel);
+        $this->withInputMessageChannel($inputChannelName);
+        $this->withOutputMessageChannel($outputChannelName);
         $this->withName($handlerName);
     }
 
     /**
-     * @param MessageChannel $inputChannel
-     * @param MessageChannel $outputChannel
+     * @param string $inputChannelName
+     * @param string $outputChannelName
      * @param $objectToInvoke
      * @param string $methodName
      * @param string $handlerName
      * @return TransformerBuilder
      */
-    public static function create(MessageChannel $inputChannel, MessageChannel $outputChannel, $objectToInvoke, string $methodName, string $handlerName): self
+    public static function create(string $inputChannelName, string $outputChannelName, $objectToInvoke, string $methodName, string $handlerName): self
     {
-        return new self($inputChannel, $outputChannel, $objectToInvoke, $methodName, $handlerName);
+        return new self($inputChannelName, $outputChannelName, $objectToInvoke, $methodName, $handlerName);
     }
 
     /**
      * @param string $handlerName
-     * @param MessageChannel $inputChannel
-     * @param MessageChannel $outputChannel
+     * @param string $inputChannelName
+     * @param string $outputChannelName
      * @param array $messageHeaders
      * @return TransformerBuilder
      */
-    public static function createHeaderEnricher(string $handlerName, MessageChannel $inputChannel, MessageChannel $outputChannel, array $messageHeaders) : self
+    public static function createHeaderEnricher(string $handlerName, string $inputChannelName, string $outputChannelName, array $messageHeaders) : self
     {
-        return new self($inputChannel, $outputChannel, HeaderEnricher::create($messageHeaders), "transform", $handlerName);
+        return new self($inputChannelName, $outputChannelName, HeaderEnricher::create($messageHeaders), "transform", $handlerName);
     }
 
     /**
@@ -111,7 +111,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
 
         return new Transformer(
             RequestReplyProducer::createFrom(
-                $this->outputMessageChannel,
+                $this->channelResolver->resolve($this->outputMessageChannelName),
                 TransformerMessageProcessor::createFrom(
                     MethodInvoker::createWith($this->objectToInvoke, $this->methodName, $methodArguments)
                 ),

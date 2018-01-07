@@ -5,7 +5,9 @@ http://docs.spring.io/spring-integration/reference/htmlsingle/#overview-componen
 Message Content Types:
 http://docs.spring.io/spring-cloud-stream/docs/1.0.0.BUILD-SNAPSHOT/reference/html/contenttypemanagement.html
 
-A) everything should retrieve channel from channel resolver
+A) everything should retrieve channel from channel resolver (gateway)
+B) remove input channel from router
+C) ParameterConverters (done like in java)
 
 1. scheduling
     a) pollers

@@ -117,7 +117,7 @@ class DomainContext implements Context
     {
         $this->getMessagingSystemConfiguration()->registerMessageHandler(
             $this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName)
-                ->withOutputChannel($this->getChannelByName($outputChannel))
+                ->withOutputChannel($outputChannel)
         );
     }
 
@@ -270,7 +270,7 @@ class DomainContext implements Context
         $object = $this->createObject($className);
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::create($object, $methodName)
-                                        ->withInputMessageChannel($this->getChannelByName($channelName))
+                                        ->withInputMessageChannel($channelName)
                                         ->withName($handlerName);
 
         return $serviceActivatorBuilder;
@@ -286,8 +286,8 @@ class DomainContext implements Context
      */
     public function iActivateTransformerWithNameForAndWithRequestChannelAndOutputChannel(string $name, string $className, string $methodName, string $requestChannelName, string $responseChannelName)
     {
-        $inputChannel = $this->getChannelByName($requestChannelName);
-        $outputChannel = $this->getChannelByName($responseChannelName);
+        $inputChannel = $requestChannelName;
+        $outputChannel = $responseChannelName;
         $object = $this->createObject($className);
 
         $this->getMessagingSystemConfiguration()
@@ -340,7 +340,7 @@ class DomainContext implements Context
         }
 
         $this->getMessagingSystemConfiguration()
-            ->registerMessageHandler(RouterBuilder::createHeaderValueRouter($handlerName, $this->getChannelByName($inputChannelName), $headerName, $channelToValue));
+            ->registerMessageHandler(RouterBuilder::createHeaderValueRouter($handlerName, $inputChannelName, $headerName, $channelToValue));
     }
 
     /**
@@ -411,8 +411,8 @@ class DomainContext implements Context
         $this->getMessagingSystemConfiguration()
                 ->registerMessageHandler(TransformerBuilder::createHeaderEnricher(
                     $handlerName,
-                    $this->getChannelByName($requestChannelName),
-                    $this->getChannelByName($outputChannelName),
+                    $requestChannelName,
+                    $outputChannelName,
                     $keyValues
         ));
     }

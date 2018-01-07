@@ -20,9 +20,9 @@ class RouterBuilder implements MessageHandlerBuilder
      */
     private $handlerName;
     /**
-     * @var MessageChannel
+     * @var string
      */
-    private $inputChannel;
+    private $inputMessageChannelName;
     /**
      * @var object
      */
@@ -47,51 +47,51 @@ class RouterBuilder implements MessageHandlerBuilder
     /**
      * RouterBuilder constructor.
      * @param string $handlerName
-     * @param MessageChannel $inputChannel
+     * @param string $inputChannel
      * @param object $objectToInvoke
      * @param string $methodName
      */
-    private function __construct(string $handlerName, MessageChannel $inputChannel, $objectToInvoke, string $methodName)
+    private function __construct(string $handlerName, string $inputChannel, $objectToInvoke, string $methodName)
     {
         $this->handlerName = $handlerName;
-        $this->inputChannel = $inputChannel;
+        $this->inputMessageChannelName = $inputChannel;
         $this->objectToInvoke = $objectToInvoke;
         $this->methodName = $methodName;
     }
 
     /**
      * @param string $handlerName
-     * @param MessageChannel $inputChannel
+     * @param string $inputChannelName
      * @param $objectToInvoke
      * @param string $methodName
      * @return RouterBuilder
      */
-    public static function create(string $handlerName, MessageChannel $inputChannel, $objectToInvoke, string $methodName) : self
+    public static function create(string $handlerName, string $inputChannelName, $objectToInvoke, string $methodName) : self
     {
-        return new self($handlerName, $inputChannel, $objectToInvoke, $methodName);
+        return new self($handlerName, $inputChannelName, $objectToInvoke, $methodName);
     }
 
     /**
      * @param string $handlerName
-     * @param MessageChannel $inputChannel
+     * @param string $inputChannelName
      * @param array $typeToChannelMapping
      * @return RouterBuilder
      */
-    public static function createPayloadTypeRouter(string $handlerName, MessageChannel $inputChannel, array $typeToChannelMapping) : self
+    public static function createPayloadTypeRouter(string $handlerName, string $inputChannelName, array $typeToChannelMapping) : self
     {
-        return self::create($handlerName, $inputChannel, PayloadTypeRouter::create($typeToChannelMapping), 'route');
+        return self::create($handlerName, $inputChannelName, PayloadTypeRouter::create($typeToChannelMapping), 'route');
     }
 
     /**
      * @param string $handlerName
-     * @param MessageChannel $inputChannel
+     * @param string $inputChannelName
      * @param string $headerName
      * @param array $headerValueToChannelMapping
      * @return RouterBuilder
      */
-    public static function createHeaderValueRouter(string $handlerName, MessageChannel $inputChannel, string $headerName, array $headerValueToChannelMapping) : self
+    public static function createHeaderValueRouter(string $handlerName, string $inputChannelName, string $headerName, array $headerValueToChannelMapping) : self
     {
-        return self::create($handlerName, $inputChannel, HeaderValueRouter::create($headerName, $headerValueToChannelMapping), 'route');
+        return self::create($handlerName, $inputChannelName, HeaderValueRouter::create($headerName, $headerValueToChannelMapping), 'route');
     }
 
     /**
@@ -101,7 +101,8 @@ class RouterBuilder implements MessageHandlerBuilder
     {
         return Router::create(
             $this->channelResolver,
-            $this->inputChannel,
+//            @TODO remoe input message channel
+            $this->channelResolver->resolve($this->inputMessageChannelName),
             $this->objectToInvoke,
             $this->methodName,
             $this->resolutionRequired,
@@ -131,9 +132,9 @@ class RouterBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getInputMessageChannel(): MessageChannel
+    public function getInputMessageChannelName(): string
     {
-        return $this->inputChannel;
+        return $this->inputMessageChannelName;
     }
 
     /**

@@ -42,13 +42,13 @@ class ConsumerEndpointFactory
      */
     public function create(MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle
     {
-        $messageChannel = $messageHandlerBuilder->getInputMessageChannel();
+        $inputMessageChannel = $this->channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
         $messageHandlerBuilder = $messageHandlerBuilder->setChannelResolver($this->channelResolver);
 
-        if ($messageChannel instanceof SubscribableChannel) {
-            return new EventDrivenConsumer($messageHandlerBuilder->messageHandlerName(), $messageChannel, $messageHandlerBuilder->build());
-        }elseif ($messageChannel instanceof PollableChannel) {
-            return $this->pollableFactory->create($messageHandlerBuilder->messageHandlerName(), $messageChannel, $messageHandlerBuilder->build());
+        if ($inputMessageChannel instanceof SubscribableChannel) {
+            return new EventDrivenConsumer($messageHandlerBuilder->messageHandlerName(), $inputMessageChannel, $messageHandlerBuilder->build());
+        }elseif ($inputMessageChannel instanceof PollableChannel) {
+            return $this->pollableFactory->create($messageHandlerBuilder->messageHandlerName(), $inputMessageChannel, $messageHandlerBuilder->build());
         }
     }
 }

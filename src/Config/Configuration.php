@@ -8,6 +8,7 @@
 
 namespace Messaging\Config;
 
+use Messaging\Channel\MessageChannelBuilder;
 use Messaging\Endpoint\PollableConsumerFactory;
 use Messaging\Handler\MessageHandlerBuilder;
 use Messaging\MessageChannel;
@@ -26,11 +27,10 @@ interface Configuration
     public static function prepare(): MessagingSystemConfiguration;
 
     /**
-     * @param string $messageChannelName
-     * @param MessageChannel $messageChannel
+     * @param MessageChannelBuilder $messageChannelBuilder
      * @return MessagingSystemConfiguration
      */
-    public function registerMessageChannel(string $messageChannelName, MessageChannel $messageChannel): MessagingSystemConfiguration;
+    public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): MessagingSystemConfiguration;
 
     /**
      * @param MessageHandlerBuilder $messageHandlerBuilder

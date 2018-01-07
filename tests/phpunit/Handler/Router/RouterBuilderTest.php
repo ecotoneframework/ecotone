@@ -22,13 +22,14 @@ class RouterBuilderTest extends MessagingTest
 {
     public function test_routing_message_to_single_channel()
     {
-        $directChannel = DirectChannel::create();
         $chanelName = 'buyChannel';
         $targetChannel = QueueChannel::create();
+        $inputChannelName = "input";
 
-        $router = RouterBuilder::create('test', $directChannel, SingleChannelRouter::createWithChosenChannelName($chanelName), 'pick')
+        $router = RouterBuilder::create('test', $inputChannelName, SingleChannelRouter::createWithChosenChannelName($chanelName), 'pick')
                     ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
-                        $chanelName => $targetChannel
+                        $chanelName => $targetChannel,
+                        $inputChannelName => DirectChannel::create()
                     ]))
                     ->build();
 
@@ -42,17 +43,18 @@ class RouterBuilderTest extends MessagingTest
 
     public function test_routing_message_to_multiple_channels()
     {
-        $directChannel = DirectChannel::create();
         $targetChannel1 = QueueChannel::create();
         $targetChannel2 = QueueChannel::create();
+        $inputChannelName = "input";
 
-        $router = RouterBuilder::create('test', $directChannel, MultipleChannelRouter::createWithChosenChannelName([
+        $router = RouterBuilder::create('test', $inputChannelName, MultipleChannelRouter::createWithChosenChannelName([
             'channel1',
             'channel2'
         ]), 'pick')
             ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                 'channel1' => $targetChannel1,
-                'channel2' => $targetChannel2
+                'channel2' => $targetChannel2,
+                $inputChannelName => DirectChannel::create()
             ]))
             ->build();
 
@@ -67,10 +69,11 @@ class RouterBuilderTest extends MessagingTest
 
     public function test_throwing_exception_if_resolution_is_required()
     {
-        $directChannel = DirectChannel::create();
-
-        $router = RouterBuilder::create('test', $directChannel, MultipleChannelRouter::createWithChosenChannelName([]), 'pick')
-            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
+        $inputChannelName = "input";
+        $router = RouterBuilder::create('test', $inputChannelName, MultipleChannelRouter::createWithChosenChannelName([]), 'pick')
+            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
+                $inputChannelName => DirectChannel::create()
+            ]))
             ->build();
 
         $message = MessageBuilder::withPayload('some')
@@ -83,11 +86,12 @@ class RouterBuilderTest extends MessagingTest
 
     public function test_if_no_resolution_required_not_throwing_exception_when_no_resolution()
     {
-        $directChannel = DirectChannel::create();
-
-        $router = RouterBuilder::create('test', $directChannel, MultipleChannelRouter::createWithChosenChannelName([]), 'pick')
+        $inputChannelName = "input";
+        $router = RouterBuilder::create('test', $inputChannelName, MultipleChannelRouter::createWithChosenChannelName([]), 'pick')
             ->setResolutionRequired(false)
-            ->setChannelResolver(InMemoryChannelResolver::createEmpty())
+            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
+                $inputChannelName => DirectChannel::create()
+            ]))
             ->build();
 
         $message = MessageBuilder::withPayload('some')
@@ -100,17 +104,18 @@ class RouterBuilderTest extends MessagingTest
 
     public function test_routing_with_payload_type()
     {
-        $directChannel = DirectChannel::create();
         $targetChannel1 = QueueChannel::create();
         $targetChannel2 = QueueChannel::create();
+        $inputChannelName = "input";
 
-        $router = RouterBuilder::createPayloadTypeRouter('test', $directChannel, [
+        $router = RouterBuilder::createPayloadTypeRouter('test', $inputChannelName, [
             \stdClass::class => 'channel1',
             Order::class => 'channel2'
         ])
             ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                 'channel1' => $targetChannel1,
-                'channel2' => $targetChannel2
+                'channel2' => $targetChannel2,
+                $inputChannelName => DirectChannel::create()
             ]))
             ->build();
 
@@ -124,18 +129,19 @@ class RouterBuilderTest extends MessagingTest
 
     public function test_routing_with_header_value()
     {
-        $directChannel = DirectChannel::create();
         $targetChannel1 = QueueChannel::create();
         $targetChannel2 = QueueChannel::create();
+        $inputChannelName = "input";
         $headerName = 'type';
 
-        $router = RouterBuilder::createHeaderValueRouter('test', $directChannel, $headerName, [
+        $router = RouterBuilder::createHeaderValueRouter('test', $inputChannelName, $headerName, [
             'private' => 'channel1',
             'public' => 'channel2'
         ])
             ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                 'channel1' => $targetChannel1,
-                'channel2' => $targetChannel2
+                'channel2' => $targetChannel2,
+                $inputChannelName => DirectChannel::create()
             ]))
             ->build();
 

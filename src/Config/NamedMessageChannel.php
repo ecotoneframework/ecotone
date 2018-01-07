@@ -50,10 +50,10 @@ class NamedMessageChannel
     }
 
     /**
-     * @param string $channelName
+     * @param string|null $channelName
      * @return bool
      */
-    public function hasName(string $channelName) : bool
+    public function hasName(?string $channelName) : bool
     {
         return $this->channelName === $channelName;
     }

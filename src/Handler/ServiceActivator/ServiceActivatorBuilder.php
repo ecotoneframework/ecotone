@@ -27,9 +27,9 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
      */
     private $methodName;
     /**
-     * @var MessageChannel
+     * @var string
      */
-    private $outputChannel;
+    private $outputChannelName;
     /**
      * @var  bool
      */
@@ -39,9 +39,9 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
      */
     private $methodArguments = [];
     /**
-     * @var MessageChannel
+     * @var string
      */
-    private $inputMessageChannel;
+    private $inputMessageChannelName;
     /**
      * @var string
      */
@@ -84,12 +84,12 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     }
 
     /**
-     * @param MessageChannel $messageChannel
+     * @param string $messageChannelName
      * @return ServiceActivatorBuilder
      */
-    public function withOutputChannel(MessageChannel $messageChannel): self
+    public function withOutputChannel(string $messageChannelName): self
     {
-        $this->outputChannel = $messageChannel;
+        $this->outputChannelName = $messageChannelName;
 
         return $this;
     }
@@ -106,12 +106,12 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     }
 
     /**
-     * @param MessageChannel $inputMessageChannel
+     * @param string $inputMessageChannelName
      * @return ServiceActivatorBuilder
      */
-    public function withInputMessageChannel(MessageChannel $inputMessageChannel) : self
+    public function withInputMessageChannel(string $inputMessageChannelName) : self
     {
-        $this->inputMessageChannel = $inputMessageChannel;
+        $this->inputMessageChannelName = $inputMessageChannelName;
 
         return $this;
     }
@@ -129,9 +129,9 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getInputMessageChannel(): MessageChannel
+    public function getInputMessageChannelName(): string
     {
-        return $this->inputMessageChannel;
+        return $this->inputMessageChannelName;
     }
 
     /**
@@ -162,7 +162,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
 
         return new ServiceActivatingHandler(
             RequestReplyProducer::createFrom(
-                $this->outputChannel,
+                $this->outputChannelName ? $this->channelResolver->resolve($this->outputChannelName) : null,
                 MethodInvoker::createWith(
                     $this->objectToInvokeOn,
                     $this->methodName,

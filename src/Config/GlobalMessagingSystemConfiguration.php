@@ -2,6 +2,7 @@
 
 namespace Messaging\Config;
 
+use Messaging\Channel\MessageChannelBuilder;
 use Messaging\Endpoint\PollableConsumerFactory;
 use Messaging\Handler\MessageHandlerBuilder;
 use Messaging\MessageChannel;
@@ -45,10 +46,10 @@ final class GlobalMessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
-    public function registerMessageChannel(string $messageChannelName, MessageChannel $messageChannel): MessagingSystemConfiguration
+    public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): MessagingSystemConfiguration
     {
         return self::prepare()
-            ->registerMessageChannel($messageChannelName, $messageChannel);
+            ->registerMessageChannel($messageChannelBuilder);
     }
 
     /**

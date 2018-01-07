@@ -14,11 +14,11 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @var MessageChannel
      */
-    protected $inputMessageChannel;
+    protected $inputMessageChannelName;
     /**
      * @var MessageChannel
      */
-    protected $outputMessageChannel;
+    protected $outputMessageChannelName;
     /**
      * @var string
      */
@@ -48,23 +48,23 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     }
 
     /**
-     * @param MessageChannel $messageChannel
+     * @param string $messageChannelName
      * @return self|static
      */
-    public function withInputMessageChannel(MessageChannel $messageChannel) : self
+    public function withInputMessageChannel(string $messageChannelName) : self
     {
-        $this->inputMessageChannel = $messageChannel;
+        $this->inputMessageChannelName = $messageChannelName;
 
         return $this;
     }
 
     /**
-     * @param MessageChannel $messageChannel
+     * @param string $messageChannelName
      * @return self|static
      */
-    public function withOutputMessageChannel(MessageChannel $messageChannel) : self
+    public function withOutputMessageChannel(string $messageChannelName) : self
     {
-        $this->outputMessageChannel = $messageChannel;
+        $this->outputMessageChannelName = $messageChannelName;
 
         return $this;
     }
@@ -72,9 +72,9 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getInputMessageChannel(): MessageChannel
+    public function getInputMessageChannelName(): string
     {
-        return $this->inputMessageChannel;
+        return $this->inputMessageChannelName;
     }
 
     /**

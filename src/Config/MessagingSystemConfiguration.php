@@ -2,6 +2,7 @@
 
 namespace Messaging\Config;
 
+use Messaging\Channel\MessageChannelBuilder;
 use Messaging\Endpoint\ConsumerEndpointFactory;
 use Messaging\Endpoint\PollableConsumerFactory;
 use Messaging\Handler\MessageHandlerBuilder;
@@ -36,13 +37,12 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @param string $messageChannelName
-     * @param MessageChannel $messageChannel
+     * @param MessageChannelBuilder $messageChannelBuilder
      * @return MessagingSystemConfiguration
      */
-    public function registerMessageChannel(string $messageChannelName, MessageChannel $messageChannel): self
+    public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): self
     {
-        $this->namedChannels[] = NamedMessageChannel::create($messageChannelName, $messageChannel);
+        $this->namedChannels[] = NamedMessageChannel::create($messageChannelBuilder->getMessageChannelName(), $messageChannelBuilder->build());
 
         return $this;
     }

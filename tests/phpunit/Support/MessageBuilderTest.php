@@ -1,16 +1,15 @@
 <?php
 
-namespace Messaging\Support;
+namespace Test\SimplyCodedSoftware\Messaging\Support;
 
-use Messaging\Channel\QueueChannel;
-use Messaging\MessageHeaders;
-use Messaging\MessagingTest;
-use Messaging\Support\Clock\DumbClock;
-use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class MessageBuilderTest
- * @package Messaging\Support
+ * @package SimplyCodedSoftware\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageBuilderTest extends MessagingTest

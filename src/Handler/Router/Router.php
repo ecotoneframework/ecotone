@@ -1,18 +1,18 @@
 <?php
 
-namespace Messaging\Handler\Router;
+namespace SimplyCodedSoftware\Messaging\Handler\Router;
 
-use Messaging\Handler\ChannelResolver;
-use Messaging\Handler\DestinationResolutionException;
-use Messaging\Handler\MethodArgument;
-use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Messaging\Message;
-use Messaging\MessageChannel;
-use Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException;
+use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
  * Class Router
- * @package Messaging\Handler\Router
+ * @package SimplyCodedSoftware\Messaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

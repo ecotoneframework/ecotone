@@ -1,17 +1,16 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
-use Messaging\Handler\Gateway\MethodParameterConverter\OnlyPayloadMessageParameterMethodArgumentConverter;
-use Messaging\Handler\InterfaceToCall;
-use Messaging\Message;
-use Messaging\Support\Assert;
-use Messaging\Support\InvalidArgumentException;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\OnlyPayloadMessageParameterMethodArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodCallToMessageConverter
- * @package Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodCallToMessageConverter
@@ -60,7 +59,7 @@ class MethodCallToMessageConverter
      * @param string $interfaceToCall
      * @param string $methodName
      * @param array|MethodArgumentConverter[] $methodArgumentConverters
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function initialize(string $interfaceToCall, string $methodName, array $methodArgumentConverters) : void
     {

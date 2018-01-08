@@ -1,13 +1,14 @@
 <?php
 
-namespace Messaging\Channel;
+namespace Test\SimplyCodedSoftware\Messaging\Channel;
 
-use Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class QueueChannelTest
- * @package Messaging\Channel
+ * @package SimplyCodedSoftware\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class QueueChannelTest extends TestCase

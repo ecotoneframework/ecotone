@@ -1,13 +1,14 @@
 <?php
 
-namespace Messaging;
+namespace Test\SimplyCodedSoftware\Messaging;
 
-use Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
 
 /**
  * Class MessagingTest
- * @package Messaging
+ * @package SimplyCodedSoftware\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class MessagingTest extends TestCase

@@ -1,10 +1,10 @@
 <?php
 
-namespace Messaging;
+namespace SimplyCodedSoftware\Messaging;
 
 /**
  * Class RunTimeMessagingException
- * @package Messaging
+ * @package SimplyCodedSoftware\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RunTimeMessagingException extends MessagingException

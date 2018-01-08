@@ -1,18 +1,18 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
-use Messaging\Channel\DirectChannel;
-use Messaging\Handler\Gateway\Poller\ChannelReplySender;
-use Messaging\Handler\Gateway\Poller\EmptyReplySender;
-use Messaging\Handler\Gateway\Poller\TimeoutChannelReplySender;
-use Messaging\PollableChannel;
-use Messaging\Support\Assert;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\ChannelReplySender;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\EmptyReplySender;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\TimeoutChannelReplySender;
+use SimplyCodedSoftware\Messaging\PollableChannel;
+use SimplyCodedSoftware\Messaging\Support\Assert;
 
 /**
  * Class GatewayProxySpec
- * @package Messaging\Config
+ * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayProxyBuilder

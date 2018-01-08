@@ -1,14 +1,12 @@
 <?php
 
-namespace Messaging;
+namespace SimplyCodedSoftware\Messaging;
 
-use Messaging\InvalidMessageHeaderException;
-use Messaging\MessageHeaderDoesNotExistsException;
 use Ramsey\Uuid\Uuid;
 
 /**
  * Class MessageHeaders
- * @package Messaging
+ * @package SimplyCodedSoftware\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageHeaders
@@ -123,7 +121,7 @@ class MessageHeaders
     /**
      * @param string $headerName
      * @return mixed
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     final public function get(string $headerName)
     {
@@ -187,7 +185,7 @@ class MessageHeaders
 
     /**
      * @param array|string[] $headers
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     final private function initialize(array $headers) : void
     {

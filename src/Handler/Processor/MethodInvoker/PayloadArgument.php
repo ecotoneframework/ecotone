@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Handler\Processor\MethodInvoker;
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use Messaging\Handler\MethodArgument;
-use Messaging\Message;
+use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Class PayloadArgument
- * @package Messaging\Handler\ServiceActivator
+ * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PayloadArgument implements MethodArgument

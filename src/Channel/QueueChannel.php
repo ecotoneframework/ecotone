@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Channel;
+namespace SimplyCodedSoftware\Messaging\Channel;
 
-use Messaging\Message;
-use Messaging\PollableChannel;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\PollableChannel;
 
 /**
  * Class QueueChannel
- * @package Messaging\Channel
+ * @package SimplyCodedSoftware\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class QueueChannel implements PollableChannel

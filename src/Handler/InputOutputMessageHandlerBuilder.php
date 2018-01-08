@@ -1,12 +1,10 @@
 <?php
 
-namespace Messaging\Handler;
-
-use Messaging\MessageChannel;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
 /**
  * Class InputOutputMessageHandlerBuilder
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder

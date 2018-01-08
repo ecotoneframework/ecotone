@@ -1,16 +1,15 @@
 <?php
 
-namespace Messaging\Handler\Gateway\Poller;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway\Poller;
 
-use Messaging\Handler\Gateway\GatewayReply;
-use Messaging\Handler\Gateway\ReplySender;
-use Messaging\Message;
-use Messaging\PollableChannel;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ReplySender;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\PollableChannel;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class TimeoutChannelReplySender
- * @package Messaging\Handler\Gateway\Poller
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Poller
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TimeoutChannelReplySender implements ReplySender

@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
-use Messaging\Message;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Interface Poller - Receive reply from request channel and forward it internally
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ReplySender

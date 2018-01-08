@@ -1,15 +1,15 @@
 <?php
 
-namespace Messaging\Handler;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
-use Messaging\Future;
-use Messaging\Handler\Gateway\NamedParameter;
-use Messaging\Message;
-use Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Future;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\NamedParameter;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class InterfaceToCall
- * @package Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceToCall
@@ -97,7 +97,7 @@ class InterfaceToCall
 
     /**
      * @return \ReflectionParameter
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function getFirstParameter() : \ReflectionParameter
     {
@@ -169,7 +169,7 @@ class InterfaceToCall
     /**
      * @param string $interfaceName
      * @param string $methodName
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function initialize(string $interfaceName, string $methodName) : void
     {

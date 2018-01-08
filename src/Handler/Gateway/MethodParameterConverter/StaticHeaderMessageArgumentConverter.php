@@ -1,14 +1,14 @@
 <?php
 
-namespace Messaging\Handler\Gateway\MethodParameterConverter;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter;
 
-use Messaging\Handler\Gateway\MethodArgument;
-use Messaging\Handler\Gateway\MethodArgumentConverter;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgumentConverter;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class StaticHeaderMessageArgumentConverter
- * @package Messaging\Handler\Gateway\MethodParameterConverter
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class StaticHeaderMessageArgumentConverter implements MethodArgumentConverter

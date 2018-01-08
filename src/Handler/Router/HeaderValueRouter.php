@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Handler\Router;
+namespace SimplyCodedSoftware\Messaging\Handler\Router;
 
-use Messaging\Message;
+use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Class HeaderValueRouter
- * @package Messaging\Handler\Router
+ * @package SimplyCodedSoftware\Messaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

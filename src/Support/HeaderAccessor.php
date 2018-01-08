@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Support;
-use Messaging\MessageHeaderDoesNotExistsException;
-use Messaging\MessageHeaders;
-use Messaging\MessagingException;
+namespace SimplyCodedSoftware\Messaging\Support;
+use SimplyCodedSoftware\Messaging\MessageHeaderDoesNotExistsException;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\MessagingException;
 
 /**
  * Class HeaderAccessor
- * @package Messaging\Support
+ * @package SimplyCodedSoftware\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal class intent to be used with {@link Message}
  */

@@ -1,11 +1,12 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
-use Messaging\Support\Assert;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+
+use SimplyCodedSoftware\Messaging\Support\Assert;
 
 /**
  * Class MethodArgument
- * @package Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodArgument

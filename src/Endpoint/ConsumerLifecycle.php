@@ -1,10 +1,10 @@
 <?php
 
-namespace Messaging\Endpoint;
+namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 /**
  * Interface Lifecycle
- * @package Messaging\Endpoint
+ * @package SimplyCodedSoftware\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ConsumerLifecycle

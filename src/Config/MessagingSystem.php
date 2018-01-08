@@ -1,17 +1,15 @@
 <?php
 
-namespace Messaging\Config;
+namespace SimplyCodedSoftware\Messaging\Config;
 
-use Messaging\Endpoint\ConsumerEndpointFactory;
-use Messaging\Endpoint\ConsumerLifecycle;
-use Messaging\Handler\ChannelResolver;
-use Messaging\Handler\MessageHandlerBuilder;
-use Messaging\Support\Assert;
-use Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class Application
- * @package Messaging\Config
+ * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessagingSystem
@@ -71,7 +69,7 @@ final class MessagingSystem
 
     /**
      * @param string $consumerName
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     public function runPollableByName(string $consumerName) : void
     {

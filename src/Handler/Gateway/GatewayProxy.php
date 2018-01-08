@@ -1,18 +1,14 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
-use Messaging\Channel\DirectChannel;
-use Messaging\Handler\InterfaceToCall;
-use Messaging\Handler\MessageHandlingException;
-use Messaging\MessageHeaders;
-use Messaging\MessagingException;
-use Messaging\Support\Assert;
-use Messaging\Support\ErrorMessage;
-use Messaging\Support\InvalidArgumentException;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class GatewayProxy
- * @package Messaging\Handler\Gateway
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
@@ -61,7 +57,7 @@ class GatewayProxy
     /**
      * @param array|mixed[] $methodArgumentValues
      * @return mixed
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     public function execute(array $methodArgumentValues)
     {
@@ -99,7 +95,7 @@ class GatewayProxy
      * @param string $methodName
      * @param ReplySender $replySender
      * @return void
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function initialize(string $interfaceName, string $methodName, ReplySender $replySender) : void
     {

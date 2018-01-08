@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Handler;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
-use Messaging\Message;
+use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Interface MessageProcessor
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageProcessor

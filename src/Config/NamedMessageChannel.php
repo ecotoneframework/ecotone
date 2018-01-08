@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Config;
+namespace SimplyCodedSoftware\Messaging\Config;
 
-use Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\MessageChannel;
 
 /**
  * Class ResolvableChannel
- * @package Messaging\Config
+ * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class NamedMessageChannel

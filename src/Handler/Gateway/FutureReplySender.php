@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
-use Messaging\Future;
+use SimplyCodedSoftware\Messaging\Future;
 
 /**
  * Class FutureReplySender
- * @package Messaging\Handler\Gateway
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

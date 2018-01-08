@@ -2,8 +2,8 @@
 
 namespace Fixture\Handler;
 
-use Messaging\Message;
-use Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
  * Class StatefulHandler

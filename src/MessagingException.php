@@ -1,10 +1,10 @@
 <?php
 
-namespace Messaging;
+namespace SimplyCodedSoftware\Messaging;
 
 /**
  * Class MessagingException
- * @package Messaging\Exception
+ * @package SimplyCodedSoftware\Messaging\Exception
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class MessagingException extends \Exception

@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Handler\Processor\MethodInvoker;
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use Messaging\Handler\MethodArgument;
-use Messaging\Message;
+use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Class MessageArgument
- * @package Messaging\Handler\Processor\MethodInvoker
+ * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageArgument implements MethodArgument

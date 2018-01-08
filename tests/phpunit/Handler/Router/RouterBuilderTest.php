@@ -1,21 +1,21 @@
 <?php
 
-namespace Messaging\Handler\Router;
+namespace Test\SimplyCodedSoftware\Messaging\Handler\Router;
 
-use Fixture\Handler\DumbChannelResolver;
 use Fixture\Router\MultipleChannelRouter;
 use Fixture\Router\Order;
 use Fixture\Router\SingleChannelRouter;
-use Messaging\Channel\DirectChannel;
-use Messaging\Channel\QueueChannel;
-use Messaging\Config\InMemoryChannelResolver;
-use Messaging\Handler\DestinationResolutionException;
-use Messaging\MessagingTest;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException;
+use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class RouterBuilderTest
- * @package Messaging\Handler\Router
+ * @package SimplyCodedSoftware\Messaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RouterBuilderTest extends MessagingTest

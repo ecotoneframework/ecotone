@@ -1,13 +1,12 @@
 <?php
 
-namespace Messaging\Handler;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
-use Messaging\MessageChannel;
-use Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
  * Interface MessageHandlerBuilder
- * @package Messaging\Config
+ * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageHandlerBuilder

@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Support;
+namespace SimplyCodedSoftware\Messaging\Support;
 
-use Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
 
 /**
  * Class MutableMessageHeaders
- * @package Messaging\Support
+ * @package SimplyCodedSoftware\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MutableMessageHeaders extends MessageHeaders

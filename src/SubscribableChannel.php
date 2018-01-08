@@ -1,10 +1,10 @@
 <?php
 
-namespace Messaging;
+namespace SimplyCodedSoftware\Messaging;
 
 /**
  * Interface SubscribableChannel
- * @package Messaging
+ * @package SimplyCodedSoftware\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface SubscribableChannel extends MessageChannel

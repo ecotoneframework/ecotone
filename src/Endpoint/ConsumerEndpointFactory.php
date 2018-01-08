@@ -1,13 +1,11 @@
 <?php
 
-namespace Messaging\Endpoint;
+namespace SimplyCodedSoftware\Messaging\Endpoint;
 
-use Messaging\Handler\ChannelResolver;
-use Messaging\Handler\MessageHandlerBuilder;
-use Messaging\MessageChannel;
-use Messaging\MessageHandler;
-use Messaging\PollableChannel;
-use Messaging\SubscribableChannel;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\PollableChannel;
+use SimplyCodedSoftware\Messaging\SubscribableChannel;
 
 /**
  * Class ConsumerEndpointFactory - Responsible for creating consumers from builders

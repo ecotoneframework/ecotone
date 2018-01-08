@@ -6,10 +6,10 @@
  * Time: 14:29
  */
 
-namespace Messaging\Channel;
+namespace SimplyCodedSoftware\Messaging\Channel;
 
 
-use Messaging\MessagingException;
+use SimplyCodedSoftware\Messaging\MessagingException;
 
 class MessageDispatchingException extends MessagingException
 {

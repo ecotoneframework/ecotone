@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Channel;
+namespace SimplyCodedSoftware\Messaging\Channel;
 
-use Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\MessageChannel;
 
 /**
  * Interface MessageChannelBuilder
- * @package Messaging\Channel
+ * @package SimplyCodedSoftware\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageChannelBuilder

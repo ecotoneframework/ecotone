@@ -1,18 +1,17 @@
 <?php
 
-namespace Messaging\Channel;
+namespace Test\SimplyCodedSoftware\Messaging\Channel;
 
 use Fixture\Handler\NoReturnMessageHandler;
-use Messaging\Channel\Dispatcher\UnicastingDispatcher;
-use Messaging\Message;
-use Messaging\MessageHandler;
-use Messaging\SubscribableChannel;
-use Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Channel\Dispatcher\UnicastingDispatcher;
+use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class DirectChannelTest
- * @package Messaging\Channel
+ * @package SimplyCodedSoftware\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DirectChannelTest extends TestCase

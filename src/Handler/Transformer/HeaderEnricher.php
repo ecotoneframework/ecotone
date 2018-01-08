@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Handler\Transformer;
+namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
 
-use Messaging\Message;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class HeaderEnricher
- * @package Messaging\Handler\Transformer
+ * @package SimplyCodedSoftware\Messaging\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

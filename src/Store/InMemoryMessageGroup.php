@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Store;
+namespace SimplyCodedSoftware\Messaging\Store;
 
-use Messaging\Message;
 use Ramsey\Uuid\Uuid;
+use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Class InMemoryMessageGroup
- * @package Messaging\Store
+ * @package SimplyCodedSoftware\Messaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class InMemoryMessageGroup implements MessageGroup

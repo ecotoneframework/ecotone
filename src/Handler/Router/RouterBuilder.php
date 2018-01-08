@@ -1,16 +1,15 @@
 <?php
 
-namespace Messaging\Handler\Router;
+namespace SimplyCodedSoftware\Messaging\Handler\Router;
 
-use Messaging\Handler\ChannelResolver;
-use Messaging\Handler\MessageHandlerBuilder;
-use Messaging\Handler\MethodArgument;
-use Messaging\MessageChannel;
-use Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
  * Class RouterBuilder
- * @package Messaging\Handler\Router
+ * @package SimplyCodedSoftware\Messaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RouterBuilder implements MessageHandlerBuilder

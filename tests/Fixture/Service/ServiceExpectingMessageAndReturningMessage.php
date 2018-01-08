@@ -2,8 +2,8 @@
 
 namespace Fixture\Service;
 
-use Messaging\Message;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class ServiceExpectingMessageAndReturningMessage

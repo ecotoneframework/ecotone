@@ -1,14 +1,13 @@
 <?php
 
-namespace Messaging\Support;
-use Messaging\Message;
-use Messaging\MessagingTest;
-use Messaging\Support\Clock\DumbClock;
-use PHPUnit\Framework\TestCase;
+namespace Test\SimplyCodedSoftware\Messaging\Support;
+use SimplyCodedSoftware\Messaging\Support\GenericMessage;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+
 
 /**
  * Class GenericMessageTest
- * @package Messaging\Support
+ * @package SimplyCodedSoftware\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GenericMessageTest extends MessagingTest

@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Handler;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
-use Messaging\InvalidMessageHeaderException;
-use Messaging\Message;
+use SimplyCodedSoftware\Messaging\InvalidMessageHeaderException;
+use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Class MethodArgument
- * @package Messaging\Handler\ServiceActivator
+ * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MethodArgument

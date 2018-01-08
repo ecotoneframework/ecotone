@@ -2,38 +2,30 @@
 
 namespace Behat\Bootstrap;
 
-use Behat\Gherkin\Node\TableNode;
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
+use Behat\Gherkin\Node\TableNode;
 use Fixture\Behat\Booking\BookingService;
 use Fixture\Behat\Ordering\Order;
 use Fixture\Behat\Ordering\OrderConfirmation;
 use Fixture\Behat\Ordering\OrderingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
-use Messaging\Channel\DirectChannel;
-use Messaging\Channel\QueueChannel;
-use Messaging\Channel\SimpleMessageChannelBuilder;
-use Messaging\Config\InMemoryChannelResolver;
-use Messaging\Config\MessagingSystem;
-use Messaging\Config\MessagingSystemConfiguration;
-use Messaging\Config\NamedMessageChannel;
-use Messaging\Endpoint\ConsumerEndpointFactory;
-use Messaging\Endpoint\ConsumerLifecycle;
-use Messaging\Endpoint\PollOrThrowPollableConsumerFactory;
-use Messaging\Future;
-use Messaging\Handler\Gateway\GatewayProxy;
-use Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Messaging\Handler\MessageHandlingException;
-use Messaging\Handler\Router\RouterBuilder;
-use Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Messaging\Handler\Transformer\TransformerBuilder;
-use Messaging\MessageChannel;
-use Messaging\MessageHandler;
-use Messaging\MessagingException;
-use Messaging\PollableChannel;
-use Messaging\RunTimeMessagingException;
-use Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\Messaging\Config\MessagingSystem;
+use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowPollableConsumerFactory;
+use SimplyCodedSoftware\Messaging\Future;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxy;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
+use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\PollableChannel;
 
 /**
  * Defines application features from the specific context.
@@ -247,7 +239,7 @@ class DomainContext implements Context
      * @param string $interfaceName
      * @param string $methodName
      * @param string $requestChannel
-     * @return \Messaging\Handler\Gateway\GatewayProxyBuilder
+     * @return \SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder
      */
     private function createGatewayBuilder(string $interfaceName, string $methodName, string $requestChannel): GatewayProxyBuilder
     {
@@ -264,7 +256,7 @@ class DomainContext implements Context
      * @param string $className
      * @param string $methodName
      * @param string $channelName
-     * @return \Messaging\Handler\ServiceActivator\ServiceActivatorBuilder
+     * @return ServiceActivatorBuilder
      */
     private function createServiceActivatorBuilder(string $handlerName, string $className, string $methodName, string $channelName): ServiceActivatorBuilder
     {

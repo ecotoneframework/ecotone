@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Store;
-use Messaging\Message;
-use Messaging\MessagingException;
+namespace SimplyCodedSoftware\Messaging\Store;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessagingException;
 
 /**
  * Interface MessageGroup - used in multiple messages scenarios
- * @package Messaging\Store
+ * @package SimplyCodedSoftware\Messaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageGroup

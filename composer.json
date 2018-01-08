@@ -1,5 +1,5 @@
 {
-    "name": "messaging/messaging",
+    "name": "simplycodedsoftware/messaging",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -12,12 +12,12 @@
     "description": "Framework helping you working in distributed architecture. Based on enterprise integration patterns and java spring framework.",
     "autoload": {
         "psr-4": {
-            "Messaging\\": "src"
+            "SimplyCodedSoftware\\Messaging\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Messaging\\": "tests/phpunit",
+            "Test\\SimplyCodedSoftware\\Messaging\\": "tests/phpunit",
             "Behat\\Bootstrap\\": "tests/Behat/Bootstrap",
             "Fixture\\": "tests/Fixture"
         }
@@ -25,7 +25,11 @@
     "require": {
         "php": ">=7.1.0",
         "ramsey/uuid": "^3.0.0",
-        "ocramius/proxy-manager": "^2.1.1"
+        "ocramius/proxy-manager": "^2.1.1",
+
+        "ext-mbstring": "*",
+        "ext-bcmath": "*",
+        "php-amqplib/php-amqplib": "^2.7.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.2.3",

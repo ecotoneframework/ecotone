@@ -1,13 +1,10 @@
 <?php
 
-namespace Messaging;
-
-use Messaging\MessagingException;
-use Messaging\MessagingExceptionInterface;
+namespace SimplyCodedSoftware\Messaging;
 
 /**
  * Class MessageHeaderDoesNotExistsException
- * @package Messaging\Exception
+ * @package SimplyCodedSoftware\Messaging\Exception
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageHeaderDoesNotExistsException extends MessagingException

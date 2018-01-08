@@ -1,16 +1,15 @@
 <?php
 
-namespace Messaging\Config;
+namespace SimplyCodedSoftware\Messaging\Config;
 
-use Messaging\Channel\MessageChannelBuilder;
-use Messaging\Endpoint\ConsumerEndpointFactory;
-use Messaging\Endpoint\PollableConsumerFactory;
-use Messaging\Handler\MessageHandlerBuilder;
-use Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\ConsumerEndpointFactory;
+use SimplyCodedSoftware\Messaging\Endpoint\PollableConsumerFactory;
 
 /**
  * Class MessagingSystemConfiguration
- * @package Messaging\Config
+ * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessagingSystemConfiguration implements Configuration

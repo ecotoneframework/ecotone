@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Handler;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
-use Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\MessageChannel;
 
 /**
  * Interface ChannelResolver
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ChannelResolver

@@ -1,11 +1,11 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
-use Messaging\Support\MessageBuilder;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Interface ParameterDefinition
- * @package Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MethodArgumentConverter extends NamedParameter

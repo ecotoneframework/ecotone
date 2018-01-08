@@ -1,13 +1,15 @@
 <?php
 
-namespace Messaging\Support;
+namespace Test\SimplyCodedSoftware\Messaging\Support;
 
-use Messaging\Message;
 use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class AssertTest
- * @package Messaging\Support
+ * @package SimplyCodedSoftware\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AssertTest extends TestCase

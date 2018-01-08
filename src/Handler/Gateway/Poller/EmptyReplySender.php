@@ -1,14 +1,14 @@
 <?php
 
-namespace Messaging\Handler\Gateway\Poller;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway\Poller;
 
-use Messaging\Handler\Gateway\ReplySender;
-use Messaging\Message;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ReplySender;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class EmptyPoller
- * @package Messaging\Handler\Gateway\Poller
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Poller
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EmptyReplySender implements ReplySender

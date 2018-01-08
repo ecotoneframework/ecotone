@@ -1,19 +1,18 @@
 <?php
 
-namespace Messaging\Handler;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
-use Messaging\Config\InMemoryChannelResolver;
-use Messaging\Message;
-use Messaging\MessageChannel;
-use Messaging\MessageDeliveryException;
-use Messaging\MessageHeaders;
-use Messaging\Support\Assert;
-use Messaging\Support\ErrorMessage;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\MessageDeliveryException;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class RequestReplyProducer
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RequestReplyProducer
@@ -65,7 +64,7 @@ class RequestReplyProducer
     /**
      * @param Message $message
      * @throws MessageDeliveryException
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     public function handleWithReply(Message $message): void
     {

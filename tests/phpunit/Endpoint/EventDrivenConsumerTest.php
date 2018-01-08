@@ -1,17 +1,17 @@
 <?php
 
-namespace Messaging\Endpoint;
+namespace Test\SimplyCodedSoftware\Messaging\Endpoint;
 
 use Fixture\Handler\NoReturnMessageHandler;
-use Messaging\Channel\DirectChannel;
-use Messaging\Channel\MessageDispatchingException;
-use Messaging\MessageDeliveryException;
-use Messaging\MessagingTest;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
+use SimplyCodedSoftware\Messaging\Endpoint\EventDrivenConsumer;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class EventDrivenConsumerTest
- * @package Messaging\Endpoint
+ * @package SimplyCodedSoftware\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EventDrivenConsumerTest extends MessagingTest

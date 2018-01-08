@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Handler;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
-use Messaging\MessagingException;
+use SimplyCodedSoftware\Messaging\MessagingException;
 
 /**
  * Class UnresolveChannelException
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DestinationResolutionException extends MessagingException

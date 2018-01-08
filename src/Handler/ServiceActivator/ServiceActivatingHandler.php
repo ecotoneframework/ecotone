@@ -1,15 +1,15 @@
 <?php
 
-namespace Messaging\Handler\ServiceActivator;
+namespace SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
 
-use Messaging\Handler\MessageProcessor;
-use Messaging\Handler\RequestReplyProducer;
-use Messaging\Message;
-use Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
+use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
  * Class ServiceActivator
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class ServiceActivatingHandler implements MessageHandler

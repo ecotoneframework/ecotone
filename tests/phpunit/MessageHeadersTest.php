@@ -1,18 +1,16 @@
 <?php
 
-namespace Messaging;
+namespace Test\SimplyCodedSoftware\Messaging;
 
-use Messaging\Channel\QueueChannel;
-use Messaging\InvalidMessageHeaderException;
-use Messaging\MessageHeaderDoesNotExistsException;
-use Messaging\Support\Clock\DumbClock;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\MessageHeaderDoesNotExistsException;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
 
 /**
  * Class MessageHeaderTest
- * @package Messaging
+ * @package SimplyCodedSoftware\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageHeadersTest extends TestCase

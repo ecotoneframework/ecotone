@@ -1,19 +1,18 @@
 <?php
 
-namespace Messaging\Handler\ServiceActivator;
+namespace SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
 
-use Messaging\Handler\ChannelResolver;
-use Messaging\Handler\MessageHandlerBuilder;
-use Messaging\Handler\MethodArgument;
-use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Messaging\Handler\RequestReplyProducer;
-use Messaging\MessageChannel;
-use Messaging\MessageHandler;
-use Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
+use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Support\Assert;
 
 /**
  * Class ServiceActivatorFactory
- * @package Messaging\Handler\ServiceActivator
+ * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceActivatorBuilder implements MessageHandlerBuilder

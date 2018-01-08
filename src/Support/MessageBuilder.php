@@ -1,15 +1,15 @@
 <?php
 
-namespace Messaging\Support;
+namespace SimplyCodedSoftware\Messaging\Support;
 
-use Messaging\Message;
-use Messaging\MessageChannel;
-use Messaging\MessageHeaders;
-use Messaging\Support\Clock\ServerClock;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\Support\Clock\ServerClock;
 
 /**
  * Class MessageBuilder
- * @package Messaging\Support
+ * @package SimplyCodedSoftware\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessageBuilder

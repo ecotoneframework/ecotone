@@ -2,10 +2,9 @@
 
 namespace Fixture\Handler;
 
-use Messaging\Handler\ChannelResolver;
-use Messaging\Handler\MessageHandlerBuilder;
-use Messaging\MessageChannel;
-use Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
  * Class DumbMessageHandlerBuilder

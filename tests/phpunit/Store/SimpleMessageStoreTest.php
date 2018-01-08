@@ -1,15 +1,16 @@
 <?php
 
-namespace Messaging\Store;
+namespace Test\SimplyCodedSoftware\Messaging\Store;
 
-use Messaging\MessageHeaders;
-use Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\Store\SimpleMessageStore;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class SimpleMessageStoreTest
- * @package Messaging\Store
+ * @package SimplyCodedSoftware\Messaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SimpleMessageStoreTest extends TestCase

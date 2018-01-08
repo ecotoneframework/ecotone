@@ -1,15 +1,15 @@
 <?php
 
-namespace Messaging\Channel;
+namespace SimplyCodedSoftware\Messaging\Channel;
 
-use Messaging\Channel\Dispatcher\BroadcastingDispatcher;
-use Messaging\Message;
-use Messaging\MessageHandler;
-use Messaging\SubscribableChannel;
+use SimplyCodedSoftware\Messaging\Channel\Dispatcher\BroadcastingDispatcher;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\SubscribableChannel;
 
 /**
  * Class PublishSubscribeChannel
- * @package Messaging\Channel
+ * @package SimplyCodedSoftware\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PublishSubscribeChannel implements SubscribableChannel

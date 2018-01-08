@@ -1,23 +1,24 @@
 <?php
 
-namespace Messaging\Handler\Transformer;
+namespace Test\SimplyCodedSoftware\Messaging\Handler\Transformer;
 
 use Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Fixture\Service\ServiceExpectingOneArgument;
 use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutReturnValue;
-use Messaging\Channel\DirectChannel;
-use Messaging\Channel\QueueChannel;
-use Messaging\Config\InMemoryChannelResolver;
-use Messaging\Handler\Processor\MethodInvoker\HeaderArgument;
-use Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
-use Messaging\MessagingTest;
-use Messaging\Support\InvalidArgumentException;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
+use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class TransformerBuilder
- * @package Messaging\Handler\Transformer
+ * @package SimplyCodedSoftware\Messaging\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TransformerBuilderTest extends MessagingTest

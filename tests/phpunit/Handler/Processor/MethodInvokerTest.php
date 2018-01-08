@@ -1,23 +1,21 @@
 <?php
 
-namespace Messaging\Handler\Processor;
+namespace Test\SimplyCodedSoftware\Messaging\Handler\Processor;
 
-use Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Fixture\Service\ServiceExpectingOneArgument;
 use Fixture\Service\ServiceExpectingThreeArguments;
 use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutAnyMethods;
-use Messaging\Handler\Processor\MethodInvoker\HeaderArgument;
-use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
-use Messaging\MessagingTest;
-use Messaging\Support\InvalidArgumentException;
-use Messaging\Support\MessageBuilder;
-use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class MethodInvocationTest
- * @package Messaging\Handler\ServiceActivator
+ * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodInvokerTest extends MessagingTest

@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Handler\Processor\MethodInvoker;
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use Messaging\Handler\MessageProcessor;
-use Messaging\Handler\MethodArgument;
-use Messaging\Message;
-use Messaging\Support\Assert;
-use Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
+use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodInvocation
@@ -65,7 +65,7 @@ final class MethodInvoker implements MessageProcessor
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array|MethodArgument[] $methodArguments
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function init($objectToInvokeOn, string $objectMethodName, array $methodArguments) : void
     {
@@ -164,7 +164,7 @@ final class MethodInvoker implements MessageProcessor
      * @param \ReflectionParameter $invokeArgument
      * @param array|MethodArgument[] $methodArguments
      * @return MethodArgument
-     * @throws \Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function getMethodArgumentForInvokedOne(string $invokedClass, string $methodToInvoke, \ReflectionParameter $invokeArgument, array $methodArguments): MethodArgument
     {

@@ -1,16 +1,16 @@
 <?php
 
-namespace Messaging\Channel\Dispatcher;
+namespace SimplyCodedSoftware\Messaging\Channel\Dispatcher;
 
-use Messaging\Channel\MessageDispatcher;
-use Messaging\Channel\MessageDispatchingException;
-use Messaging\Channel\WrongHandlerAmountException;
-use Messaging\Message;
-use Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Channel\MessageDispatcher;
+use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
+use SimplyCodedSoftware\Messaging\Channel\WrongHandlerAmountException;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
  * Class UnicastingDispatcher
- * @package Messaging\Dispatcher
+ * @package SimplyCodedSoftware\Messaging\Dispatcher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class UnicastingDispatcher implements MessageDispatcher

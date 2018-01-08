@@ -1,10 +1,10 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 /**
  * Interface ParameterConverter
- * @package Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface NamedParameter

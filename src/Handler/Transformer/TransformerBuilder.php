@@ -1,18 +1,16 @@
 <?php
 
-namespace Messaging\Handler\Transformer;
-use Messaging\Handler\InputOutputMessageHandlerBuilder;
-use Messaging\Handler\InterfaceToCall;
-use Messaging\Handler\MessageHandlerBuilder;
-use Messaging\Handler\MethodArgument;
-use Messaging\Handler\Processor\MethodInvoker\MessageArgument;
-use Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
-use Messaging\Handler\RequestReplyProducer;
-use Messaging\MessageChannel;
-use Messaging\MessageHandler;
-use Messaging\Support\InvalidArgumentException;
-use Messaging\Support\MessageBuilder;
+namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
+use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
+use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
+use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class TransformerBuilder

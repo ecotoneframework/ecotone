@@ -1,14 +1,15 @@
 <?php
 
-namespace Messaging\Handler\Gateway\MethodParameterConverter;
+namespace Test\SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter;
 
-use Messaging\Handler\Gateway\MethodArgument;
-use Messaging\MessagingTest;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageArgumentConverter;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class HeaderMessageParameterTest
- * @package Messaging\Handler\Gateway\Gateway\MethodParameterConverter
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class HeaderMessageParameterTest extends MessagingTest

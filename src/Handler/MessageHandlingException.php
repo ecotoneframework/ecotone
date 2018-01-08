@@ -1,14 +1,14 @@
 <?php
 
-namespace Messaging\Handler;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
-use Messaging\Message;
-use Messaging\MessagingException;
-use Messaging\Support\ErrorMessage;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessagingException;
+use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
 
 /**
  * Class MessageHandlingException
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessageHandlingException extends MessagingException

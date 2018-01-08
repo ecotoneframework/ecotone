@@ -1,15 +1,16 @@
 <?php
 
-namespace Messaging\Handler\ServiceActivator;
+namespace Test\SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
 use Fixture\Service\ServiceExpectingOneArgument;
-use Messaging\Config\InMemoryChannelResolver;
-use Messaging\MessagingTest;
-use Messaging\Support\InvalidArgumentException;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class ServiceActivatorBuilderTest
- * @package Messaging\Config
+ * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceActivatorBuilderTest extends MessagingTest

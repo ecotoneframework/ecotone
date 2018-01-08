@@ -1,10 +1,10 @@
 <?php
 
-namespace Messaging\Scheduling;
+namespace SimplyCodedSoftware\Messaging\Scheduling;
 
 /**
  * Class ScheduledFuture
- * @package Messaging\Scheduling
+ * @package SimplyCodedSoftware\Messaging\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ScheduledFuture

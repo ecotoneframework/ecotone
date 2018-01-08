@@ -1,20 +1,22 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace Test\SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithThreeArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
-use Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageArgumentConverter;
-use Messaging\Handler\Gateway\MethodParameterConverter\PayloadMethodArgumentMessageParameter;
-use Messaging\MessagingTest;
-use Messaging\Support\InvalidArgumentException;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodCallToMessageConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\PayloadMethodArgumentMessageParameter;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageArgumentConverter;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class MethodCallToMessageConverterTest
- * @package Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodCallToMessageConverterTest extends MessagingTest

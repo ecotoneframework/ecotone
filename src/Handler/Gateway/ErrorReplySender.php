@@ -1,15 +1,15 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
-use Messaging\Handler\MessageHandlingException;
-use Messaging\Message;
-use Messaging\Support\ErrorMessage;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class ErrorReplySender
- * @package Messaging\Handler\Gateway
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

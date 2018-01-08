@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Endpoint;
-use Messaging\MessageHandler;
-use Messaging\PollableChannel;
+namespace SimplyCodedSoftware\Messaging\Endpoint;
+use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\PollableChannel;
 
 /**
  * Interface PollableFactory
- * @package Messaging\Endpoint
+ * @package SimplyCodedSoftware\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface PollableConsumerFactory

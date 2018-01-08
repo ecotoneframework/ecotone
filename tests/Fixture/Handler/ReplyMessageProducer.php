@@ -2,14 +2,14 @@
 
 namespace Fixture\Handler;
 
-use Messaging\Message;
+use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Class ReplyMessageProducer
  * @package Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ReplyMessageProducer implements \Messaging\Handler\MessageProcessor
+class ReplyMessageProducer implements \SimplyCodedSoftware\Messaging\Handler\MessageProcessor
 {
     private $replyData;
 

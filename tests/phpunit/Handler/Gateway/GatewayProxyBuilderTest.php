@@ -1,6 +1,6 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace Test\SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use Fixture\Handler\NoReturnMessageHandler;
 use Fixture\Handler\StatefulHandler;
@@ -11,22 +11,22 @@ use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceWithFutureReceive;
 use Fixture\Service\ServiceInterface\ServiceInterfaceWithUnknownReturnType;
-use Messaging\Channel\DirectChannel;
-use Messaging\Channel\QueueChannel;
-use Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageArgumentConverter;
-use Messaging\Handler\Gateway\MethodParameterConverter\PayloadMethodArgumentMessageParameter;
-use Messaging\Handler\Gateway\MethodParameterConverter\StaticHeaderMessageArgumentConverter;
-use Messaging\Handler\MessageHandlingException;
-use Messaging\MessageHeaders;
-use Messaging\MessagingException;
-use Messaging\MessagingTest;
-use Messaging\Support\ErrorMessage;
-use Messaging\Support\InvalidArgumentException;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\PayloadMethodArgumentMessageParameter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\StaticHeaderMessageArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class GatewayProxyBuilderTest
- * @package Messaging\Config
+ * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayProxyBuilderTest extends MessagingTest

@@ -1,23 +1,22 @@
 <?php
 
-namespace Messaging\Config;
+namespace Test\SimplyCodedSoftware\Messaging\Config;
 
 use Fixture\Handler\DumbMessageHandlerBuilder;
 use Fixture\Handler\NoReturnMessageHandler;
-use Messaging\Channel\DirectChannel;
-use Messaging\Channel\MessageDispatchingException;
-use Messaging\Channel\QueueChannel;
-use Messaging\Channel\SimpleMessageChannelBuilder;
-use Messaging\Endpoint\EventDrivenConsumer;
-use Messaging\Endpoint\PollOrThrowExceptionConsumer;
-use Messaging\Endpoint\PollOrThrowPollableConsumerFactory;
-use Messaging\MessagingTest;
-use Messaging\Support\InvalidArgumentException;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowPollableConsumerFactory;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class ApplicationTest
- * @package Messaging\Config
+ * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessagingSystemConfigurationTest extends MessagingTest

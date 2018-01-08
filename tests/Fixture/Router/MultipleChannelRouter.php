@@ -1,7 +1,7 @@
 <?php
 
 namespace Fixture\Router;
-use Messaging\Message;
+use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Class MultipleChannelRouter

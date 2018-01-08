@@ -1,22 +1,24 @@
 <?php
 
-namespace Messaging\Handler;
+namespace Test\SimplyCodedSoftware\Messaging\Handler;
 
 use Fixture\Handler\NoReplyMessageProducer;
 use Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
 use Fixture\Handler\ReplyMessageProducer;
-use Messaging\Channel\QueueChannel;
-use Messaging\Config\InMemoryChannelResolver;
-use Messaging\Message;
-use Messaging\MessageChannel;
-use Messaging\MessageDeliveryException;
-use Messaging\MessagingTest;
-use Messaging\Support\ErrorMessage;
-use Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
+use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\MessageDeliveryException;
+use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
  * Class RequestReplyProducerTest
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RequestReplyProducerTest extends MessagingTest
@@ -31,10 +33,10 @@ class RequestReplyProducerTest extends MessagingTest
     }
 
     /**
-     * @param \Messaging\Handler\MessageProcessor $replyMessageProducer
+     * @param \SimplyCodedSoftware\Messaging\Handler\MessageProcessor $replyMessageProducer
      * @param MessageChannel|null $messageChannel
      * @param bool $requireReply
-     * @return \Messaging\Handler\RequestReplyProducer
+     * @return \SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer
      */
     private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, MessageChannel $messageChannel = null, bool $requireReply = false): RequestReplyProducer
     {

@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Support;
+namespace SimplyCodedSoftware\Messaging\Support;
 
-use Messaging\Message;
-use Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
 
 /**
  * Class GenericMessage
- * @package Messaging\Support
+ * @package SimplyCodedSoftware\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GenericMessage implements Message

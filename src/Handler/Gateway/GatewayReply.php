@@ -1,12 +1,12 @@
 <?php
 
-namespace Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
-use Messaging\PollableChannel;
+use SimplyCodedSoftware\Messaging\PollableChannel;
 
 /**
  * Class GatewayReply
- * @package Messaging\Handler
+ * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayReply

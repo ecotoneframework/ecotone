@@ -1,13 +1,13 @@
 <?php
 
-namespace Messaging\Channel;
+namespace SimplyCodedSoftware\Messaging\Channel;
 
-use Messaging\Message;
-use Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
  * Interface MessageDispatcher
- * @package Messaging\Dispatcher
+ * @package SimplyCodedSoftware\Messaging\Dispatcher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageDispatcher

@@ -12,11 +12,11 @@ use Messaging\MessageChannel;
 abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
 {
     /**
-     * @var MessageChannel
+     * @var string
      */
     protected $inputMessageChannelName;
     /**
-     * @var MessageChannel
+     * @var string
      */
     protected $outputMessageChannelName;
     /**

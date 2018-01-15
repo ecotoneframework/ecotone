@@ -40,7 +40,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function messageHandlerName(): string
+    public function getComponentName(): string
     {
         return $this->messageHandlerName;
     }

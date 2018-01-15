@@ -5,7 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Config;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerEndpointFactory;
-use SimplyCodedSoftware\Messaging\Endpoint\PollableConsumerFactory;
+use SimplyCodedSoftware\Messaging\Endpoint\ConsumerFactory;
 
 /**
  * Class MessagingSystemConfiguration
@@ -23,9 +23,9 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private $messageHandlerBuilders = [];
     /**
-     * @var PollableConsumerFactory
+     * @var ConsumerFactory[]
      */
-    private $pollableFactory;
+    private $consumerFactories = [];
 
     /**
      * @return MessagingSystemConfiguration
@@ -58,12 +58,11 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @param PollableConsumerFactory $pollableFactory
-     * @return MessagingSystemConfiguration
+     * @inheritDoc
      */
-    public function setPollableFactory(PollableConsumerFactory $pollableFactory) : self
+    public function registerConsumerFactory(ConsumerFactory $consumerFactory): MessagingSystemConfiguration
     {
-        $this->pollableFactory = $pollableFactory;
+        $this->consumerFactories[] = $consumerFactory;
 
         return $this;
     }
@@ -77,7 +76,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function buildMessagingSystemFromConfiguration() : MessagingSystem
     {
         $channelResolver = InMemoryChannelResolver::create($this->namedChannels);
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $this->pollableFactory);
+        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $this->consumerFactories);
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {

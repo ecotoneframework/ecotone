@@ -10,6 +10,7 @@ use Fixture\Behat\Ordering\OrderConfirmation;
 use Fixture\Behat\Ordering\OrderingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
+use SimplyCodedSoftware\Messaging\Endpoint\EventDrivenConsumerFactory;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
@@ -17,7 +18,7 @@ use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystem;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowPollableConsumerFactory;
+use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowConsumerFactory;
 use SimplyCodedSoftware\Messaging\Future;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxy;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -198,11 +199,9 @@ class DomainContext implements Context
     public function iRunMessagingSystem()
     {
         $this->messagingSystem = $this->getMessagingSystemConfiguration()
-                                    ->setPollableFactory(new PollOrThrowPollableConsumerFactory())
+                                    ->registerConsumerFactory(new EventDrivenConsumerFactory())
+                                    ->registerConsumerFactory(new PollOrThrowConsumerFactory())
                                     ->buildMessagingSystemFromConfiguration();
-
-        $this->messagingSystem
-            ->runEventDrivenConsumers();
     }
 
     /**
@@ -416,7 +415,7 @@ class DomainContext implements Context
      */
     public function handlesMessage(string $consumerName)
     {
-        $this->messagingSystem->runPollableByName($consumerName);
+        $this->messagingSystem->runConsumerByName($consumerName);
     }
 
     /**

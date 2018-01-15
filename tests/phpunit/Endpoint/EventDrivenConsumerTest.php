@@ -51,8 +51,6 @@ class EventDrivenConsumerTest extends MessagingTest
         $handler = NoReturnMessageHandler::create();
         $eventDrivenConsumer = new EventDrivenConsumer('some', $directChannel, $handler);
 
-        $this->assertEquals("some", $eventDrivenConsumer->getConsumerName());
-        $this->assertEquals("", $eventDrivenConsumer->getMissingConfiguration());
-        $this->assertFalse($eventDrivenConsumer->isMissingConfiguration(), "Configuration should not be missing");
+        $this->assertEquals("some", $eventDrivenConsumer->getComponentName());
     }
 }

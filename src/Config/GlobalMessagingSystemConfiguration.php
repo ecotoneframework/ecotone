@@ -3,7 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Config;
 
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollableConsumerFactory;
+use SimplyCodedSoftware\Messaging\Endpoint\ConsumerFactory;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 
 /**
@@ -63,10 +63,10 @@ final class GlobalMessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
-    public function setPollableFactory(PollableConsumerFactory $pollableFactory): MessagingSystemConfiguration
+    public function registerConsumerFactory(ConsumerFactory $consumerFactory): MessagingSystemConfiguration
     {
         return self::prepare()
-                ->setPollableFactory($pollableFactory);
+                ->registerConsumerFactory($consumerFactory);
     }
 
     /**

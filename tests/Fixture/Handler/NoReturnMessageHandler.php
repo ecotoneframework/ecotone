@@ -33,6 +33,8 @@ class NoReturnMessageHandler implements MessageHandler
         return $this->wasCalled;
     }
 
+
+
     public function __toString()
     {
         return self::class;

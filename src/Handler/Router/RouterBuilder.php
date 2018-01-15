@@ -123,7 +123,7 @@ class RouterBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function messageHandlerName(): string
+    public function getComponentName(): string
     {
         return $this->handlerName;
     }
@@ -144,5 +144,10 @@ class RouterBuilder implements MessageHandlerBuilder
         $this->channelResolver = $channelResolver;
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        return "router";
     }
 }

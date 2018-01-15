@@ -19,7 +19,6 @@ abstract class MessagingException extends \Exception
     const MESSAGE_DELIVERY_EXCEPTION = 200;
     const MESSAGE_DISPATCHING_EXCEPTION = 201;
     const WRONG_HANDLER_AMOUNT_EXCEPTION = 202;
-    const RUN_TIME_MESSAGING_EXCEPTION = 204;
     const MESSAGE_HANDLING_EXCEPTION = 205;
 
     /**

@@ -8,7 +8,7 @@
             "email": "dgafka.mail@gmail.com"
         }
     ],
-    "keywords": ["messaging", "asynchronous", "message", "spring", "enterprise integration patterns", "eip", "distributed architecture"],
+    "keywords": ["messaging", "asynchronous", "message", "spring", "enterprise integration patterns", "eip", "distributed architecture", "event driven architecture", "eda"],
     "description": "Framework helping you working in distributed architecture. Based on enterprise integration patterns and java spring framework.",
     "autoload": {
         "psr-4": {

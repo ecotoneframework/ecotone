@@ -33,6 +33,8 @@ final class MessagingSystem
         Assert::allInstanceOfType($consumers, ConsumerLifecycle::class);
         $this->consumers = $consumers;
         $this->channelResolver = $channelResolver;
+
+        $this->initialize();
     }
 
     /**
@@ -47,37 +49,26 @@ final class MessagingSystem
     }
 
     /**
-     * Run al event driven
+     * @param string $consumerName
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function runEventDrivenConsumers() : void
+    public function runConsumerByName(string $consumerName) : void
     {
         foreach ($this->consumers as $consumer) {
-            if (!$consumer->isPollable()) {
+            if ($consumer->getComponentName() === $consumerName) {
+                if (!$consumer->isRunningInSeparateThread()) {
+                    throw InvalidArgumentException::create("Can't run event driven consumer with name {$consumerName} in separate thread");
+                }
+
                 $consumer->start();
             }
         }
     }
 
-    public function stopEventDrivenConsumers() : void
+    private function initialize() : void
     {
         foreach ($this->consumers as $consumer) {
-            if (!$consumer->isPollable()) {
-                $consumer->stop();
-            }
-        }
-    }
-
-    /**
-     * @param string $consumerName
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function runPollableByName(string $consumerName) : void
-    {
-        foreach ($this->consumers as $consumer) {
-            if ($consumer->getConsumerName() === $consumerName) {
-                if (!$consumer->isPollable()) {
-                    throw InvalidArgumentException::create("Can't run event driven consumer with name {$consumerName} as pollable");
-                }
+            if (!$consumer->isRunningInSeparateThread()) {
                 $consumer->start();
             }
         }

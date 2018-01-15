@@ -9,7 +9,7 @@
 namespace SimplyCodedSoftware\Messaging\Config;
 
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollableConsumerFactory;
+use SimplyCodedSoftware\Messaging\Endpoint\ConsumerFactory;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 
 
@@ -38,10 +38,10 @@ interface Configuration
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): MessagingSystemConfiguration;
 
     /**
-     * @param PollableConsumerFactory $pollableFactory
+     * @param ConsumerFactory $consumerFactory
      * @return MessagingSystemConfiguration
      */
-    public function setPollableFactory(PollableConsumerFactory $pollableFactory): MessagingSystemConfiguration;
+    public function registerConsumerFactory(ConsumerFactory $consumerFactory) : MessagingSystemConfiguration;
 
     /**
      * Initialize messaging system from current configuration.

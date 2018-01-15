@@ -19,7 +19,7 @@ interface MessageHandlerBuilder
     /**
      * @return string
      */
-    public function messageHandlerName() : string;
+    public function getComponentName() : string;
 
     /**
      * @return string

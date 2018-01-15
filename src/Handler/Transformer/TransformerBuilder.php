@@ -118,4 +118,9 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
             )
         );
     }
+
+    public function __toString()
+    {
+        return "transformer";
+    }
 }

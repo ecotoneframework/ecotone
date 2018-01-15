@@ -69,7 +69,7 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function messageHandlerName(): string
+    public function getComponentName(): string
     {
         return $this->messageHandlerName;
     }
@@ -80,5 +80,10 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
     public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
     {
         return $this;
+    }
+
+    public function __toString()
+    {
+        return "dumb message handler builder";
     }
 }

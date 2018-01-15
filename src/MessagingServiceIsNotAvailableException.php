@@ -7,7 +7,7 @@ namespace SimplyCodedSoftware\Messaging;
  * @package SimplyCodedSoftware\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MessagingServiceIsNotAvailable extends MessagingException
+class MessagingServiceIsNotAvailableException extends MessagingException
 {
     /**
      * @inheritDoc

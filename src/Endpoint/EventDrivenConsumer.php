@@ -64,7 +64,7 @@ class EventDrivenConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function isMissingConfiguration(): bool
+    public function isRunningInSeparateThread(): bool
     {
         return false;
     }
@@ -72,23 +72,7 @@ class EventDrivenConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function getMissingConfiguration(): string
-    {
-        return '';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function isPollable(): bool
-    {
-        return false;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getConsumerName(): string
+    public function getComponentName(): string
     {
         return $this->consumerName;
     }

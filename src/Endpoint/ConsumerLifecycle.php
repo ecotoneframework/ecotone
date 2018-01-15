@@ -22,7 +22,7 @@ interface ConsumerLifecycle
     /**
      * @return bool
      */
-    public function isPollable() : bool;
+    public function isRunningInSeparateThread() : bool;
 
     /**
      * Is component running
@@ -32,21 +32,7 @@ interface ConsumerLifecycle
     public function isRunning() : bool;
 
     /**
-     * Checks if component does not miss configuration
-     *
-     * @return bool
-     */
-    public function isMissingConfiguration() : bool;
-
-    /**
-     * Returns information about what configuration is missing
-     *
      * @return string
      */
-    public function getMissingConfiguration() : string;
-
-    /**
-     * @return string
-     */
-    public function getConsumerName() : string;
+    public function getComponentName() : string;
 }

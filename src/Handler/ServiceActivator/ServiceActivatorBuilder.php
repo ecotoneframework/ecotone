@@ -147,7 +147,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function messageHandlerName(): string
+    public function getComponentName(): string
     {
         return $this->messageHandlerName;
     }
@@ -171,5 +171,10 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
                 $this->isReplyRequired
             )
         );
+    }
+
+    public function __toString()
+    {
+        return "service activator";
     }
 }

@@ -63,22 +63,6 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function isMissingConfiguration(): bool
-    {
-        return false;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getMissingConfiguration(): string
-    {
-        return "";
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function start(): void
     {
         $message = $this->pollableChannel->receive();
@@ -92,7 +76,7 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function isPollable(): bool
+    public function isRunningInSeparateThread(): bool
     {
         return true;
     }
@@ -116,7 +100,7 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function getConsumerName(): string
+    public function getComponentName(): string
     {
         return $this->consumerName;
     }

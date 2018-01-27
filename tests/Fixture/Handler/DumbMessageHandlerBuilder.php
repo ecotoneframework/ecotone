@@ -4,6 +4,7 @@ namespace Fixture\Handler;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
@@ -69,7 +70,7 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getComponentName(): string
+    public function getConsumerName(): string
     {
         return $this->messageHandlerName;
     }
@@ -78,6 +79,14 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
      * @inheritDoc
      */
     public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
+    {
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setReferenceSearchService(ReferenceSearchService $referenceSearchService): MessageHandlerBuilder
     {
         return $this;
     }

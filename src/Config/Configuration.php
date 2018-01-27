@@ -9,8 +9,10 @@
 namespace SimplyCodedSoftware\Messaging\Config;
 
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\ConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerFactory;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 
 /**
@@ -21,9 +23,9 @@ use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 interface Configuration
 {
     /**
-     * @return MessagingSystemConfiguration
+     * @return ReferenceSearchService
      */
-    public static function prepare(): MessagingSystemConfiguration;
+    public function getReferenceSearchService() : ReferenceSearchService;
 
     /**
      * @param MessageChannelBuilder $messageChannelBuilder
@@ -36,6 +38,12 @@ interface Configuration
      * @return MessagingSystemConfiguration
      */
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): MessagingSystemConfiguration;
+
+    /**
+     * @param ConsumerBuilder $consumerBuilder
+     * @return MessagingSystemConfiguration
+     */
+    public function registerConsumer(ConsumerBuilder $consumerBuilder) : MessagingSystemConfiguration;
 
     /**
      * @param ConsumerFactory $consumerFactory

@@ -9,6 +9,7 @@ use Fixture\Service\ServiceWithoutReturnValue;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderArgument;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
 use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
@@ -28,9 +29,13 @@ class TransformerBuilderTest extends MessagingTest
         $payload = 'some';
         $outputChannel = QueueChannel::create();
         $outputChannelName = "output";
-        $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannelName, ServiceExpectingMessageAndReturningMessage::create($payload), 'send', 'test')
+        $objectToInvoke = "objecToInvoke";
+        $transformer = TransformerBuilder::create("someChannel", $outputChannelName, $objectToInvoke, 'send', 'test')
                             ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                                 $outputChannelName => $outputChannel
+                            ]))
+                            ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
+                                $objectToInvoke => ServiceExpectingMessageAndReturningMessage::create($payload)
                             ]))
                             ->build();
 
@@ -48,9 +53,13 @@ class TransformerBuilderTest extends MessagingTest
         $payload = 'someBigPayload';
         $outputChannel = QueueChannel::create();
         $outputChannelName = 'output';
-        $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannelName, ServiceExpectingOneArgument::create(), 'withReturnValue', 'test')
+        $objectToInvokeReference = "service-a";
+        $transformer = TransformerBuilder::create("inputChannel", $outputChannelName, $objectToInvokeReference, 'withReturnValue', 'test')
                             ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                                 $outputChannelName => $outputChannel
+                            ]))
+                            ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
+                                $objectToInvokeReference => ServiceExpectingOneArgument::create()
                             ]))
                             ->build();
 
@@ -68,9 +77,13 @@ class TransformerBuilderTest extends MessagingTest
         $this->expectException(InvalidArgumentException::class);
 
         $outputChannelName = "outputChannelName";
-        TransformerBuilder::create(DirectChannel::create(), $outputChannelName, ServiceWithoutReturnValue::create(), 'setName', 'test')
+        $objectToInvokeReference = "service-a";
+        TransformerBuilder::create("inputChannel", $outputChannelName, $objectToInvokeReference, 'setName', 'test')
                             ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                                 $outputChannelName => QueueChannel::create()
+                            ]))
+                            ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
+                                $objectToInvokeReference => ServiceWithoutReturnValue::create()
                             ]))
                             ->build();
     }
@@ -79,9 +92,13 @@ class TransformerBuilderTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
         $outputChannelName = "output";
-        $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannelName, ServiceExpectingOneArgument::create(), 'withNullReturnValue', 'test')
+        $objectToInvokeReference = "service-a";
+        $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannelName, $objectToInvokeReference, 'withNullReturnValue', 'test')
                         ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                             $outputChannelName => $outputChannel
+                        ]))
+                        ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
+                            $objectToInvokeReference => ServiceExpectingOneArgument::create()
                         ]))
                         ->build();
 
@@ -96,10 +113,14 @@ class TransformerBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $inputChannelName = "input";
         $outputChannelName = "output";
-        $transformer = TransformerBuilder::create($inputChannelName, $outputChannelName, ServiceExpectingOneArgument::create(), 'withArrayReturnValue', 'test')
+        $objectToInvokeReference = "service-a";
+        $transformer = TransformerBuilder::create($inputChannelName, $outputChannelName, $objectToInvokeReference, 'withArrayReturnValue', 'test')
                             ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                                 $inputChannelName => DirectChannel::create(),
                                 $outputChannelName => $outputChannel
+                            ]))
+                            ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
+                                $objectToInvokeReference => ServiceExpectingOneArgument::create()
                             ]))
                             ->build();
 
@@ -119,10 +140,14 @@ class TransformerBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $inputChannelName = "input";
         $outputChannelName = "output";
-        $transformer = TransformerBuilder::create($inputChannelName, $outputChannelName,ServiceExpectingOneArgument::create(), 'withArrayTypeHintAndArrayReturnValue', 'test')
+        $objectToInvokeReference = "service-a";
+        $transformer = TransformerBuilder::create($inputChannelName, $outputChannelName, $objectToInvokeReference, 'withArrayTypeHintAndArrayReturnValue', 'test')
                         ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                             $inputChannelName => DirectChannel::create(),
                             $outputChannelName => $outputChannel
+                        ]))
+                        ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
+                            $objectToInvokeReference => ServiceExpectingOneArgument::create()
                         ]))
                         ->build();
 
@@ -142,7 +167,8 @@ class TransformerBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $outputChannelName = 'output';
         $inputChannelName = 'input';
-        $transformer = TransformerBuilder::create($inputChannelName, $outputChannelName, ServiceExpectingTwoArguments::create(), 'withReturnValue', 'test')
+        $objectToInvokeReference = "service-a";
+        $transformer = TransformerBuilder::create($inputChannelName, $outputChannelName, $objectToInvokeReference, 'withReturnValue', 'test')
             ->withMethodArguments([
                 PayloadArgument::create('name'),
                 HeaderArgument::create('surname', 'token')
@@ -150,6 +176,9 @@ class TransformerBuilderTest extends MessagingTest
             ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => DirectChannel::create(),
                 $outputChannelName => $outputChannel
+            ]))
+            ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
+                $objectToInvokeReference => ServiceExpectingTwoArguments::create()
             ]))
             ->build();
 
@@ -175,9 +204,9 @@ class TransformerBuilderTest extends MessagingTest
         $inputChannelName = "input";
         $outputChannelName = "output";
         $transformer = TransformerBuilder::createHeaderEnricher('test', $inputChannelName, $outputChannelName, [
-            "token" => $headerValue,
-            "correlation-id" => 1
-        ])
+                "token" => $headerValue,
+                "correlation-id" => 1
+            ])
             ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => DirectChannel::create(),
                 $outputChannelName => $outputChannel

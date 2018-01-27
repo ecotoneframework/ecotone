@@ -8,9 +8,11 @@ use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessagingConfiguration;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDrivenConsumerFactory;
 use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowConsumerFactory;
+use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
@@ -28,7 +30,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $subscribableChannel = DirectChannel::create();
         $messageHandler = NoReturnMessageHandler::create();
 
-        MessagingSystemConfiguration::prepare()
+        MessagingSystemConfiguration::prepare(InMemoryReferenceSearchService::createEmpty(), InMemoryModuleMessagingConfiguration::createEmpty())
             ->registerMessageHandler(DumbMessageHandlerBuilder::create('test', $messageHandler, $subscribableChannelName))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create($subscribableChannelName, $subscribableChannel))
             ->registerConsumerFactory(new EventDrivenConsumerFactory())
@@ -46,7 +48,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messageHandler = NoReturnMessageHandler::create();
         $pollableName = 'test';
 
-        $messagingSystem = MessagingSystemConfiguration::prepare()
+        $messagingSystem = MessagingSystemConfiguration::prepare(InMemoryReferenceSearchService::createEmpty(), InMemoryModuleMessagingConfiguration::createEmpty())
             ->registerMessageHandler(DumbMessageHandlerBuilder::create($pollableName, $messageHandler, $messageChannelName))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create($messageChannelName, $pollableChannel))
             ->registerConsumerFactory(new PollOrThrowConsumerFactory())
@@ -66,7 +68,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messageHandler = NoReturnMessageHandler::create();
 
         $messageHandlerName = 'test';
-        $messagingSystem = MessagingSystemConfiguration::prepare()
+        $messagingSystem = MessagingSystemConfiguration::prepare(InMemoryReferenceSearchService::createEmpty(), InMemoryModuleMessagingConfiguration::createEmpty())
             ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandlerName, $messageHandler, $subscribableChannelName))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create($subscribableChannelName, DirectChannel::create()))
             ->registerConsumerFactory(new EventDrivenConsumerFactory())

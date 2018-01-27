@@ -27,7 +27,6 @@ class EventDrivenConsumerTest extends MessagingTest
         $directChannel->send(MessageBuilder::withPayload('test')->build());
 
         $this->assertTrue($handler->wasCalled(), "Handler for event driven consumer was not called");
-        $this->assertTrue($eventDrivenConsumer->isRunning(), "Event driven consumer should be running");
     }
 
     public function test_stopping_consumer()
@@ -42,7 +41,6 @@ class EventDrivenConsumerTest extends MessagingTest
         $this->expectException(MessageDispatchingException::class);
 
         $directChannel->send(MessageBuilder::withPayload('test')->build());
-        $this->assertFalse($eventDrivenConsumer->isRunning(), "Event driven consumer should not be running after");
     }
 
     public function test_naming_and_configuration()
@@ -51,6 +49,6 @@ class EventDrivenConsumerTest extends MessagingTest
         $handler = NoReturnMessageHandler::create();
         $eventDrivenConsumer = new EventDrivenConsumer('some', $directChannel, $handler);
 
-        $this->assertEquals("some", $eventDrivenConsumer->getComponentName());
+        $this->assertEquals("some", $eventDrivenConsumer->getConsumerName());
     }
 }

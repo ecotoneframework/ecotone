@@ -30,7 +30,7 @@ class EventDrivenConsumerFactory implements ConsumerFactory
         $subscribableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
         return new EventDrivenConsumer(
-            $messageHandlerBuilder->getComponentName(),
+            $messageHandlerBuilder->getConsumerName(),
             $subscribableChannel,
             $messageHandlerBuilder->build()
         );

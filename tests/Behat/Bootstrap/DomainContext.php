@@ -10,7 +10,11 @@ use Fixture\Behat\Ordering\OrderConfirmation;
 use Fixture\Behat\Ordering\OrderingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
+use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessagingConfiguration;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDrivenConsumerFactory;
+use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
@@ -50,9 +54,9 @@ class DomainContext implements Context
      */
     private $messagingSystem;
     /**
-     * @var object[]
+     * @var InMemoryReferenceSearchService
      */
-    private $serviceObjects = [];
+    private $inMemoryReferenceSearchService;
     /**
      * @var Future
      */
@@ -60,7 +64,11 @@ class DomainContext implements Context
 
     public function __construct()
     {
-        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare();
+        $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(
+            $this->inMemoryReferenceSearchService,
+            InMemoryModuleMessagingConfiguration::createEmpty()
+        );
     }
 
     /**
@@ -109,6 +117,8 @@ class DomainContext implements Context
      */
     public function iActivateServiceWithNameForWithMethodToListenOnChannelAndOutputChannel(string $handlerName, string $className, string $methodName, string $channelName, string $outputChannel)
     {
+        $this->registerReference($className);
+
         $this->getMessagingSystemConfiguration()->registerMessageHandler(
             $this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName)
                 ->withOutputChannel($outputChannel)
@@ -255,17 +265,14 @@ class DomainContext implements Context
      * @param string $className
      * @param string $methodName
      * @param string $channelName
-     * @return ServiceActivatorBuilder
+     * @return MessageHandlerBuilder
      */
-    private function createServiceActivatorBuilder(string $handlerName, string $className, string $methodName, string $channelName): ServiceActivatorBuilder
+    private function createServiceActivatorBuilder(string $handlerName, string $className, string $methodName, string $channelName): MessageHandlerBuilder
     {
-        $object = $this->createObject($className);
-
-        $serviceActivatorBuilder = ServiceActivatorBuilder::create($object, $methodName)
+        return ServiceActivatorBuilder::create($className, $methodName)
+                                        ->withName($handlerName)
                                         ->withInputMessageChannel($channelName)
-                                        ->withName($handlerName);
-
-        return $serviceActivatorBuilder;
+                                        ->setReferenceSearchService($this->inMemoryReferenceSearchService);
     }
 
     /**
@@ -280,10 +287,10 @@ class DomainContext implements Context
     {
         $inputChannel = $requestChannelName;
         $outputChannel = $responseChannelName;
-        $object = $this->createObject($className);
+        $this->registerReference($className);
 
         $this->getMessagingSystemConfiguration()
-            ->registerMessageHandler(TransformerBuilder::create($inputChannel, $outputChannel, $object, $methodName, $name));
+            ->registerMessageHandler(TransformerBuilder::create($inputChannel, $outputChannel, $className, $methodName, $name));
     }
 
     /**
@@ -305,16 +312,9 @@ class DomainContext implements Context
      * @param string $className
      * @return null|object
      */
-    private function createObject(string $className)
+    private function registerReference(string $className)
     {
-        $object = null;
-        if (array_key_exists($className, $this->serviceObjects)) {
-            $object = $this->serviceObjects[$className];
-        } else {
-            $object = new $className();
-            $this->serviceObjects[$className] = $object;
-        }
-        return $object;
+        $this->inMemoryReferenceSearchService->registerReferencedObject($className, new $className());
     }
 
     /**

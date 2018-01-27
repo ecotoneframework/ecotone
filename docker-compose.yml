@@ -8,3 +8,16 @@ services:
     user: 1000:1000
     working_dir: "/data/app"
     command: sleep 99999
+    networks:
+      - default
+  rabbitmq:
+    image: rabbitmq:3.6-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

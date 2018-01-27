@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\SubscribableChannel;
@@ -23,16 +24,22 @@ class ConsumerEndpointFactory
      * @var array|ConsumerFactory[]
      */
     private $consumerFactories;
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
 
     /**
      * ConsumerEndpointFactory constructor.
      * @param ChannelResolver $channelResolver
+     * @param ReferenceSearchService $referenceSearchService
      * @param array $consumerFactories
      */
-    public function __construct(ChannelResolver $channelResolver, array $consumerFactories)
+    public function __construct(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $consumerFactories)
     {
         $this->channelResolver = $channelResolver;
         $this->consumerFactories = $consumerFactories;
+        $this->referenceSearchService = $referenceSearchService;
     }
 
     /**
@@ -42,7 +49,9 @@ class ConsumerEndpointFactory
      */
     public function create(MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle
     {
-        $messageHandlerBuilder = $messageHandlerBuilder->setChannelResolver($this->channelResolver);
+        $messageHandlerBuilder = $messageHandlerBuilder
+                                    ->setChannelResolver($this->channelResolver)
+                                    ->setReferenceSearchService($this->referenceSearchService);
 
         foreach ($this->consumerFactories as $consumerFactory) {
             if ($consumerFactory->isSupporting($this->channelResolver, $messageHandlerBuilder)) {

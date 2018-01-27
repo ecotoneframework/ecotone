@@ -55,7 +55,7 @@ final class MessagingSystem
     public function runConsumerByName(string $consumerName) : void
     {
         foreach ($this->consumers as $consumer) {
-            if ($consumer->getComponentName() === $consumerName) {
+            if ($consumer->getConsumerName() === $consumerName) {
                 if (!$consumer->isRunningInSeparateThread()) {
                     throw InvalidArgumentException::create("Can't run event driven consumer with name {$consumerName} in separate thread");
                 }

@@ -1,11 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Router;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\Support\Assert;
 
 /**
  * Class RouterBuilder
@@ -23,6 +25,10 @@ class RouterBuilder implements MessageHandlerBuilder
      */
     private $inputMessageChannelName;
     /**
+     * @var string
+     */
+    private $objectToInvokeReference;
+    /**
      * @var object
      */
     private $objectToInvoke;
@@ -34,6 +40,10 @@ class RouterBuilder implements MessageHandlerBuilder
      * @var ChannelResolver
      */
     private $channelResolver;
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
     /**
      * @var array|MethodArgument[]
      */
@@ -47,27 +57,27 @@ class RouterBuilder implements MessageHandlerBuilder
      * RouterBuilder constructor.
      * @param string $handlerName
      * @param string $inputChannel
-     * @param object $objectToInvoke
+     * @param string $objectToInvokeReference
      * @param string $methodName
      */
-    private function __construct(string $handlerName, string $inputChannel, $objectToInvoke, string $methodName)
+    private function __construct(string $handlerName, string $inputChannel, string $objectToInvokeReference, string $methodName)
     {
         $this->handlerName = $handlerName;
         $this->inputMessageChannelName = $inputChannel;
-        $this->objectToInvoke = $objectToInvoke;
+        $this->objectToInvokeReference = $objectToInvokeReference;
         $this->methodName = $methodName;
     }
 
     /**
      * @param string $handlerName
      * @param string $inputChannelName
-     * @param $objectToInvoke
+     * @param string $objectToInvokeReference
      * @param string $methodName
      * @return RouterBuilder
      */
-    public static function create(string $handlerName, string $inputChannelName, $objectToInvoke, string $methodName) : self
+    public static function create(string $handlerName, string $inputChannelName, string $objectToInvokeReference, string $methodName) : self
     {
-        return new self($handlerName, $inputChannelName, $objectToInvoke, $methodName);
+        return new self($handlerName, $inputChannelName, $objectToInvokeReference, $methodName);
     }
 
     /**
@@ -78,7 +88,10 @@ class RouterBuilder implements MessageHandlerBuilder
      */
     public static function createPayloadTypeRouter(string $handlerName, string $inputChannelName, array $typeToChannelMapping) : self
     {
-        return self::create($handlerName, $inputChannelName, PayloadTypeRouter::create($typeToChannelMapping), 'route');
+        $routerBuilder = self::create($handlerName, $inputChannelName, "", 'route');
+        $routerBuilder->setObjectToInvoke(PayloadTypeRouter::create($typeToChannelMapping));
+
+        return $routerBuilder;
     }
 
     /**
@@ -90,7 +103,10 @@ class RouterBuilder implements MessageHandlerBuilder
      */
     public static function createHeaderValueRouter(string $handlerName, string $inputChannelName, string $headerName, array $headerValueToChannelMapping) : self
     {
-        return self::create($handlerName, $inputChannelName, HeaderValueRouter::create($headerName, $headerValueToChannelMapping), 'route');
+        $routerBuilder = self::create($handlerName, $inputChannelName, "", 'route');
+        $routerBuilder->setObjectToInvoke(HeaderValueRouter::create($headerName, $headerValueToChannelMapping));
+
+        return $routerBuilder;
     }
 
     /**
@@ -98,11 +114,11 @@ class RouterBuilder implements MessageHandlerBuilder
      */
     public function build(): MessageHandler
     {
+        $objectToInvoke = $this->objectToInvoke ? $this->objectToInvoke : $this->referenceSearchService->findByReference($this->objectToInvokeReference);
+
         return Router::create(
             $this->channelResolver,
-//            @TODO remoe input message channel
-            $this->channelResolver->resolve($this->inputMessageChannelName),
-            $this->objectToInvoke,
+            $objectToInvoke,
             $this->methodName,
             $this->resolutionRequired,
             $this->methodArguments
@@ -123,7 +139,7 @@ class RouterBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getComponentName(): string
+    public function getConsumerName(): string
     {
         return $this->handlerName;
     }
@@ -139,6 +155,16 @@ class RouterBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
+    public function setReferenceSearchService(ReferenceSearchService $referenceSearchService): MessageHandlerBuilder
+    {
+        $this->referenceSearchService = $referenceSearchService;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
     {
         $this->channelResolver = $channelResolver;
@@ -149,5 +175,15 @@ class RouterBuilder implements MessageHandlerBuilder
     public function __toString()
     {
         return "router";
+    }
+
+    /**
+     * @param object $objectToInvoke
+     */
+    private function setObjectToInvoke($objectToInvoke) : void
+    {
+        Assert::isObject($objectToInvoke, "Object to invoke in router must be object");
+
+        $this->objectToInvoke = $objectToInvoke;
     }
 }

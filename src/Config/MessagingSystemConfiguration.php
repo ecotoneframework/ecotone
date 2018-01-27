@@ -3,9 +3,11 @@
 namespace SimplyCodedSoftware\Messaging\Config;
 
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\ConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerEndpointFactory;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerFactory;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class MessagingSystemConfiguration
@@ -26,13 +28,44 @@ final class MessagingSystemConfiguration implements Configuration
      * @var ConsumerFactory[]
      */
     private $consumerFactories = [];
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
+    /**
+     * @var ModuleConfigurationRetrievingService
+     */
+    private $moduleConfigurationRetrievingService;
 
     /**
+     * Only one instance at time
+     *
+     * MessagingSystemConfiguration constructor.
+     * @param ReferenceSearchService $referenceSearchService
+     * @param ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService
+     */
+    private function __construct(ReferenceSearchService $referenceSearchService, ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService)
+    {
+        $this->referenceSearchService = $referenceSearchService;
+        $this->moduleConfigurationRetrievingService = $moduleConfigurationRetrievingService;
+    }
+
+    /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @param ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService
      * @return MessagingSystemConfiguration
      */
-    public static function prepare() : self
+    public static function prepare(ReferenceSearchService $referenceSearchService, ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService) : self
     {
-        return new self();
+        return new self($referenceSearchService, $moduleConfigurationRetrievingService);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getReferenceSearchService(): ReferenceSearchService
+    {
+        return $this->referenceSearchService;
     }
 
     /**
@@ -60,6 +93,14 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
+    public function registerConsumer(ConsumerBuilder $consumerBuilder): MessagingSystemConfiguration
+    {
+        // TODO: Implement registerConsumer() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function registerConsumerFactory(ConsumerFactory $consumerFactory): MessagingSystemConfiguration
     {
         $this->consumerFactories[] = $consumerFactory;
@@ -68,31 +109,25 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * Initialize messaging system from current configuration.
-     * This is one time process, after initialization you won't be able to configure messaging system anymore.
+     * Initialize messaging system from current configuration
      *
      * @return MessagingSystem
      */
     public function buildMessagingSystemFromConfiguration() : MessagingSystem
     {
         $channelResolver = InMemoryChannelResolver::create($this->namedChannels);
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $this->consumerFactories);
+        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $this->referenceSearchService, $this->consumerFactories);
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $consumers[] = $consumerEndpointFactory->create($messageHandlerBuilder);
         }
 
-        return MessagingSystem::create($consumers, $channelResolver);
-    }
+        foreach ($this->moduleConfigurationRetrievingService->findAllModuleConfigurations() as $moduleMessagingConfiguration) {
+            $moduleMessagingConfiguration->registerWithin($this);
+        }
 
-    /**
-     * Only one instance at time
-     *
-     * MessagingSystemConfiguration constructor.
-     */
-    private function __construct()
-    {
+        return MessagingSystem::create($consumers, $channelResolver);
     }
 
     /**

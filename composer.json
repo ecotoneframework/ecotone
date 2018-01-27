@@ -1,5 +1,5 @@
 {
-    "name": "simplycodedsoftware/messaging",
+    "name": "simplycodedsoftware/enterprise-messaging",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -9,7 +9,7 @@
         }
     ],
     "keywords": ["messaging", "asynchronous", "message", "spring", "enterprise integration patterns", "eip", "distributed architecture", "event driven architecture", "eda"],
-    "description": "Framework helping you working in distributed architecture. Based on enterprise integration patterns and java spring framework.",
+    "description": "Framework to help you working in distributed architecture. Based on enterprise integration patterns and java spring framework.",
     "autoload": {
         "psr-4": {
             "SimplyCodedSoftware\\Messaging\\": "src"
@@ -25,7 +25,10 @@
     "require": {
         "php": ">=7.1.0",
         "ramsey/uuid": "^3.0.0",
+        "psr/container": "^1.0.0",
         "ocramius/proxy-manager": "^2.1.1",
+        "doctrine/annotations": "^1.6.0",
+        "symfony/dependency-injection": "^4.0.0",
 
         "ext-mbstring": "*",
         "ext-bcmath": "*",

@@ -25,14 +25,7 @@ interface ConsumerLifecycle
     public function isRunningInSeparateThread() : bool;
 
     /**
-     * Is component running
-     *
-     * @return bool
-     */
-    public function isRunning() : bool;
-
-    /**
      * @return string
      */
-    public function getComponentName() : string;
+    public function getConsumerName() : string;
 }

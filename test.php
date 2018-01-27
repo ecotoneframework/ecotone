@@ -2,38 +2,71 @@
 
 require __DIR__ . "/vendor/autoload.php";
 
-interface OrderingService
-{
-    public function placeOrder(string $some) : void;
-}
+/** @var \Composer\Autoload\ClassLoader $loader */
+$loader = require __DIR__.'/vendor/autoload.php';
 
-$factory = new \ProxyManager\Factory\RemoteObjectFactory(new class implements \ProxyManager\Factory\RemoteObject\AdapterInterface{
+\Doctrine\Common\Annotations\AnnotationRegistry::registerLoader([$loader, 'loadClass']);
+
+$reader = new \Doctrine\Common\Annotations\AnnotationReader();
+
+$start = microtime(true);
+$fileLocator = new \SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\FileSystemClassLocator([__DIR__ . '/src', __DIR__ . '/vendor'], [
+    'IntegrationMessaging',
+    'SimplyCodedSoftware'
+]);
+$end = microtime(true);
+
+
+$start = microtime(true);
+$reflectionClasses = [];
+foreach ($fileLocator->getAllClasses() as $class) {
+    $reflectionClasses[] = new \ReflectionClass($class);
+}
+$end = microtime(true);
+
+die($end - $start);
+
+class Test {
+    private $number = 0;
     /**
-     * @inheritDoc
+     * @var Test|null
      */
-    public function call(string $wrappedClass, string $method, array $params = [])
+    private $test;
+
+    /**
+     * Test constructor.
+     * @param int $number
+     * @param Test $test
+     */
+    public function __construct(int $number, Test $test = null)
     {
-        echo "it works!";
-    }
-});
-
-$orderingService = $factory->createProxy(OrderingService::class);
-
-$orderingService->placeOrder('some');
-
-
-class Proxy
-{
-    public function callGatewayMethod(...$tmp) {
-        print_r($tmp);
+        $this->number = $number;
+        $this->test = $test;
     }
 }
 
+$file = '/tmp/container.php';
+if (file_exists($file)) {
+    require_once $file;
+    $container = new MessagingSystemContainer();
+} else {
+    $container = new \Symfony\Component\DependencyInjection\ContainerBuilder();
 
-$proxy = new Proxy();
+    $container->set('test', new Test(4));
+    $definition = new \Symfony\Component\DependencyInjection\Definition();
+    $definition->setPrivate(false);
+    $definition->setClass(Test::class);
+    $definition->setArgument(0, 3);
+    $definition->setArgument(0, new \Symfony\Component\DependencyInjection\Reference('test'));
+    $container->setDefinition('test2', $definition);
 
-$proxy->callGatewayMethod('test', 'test2', 'test3');
-$proxy->callGatewayMethod(['test', 'test2', 'test3']);
+    $container->compile();
 
+    $dumper = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($container);
+    file_put_contents(
+        $file,
+        $dumper->dump(array('class' => 'MessagingSystemContainer'))
+    );
+}
 
-
+var_dump($container->get('test2'));

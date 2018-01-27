@@ -19,7 +19,7 @@ interface MessageHandlerBuilder
     /**
      * @return string
      */
-    public function getComponentName() : string;
+    public function getConsumerName() : string;
 
     /**
      * @return string
@@ -31,4 +31,10 @@ interface MessageHandlerBuilder
      * @return MessageHandlerBuilder
      */
     public function setChannelResolver(ChannelResolver $channelResolver) : MessageHandlerBuilder;
+
+    /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @return MessageHandlerBuilder
+     */
+    public function setReferenceSearchService(ReferenceSearchService $referenceSearchService) : MessageHandlerBuilder;
 }

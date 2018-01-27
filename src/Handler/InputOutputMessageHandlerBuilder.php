@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimplyCodedSoftware\Messaging\Handler;
 
 /**
@@ -25,6 +27,10 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      * @var ChannelResolver
      */
     protected $channelResolver;
+    /**
+     * @var ReferenceSearchService
+     */
+    protected $referenceSearchService;
 
     /**
      * @param string $name
@@ -40,7 +46,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getComponentName(): string
+    public function getConsumerName(): string
     {
         return $this->messageHandlerName;
     }
@@ -73,6 +79,16 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     public function getInputMessageChannelName(): string
     {
         return $this->inputMessageChannelName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setReferenceSearchService(ReferenceSearchService $referenceSearchService): MessageHandlerBuilder
+    {
+        $this->referenceSearchService = $referenceSearchService;
+
+        return $this;
     }
 
     /**

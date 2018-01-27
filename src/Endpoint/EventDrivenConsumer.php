@@ -21,10 +21,6 @@ class EventDrivenConsumer implements ConsumerLifecycle
      */
     private $messageHandler;
     /**
-     * @var bool
-     */
-    private $isRunning;
-    /**
      * @var string
      */
     private $consumerName;
@@ -40,25 +36,16 @@ class EventDrivenConsumer implements ConsumerLifecycle
         $this->consumerName = $consumerName;
         $this->subscribableChannel = $subscribableChannel;
         $this->messageHandler = $messageHandler;
-
-        $this->initialize();
     }
 
     public function start(): void
     {
         $this->subscribableChannel->subscribe($this->messageHandler);
-        $this->isRunning = true;
     }
 
     public function stop(): void
     {
         $this->subscribableChannel->unsubscribe($this->messageHandler);
-        $this->isRunning = false;
-    }
-
-    public function isRunning(): bool
-    {
-        return $this->isRunning;
     }
 
     /**
@@ -72,13 +59,8 @@ class EventDrivenConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function getComponentName(): string
+    public function getConsumerName(): string
     {
         return $this->consumerName;
-    }
-
-    private function initialize() : void
-    {
-        $this->isRunning = false;
     }
 }

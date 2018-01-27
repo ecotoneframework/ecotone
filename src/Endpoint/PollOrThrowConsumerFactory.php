@@ -30,6 +30,6 @@ class PollOrThrowConsumerFactory implements ConsumerFactory
         /** @var PollableChannel $pollableChannel */
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
-        return PollOrThrowExceptionConsumer::create($messageHandlerBuilder->getComponentName(), $pollableChannel, $messageHandlerBuilder->build());
+        return PollOrThrowExceptionConsumer::create($messageHandlerBuilder->getConsumerName(), $pollableChannel, $messageHandlerBuilder->build());
     }
 }

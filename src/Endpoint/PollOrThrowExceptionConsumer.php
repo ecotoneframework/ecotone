@@ -92,15 +92,7 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function isRunning(): bool
-    {
-        return true;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getComponentName(): string
+    public function getConsumerName(): string
     {
         return $this->consumerName;
     }

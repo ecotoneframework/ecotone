@@ -10,7 +10,16 @@ namespace SimplyCodedSoftware\Messaging\Config;
 interface ModuleMessagingConfiguration
 {
     /**
+     * Runs during configuration
+     *
      * @param Configuration $configuration
      */
     public function registerWithin(Configuration $configuration) : void;
+
+    /**
+     * Runs after messaging system was built from configuration
+     *
+     * @param ConfiguredMessagingSystem $configuredMessagingSystem
+     */
+    public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem) : void;
 }

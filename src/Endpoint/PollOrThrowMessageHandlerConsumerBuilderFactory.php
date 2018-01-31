@@ -12,7 +12,7 @@ use SimplyCodedSoftware\Messaging\PollableChannel;
  * @package SimplyCodedSoftware\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PollOrThrowConsumerFactory implements ConsumerFactory
+class PollOrThrowMessageHandlerConsumerBuilderFactory implements MessageHandlerConsumerBuilderFactory
 {
     /**
      * @inheritDoc

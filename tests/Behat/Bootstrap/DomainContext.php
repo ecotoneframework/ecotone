@@ -10,8 +10,10 @@ use Fixture\Behat\Ordering\OrderConfirmation;
 use Fixture\Behat\Ordering\OrderingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
+use Fixture\Configuration\DumbConfigurationObserver;
+use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessagingConfiguration;
-use SimplyCodedSoftware\Messaging\Endpoint\EventDrivenConsumerFactory;
+use SimplyCodedSoftware\Messaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
@@ -22,7 +24,7 @@ use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystem;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowConsumerFactory;
+use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\Messaging\Future;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxy;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -38,19 +40,11 @@ use SimplyCodedSoftware\Messaging\PollableChannel;
 class DomainContext implements Context
 {
     /**
-     * @var array|MessageChannel[]
-     */
-    private $messageChannels = [];
-    /**
-     * @var GatewayProxy[]
-     */
-    private $gateways;
-    /**
      * @var MessagingSystemConfiguration
      */
     private $messagingSystemConfiguration;
     /**
-     * @var MessagingSystem
+     * @var ConfiguredMessagingSystem
      */
     private $messagingSystem;
     /**
@@ -65,10 +59,7 @@ class DomainContext implements Context
     public function __construct()
     {
         $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
-        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(
-            $this->inMemoryReferenceSearchService,
-            InMemoryModuleMessagingConfiguration::createEmpty()
-        );
+        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), DumbConfigurationObserver::create());
     }
 
     /**
@@ -80,15 +71,13 @@ class DomainContext implements Context
     {
         switch ($type) {
             case "Direct Channel": {
-                $this->messageChannels[$channelName] = DirectChannel::create();
                 $this->getMessagingSystemConfiguration()
-                    ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $this->messageChannels[$channelName]));
+                    ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, DirectChannel::create()));
                 break;
             }
             case "Pollable Channel": {
-                $this->messageChannels[$channelName] = QueueChannel::create();
                 $this->getMessagingSystemConfiguration()
-                    ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $this->messageChannels[$channelName]));
+                    ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, QueueChannel::create()));
                 break;
             }
         }
@@ -126,21 +115,6 @@ class DomainContext implements Context
     }
 
     /**
-     * @Given I set gateway for :interfaceName and :methodName with request channel :requestChannel
-     * @param string $interfaceName
-     * @param string $methodName
-     * @param string $requestChannel
-     */
-    public function iSetGatewayForAndWithRequestChannel(string $interfaceName, string $methodName, string $requestChannel)
-    {
-        /** @var DirectChannel $messageChannel */
-        $messageChannel = $this->getChannelByName($requestChannel);
-        Assert::isSubclassOf($messageChannel, DirectChannel::class, "Request Channel for Direct Channel");
-
-        $this->gateways = GatewayProxyBuilder::create($interfaceName, $methodName, $messageChannel);
-    }
-
-    /**
      * @Given I activate gateway with name :gatewayName for :interfaceName and :methodName with request channel :requestChannel
      * @param string $gatewayName
      * @param string $interfaceName
@@ -149,10 +123,9 @@ class DomainContext implements Context
      */
     public function iActivateGatewayWithNameForAndWithRequestChannel(string $gatewayName, string $interfaceName, string $methodName, string $requestChannel)
     {
-        $gatewayProxyBuilder = $this->createGatewayBuilder($interfaceName, $methodName, $requestChannel);
-
-        $this->gateways[$gatewayName] = $gatewayProxyBuilder
-                                            ->build();
+        $this->messagingSystemConfiguration->registerGatewayBuilder(
+            GatewayProxyBuilder::create($gatewayName, $interfaceName, $methodName, $requestChannel)
+        );
     }
 
     /**
@@ -165,16 +138,11 @@ class DomainContext implements Context
      */
     public function iActivateGatewayWithNameForAndWithRequestChannelAndReplyChannel(string $gatewayName, string $interfaceName, string $methodName, string $requestChannel, string $replyChannel)
     {
-        /** @var PollableChannel $pollableChannel */
-        $pollableChannel = $this->getChannelByName($replyChannel);
-        Assert::isSubclassOf($pollableChannel, PollableChannel::class, "Reply channel for gateway must be pollable channel");
-
-        $gatewayProxyBuilder = $this->createGatewayBuilder($interfaceName, $methodName, $requestChannel)
-                                    ->withReplyChannel($pollableChannel)
-                                    ->withMillisecondTimeout(1);
-
-        $this->gateways[$gatewayName] = $gatewayProxyBuilder
-            ->build();
+        $this->messagingSystemConfiguration->registerGatewayBuilder(
+            GatewayProxyBuilder::create($gatewayName, $interfaceName, $methodName, $requestChannel)
+                ->withReplyChannel($replyChannel)
+                ->withMillisecondTimeout(1)
+        );
     }
 
     /**
@@ -209,55 +177,18 @@ class DomainContext implements Context
     public function iRunMessagingSystem()
     {
         $this->messagingSystem = $this->getMessagingSystemConfiguration()
-                                    ->registerConsumerFactory(new EventDrivenConsumerFactory())
-                                    ->registerConsumerFactory(new PollOrThrowConsumerFactory())
-                                    ->buildMessagingSystemFromConfiguration();
-    }
-
-    /**
-     * @param string $channelName
-     * @return MessageChannel
-     */
-    private function getChannelByName(string $channelName) : MessageChannel
-    {
-        foreach ($this->messageChannels as $messageChannelName => $messageChannel) {
-            if ($messageChannelName === $channelName) {
-                return $messageChannel;
-            }
-        }
-
-        throw new \InvalidArgumentException("Channel with name {$channelName} do not exists");
+                                    ->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory())
+                                    ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory())
+                                    ->buildMessagingSystemFromConfiguration($this->inMemoryReferenceSearchService);
     }
 
     /**
      * @param string $gatewayNameToFind
-     * @return mixed
+     * @return object
      */
     private function getGatewayByName(string $gatewayNameToFind)
     {
-        foreach ($this->gateways as $gatewayName => $gateway) {
-            if ($gatewayName == $gatewayNameToFind) {
-                return $gateway;
-            }
-        }
-
-        throw new \InvalidArgumentException("Channel with name {$gatewayNameToFind} do not exists");
-    }
-
-    /**
-     * @param string $interfaceName
-     * @param string $methodName
-     * @param string $requestChannel
-     * @return \SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder
-     */
-    private function createGatewayBuilder(string $interfaceName, string $methodName, string $requestChannel): GatewayProxyBuilder
-    {
-        $messageChannel = $this->getChannelByName($requestChannel);
-        /** @var DirectChannel $messageChannel */
-        Assert::isSubclassOf($messageChannel, DirectChannel::class, "Request Channel should be Direct Channel");
-
-        $gatewayProxyBuilder = GatewayProxyBuilder::create($interfaceName, $methodName, $messageChannel);
-        return $gatewayProxyBuilder;
+        return $this->messagingSystem->getGatewayByName($gatewayNameToFind);
     }
 
     /**
@@ -415,7 +346,7 @@ class DomainContext implements Context
      */
     public function handlesMessage(string $consumerName)
     {
-        $this->messagingSystem->runConsumerByName($consumerName);
+        $this->messagingSystem->runSeparatelyRunningConsumerBy($consumerName);
     }
 
     /**

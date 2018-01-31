@@ -11,7 +11,28 @@ use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
  */
 interface GatewayBuilder
 {
+    /**
+     * @return string
+     */
+    public function getReferenceName() : string;
+
+    /**
+     * @return string
+     */
+    public function getInputChannelName() : string;
+
+    /**
+     * @return string
+     */
+    public function getInterfaceName() : string;
+
+    /**
+     * @param ChannelResolver $channelResolver
+     */
     public function setChannelResolver(ChannelResolver $channelResolver) : void;
 
+    /**
+     * @return object
+     */
     public function build();
 }

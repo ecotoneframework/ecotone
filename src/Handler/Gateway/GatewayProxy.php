@@ -41,9 +41,9 @@ class GatewayProxy
      * @param string $methodName
      * @param MethodCallToMessageConverter $methodCallToMessageConverter
      * @param ReplySender $replySender
-     * @param DirectChannel|null $requestChannel
+     * @param DirectChannel $requestChannel
      */
-    public function __construct(string $className, string $methodName, MethodCallToMessageConverter $methodCallToMessageConverter, ReplySender $replySender, ?DirectChannel $requestChannel)
+    public function __construct(string $className, string $methodName, MethodCallToMessageConverter $methodCallToMessageConverter, ReplySender $replySender, DirectChannel $requestChannel)
     {
         $this->methodCallToMessageConverter = $methodCallToMessageConverter;
         $this->className = $className;

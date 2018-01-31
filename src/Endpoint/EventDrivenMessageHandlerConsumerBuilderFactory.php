@@ -11,7 +11,7 @@ use SimplyCodedSoftware\Messaging\SubscribableChannel;
  * @package SimplyCodedSoftware\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EventDrivenConsumerFactory implements ConsumerFactory
+class EventDrivenMessageHandlerConsumerBuilderFactory implements MessageHandlerConsumerBuilderFactory
 {
     /**
      * @inheritDoc

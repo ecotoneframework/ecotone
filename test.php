@@ -24,7 +24,7 @@ foreach ($fileLocator->getAllClasses() as $class) {
 }
 $end = microtime(true);
 
-die($end - $start);
+//die($end - $start);
 
 class Test {
     private $number = 0;
@@ -46,27 +46,29 @@ class Test {
 }
 
 $file = '/tmp/container.php';
-if (file_exists($file)) {
-    require_once $file;
-    $container = new MessagingSystemContainer();
-} else {
+//if (file_exists($file)) {
+//    require_once $file;
+//    $container = new MessagingSystemContainer();
+//} else {
     $container = new \Symfony\Component\DependencyInjection\ContainerBuilder();
 
-    $container->set('test', new Test(4));
     $definition = new \Symfony\Component\DependencyInjection\Definition();
     $definition->setPrivate(false);
     $definition->setClass(Test::class);
     $definition->setArgument(0, 3);
-    $definition->setArgument(0, new \Symfony\Component\DependencyInjection\Reference('test'));
+    $definition->setArgument(1, new \Symfony\Component\DependencyInjection\Reference('test'));
     $container->setDefinition('test2', $definition);
+    $container->set('test', new Test(4));
 
     $container->compile();
+
+    var_dump($container->get('test2'));
 
     $dumper = new \Symfony\Component\DependencyInjection\Dumper\PhpDumper($container);
     file_put_contents(
         $file,
         $dumper->dump(array('class' => 'MessagingSystemContainer'))
     );
-}
+//}
 
-var_dump($container->get('test2'));
+//var_dump($container->get('test2'));

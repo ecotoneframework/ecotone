@@ -56,4 +56,9 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
     {
         return $this->messageChannel;
     }
+
+    public function __toString()
+    {
+        return (string)$this->messageChannel;
+    }
 }

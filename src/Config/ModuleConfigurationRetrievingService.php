@@ -10,7 +10,7 @@ namespace SimplyCodedSoftware\Messaging\Config;
 interface ModuleConfigurationRetrievingService
 {
     /**
-     * @return array|ModuleMessagingConfiguration[]
+     * @return ModuleMessagingConfiguration[]
      */
     public function findAllModuleConfigurations() : array;
 }

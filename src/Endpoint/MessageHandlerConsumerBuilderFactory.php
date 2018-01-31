@@ -10,7 +10,7 @@ use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
  * @package SimplyCodedSoftware\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface ConsumerFactory
+interface MessageHandlerConsumerBuilderFactory
 {
     /**
      * @param ChannelResolver $channelResolver

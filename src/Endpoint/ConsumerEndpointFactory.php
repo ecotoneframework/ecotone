@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessagingException;
@@ -21,7 +22,7 @@ class ConsumerEndpointFactory
      */
     private $channelResolver;
     /**
-     * @var array|ConsumerFactory[]
+     * @var array|MessageHandlerConsumerBuilderFactory[]
      */
     private $consumerFactories;
     /**
@@ -47,7 +48,7 @@ class ConsumerEndpointFactory
      * @return ConsumerLifecycle
      * @throws NoConsumerFactoryForBuilderException
      */
-    public function create(MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle
+    public function createForMessageHandler(MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle
     {
         $messageHandlerBuilder = $messageHandlerBuilder
                                     ->setChannelResolver($this->channelResolver)

@@ -10,7 +10,8 @@ namespace SimplyCodedSoftware\Messaging\Config;
 
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerFactory;
+use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
@@ -46,16 +47,14 @@ interface Configuration
     public function registerConsumer(ConsumerBuilder $consumerBuilder) : MessagingSystemConfiguration;
 
     /**
-     * @param ConsumerFactory $consumerFactory
+     * @param MessageHandlerConsumerBuilderFactory $consumerFactory
      * @return MessagingSystemConfiguration
      */
-    public function registerConsumerFactory(ConsumerFactory $consumerFactory) : MessagingSystemConfiguration;
+    public function registerConsumerFactory(MessageHandlerConsumerBuilderFactory $consumerFactory) : MessagingSystemConfiguration;
 
     /**
-     * Initialize messaging system from current configuration.
-     * This is one time process, after initialization you won't be able to configure messaging system anymore.
-     *
-     * @return MessagingSystem
+     * @param GatewayBuilder $gatewayBuilder
+     * @return MessagingSystemConfiguration
      */
-    public function buildMessagingSystemFromConfiguration(): MessagingSystem;
+    public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder) : MessagingSystemConfiguration;
 }

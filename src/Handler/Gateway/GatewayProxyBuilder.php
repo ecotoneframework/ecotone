@@ -1,12 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\ChannelReplySender;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\EmptyReplySender;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\TimeoutChannelReplySender;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\Messaging\MessageChannel;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 
@@ -15,8 +19,12 @@ use SimplyCodedSoftware\Messaging\Support\Assert;
  * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class GatewayProxyBuilder
+class GatewayProxyBuilder implements GatewayBuilder
 {
+    /**
+     * @var string
+     */
+    private $referenceName;
     /**
      * @var string
      */
@@ -26,53 +34,60 @@ class GatewayProxyBuilder
      */
     private $methodName;
     /**
-     * @var DirectChannel
+     * @var string
      */
-    private $requestChannel;
+    private $requestChannelName;
     /**
      * @var int
      */
     private $milliSecondsTimeout;
     /**
-     * @var PollableChannel
+     * @var string
      */
-    private $replyChannel;
+    private $replyChannelName;
     /**
      * @var array|MethodArgumentConverter[]
      */
     private $methodArgumentConverters = [];
+    /**
+     * @var ChannelResolver
+     */
+    private $channelResolver;
 
     /**
      * GatewayProxyBuilder constructor.
+     * @param string $referenceName
      * @param string $interfaceName
      * @param string $methodName
-     * @param DirectChannel $requestChannel
+     * @param string $requestChannelName
      */
-    private function __construct(string $interfaceName, string $methodName, DirectChannel $requestChannel)
+    private function __construct(string $referenceName, string $interfaceName, string $methodName, string $requestChannelName)
     {
+        $this->referenceName = $referenceName;
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;
-        $this->requestChannel = $requestChannel;
+        $this->requestChannelName = $requestChannelName;
     }
 
     /**
+     * @param string $referenceName
      * @param string $interfaceName
      * @param string $methodName
-     * @param DirectChannel $requestChannel
+     * @param string $requestChannelName
      * @return GatewayProxyBuilder
      */
-    public static function create(string $interfaceName, string $methodName, DirectChannel $requestChannel): self
+    public static function create(string $referenceName, string $interfaceName, string $methodName, string $requestChannelName): self
     {
-        return new self($interfaceName, $methodName, $requestChannel);
+        return new self($referenceName, $interfaceName, $methodName, $requestChannelName);
     }
 
     /**
-     * @param PollableChannel $replyChannel where to expect reply
+     * @param string $replyChannelName where to expect reply
      * @return GatewayProxyBuilder
      */
-    public function withReplyChannel(PollableChannel $replyChannel): self
+    public function withReplyChannel(string $replyChannelName): self
     {
-        $this->replyChannel = $replyChannel;
+        $this->replyChannelName = $replyChannelName;
 
         return $this;
     }
@@ -86,6 +101,38 @@ class GatewayProxyBuilder
         $this->milliSecondsTimeout = $millisecondsTimeout;
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getReferenceName(): string
+    {
+        return $this->referenceName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInputChannelName(): string
+    {
+        return $this->requestChannelName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterfaceName(): string
+    {
+        return $this->interfaceName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setChannelResolver(ChannelResolver $channelResolver): void
+    {
+        $this->channelResolver = $channelResolver;
     }
 
     /**
@@ -104,17 +151,26 @@ class GatewayProxyBuilder
     /**
      * Returns proxy to passed interface
      *
-     * @return mixed
+     * @return object
      */
     public function build()
     {
+        $replyChannel = $this->replyChannelName ? $this->channelResolver->resolve($this->replyChannelName) : null;
+
         $replySender = new EmptyReplySender();
-        if ($this->replyChannel) {
-            $replySender = new ChannelReplySender($this->replyChannel);
+        if ($replyChannel) {
+            /** @var PollableChannel $replyChannel */
+            Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");
+
+            $replySender = new ChannelReplySender($replyChannel);
         }
-        if ($this->replyChannel && $this->milliSecondsTimeout > 0) {
-            $replySender = new TimeoutChannelReplySender($this->replyChannel, $this->milliSecondsTimeout);
+        if ($this->replyChannelName && $this->milliSecondsTimeout > 0) {
+            $replySender = new TimeoutChannelReplySender($replyChannel, $this->milliSecondsTimeout);
         }
+
+        /** @var DirectChannel $requestChannel */
+        $requestChannel = $this->channelResolver->resolve($this->requestChannelName);
+        Assert::isSubclassOf($requestChannel, DirectChannel::class, "Gateway request channel ");
 
         $gatewayProxy = new GatewayProxy(
             $this->interfaceName, $this->methodName,
@@ -122,7 +178,7 @@ class GatewayProxyBuilder
                 $this->interfaceName, $this->methodName, $this->methodArgumentConverters
             ),
             ErrorReplySender::create($replySender),
-            $this->requestChannel
+            $requestChannel
         );
 
         $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gatewayProxy) implements AdapterInterface {
@@ -150,5 +206,10 @@ class GatewayProxyBuilder
         });
 
         return $factory->createProxy($this->interfaceName);
+    }
+
+    public function __toString()
+    {
+        return "gateway proxy";
     }
 }

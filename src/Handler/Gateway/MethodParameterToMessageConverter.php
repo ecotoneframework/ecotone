@@ -8,7 +8,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface MethodArgumentConverter extends NamedParameter
+interface MethodParameterToMessageConverter extends NamedParameter
 {
     /**
      * @param MethodArgument $methodArgument

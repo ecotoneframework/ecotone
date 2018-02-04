@@ -3,7 +3,7 @@
 namespace Test\SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter;
 
 use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
@@ -17,7 +17,7 @@ class HeaderMessageParameterTest extends MessagingTest
     public function test_returning_parameter_name()
     {
         $parameterName = 'johny';
-        $headerMessageParameter = HeaderMessageArgumentConverter::create($parameterName, 'personName');
+        $headerMessageParameter = HeaderMessageParameterToMessageConverter::create($parameterName, 'personName');
 
         $this->assertEquals($headerMessageParameter->parameterName(), $parameterName);
     }
@@ -25,7 +25,7 @@ class HeaderMessageParameterTest extends MessagingTest
     public function test_adding_value_to_message_header()
     {
         $headerName = 'personName';
-        $headerMessageParameter = HeaderMessageArgumentConverter::create('johny', $headerName);
+        $headerMessageParameter = HeaderMessageParameterToMessageConverter::create('johny', $headerName);
 
         $messageBuilder = MessageBuilder::withPayload('test');
         $headerValue = 'JohnyMacaraony';

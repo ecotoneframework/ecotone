@@ -23,13 +23,19 @@ class FileSystemClassLocator implements ClassLocator {
      * @var array|string[]
      */
     private $namespacesToUse;
+    /**
+     * @var AnnotationReader
+     */
+    private $annotationReader;
 
     /**
+     * @param AnnotationReader $annotationReader
      * @param string|array $paths One or multiple paths where mapping documents can be found.
      * @param array|string[] $namespaces
      */
-    public function __construct(array $paths, array $namespaces)
+    public function __construct(AnnotationReader $annotationReader, array $paths, array $namespaces)
     {
+        $this->annotationReader = $annotationReader;
         $this->namespacesToUse = $namespaces;
         $this->init($paths);
     }
@@ -50,8 +56,9 @@ class FileSystemClassLocator implements ClassLocator {
     {
         $classesWithAnnotations = [];
         foreach ($this->getAllClasses() as $class) {
-            $annotationReader = new AnnotationReader();
-            $classAnnotation = $annotationReader->getClassAnnotation($class, $annotationName);
+            $classReflection = new \ReflectionClass($class);
+
+            $classAnnotation = $this->annotationReader->getClassAnnotation($classReflection, $annotationName);
 
             if ($classAnnotation) {
                 $classesWithAnnotations[] = $class;

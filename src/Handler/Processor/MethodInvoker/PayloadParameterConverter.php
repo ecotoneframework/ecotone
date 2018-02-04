@@ -2,15 +2,15 @@
 
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
 use SimplyCodedSoftware\Messaging\Message;
 
 /**
- * Class MessageArgument
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * Class PayloadArgument
+ * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MessageArgument implements MethodArgument
+class PayloadParameterConverter implements MethodParameterConverter
 {
     /**
      * @var string
@@ -18,7 +18,7 @@ class MessageArgument implements MethodArgument
     private $parameterName;
 
     /**
-     * MessageArgument constructor.
+     * PayloadArgument constructor.
      * @param string $parameterName
      */
     private function __construct(string $parameterName)
@@ -26,11 +26,7 @@ class MessageArgument implements MethodArgument
         $this->parameterName = $parameterName;
     }
 
-    /**
-     * @param string $parameterName
-     * @return MessageArgument
-     */
-    public static function create(string $parameterName) : self
+    public static function create(string $parameterName)
     {
         return new self($parameterName);
     }
@@ -38,16 +34,16 @@ class MessageArgument implements MethodArgument
     /**
      * @inheritDoc
      */
-    public function getFrom(Message $message)
+    public function getArgumentFrom(Message $message)
     {
-        return $message;
+        return $message->getPayload();
     }
 
     /**
      * @inheritDoc
      */
-    public function getName(): string
+    public function isHandling(\ReflectionParameter $reflectionParameter): bool
     {
-        return $this->parameterName;
+        return $reflectionParameter->getName() == $this->parameterName;
     }
 }

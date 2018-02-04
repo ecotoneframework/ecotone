@@ -4,10 +4,10 @@ namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageArgument;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
@@ -32,7 +32,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     private $methodName;
     /**
-     * @var MethodArgument[]|array
+     * @var MethodParameterConverter[]|array
      */
     private $methodArguments;
 
@@ -83,7 +83,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     }
 
     /**
-     * @param array|MethodArgument[] $methodArguments
+     * @param array|MethodParameterConverter[] $methodArguments
      * @return TransformerBuilder
      */
     public function withMethodArguments(array $methodArguments) : self
@@ -109,9 +109,9 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
 
         if (empty($methodArguments)) {
             if ($interfaceToCall->hasFirstParameterMessageTypeHint()) {
-                $methodArguments[] = MessageArgument::create($firstParameterName);
+                $methodArguments[] = MessageParameterConverter::create($firstParameterName);
             }else {
-                $methodArguments[] = PayloadArgument::create($firstParameterName);
+                $methodArguments[] = PayloadParameterConverter::create($firstParameterName);
             }
         }
 

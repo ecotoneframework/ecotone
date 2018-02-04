@@ -3,7 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter;
 
 use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
@@ -11,7 +11,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class StaticHeaderMessageArgumentConverter implements MethodArgumentConverter
+class StaticHeaderMessageParameterToMessageConverter implements MethodParameterToMessageConverter
 {
     /**
      * @var string
@@ -36,7 +36,7 @@ class StaticHeaderMessageArgumentConverter implements MethodArgumentConverter
     /**
      * @param string $headerName
      * @param string $headerValue
-     * @return StaticHeaderMessageArgumentConverter
+     * @return StaticHeaderMessageParameterToMessageConverter
      */
     public static function create(string $headerName, string $headerValue) : self
     {

@@ -4,7 +4,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
@@ -35,7 +35,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
      */
     private $isReplyRequired = false;
     /**
-     * @var array|MethodArgument[]
+     * @var array|MethodParameterConverter[]
      */
     private $methodArguments = [];
     /**
@@ -99,7 +99,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     }
 
     /**
-     * @param array|MethodArgument[] $methodArguments
+     * @param array|MethodParameterConverter[] $methodArguments
      * @return ServiceActivatorBuilder
      */
     public function withMethodArguments(array $methodArguments): self

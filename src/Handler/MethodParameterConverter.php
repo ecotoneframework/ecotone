@@ -10,17 +10,18 @@ use SimplyCodedSoftware\Messaging\Message;
  * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface MethodArgument
+interface MethodParameterConverter
 {
     /**
      * @param Message $message
      * @return mixed
      * @throws InvalidMessageHeaderException
      */
-    public function getFrom(Message $message);
+    public function getArgumentFrom(Message $message);
 
     /**
-     * @return string
+     * @param \ReflectionParameter $reflectionParameter
+     * @return bool
      */
-    public function getName() : string;
+    public function isHandling(\ReflectionParameter $reflectionParameter) : bool;
 }

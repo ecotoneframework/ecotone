@@ -16,9 +16,9 @@ use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Config\NamedMessageChannel;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageArgumentConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\PayloadMethodArgumentMessageParameter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\StaticHeaderMessageArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\HeaderMessageParameterToMessageConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\PayloadMethodParameterToMessageMessageParameter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\StaticHeaderMessageParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\MessageHeaders;
@@ -178,8 +178,8 @@ class GatewayProxyBuilderTest extends MessagingTest
             $requestChannelName => $requestChannel
         ]));
         $gatewayProxyBuilder->withMethodArgumentConverters([
-            HeaderMessageArgumentConverter::create('personId', 'personId'),
-            PayloadMethodArgumentMessageParameter::create('content')
+            HeaderMessageParameterToMessageConverter::create('personId', 'personId'),
+            PayloadMethodParameterToMessageMessageParameter::create('content')
         ]);
 
         /** @var ServiceInterfaceSendOnlyWithTwoArguments $gatewayProxy */
@@ -210,9 +210,9 @@ class GatewayProxyBuilderTest extends MessagingTest
             $requestChannelName => $requestChannel
         ]));
         $gatewayProxyBuilder->withMethodArgumentConverters([
-            StaticHeaderMessageArgumentConverter::create('personId', $personId),
-            PayloadMethodArgumentMessageParameter::create('content'),
-            StaticHeaderMessageArgumentConverter::create('personName', $personName)
+            StaticHeaderMessageParameterToMessageConverter::create('personId', $personId),
+            PayloadMethodParameterToMessageMessageParameter::create('content'),
+            StaticHeaderMessageParameterToMessageConverter::create('personName', $personName)
         ]);
 
         /** @var ServiceInterfaceSendOnly $gatewayProxy */

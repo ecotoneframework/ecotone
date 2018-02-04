@@ -3,7 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\OnlyPayloadMessageParameterMethodArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter\OnlyPayloadMessageParameterMethodParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
@@ -20,7 +20,7 @@ class MethodCallToMessageConverter
      */
     private $interfaceToCall;
     /**
-     * @var array|MethodArgumentConverter[]
+     * @var array|MethodParameterToMessageConverter[]
      */
     private $methodArgumentConverters;
 
@@ -28,7 +28,7 @@ class MethodCallToMessageConverter
      * MethodCallToMessageConverter constructor.
      * @param string $interfaceToCall
      * @param string $methodName
-     * @param array|MethodArgumentConverter[] $methodArgumentConverters
+     * @param array|MethodParameterToMessageConverter[] $methodArgumentConverters
      */
     public function __construct(string $interfaceToCall, string $methodName, array $methodArgumentConverters)
     {
@@ -58,12 +58,12 @@ class MethodCallToMessageConverter
     /**
      * @param string $interfaceToCall
      * @param string $methodName
-     * @param array|MethodArgumentConverter[] $methodArgumentConverters
+     * @param array|MethodParameterToMessageConverter[] $methodArgumentConverters
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function initialize(string $interfaceToCall, string $methodName, array $methodArgumentConverters) : void
     {
-        Assert::allInstanceOfType($methodArgumentConverters, MethodArgumentConverter::class);
+        Assert::allInstanceOfType($methodArgumentConverters, MethodParameterToMessageConverter::class);
 
         $this->interfaceToCall = InterfaceToCall::create($interfaceToCall, $methodName);
 
@@ -72,7 +72,7 @@ class MethodCallToMessageConverter
         }
 
         if (empty($methodArgumentConverters) && $this->interfaceToCall->hasSingleArguments()) {
-            $methodArgumentConverters = [new OnlyPayloadMessageParameterMethodArgumentConverter()];
+            $methodArgumentConverters = [new OnlyPayloadMessageParameterMethodParameterToMessageConverter()];
         }
 
         $this->interfaceToCall->checkCompatibilityWithMethodParameters($methodArgumentConverters);

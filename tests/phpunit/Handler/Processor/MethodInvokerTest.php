@@ -6,9 +6,9 @@ use Fixture\Service\ServiceExpectingOneArgument;
 use Fixture\Service\ServiceExpectingThreeArguments;
 use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutAnyMethods;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadParameterConverter;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
@@ -39,7 +39,7 @@ class MethodInvokerTest extends MessagingTest
         $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();
 
         $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
-            PayloadArgument::create('name')
+            PayloadParameterConverter::create('name')
         ]);
 
         $methodInvocation->processMessage(MessageBuilder::withPayload('some')->build());
@@ -54,7 +54,7 @@ class MethodInvokerTest extends MessagingTest
         $headerValue = '123X';
 
         $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withReturnValue', [
-            HeaderArgument::create('name', $headerName)
+            HeaderParameterConverter::create('name', $headerName)
         ]);
 
         $this->assertEquals($headerValue,
@@ -89,7 +89,7 @@ class MethodInvokerTest extends MessagingTest
         $this->expectException(InvalidArgumentException::class);
 
         MethodInvoker::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
-            PayloadArgument::create('wrongName')
+            PayloadParameterConverter::create('wrongName')
         ]);
     }
 
@@ -98,9 +98,9 @@ class MethodInvokerTest extends MessagingTest
         $serviceExpectingThreeArgument = ServiceExpectingThreeArguments::create();
 
         $methodInvocation = MethodInvoker::createWith($serviceExpectingThreeArgument, 'withReturnValue', [
-            HeaderArgument::create('surname', 'personSurname'),
-            HeaderArgument::create('age', 'personAge'),
-            PayloadArgument::create('name'),
+            HeaderParameterConverter::create('surname', 'personSurname'),
+            HeaderParameterConverter::create('age', 'personAge'),
+            PayloadParameterConverter::create('name'),
         ]);
 
         $this->assertEquals("johnybilbo13",

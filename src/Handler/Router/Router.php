@@ -4,7 +4,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Router;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException;
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\MessageChannel;
@@ -49,7 +49,7 @@ final class Router implements MessageHandler
      * @param $objectToInvoke
      * @param string $methodName
      * @param bool $isResolutionRequired
-     * @param array|MethodArgument[] $methodArguments
+     * @param array|MethodParameterConverter[] $methodArguments
      * @return Router
      */
     public static function create(ChannelResolver $channelResolver, $objectToInvoke, string $methodName, bool $isResolutionRequired, array $methodArguments) : self

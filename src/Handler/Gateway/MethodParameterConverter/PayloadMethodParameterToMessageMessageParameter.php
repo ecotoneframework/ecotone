@@ -3,44 +3,37 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter;
 
 use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
- * Class HeaderMessageParameter
+ * Class PayloadMessageParameter
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class HeaderMessageArgumentConverter implements MethodArgumentConverter
+class PayloadMethodParameterToMessageMessageParameter implements MethodParameterToMessageConverter
 {
     /**
      * @var string
      */
     private $parameterName;
-    /**
-     * @var string
-     */
-    private $headerName;
 
     /**
-     * HeaderMessageParameter constructor.
+     * PayloadMessageParameter constructor.
      * @param string $parameterName
-     * @param string $headerName
      */
-    private function __construct(string $parameterName, string $headerName)
+    private function __construct(string $parameterName)
     {
         $this->parameterName = $parameterName;
-        $this->headerName = $headerName;
     }
 
     /**
      * @param string $parameterName
-     * @param string $headerName
-     * @return HeaderMessageArgumentConverter
+     * @return PayloadMethodParameterToMessageMessageParameter
      */
-    public static function create(string $parameterName, string $headerName) : self
+    public static function create(string $parameterName) : self
     {
-        return new self($parameterName, $headerName);
+        return new self($parameterName);
     }
 
     /**
@@ -62,17 +55,8 @@ class HeaderMessageArgumentConverter implements MethodArgumentConverter
     /**
      * @inheritDoc
      */
-    public function parameterName(): string
-    {
-        return $this->parameterName;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
-        return $messageBuilder
-                    ->setHeader($this->headerName, $methodArgument->value());
+        return $messageBuilder->setPayload($methodArgument->value());
     }
 }

@@ -3,7 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter;
 
 use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\PayloadMethodArgumentConverter;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
@@ -12,7 +12,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class OnlyPayloadMessageParameterMethodArgumentConverter implements MethodArgumentConverter
+class OnlyPayloadMessageParameterMethodParameterToMessageConverter implements MethodParameterToMessageConverter
 {
     /**
      * @inheritDoc

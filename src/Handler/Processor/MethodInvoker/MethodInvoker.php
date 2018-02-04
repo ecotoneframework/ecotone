@@ -3,7 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
 use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
@@ -24,7 +24,7 @@ final class MethodInvoker implements MessageProcessor
      */
     private $objectMethodName;
     /**
-     * @var MethodArgument[]
+     * @var MethodParameterConverter[]
      */
     private $orderedMethodArguments;
 
@@ -32,14 +32,14 @@ final class MethodInvoker implements MessageProcessor
      * MethodInvocation constructor.
      * @param $objectToInvokeOn
      * @param string $objectMethodName
-     * @param array|MethodArgument[] $methodArguments
+     * @param array|MethodParameterConverter[] $methodParameterConverters
      */
-    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodArguments)
+    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters)
     {
         Assert::isObject($objectToInvokeOn, "Passed value for invocation is not an object");
-        Assert::allInstanceOfType($methodArguments, MethodArgument::class);
+        Assert::allInstanceOfType($methodParameterConverters, MethodParameterConverter::class);
 
-        $this->init($objectToInvokeOn, $objectMethodName, $methodArguments);
+        $this->init($objectToInvokeOn, $objectMethodName, $methodParameterConverters);
     }
 
     /**
@@ -64,27 +64,27 @@ final class MethodInvoker implements MessageProcessor
     /**
      * @param $objectToInvokeOn
      * @param string $objectMethodName
-     * @param array|MethodArgument[] $methodArguments
+     * @param array|MethodParameterConverter[] $methodParameterConverters
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function init($objectToInvokeOn, string $objectMethodName, array $methodArguments) : void
+    private function init($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters) : void
     {
         if (!$this->hasObjectMethod($objectToInvokeOn, $objectMethodName)) {
             throw InvalidArgumentException::create("Object {$this->objectToClassName($objectToInvokeOn)} does not contain method {$objectMethodName}");
         }
 
         $objectToInvokeReflection = new \ReflectionMethod($objectToInvokeOn, $objectMethodName);
-        $objectToInvokeArguments = $objectToInvokeReflection->getParameters();
-        $passedArgumentsCount = count($methodArguments);
+        $parametersForObjectToInvoke = $objectToInvokeReflection->getParameters();
+        $passedArgumentsCount = count($methodParameterConverters);
         $requiredArgumentsCount = count($objectToInvokeReflection->getParameters());
 
         if ($this->canBeInvokedWithDefaultArgument($passedArgumentsCount, $requiredArgumentsCount)) {
-            $firstArgument = $objectToInvokeArguments[0];
+            $firstArgument = $parametersForObjectToInvoke[0];
 
             if ((string)$firstArgument->getType() === Message::class) {
-                $methodArguments = [MessageArgument::create($firstArgument->getName())];
+                $methodParameterConverters = [MessageParameterConverter::create($firstArgument->getName())];
             }else {
-                $methodArguments = [PayloadArgument::create($firstArgument->getName())];
+                $methodParameterConverters = [PayloadParameterConverter::create($firstArgument->getName())];
             }
 
             $passedArgumentsCount = 1;
@@ -95,8 +95,8 @@ final class MethodInvoker implements MessageProcessor
         }
 
         $orderedMethodArguments = [];
-        foreach ($objectToInvokeArguments as $invokeArgument) {
-            $orderedMethodArguments[] = $this->getMethodArgumentForInvokedOne($this->objectToClassName($objectToInvokeOn), $objectMethodName, $invokeArgument, $methodArguments);
+        foreach ($parametersForObjectToInvoke as $invokeParameter) {
+            $orderedMethodArguments[] = $this->getMethodArgumentFor($this->objectToClassName($objectToInvokeOn), $objectMethodName, $invokeParameter, $methodParameterConverters);
         }
 
         $this->objectToInvokeOn = $objectToInvokeOn;
@@ -113,7 +113,7 @@ final class MethodInvoker implements MessageProcessor
         $methodArguments = [];
 
         foreach ($this->orderedMethodArguments as $methodArgument) {
-            $methodArguments[] = $methodArgument->getFrom($message);
+            $methodArguments[] = $methodArgument->getArgumentFrom($message);
         }
 
         return $methodArguments;
@@ -161,22 +161,20 @@ final class MethodInvoker implements MessageProcessor
     /**
      * @param string $invokedClass
      * @param string $methodToInvoke
-     * @param \ReflectionParameter $invokeArgument
-     * @param array|MethodArgument[] $methodArguments
-     * @return MethodArgument
+     * @param \ReflectionParameter $invokeParameter
+     * @param array|MethodParameterConverter[] $methodParameterConverters
+     * @return MethodParameterConverter
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function getMethodArgumentForInvokedOne(string $invokedClass, string $methodToInvoke, \ReflectionParameter $invokeArgument, array $methodArguments): MethodArgument
+    private function getMethodArgumentFor(string $invokedClass, string $methodToInvoke, \ReflectionParameter $invokeParameter, array $methodParameterConverters): MethodParameterConverter
     {
-        $lastArgumentName = '';
-        foreach ($methodArguments as $methodArgument) {
-            $lastArgumentName = $methodArgument->getName();
-            if ($invokeArgument->getName() == $lastArgumentName) {
-                return $methodArgument;
+        foreach ($methodParameterConverters as $methodParameterConverter) {
+            if ($methodParameterConverter->isHandling($invokeParameter)) {
+                return $methodParameterConverter;
             }
         }
 
-        throw InvalidArgumentException::create("Invoked object {$invokedClass} with method {$methodToInvoke} does not have argument with name {$lastArgumentName}");
+        throw InvalidArgumentException::create("Invoked object {$invokedClass} with method {$methodToInvoke} has no converter for {$invokeParameter->getName()}");
     }
 
     public function __toString()

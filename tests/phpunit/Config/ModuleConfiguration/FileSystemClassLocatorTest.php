@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Annotation\FileSystem\DumbModuleConfiguration;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\FileSystemClassLocator;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
@@ -16,6 +17,7 @@ class FileSystemClassLocatorTest extends MessagingTest
     public function test_retrieving_module_configuration_by_annotation()
     {
         $fileSystemClassLocator = new FileSystemClassLocator(
+            new AnnotationReader(),
             [
             __DIR__ . DIRECTORY_SEPARATOR . '../../../Fixture/Annotation/FileSystem',
             ],

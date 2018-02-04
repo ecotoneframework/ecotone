@@ -4,7 +4,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Router;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 use SimplyCodedSoftware\Messaging\Support\Assert;
@@ -45,7 +45,7 @@ class RouterBuilder implements MessageHandlerBuilder
      */
     private $referenceSearchService;
     /**
-     * @var array|MethodArgument[]
+     * @var array|MethodParameterConverter[]
      */
     private $methodArguments = [];
     /**

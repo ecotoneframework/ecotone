@@ -1,6 +1,7 @@
 <?php
 
 namespace Fixture\Configuration;
+use PHPUnit\Framework\Assert;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
 
@@ -49,5 +50,13 @@ class DumbConfigurationObserver implements ConfigurationObserver
     public function wasNotifiedCorrectly() : bool
     {
         return $this->gatewayNotification && $this->messageChannelNotification && $this->configurationNotification;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function notifyRequiredAvailableReference(string $referenceName): void
+    {
+        return;
     }
 }

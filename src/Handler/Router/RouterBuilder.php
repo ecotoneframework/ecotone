@@ -112,6 +112,14 @@ class RouterBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
+    public function getRequiredReferenceNames(): array
+    {
+        return [$this->objectToInvokeReference];
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function build(): MessageHandler
     {
         $objectToInvoke = $this->objectToInvoke ? $this->objectToInvoke : $this->referenceSearchService->findByReference($this->objectToInvokeReference);

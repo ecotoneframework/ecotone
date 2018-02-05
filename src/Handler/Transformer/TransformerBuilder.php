@@ -83,6 +83,14 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getRequiredReferenceNames(): array
+    {
+        return [$this->objectToInvokeReference];
+    }
+
+    /**
      * @param array|MethodParameterConverter[] $methodArguments
      * @return TransformerBuilder
      */

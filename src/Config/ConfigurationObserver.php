@@ -27,4 +27,9 @@ interface ConfigurationObserver
      * @param ConfiguredMessagingSystem $configuredMessagingSystem
      */
     public function notifyConfigurationWasFinished(ConfiguredMessagingSystem $configuredMessagingSystem) : void;
+
+    /**
+     * @param string $referenceName
+     */
+    public function notifyRequiredAvailableReference(string $referenceName) : void;
 }

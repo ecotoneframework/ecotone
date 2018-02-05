@@ -149,6 +149,11 @@ final class MessagingSystemConfiguration implements Configuration
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            foreach ($messageHandlerBuilder->getRequiredReferenceNames() as $requiredReferenceName) {
+                if ($requiredReferenceName) {
+                    $this->configurationObserver->notifyRequiredAvailableReference($requiredReferenceName);
+                }
+            }
             $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder);
         }
         $gateways = [];

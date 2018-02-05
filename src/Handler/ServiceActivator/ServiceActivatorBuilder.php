@@ -149,6 +149,14 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getRequiredReferenceNames(): array
+    {
+        return [$this->objectToInvokeOnReference];
+    }
+
+    /**
      * @param string $name
      * @return ServiceActivatorBuilder
      */

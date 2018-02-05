@@ -70,6 +70,14 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
+    public function getRequiredReferenceNames(): array
+    {
+        return [get_class($this->messageHandler)];
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getConsumerName(): string
     {
         return $this->messageHandlerName;

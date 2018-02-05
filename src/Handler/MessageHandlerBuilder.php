@@ -27,6 +27,11 @@ interface MessageHandlerBuilder
     public function getInputMessageChannelName() : string;
 
     /**
+     * @return string[] empty string means no required reference name exists
+     */
+    public function getRequiredReferenceNames() : array;
+
+    /**
      * @param ChannelResolver $channelResolver
      * @return MessageHandlerBuilder
      */

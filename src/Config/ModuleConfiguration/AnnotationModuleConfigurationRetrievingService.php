@@ -31,7 +31,12 @@ class AnnotationModuleConfigurationRetrievingService implements ModuleConfigurat
      */
     public function findAllModuleConfigurations(): array
     {
-        $configurationClasses = $this->classLocator->getAllClassesWithAnnotation(ModuleConfiguration::class);
+        $configurationClassesNames = $this->classLocator->getAllClassesWithAnnotation(ModuleConfiguration::class);
+        $configurationClasses = [];
+
+        foreach ($configurationClassesNames as $configurationClassesName) {
+            $configurationClasses[] = new $configurationClassesName();
+        }
 
         foreach ($configurationClasses as $configurationClass) {
             if ($configurationClass instanceof AnnotationConfiguration) {

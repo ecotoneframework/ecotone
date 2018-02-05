@@ -18,6 +18,8 @@ class DumbConfigurationObserver implements ConfigurationObserver
 
     private $configurationNotification = false;
 
+    private $requiredReferences = [];
+
     public static function create() : self
     {
         return new self();
@@ -57,6 +59,11 @@ class DumbConfigurationObserver implements ConfigurationObserver
      */
     public function notifyRequiredAvailableReference(string $referenceName): void
     {
-        return;
+        $this->requiredReferences[] = $referenceName;
+    }
+
+    public function getRequiredReferences() : array
+    {
+        return $this->requiredReferences;
     }
 }

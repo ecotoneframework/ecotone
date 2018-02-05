@@ -94,6 +94,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
         $this->assertTrue($dumbConfigurationObserver->wasNotifiedCorrectly(), "Configuration observer was not notified correctly");
+        $this->assertEquals([NoReturnMessageHandler::class], $dumbConfigurationObserver->getRequiredReferences());
     }
 
     /**

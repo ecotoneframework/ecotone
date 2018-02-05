@@ -95,6 +95,12 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder) : self
     {
+        foreach ($messageHandlerBuilder->getRequiredReferenceNames() as $requiredReferenceName) {
+            if ($requiredReferenceName) {
+                $this->configurationObserver->notifyRequiredAvailableReference($requiredReferenceName);
+            }
+        }
+
         $this->messageHandlerBuilders[] = $messageHandlerBuilder;
 
         return $this;
@@ -149,11 +155,6 @@ final class MessagingSystemConfiguration implements Configuration
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            foreach ($messageHandlerBuilder->getRequiredReferenceNames() as $requiredReferenceName) {
-                if ($requiredReferenceName) {
-                    $this->configurationObserver->notifyRequiredAvailableReference($requiredReferenceName);
-                }
-            }
             $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder);
         }
         $gateways = [];

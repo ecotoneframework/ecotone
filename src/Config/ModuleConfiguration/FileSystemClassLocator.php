@@ -11,6 +11,7 @@ use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FileSystemClassLocator implements ClassLocator {
+
     const INTEGRATION_MESSAGING_NAMESPACE = 'IntegrationMessaging';
     const SIMPLY_CODED_SOFTWARE_NAMESPACE = 'SimplyCodedSoftware';
 

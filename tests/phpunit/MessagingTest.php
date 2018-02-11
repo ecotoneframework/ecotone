@@ -13,6 +13,8 @@ use SimplyCodedSoftware\Messaging\MessageHeaders;
  */
 abstract class MessagingTest extends TestCase
 {
+    const FIXTURE_DIR = __DIR__ . '/../Fixture';
+
     public function assertMessages(Message $message, Message $toCompareWith) : void
     {
         $this->assertEquals($message->getPayload(), $toCompareWith->getPayload(), "Message payload is different");

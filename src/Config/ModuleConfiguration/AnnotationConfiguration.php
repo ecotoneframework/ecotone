@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use SimplyCodedSoftware\Messaging\Config\ModuleMessagingConfiguration;
 
 /**
@@ -15,4 +16,9 @@ interface AnnotationConfiguration extends ModuleMessagingConfiguration
      * @param ClassLocator $classLocator
      */
     public function setClassLocator(ClassLocator $classLocator) : void;
+
+    /**
+     * @param ClassMetadataReader $classMetadataReader
+     */
+    public function setClassMetadataReader(ClassMetadataReader $classMetadataReader) : void;
 }

@@ -4,7 +4,9 @@ namespace SimplyCodedSoftware\Messaging\Handler\Router;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 use SimplyCodedSoftware\Messaging\Support\Assert;
@@ -14,7 +16,7 @@ use SimplyCodedSoftware\Messaging\Support\Assert;
  * @package SimplyCodedSoftware\Messaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class RouterBuilder implements MessageHandlerBuilder
+class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 {
     /**
      * @var string
@@ -37,21 +39,17 @@ class RouterBuilder implements MessageHandlerBuilder
      */
     private $methodName;
     /**
-     * @var ChannelResolver
+     * @var array|MethodParameterConverterBuilder[]
      */
-    private $channelResolver;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
-    /**
-     * @var array|MethodParameterConverter[]
-     */
-    private $methodArguments = [];
+    private $methodParameterConverters = [];
     /**
      * @var bool
      */
     private $resolutionRequired = true;
+    /**
+     * @var string[]
+     */
+    private $requiredReferenceNames = [];
 
     /**
      * RouterBuilder constructor.
@@ -114,22 +112,48 @@ class RouterBuilder implements MessageHandlerBuilder
      */
     public function getRequiredReferenceNames(): array
     {
-        return [$this->objectToInvokeReference];
+        $requiredReferenceNames = $this->requiredReferenceNames;
+        $requiredReferenceNames[] = $this->objectToInvokeReference;
+
+        return $requiredReferenceNames;
     }
 
     /**
      * @inheritDoc
      */
-    public function build(): MessageHandler
+    public function registerRequiredReference(string $referenceName): void
     {
-        $objectToInvoke = $this->objectToInvoke ? $this->objectToInvoke : $this->referenceSearchService->findByReference($this->objectToInvokeReference);
+        $this->requiredReferenceNames[] = $referenceName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders): void
+    {
+        Assert::allInstanceOfType($methodParameterConverterBuilders, MethodParameterConverterBuilder::class);
+
+        $this->methodParameterConverters = $methodParameterConverterBuilders;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
+    {
+        $objectToInvoke = $this->objectToInvoke ? $this->objectToInvoke : $referenceSearchService->findByReference($this->objectToInvokeReference);
+
+        $methodParameterConverters = [];
+        foreach ($this->methodParameterConverters as $methodParameterConverterBuilder) {
+            $methodParameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
+        }
 
         return Router::create(
-            $this->channelResolver,
+            $channelResolver,
             $objectToInvoke,
             $this->methodName,
             $this->resolutionRequired,
-            $this->methodArguments
+            $methodParameterConverters
         );
     }
 
@@ -158,26 +182,6 @@ class RouterBuilder implements MessageHandlerBuilder
     public function getInputMessageChannelName(): string
     {
         return $this->inputMessageChannelName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setReferenceSearchService(ReferenceSearchService $referenceSearchService): MessageHandlerBuilder
-    {
-        $this->referenceSearchService = $referenceSearchService;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
-    {
-        $this->channelResolver = $channelResolver;
-
-        return $this;
     }
 
     public function __toString()

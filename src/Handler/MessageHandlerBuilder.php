@@ -12,9 +12,11 @@ use SimplyCodedSoftware\Messaging\MessageHandler;
 interface MessageHandlerBuilder
 {
     /**
+     * @param ChannelResolver $channelResolver
+     * @param ReferenceSearchService $referenceSearchService
      * @return MessageHandler
      */
-    public function build() : MessageHandler;
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler;
 
     /**
      * @return string
@@ -30,16 +32,4 @@ interface MessageHandlerBuilder
      * @return string[] empty string means no required reference name exists
      */
     public function getRequiredReferenceNames() : array;
-
-    /**
-     * @param ChannelResolver $channelResolver
-     * @return MessageHandlerBuilder
-     */
-    public function setChannelResolver(ChannelResolver $channelResolver) : MessageHandlerBuilder;
-
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @return MessageHandlerBuilder
-     */
-    public function setReferenceSearchService(ReferenceSearchService $referenceSearchService) : MessageHandlerBuilder;
 }

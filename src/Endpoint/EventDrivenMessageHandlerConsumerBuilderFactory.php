@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\SubscribableChannel;
 
 /**
@@ -24,7 +25,7 @@ class EventDrivenMessageHandlerConsumerBuilderFactory implements MessageHandlerC
     /**
      * @inheritDoc
      */
-    public function create(ChannelResolver $channelResolver, MessageHandlerBuilder $messageHandlerBuilder): ConsumerLifecycle
+    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder): ConsumerLifecycle
     {
         /** @var SubscribableChannel $subscribableChannel */
         $subscribableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
@@ -32,7 +33,7 @@ class EventDrivenMessageHandlerConsumerBuilderFactory implements MessageHandlerC
         return new EventDrivenConsumer(
             $messageHandlerBuilder->getConsumerName(),
             $subscribableChannel,
-            $messageHandlerBuilder->build()
+            $messageHandlerBuilder->build($channelResolver, $referenceSearchService)
         );
     }
 }

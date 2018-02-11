@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Interface PollableFactory
@@ -21,8 +22,9 @@ interface MessageHandlerConsumerBuilderFactory
 
     /**
      * @param ChannelResolver $channelResolver
+     * @param ReferenceSearchService $referenceSearchService
      * @param MessageHandlerBuilder $messageHandlerBuilder
      * @return ConsumerLifecycle
      */
-    public function create(ChannelResolver $channelResolver, MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle;
+    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle;
 }

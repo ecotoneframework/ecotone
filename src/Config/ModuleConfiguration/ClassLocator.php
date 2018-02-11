@@ -1,13 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: dgafka
- * Date: 27.01.18
- * Time: 19:07
- */
 
 namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
-
+use Doctrine\Common\Annotations\AnnotationReader;
 
 /**
  * Class ClassLocator

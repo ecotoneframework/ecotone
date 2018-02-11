@@ -1,13 +1,17 @@
 <?php
 
 namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
@@ -17,12 +21,12 @@ use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
  * @package Messaging\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class TransformerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
+class TransformerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {
     /**
      * @var string
      */
-    private $objectToInvokeReference;
+    private $objectToInvokeReferenceName;
     /**
      * @var object
      */
@@ -32,9 +36,13 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     private $methodName;
     /**
-     * @var MethodParameterConverter[]|array
+     * @var MethodParameterConverterBuilder[]|array
      */
-    private $methodArguments;
+    private $methodParameterConverterBuilders = [];
+    /**
+     * @var string[]
+     */
+    private $requiredReferenceNames = [];
 
     /**
      * TransformerBuilder constructor.
@@ -46,7 +54,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     private function __construct(string $inputChannelName, string $outputChannelName, string $objectToInvokeReference, string $methodName, string $handlerName)
     {
-        $this->objectToInvokeReference = $objectToInvokeReference;
+        $this->objectToInvokeReferenceName = $objectToInvokeReference;
         $this->methodName = $methodName;
 
         $this->withInputMessageChannel($inputChannelName);
@@ -87,53 +95,65 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     public function getRequiredReferenceNames(): array
     {
-        return [$this->objectToInvokeReference];
-    }
+        $requiredReferenceNames = $this->requiredReferenceNames;
+        $requiredReferenceNames[] = $this->objectToInvokeReferenceName;
 
-    /**
-     * @param array|MethodParameterConverter[] $methodArguments
-     * @return TransformerBuilder
-     */
-    public function withMethodArguments(array $methodArguments) : self
-    {
-       $this->methodArguments = $methodArguments;
-
-       return $this;
+        return $requiredReferenceNames;
     }
 
     /**
      * @inheritDoc
      */
-    public function build(): MessageHandler
+    public function registerRequiredReference(string $referenceName): void
     {
-        $objectToInvokeOn = $this->object ? $this->object : $this->referenceSearchService->findByReference($this->objectToInvokeReference);
+        $this->requiredReferenceNames[] = $referenceName;
+    }
+
+    /**
+     * @param array|MethodParameterConverter[] $methodParameterConverterBuilders
+     * @return void
+     */
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders) : void
+    {
+       $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
+    {
+        $objectToInvokeOn = $this->object ? $this->object : $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
         $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
         $firstParameterName = $interfaceToCall->getFirstParameterName();
-        $methodArguments = $this->methodArguments;
+        $methodParameterConverters = [];
+        foreach ($this->methodParameterConverterBuilders as $methodParameterConverterBuilder) {
+            $methodParameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
+        }
 
         if ($interfaceToCall->doesItReturnValue()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
-        if (empty($methodArguments)) {
+        if (empty($methodParameterConverters)) {
             if ($interfaceToCall->hasFirstParameterMessageTypeHint()) {
-                $methodArguments[] = MessageParameterConverter::create($firstParameterName);
+                $methodParameterConverters[] = MessageParameterConverter::create($firstParameterName);
             }else {
-                $methodArguments[] = PayloadParameterConverter::create($firstParameterName);
+                $methodParameterConverters[] = PayloadParameterConverter::create($firstParameterName);
             }
         }
 
         return new Transformer(
             RequestReplyProducer::createFrom(
-                $this->channelResolver->resolve($this->outputMessageChannelName),
+                $channelResolver->resolve($this->outputMessageChannelName),
                 TransformerMessageProcessor::createFrom(
                     MethodInvoker::createWith(
                         $objectToInvokeOn,
                         $this->methodName,
-                        $methodArguments
+                        $methodParameterConverters
                     )
                 ),
-                $this->channelResolver,
+                $channelResolver,
                 false
             )
         );

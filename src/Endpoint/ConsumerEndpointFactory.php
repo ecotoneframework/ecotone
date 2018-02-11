@@ -50,13 +50,9 @@ class ConsumerEndpointFactory
      */
     public function createForMessageHandler(MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle
     {
-        $messageHandlerBuilder = $messageHandlerBuilder
-                                    ->setChannelResolver($this->channelResolver)
-                                    ->setReferenceSearchService($this->referenceSearchService);
-
         foreach ($this->consumerFactories as $consumerFactory) {
             if ($consumerFactory->isSupporting($this->channelResolver, $messageHandlerBuilder)) {
-                return $consumerFactory->create($this->channelResolver, $messageHandlerBuilder);
+                return $consumerFactory->create($this->channelResolver, $this->referenceSearchService, $messageHandlerBuilder);
             }
         }
 

@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 
@@ -25,11 +26,13 @@ class PollOrThrowMessageHandlerConsumerBuilderFactory implements MessageHandlerC
     /**
      * @inheritDoc
      */
-    public function create(ChannelResolver $channelResolver, MessageHandlerBuilder $messageHandlerBuilder): ConsumerLifecycle
+    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder): ConsumerLifecycle
     {
         /** @var PollableChannel $pollableChannel */
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
-        return PollOrThrowExceptionConsumer::create($messageHandlerBuilder->getConsumerName(), $pollableChannel, $messageHandlerBuilder->build());
+        return PollOrThrowExceptionConsumer::create($messageHandlerBuilder->getConsumerName(), $pollableChannel, $messageHandlerBuilder->build(
+            $channelResolver, $referenceSearchService
+        ));
     }
 }

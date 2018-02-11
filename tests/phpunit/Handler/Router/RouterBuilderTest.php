@@ -29,14 +29,15 @@ class RouterBuilderTest extends MessagingTest
         $objectToInvokeReference = "service-a";
 
         $router = RouterBuilder::create('test', $inputChannelName, $objectToInvokeReference, 'pick')
-                    ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
-                        $chanelName => $targetChannel,
-                        $inputChannelName => DirectChannel::create()
-                    ]))
-                    ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
-                        $objectToInvokeReference => SingleChannelRouter::createWithChosenChannelName($chanelName)
-                    ]))
-                    ->build();
+                    ->build(
+                        InMemoryChannelResolver::createFromAssociativeArray([
+                            $chanelName => $targetChannel,
+                            $inputChannelName => DirectChannel::create()
+                        ]),
+                        InMemoryReferenceSearchService::createWith([
+                            $objectToInvokeReference => SingleChannelRouter::createWithChosenChannelName($chanelName)
+                        ])
+                    );
 
         $message = MessageBuilder::withPayload('some')
             ->build();
@@ -54,18 +55,19 @@ class RouterBuilderTest extends MessagingTest
 
         $objectToInvokeReference = "service-a";
         $router = RouterBuilder::create('test', $inputChannelName, $objectToInvokeReference, 'pick')
-            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
-                'channel1' => $targetChannel1,
-                'channel2' => $targetChannel2,
-                $inputChannelName => DirectChannel::create()
-            ]))
-            ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
-                $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([
-                    'channel1',
-                    'channel2'
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    'channel1' => $targetChannel1,
+                    'channel2' => $targetChannel2,
+                    $inputChannelName => DirectChannel::create()
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([
+                        'channel1',
+                        'channel2'
+                    ])
                 ])
-            ]))
-            ->build();
+            );
 
         $message = MessageBuilder::withPayload('some')
             ->build();
@@ -81,13 +83,14 @@ class RouterBuilderTest extends MessagingTest
         $inputChannelName = "input";
         $objectToInvokeReference = "service-a";
         $router = RouterBuilder::create('test', $inputChannelName, $objectToInvokeReference, 'pick')
-            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
-                $inputChannelName => DirectChannel::create()
-            ]))
-            ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
-                $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([])
-            ]))
-            ->build();
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $inputChannelName => DirectChannel::create()
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([])
+                ])
+            );
 
         $message = MessageBuilder::withPayload('some')
             ->build();
@@ -103,13 +106,14 @@ class RouterBuilderTest extends MessagingTest
         $objectToInvokeReference = "service-a";
         $router = RouterBuilder::create('test', $inputChannelName, $objectToInvokeReference, 'pick')
             ->setResolutionRequired(false)
-            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
-                $inputChannelName => DirectChannel::create()
-            ]))
-            ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
-                $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([])
-            ]))
-            ->build();
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $inputChannelName => DirectChannel::create()
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([])
+                ])
+            );
 
         $message = MessageBuilder::withPayload('some')
             ->build();
@@ -129,12 +133,14 @@ class RouterBuilderTest extends MessagingTest
             \stdClass::class => 'channel1',
             Order::class => 'channel2'
         ])
-            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
-                'channel1' => $targetChannel1,
-                'channel2' => $targetChannel2,
-                $inputChannelName => DirectChannel::create()
-            ]))
-            ->build();
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    'channel1' => $targetChannel1,
+                    'channel2' => $targetChannel2,
+                    $inputChannelName => DirectChannel::create()
+                ]),
+                InMemoryReferenceSearchService::createEmpty()
+            );
 
         $message = MessageBuilder::withPayload(new \stdClass())
             ->build();
@@ -155,12 +161,14 @@ class RouterBuilderTest extends MessagingTest
             'private' => 'channel1',
             'public' => 'channel2'
         ])
-            ->setChannelResolver(InMemoryChannelResolver::createFromAssociativeArray([
-                'channel1' => $targetChannel1,
-                'channel2' => $targetChannel2,
-                $inputChannelName => DirectChannel::create()
-            ]))
-            ->build();
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    'channel1' => $targetChannel1,
+                    'channel2' => $targetChannel2,
+                    $inputChannelName => DirectChannel::create()
+                ]),
+                InMemoryReferenceSearchService::createEmpty()
+            );
 
         $message = MessageBuilder::withPayload('some')
                     ->setHeader($headerName, 'private')

@@ -1,6 +1,6 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\Annotation;
+namespace SimplyCodedSoftware\Messaging\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 

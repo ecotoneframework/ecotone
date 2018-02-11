@@ -4,7 +4,9 @@ namespace SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
@@ -16,12 +18,12 @@ use SimplyCodedSoftware\Messaging\Support\Assert;
  * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ServiceActivatorBuilder implements MessageHandlerBuilder
+class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConverters
 {
     /**
      * @var string
      */
-    private $objectToInvokeOnReference;
+    private $objectToInvokeReferenceName;
     /**
      * @var string
      */
@@ -35,9 +37,9 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
      */
     private $isReplyRequired = false;
     /**
-     * @var array|MethodParameterConverter[]
+     * @var array|\SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder[]
      */
-    private $methodArguments = [];
+    private $methodParameterConverterBuilders = [];
     /**
      * @var string
      */
@@ -45,35 +47,31 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     /**
      * @var string
      */
-    private $messageHandlerName;
+    private $consumerName;
     /**
-     * @var ChannelResolver
+     * @var string[]
      */
-    private $channelResolver;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
+    private $requiredReferenceNames;
 
     /**
      * ServiceActivatorBuilder constructor.
-     * @param string $objectToInvokeOnReference
+     * @param string $objectToInvokeOnReferenceName
      * @param string $methodName
      */
-    private function __construct(string $objectToInvokeOnReference, string $methodName)
+    private function __construct(string $objectToInvokeOnReferenceName, string $methodName)
     {
-        $this->objectToInvokeOnReference = $objectToInvokeOnReference;
+        $this->objectToInvokeReferenceName = $objectToInvokeOnReferenceName;
         $this->methodName = $methodName;
     }
 
     /**
-     * @param string $objectToInvokeOnReference
+     * @param string $objectToInvokeOnReferenceName
      * @param string $methodName
      * @return ServiceActivatorBuilder
      */
-    public static function create(string $objectToInvokeOnReference, string $methodName): self
+    public static function create(string $objectToInvokeOnReferenceName, string $methodName): self
     {
-        return new self($objectToInvokeOnReference, $methodName);
+        return new self($objectToInvokeOnReferenceName, $methodName);
     }
 
     /**
@@ -99,14 +97,13 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     }
 
     /**
-     * @param array|MethodParameterConverter[] $methodArguments
-     * @return ServiceActivatorBuilder
+     * @inheritDoc
      */
-    public function withMethodArguments(array $methodArguments): self
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders): void
     {
-        $this->methodArguments = $methodArguments;
+        Assert::allInstanceOfType($methodParameterConverterBuilders, MethodParameterConverterBuilder::class);
 
-        return $this;
+        $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
     }
 
     /**
@@ -116,26 +113,6 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
     public function withInputMessageChannel(string $inputMessageChannelName) : self
     {
         $this->inputMessageChannelName = $inputMessageChannelName;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
-    {
-        $this->channelResolver = $channelResolver;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setReferenceSearchService(ReferenceSearchService $referenceSearchService): MessageHandlerBuilder
-    {
-        $this->referenceSearchService = $referenceSearchService;
 
         return $this;
     }
@@ -153,16 +130,27 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
      */
     public function getRequiredReferenceNames(): array
     {
-        return [$this->objectToInvokeOnReference];
+        $requiredReferenceNames = $this->requiredReferenceNames;
+        $requiredReferenceNames[] = $this->objectToInvokeReferenceName;
+
+        return $requiredReferenceNames;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function registerRequiredReference(string $referenceName): void
+    {
+        $this->requiredReferenceNames[] = $referenceName;
     }
 
     /**
      * @param string $name
      * @return ServiceActivatorBuilder
      */
-    public function withName(string $name) : self
+    public function withConsumerName(string $name) : self
     {
-        $this->messageHandlerName = $name;
+        $this->consumerName = $name;
 
         return $this;
     }
@@ -172,27 +160,30 @@ class ServiceActivatorBuilder implements MessageHandlerBuilder
      */
     public function getConsumerName(): string
     {
-        return $this->messageHandlerName;
+        return $this->consumerName;
     }
 
     /**
-     * @return MessageHandler
+     * @inheritdoc
      */
-    public function build(): MessageHandler
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
     {
-        Assert::notNullAndEmpty($this->channelResolver, "You must pass channel resolver to Service Activator Builder");
-        Assert::notNullAndEmpty($this->referenceSearchService, "You must pass reference search service");
-        $objectToInvoke = $this->referenceSearchService->findByReference($this->objectToInvokeOnReference);
+        $parameterConverters = [];
+        foreach ($this->methodParameterConverterBuilders as $methodParameterConverterBuilder) {
+            $parameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
+        }
+
+        $objectToInvoke = $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
 
         return new ServiceActivatingHandler(
             RequestReplyProducer::createFrom(
-                $this->outputChannelName ? $this->channelResolver->resolve($this->outputChannelName) : null,
+                $this->outputChannelName ? $channelResolver->resolve($this->outputChannelName) : null,
                 MethodInvoker::createWith(
                     $objectToInvoke,
                     $this->methodName,
-                    $this->methodArguments
+                    $parameterConverters
                 ),
-                $this->channelResolver,
+                $channelResolver,
                 $this->isReplyRequired
             )
         );

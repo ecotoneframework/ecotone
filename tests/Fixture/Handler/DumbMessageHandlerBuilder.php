@@ -4,6 +4,8 @@ namespace Fixture\Handler;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 
@@ -12,7 +14,7 @@ use SimplyCodedSoftware\Messaging\MessageHandler;
  * @package Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class DumbMessageHandlerBuilder implements MessageHandlerBuilder
+class DumbMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {
     /**
      * @var MessageHandler
@@ -26,6 +28,10 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
      * @var string
      */
     private $messageHandlerName;
+    /**
+     * @var string[]
+     */
+    private $requiredReferenceNames = [];
 
     /**
      * DumbMessageHandlerBuilder constructor.
@@ -38,6 +44,8 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
         $this->messageHandlerName = $messageHandlerName;
         $this->messageHandler = $messageHandler;
         $this->messageChannel = $inputMessageChannelName;
+
+        $this->requiredReferenceNames = [get_class($this->messageHandler)];
     }
 
     /**
@@ -51,10 +59,15 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
         return new self($messageHandlerName, $messageHandler, $inputMessageChannelName);
     }
 
+    public static function createSimple() : self
+    {
+        return new self("handler", NoReturnMessageHandler::create(), "inputChannel");
+    }
+
     /**
      * @inheritDoc
      */
-    public function build(): MessageHandler
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
     {
         return $this->messageHandler;
     }
@@ -72,7 +85,23 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
      */
     public function getRequiredReferenceNames(): array
     {
-        return [get_class($this->messageHandler)];
+        return $this->requiredReferenceNames;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function registerRequiredReference(string $referenceName): void
+    {
+        $this->requiredReferenceNames[] = $referenceName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders): void
+    {
+        return;
     }
 
     /**
@@ -81,22 +110,6 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilder
     public function getConsumerName(): string
     {
         return $this->messageHandlerName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setChannelResolver(ChannelResolver $channelResolver): MessageHandlerBuilder
-    {
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setReferenceSearchService(ReferenceSearchService $referenceSearchService): MessageHandlerBuilder
-    {
-        return $this;
     }
 
     public function __toString()

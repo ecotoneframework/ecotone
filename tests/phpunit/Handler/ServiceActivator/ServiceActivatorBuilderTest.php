@@ -22,11 +22,12 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $objectToInvoke = ServiceExpectingOneArgument::create();
 
         $serviceActivator = ServiceActivatorBuilder::create($objectToInvokeOnReference, 'withoutReturnValue')
-                                ->setChannelResolver(InMemoryChannelResolver::createEmpty())
-                                ->setReferenceSearchService(InMemoryReferenceSearchService::createWith([
-                                    $objectToInvokeOnReference => $objectToInvoke
-                                ]))
-                                ->build();
+                                ->build(
+                                    InMemoryChannelResolver::createEmpty(),
+                                    InMemoryReferenceSearchService::createWith([
+                                        $objectToInvokeOnReference => $objectToInvoke
+                                    ])
+                                );
 
         $serviceActivator->handle(MessageBuilder::withPayload('some')->build());
 

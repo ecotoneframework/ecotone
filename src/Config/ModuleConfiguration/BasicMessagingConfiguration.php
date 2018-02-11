@@ -2,9 +2,9 @@
 
 namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
 
+use SimplyCodedSoftware\Messaging\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\Messaging\Config\ModuleMessagingConfiguration;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;

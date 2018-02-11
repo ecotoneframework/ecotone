@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\Annotation\ModuleConfiguration;
+use SimplyCodedSoftware\Messaging\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfigurationRetrievingService;
 
 /**

@@ -159,8 +159,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
         $gateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $gatewayBuilder->setChannelResolver($channelResolver);
-            $gateways[] = GatewayReference::createWith($gatewayBuilder);
+            $gateways[] = GatewayReference::createWith($gatewayBuilder, $channelResolver);
         }
 
         $messagingSystem = MessagingSystem::create($consumers, $gateways, $channelResolver);

@@ -1,9 +1,9 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
@@ -11,7 +11,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PayloadMethodParameterToMessageMessageParameter implements MethodParameterToMessageConverter
+class PayloadToMessageConverter implements ParameterToMessageConverter
 {
     /**
      * @var string
@@ -29,7 +29,7 @@ class PayloadMethodParameterToMessageMessageParameter implements MethodParameter
 
     /**
      * @param string $parameterName
-     * @return PayloadMethodParameterToMessageMessageParameter
+     * @return PayloadToMessageConverter
      */
     public static function create(string $parameterName) : self
     {
@@ -39,17 +39,9 @@ class PayloadMethodParameterToMessageMessageParameter implements MethodParameter
     /**
      * @inheritDoc
      */
-    public function hasParameterNameAs(MethodArgument $methodArgument): bool
+    public function isSupporting(MethodArgument $methodArgument): bool
     {
         return $this->parameterName == $methodArgument->getParameterName();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasParameterName(string $parameterName): bool
-    {
-        return $this->parameterName == $parameterName;
     }
 
     /**

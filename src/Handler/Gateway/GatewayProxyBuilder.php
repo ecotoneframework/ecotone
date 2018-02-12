@@ -46,13 +46,9 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     private $replyChannelName;
     /**
-     * @var array|MethodParameterToMessageConverter[]
+     * @var array|ParameterToMessageConverterBuilder[]
      */
     private $methodArgumentConverters = [];
-    /**
-     * @var ChannelResolver
-     */
-    private $channelResolver;
 
     /**
      * GatewayProxyBuilder constructor.
@@ -128,20 +124,12 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
-     * @inheritDoc
-     */
-    public function setChannelResolver(ChannelResolver $channelResolver): void
-    {
-        $this->channelResolver = $channelResolver;
-    }
-
-    /**
      * @param array $methodArgumentConverters
      * @return GatewayProxyBuilder
      */
-    public function withMethodArgumentConverters(array $methodArgumentConverters): self
+    public function withParameterToMessageConverters(array $methodArgumentConverters): self
     {
-        Assert::allInstanceOfType($methodArgumentConverters, MethodParameterToMessageConverter::class);
+        Assert::allInstanceOfType($methodArgumentConverters, ParameterToMessageConverterBuilder::class);
 
         $this->methodArgumentConverters = $methodArgumentConverters;
 
@@ -149,13 +137,11 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
-     * Returns proxy to passed interface
-     *
-     * @return object
+     * @inheritdoc
      */
-    public function build()
+    public function build(ChannelResolver $channelResolver)
     {
-        $replyChannel = $this->replyChannelName ? $this->channelResolver->resolve($this->replyChannelName) : null;
+        $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
 
         $replySender = new EmptyReplySender();
         if ($replyChannel) {
@@ -169,13 +155,18 @@ class GatewayProxyBuilder implements GatewayBuilder
         }
 
         /** @var DirectChannel $requestChannel */
-        $requestChannel = $this->channelResolver->resolve($this->requestChannelName);
+        $requestChannel = $channelResolver->resolve($this->requestChannelName);
         Assert::isSubclassOf($requestChannel, DirectChannel::class, "Gateway request channel ");
+
+        $methodArgumentConverters = [];
+        foreach ($this->methodArgumentConverters as $messageConverterBuilder) {
+            $methodArgumentConverters[] = $messageConverterBuilder->build();
+        }
 
         $gatewayProxy = new GatewayProxy(
             $this->interfaceName, $this->methodName,
             new MethodCallToMessageConverter(
-                $this->interfaceName, $this->methodName, $this->methodArgumentConverters
+                $this->interfaceName, $this->methodName, $methodArgumentConverters
             ),
             ErrorReplySender::create($replySender),
             $requestChannel

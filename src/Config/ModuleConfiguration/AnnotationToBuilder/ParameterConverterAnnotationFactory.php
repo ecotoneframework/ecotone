@@ -1,14 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
+namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
 use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\HeaderParameterConverterAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\MessageParameterConverterAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\PayloadParameterConverterAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\ReferenceServiceConverterAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\ParameterConverterAnnotation;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\HeaderParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\MessageParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\PayloadParameterConverterBuilder;
@@ -36,11 +35,13 @@ class ParameterConverterAnnotationFactory
     /**
      * @param MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder
      * @param string $relatedClassName
+     * @param string $methodName
      * @param array|ParameterConverterAnnotation[] $parameterConverterAnnotations
      * @return void
      */
-    public function configureParameterConverters(MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder, string $relatedClassName, array $parameterConverterAnnotations) : void
+    public function configureParameterConverters(MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder, string $relatedClassName, string $methodName, array $parameterConverterAnnotations) : void
     {
+        $interfaceToCall = InterfaceToCall::create($relatedClassName, $methodName);
         $parameterConverters = [];
 
         foreach ($parameterConverterAnnotations as $parameterConverterAnnotation) {
@@ -51,7 +52,8 @@ class ParameterConverterAnnotationFactory
             }else if ($parameterConverterAnnotation instanceof MessageParameterConverterAnnotation) {
                 $parameterConverters[] = MessageParameterConverterBuilder::create($parameterConverterAnnotation->parameterName);
             }else if ($parameterConverterAnnotation instanceof ReferenceServiceConverterAnnotation) {
-                $referenceName = $parameterConverterAnnotation->referenceName ? $parameterConverterAnnotation->referenceName : $relatedClassName;
+                $parameter = $interfaceToCall->getParameterWithName($parameterConverterAnnotation->parameterName);
+                $referenceName = $parameterConverterAnnotation->referenceName ? $parameterConverterAnnotation->referenceName : $parameter->getTypeHint();
                 $messageHandlerBuilder->registerRequiredReference($referenceName);
 
                 $parameterConverters[] = ReferenceServiceParameterConverterBuilder::create(

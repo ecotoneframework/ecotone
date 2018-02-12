@@ -29,6 +29,14 @@ class PublishSubscribeChannel implements SubscribableChannel
     }
 
     /**
+     * @return PublishSubscribeChannel
+     */
+    public static function create() : self
+    {
+        return new self(new BroadcastingDispatcher());
+    }
+
+    /**
      * @inheritDoc
      */
     public function send(Message $message): void

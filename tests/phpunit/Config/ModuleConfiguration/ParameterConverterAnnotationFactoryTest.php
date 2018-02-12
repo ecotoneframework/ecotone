@@ -3,9 +3,8 @@
 namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
 
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
-use Fixture\Handler\DumbMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\ReferenceServiceConverterAnnotation;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\ParameterConverterAnnotationFactory;
+use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\ParameterConverterAnnotationFactory;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\ReferenceServiceParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
@@ -21,25 +20,27 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
         $parameterConverterAnnotation = new ReferenceServiceConverterAnnotation();
-        $parameterConverterAnnotation->parameterName = "some";
+        $parameterConverterAnnotation->parameterName = "object";
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
-        $messageHandler = ServiceActivatorBuilder::create($relatedClassName, "sendMessage");
+        $methodName = "sendMessage";
+        $messageHandler = ServiceActivatorBuilder::create($relatedClassName, $methodName);
         $messageHandler
             ->withMethodParameterConverters([
                 ReferenceServiceParameterConverterBuilder::create(
                     $parameterConverterAnnotation->parameterName,
-                    $relatedClassName,
+                    \stdClass::class,
                     $messageHandler
                 )
             ]);
         $messageHandler
-            ->registerRequiredReference($relatedClassName);
+            ->registerRequiredReference(\stdClass::class);
 
-        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, "sendMessage");
+        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
         $parameterConverterAnnotationFactory->configureParameterConverters(
             $messageHandlerBuilderToCompare,
             $relatedClassName,
+            $methodName,
             [$parameterConverterAnnotation]
         );
 

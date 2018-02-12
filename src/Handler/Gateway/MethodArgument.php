@@ -12,9 +12,9 @@ use SimplyCodedSoftware\Messaging\Support\Assert;
 class MethodArgument
 {
     /**
-     * @var string
+     * @var \ReflectionParameter
      */
-    private $parameterName;
+    private $parameter;
     /**
      * @var mixed
      */
@@ -22,22 +22,21 @@ class MethodArgument
 
     /**
      * MethodArgument constructor.
-     * @param string $parameterName
+     * @param \ReflectionParameter $parameter
      * @param mixed $value
      */
-    private function __construct(string $parameterName, $value)
+    private function __construct(\ReflectionParameter $parameter, $value)
     {
+        $this->parameter = $parameter;
         $this->value = $value;
-
-        $this->initialize($parameterName);
     }
 
     /**
-     * @param string $parameterName
-     * @param $value
+     * @param \ReflectionParameter $parameterName
+     * @param mixed $value
      * @return MethodArgument
      */
-    public static function createWith(string $parameterName, $value) : self
+    public static function createWith(\ReflectionParameter $parameterName, $value) : self
     {
         return new self($parameterName, $value);
     }
@@ -47,7 +46,15 @@ class MethodArgument
      */
     public function getParameterName() : string
     {
-        return $this->parameterName;
+        return $this->parameter->getName();
+    }
+
+    /**
+     * @return \ReflectionParameter
+     */
+    public function getParameter() : \ReflectionParameter
+    {
+        return $this->parameter;
     }
 
     /**
@@ -56,15 +63,5 @@ class MethodArgument
     public function value()
     {
         return $this->value;
-    }
-
-    /**
-     * @param string $parameterName
-     */
-    private function initialize(string $parameterName) : void
-    {
-        Assert::notNullAndEmpty($parameterName, "Argument to method must contain parameter name");
-
-        $this->parameterName = $parameterName;
     }
 }

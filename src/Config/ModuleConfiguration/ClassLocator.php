@@ -1,7 +1,6 @@
 <?php
 
 namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
-use Doctrine\Common\Annotations\AnnotationReader;
 
 /**
  * Class ClassLocator
@@ -11,13 +10,13 @@ use Doctrine\Common\Annotations\AnnotationReader;
 interface ClassLocator
 {
     /**
-     * @return array|\ReflectionClass[]
+     * @return string[]
      */
     public function getAllClasses(): array;
 
     /**
      * @param string $annotationName
-     * @return array|\ReflectionClass[]
+     * @return string[]
      */
     public function getAllClassesWithAnnotation(string $annotationName): array;
 }

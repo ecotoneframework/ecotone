@@ -48,15 +48,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function setChannelResolver(ChannelResolver $channelResolver): void
-    {
-        // TODO: Implement setChannelResolver() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function build()
+    public function build(ChannelResolver $channelResolver)
     {
         return new \stdClass();
     }

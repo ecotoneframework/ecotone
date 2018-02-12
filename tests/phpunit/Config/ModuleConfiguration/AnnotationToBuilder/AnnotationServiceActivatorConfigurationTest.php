@@ -1,20 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\Annotation;
+namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use Fixture\Annotation\FileSystem\DumbModuleConfiguration;
-use Fixture\Configuration\DumbConfigurationObserver;
-use Fixture\Configuration\DumbModuleConfigurationRetrievingService;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationModuleConfigurationRetrievingService;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationServiceActivatorConfiguration;
+use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationServiceActivatorConfiguration;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\HeaderParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\MessageParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\PayloadParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\ReferenceServiceParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 /**
@@ -28,6 +21,7 @@ class AnnotationServiceActivatorConfigurationTest extends AnnotationConfiguratio
     {
         $configuration = $this->createMessagingSystemConfiguration();
         $this->annotationConfiguration->registerWithin($configuration);
+
         $serviceActivatorBuilder = ServiceActivatorBuilder::create("message_sender", "sendMessage");
         $serviceActivatorBuilder->withMethodParameterConverters([
             HeaderParameterConverterBuilder::create("to", "sendTo"),

@@ -1,10 +1,9 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
 use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterToMessageConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\PayloadMethodArgumentConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
@@ -12,20 +11,12 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class OnlyPayloadMessageParameterMethodParameterToMessageConverter implements MethodParameterToMessageConverter
+class OnlyPayloadToMessageConverter implements ParameterToMessageConverter
 {
     /**
      * @inheritDoc
      */
-    public function hasParameterNameAs(MethodArgument $methodArgument): bool
-    {
-        return true;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasParameterName(string $parameterName): bool
+    public function isSupporting(MethodArgument $methodArgument): bool
     {
         return true;
     }

@@ -42,7 +42,7 @@ class FileSystemClassLocator implements ClassLocator {
     }
 
     /**
-     * @return array|string[]
+     * @inheritdoc
      */
     public function getAllClasses() : array
     {
@@ -50,8 +50,7 @@ class FileSystemClassLocator implements ClassLocator {
     }
 
     /**
-     * @param string $annotationName
-     * @return array|string[]
+     * @inheritdoc
      */
     public function getAllClassesWithAnnotation(string $annotationName) : array
     {

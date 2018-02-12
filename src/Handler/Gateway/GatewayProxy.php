@@ -68,7 +68,7 @@ class GatewayProxy
         $parameters = $interfaceToCall->parameters();
         $countArguments = count($methodArgumentValues);
         for ($index = 0; $index < $countArguments; $index++) {
-            $methodArguments[] = MethodArgument::createWith($parameters[$index]->getName(), $methodArgumentValues[$index]);
+            $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
         }
 
         $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
@@ -83,7 +83,7 @@ class GatewayProxy
         }
 
         $replyMessage = $this->replySender->receiveReply();
-        if (is_null($replyMessage) && !$interfaceToCall->doesItReturnValue() && !$interfaceToCall->canItReturnNull()) {
+        if (is_null($replyMessage) && !$interfaceToCall->doesItNotReturnValue() && !$interfaceToCall->canItReturnNull()) {
             throw InvalidArgumentException::create("{$interfaceToCall} expects value, but null was returned. Change return type hint to allow nullable values.");
         }
 
@@ -100,10 +100,10 @@ class GatewayProxy
     private function initialize(string $interfaceName, string $methodName, ReplySender $replySender) : void
     {
         $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName);
-        if ($interfaceToCall->doesItReturnValue() && $replySender->hasReply()) {
+        if ($interfaceToCall->doesItNotReturnValue() && $replySender->hasReply()) {
             throw InvalidArgumentException::create("Can't create gateway with reply channel, when {$interfaceToCall} is void");
         }
-        if (!$interfaceToCall->doesItReturnValue() && !$replySender->hasReply()) {
+        if (!$interfaceToCall->doesItNotReturnValue() && !$replySender->hasReply()) {
             throw InvalidArgumentException::create("Interface {$interfaceToCall} has return value, but no reply channel was defined");
         }
     }

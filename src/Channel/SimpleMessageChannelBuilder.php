@@ -42,6 +42,33 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
+     * @param string $messageChannelName
+     * @return SimpleMessageChannelBuilder
+     */
+    public static function createDirectMessageChannel(string $messageChannelName) : self
+    {
+        return self::create($messageChannelName, DirectChannel::create());
+    }
+
+    /**
+     * @param string $messageChannelName
+     * @return SimpleMessageChannelBuilder
+     */
+    public static function createPublishSubscribeChannel(string $messageChannelName) : self
+    {
+        return self::create($messageChannelName, PublishSubscribeChannel::create());
+    }
+
+    /**
+     * @param string $messageChannelName
+     * @return SimpleMessageChannelBuilder
+     */
+    public static function createQueueChannel(string $messageChannelName) : self
+    {
+        return self::create($messageChannelName, QueueChannel::create());
+    }
+
+    /**
      * @inheritDoc
      */
     public function getMessageChannelName(): string

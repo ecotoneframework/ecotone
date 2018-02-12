@@ -1,9 +1,9 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterToMessageConverter;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
@@ -11,7 +11,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class StaticHeaderMessageParameterToMessageConverter implements MethodParameterToMessageConverter
+class StaticHeaderToMessageConverter implements ParameterToMessageConverter
 {
     /**
      * @var string
@@ -36,7 +36,7 @@ class StaticHeaderMessageParameterToMessageConverter implements MethodParameterT
     /**
      * @param string $headerName
      * @param string $headerValue
-     * @return StaticHeaderMessageParameterToMessageConverter
+     * @return StaticHeaderToMessageConverter
      */
     public static function create(string $headerName, string $headerValue) : self
     {
@@ -55,15 +55,7 @@ class StaticHeaderMessageParameterToMessageConverter implements MethodParameterT
     /**
      * @inheritDoc
      */
-    public function hasParameterNameAs(MethodArgument $methodArgument): bool
-    {
-        return true;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasParameterName(string $parameterName): bool
+    public function isSupporting(MethodArgument $methodArgument): bool
     {
         return true;
     }

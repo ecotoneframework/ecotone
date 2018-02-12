@@ -28,11 +28,7 @@ interface GatewayBuilder
 
     /**
      * @param ChannelResolver $channelResolver
-     */
-    public function setChannelResolver(ChannelResolver $channelResolver) : void;
-
-    /**
      * @return object
      */
-    public function build();
+    public function build(ChannelResolver $channelResolver);
 }

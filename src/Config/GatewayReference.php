@@ -1,6 +1,7 @@
 <?php
 
 namespace SimplyCodedSoftware\Messaging\Config;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 
@@ -35,11 +36,12 @@ class GatewayReference
 
     /**
      * @param GatewayBuilder $gatewayBuilder
+     * @param ChannelResolver $channelResolver
      * @return GatewayReference
      */
-    public static function createWith(GatewayBuilder $gatewayBuilder) : self
+    public static function createWith(GatewayBuilder $gatewayBuilder, ChannelResolver $channelResolver) : self
     {
-        return new self($gatewayBuilder->getReferenceName(), $gatewayBuilder->build());
+        return new self($gatewayBuilder->getReferenceName(), $gatewayBuilder->build($channelResolver));
     }
 
     /**

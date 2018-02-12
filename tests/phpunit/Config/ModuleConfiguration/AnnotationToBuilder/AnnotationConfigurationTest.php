@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\Annotation;
+namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Configuration\DumbConfigurationObserver;

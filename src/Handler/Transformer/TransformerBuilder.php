@@ -50,16 +50,16 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      * @param string $outputChannelName
      * @param string $objectToInvokeReference
      * @param string $methodName
-     * @param string $handlerName
+     * @param string $consumerName
      */
-    private function __construct(string $inputChannelName, string $outputChannelName, string $objectToInvokeReference, string $methodName, string $handlerName)
+    private function __construct(string $inputChannelName, string $outputChannelName, string $objectToInvokeReference, string $methodName, string $consumerName)
     {
         $this->objectToInvokeReferenceName = $objectToInvokeReference;
         $this->methodName = $methodName;
 
         $this->withInputMessageChannel($inputChannelName);
         $this->withOutputMessageChannel($outputChannelName);
-        $this->withName($handlerName);
+        $this->withName($consumerName);
     }
 
     /**
@@ -67,24 +67,24 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      * @param string $outputChannelName
      * @param string $objectToInvokeReference
      * @param string $methodName
-     * @param string $handlerName
+     * @param string $consumerName
      * @return TransformerBuilder
      */
-    public static function create(string $inputChannelName, string $outputChannelName, string $objectToInvokeReference, string $methodName, string $handlerName): self
+    public static function create(string $inputChannelName, string $outputChannelName, string $objectToInvokeReference, string $methodName, string $consumerName): self
     {
-        return new self($inputChannelName, $outputChannelName, $objectToInvokeReference, $methodName, $handlerName);
+        return new self($inputChannelName, $outputChannelName, $objectToInvokeReference, $methodName, $consumerName);
     }
 
     /**
-     * @param string $handlerName
+     * @param string $consumerName
      * @param string $inputChannelName
      * @param string $outputChannelName
-     * @param array $messageHeaders
+     * @param array|string[] $messageHeaders
      * @return TransformerBuilder
      */
-    public static function createHeaderEnricher(string $handlerName, string $inputChannelName, string $outputChannelName, array $messageHeaders) : self
+    public static function createHeaderEnricher(string $consumerName, string $inputChannelName, string $outputChannelName, array $messageHeaders) : self
     {
-        $transformerBuilder = new self($inputChannelName, $outputChannelName, "", "transform", $handlerName);
+        $transformerBuilder = new self($inputChannelName, $outputChannelName, "", "transform", $consumerName);
         $transformerBuilder->setDirectObjectToInvoke(HeaderEnricher::create($messageHeaders));
 
         return $transformerBuilder;
@@ -125,22 +125,14 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     {
         $objectToInvokeOn = $this->object ? $this->object : $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
         $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
-        $firstParameterName = $interfaceToCall->getFirstParameterName();
-        $methodParameterConverters = [];
-        foreach ($this->methodParameterConverterBuilders as $methodParameterConverterBuilder) {
-            $methodParameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
-        }
 
-        if ($interfaceToCall->doesItReturnValue()) {
+        if ($interfaceToCall->doesItNotReturnValue()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
-        if (empty($methodParameterConverters)) {
-            if ($interfaceToCall->hasFirstParameterMessageTypeHint()) {
-                $methodParameterConverters[] = MessageParameterConverter::create($firstParameterName);
-            }else {
-                $methodParameterConverters[] = PayloadParameterConverter::create($firstParameterName);
-            }
+        $methodParameterConverters = [];
+        foreach ($this->methodParameterConverterBuilders as $methodParameterConverterBuilder) {
+            $methodParameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
         }
 
         return new Transformer(
@@ -158,6 +150,8 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
             )
         );
     }
+
+
 
     public function __toString()
     {

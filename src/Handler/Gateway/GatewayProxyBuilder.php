@@ -7,12 +7,13 @@ use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\ChannelReplySender;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\EmptyReplySender;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\DefaultReplySender;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\ErrorReplySender;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\TimeoutChannelReplySender;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class GatewayProxySpec
@@ -142,8 +143,9 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function build(ChannelResolver $channelResolver)
     {
         $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
+        $interfaceToCall = InterfaceToCall::create($this->interfaceName, $this->methodName);
 
-        $replySender = new EmptyReplySender();
+        $replySender = DefaultReplySender::create();
         if ($replyChannel) {
             /** @var PollableChannel $replyChannel */
             Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");
@@ -157,6 +159,10 @@ class GatewayProxyBuilder implements GatewayBuilder
         /** @var DirectChannel $requestChannel */
         $requestChannel = $channelResolver->resolve($this->requestChannelName);
         Assert::isSubclassOf($requestChannel, DirectChannel::class, "Gateway request channel ");
+
+        if ($interfaceToCall->doesItNotReturnValue() && $this->replyChannelName) {
+            throw InvalidArgumentException::create("Can't set reply channel for {$interfaceToCall}");
+        }
 
         $methodArgumentConverters = [];
         foreach ($this->methodArgumentConverters as $messageConverterBuilder) {

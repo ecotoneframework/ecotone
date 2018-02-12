@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
@@ -13,10 +14,11 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 interface ReplySender
 {
     /**
+     * @param InterfaceToCall $interfaceToCall
      * @param MessageBuilder $messageBuilder
      * @return MessageBuilder
      */
-    public function addErrorChannel(MessageBuilder $messageBuilder) : MessageBuilder;
+    public function prepareFor(InterfaceToCall $interfaceToCall, MessageBuilder $messageBuilder) : MessageBuilder;
 
     /**
      * Receives reply after sending message to request channel and forward it internally

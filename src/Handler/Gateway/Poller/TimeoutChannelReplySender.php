@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway\Poller;
 
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ReplySender;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
@@ -38,7 +39,7 @@ class TimeoutChannelReplySender implements ReplySender
     /**
      * @inheritDoc
      */
-    public function addErrorChannel(MessageBuilder $messageBuilder): MessageBuilder
+    public function prepareFor(InterfaceToCall $interfaceToCall, MessageBuilder $messageBuilder): MessageBuilder
     {
         return $messageBuilder
                     ->setErrorChannel($this->replyChannel);

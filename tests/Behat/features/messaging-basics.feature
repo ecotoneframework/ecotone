@@ -116,3 +116,4 @@ Feature: Service activator
     When I send order request with id 3 product name "INCORRECT" using gateway "orderingService"
     And "orderProcessor" handles message
     Then I expect exception during confirmation receiving
+

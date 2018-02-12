@@ -49,7 +49,7 @@ class GatewayProxy
         $this->className = $className;
         $this->methodName = $methodName;
 
-        $this->initialize($className, $methodName, $replySender);
+//        $this->initialize($className, $methodName, $replySender);
         $this->requestChannel = $requestChannel;
         $this->replySender = $replySender;
     }
@@ -73,7 +73,7 @@ class GatewayProxy
 
         $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
         $message = $this->replySender
-                        ->addErrorChannel($message)
+                        ->prepareFor($interfaceToCall, $message)
                         ->build();
 
         $this->requestChannel->send($message);

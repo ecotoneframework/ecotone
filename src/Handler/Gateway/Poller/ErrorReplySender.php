@@ -1,7 +1,9 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\Messaging\Handler\Gateway\Poller;
 
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ReplySender;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
@@ -21,14 +23,6 @@ class ErrorReplySender implements ReplySender
     private $replySender;
 
     /**
-     * @inheritDoc
-     */
-    public function addErrorChannel(MessageBuilder $messageBuilder): MessageBuilder
-    {
-        return $this->replySender->addErrorChannel($messageBuilder);
-    }
-
-    /**
      * ErrorReplySender constructor.
      * @param ReplySender $replySender
      */
@@ -44,6 +38,14 @@ class ErrorReplySender implements ReplySender
     public static function create(ReplySender $replySender) : self
     {
         return new self($replySender);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function prepareFor(InterfaceToCall $interfaceToCall, MessageBuilder $messageBuilder): MessageBuilder
+    {
+        return $this->replySender->prepareFor($interfaceToCall, $messageBuilder);
     }
 
     /**

@@ -100,22 +100,6 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_throwing_exception_when_no_reply_channel_defined_for_receive_only()
-    {
-        $messageHandler = NoReturnMessageHandler::create();
-        $requestChannelName = "request-channel";
-        $requestChannel = DirectChannel::create();
-        $requestChannel->subscribe($messageHandler);
-
-        $gatewayProxyBuilder = GatewayProxyBuilder::create("ref-name", ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName);
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $gatewayProxyBuilder->build(InMemoryChannelResolver::createFromAssociativeArray([
-            $requestChannelName => $requestChannel
-        ]));
-    }
-
     public function test_throwing_exception_if_service_has_no_return_type()
     {
         $messageHandler = NoReturnMessageHandler::create();
@@ -213,14 +197,10 @@ class GatewayProxyBuilderTest extends MessagingTest
         ]));
         $gatewayProxy->sendMail($content);
 
-        $this->assertMessages(
-            MessageBuilder::withPayload($content)
-                ->setHeader('personId', $personId)
-                ->setHeader('personName', $personName)
-                ->setHeader(MessageHeaders::ERROR_CHANNEL, "errorChannel")
-                ->build(),
-            $messageHandler->message()
-        );
+        $message = $messageHandler->message();
+        $this->assertEquals($personId, $message->getHeaders()->get("personId"));
+        $this->assertEquals($personName, $message->getHeaders()->get("personName"));
+        $this->assertEquals($content, $message->getPayload());
     }
 
     public function test_executing_with_multiple_message_converters_for_same_parameter()
@@ -243,14 +223,9 @@ class GatewayProxyBuilderTest extends MessagingTest
         ]));
         $gatewayProxy->sendMail($content);
 
-        $this->assertMessages(
-            MessageBuilder::withPayload("empty")
-                ->setHeader('test1', $content)
-                ->setHeader('test2', $content)
-                ->setHeader(MessageHeaders::ERROR_CHANNEL, "errorChannel")
-                ->build(),
-            $messageHandler->message()
-        );
+        $message = $messageHandler->message();
+        $this->assertEquals($content, $message->getHeaders()->get("test1"));
+        $this->assertEquals($content, $message->getHeaders()->get("test2"));
     }
 
     public function test_resolving_response_in_future()

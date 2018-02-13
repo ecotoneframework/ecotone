@@ -3,6 +3,7 @@
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
 use Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationTransformerConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
@@ -19,7 +20,7 @@ class AnnotationTransformerConfigurationTest extends AnnotationConfigurationTest
     {
         $configuration = $this->createMessagingSystemConfiguration();
 
-        $this->annotationConfiguration->registerWithin($configuration);
+        $this->annotationConfiguration->registerWithin($configuration, InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $messageHandlerBuilder = TransformerBuilder::create(
             "inputChannel", "outputChannel", TransformerWithMethodParameterExample::class, "send", TransformerWithMethodParameterExample::class

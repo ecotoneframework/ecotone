@@ -24,11 +24,6 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 interface Configuration
 {
     /**
-     * @return ReferenceSearchService
-     */
-    public function getReferenceSearchService() : ReferenceSearchService;
-
-    /**
      * @param MessageChannelBuilder $messageChannelBuilder
      * @return MessagingSystemConfiguration
      */

@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurati
 use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Configuration\DumbConfigurationObserver;
 use Fixture\Configuration\DumbModuleConfigurationRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\DoctrineClassMetadataReader;
@@ -51,6 +52,7 @@ abstract class AnnotationConfigurationTest extends MessagingTest
     {
         return MessagingSystemConfiguration::prepare(
             DumbModuleConfigurationRetrievingService::createEmpty(),
+            InMemoryConfigurationVariableRetrievingService::createEmpty(),
             DumbConfigurationObserver::create()
         );
     }

@@ -4,6 +4,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurati
 
 use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationApplicationContextConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
@@ -19,7 +20,7 @@ class AnnotationApplicationContextConfigurationTest extends AnnotationConfigurat
     {
         $configuration = $this->createMessagingSystemConfiguration();
 
-        $this->annotationConfiguration->registerWithin($configuration);
+        $this->annotationConfiguration->registerWithin($configuration, InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

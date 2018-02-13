@@ -3,6 +3,7 @@
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
 use Fixture\Annotation\MessageEndpoint\Gateway\GatewayWithReplyChannelExample;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationGatewayConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
@@ -18,7 +19,7 @@ class AnnotationGatewayConfigurationTest extends AnnotationConfigurationTest
     {
         $configuration = $this->createMessagingSystemConfiguration();
 
-        $this->annotationConfiguration->registerWithin($configuration);
+        $this->annotationConfiguration->registerWithin($configuration, InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

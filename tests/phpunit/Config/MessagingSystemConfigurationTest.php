@@ -10,6 +10,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageDispatchingException;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessagingConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
@@ -84,7 +85,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     public function test_notifying_observer()
     {
         $dumbConfigurationObserver = DumbConfigurationObserver::create();
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), $dumbConfigurationObserver);
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), $dumbConfigurationObserver);
 
         $messagingSystemConfiguration
             ->registerMessageHandler(DumbMessageHandlerBuilder::create('some', NoReturnMessageHandler::create(), 'queue'))
@@ -102,6 +103,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
      */
     private function createMessagingSystemConfiguration(): MessagingSystemConfiguration
     {
-        return MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), DumbConfigurationObserver::create());
+        return MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
     }
 }

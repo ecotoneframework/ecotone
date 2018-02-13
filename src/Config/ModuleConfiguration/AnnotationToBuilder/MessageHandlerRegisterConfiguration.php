@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\An
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\ClassLocator;
@@ -31,7 +32,7 @@ abstract class MessageHandlerRegisterConfiguration implements AnnotationConfigur
     /**
      * @inheritDoc
      */
-    public function registerWithin(Configuration $configuration): void
+    public function registerWithin(Configuration $configuration, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
     {
         $annotationMessageEndpointConfigurationFinder = new AnnotationClassesWithMethodFinder($this->classLocator, $this->classMetadataReader);
         $parameterConvertAnnotationFactory = ParameterConverterAnnotationFactory::create();

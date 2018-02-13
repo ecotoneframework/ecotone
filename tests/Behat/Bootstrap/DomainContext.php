@@ -12,6 +12,7 @@ use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
 use Fixture\Configuration\DumbConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessagingConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
@@ -59,7 +60,7 @@ class DomainContext implements Context
     public function __construct()
     {
         $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
-        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), DumbConfigurationObserver::create());
+        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Fixture\Annotation\FileSystem;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration;
 
@@ -18,7 +19,7 @@ class DumbModuleConfiguration implements ModuleMessagingConfiguration
     /**
      * @inheritDoc
      */
-    public function registerWithin(Configuration $configuration): void
+    public function registerWithin(Configuration $configuration, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
     {
 
     }

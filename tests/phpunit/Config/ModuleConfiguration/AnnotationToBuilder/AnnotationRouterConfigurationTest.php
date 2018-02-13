@@ -3,6 +3,7 @@
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
 use Fixture\Annotation\MessageEndpoint\Router\RouterWithNoResolutionRequiredExample;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationRouterConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
@@ -18,7 +19,7 @@ class AnnotationRouterConfigurationTest extends AnnotationConfigurationTest
     public function test_creating_router_builder_from_annotation()
     {
         $configuration = $this->createMessagingSystemConfiguration();
-        $this->annotationConfiguration->registerWithin($configuration);
+        $this->annotationConfiguration->registerWithin($configuration, InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $objectToInvokeReference = RouterWithNoResolutionRequiredExample::class;
 

@@ -30,13 +30,9 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private $consumerFactories = [];
     /**
-     * @var ReferenceSearchService
+     * @var ModuleMessagingConfiguration[]
      */
-    private $referenceSearchService;
-    /**
-     * @var ModuleConfigurationRetrievingService
-     */
-    private $moduleConfigurationRetrievingService;
+    private $moduleConfigurations = [];
     /**
      * @var array|GatewayBuilder[]
      */
@@ -51,30 +47,24 @@ final class MessagingSystemConfiguration implements Configuration
      *
      * MessagingSystemConfiguration constructor.
      * @param ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService
+     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
      * @param ConfigurationObserver $configurationObserver
      */
-    private function __construct(ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService, ConfigurationObserver $configurationObserver)
+    private function __construct(ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ConfigurationObserver $configurationObserver)
     {
-        $this->moduleConfigurationRetrievingService = $moduleConfigurationRetrievingService;
         $this->configurationObserver = $configurationObserver;
+        $this->initialize($moduleConfigurationRetrievingService, $configurationVariableRetrievingService);
     }
 
     /**
      * @param ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService
+     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
      * @param ConfigurationObserver $configurationObserver
      * @return MessagingSystemConfiguration
      */
-    public static function prepare(ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService, ConfigurationObserver $configurationObserver) : self
+    public static function prepare(ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ConfigurationObserver $configurationObserver) : self
     {
-        return new self($moduleConfigurationRetrievingService, $configurationObserver);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getReferenceSearchService(): ReferenceSearchService
-    {
-        return $this->referenceSearchService;
+        return new self($moduleConfigurationRetrievingService, $configurationVariableRetrievingService, $configurationObserver);
     }
 
     /**
@@ -144,14 +134,8 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService) : ConfiguredMessagingSystem
     {
-        $this->referenceSearchService = $referenceSearchService;
-        $moduleMessagingConfigurations = $this->moduleConfigurationRetrievingService->findAllModuleConfigurations();
-        foreach ($moduleMessagingConfigurations as $moduleMessagingConfiguration) {
-            $moduleMessagingConfiguration->registerWithin($this);
-        }
-
         $channelResolver = InMemoryChannelResolver::create($this->namedChannels);
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $this->referenceSearchService, $this->consumerFactories);
+        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories);
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
@@ -164,11 +148,25 @@ final class MessagingSystemConfiguration implements Configuration
 
         $messagingSystem = MessagingSystem::create($consumers, $gateways, $channelResolver);
         $this->configurationObserver->notifyConfigurationWasFinished($messagingSystem);
-        foreach ($moduleMessagingConfigurations as $moduleMessagingConfiguration) {
+        foreach ($this->moduleConfigurations as $moduleMessagingConfiguration) {
             $moduleMessagingConfiguration->postConfigure($messagingSystem);
         }
 
         return $messagingSystem;
+    }
+
+    /**
+     * @param ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService
+     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
+     */
+    private function initialize(ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService) : void
+    {
+        $moduleMessagingConfigurations = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
+        foreach ($moduleMessagingConfigurations as $moduleMessagingConfiguration) {
+            $moduleMessagingConfiguration->registerWithin($this, $configurationVariableRetrievingService);
+        }
+
+        $this->moduleConfigurations = $moduleMessagingConfigurations;
     }
 
     /**

@@ -7,6 +7,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnota
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
@@ -22,7 +23,7 @@ class AnnotationApplicationContextConfiguration extends BaseAnnotationConfigurat
     /**
      * @inheritDoc
      */
-    public function registerWithin(Configuration $configuration): void
+    public function registerWithin(Configuration $configuration, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
     {
         $annotationMessageEndpointConfigurationFinder = new AnnotationClassesWithMethodFinder($this->classLocator, $this->classMetadataReader);
 

@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationServiceActivatorConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
@@ -20,7 +21,7 @@ class AnnotationServiceActivatorConfigurationTest extends AnnotationConfiguratio
     public function test_creating_service_activator_builder_from_annotation()
     {
         $configuration = $this->createMessagingSystemConfiguration();
-        $this->annotationConfiguration->registerWithin($configuration);
+        $this->annotationConfiguration->registerWithin($configuration, InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::create("message_sender", "sendMessage");
         $serviceActivatorBuilder->withMethodParameterConverters([

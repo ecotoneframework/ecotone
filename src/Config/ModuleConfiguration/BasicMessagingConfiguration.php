@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
@@ -23,7 +24,7 @@ class BasicMessagingConfiguration implements ModuleMessagingConfiguration
     /**
      * @inheritDoc
      */
-    public function registerWithin(Configuration $configuration): void
+    public function registerWithin(Configuration $configuration, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
     {
         $configuration->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory());
         $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory());

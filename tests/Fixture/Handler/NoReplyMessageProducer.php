@@ -2,8 +2,8 @@
 
 namespace Fixture\Handler;
 
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class NoReplyMessageProducer

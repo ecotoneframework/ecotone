@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Rabbitmq;
+namespace SimplyCodedSoftware\IntegrationMessaging\Rabbitmq;
 
 use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 /**
  * Interface ConnectionFactory
- * @package SimplyCodedSoftware\Messaging\Rabbitmq
+ * @package SimplyCodedSoftware\IntegrationMessaging\Rabbitmq
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RabbitmqConnectionFactory implements ConnectionFactory

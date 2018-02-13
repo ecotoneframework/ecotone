@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging;
+namespace SimplyCodedSoftware\IntegrationMessaging;
 
 /**
  * Class Future
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface Future

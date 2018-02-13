@@ -1,21 +1,21 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Handler\Processor;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 
 use Fixture\Service\ServiceExpectingOneArgument;
 use Fixture\Service\ServiceExpectingThreeArguments;
 use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutAnyMethods;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverter;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class MethodInvocationTest
- * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodInvokerTest extends MessagingTest

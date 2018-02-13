@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging;
+namespace SimplyCodedSoftware\IntegrationMessaging;
 
 /**
  * Class MessagingServiceIsNotAvailable
- * @package SimplyCodedSoftware\Messaging
+ * @package SimplyCodedSoftware\IntegrationMessaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessagingServiceIsNotAvailableException extends MessagingException

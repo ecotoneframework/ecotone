@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class InMemoryReferenceSearchService
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryReferenceSearchService implements ReferenceSearchService

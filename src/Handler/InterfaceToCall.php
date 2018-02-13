@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Future;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Future;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
  * Class InterfaceToCall
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceToCall
@@ -35,7 +35,7 @@ class InterfaceToCall
     /**
      * @param string $interfaceName
      * @param string $methodName
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function initialize(string $interfaceName, string $methodName): void
     {
@@ -109,7 +109,7 @@ class InterfaceToCall
 
     /**
      * @return \ReflectionParameter
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function getFirstParameter(): \ReflectionParameter
     {

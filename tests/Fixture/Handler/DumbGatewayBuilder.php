@@ -2,8 +2,8 @@
 
 namespace Fixture\Handler;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 
 /**
  * Class DumbGatewayBuilder

@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\DestinationResolutionException;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class InMemoryChannelResolver
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryChannelResolver implements ChannelResolver

@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\SubscribableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
+use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\SubscribableChannel;
 
 /**
  * Class ConsumerEndpointFactory - Responsible for creating consumers from builders

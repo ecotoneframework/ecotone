@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration;
 
 /**
  * Class ClassLocator
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ClassLocator

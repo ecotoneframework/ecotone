@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Handler\Processor;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 
 use Fixture\Handler\DumbMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class ReferenceServiceParameterConverterTest
- * @package Test\SimplyCodedSoftware\Messaging\Handler\Processor
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReferenceServiceParameterConverterBuilderTest extends MessagingTest

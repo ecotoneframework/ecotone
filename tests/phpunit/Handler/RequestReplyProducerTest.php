@@ -1,24 +1,24 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Handler;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler;
 
 use Fixture\Handler\NoReplyMessageProducer;
 use Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
 use Fixture\Handler\ReplyMessageProducer;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageDeliveryException;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\MessageDeliveryException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\ErrorMessage;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class RequestReplyProducerTest
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RequestReplyProducerTest extends MessagingTest
@@ -33,10 +33,10 @@ class RequestReplyProducerTest extends MessagingTest
     }
 
     /**
-     * @param \SimplyCodedSoftware\Messaging\Handler\MessageProcessor $replyMessageProducer
+     * @param \SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor $replyMessageProducer
      * @param MessageChannel|null $messageChannel
      * @param bool $requireReply
-     * @return \SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer
+     * @return \SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer
      */
     private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, MessageChannel $messageChannel = null, bool $requireReply = false): RequestReplyProducer
     {

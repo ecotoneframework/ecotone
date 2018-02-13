@@ -1,22 +1,22 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithThreeArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodCallToMessageConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverter;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\MethodArgument;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\MethodCallToMessageConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class MethodCallToMessageConverterTest
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodCallToMessageConverterTest extends MessagingTest

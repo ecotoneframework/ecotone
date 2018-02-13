@@ -1,17 +1,17 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration;
 
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
-use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\ParameterConverterAnnotationFactory;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder\ParameterConverterAnnotationFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class ParameterConverterAnnotationFactoryTest
- * @package Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ParameterConverterAnnotationFactoryTest extends MessagingTest

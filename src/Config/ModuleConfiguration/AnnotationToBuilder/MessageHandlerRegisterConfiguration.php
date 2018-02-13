@@ -1,20 +1,20 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\ClassLocator;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\ClassMetadataReader;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\ClassLocator;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\ClassMetadataReader;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 
 /**
  * Class BaseAnnotationConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class MessageHandlerRegisterConfiguration implements AnnotationConfiguration

@@ -1,18 +1,18 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerEndpointFactory;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilderFactory;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerEndpointFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class MessagingSystemConfiguration
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessagingSystemConfiguration implements Configuration

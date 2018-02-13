@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace SimplyCodedSoftware\IntegrationMessaging\Channel;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 
 /**
  * Interface ChannelInterceptor
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package SimplyCodedSoftware\IntegrationMessaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ChannelInterceptor

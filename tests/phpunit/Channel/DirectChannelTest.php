@@ -1,17 +1,17 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Channel;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Channel;
 
 use Fixture\Handler\NoReturnMessageHandler;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\Dispatcher\UnicastingDispatcher;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\Dispatcher\UnicastingDispatcher;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageDispatchingException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class DirectChannelTest
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package SimplyCodedSoftware\IntegrationMessaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DirectChannelTest extends TestCase

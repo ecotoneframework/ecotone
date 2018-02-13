@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
 /**
  * Interface ExternalConfiguration
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ModuleMessagingConfiguration

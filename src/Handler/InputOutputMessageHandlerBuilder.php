@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
 /**
  * Class InputOutputMessageHandlerBuilder
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder

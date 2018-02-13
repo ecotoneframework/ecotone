@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Channel\Dispatcher;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Channel\Dispatcher;
 
 use Fixture\Handler\NoReturnMessageHandler;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\Dispatcher\BroadcastingDispatcher;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\Dispatcher\BroadcastingDispatcher;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageDispatchingException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class BroadcastingDispatcherTest
- * @package SimplyCodedSoftware\Messaging\Channel\Dispatcher
+ * @package SimplyCodedSoftware\IntegrationMessaging\Channel\Dispatcher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class BroadcastingDispatcherTest extends TestCase

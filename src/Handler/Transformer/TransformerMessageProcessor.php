@@ -1,11 +1,11 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class TransformerMessageProcessor

@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace SimplyCodedSoftware\IntegrationMessaging\Channel;
 
-use SimplyCodedSoftware\Messaging\Channel\Dispatcher\UnicastingDispatcher;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\SubscribableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\Dispatcher\UnicastingDispatcher;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\SubscribableChannel;
 
 /**
  * Class DirectChannel
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package SimplyCodedSoftware\IntegrationMessaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DirectChannel implements SubscribableChannel

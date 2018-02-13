@@ -2,9 +2,9 @@
 
 namespace Fixture\Annotation\MessageEndpoint\Transformer;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\TransformerAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\TransformerAnnotation;
 
 /**
  * Class TransformerExample

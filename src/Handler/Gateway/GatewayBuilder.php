@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 
 /**
  * Interface Gateway
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface GatewayBuilder

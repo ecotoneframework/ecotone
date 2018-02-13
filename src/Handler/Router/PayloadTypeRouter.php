@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Router;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Router;
 
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class PayloadTypeRouter
- * @package SimplyCodedSoftware\Messaging\Handler\Router
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

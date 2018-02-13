@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Support;
-use SimplyCodedSoftware\Messaging\Support\GenericMessage;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Support;
+use SimplyCodedSoftware\IntegrationMessaging\Support\GenericMessage;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 
 /**
  * Class GenericMessageTest
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package SimplyCodedSoftware\IntegrationMessaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GenericMessageTest extends MessagingTest

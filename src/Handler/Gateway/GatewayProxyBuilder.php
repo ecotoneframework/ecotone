@@ -1,23 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\ChannelReplySender;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\DefaultReplySender;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\ErrorReplySender;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\Poller\TimeoutChannelReplySender;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller\ChannelReplySender;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller\DefaultReplySender;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller\ErrorReplySender;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller\TimeoutChannelReplySender;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
  * Class GatewayProxySpec
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayProxyBuilder implements GatewayBuilder

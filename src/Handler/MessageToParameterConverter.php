@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
-use SimplyCodedSoftware\Messaging\InvalidMessageHeaderException;
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\InvalidMessageHeaderException;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class MethodArgument
- * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageToParameterConverter

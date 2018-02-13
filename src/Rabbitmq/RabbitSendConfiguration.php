@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Rabbitmq;
+namespace SimplyCodedSoftware\IntegrationMessaging\Rabbitmq;
 
 /**
  * Class RabbitSendConfiguration
- * @package Test\SimplyCodedSoftware\Messaging\Rabbitmq
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Rabbitmq
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RabbitSendConfiguration

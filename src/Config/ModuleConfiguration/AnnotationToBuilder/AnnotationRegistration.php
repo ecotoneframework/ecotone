@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class AnnotationRegistration
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationRegistration

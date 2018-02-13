@@ -1,17 +1,17 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\Poller;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ReplySender;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ReplySender;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Support\ErrorMessage;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class ErrorReplySender
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

@@ -1,21 +1,21 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class ServiceActivatorFactory
- * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConverters
@@ -37,7 +37,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
      */
     private $isReplyRequired = false;
     /**
-     * @var array|\SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder[]
+     * @var array|\SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder[]
      */
     private $methodParameterConverterBuilders = [];
     /**

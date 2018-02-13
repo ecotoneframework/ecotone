@@ -1,19 +1,19 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Configuration\DumbConfigurationObserver;
 use Fixture\Configuration\DumbModuleConfigurationRetrievingService;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\DoctrineClassMetadataReader;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\FileSystemClassLocator;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\DoctrineClassMetadataReader;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\FileSystemClassLocator;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class AnnotationConfigurationTest
- * @package Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\Annotation
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class AnnotationConfigurationTest extends MessagingTest

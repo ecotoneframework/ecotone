@@ -1,17 +1,17 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging;
+namespace SimplyCodedSoftware\IntegrationMessaging;
 
 /**
  * Interface PollableChannel
- * @package SimplyCodedSoftware\Messaging
+ * @package SimplyCodedSoftware\IntegrationMessaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface PollableChannel extends MessageChannel
 {
     /**
      * Receive a message from this channel.
-     * Return the next available {@see \SimplyCodedSoftware\Messaging\Message} or {@see null} if interrupted.
+     * Return the next available {@see \SimplyCodedSoftware\IntegrationMessaging\Message} or {@see null} if interrupted.
      *
      * @return Message|null
      */

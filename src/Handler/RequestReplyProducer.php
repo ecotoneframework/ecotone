@@ -1,18 +1,18 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageDeliveryException;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\MessageDeliveryException;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Support\ErrorMessage;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class RequestReplyProducer
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RequestReplyProducer
@@ -64,7 +64,7 @@ class RequestReplyProducer
     /**
      * @param Message $message
      * @throws MessageDeliveryException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function handleWithReply(Message $message): void
     {

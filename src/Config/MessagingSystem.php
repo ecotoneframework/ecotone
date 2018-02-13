@@ -1,16 +1,16 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerLifecycle;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
  * Class Application
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessagingSystem implements ConfiguredMessagingSystem

@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Store;
+namespace SimplyCodedSoftware\IntegrationMessaging\Store;
 
 use Ramsey\Uuid\UuidInterface;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 
 /**
  * Class SimpleMessageStore
- * @package SimplyCodedSoftware\Messaging\Store
+ * @package SimplyCodedSoftware\IntegrationMessaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class SimpleMessageStore implements MessageStore, MessageGroupStore

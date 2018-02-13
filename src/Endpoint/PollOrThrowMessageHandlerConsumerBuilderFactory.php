@@ -1,16 +1,16 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 
 /**
  * Class PollOrThrowPollableFactory
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PollOrThrowMessageHandlerConsumerBuilderFactory implements MessageHandlerConsumerBuilderFactory

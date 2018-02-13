@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
 /**
  * Interface MessageHandlerBuilderWithParameterConverters
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageHandlerBuilderWithParameterConverters extends MessageHandlerBuilder

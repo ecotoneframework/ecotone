@@ -2,8 +2,8 @@
 
 namespace Fixture\Configuration;
 use PHPUnit\Framework\Assert;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationObserver;
-use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 
 /**
  * Class DumbConfigurationObserver

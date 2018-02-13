@@ -1,17 +1,17 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Channel\Dispatcher;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Channel\Dispatcher;
 
 use Fixture\Handler\NoReturnMessageHandler;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\Dispatcher\UnicastingDispatcher;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Channel\WrongHandlerAmountException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\Dispatcher\UnicastingDispatcher;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageDispatchingException;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\WrongHandlerAmountException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class UnicastingDispatcherTest
- * @package SimplyCodedSoftware\Messaging\Dispatcher
+ * @package SimplyCodedSoftware\IntegrationMessaging\Dispatcher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class UnicastingDispatcherTest extends TestCase

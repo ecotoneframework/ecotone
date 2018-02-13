@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Support;
+namespace SimplyCodedSoftware\IntegrationMessaging\Support;
 
 /**
  * Class Assert
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package SimplyCodedSoftware\IntegrationMessaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class Assert
@@ -12,7 +12,7 @@ class Assert
     /**
      * @param $valueToCheck
      * @param string $exceptionMessage
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function notNullAndEmpty($valueToCheck, string $exceptionMessage) : void
     {
@@ -24,7 +24,7 @@ class Assert
     /**
      * @param array $arrayToCheck
      * @param string $className
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function allInstanceOfType(array $arrayToCheck, string $className) : void
     {
@@ -37,7 +37,7 @@ class Assert
      * @param $objectToCheck
      * @param string $className
      * @param string $message
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function isSubclassOf($objectToCheck, string $className, string $message) : void
     {
@@ -50,7 +50,7 @@ class Assert
     /**
      * @param string $interfaceToCheck
      * @param string $message
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function isInterface(string $interfaceToCheck, string $message) : void
     {
@@ -62,7 +62,7 @@ class Assert
     /**
      * @param $valueToCheck
      * @param string $exceptionMessage
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function isObject($valueToCheck, string $exceptionMessage) : void
     {

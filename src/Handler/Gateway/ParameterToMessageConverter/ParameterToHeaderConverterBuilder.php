@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class HeaderToMessageConverterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ParameterToHeaderConverterBuilder implements ParameterToMessageConverterBuilder

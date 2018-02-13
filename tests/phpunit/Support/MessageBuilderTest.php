@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Support;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Support;
 
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class MessageBuilderTest
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package SimplyCodedSoftware\IntegrationMessaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageBuilderTest extends MessagingTest

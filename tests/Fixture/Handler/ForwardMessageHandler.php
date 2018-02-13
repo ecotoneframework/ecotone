@@ -9,9 +9,9 @@
 namespace Fixture\Handler;
 
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 
 class ForwardMessageHandler implements MessageHandler
 {

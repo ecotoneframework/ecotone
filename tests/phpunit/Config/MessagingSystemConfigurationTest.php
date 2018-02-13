@@ -1,27 +1,27 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config;
 
 use Fixture\Configuration\DumbConfigurationObserver;
 use Fixture\Handler\DumbGatewayBuilder;
 use Fixture\Handler\DumbMessageHandlerBuilder;
 use Fixture\Handler\NoReturnMessageHandler;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessagingConfiguration;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
-use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageDispatchingException;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessagingConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class ApplicationTest
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessagingSystemConfigurationTest extends MessagingTest

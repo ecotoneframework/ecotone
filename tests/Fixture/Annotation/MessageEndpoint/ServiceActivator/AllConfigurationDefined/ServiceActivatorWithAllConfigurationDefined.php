@@ -2,13 +2,13 @@
 
 namespace Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToHeaderParameterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageParameterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivatorAnnotation;
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToHeaderParameterAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageParameterAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivatorAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class ServiceActivatorWithAllConfigurationDefined

@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace SimplyCodedSoftware\IntegrationMessaging\Channel;
 
-use SimplyCodedSoftware\Messaging\MessagingException;
+use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
 
 /**
  * Class WrongHandlerAmountException
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package SimplyCodedSoftware\IntegrationMessaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class WrongHandlerAmountException extends MessagingException

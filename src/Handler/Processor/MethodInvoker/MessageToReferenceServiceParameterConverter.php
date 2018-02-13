@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class ServiceReferenceParameterConverter
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageToReferenceServiceParameterConverter implements MessageToParameterConverter

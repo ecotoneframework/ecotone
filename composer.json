@@ -12,12 +12,12 @@
     "description": "Framework to help you working in distributed architecture. Based on enterprise integration patterns and java spring framework.",
     "autoload": {
         "psr-4": {
-            "SimplyCodedSoftware\\Messaging\\": "src"
+            "SimplyCodedSoftware\\IntegrationMessaging\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Test\\SimplyCodedSoftware\\Messaging\\": "tests/phpunit",
+            "Test\\SimplyCodedSoftware\\IntegrationMessaging\\": "tests/phpunit",
             "Behat\\Bootstrap\\": "tests/Behat/Bootstrap",
             "Fixture\\": "tests/Fixture"
         }

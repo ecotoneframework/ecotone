@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class TransformerHandler
- * @package SimplyCodedSoftware\Messaging\Handler\Transformer
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
 /**
  * Interface MethodParameterConverterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageToParameterConverterBuilder

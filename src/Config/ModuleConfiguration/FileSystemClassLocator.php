@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 
 /**
  * Class ClassLocator
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FileSystemClassLocator implements ClassLocator {

@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\MethodArgument;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class PayloadMessageParameter
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway\MethodParameterConverter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ParameterToPayloadConverter implements ParameterToMessageConverter

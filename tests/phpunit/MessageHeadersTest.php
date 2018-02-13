@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging;
 
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\MessageHeaderDoesNotExistsException;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaderDoesNotExistsException;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 
 /**
  * Class MessageHeaderTest
- * @package SimplyCodedSoftware\Messaging
+ * @package SimplyCodedSoftware\IntegrationMessaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageHeadersTest extends TestCase

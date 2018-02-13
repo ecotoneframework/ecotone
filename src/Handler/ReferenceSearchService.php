@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
 /**
  * Interface ObjectDefinitionService
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ReferenceSearchService

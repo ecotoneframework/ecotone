@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 
 /**
  * Interface ClassConfigurationReader
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ClassMetadataReader

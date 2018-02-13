@@ -2,9 +2,9 @@
 
 namespace Fixture\Annotation\MessageEndpoint\Gateway;
 
-use SimplyCodedSoftware\Messaging\Annotation\GatewayAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\GatewayAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
 
 /**
  * Class GatewayWithReplyChannelExample

@@ -1,18 +1,18 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationServiceActivatorConfiguration;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationServiceActivatorConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 /**
  * Class AnnotationServiceActivatorConfigurationTest
- * @package Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\Annotation
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationServiceActivatorConfigurationTest extends AnnotationConfigurationTest

@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
 use Fixture\Annotation\MessageEndpoint\Gateway\GatewayWithReplyChannelExample;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationGatewayConfiguration;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationGatewayConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 
 /**
  * Class AnnotationTransformerConfigurationTest
- * @package Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationGatewayConfigurationTest extends AnnotationConfigurationTest

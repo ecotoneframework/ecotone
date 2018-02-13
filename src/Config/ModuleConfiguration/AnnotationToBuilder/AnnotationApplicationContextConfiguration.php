@@ -1,19 +1,19 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use SimplyCodedSoftware\Messaging\Annotation\ApplicationContextAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessagingComponentAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ModuleConfiguration;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
  * Class AnnotationApplicationContextConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleConfiguration()
  */

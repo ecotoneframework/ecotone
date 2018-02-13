@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Rabbitmq;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Rabbitmq;
 
-use SimplyCodedSoftware\Messaging\Rabbitmq\RabbitmqConnectionFactory;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Rabbitmq\RabbitmqConnectionFactory;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class RabbitmqMessagingTest
- * @package Test\SimplyCodedSoftware\Messaging\Rabbitmq
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Rabbitmq
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class RabbitmqMessagingTest extends MessagingTest

@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 
 /**
  * Interface ConsumerBuilder
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ConsumerBuilder

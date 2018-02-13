@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Annotation\FileSystem\DumbModuleConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\FileSystemClassLocator;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\FileSystemClassLocator;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class FileSystemClassLocatorTest
- * @package Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FileSystemClassLocatorTest extends MessagingTest

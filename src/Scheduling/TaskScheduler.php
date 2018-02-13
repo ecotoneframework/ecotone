@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Scheduling;
+namespace SimplyCodedSoftware\IntegrationMessaging\Scheduling;
 
 /**
  * Interface TaskScheduler
- * @package SimplyCodedSoftware\Messaging\Scheduling
+ * @package SimplyCodedSoftware\IntegrationMessaging\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface TaskScheduler

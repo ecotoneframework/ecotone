@@ -2,8 +2,8 @@
 
 namespace Fixture\Configuration;
 
-use SimplyCodedSoftware\Messaging\Config\ModuleConfigurationRetrievingService;
-use SimplyCodedSoftware\Messaging\Config\ModuleMessagingConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurationRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration;
 
 /**
  * Class DumbModuleConfigurationRetrievingService

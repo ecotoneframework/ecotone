@@ -1,25 +1,25 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Handler\Transformer;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer;
 
 use Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Fixture\Service\ServiceExpectingOneArgument;
 use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutReturnValue;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class TransformerBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Transformer
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TransformerBuilderTest extends MessagingTest

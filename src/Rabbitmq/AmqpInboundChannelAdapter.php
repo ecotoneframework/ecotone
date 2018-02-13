@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Rabbitmq;
+namespace SimplyCodedSoftware\IntegrationMessaging\Rabbitmq;
 
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerLifecycle;
 
 /**
  * Class AmqpInboundChannelAdapter
- * @package SimplyCodedSoftware\Messaging\Rabbitmq
+ * @package SimplyCodedSoftware\IntegrationMessaging\Rabbitmq
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpInboundChannelAdapter implements ConsumerLifecycle

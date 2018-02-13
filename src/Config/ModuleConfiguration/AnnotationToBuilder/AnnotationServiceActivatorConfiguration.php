@@ -1,16 +1,16 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivatorAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivatorAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 /**
  * Class AnnotationServiceActivatorConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationServiceActivatorConfiguration extends MessageHandlerRegisterConfiguration implements AnnotationConfiguration

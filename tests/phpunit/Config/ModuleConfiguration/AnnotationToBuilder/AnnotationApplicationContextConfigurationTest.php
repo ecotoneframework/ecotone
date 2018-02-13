@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
 use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationApplicationContextConfiguration;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationApplicationContextConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 
 /**
  * Class AnnotationApplicationContextConfigurationTest
- * @package Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationApplicationContextConfigurationTest extends AnnotationConfigurationTest

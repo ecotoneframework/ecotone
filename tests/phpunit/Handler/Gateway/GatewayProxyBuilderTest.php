@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
 use Fixture\Handler\NoReturnMessageHandler;
 use Fixture\Handler\StatefulHandler;
@@ -11,27 +11,27 @@ use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceWithFutureReceive;
 use Fixture\Service\ServiceInterface\ServiceInterfaceWithUnknownReturnType;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Config\NamedMessageChannel;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToStaticHeaderConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToStaticHeaderConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Config\NamedMessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToStaticHeaderConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToStaticHeaderConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\Support\ErrorMessage;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class GatewayProxyBuilderTest
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayProxyBuilderTest extends MessagingTest

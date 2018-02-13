@@ -1,22 +1,22 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Handler\Router;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Router;
 
 use Fixture\Router\MultipleChannelRouter;
 use Fixture\Router\Order;
 use Fixture\Router\SingleChannelRouter;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\DestinationResolutionException;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class RouterBuilderTest
- * @package SimplyCodedSoftware\Messaging\Handler\Router
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RouterBuilderTest extends MessagingTest

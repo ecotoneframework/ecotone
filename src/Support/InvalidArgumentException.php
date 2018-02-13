@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Support;
+namespace SimplyCodedSoftware\IntegrationMessaging\Support;
 
-use SimplyCodedSoftware\Messaging\MessagingException;
+use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
 
 /**
  * Class InvalidArgumentException
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package SimplyCodedSoftware\IntegrationMessaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InvalidArgumentException extends MessagingException

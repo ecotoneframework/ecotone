@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
-use SimplyCodedSoftware\Messaging\MessagingException;
+use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
 
 /**
  * Class ConfigurationException
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ConfigurationException extends MessagingException

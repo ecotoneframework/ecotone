@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
 /**
  * Class NullConsumerFactory
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class NullConsumerFactory implements ConsumerLifecycle

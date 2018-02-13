@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging;
+namespace SimplyCodedSoftware\IntegrationMessaging;
 
 /**
  * Class InvalidMessageHeaderException
- * @package SimplyCodedSoftware\Messaging\Exception
+ * @package SimplyCodedSoftware\IntegrationMessaging\Exception
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InvalidMessageHeaderException extends MessagingException

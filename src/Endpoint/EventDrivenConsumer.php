@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\SubscribableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\SubscribableChannel;
 
 /**
  * Class EventDrivenConsumer
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EventDrivenConsumer implements ConsumerLifecycle

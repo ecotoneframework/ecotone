@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\ClassLocator;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\ClassMetadataReader;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\ClassLocator;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\ClassMetadataReader;
 
 /**
  * Class AnnotationConfigurationToMessageHandler
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationClassesWithMethodFinder

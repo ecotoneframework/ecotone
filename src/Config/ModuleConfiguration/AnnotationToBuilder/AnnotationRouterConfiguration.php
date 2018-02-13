@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use SimplyCodedSoftware\Messaging\Annotation\RouterAnnotation;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\RouterAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
 
 /**
  * Class AnnotationRouterConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationRouterConfiguration extends MessageHandlerRegisterConfiguration

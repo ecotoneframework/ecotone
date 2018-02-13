@@ -2,7 +2,7 @@
 
 namespace Fixture\Service\ServiceInterface;
 
-use SimplyCodedSoftware\Messaging\Future;
+use SimplyCodedSoftware\IntegrationMessaging\Future;
 
 /**
  * Interface ServiceInterfaceWithFutureReceive

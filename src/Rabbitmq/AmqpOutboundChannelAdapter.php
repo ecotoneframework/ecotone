@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Rabbitmq;
+namespace SimplyCodedSoftware\IntegrationMessaging\Rabbitmq;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 
 /**
  * Class AmqpOutboundChannelAdapter
- * @package SimplyCodedSoftware\Messaging\Rabbitmq
+ * @package SimplyCodedSoftware\IntegrationMessaging\Rabbitmq
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpOutboundChannelAdapter implements MessageHandler

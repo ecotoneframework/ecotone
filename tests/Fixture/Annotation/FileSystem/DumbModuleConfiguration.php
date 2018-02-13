@@ -2,10 +2,10 @@
 
 namespace Fixture\Annotation\FileSystem;
 
-use SimplyCodedSoftware\Messaging\Annotation\ModuleConfiguration;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\Messaging\Config\ModuleMessagingConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration;
 
 /**
  * Class DumbModuleConfiguration

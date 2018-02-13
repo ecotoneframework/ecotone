@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Annotation;
+namespace SimplyCodedSoftware\IntegrationMessaging\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Class ApplicationContext
- * @package SimplyCodedSoftware\Messaging\Annotation
+ * @package SimplyCodedSoftware\IntegrationMessaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  * @Target({"CLASS"})

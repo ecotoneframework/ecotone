@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Handler\Processor;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverter;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverter;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class HeaderParameterConverterBuilderTest
- * @package Test\SimplyCodedSoftware\Messaging\Handler\Processor
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class HeaderParameterConverterBuilderTest extends MessagingTest

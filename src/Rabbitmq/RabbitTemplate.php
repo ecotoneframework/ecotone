@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Rabbitmq;
+namespace SimplyCodedSoftware\IntegrationMessaging\Rabbitmq;
 
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class RabbitTemplate
- * @package SimplyCodedSoftware\Messaging\Rabbitmq
+ * @package SimplyCodedSoftware\IntegrationMessaging\Rabbitmq
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RabbitTemplate

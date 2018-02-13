@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Store;
+namespace SimplyCodedSoftware\IntegrationMessaging\Store;
 
 use Ramsey\Uuid\UuidInterface;
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Interface PollableMessageGroupStore
- * @package SimplyCodedSoftware\Messaging\Store
+ * @package SimplyCodedSoftware\IntegrationMessaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageGroupStore

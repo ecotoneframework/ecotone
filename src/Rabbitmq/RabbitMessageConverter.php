@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Rabbitmq;
+namespace SimplyCodedSoftware\IntegrationMessaging\Rabbitmq;
 
 use PhpAmqpLib\Message\AMQPMessage;
 
 /**
  * Interface MessageConverter
- * @package SimplyCodedSoftware\Messaging\Rabbitmq
+ * @package SimplyCodedSoftware\IntegrationMessaging\Rabbitmq
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface RabbitMessageConverter

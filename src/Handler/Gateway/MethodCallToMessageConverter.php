@@ -1,16 +1,16 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\OnlyPayloadConverter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\OnlyPayloadConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class MethodCallToMessageConverter
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodCallToMessageConverter
@@ -59,7 +59,7 @@ class MethodCallToMessageConverter
      * @param string $interfaceToCall
      * @param string $methodName
      * @param array|ParameterToMessageConverter[] $methodArgumentConverters
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function initialize(string $interfaceToCall, string $methodName, array $methodArgumentConverters) : void
     {

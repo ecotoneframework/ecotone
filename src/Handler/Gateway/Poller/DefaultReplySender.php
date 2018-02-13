@@ -1,18 +1,18 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\Poller;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller;
 
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ReplySender;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ReplySender;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class EmptyPoller
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Poller
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DefaultReplySender implements ReplySender

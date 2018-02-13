@@ -1,23 +1,23 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use SimplyCodedSoftware\Messaging\Annotation\GatewayAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ModuleConfiguration;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterToMessage\ParameterToHeaderAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterToMessage\ParameterToPayloadAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterToMessage\ParameterToStaticHeaderAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToStaticHeaderConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\GatewayAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ParameterToMessage\ParameterToHeaderAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ParameterToMessage\ParameterToPayloadAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ParameterToMessage\ParameterToStaticHeaderAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToStaticHeaderConverterBuilder;
 
 /**
  * Class AnnotationGatewayConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleConfiguration()
  */

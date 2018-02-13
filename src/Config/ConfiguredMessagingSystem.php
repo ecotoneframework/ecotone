@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
-use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 
 /**
  * Interface ConfiguredMessagingSystem
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ConfiguredMessagingSystem

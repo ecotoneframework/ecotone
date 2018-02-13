@@ -1,20 +1,20 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\ModuleConfiguration;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\Messaging\Config\ModuleMessagingConfiguration;
-use SimplyCodedSoftware\Messaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
-use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\NullableMessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\NullableMessageChannel;
 
 /**
  * Class BasicMessagingConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleConfiguration()
  */

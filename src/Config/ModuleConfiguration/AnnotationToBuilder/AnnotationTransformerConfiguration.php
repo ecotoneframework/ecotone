@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use SimplyCodedSoftware\Messaging\Annotation\TransformerAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\TransformerAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 
 /**
  * Class AnnotationTransformerConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationTransformerConfiguration extends MessageHandlerRegisterConfiguration

@@ -3,12 +3,12 @@
 namespace Fixture\Annotation\ApplicationContext;
 
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Annotation\ApplicationContextAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessagingComponentAnnotation;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 
 /**
  * Class ApplicationContext

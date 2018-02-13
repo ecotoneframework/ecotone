@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel\Dispatcher;
+namespace SimplyCodedSoftware\IntegrationMessaging\Channel\Dispatcher;
 
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatcher;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageDispatcher;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageDispatchingException;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 
 /**
  * Class BroadcastingDispatcher
- * @package SimplyCodedSoftware\Messaging\Channel\Dispatcher
+ * @package SimplyCodedSoftware\IntegrationMessaging\Channel\Dispatcher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class BroadcastingDispatcher implements MessageDispatcher

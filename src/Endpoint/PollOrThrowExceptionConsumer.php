@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
-use SimplyCodedSoftware\Messaging\MessageDeliveryException;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\MessageDeliveryException;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 
 /**
  * Class PollingConsumer
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PollOrThrowExceptionConsumer implements ConsumerLifecycle

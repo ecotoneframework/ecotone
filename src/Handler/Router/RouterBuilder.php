@@ -1,19 +1,19 @@
 <?php declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Router;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Router;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class RouterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Router
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RouterBuilder implements MessageHandlerBuilderWithParameterConverters

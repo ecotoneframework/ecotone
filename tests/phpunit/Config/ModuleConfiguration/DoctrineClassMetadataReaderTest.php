@@ -1,19 +1,19 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ModuleConfiguration;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivatorAnnotation;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\DoctrineClassMetadataReader;
-use Test\SimplyCodedSoftware\Messaging\MessagingTest;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivatorAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\DoctrineClassMetadataReader;
+use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
  * Class DoctrineClassMetadataReaderTest
- * @package Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration
+ * @package Test\SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DoctrineClassMetadataReaderTest extends MessagingTest

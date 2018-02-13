@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class GatewayReference
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayReference

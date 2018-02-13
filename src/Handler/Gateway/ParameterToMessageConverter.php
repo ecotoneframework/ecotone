@@ -1,11 +1,11 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Interface ParameterDefinition
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ParameterToMessageConverter

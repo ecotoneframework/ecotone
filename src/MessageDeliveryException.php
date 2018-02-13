@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging;
+namespace SimplyCodedSoftware\IntegrationMessaging;
 
 /**
  * Class MessageSendException
- * @package SimplyCodedSoftware\Messaging\Exception
+ * @package SimplyCodedSoftware\IntegrationMessaging\Exception
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageDeliveryException extends MessagingException

@@ -1,7 +1,7 @@
 <?php
 
 namespace Fixture\Behat\Ordering;
-use SimplyCodedSoftware\Messaging\Future;
+use SimplyCodedSoftware\IntegrationMessaging\Future;
 
 /**
  * Interface OrderingService

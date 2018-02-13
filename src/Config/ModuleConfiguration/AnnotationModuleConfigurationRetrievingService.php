@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\ModuleConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfigurationRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurationRetrievingService;
 
 /**
  * Class AnnotationModuleConfigurationRetrievingService
- * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationModuleConfigurationRetrievingService implements ModuleConfigurationRetrievingService

@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodInvocation
@@ -65,7 +65,7 @@ final class MethodInvoker implements MessageProcessor
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array|MessageToParameterConverter[] $methodParameterConverters
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function init($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters) : void
     {
@@ -164,7 +164,7 @@ final class MethodInvoker implements MessageProcessor
      * @param \ReflectionParameter $invokeParameter
      * @param array|MessageToParameterConverter[] $methodParameterConverters
      * @return MessageToParameterConverter
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function getMethodArgumentFor(string $invokedClass, string $methodToInvoke, \ReflectionParameter $invokeParameter, array $methodParameterConverters): MessageToParameterConverter
     {

@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Store;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Store;
 
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Store\InMemoryMessageGroup;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Store\InMemoryMessageGroup;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class InMemoryMessageGroupTest
- * @package SimplyCodedSoftware\Messaging\Store
+ * @package SimplyCodedSoftware\IntegrationMessaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryMessageGroupTest extends TestCase

@@ -2,7 +2,7 @@
 
 namespace Fixture\Router;
 
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class SingleChannelRouter

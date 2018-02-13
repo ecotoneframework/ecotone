@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Annotation\ParameterToMessage;
+namespace SimplyCodedSoftware\IntegrationMessaging\Annotation\ParameterToMessage;
 
 use Doctrine\Common\Annotations\Annotation\Required;
 
 /**
  * Class StaticHeaderToMessageAnnotation
- * @package SimplyCodedSoftware\Messaging\Annotation\ParameterToMessage
+ * @package SimplyCodedSoftware\IntegrationMessaging\Annotation\ParameterToMessage
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */

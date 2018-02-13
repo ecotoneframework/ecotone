@@ -19,7 +19,7 @@ interface GatewayBuilder
     /**
      * @return string
      */
-    public function getInputChannelName() : string;
+    public function getRequestChannelName() : string;
 
     /**
      * @return string

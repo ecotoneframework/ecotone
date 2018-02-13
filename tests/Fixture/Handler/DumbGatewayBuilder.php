@@ -32,7 +32,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function getInputChannelName(): string
+    public function getRequestChannelName(): string
     {
         // TODO: Implement getInputChannelName() method.
     }

@@ -1,18 +1,17 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder;
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class MessageParameterConverterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder
+ * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MessageParameterConverterBuilder implements MethodParameterConverterBuilder
+class MessageParameterConverterBuilder implements MessageToParameterConverterBuilder
 {
     /**
      * @var string
@@ -40,7 +39,7 @@ class MessageParameterConverterBuilder implements MethodParameterConverterBuilde
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): MethodParameterConverter
+    public function build(ReferenceSearchService $referenceSearchService): MessageToParameterConverter
     {
         return MessageParameterConverter::create($this->parameterName);
     }

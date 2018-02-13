@@ -2,13 +2,10 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
-use Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
+use Fixture\Annotation\MessageEndpoint\Gateway\GatewayWithReplyChannelExample;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationGatewayConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationTransformerConfiguration;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\PayloadParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 
 /**
  * Class AnnotationTransformerConfigurationTest
@@ -19,18 +16,18 @@ class AnnotationGatewayConfigurationTest extends AnnotationConfigurationTest
 {
     public function test_creating_transformer_builder()
     {
-//        $configuration = $this->createMessagingSystemConfiguration();
-//
-//        $this->annotationConfiguration->registerWithin($configuration);
-//
-//
-//
-//        $this->assertEquals(
-//            $this->createMessagingSystemConfiguration()
-//                ->registerMessageHandler($messageHandlerBuilder),
-//            $configuration
-//        );
-        $this->assertTrue(true);
+        $configuration = $this->createMessagingSystemConfiguration();
+
+        $this->annotationConfiguration->registerWithin($configuration);
+
+        $this->assertEquals(
+            $this->createMessagingSystemConfiguration()
+                ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                    GatewayWithReplyChannelExample::class, GatewayWithReplyChannelExample::class,
+                    "buy", "requestChannel"
+                )->withMillisecondTimeout(1)),
+            $configuration
+        );
     }
 
     /**
@@ -46,6 +43,6 @@ class AnnotationGatewayConfigurationTest extends AnnotationConfigurationTest
      */
     protected function getPartOfTheNamespaceForTests(): string
     {
-        return "MessageEndpoint\Transformer";
+        return "MessageEndpoint\Gateway";
     }
 }

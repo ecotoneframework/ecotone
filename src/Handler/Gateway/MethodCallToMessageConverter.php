@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\OnlyPayloadToMessageConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\OnlyPayloadConverter;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
@@ -72,7 +72,7 @@ class MethodCallToMessageConverter
         }
 
         if (empty($methodArgumentConverters) && $this->interfaceToCall->hasSingleArguments()) {
-            $methodArgumentConverters = [new OnlyPayloadToMessageConverter()];
+            $methodArgumentConverters = [new OnlyPayloadConverter()];
         }
 
         $this->methodArgumentConverters = $methodArgumentConverters;

@@ -1,17 +1,18 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Annotation\ParameterConverter;
+namespace SimplyCodedSoftware\Messaging\Annotation\MessageToParameter;
 
 use Doctrine\Common\Annotations\Annotation\Required;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverterAnnotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Class HeaderParameterConverter
  * @package SimplyCodedSoftware\Messaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation({"Annotation"})
+ * @Annotation()
+ * @Target({"ANNOTATION"})
  */
-class HeaderParameterConverterAnnotation implements ParameterConverterAnnotation
+class MessageToHeaderParameterAnnotation
 {
     /**
      * @var string

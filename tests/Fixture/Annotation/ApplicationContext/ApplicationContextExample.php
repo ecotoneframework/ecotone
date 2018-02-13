@@ -45,7 +45,7 @@ class ApplicationContextExample
      */
     public function enricherHttpEntry() : MessageHandlerBuilder
     {
-        return TransformerBuilder::createHeaderEnricher(Uuid::uuid4(), self::HTTP_INPUT_CHANNEL, self::HTTP_OUTPUT_CHANNEL, [
+        return TransformerBuilder::createHeaderEnricher("http-entry-enricher", self::HTTP_INPUT_CHANNEL, self::HTTP_OUTPUT_CHANNEL, [
             "token" => "abcedfg"
         ]);
     }

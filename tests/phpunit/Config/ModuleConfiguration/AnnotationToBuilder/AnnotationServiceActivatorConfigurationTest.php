@@ -4,10 +4,10 @@ namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\Annotati
 
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationServiceActivatorConfiguration;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\HeaderParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\MessageParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\PayloadParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\ReferenceServiceParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 /**
@@ -24,10 +24,10 @@ class AnnotationServiceActivatorConfigurationTest extends AnnotationConfiguratio
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::create("message_sender", "sendMessage");
         $serviceActivatorBuilder->withMethodParameterConverters([
-            HeaderParameterConverterBuilder::create("to", "sendTo"),
-            PayloadParameterConverterBuilder::create("content"),
+            MessageToHeaderParameterConverterBuilder::create("to", "sendTo"),
+            MessageToPayloadParameterConverterBuilder::create("content"),
             MessageParameterConverterBuilder::create("message"),
-            ReferenceServiceParameterConverterBuilder::create("object", "reference", $serviceActivatorBuilder)
+            MessageToReferenceServiceParameterConverterBuilder::create("object", "reference", $serviceActivatorBuilder)
         ]);
         $serviceActivatorBuilder->registerRequiredReference("reference");
 

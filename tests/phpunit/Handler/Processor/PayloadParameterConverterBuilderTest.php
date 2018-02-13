@@ -3,8 +3,8 @@
 namespace Test\SimplyCodedSoftware\Messaging\Handler\Processor;
 
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\PayloadParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
@@ -19,8 +19,8 @@ class PayloadParameterConverterBuilderTest extends MessagingTest
         $parameterName = "parameterName";
 
         $this->assertEquals(
-            PayloadParameterConverter::create($parameterName),
-            PayloadParameterConverterBuilder::create($parameterName)->build(InMemoryReferenceSearchService::createEmpty())
+            MessageToPayloadParameterConverter::create($parameterName),
+            MessageToPayloadParameterConverterBuilder::create($parameterName)->build(InMemoryReferenceSearchService::createEmpty())
         );
     }
 }

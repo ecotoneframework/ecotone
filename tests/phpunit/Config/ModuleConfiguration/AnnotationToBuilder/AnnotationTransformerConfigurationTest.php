@@ -2,11 +2,10 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
-use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationTransformerConfiguration;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\PayloadParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
 
 /**
@@ -26,7 +25,7 @@ class AnnotationTransformerConfigurationTest extends AnnotationConfigurationTest
             "inputChannel", "outputChannel", TransformerWithMethodParameterExample::class, "send", TransformerWithMethodParameterExample::class
         );
         $messageHandlerBuilder->withMethodParameterConverters([
-            PayloadParameterConverterBuilder::create("message")
+            MessageToPayloadParameterConverterBuilder::create("message")
         ]);
 
         $this->assertEquals(

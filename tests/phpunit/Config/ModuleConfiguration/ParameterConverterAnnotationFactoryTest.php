@@ -3,9 +3,9 @@
 namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration;
 
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\ReferenceServiceConverterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\ParameterConverterAnnotationFactory;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\ReferenceServiceParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
@@ -19,7 +19,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
     public function test_creating_with_class_name_as_reference_name_if_no_reference_passed()
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
-        $parameterConverterAnnotation = new ReferenceServiceConverterAnnotation();
+        $parameterConverterAnnotation = new MessageToReferenceServiceAnnotation();
         $parameterConverterAnnotation->parameterName = "object";
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
@@ -27,7 +27,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
         $messageHandler = ServiceActivatorBuilder::create($relatedClassName, $methodName);
         $messageHandler
             ->withMethodParameterConverters([
-                ReferenceServiceParameterConverterBuilder::create(
+                MessageToReferenceServiceParameterConverterBuilder::create(
                     $parameterConverterAnnotation->parameterName,
                     \stdClass::class,
                     $messageHandler

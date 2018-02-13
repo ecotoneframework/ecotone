@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
 use SimplyCodedSoftware\Messaging\Message;
 
 /**
@@ -10,7 +10,7 @@ use SimplyCodedSoftware\Messaging\Message;
  * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PayloadParameterConverter implements MethodParameterConverter
+class MessageToPayloadParameterConverter implements MessageToParameterConverter
 {
     /**
      * @var string

@@ -3,14 +3,15 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
 use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
- * Class MessageArgument
+ * Class PayloadParameterConverterBuilder
  * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MessageParameterConverter implements MessageToParameterConverter
+class MessageToPayloadParameterConverterBuilder implements MessageToParameterConverterBuilder
 {
     /**
      * @var string
@@ -18,7 +19,7 @@ class MessageParameterConverter implements MessageToParameterConverter
     private $parameterName;
 
     /**
-     * MessageArgument constructor.
+     * PayloadParameterConverterBuilder constructor.
      * @param string $parameterName
      */
     private function __construct(string $parameterName)
@@ -28,7 +29,7 @@ class MessageParameterConverter implements MessageToParameterConverter
 
     /**
      * @param string $parameterName
-     * @return MessageParameterConverter
+     * @return MessageToPayloadParameterConverterBuilder
      */
     public static function create(string $parameterName) : self
     {
@@ -38,16 +39,8 @@ class MessageParameterConverter implements MessageToParameterConverter
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(Message $message)
+    public function build(ReferenceSearchService $referenceSearchService): MessageToParameterConverter
     {
-        return $message;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function isHandling(\ReflectionParameter $reflectionParameter): bool
-    {
-        return $reflectionParameter->getName() == $this->parameterName;
+        return MessageToPayloadParameterConverter::create($this->parameterName);
     }
 }

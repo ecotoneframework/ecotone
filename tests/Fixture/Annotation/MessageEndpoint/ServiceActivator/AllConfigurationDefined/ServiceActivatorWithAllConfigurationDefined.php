@@ -3,10 +3,10 @@
 namespace Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined;
 
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\HeaderParameterConverterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\MessageParameterConverterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\PayloadParameterConverterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\ReferenceServiceConverterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToHeaderParameterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageParameterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\ServiceActivatorAnnotation;
 use SimplyCodedSoftware\Messaging\Message;
 
@@ -24,7 +24,12 @@ class ServiceActivatorWithAllConfigurationDefined
      * @param Message $message
      * @param \stdClass $object
      * @return void
-     * @ServiceActivatorAnnotation(inputChannel="inputChannel", outputChannel="outputChannel", requiresReply=true, parameterConverters={@HeaderParameterConverterAnnotation(parameterName="to", headerName="sendTo"), @PayloadParameterConverterAnnotation(parameterName="content"), @MessageParameterConverterAnnotation(parameterName="message"), @ReferenceServiceConverterAnnotation(parameterName="object", referenceName="reference")})
+     * @ServiceActivatorAnnotation(inputChannel="inputChannel", outputChannel="outputChannel", requiresReply=true, parameterConverters={
+     *     @MessageToHeaderParameterAnnotation(parameterName="to", headerName="sendTo"),
+     *     @MessageToPayloadParameterAnnotation(parameterName="content"),
+     *     @MessageParameterAnnotation(parameterName="message"),
+     *     @MessageToReferenceServiceAnnotation(parameterName="object", referenceName="reference")
+     * })
      */
     public function sendMessage(string $to, string $content, Message $message, \stdClass $object) : void
     {

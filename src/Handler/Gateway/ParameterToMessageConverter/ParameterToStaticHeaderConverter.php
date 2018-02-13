@@ -3,14 +3,15 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
- * Class StaticHeaderToMessageConverterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter
+ * Class StaticHeaderMessageArgumentConverter
+ * @package SimplyCodedSoftware\Messaging\Handler\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class StaticHeaderToMessageConverterBuilder implements ParameterToMessageConverterBuilder
+class ParameterToStaticHeaderConverter implements ParameterToMessageConverter
 {
     /**
      * @var string
@@ -35,7 +36,7 @@ class StaticHeaderToMessageConverterBuilder implements ParameterToMessageConvert
     /**
      * @param string $headerName
      * @param string $headerValue
-     * @return self
+     * @return ParameterToStaticHeaderConverter
      */
     public static function create(string $headerName, string $headerValue) : self
     {
@@ -45,8 +46,17 @@ class StaticHeaderToMessageConverterBuilder implements ParameterToMessageConvert
     /**
      * @inheritDoc
      */
-    public function build(): ParameterToMessageConverter
+    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
-        return StaticHeaderToMessageConverter::create($this->headerName, $this->headerValue);
+        return $messageBuilder
+                ->setHeader($this->headerName, $this->headerValue);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isSupporting(MethodArgument $methodArgument): bool
+    {
+        return true;
     }
 }

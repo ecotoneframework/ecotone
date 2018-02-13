@@ -1,19 +1,18 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder;
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceServiceParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class ReferenceServiceParameterConverterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder
+ * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ReferenceServiceParameterConverterBuilder implements MethodParameterConverterBuilder
+class MessageToReferenceServiceParameterConverterBuilder implements MessageToParameterConverterBuilder
 {
     /**
      * @var string
@@ -41,7 +40,7 @@ class ReferenceServiceParameterConverterBuilder implements MethodParameterConver
      * @param string $parameterName
      * @param string $referenceName
      * @param MessageHandlerBuilder $messageHandlerBuilder
-     * @return ReferenceServiceParameterConverterBuilder
+     * @return MessageToReferenceServiceParameterConverterBuilder
      */
     public static function create(string $parameterName, string $referenceName, MessageHandlerBuilder $messageHandlerBuilder) : self
     {
@@ -51,9 +50,9 @@ class ReferenceServiceParameterConverterBuilder implements MethodParameterConver
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): MethodParameterConverter
+    public function build(ReferenceSearchService $referenceSearchService): MessageToParameterConverter
     {
-         return ReferenceServiceParameterConverter::create($this->parameterName, $referenceSearchService->findByReference($this->referenceName));
+         return MessageToReferenceServiceParameterConverter::create($this->parameterName, $referenceSearchService->findByReference($this->referenceName));
     }
 
     /**

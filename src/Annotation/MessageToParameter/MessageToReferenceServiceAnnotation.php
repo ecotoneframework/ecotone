@@ -1,17 +1,18 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Annotation\ParameterConverter;
+namespace SimplyCodedSoftware\Messaging\Annotation\MessageToParameter;
 
 use Doctrine\Common\Annotations\Annotation\Required;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverterAnnotation;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Class ReferenceServiceParameterConverterAnnotation
- * @package SimplyCodedSoftware\Messaging\Annotation\ParameterConverter
+ * @package SimplyCodedSoftware\Messaging\Annotation\MessageToParameter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
+ * @Target({"ANNOTATION"})
  */
-class ReferenceServiceConverterAnnotation implements ParameterConverterAnnotation
+class MessageToReferenceServiceAnnotation
 {
     /**
      * @var string

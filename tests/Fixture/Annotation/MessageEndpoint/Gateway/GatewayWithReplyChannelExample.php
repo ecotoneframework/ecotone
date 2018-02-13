@@ -4,7 +4,7 @@ namespace Fixture\Annotation\MessageEndpoint\Gateway;
 
 use SimplyCodedSoftware\Messaging\Annotation\GatewayAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\PayloadParameterConverterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
 
 /**
  * Class GatewayWithReplyChannelExample
@@ -18,8 +18,8 @@ interface GatewayWithReplyChannelExample
      * @param string $orderId
      * @return bool
      *
-     * @GatewayAnnotation(requestChannel="requestChannel", replyChannel="replyChannel", parameterConverters={
-     *  @PayloadParameterConverterAnnotation(parameterName="orderId")
+     * @GatewayAnnotation(requestChannel="requestChannel", parameterConverters={
+     *  @MessageToPayloadParameterAnnotation(parameterName="orderId")
      * })
      */
     public function buy(string $orderId) : bool;

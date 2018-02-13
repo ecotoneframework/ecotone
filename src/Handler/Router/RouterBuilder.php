@@ -5,8 +5,8 @@ namespace SimplyCodedSoftware\Messaging\Handler\Router;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 use SimplyCodedSoftware\Messaging\Support\Assert;
@@ -39,7 +39,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     private $methodName;
     /**
-     * @var array|MethodParameterConverterBuilder[]
+     * @var array|MessageToParameterConverterBuilder[]
      */
     private $methodParameterConverters = [];
     /**
@@ -131,7 +131,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders): void
     {
-        Assert::allInstanceOfType($methodParameterConverterBuilders, MethodParameterConverterBuilder::class);
+        Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
 
         $this->methodParameterConverters = $methodParameterConverterBuilders;
     }

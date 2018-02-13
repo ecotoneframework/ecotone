@@ -4,8 +4,8 @@ namespace Test\SimplyCodedSoftware\Messaging\Handler\Processor;
 
 use Fixture\Handler\DumbMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\ReferenceServiceParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceServiceParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
@@ -21,7 +21,7 @@ class ReferenceServiceParameterConverterBuilderTest extends MessagingTest
         $parameterName = "parameterName";
         $referenceName = "referenceName";
         $reference = new \stdClass();
-        $referenceServiceParameterConverter = ReferenceServiceParameterConverterBuilder::create($parameterName, $referenceName, $messageHandlerBuilder);
+        $referenceServiceParameterConverter = MessageToReferenceServiceParameterConverterBuilder::create($parameterName, $referenceName, $messageHandlerBuilder);
 
         $this->assertEquals(
             $referenceName,
@@ -29,7 +29,7 @@ class ReferenceServiceParameterConverterBuilderTest extends MessagingTest
         );
 
         $this->assertEquals(
-            ReferenceServiceParameterConverter::create($parameterName, $reference),
+            MessageToReferenceServiceParameterConverter::create($parameterName, $reference),
             $referenceServiceParameterConverter->build(InMemoryReferenceSearchService::createWith([
                 $referenceName => $reference
             ]))

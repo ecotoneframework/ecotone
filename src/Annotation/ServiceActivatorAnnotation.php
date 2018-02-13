@@ -2,6 +2,9 @@
 
 namespace SimplyCodedSoftware\Messaging\Annotation;
 
+use Doctrine\Common\Annotations\Annotation\Required;
+use Doctrine\Common\Annotations\Annotation\Target;
+
 /**
  * Class ServiceActivator
  * @package SimplyCodedSoftware\Messaging\Annotation
@@ -13,6 +16,7 @@ class ServiceActivatorAnnotation
 {
     /**
      * @var string
+     * @Required()
      */
     public $inputChannel = '';
     /**

@@ -10,7 +10,7 @@ use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\ClassMetadataReader
  * @package SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class AnnotationMessageEndpointConfigurationFinder
+class AnnotationClassesWithMethodFinder
 {
     /**
      * @var ClassLocator
@@ -34,25 +34,25 @@ class AnnotationMessageEndpointConfigurationFinder
 
 
     /**
-     * @param string $messageHandlerAnnotationName
+     * @param string $classAnnotationName
+     * @param string $methodAnnotationName
      * @return AnnotationRegistration[]
      */
-    public function findFor(string $messageHandlerAnnotationName): array
+    public function findFor(string $classAnnotationName, string $methodAnnotationName): array
     {
-        /** @var MessageEndpoint[] $messageEndpoints */
-        $messageEndpoints = $this->classLocator->getAllClassesWithAnnotation(MessageEndpoint::class);
+        /** @var MessageEndpoint[] $classesWithAnnotation */
+        $classesWithAnnotation = $this->classLocator->getAllClassesWithAnnotation($classAnnotationName);
         $annotationRegistrations = [];
 
-        foreach ($messageEndpoints as $messageEndpoint) {
-            /** @var MessageEndpoint $messageEndpointAnnotation */
-            $messageEndpointAnnotation = $this->classMetadataReader->getAnnotationForClass($messageEndpoint, MessageEndpoint::class);
-            $referenceName = $messageEndpointAnnotation->referenceName ? $messageEndpointAnnotation->referenceName : $messageEndpoint;
+        foreach ($classesWithAnnotation as $classWithAnnotation) {
+            $annotationForClass = $this->classMetadataReader->getAnnotationForClass($classWithAnnotation, $classAnnotationName);
+            $referenceName = (property_exists($classAnnotationName, 'referenceName') && $annotationForClass->referenceName) ? $annotationForClass->referenceName : $classWithAnnotation;
 
-            $methods = $this->classMetadataReader->getMethodsWithAnnotation($messageEndpoint, $messageHandlerAnnotationName);
+            $methods = $this->classMetadataReader->getMethodsWithAnnotation($classWithAnnotation, $methodAnnotationName);
             foreach ($methods as $method) {
-                $annotation = $this->classMetadataReader->getAnnotationForMethod($messageEndpoint, $method, $messageHandlerAnnotationName);
+                $annotation = $this->classMetadataReader->getAnnotationForMethod($classWithAnnotation, $method, $methodAnnotationName);
 
-                $annotationRegistrations[] = new AnnotationRegistration($annotation, $messageEndpoint, $referenceName, $method);
+                $annotationRegistrations[] = new AnnotationRegistration($annotation, $classWithAnnotation, $referenceName, $method);
             }
         }
 

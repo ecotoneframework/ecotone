@@ -5,8 +5,8 @@ namespace SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
@@ -37,7 +37,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
      */
     private $isReplyRequired = false;
     /**
-     * @var array|\SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder[]
+     * @var array|\SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder[]
      */
     private $methodParameterConverterBuilders = [];
     /**
@@ -101,7 +101,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
      */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders): void
     {
-        Assert::allInstanceOfType($methodParameterConverterBuilders, MethodParameterConverterBuilder::class);
+        Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
 
         $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
     }

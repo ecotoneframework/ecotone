@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 
@@ -11,7 +11,7 @@ use SimplyCodedSoftware\Messaging\Support\Assert;
  * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ReferenceServiceParameterConverter implements MethodParameterConverter
+class MessageToReferenceServiceParameterConverter implements MessageToParameterConverter
 {
     /**
      * @var string
@@ -37,7 +37,7 @@ class ReferenceServiceParameterConverter implements MethodParameterConverter
     /**
      * @param string $parameterName
      * @param $serviceReference
-     * @return ReferenceServiceParameterConverter
+     * @return MessageToReferenceServiceParameterConverter
      */
     public static function create(string $parameterName, $serviceReference) : self
     {

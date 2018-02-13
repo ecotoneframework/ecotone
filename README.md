@@ -2,23 +2,18 @@
 General Concept
 http://docs.spring.io/spring-integration/reference/htmlsingle/#overview-components
 
-Message Content Types:
-http://docs.spring.io/spring-cloud-stream/docs/1.0.0.BUILD-SNAPSHOT/reference/html/contenttypemanagement.html
+TODO before release
+* Channel interceptors
+* gateway
+* http inbound
+* call static method
+* command and query handlers
 
-A) everything should retrieve channel from channel resolver (gateway)
-B) remove input channel from router
-C) ParameterConverters (done like in java)
-
-1. scheduling
+TODO after release
+* scheduling
     a) pollers
     b) executors (systemctl, supervisor)
-2. Channel interceptors
-3. content management
+* content management (http://docs.spring.io/spring-cloud-stream/docs/1.0.0.BUILD-SNAPSHOT/reference/html/contenttypemanagement.html)   
 
 # example
 https://www.javacodegeeks.com/2014/12/message-processing-with-spring-integration.html
-
-# TODO
-
-ReplyChannel: 
-- 

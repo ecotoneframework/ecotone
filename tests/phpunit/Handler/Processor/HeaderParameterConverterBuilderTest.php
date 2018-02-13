@@ -3,8 +3,8 @@
 namespace Test\SimplyCodedSoftware\Messaging\Handler\Processor;
 
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\HeaderParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverter;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**
@@ -19,8 +19,8 @@ class HeaderParameterConverterBuilderTest extends MessagingTest
         $headerName = 'private-token';
         $parameterName = 'token';
         $this->assertEquals(
-            HeaderParameterConverter::create($parameterName, $headerName),
-            HeaderParameterConverterBuilder::create($parameterName, $headerName)
+            MessageToHeaderParameterConverter::create($parameterName, $headerName),
+            MessageToHeaderParameterConverterBuilder::create($parameterName, $headerName)
                 ->build(InMemoryReferenceSearchService::createEmpty())
         );
     }

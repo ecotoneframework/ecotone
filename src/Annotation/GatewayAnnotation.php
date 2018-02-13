@@ -3,12 +3,14 @@
 namespace SimplyCodedSoftware\Messaging\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Required;
+use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Class GatewayAnnotation
  * @package SimplyCodedSoftware\Messaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
+ * @Target({"METHOD"})
  */
 class GatewayAnnotation
 {
@@ -17,10 +19,6 @@ class GatewayAnnotation
      * @Required()
      */
     public $requestChannel;
-    /**
-     * @var string
-     */
-    public $replyChannel;
     /**
      * @var array
      */

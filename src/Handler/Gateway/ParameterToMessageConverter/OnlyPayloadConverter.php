@@ -11,7 +11,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class OnlyPayloadToMessageConverter implements ParameterToMessageConverter
+class OnlyPayloadConverter implements ParameterToMessageConverter
 {
     /**
      * @inheritDoc

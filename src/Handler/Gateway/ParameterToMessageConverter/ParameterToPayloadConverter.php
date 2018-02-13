@@ -11,7 +11,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PayloadToMessageConverter implements ParameterToMessageConverter
+class ParameterToPayloadConverter implements ParameterToMessageConverter
 {
     /**
      * @var string
@@ -29,7 +29,7 @@ class PayloadToMessageConverter implements ParameterToMessageConverter
 
     /**
      * @param string $parameterName
-     * @return PayloadToMessageConverter
+     * @return ParameterToPayloadConverter
      */
     public static function create(string $parameterName) : self
     {

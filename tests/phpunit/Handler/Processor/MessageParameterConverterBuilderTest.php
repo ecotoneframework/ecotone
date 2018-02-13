@@ -3,8 +3,8 @@
 namespace Test\SimplyCodedSoftware\Messaging\Handler\Processor;
 
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\MessageParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageParameterConverterBuilder;
 use Test\SimplyCodedSoftware\Messaging\MessagingTest;
 
 /**

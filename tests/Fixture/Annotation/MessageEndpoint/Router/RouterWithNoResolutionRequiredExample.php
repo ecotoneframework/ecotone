@@ -3,7 +3,7 @@
 namespace Fixture\Annotation\MessageEndpoint\Router;
 
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\PayloadParameterConverterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\RouterAnnotation;
 
 /**
@@ -17,7 +17,9 @@ class RouterWithNoResolutionRequiredExample
     /**
      * @param $content
      * @return string
-     * @RouterAnnotation(inputChannel="inputChannel", isResolutionRequired=false, parameterConverters={@PayloadParameterConverterAnnotation(parameterName="content")})
+     * @RouterAnnotation(inputChannel="inputChannel", isResolutionRequired=false, parameterConverters={
+     *     @MessageToPayloadParameterAnnotation(parameterName="content")
+     * })
      */
     public function route($content) : string
     {

@@ -1,17 +1,17 @@
 <?php
 
 namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\HeaderParameterConverterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\MessageParameterConverterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\PayloadParameterConverterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverter\ReferenceServiceConverterAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ParameterConverterAnnotation;
+
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageParameterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToHeaderParameterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\HeaderParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\MessageParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\PayloadParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\ReferenceServiceParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
 
 /**
  * Class ParameterConverterAnnotationFactory
@@ -27,7 +27,7 @@ class ParameterConverterAnnotationFactory
     /**
      * @return ParameterConverterAnnotationFactory
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -36,27 +36,27 @@ class ParameterConverterAnnotationFactory
      * @param MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder
      * @param string $relatedClassName
      * @param string $methodName
-     * @param array|ParameterConverterAnnotation[] $parameterConverterAnnotations
+     * @param array $parameterConverterAnnotations
      * @return void
      */
-    public function configureParameterConverters(MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder, string $relatedClassName, string $methodName, array $parameterConverterAnnotations) : void
+    public function configureParameterConverters(MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder, string $relatedClassName, string $methodName, array $parameterConverterAnnotations): void
     {
         $interfaceToCall = InterfaceToCall::create($relatedClassName, $methodName);
         $parameterConverters = [];
 
         foreach ($parameterConverterAnnotations as $parameterConverterAnnotation) {
-            if ($parameterConverterAnnotation instanceof HeaderParameterConverterAnnotation) {
-                $parameterConverters[] = HeaderParameterConverterBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->headerName);
-            }else if ($parameterConverterAnnotation instanceof PayloadParameterConverterAnnotation) {
-                $parameterConverters[] = PayloadParameterConverterBuilder::create($parameterConverterAnnotation->parameterName);
-            }else if ($parameterConverterAnnotation instanceof MessageParameterConverterAnnotation) {
+            if ($parameterConverterAnnotation instanceof MessageToHeaderParameterAnnotation) {
+                $parameterConverters[] = MessageToHeaderParameterConverterBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->headerName);
+            } else if ($parameterConverterAnnotation instanceof MessageToPayloadParameterAnnotation) {
+                $parameterConverters[] = MessageToPayloadParameterConverterBuilder::create($parameterConverterAnnotation->parameterName);
+            } else if ($parameterConverterAnnotation instanceof MessageParameterAnnotation) {
                 $parameterConverters[] = MessageParameterConverterBuilder::create($parameterConverterAnnotation->parameterName);
-            }else if ($parameterConverterAnnotation instanceof ReferenceServiceConverterAnnotation) {
+            } else if ($parameterConverterAnnotation instanceof MessageToReferenceServiceAnnotation) {
                 $parameter = $interfaceToCall->getParameterWithName($parameterConverterAnnotation->parameterName);
                 $referenceName = $parameterConverterAnnotation->referenceName ? $parameterConverterAnnotation->referenceName : $parameter->getTypeHint();
                 $messageHandlerBuilder->registerRequiredReference($referenceName);
 
-                $parameterConverters[] = ReferenceServiceParameterConverterBuilder::create(
+                $parameterConverters[] = MessageToReferenceServiceParameterConverterBuilder::create(
                     $parameterConverterAnnotation->parameterName, $referenceName, $messageHandlerBuilder
                 );
             }

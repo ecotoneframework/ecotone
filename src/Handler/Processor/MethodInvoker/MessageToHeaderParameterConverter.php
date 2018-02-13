@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
 use SimplyCodedSoftware\Messaging\Message;
 
 /**
@@ -10,7 +10,7 @@ use SimplyCodedSoftware\Messaging\Message;
  * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class HeaderParameterConverter implements MethodParameterConverter
+class MessageToHeaderParameterConverter implements MessageToParameterConverter
 {
     /**
      * @var string
@@ -35,7 +35,7 @@ class HeaderParameterConverter implements MethodParameterConverter
     /**
      * @param string $parameterName
      * @param string $headerName
-     * @return HeaderParameterConverter
+     * @return MessageToHeaderParameterConverter
      */
     public static function create(string $parameterName, string $headerName) : self
     {

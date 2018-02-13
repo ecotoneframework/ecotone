@@ -3,10 +3,9 @@
 namespace Test\SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
 use Fixture\Annotation\MessageEndpoint\Router\RouterWithNoResolutionRequiredExample;
-use Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder\AnnotationRouterConfiguration;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Builder\PayloadParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
 
 /**
@@ -26,7 +25,7 @@ class AnnotationRouterConfigurationTest extends AnnotationConfigurationTest
         $router = RouterBuilder::create($objectToInvokeReference, "inputChannel", $objectToInvokeReference, "route");
         $router->setResolutionRequired(false);
         $router->withMethodParameterConverters([
-            PayloadParameterConverterBuilder::create("content")
+            MessageToPayloadParameterConverterBuilder::create("content")
         ]);
 
 

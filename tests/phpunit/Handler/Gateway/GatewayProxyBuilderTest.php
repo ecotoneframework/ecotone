@@ -16,12 +16,12 @@ use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Config\NamedMessageChannel;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\HeaderToMessageConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\HeaderToMessageConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\PayloadToMessageConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\PayloadToMessageConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\StaticHeaderToMessageConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\StaticHeaderToMessageConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToStaticHeaderConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\ParameterToStaticHeaderConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\MessageHeaders;
 use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
@@ -155,8 +155,8 @@ class GatewayProxyBuilderTest extends MessagingTest
         $content = 'some bla content';
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnlyWithTwoArguments::class, 'sendMail', $requestChannelName);
         $gatewayProxyBuilder->withParameterToMessageConverters([
-            HeaderToMessageConverterBuilder::create('personId', 'personId'),
-            PayloadToMessageConverterBuilder::create('content')
+            ParameterToHeaderConverterBuilder::create('personId', 'personId'),
+            ParameterToPayloadConverterBuilder::create('content')
         ]);
 
         /** @var ServiceInterfaceSendOnlyWithTwoArguments $gatewayProxy */
@@ -186,9 +186,9 @@ class GatewayProxyBuilderTest extends MessagingTest
         $content = 'some bla content';
         $gatewayProxyBuilder = GatewayProxyBuilder::create("ref-name", ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName);
         $gatewayProxyBuilder->withParameterToMessageConverters([
-            StaticHeaderToMessageConverterBuilder::create('personId', $personId),
-            PayloadToMessageConverterBuilder::create('content'),
-            StaticHeaderToMessageConverterBuilder::create('personName', $personName)
+            ParameterToStaticHeaderConverterBuilder::create('personId', $personId),
+            ParameterToPayloadConverterBuilder::create('content'),
+            ParameterToStaticHeaderConverterBuilder::create('personName', $personName)
         ]);
 
         /** @var ServiceInterfaceSendOnly $gatewayProxy */
@@ -213,8 +213,8 @@ class GatewayProxyBuilderTest extends MessagingTest
         $content = "testContent";
         $gatewayProxyBuilder = GatewayProxyBuilder::create("ref-name", ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName);
         $gatewayProxyBuilder->withParameterToMessageConverters([
-            HeaderToMessageConverterBuilder::create('content', "test1"),
-            HeaderToMessageConverterBuilder::create('content', "test2")
+            ParameterToHeaderConverterBuilder::create('content', "test1"),
+            ParameterToHeaderConverterBuilder::create('content', "test2")
         ]);
 
         /** @var ServiceInterfaceSendOnly $gatewayProxy */

@@ -11,7 +11,7 @@ use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class HeaderToMessageConverterBuilder implements ParameterToMessageConverterBuilder
+class ParameterToHeaderConverterBuilder implements ParameterToMessageConverterBuilder
 {
     /**
      * @var string
@@ -49,6 +49,6 @@ class HeaderToMessageConverterBuilder implements ParameterToMessageConverterBuil
      */
     public function build(): ParameterToMessageConverter
     {
-        return HeaderToMessageConverter::create($this->parameterName, $this->headerName);
+        return ParameterToHeaderConverter::create($this->parameterName, $this->headerName);
     }
 }

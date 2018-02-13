@@ -6,11 +6,11 @@ use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\MethodParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\MessageToParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadParameterConverter;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\Messaging\MessageHandler;
@@ -36,7 +36,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     private $methodName;
     /**
-     * @var MethodParameterConverterBuilder[]|array
+     * @var MessageToParameterConverterBuilder[]|array
      */
     private $methodParameterConverterBuilders = [];
     /**
@@ -110,7 +110,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     }
 
     /**
-     * @param array|MethodParameterConverter[] $methodParameterConverterBuilders
+     * @param array|MessageToParameterConverter[] $methodParameterConverterBuilders
      * @return void
      */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders) : void

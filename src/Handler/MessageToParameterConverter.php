@@ -10,7 +10,7 @@ use SimplyCodedSoftware\Messaging\Message;
  * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface MethodParameterConverter
+interface MessageToParameterConverter
 {
     /**
      * @param Message $message

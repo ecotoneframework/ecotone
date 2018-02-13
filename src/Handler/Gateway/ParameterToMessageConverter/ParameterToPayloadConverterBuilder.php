@@ -10,7 +10,7 @@ use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverterBui
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PayloadToMessageConverterBuilder implements ParameterToMessageConverterBuilder
+class ParameterToPayloadConverterBuilder implements ParameterToMessageConverterBuilder
 {
     /**
      * @var string
@@ -40,6 +40,6 @@ class PayloadToMessageConverterBuilder implements ParameterToMessageConverterBui
      */
     public function build(): ParameterToMessageConverter
     {
-        return PayloadToMessageConverter::create($this->parameterName);
+        return ParameterToPayloadConverter::create($this->parameterName);
     }
 }

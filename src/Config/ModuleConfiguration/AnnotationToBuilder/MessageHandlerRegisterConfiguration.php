@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationToBuilder;
 
+use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\Messaging\Config\ModuleConfiguration\AnnotationConfiguration;
@@ -32,11 +33,11 @@ abstract class MessageHandlerRegisterConfiguration implements AnnotationConfigur
      */
     public function registerWithin(Configuration $configuration): void
     {
-        $annotationMessageEndpointConfigurationFinder = new AnnotationMessageEndpointConfigurationFinder($this->classLocator, $this->classMetadataReader);
+        $annotationMessageEndpointConfigurationFinder = new AnnotationClassesWithMethodFinder($this->classLocator, $this->classMetadataReader);
         $parameterConvertAnnotationFactory = ParameterConverterAnnotationFactory::create();
 
 
-        foreach ($annotationMessageEndpointConfigurationFinder->findFor($this->getMessageHandlerAnnotation()) as $annotationRegistration) {
+        foreach ($annotationMessageEndpointConfigurationFinder->findFor(MessageEndpoint::class,$this->getMessageHandlerAnnotation()) as $annotationRegistration) {
             $annotation = $annotationRegistration->getAnnotation();
             $messageHandlerBuilder = $this->createMessageHandlerFrom($annotationRegistration);
 

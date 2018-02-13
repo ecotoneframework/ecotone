@@ -29,7 +29,7 @@ class BasicMessagingConfiguration implements ModuleMessagingConfiguration
         $configuration->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory());
         $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory());
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
-        $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create("nullChannel", NullableMessageChannel::create()));
+        $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
     }
 
     /**

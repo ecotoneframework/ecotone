@@ -9,7 +9,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging;
  */
 final class NullableMessageChannel implements MessageChannel
 {
-    const CHANNEL_NAME = 'nullableChannel';
+    const CHANNEL_NAME = 'nullChannel';
 
     /**
      * @return NullableMessageChannel

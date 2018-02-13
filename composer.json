@@ -1,5 +1,5 @@
 {
-    "name": "simplycodedsoftware/enterprise-messaging",
+    "name": "simplycodedsoftware/integration-messaging",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -25,10 +25,8 @@
     "require": {
         "php": ">=7.1.0",
         "ramsey/uuid": "^3.0.0",
-        "psr/container": "^1.0.0",
         "ocramius/proxy-manager": "^2.1.1",
         "doctrine/annotations": "^1.6.0",
-        "symfony/dependency-injection": "^4.0.0",
 
         "ext-mbstring": "*",
         "ext-bcmath": "*",

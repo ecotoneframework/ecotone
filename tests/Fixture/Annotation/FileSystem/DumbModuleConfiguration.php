@@ -2,20 +2,30 @@
 
 namespace Fixture\Annotation\FileSystem;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfigurationAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassLocator;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassMetadataReader;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationConfiguration;
 
 /**
  * Class DumbModuleConfiguration
  * @package Fixture\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleConfiguration()
+ * @ModuleConfigurationAnnotation(moduleName="dumb-configuration")
  */
-class DumbModuleConfiguration implements ModuleMessagingConfiguration
+class DumbModuleConfiguration implements AnnotationConfiguration
 {
+    /**
+     * @inheritDoc
+     */
+    public static function createAnnotationConfiguration(ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader): AnnotationConfiguration
+    {
+        return new self();
+    }
+
     /**
      * @inheritDoc
      */

@@ -10,7 +10,7 @@ $loader = require __DIR__.'/vendor/autoload.php';
 $reader = new \Doctrine\Common\Annotations\AnnotationReader();
 
 $start = microtime(true);
-$fileLocator = new \SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfiguration\FileSystemClassLocator([__DIR__ . '/src', __DIR__ . '/vendor'], [
+$fileLocator = new \SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\FileSystemClassLocator([__DIR__ . '/src', __DIR__ . '/vendor'], [
     'IntegrationMessaging',
     'SimplyCodedSoftware'
 ]);

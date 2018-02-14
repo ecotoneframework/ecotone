@@ -2,7 +2,7 @@
 
 namespace Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToHeaderParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
@@ -14,7 +14,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * Class ServiceActivatorWithAllConfigurationDefined
  * @package Fixture\Annotation\MessageEndpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint(referenceName="message_sender")
+ * @MessageEndpointAnnotation(referenceName="message_sender")
  */
 class ServiceActivatorWithAllConfigurationDefined
 {

@@ -3,14 +3,14 @@
 namespace Fixture\Annotation\MessageEndpoint\Gateway;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\GatewayAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
 
 /**
  * Class GatewayWithReplyChannelExample
  * @package Fixture\Annotation\MessageEndpoint\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
+ * @MessageEndpointAnnotation()
  */
 interface GatewayWithReplyChannelExample
 {

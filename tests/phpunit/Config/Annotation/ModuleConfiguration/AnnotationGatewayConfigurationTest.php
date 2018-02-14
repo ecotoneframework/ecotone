@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Fixture\Annotation\MessageEndpoint\Gateway\GatewayWithReplyChannelExample;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation\AnnotationGatewayConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\AnnotationGatewayConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 
 /**

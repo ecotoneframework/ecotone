@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation\AnnotationTransformerConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\AnnotationTransformerConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 

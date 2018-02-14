@@ -1,27 +1,22 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfigurationAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassLocator;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassMetadataReader;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 
 /**
- * Class AnnotationApplicationContextConfiguration
- * @package SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationToBuilder
+ * Class BaseAnnotationConfiguration
+ * @package SimplyCodedSoftware\IntegrationMessaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleConfigurationAnnotation(moduleName="application-context-configuration")
  */
-class AnnotationApplicationContextConfiguration implements AnnotationConfiguration
+abstract class MessageHandlerRegisterConfiguration implements AnnotationConfiguration
 {
     /**
      * @var ConfigurationVariableRetrievingService
@@ -54,7 +49,7 @@ class AnnotationApplicationContextConfiguration implements AnnotationConfigurati
      */
     public static function createAnnotationConfiguration(ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader): AnnotationConfiguration
     {
-        return new self($configurationVariableRetrievingService, $classLocator, $classMetadataReader);
+        return new static($configurationVariableRetrievingService, $classLocator, $classMetadataReader);
     }
 
     /**
@@ -63,26 +58,29 @@ class AnnotationApplicationContextConfiguration implements AnnotationConfigurati
     public function registerWithin(Configuration $configuration, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
     {
         $annotationMessageEndpointConfigurationFinder = new AnnotationClassesWithMethodFinder($this->classLocator, $this->classMetadataReader);
+        $parameterConvertAnnotationFactory = ParameterConverterAnnotationFactory::create();
 
-        $classes = [];
-        foreach ($annotationMessageEndpointConfigurationFinder->findFor(ApplicationContextAnnotation::class, MessagingComponentAnnotation::class) as $annotationRegistration) {
-            if (!array_key_exists($annotationRegistration->getMessageEndpointClass(), $classes)) {
-                $classToInstantiate = $annotationRegistration->getMessageEndpointClass();
-                $classes[$annotationRegistration->getMessageEndpointClass()] = new $classToInstantiate();
-            }
 
-            $classToRun = $classes[$annotationRegistration->getMessageEndpointClass()];
-            $messagingComponent = $classToRun->{$annotationRegistration->getMethodName()}();
+        foreach ($annotationMessageEndpointConfigurationFinder->findFor(MessageEndpointAnnotation::class,$this->getMessageHandlerAnnotation()) as $annotationRegistration) {
+            $annotation = $annotationRegistration->getAnnotation();
+            $messageHandlerBuilder = $this->createMessageHandlerFrom($annotationRegistration);
 
-            if ($messagingComponent instanceof MessageHandlerBuilder) {
-                $configuration->registerMessageHandler($messagingComponent);
-            } else if ($messagingComponent instanceof MessageChannelBuilder) {
-                $configuration->registerMessageChannel($messagingComponent);
-            } else {
-                throw InvalidArgumentException::create(get_class($messagingComponent) . " is not known component to register");
-            }
+            $parameterConvertAnnotationFactory->configureParameterConverters($messageHandlerBuilder, $annotationRegistration->getMessageEndpointClass(), $annotationRegistration->getMethodName(), $annotation->parameterConverters);
+
+            $configuration->registerMessageHandler($messageHandlerBuilder);
         }
     }
+
+    /**
+     * @param AnnotationRegistration $annotationRegistration
+     * @return MessageHandlerBuilderWithParameterConverters
+     */
+    public abstract function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration) : MessageHandlerBuilderWithParameterConverters;
+
+    /**
+     * @return string
+     */
+    public abstract function getMessageHandlerAnnotation() : string;
 
     /**
      * @inheritDoc

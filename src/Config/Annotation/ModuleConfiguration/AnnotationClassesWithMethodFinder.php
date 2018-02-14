@@ -1,6 +1,6 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassLocator;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassMetadataReader;

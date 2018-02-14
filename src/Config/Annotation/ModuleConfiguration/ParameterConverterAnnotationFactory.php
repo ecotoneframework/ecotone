@@ -1,6 +1,6 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToHeaderParameterAnnotation;

@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Configuration\DumbConfigurationObserver;
 use Fixture\Configuration\DumbModuleConfigurationRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\DoctrineClassMetadataReader;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\FileSystemClassLocator;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;

@@ -8,7 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassMetadataRead
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfigurationConfiguration;
 
 /**
  * Class DumbModuleConfiguration

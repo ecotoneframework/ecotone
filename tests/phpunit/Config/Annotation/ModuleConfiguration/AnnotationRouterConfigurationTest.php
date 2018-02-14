@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Fixture\Annotation\MessageEndpoint\Router\RouterWithNoResolutionRequiredExample;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation\AnnotationRouterConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\AnnotationRouterConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
 

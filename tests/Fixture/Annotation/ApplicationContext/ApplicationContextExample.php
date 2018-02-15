@@ -7,6 +7,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnota
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 
@@ -48,5 +50,14 @@ class ApplicationContextExample
         return TransformerBuilder::createHeaderEnricher("http-entry-enricher", self::HTTP_INPUT_CHANNEL, self::HTTP_OUTPUT_CHANNEL, [
             "token" => "abcedfg"
         ]);
+    }
+
+    /**
+     * @return GatewayBuilder
+     * @MessagingComponentAnnotation()
+     */
+    public function gateway() : GatewayBuilder
+    {
+        return GatewayProxyBuilder::create("some-ref", GatewayExample::class, "doSomething", self::HTTP_INPUT_CHANNEL);
     }
 }

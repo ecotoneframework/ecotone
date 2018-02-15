@@ -3,9 +3,11 @@
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
+use Fixture\Annotation\ApplicationContext\GatewayExample;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\AnnotationApplicationContextConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 
 /**
@@ -27,7 +29,8 @@ class AnnotationApplicationContextConfigurationTest extends AnnotationConfigurat
                 ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel(ApplicationContextExample::HTTP_OUTPUT_CHANNEL))
                 ->registerMessageHandler(TransformerBuilder::createHeaderEnricher("http-entry-enricher", ApplicationContextExample::HTTP_INPUT_CHANNEL, ApplicationContextExample::HTTP_OUTPUT_CHANNEL, [
                     "token" => "abcedfg"
-                ])),
+                ]))
+                ->registerGatewayBuilder(GatewayProxyBuilder::create("some-ref", GatewayExample::class, "doSomething", ApplicationContextExample::HTTP_INPUT_CHANNEL)),
             $configuration
         );
     }

@@ -12,6 +12,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassMetadataRead
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
@@ -78,6 +79,8 @@ class AnnotationApplicationContextConfiguration implements AnnotationConfigurati
                 $configuration->registerMessageHandler($messagingComponent);
             } else if ($messagingComponent instanceof MessageChannelBuilder) {
                 $configuration->registerMessageChannel($messagingComponent);
+            } else if ($messagingComponent instanceof GatewayBuilder) {
+                $configuration->registerGatewayBuilder($messagingComponent);
             } else {
                 throw InvalidArgumentException::create(get_class($messagingComponent) . " is not known component to register");
             }

@@ -47,7 +47,7 @@ abstract class MessageHandlerRegisterConfiguration implements AnnotationConfigur
     /**
      * @inheritDoc
      */
-    public static function createAnnotationConfiguration(ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader): AnnotationConfiguration
+    public static function createAnnotationConfiguration(array $moduleConfigurationExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader): AnnotationConfiguration
     {
         return new static($configurationVariableRetrievingService, $classLocator, $classMetadataReader);
     }

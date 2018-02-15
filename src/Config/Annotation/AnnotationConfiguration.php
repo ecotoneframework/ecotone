@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurationExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration;
 
 /**
@@ -13,10 +14,11 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration
 interface AnnotationConfiguration extends ModuleMessagingConfiguration
 {
     /**
+     * @param array|ModuleConfigurationExtension[] $moduleConfigurationExtensions
      * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
      * @param ClassLocator $classLocator
      * @param ClassMetadataReader $classMetadataReader
      * @return AnnotationConfiguration
      */
-    public static function createAnnotationConfiguration(ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader) : AnnotationConfiguration;
+    public static function createAnnotationConfiguration(array $moduleConfigurationExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader) : AnnotationConfiguration;
 }

@@ -21,7 +21,7 @@ class ModuleConfigurationExtensionAnnotation
      */
     public $moduleName;
     /**
-     * @var ConfigurationVariableAnnotation[]
+     * @var array<\SimplyCodedSoftware\IntegrationMessaging\Annotation\ConfigurationVariableAnnotation>
      */
-    public $variables;
+    public $variables = [];
 }

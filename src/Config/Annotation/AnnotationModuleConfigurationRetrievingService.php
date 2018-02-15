@@ -4,9 +4,11 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfigurationAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfigurationExtensionAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Config\AnnotationRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration;
-use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurationExtension;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurationRetrievingService;
 
 /**
  * Class AnnotationModuleConfigurationRetrievingService
@@ -23,14 +25,20 @@ class AnnotationModuleConfigurationRetrievingService implements ModuleConfigurat
      * @var ClassMetadataReader
      */
     private $classMetadataReader;
+    /**
+     * @var ConfigurationVariableRetrievingService
+     */
+    private $configurationVariableRetrievingService;
 
     /**
      * AnnotationModuleConfigurationRetrievingService constructor.
+     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
      * @param ClassLocator $classLocator
      * @param ClassMetadataReader $classMetadataReader
      */
-    public function __construct(ClassLocator $classLocator, ClassMetadataReader $classMetadataReader)
+    public function __construct(ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader)
     {
+        $this->configurationVariableRetrievingService = $configurationVariableRetrievingService;
         $this->classLocator = $classLocator;
         $this->classMetadataReader = $classMetadataReader;
     }
@@ -40,25 +48,62 @@ class AnnotationModuleConfigurationRetrievingService implements ModuleConfigurat
      */
     public function findAllModuleConfigurations(): array
     {
+        /** @var AnnotationConfiguration[]|string[] $configurationClassNames */
         $configurationClassNames = $this->classLocator->getAllClassesWithAnnotation(ModuleConfigurationAnnotation::class);
         $configurationClasses = [];
+        /** @var ModuleConfigurationExtension[]|string[] $configurationExtensionClassNames */
         $configurationExtensionClassNames = $this->classLocator->getAllClassesWithAnnotation(ModuleConfigurationExtensionAnnotation::class);
+        $configurationExtensions = [];
 
+        foreach ($configurationExtensionClassNames as $configurationExtensionClassName) {
+            /** @var ModuleConfigurationExtensionAnnotation $annotation */
+            $annotation = $this->classMetadataReader->getAnnotationForClass($configurationExtensionClassName, ModuleConfigurationExtensionAnnotation::class);
+            $configurationVariables = $this->getConfigurationVariablesForAnnotation($annotation);
 
-
-        foreach ($configurationClassNames as $configurationClassesName) {
-            /** @var ModuleConfigurationAnnotation $annotation */
-            $annotation = $this->classMetadataReader->getAnnotationForClass($configurationClassesName, ModuleConfigurationAnnotation::class);
-
-            if (class_implements($configurationClassesName, AnnotationConfiguration::class)) {
-//                $configurationClass::createAnnotationConfiguration()
-            }else if (class_implements($configurationClassesName, ModuleMessagingConfiguration::class)) {
-//                $configurationClassesName::
-            }else {
-                throw new InvalidArgumentException("Can't register module {$configurationClassesName} it doesn't extend " . ModuleMessagingConfiguration::class);
+            if (!is_subclass_of($configurationExtensionClassName, ModuleConfigurationExtension::class)) {
+                throw ConfigurationException::create("Can't register module extension {$configurationExtensionClassName} it doesn't extend " . ModuleConfigurationExtension::class);
             }
+
+            $configurationExtensions[$annotation->moduleName][] = $configurationExtensionClassName::create(InMemoryConfigurationVariableRetrievingService::create($configurationVariables));
+        }
+
+        foreach ($configurationClassNames as $configurationClassName) {
+            /** @var ModuleConfigurationAnnotation $annotation */
+            $annotation = $this->classMetadataReader->getAnnotationForClass($configurationClassName, ModuleConfigurationAnnotation::class);
+            $configurationVariables = $this->getConfigurationVariablesForAnnotation($annotation);
+
+            if (!is_subclass_of($configurationClassName, AnnotationConfiguration::class)) {
+                throw ConfigurationException::create("Can't register module {$configurationClassName} it doesn't extend " . AnnotationConfiguration::class);
+            }
+
+            $extensionsForConfiguration = array_key_exists($annotation->moduleName, $configurationExtensions) ? $configurationExtensions[$annotation->moduleName] : [];
+            $configurationClasses[] = $configurationClassName::createAnnotationConfiguration($extensionsForConfiguration, InMemoryConfigurationVariableRetrievingService::create($configurationVariables), $this->classLocator, $this->classMetadataReader);
         }
 
         return $configurationClasses;
+    }
+
+    /**
+     * @param $annotation
+     * @return array
+     * @throws ConfigurationException
+     */
+    private function getConfigurationVariablesForAnnotation($annotation): array
+    {
+        $configurationVariables = [];
+        foreach ($annotation->variables as $variable) {
+            if (!$this->configurationVariableRetrievingService->has($variable->variableName)) {
+                if ($variable->defaultValue) {
+                    $configurationVariables[$variable->variableName] = $variable->defaultValue;
+                    continue;
+                }
+
+                throw ConfigurationException::create("Configuration '{$variable->variableName}' for module '{$annotation->moduleName}' is required to be set");
+            }
+
+            $configurationVariables[$variable->variableName] = $this->configurationVariableRetrievingService->get($variable->variableName);
+        }
+
+        return $configurationVariables;
     }
 }

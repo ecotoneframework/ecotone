@@ -56,7 +56,7 @@ class InMemoryConfigurationVariableRetrievingService implements ConfigurationVar
     public function get(string $variableName): string
     {
         if (!$this->has($variableName)) {
-            throw InvalidArgumentException::create("Expected {$variableName} but got none");
+            throw InvalidArgumentException::create("Expected configuration variable with name '{$variableName}' but got none.");
         }
 
         return $this->variables[$variableName];

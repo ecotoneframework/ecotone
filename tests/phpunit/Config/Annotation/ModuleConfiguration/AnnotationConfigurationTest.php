@@ -29,6 +29,7 @@ abstract class AnnotationConfigurationTest extends MessagingTest
         $annotationReader = new AnnotationReader();
 
         $this->annotationConfiguration = $this->createAnnotationConfiguration()::createAnnotationConfiguration(
+            [],
             InMemoryConfigurationVariableRetrievingService::createEmpty(),
             new FileSystemClassLocator(
                 $annotationReader,

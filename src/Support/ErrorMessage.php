@@ -39,6 +39,9 @@ final class ErrorMessage extends GenericMessage
         return $this->originalMessage;
     }
 
+    /**
+     * @param Message $message
+     */
     private function setOriginalMessage(Message $message) : void
     {
         $this->originalMessage = $message;

@@ -6,10 +6,10 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller\ChannelReplySender;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller\DefaultReplySender;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller\ErrorReplySender;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller\TimeoutChannelReplySender;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Receiver\ChannelSendAndReceiveService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Receiver\DefaultSendAndReceiveService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Receiver\ErrorSendAndReceiveService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Receiver\TimeoutChannelSendAndReceiveService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
@@ -50,6 +50,14 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @var array|ParameterToMessageConverterBuilder[]
      */
     private $methodArgumentConverters = [];
+    /**
+     * @var CustomSendAndReceiveService
+     */
+    private $customSendAndReceiveService;
+    /**
+     * @var string
+     */
+    private $errorChannelName;
 
     /**
      * GatewayProxyBuilder constructor.
@@ -90,6 +98,17 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @param string $errorChannelName
+     * @return GatewayProxyBuilder
+     */
+    public function withErrorChannel(string $errorChannelName) : self
+    {
+        $this->errorChannelName = $errorChannelName;
+
+        return $this;
+    }
+
+    /**
      * @param int $millisecondsTimeout
      * @return GatewayProxyBuilder
      */
@@ -125,6 +144,17 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @param CustomSendAndReceiveService $sendAndReceiveService
+     * @return GatewayProxyBuilder
+     */
+    public function withCustomSendAndReceiveService(CustomSendAndReceiveService $sendAndReceiveService) : self
+    {
+        $this->customSendAndReceiveService = $sendAndReceiveService;
+
+        return $this;
+    }
+
+    /**
      * @param array $methodArgumentConverters
      * @return GatewayProxyBuilder
      */
@@ -143,22 +173,28 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function build(ChannelResolver $channelResolver)
     {
         $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
-        $interfaceToCall = InterfaceToCall::create($this->interfaceName, $this->methodName);
-
-        $replySender = DefaultReplySender::create();
+        $requestChannel = $channelResolver->resolve($this->requestChannelName);
+        /** @var DirectChannel $requestChannel */
+        Assert::isSubclassOf($requestChannel, DirectChannel::class, "Gateway request channel ");
         if ($replyChannel) {
             /** @var PollableChannel $replyChannel */
             Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");
+        }
+        $errorChannel = $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null;
 
-            $replySender = new ChannelReplySender($replyChannel);
+        $interfaceToCall = InterfaceToCall::create($this->interfaceName, $this->methodName);
+
+        $replyReceiver = DefaultSendAndReceiveService::create($requestChannel, $replyChannel, $errorChannel);
+        if ($this->customSendAndReceiveService) {
+            $replyReceiver = $this->customSendAndReceiveService;
+            $this->customSendAndReceiveService->setSendAndReceive($requestChannel, $replyChannel, $errorChannel);
+        }
+        if ($replyChannel) {
+            $replyReceiver = new ChannelSendAndReceiveService($requestChannel, $replyChannel, $errorChannel);
         }
         if ($this->replyChannelName && $this->milliSecondsTimeout > 0) {
-            $replySender = new TimeoutChannelReplySender($replyChannel, $this->milliSecondsTimeout);
+            $replyReceiver = new TimeoutChannelSendAndReceiveService($requestChannel, $replyChannel, $errorChannel, $this->milliSecondsTimeout);
         }
-
-        /** @var DirectChannel $requestChannel */
-        $requestChannel = $channelResolver->resolve($this->requestChannelName);
-        Assert::isSubclassOf($requestChannel, DirectChannel::class, "Gateway request channel ");
 
         if ($interfaceToCall->doesItNotReturnValue() && $this->replyChannelName) {
             throw InvalidArgumentException::create("Can't set reply channel for {$interfaceToCall}");
@@ -169,16 +205,15 @@ class GatewayProxyBuilder implements GatewayBuilder
             $methodArgumentConverters[] = $messageConverterBuilder->build();
         }
 
-        $gatewayProxy = new GatewayProxy(
+        $gateway = new GatewayProxy(
             $this->interfaceName, $this->methodName,
             new MethodCallToMessageConverter(
                 $this->interfaceName, $this->methodName, $methodArgumentConverters
             ),
-            ErrorReplySender::create($replySender),
-            $requestChannel
+            ErrorSendAndReceiveService::create($replyReceiver, $errorChannel)
         );
 
-        $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gatewayProxy) implements AdapterInterface {
+        $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gateway) implements AdapterInterface {
             /**
              * @var GatewayProxy
              */

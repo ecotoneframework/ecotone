@@ -2,7 +2,10 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
+use Fixture\Handler\ExceptionMessageHandler;
+use Fixture\Handler\Gateway\DumbSendAndReceiveService;
 use Fixture\Handler\NoReturnMessageHandler;
+use Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Fixture\Handler\StatefulHandler;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
@@ -353,5 +356,69 @@ class GatewayProxyBuilderTest extends MessagingTest
         ]));
 
         $gatewayProxy->sendMail();
+    }
+
+    public function test_creating_gateway_with_custom_reply_receiver()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(ReplyViaHeadersMessageHandler::create("reply"));
+        $reply = MessageBuilder::withPayload("extended reply")->build();
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName)
+                                ->withCustomSendAndReceiveService(DumbSendAndReceiveService::create()->setMessageToReceive($reply));
+
+        /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build(InMemoryChannelResolver::createFromAssociativeArray([
+            $requestChannelName => $requestChannel
+        ]));
+
+        $this->assertEquals(
+            "extended reply",
+            $gatewayProxy->sendMail()
+        );
+    }
+
+    public function test_exception_containing_original_message()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(ExceptionMessageHandler::create());
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName);
+
+        /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build(InMemoryChannelResolver::createFromAssociativeArray([
+            $requestChannelName => $requestChannel
+        ]));
+
+        $this->expectExceptionObject(MessageHandlingException::fromOtherException(new \InvalidArgumentException("test"), MessageBuilder::withPayload("empty")->build()));
+
+        $gatewayProxy->sendMail();
+    }
+
+    public function test_propagating_error_to_error_channel()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(ExceptionMessageHandler::create());
+
+        $errorChannel = QueueChannel::create();
+        $errorChannelName = "errorChannel";
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnlyWithNull::class, 'sendMail', $requestChannelName)
+            ->withErrorChannel($errorChannelName);
+
+        /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build(InMemoryChannelResolver::createFromAssociativeArray([
+            $requestChannelName => $requestChannel,
+            $errorChannelName => $errorChannel
+        ]));
+
+        $gatewayProxy->sendMail();
+
+        $this->assertInstanceOf(
+            ErrorMessage::class,
+            $errorChannel->receive()
+        );
     }
 }

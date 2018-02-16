@@ -10,27 +10,27 @@ use SimplyCodedSoftware\IntegrationMessaging\Future;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class FutureReplySender implements Future
+class FutureReplyReceiver implements Future
 {
     /**
-     * @var ReplySender
+     * @var SendAndReceiveService
      */
     private $replySender;
 
     /**
      * FutureReplySender constructor.
-     * @param ReplySender $replySender
+     * @param SendAndReceiveService $replySender
      */
-    private function __construct(ReplySender $replySender)
+    private function __construct(SendAndReceiveService $replySender)
     {
         $this->replySender = $replySender;
     }
 
     /**
-     * @param ReplySender $replySender
-     * @return FutureReplySender
+     * @param SendAndReceiveService $replySender
+     * @return FutureReplyReceiver
      */
-    public static function create(ReplySender $replySender) : self
+    public static function create(SendAndReceiveService $replySender) : self
     {
         return new self($replySender);
     }

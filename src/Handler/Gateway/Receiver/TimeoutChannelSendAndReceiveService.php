@@ -1,19 +1,21 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Receiver;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ReplySender;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\SendAndReceiveService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class TimeoutChannelReplySender
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Poller
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Receiver
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class TimeoutChannelReplySender implements ReplySender
+class TimeoutChannelSendAndReceiveService implements SendAndReceiveService
 {
     const MICROSECOND_TO_MILLI_SECOND = 1000;
     /**
@@ -24,25 +26,45 @@ class TimeoutChannelReplySender implements ReplySender
      * @var int
      */
     private $millisecondsTimeout;
+    /**
+     * @var DirectChannel
+     */
+    private $requestChannel;
+    /**
+     * @var null|MessageChannel
+     */
+    private $errorChannel;
 
     /**
      * ReceivePoller constructor.
+     * @param DirectChannel $requestChannel
      * @param PollableChannel $replyChannel
+     * @param null|MessageChannel $errorChannel
      * @param int $millisecondsTimeout
      */
-    public function __construct(PollableChannel $replyChannel, int $millisecondsTimeout)
+    public function __construct(DirectChannel $requestChannel, PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $millisecondsTimeout)
     {
+        $this->requestChannel = $requestChannel;
         $this->replyChannel = $replyChannel;
         $this->millisecondsTimeout = $millisecondsTimeout;
+        $this->errorChannel = $errorChannel;
     }
 
     /**
      * @inheritDoc
      */
-    public function prepareFor(InterfaceToCall $interfaceToCall, MessageBuilder $messageBuilder): MessageBuilder
+    public function send(Message $message): void
+    {
+        $this->requestChannel->send($message);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function prepareForSend(MessageBuilder $messageBuilder, InterfaceToCall $interfaceToCall): MessageBuilder
     {
         return $messageBuilder
-                    ->setErrorChannel($this->replyChannel);
+                    ->setErrorChannel($this->errorChannel ? $this->errorChannel : $this->replyChannel);
     }
 
     /**
@@ -66,13 +88,5 @@ class TimeoutChannelReplySender implements ReplySender
     private function currentMillisecond(): float
     {
         return microtime(true) * self::MICROSECOND_TO_MILLI_SECOND;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasReply(): bool
-    {
-        return true;
     }
 }

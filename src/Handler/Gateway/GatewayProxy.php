@@ -3,6 +3,9 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
@@ -27,31 +30,23 @@ class GatewayProxy
      */
     private $methodCallToMessageConverter;
     /**
-     * @var DirectChannel
+     * @var SendAndReceiveService
      */
-    private $requestChannel;
-    /**
-     * @var ReplySender
-     */
-    private $replySender;
+    private $requestReplyService;
 
     /**
      * GatewayProxy constructor.
      * @param string $className
      * @param string $methodName
      * @param MethodCallToMessageConverter $methodCallToMessageConverter
-     * @param ReplySender $replySender
-     * @param DirectChannel $requestChannel
+     * @param SendAndReceiveService $requestReplyService
      */
-    public function __construct(string $className, string $methodName, MethodCallToMessageConverter $methodCallToMessageConverter, ReplySender $replySender, DirectChannel $requestChannel)
+    public function __construct(string $className, string $methodName, MethodCallToMessageConverter $methodCallToMessageConverter, SendAndReceiveService $requestReplyService)
     {
         $this->methodCallToMessageConverter = $methodCallToMessageConverter;
         $this->className = $className;
         $this->methodName = $methodName;
-
-//        $this->initialize($className, $methodName, $replySender);
-        $this->requestChannel = $requestChannel;
-        $this->replySender = $replySender;
+        $this->requestReplyService = $requestReplyService;
     }
 
     /**
@@ -72,39 +67,21 @@ class GatewayProxy
         }
 
         $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
-        $message = $this->replySender
-                        ->prepareFor($interfaceToCall, $message)
+        $message = $this->requestReplyService
+                        ->prepareForSend($message, $interfaceToCall)
                         ->build();
 
-        $this->requestChannel->send($message);
+        $this->requestReplyService->send($message);
 
         if ($interfaceToCall->doesItReturnFuture()) {
-            return FutureReplySender::create($this->replySender);
+            return FutureReplyReceiver::create($this->requestReplyService);
         }
 
-        $replyMessage = $this->replySender->receiveReply();
+        $replyMessage = $this->requestReplyService->receiveReply();
         if (is_null($replyMessage) && !$interfaceToCall->doesItNotReturnValue() && !$interfaceToCall->canItReturnNull()) {
-            throw InvalidArgumentException::create("{$interfaceToCall} expects value, but null was returned. Change return type hint to allow nullable values.");
+            throw InvalidArgumentException::create("{$interfaceToCall} expects value, but null was returned. If you defined errorChannel it's advised to change interface to nullable.");
         }
 
         return $replyMessage ? $replyMessage->getPayload() : null;
-    }
-
-    /**
-     * @param string $interfaceName
-     * @param string $methodName
-     * @param ReplySender $replySender
-     * @return void
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    private function initialize(string $interfaceName, string $methodName, ReplySender $replySender) : void
-    {
-        $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName);
-        if ($interfaceToCall->doesItNotReturnValue() && $replySender->hasReply()) {
-            throw InvalidArgumentException::create("Can't create gateway with reply channel, when {$interfaceToCall} is void");
-        }
-        if (!$interfaceToCall->doesItNotReturnValue() && !$replySender->hasReply()) {
-            throw InvalidArgumentException::create("Interface {$interfaceToCall} has return value, but no reply channel was defined");
-        }
     }
 }

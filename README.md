@@ -4,7 +4,12 @@
 
 This is implementation of [Enterprise Integration Patterns](enterpriseintegrationpatterns.com) in PHP.  
 Implementation is based on [EIP book](https://www.amazon.com/Enterprise-Integration-Patterns-Designing-Deploying/dp/0321200683) 
-and [Spring Integration](https://projects.spring.io/spring-integration/) 
+and [Spring Integration](https://projects.spring.io/spring-integration/)   
+
+#### What it should help me with
+
+It will provide pipe and filters architecture for your system where components are loosely coupled and easily replaceable.  
+There are a lot of benefits, which will be described in later stage of the project. 
 
 #### How far in development is this framework
 

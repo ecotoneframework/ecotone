@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
@@ -27,6 +28,10 @@ final class MethodInvoker implements MessageProcessor
      * @var MessageToParameterConverter[]
      */
     private $orderedMethodArguments;
+    /**
+     * @var bool
+     */
+    private $isCalledStatically;
 
     /**
      * MethodInvocation constructor.
@@ -36,7 +41,6 @@ final class MethodInvoker implements MessageProcessor
      */
     private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters)
     {
-        Assert::isObject($objectToInvokeOn, "Passed value for invocation is not an object");
         Assert::allInstanceOfType($methodParameterConverters, MessageToParameterConverter::class);
 
         $this->init($objectToInvokeOn, $objectMethodName, $methodParameterConverters);
@@ -69,6 +73,16 @@ final class MethodInvoker implements MessageProcessor
      */
     private function init($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters) : void
     {
+        $this->isCalledStatically = false;
+        if (!is_object($objectToInvokeOn)) {
+            $interfaceToCall = InterfaceToCall::create($objectToInvokeOn, $objectMethodName);
+
+            if (!$interfaceToCall->isStaticallyCalled()) {
+                throw InvalidArgumentException::create("Reference to invoke must be object given {$objectToInvokeOn}");
+            }
+            $this->isCalledStatically = true;
+        }
+
         if (!$this->hasObjectMethod($objectToInvokeOn, $objectMethodName)) {
             throw InvalidArgumentException::create("Object {$this->objectToClassName($objectToInvokeOn)} does not contain method {$objectMethodName}");
         }
@@ -135,7 +149,7 @@ final class MethodInvoker implements MessageProcessor
      */
     private function objectToClassName($objectToInvokeOn): string
     {
-        return get_class($objectToInvokeOn);
+        return $this->isCalledStatically ? $objectToInvokeOn : get_class($objectToInvokeOn);
     }
 
     /**

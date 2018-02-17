@@ -173,7 +173,10 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
             $parameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
         }
 
-        $objectToInvoke = $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
+        $objectToInvoke = $this->objectToInvokeReferenceName;
+        if (!$this->isStaticallyCalled()) {
+            $objectToInvoke = $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
+        }
 
         return new ServiceActivatingHandler(
             RequestReplyProducer::createRequestAndReply(
@@ -192,5 +195,21 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
     public function __toString()
     {
         return "service activator";
+    }
+
+    /**
+     * @return bool
+     */
+    private function isStaticallyCalled(): bool
+    {
+        if (class_exists($this->objectToInvokeReferenceName)) {
+            $referenceMethod = new \ReflectionMethod($this->objectToInvokeReferenceName, $this->methodName);
+
+            if ($referenceMethod->isStatic()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -85,12 +85,12 @@ final class MessageBuilder
     }
 
     /**
-     * @param MessageChannel $messageChannel
+     * @param MessageChannel $replyChannel
      * @return MessageBuilder
      */
-    public function setReplyChannel(MessageChannel $messageChannel) : self
+    public function setReplyChannel(MessageChannel $replyChannel) : self
     {
-        $this->setHeader(MessageHeaders::REPLY_CHANNEL, $messageChannel);
+        $this->setHeader(MessageHeaders::REPLY_CHANNEL, $replyChannel);
 
         return $this;
     }

@@ -94,6 +94,17 @@ class InterfaceToCall
         return new self(get_class($object), $methodName);
     }
 
+    /**
+     * @return bool
+     */
+    public function isStaticallyCalled() : bool
+    {
+        return $this->reflectionMethod()->isStatic();
+    }
+
+    /**
+     * @return bool
+     */
     public function doesItNotReturnValue(): bool
     {
         return $this->getReturnType() == 'void';

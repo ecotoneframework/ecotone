@@ -2,6 +2,8 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator;
 use Fixture\Service\ServiceExpectingOneArgument;
+use Fixture\Service\StaticallyCalledService;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -32,5 +34,27 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $serviceActivator->handle(MessageBuilder::withPayload('some')->build());
 
         $this->assertTrue($objectToInvoke->wasCalled());
+    }
+
+    public function test_activating_statically_called_service()
+    {
+        $reference = StaticallyCalledService::class;
+
+        $serviceActivator = ServiceActivatorBuilder::create($reference, "run")
+                                ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+
+
+        $payload = "Hello World";
+        $replyChannel = QueueChannel::create();
+        $serviceActivator->handle(
+            MessageBuilder::withPayload($payload)
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            $payload,
+            $replyChannel->receive()->getPayload()
+        );
     }
 }

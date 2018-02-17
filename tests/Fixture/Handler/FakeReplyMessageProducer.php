@@ -9,7 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * @package Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ReplyMessageProducer implements \SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor
+class FakeReplyMessageProducer implements \SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor
 {
     private $replyData;
 

@@ -93,27 +93,28 @@ Feature: Service activator
     And I run messaging system
     When I expect exception when sending order request with id 3 product name "INCORRECT" using gateway "orderingService"
 
-  Scenario: Application consist of order service. It receives and order and return confirmation.
-  Gateway is entry point to the messaging system, it will receive the order and send it to request channel.
-  At request channel message will be transformed to contain isAsync header
-  At route channel router will route message to proper "syncChannel" or "asyncChannel", based on "isAsync" header
-  This will focus on  exception  asynchronous scenario.
-    Given I register "requestChannel" as "Direct Channel"
-    And I register "routeChannel" as "Direct Channel"
-    And I register "syncChannel" as "Direct Channel"
-    And I register "asyncChannel" as "Pollable Channel"
-    And I register "responseChannel" as "Pollable Channel"
-    And I activate gateway with name "orderingService" for "Fixture\Behat\Ordering\OrderingService" and "processOrder" with request channel "requestChannel" and reply channel "responseChannel"
-    And I activate header enricher transformer with name "transformer" with request channel "requestChannel" and output channel "routeChannel" with headers:
-      | key     | value |
-      | isAsync |     1 |
-    And I activate header router with name "routing" and input Channel "routeChannel" for header "isAsync" with mapping:
-      | value | target_channel |
-      |     1 | asyncChannel   |
-      |     0 | syncChannel    |
-    And I activate service with name "orderProcessor" for "Fixture\Behat\Ordering\OrderProcessor" with method "processOrder" to listen on "asyncChannel" channel and output channel "responseChannel"
-    And I run messaging system
-    When I send order request with id 3 product name "INCORRECT" using gateway "orderingService"
-    And "orderProcessor" handles message
-    Then I expect exception during confirmation receiving
+  ## get back to this one, when inbound channel adapter will be available
+#  Scenario: Application consist of order service. It receives and order and return confirmation.
+#  Gateway is entry point to the messaging system, it will receive the order and send it to request channel.
+#  At request channel message will be transformed to contain isAsync header
+#  At route channel router will route message to proper "syncChannel" or "asyncChannel", based on "isAsync" header
+#  This will focus on  exception  asynchronous scenario.
+#    Given I register "requestChannel" as "Direct Channel"
+#    And I register "routeChannel" as "Direct Channel"
+#    And I register "syncChannel" as "Direct Channel"
+#    And I register "asyncChannel" as "Pollable Channel"
+#    And I register "responseChannel" as "Pollable Channel"
+#    And I activate gateway with name "orderingService" for "Fixture\Behat\Ordering\OrderingService" and "processOrder" with request channel "requestChannel" and reply channel "responseChannel"
+#    And I activate header enricher transformer with name "transformer" with request channel "requestChannel" and output channel "routeChannel" with headers:
+#      | key     | value |
+#      | isAsync |     1 |
+#    And I activate header router with name "routing" and input Channel "routeChannel" for header "isAsync" with mapping:
+#      | value | target_channel |
+#      |     1 | asyncChannel   |
+#      |     0 | syncChannel    |
+#    And I activate service with name "orderProcessor" for "Fixture\Behat\Ordering\OrderProcessor" with method "processOrder" to listen on "asyncChannel" channel and output channel "responseChannel"
+#    And I run messaging system
+#    When I send order request with id 3 product name "INCORRECT" using gateway "orderingService"
+#    And "orderProcessor" handles message
+#    Then I expect exception during confirmation receiving
 

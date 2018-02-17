@@ -4,7 +4,8 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler;
 
 use Fixture\Handler\NoReplyMessageProducer;
 use Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
-use Fixture\Handler\ReplyMessageProducer;
+use Fixture\Handler\FakeReplyMessageProducer;
+use Prophecy\Argument;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
@@ -12,6 +13,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageDeliveryException;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
+use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Support\ErrorMessage;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
@@ -30,17 +34,6 @@ class RequestReplyProducerTest extends MessagingTest
 
         $this->handleReplyWith($requestReplyProducer);
         $this->assertTrue($messageProcessor->wasCalled(), "Service was not called");
-    }
-
-    /**
-     * @param \SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor $replyMessageProducer
-     * @param MessageChannel|null $messageChannel
-     * @param bool $requireReply
-     * @return \SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer
-     */
-    private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, MessageChannel $messageChannel = null, bool $requireReply = false): RequestReplyProducer
-    {
-        return RequestReplyProducer::createFrom($messageChannel, $replyMessageProducer, InMemoryChannelResolver::createEmpty(), $requireReply);
     }
 
     /**
@@ -67,7 +60,7 @@ class RequestReplyProducerTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
         $replyData = "some result";
-        $requestReplyProducer = $this->createRequestReplyProducer(ReplyMessageProducer::create($replyData), $outputChannel);
+        $requestReplyProducer = $this->createRequestReplyProducer(FakeReplyMessageProducer::create($replyData), $outputChannel);
 
         $this->handleReplyWith($requestReplyProducer);
 
@@ -86,7 +79,7 @@ class RequestReplyProducerTest extends MessagingTest
     public function test_sending_reply_to_message_channel_if_there_is_nonone_in_producer()
     {
         $replyData = "some result";
-        $requestReplyProducer = $this->createRequestReplyProducer(ReplyMessageProducer::create($replyData));
+        $requestReplyProducer = $this->createRequestReplyProducer(FakeReplyMessageProducer::create($replyData));
 
         $replyChannel = QueueChannel::create();
         $message = MessageBuilder::withPayload('a')
@@ -105,7 +98,7 @@ class RequestReplyProducerTest extends MessagingTest
 
     public function test_throwing_exception_if_there_is_reply_data_but_no_output_channel()
     {
-        $requestReplyProducer = $this->createRequestReplyProducer(ReplyMessageProducer::create("some payload"));
+        $requestReplyProducer = $this->createRequestReplyProducer(FakeReplyMessageProducer::create("some payload"));
 
         $this->expectException(MessageDeliveryException::class);
 
@@ -116,7 +109,7 @@ class RequestReplyProducerTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
         $replyData = "some result";
-        $requestReplyProducer = $this->createRequestReplyProducer(ReplyMessageProducer::create($replyData), $outputChannel);
+        $requestReplyProducer = $this->createRequestReplyProducer(FakeReplyMessageProducer::create($replyData), $outputChannel);
 
         $replyChannelFromMessage = QueueChannel::create();
         $this->handleReplyWithMessage(
@@ -135,17 +128,122 @@ class RequestReplyProducerTest extends MessagingTest
         );
     }
 
-    public function test_routing_to_error_channel_if_exception_has_been_thrown()
+    public function test_rethrowing_exception_as_messaging_one()
     {
-        $errorChannel = QueueChannel::create();
+        $this->expectException(MessagingException::class);
+
         $this->handleReplyWithMessage(
             MessageBuilder::withPayload('some')
                 ->build(),
-            RequestReplyProducer::createFrom(QueueChannel::create(), ThrowExceptionMessageProcessor::create(new \InvalidArgumentException()), InMemoryChannelResolver::createFromAssociativeArray([
-                "errorChannel" => $errorChannel
-            ]), false)
+            RequestReplyProducer::createRequestAndReply("", ThrowExceptionMessageProcessor::create(new \InvalidArgumentException()), InMemoryChannelResolver::createEmpty(), false)
         );
+    }
 
-        $this->assertInstanceOf(ErrorMessage::class, $errorChannel->receive());
+    public function test_splitting_payload_into_multiple_messages()
+    {
+        $replyData = [1, 2, 3, 4];
+        $requestReplyProducer = RequestReplyProducer::createRequestAndSplit(null, FakeReplyMessageProducer::create($replyData), InMemoryChannelResolver::createEmpty());
+
+        $outputChannel = QueueChannel::create();
+        $requestMessage = MessageBuilder::withPayload('some')
+            ->setHeader('token', "abcd")
+            ->setReplyChannel($outputChannel)
+            ->build();
+        $requestReplyProducer->handleWithReply($requestMessage);
+
+        $this->compareToSplittedMessages($replyData, $outputChannel, $requestMessage);
+    }
+
+    public function test_splitting_messages_when_multiple_messages_were_returned_from_service()
+    {
+        $replyData = [MessageBuilder::withPayload("some1")->build(), MessageBuilder::withPayload("some2")->build()];
+        $requestReplyProducer = RequestReplyProducer::createRequestAndSplit(null, FakeReplyMessageProducer::create($replyData), InMemoryChannelResolver::createEmpty());
+
+        $outputChannel = QueueChannel::create();
+        $requestMessage = MessageBuilder::withPayload('some')
+            ->setHeader('token', "abcd")
+            ->setReplyChannel($outputChannel)
+            ->build();
+        $requestReplyProducer->handleWithReply($requestMessage);
+
+        $splittedMessages = [];
+        while ($splittedMessage = $outputChannel->receive()) {
+            $splittedMessages[] = $splittedMessage;
+        }
+
+        $this->assertMultipleMessages(
+            [
+                MessageBuilder::withPayload("some2")
+                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $splittedMessages[0]->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID))
+                    ->setHeader(MessageHeaders::SEQUENCE_SIZE, 2)
+                    ->setHeader(MessageHeaders::SEQUENCE_NUMBER, 2)
+                    ->build(),
+                MessageBuilder::withPayload("some1")
+                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $splittedMessages[0]->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID))
+                    ->setHeader(MessageHeaders::SEQUENCE_SIZE, 2)
+                    ->setHeader(MessageHeaders::SEQUENCE_NUMBER, 1)
+                    ->build(),
+            ],
+            $splittedMessages
+        );
+    }
+
+    public function test_throwing_exception_if_result_of_service_call_is_not_array()
+    {
+        $replyData = "someString";
+        $requestReplyProducer = RequestReplyProducer::createRequestAndSplit(null, FakeReplyMessageProducer::create($replyData), InMemoryChannelResolver::createEmpty());
+
+        $this->expectException(MessageDeliveryException::class);
+
+        $requestReplyProducer->handleWithReply(
+            MessageBuilder::withPayload('some')
+                ->setReplyChannel(QueueChannel::create())
+                ->build()
+        );
+    }
+
+    /**
+     * @param \SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor $replyMessageProducer
+     * @param MessageChannel|null $outputChannel
+     * @param bool $requireReply
+     * @return \SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer
+     */
+    private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, MessageChannel $outputChannel = null, bool $requireReply = false): RequestReplyProducer
+    {
+        $outputChannelName = $outputChannel ? "output-channel" : "";
+        $channelResolver = $outputChannel ? InMemoryChannelResolver::createFromAssociativeArray([
+            $outputChannelName => $outputChannel
+        ]) : InMemoryChannelResolver::createEmpty();
+
+        return RequestReplyProducer::createRequestAndReply($outputChannelName, $replyMessageProducer, $channelResolver, $requireReply);
+    }
+
+    /**
+     * @param $replyData
+     * @param $outputChannel
+     * @param $requestMessage
+     */
+    private function compareToSplittedMessages(array $replyData, PollableChannel $outputChannel, Message $requestMessage): void
+    {
+        $correlationHeader = null;
+        $sequenceSize = count($replyData);
+        for ($sequenceNumber = $sequenceSize - 1; $sequenceNumber >= 0; $sequenceNumber--) {
+            $splittedMessage = $outputChannel->receive();
+
+            $this->assertNotInstanceOf(Message::class, $splittedMessage->getPayload(), "Message is inside message.");
+            if (!$correlationHeader) {
+                $correlationHeader = $splittedMessage->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID);
+            }
+
+            $this->assertMessages(
+                MessageBuilder::fromMessage($requestMessage)
+                    ->setPayload($replyData[$sequenceNumber])
+                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationHeader)
+                    ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
+                    ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
+                    ->build(),
+                $splittedMessage
+            );
+        }
     }
 }

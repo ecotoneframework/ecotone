@@ -2,10 +2,12 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
+use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageDeliveryException;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\ErrorMessage;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
@@ -17,6 +19,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
  */
 class RequestReplyProducer
 {
+    private const REQUEST_REPLY_METHOD = 1;
+    private const REQUEST_SPLIT_METHOD = 2;
+
     /**
      * @var MessageChannel|null
      */
@@ -33,6 +38,10 @@ class RequestReplyProducer
      * @var MessageProcessor
      */
     private $messageProcessor;
+    /**
+     * @var int
+     */
+    private $method;
 
     /**
      * RequestReplyProducer constructor.
@@ -40,25 +49,42 @@ class RequestReplyProducer
      * @param MessageProcessor $messageProcessor
      * @param ChannelResolver $channelResolver
      * @param bool $isReplyRequired
+     * @param int $method
      */
-    private function __construct(?MessageChannel $outputChannel, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
+    private function __construct(?MessageChannel $outputChannel, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired, int $method)
     {
         $this->outputChannel = $outputChannel;
         $this->isReplyRequired = $isReplyRequired;
         $this->channelResolver = $channelResolver;
         $this->messageProcessor = $messageProcessor;
+        $this->method = $method;
     }
 
     /**
-     * @param MessageChannel|null $outputChannel
+     * @param string $outputChannelName
      * @param MessageProcessor $messageProcessor
      * @param ChannelResolver $channelResolver
      * @param bool $isReplyRequired
      * @return RequestReplyProducer
      */
-    public static function createFrom(?MessageChannel $outputChannel, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
+    public static function createRequestAndReply(string $outputChannelName, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
     {
-        return new self($outputChannel, $messageProcessor, $channelResolver, $isReplyRequired);
+        $outputChannel = $outputChannelName ? $channelResolver->resolve($outputChannelName) : null;
+
+        return new self($outputChannel, $messageProcessor, $channelResolver, $isReplyRequired, self::REQUEST_REPLY_METHOD);
+    }
+
+    /**
+     * @param string $outputChannelName
+     * @param MessageProcessor $messageProcessor
+     * @param ChannelResolver $channelResolver
+     * @return RequestReplyProducer
+     */
+    public static function createRequestAndSplit(?string $outputChannelName, MessageProcessor $messageProcessor, ChannelResolver $channelResolver) : self
+    {
+        $outputChannel = $outputChannelName ? $channelResolver->resolve($outputChannelName) : null;
+
+        return new self($outputChannel, $messageProcessor, $channelResolver, true, self::REQUEST_SPLIT_METHOD);
     }
 
     /**
@@ -71,34 +97,59 @@ class RequestReplyProducer
         try {
             $replyData = $this->messageProcessor->processMessage($message);
         }catch (\Throwable $e) {
-            $errorChannel = $this->channelResolver->resolve($message->getHeaders()->getErrorChannel());
-            $errorChannel->send(ErrorMessage::createWithOriginalMessage($e, $message));
-
-            return;
+            throw MessageHandlingException::fromOtherException($e, $message);
         }
 
         if ($this->isReplyRequired() && $this->isReplyDataEmpty($replyData)) {
-            throw MessageDeliveryException::create("Requires response but got none. {$this->messageProcessor}");
+            throw MessageDeliveryException::createWithFailedMessage("Requires response but got none. {$this->messageProcessor}", $message);
         }
 
         if (!is_null($replyData)) {
-            if (!$this->hasOutputChannel() && !$message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
-                throw new MessageDeliveryException("Can't process {$message}, no output channel during delivery using {$this->messageProcessor}");
+            $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $this->channelResolver->resolve($message->getHeaders()->getReplyChannel()) : null);
+            if (!$replyChannel) {
+                throw MessageDeliveryException::createWithFailedMessage("Can't process {$message}, no output channel during delivery using {$this->messageProcessor}", $message);
             }
 
-            $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : $message->getHeaders()->getReplyChannel();
-            Assert::isSubclassOf($replyChannel, MessageChannel::class, "Reply channel for service activator must be MessageChannel");
+            if ($this->method === self::REQUEST_REPLY_METHOD) {
+                if ($replyData instanceof Message) {
+                    $replyChannel->send($replyData);
+                    return;
+                }
 
-            if ($replyData instanceof Message) {
-                $replyChannel->send($replyData);
-                return;
+                $replyChannel->send(
+                    MessageBuilder::fromMessage($message)
+                        ->setPayload($replyData)
+                        ->build()
+                );
+            }else {
+                if (!is_array($replyData)) {
+                    throw MessageDeliveryException::createWithFailedMessage("Can't split message {$message}, payload to split is not array", $message);
+                }
+
+                $sequenceSize = count($replyData);
+                $correlationId = Uuid::uuid4()->toString();
+                for ($sequenceNumber = 0; $sequenceNumber < $sequenceSize; $sequenceNumber++) {
+                    $payload = $replyData[$sequenceNumber];
+                    if ($payload instanceof Message) {
+                        $replyChannel->send(
+                            MessageBuilder::fromMessage($payload)
+                                ->setHeaderIfAbsent(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationId)
+                                ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
+                                ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
+                                ->build()
+                        );
+                    }else {
+                        $replyChannel->send(
+                            MessageBuilder::fromMessage($message)
+                                ->setPayload($payload)
+                                ->setHeaderIfAbsent(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationId)
+                                ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
+                                ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
+                                ->build()
+                        );
+                    }
+                }
             }
-
-            $replyChannel->send(
-                MessageBuilder::fromMessage($message)
-                    ->setPayload($replyData)
-                    ->build()
-            );
         }
     }
 

@@ -100,6 +100,14 @@ class InterfaceToCall
     }
 
     /**
+     * @return bool
+     */
+    public function doesItReturnArray() : bool
+    {
+        return $this->getReturnType() == "array";
+    }
+
+    /**
      * @return string
      */
     public function getFirstParameterName(): string

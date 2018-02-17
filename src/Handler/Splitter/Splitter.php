@@ -1,8 +1,7 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
@@ -13,7 +12,7 @@ use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-final class ServiceActivatingHandler implements MessageHandler
+final class Splitter implements MessageHandler
 {
     /**
      * @var RequestReplyProducer

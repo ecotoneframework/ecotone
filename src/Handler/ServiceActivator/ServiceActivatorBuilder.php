@@ -31,7 +31,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
     /**
      * @var string
      */
-    private $outputChannelName;
+    private $outputChannelName = "";
     /**
      * @var  bool
      */
@@ -176,8 +176,8 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
         $objectToInvoke = $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
 
         return new ServiceActivatingHandler(
-            RequestReplyProducer::createFrom(
-                $this->outputChannelName ? $channelResolver->resolve($this->outputChannelName) : null,
+            RequestReplyProducer::createRequestAndReply(
+                $this->outputChannelName,
                 MethodInvoker::createWith(
                     $objectToInvoke,
                     $this->methodName,

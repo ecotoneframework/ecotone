@@ -14,6 +14,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\Mes
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
@@ -115,6 +116,8 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders) : void
     {
+        Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
+
        $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
     }
 
@@ -136,8 +139,8 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         }
 
         return new Transformer(
-            RequestReplyProducer::createFrom(
-                $channelResolver->resolve($this->outputMessageChannelName),
+            RequestReplyProducer::createRequestAndReply(
+                $this->outputMessageChannelName,
                 TransformerMessageProcessor::createFrom(
                     MethodInvoker::createWith(
                         $objectToInvokeOn,

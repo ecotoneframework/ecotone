@@ -18,7 +18,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @var string
      */
-    protected $outputMessageChannelName;
+    protected $outputMessageChannelName = "";
     /**
      * @var string
      */

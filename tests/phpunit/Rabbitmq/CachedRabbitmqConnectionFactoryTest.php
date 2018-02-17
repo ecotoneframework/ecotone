@@ -11,13 +11,13 @@ use SimplyCodedSoftware\IntegrationMessaging\Rabbitmq\CachedRabbitmqConnectionFa
  */
 class CachedRabbitmqConnectionFactoryTest extends RabbitmqMessagingTest
 {
-    public function test_using_same_instance_of_connection()
-    {
-        $cachedRabbitmqConnectionFactory = new CachedRabbitmqConnectionFactory($this->getRabbitConnectionFactory());
-
-        $this->assertEquals(
-            $cachedRabbitmqConnectionFactory->createConnection(),
-            $cachedRabbitmqConnectionFactory->createConnection()
-        );
-    }
+//    public function test_using_same_instance_of_connection()
+//    {
+//        $cachedRabbitmqConnectionFactory = new CachedRabbitmqConnectionFactory($this->getRabbitConnectionFactory());
+//
+//        $this->assertEquals(
+//            $cachedRabbitmqConnectionFactory->createConnection(),
+//            $cachedRabbitmqConnectionFactory->createConnection()
+//        );
+//    }
 }

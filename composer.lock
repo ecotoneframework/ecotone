@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "81870acce2065db5786bbc95ab086746",
+    "content-hash": "584a50e193da10f2fa5dddad2fa31164",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -293,77 +293,6 @@
                 "random"
             ],
             "time": "2017-09-27T21:40:39+00:00"
-        },
-        {
-            "name": "php-amqplib/php-amqplib",
-            "version": "v2.7.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-amqplib/php-amqplib.git",
-                "reference": "dfd3694a86f1a7394d3693485259d4074a6ec79b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-amqplib/php-amqplib/zipball/dfd3694a86f1a7394d3693485259d4074a6ec79b",
-                "reference": "dfd3694a86f1a7394d3693485259d4074a6ec79b",
-                "shasum": ""
-            },
-            "require": {
-                "ext-bcmath": "*",
-                "ext-mbstring": "*",
-                "php": ">=5.3.0"
-            },
-            "replace": {
-                "videlalvaro/php-amqplib": "self.version"
-            },
-            "require-dev": {
-                "phpdocumentor/phpdocumentor": "^2.9",
-                "phpunit/phpunit": "^4.8",
-                "scrutinizer/ocular": "^1.1",
-                "squizlabs/php_codesniffer": "^2.5"
-            },
-            "suggest": {
-                "ext-sockets": "Use AMQPSocketConnection"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.7-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "PhpAmqpLib\\": "PhpAmqpLib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-2.1-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "Alvaro Videla",
-                    "role": "Original Maintainer"
-                },
-                {
-                    "name": "John Kelly",
-                    "email": "johnmkelly86@gmail.com",
-                    "role": "Maintainer"
-                },
-                {
-                    "name": "Raúl Araya",
-                    "email": "nubeiro@gmail.com",
-                    "role": "Maintainer"
-                }
-            ],
-            "description": "Formerly videlalvaro/php-amqplib.  This library is a pure PHP implementation of the AMQP protocol. It's been tested against RabbitMQ.",
-            "homepage": "https://github.com/php-amqplib/php-amqplib/",
-            "keywords": [
-                "message",
-                "queue",
-                "rabbitmq"
-            ],
-            "time": "2018-02-11T19:28:00+00:00"
         },
         {
             "name": "ramsey/uuid",
@@ -868,16 +797,16 @@
         },
         {
             "name": "microsoft/tolerant-php-parser",
-            "version": "v0.0.8",
+            "version": "v0.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Microsoft/tolerant-php-parser.git",
-                "reference": "10e901a6086826376c6256954dc8903ef0ec6c9e"
+                "reference": "59351ce2a6b32c6cafc667dc20a48da36f38a482"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Microsoft/tolerant-php-parser/zipball/10e901a6086826376c6256954dc8903ef0ec6c9e",
-                "reference": "10e901a6086826376c6256954dc8903ef0ec6c9e",
+                "url": "https://api.github.com/repos/Microsoft/tolerant-php-parser/zipball/59351ce2a6b32c6cafc667dc20a48da36f38a482",
+                "reference": "59351ce2a6b32c6cafc667dc20a48da36f38a482",
                 "shasum": ""
             },
             "require": {
@@ -905,7 +834,7 @@
                 }
             ],
             "description": "Tolerant PHP-to-AST parser designed for IDE usage scenarios",
-            "time": "2017-11-17T17:06:43+00:00"
+            "time": "2018-02-14T18:39:41+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -1047,22 +976,22 @@
         },
         {
             "name": "phan/phan",
-            "version": "0.10.4",
+            "version": "0.10.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phan/phan.git",
-                "reference": "873b132d1baa096ee91308b3c6cf6a322ad9862e"
+                "reference": "93b2c77c59e2576bc57d6a41a4f1efa577b3aace"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phan/phan/zipball/873b132d1baa096ee91308b3c6cf6a322ad9862e",
-                "reference": "873b132d1baa096ee91308b3c6cf6a322ad9862e",
+                "url": "https://api.github.com/repos/phan/phan/zipball/93b2c77c59e2576bc57d6a41a4f1efa577b3aace",
+                "reference": "93b2c77c59e2576bc57d6a41a4f1efa577b3aace",
                 "shasum": ""
             },
             "require": {
                 "ext-ast": "^0.1.5",
                 "felixfbecker/advanced-json-rpc": "^3.0",
-                "microsoft/tolerant-php-parser": "0.0.8",
+                "microsoft/tolerant-php-parser": "0.0.9",
                 "nikic/php-parser": "~3.1.1",
                 "php": "~7.1.0 || ~7.2.0",
                 "sabre/event": "^5.0",
@@ -1103,7 +1032,7 @@
                 "php",
                 "static"
             ],
-            "time": "2018-02-11T21:03:53+00:00"
+            "time": "2018-02-15T05:58:36+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -3131,9 +3060,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.1.0",
-        "ext-mbstring": "*",
-        "ext-bcmath": "*"
+        "php": ">=7.1.0"
     },
     "platform-dev": []
 }

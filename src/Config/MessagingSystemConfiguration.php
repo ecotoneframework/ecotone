@@ -93,6 +93,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder): MessagingSystemConfiguration
     {
         $this->channelInterceptorBuilders[$channelInterceptorBuilder->getImportanceOrder()][] = $channelInterceptorBuilder;
+        $this->requireReferences($channelInterceptorBuilder->getRequiredReferenceNames());
 
         return $this;
     }
@@ -103,15 +104,23 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder) : self
     {
-        foreach ($messageHandlerBuilder->getRequiredReferenceNames() as $requiredReferenceName) {
-            if ($requiredReferenceName) {
-                $this->configurationObserver->notifyRequiredAvailableReference($requiredReferenceName);
-            }
-        }
+        $this->requireReferences($messageHandlerBuilder->getRequiredReferenceNames());
 
         $this->messageHandlerBuilders[] = $messageHandlerBuilder;
 
         return $this;
+    }
+
+    /**
+     * @param string[] $referenceNames
+     */
+    private function requireReferences(array $referenceNames) : void
+    {
+        foreach ($referenceNames as $requiredReferenceName) {
+            if ($requiredReferenceName) {
+                $this->configurationObserver->notifyRequiredAvailableReference($requiredReferenceName);
+            }
+        }
     }
 
     /**

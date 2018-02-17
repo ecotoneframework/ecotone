@@ -97,10 +97,11 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerGatewayBuilder(DumbGatewayBuilder::create())
             ->registerMessageChannel(SimpleMessageChannelBuilder::create("queue", QueueChannel::create()))
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory())
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+            ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create("queue", "interceptor"))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(["interceptor" => new DumbChannelInterceptor()]));
 
         $this->assertTrue($dumbConfigurationObserver->wasNotifiedCorrectly(), "Configuration observer was not notified correctly");
-        $this->assertEquals([NoReturnMessageHandler::class], $dumbConfigurationObserver->getRequiredReferences());
+        $this->assertEquals([NoReturnMessageHandler::class, "interceptor"], $dumbConfigurationObserver->getRequiredReferences());
     }
 
     public function test_intercepting_message_flow_before_sending()

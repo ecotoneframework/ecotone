@@ -9,7 +9,7 @@
         }
     ],
     "keywords": ["messaging", "asynchronous", "message", "spring", "enterprise integration patterns", "eip", "distributed architecture", "event driven architecture", "eda"],
-    "description": "Framework to help you working in distributed architecture. Based on enterprise integration patterns and java spring framework.",
+    "description": "Framework to provide pipe and filters architecture and for working in distributed architecture. Based on enterprise integration patterns and java spring framework.",
     "autoload": {
         "psr-4": {
             "SimplyCodedSoftware\\IntegrationMessaging\\": "src"

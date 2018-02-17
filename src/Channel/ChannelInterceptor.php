@@ -22,8 +22,9 @@ interface ChannelInterceptor
     /**
      * @param Message|null $message
      * @param MessageChannel $messageChannel message channel that message was sent to
+     * @param bool $wasSuccessful
      */
-    public function postSend(?Message $message, MessageChannel $messageChannel) : void;
+    public function postSend(?Message $message, MessageChannel $messageChannel, bool $wasSuccessful) : void;
 
     /**
      * Before receiving from subscription channel

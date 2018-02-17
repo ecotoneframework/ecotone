@@ -2,13 +2,17 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
+use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerEndpointFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 
 /**
  * Class MessagingSystemConfiguration
@@ -18,9 +22,13 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 final class MessagingSystemConfiguration implements Configuration
 {
     /**
-     * @var NamedMessageChannel[]
+     * @var MessageChannelBuilder[]
      */
-    private $namedChannels = [];
+    private $channelsBuilders = [];
+    /**
+     * @var ChannelInterceptorBuilder[]
+     */
+    private $channelInterceptorBuilders = [];
     /**
      * @var MessageHandlerBuilder[]
      */
@@ -73,8 +81,18 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): self
     {
-        $this->namedChannels[] = NamedMessageChannel::create($messageChannelBuilder->getMessageChannelName(), $messageChannelBuilder->build());
+        $this->channelsBuilders[] = $messageChannelBuilder;
         $this->configurationObserver->notifyMessageChannelWasRegistered($messageChannelBuilder->getMessageChannelName(), (string)$messageChannelBuilder);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder): MessagingSystemConfiguration
+    {
+        $this->channelInterceptorBuilders[$channelInterceptorBuilder->getImportanceOrder()][] = $channelInterceptorBuilder;
 
         return $this;
     }
@@ -134,7 +152,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService) : ConfiguredMessagingSystem
     {
-        $channelResolver = InMemoryChannelResolver::create($this->namedChannels);
+        $channelResolver = $this->createChannelResolver($referenceSearchService);
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories);
         $consumers = [];
 
@@ -153,6 +171,40 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         return $messagingSystem;
+    }
+
+    /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @return ChannelResolver
+     */
+    private function createChannelResolver(ReferenceSearchService $referenceSearchService) : ChannelResolver
+    {
+        $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
+        arsort($channelInterceptorsByImportance);
+        $channelInterceptorsByChannelName = [];
+
+        foreach ($channelInterceptorsByImportance as $channelInterceptors) {
+            foreach ($channelInterceptors as $channelInterceptor) {
+                $channelInterceptorsByChannelName[$channelInterceptor->relatedChannelName()][] = $channelInterceptor->build($referenceSearchService);
+            }
+        }
+
+        $channels = [];
+        foreach ($this->channelsBuilders as $channelsBuilder) {
+            $messageChannel = $channelsBuilder->build();
+            if (array_key_exists($channelsBuilder->getMessageChannelName(), $channelInterceptorsByChannelName)) {
+                $interceptors = $channelInterceptorsByChannelName[$channelsBuilder->getMessageChannelName()];
+                if ($messageChannel instanceof PollableChannel) {
+                    $messageChannel = new PollableChannelInterceptorAdapter($messageChannel, $interceptors);
+                } else {
+                    $messageChannel = new EventDrivenChannelInterceptorAdapter($messageChannel, $interceptors);
+                }
+            }
+
+            $channels[] = NamedMessageChannel::create($channelsBuilder->getMessageChannelName(), $messageChannel);
+        }
+
+        return InMemoryChannelResolver::create($channels);
     }
 
     /**

@@ -19,11 +19,11 @@ interface ConfiguredMessagingSystem
     public function getGatewayByName(string $gatewayReferenceName);
 
     /**
-     * @param string $queueName
+     * @param string $channelName
      * @return MessageChannel
-     * @throws ConfigurationException if trying to find not existing queue
+     * @throws ConfigurationException if trying to find not existing channel
      */
-    public function getMessageChannelByName(string $queueName) : MessageChannel;
+    public function getMessageChannelByName(string $channelName) : MessageChannel;
 
     /**
      * @param string $consumerName

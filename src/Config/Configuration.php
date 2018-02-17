@@ -8,6 +8,8 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
+use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilderFactory;
@@ -34,6 +36,12 @@ interface Configuration
      * @return MessagingSystemConfiguration
      */
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): MessagingSystemConfiguration;
+
+    /**
+     * @param ChannelInterceptorBuilder $channelInterceptorBuilder
+     * @return MessagingSystemConfiguration
+     */
+    public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder) : MessagingSystemConfiguration;
 
     /**
      * @param ConsumerBuilder $consumerBuilder

@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
@@ -20,7 +21,13 @@ class PollOrThrowMessageHandlerConsumerBuilderFactory implements MessageHandlerC
      */
     public function isSupporting(ChannelResolver $channelResolver, MessageHandlerBuilder $messageHandlerBuilder): bool
     {
-        return $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName()) instanceof PollableChannel;
+        $messageChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
+
+        if ($messageChannel instanceof MessageChannelAdapter) {
+            return $messageChannel->getInternalMessageChannel() instanceof PollableChannel;
+        }
+
+        return $messageChannel instanceof PollableChannel;
     }
 
     /**

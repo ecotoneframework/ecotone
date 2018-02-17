@@ -92,9 +92,9 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     /**
      * @inheritDoc
      */
-    public function getMessageChannelByName(string $queueName): MessageChannel
+    public function getMessageChannelByName(string $channelName): MessageChannel
     {
-        // TODO: Implement getMessageChannelByName() method.
+        return $this->channelResolver->resolve($channelName);
     }
 
     /**

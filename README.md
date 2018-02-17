@@ -1,15 +1,11 @@
-
-General Concept
+#### General Concept
 http://docs.spring.io/spring-integration/reference/htmlsingle/#overview-components
 
-TODO before release
-* Channel interceptors
-* gateway
-* http inbound
+#### TODO before stable release
 * call static method
+* splitter
+* aggregator
 * command and query handlers
-
-TODO after release
 * scheduling
     a) pollers
     b) executors (systemctl, supervisor)

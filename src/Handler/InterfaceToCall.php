@@ -182,6 +182,19 @@ class InterfaceToCall
     }
 
     /**
+     * @return bool
+     * @throws InvalidArgumentException
+     */
+    public function getFirstParameterTypeHint() : bool
+    {
+        if ($this->parameterAmount() < 1) {
+            throw InvalidArgumentException::create("Trying to get first parameter, but has none");
+        }
+
+        return (string)($this->getFirstParameter()->getType());
+    }
+
+    /**
      * @param string $parameterName
      * @return InterfaceParameter
      * @throws InvalidArgumentException

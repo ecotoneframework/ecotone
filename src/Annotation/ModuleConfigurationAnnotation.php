@@ -23,4 +23,8 @@ class ModuleConfigurationAnnotation
      * @var array<\SimplyCodedSoftware\IntegrationMessaging\Annotation\ConfigurationVariableAnnotation>
      */
     public $variables = [];
+    /**
+     * @var array<\SimplyCodedSoftware\IntegrationMessaging\Annotation\RequiredReferenceAnnotation>
+     */
+    public $requiredReferences = [];
 }

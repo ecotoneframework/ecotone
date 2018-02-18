@@ -11,6 +11,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetriev
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurationExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ConfigurationVariableAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class WithExtensionsModuleConfiguration
@@ -59,6 +60,14 @@ class WithExtensionsModuleConfiguration implements AnnotationConfiguration
     public function registerWithin(Configuration $configuration, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
     {
         // TODO: Implement registerWithin() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function configure(ReferenceSearchService $referenceSearchService): void
+    {
+        return;
     }
 
     /**

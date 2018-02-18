@@ -11,6 +11,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetriev
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurationExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ConfigurationVariableAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class UsingVariablesNotDefinedInModuleConfiguration
@@ -29,6 +30,14 @@ class UsingVariablesNotDefinedInModuleConfiguration implements AnnotationConfigu
     public static function createAnnotationConfiguration(array $moduleConfigurationExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader): AnnotationConfiguration
     {
         $configurationVariableRetrievingService->get("autologin");
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function configure(ReferenceSearchService $referenceSearchService): void
+    {
+        return;
     }
 
     /**

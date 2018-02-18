@@ -4,7 +4,9 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfigurationAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfigurationExtensionAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\RequiredReferenceAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleConfigurationExtension;
@@ -29,18 +31,24 @@ class AnnotationModuleConfigurationRetrievingService implements ModuleConfigurat
      * @var ConfigurationVariableRetrievingService
      */
     private $configurationVariableRetrievingService;
+    /**
+     * @var ConfigurationObserver
+     */
+    private $configurationObserver;
 
     /**
      * AnnotationModuleConfigurationRetrievingService constructor.
      * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
+     * @param ConfigurationObserver $configurationObserver
      * @param ClassLocator $classLocator
      * @param ClassMetadataReader $classMetadataReader
      */
-    public function __construct(ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader)
+    public function __construct(ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ConfigurationObserver $configurationObserver, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader)
     {
         $this->configurationVariableRetrievingService = $configurationVariableRetrievingService;
         $this->classLocator = $classLocator;
         $this->classMetadataReader = $classMetadataReader;
+        $this->configurationObserver = $configurationObserver;
     }
 
     /**
@@ -71,6 +79,10 @@ class AnnotationModuleConfigurationRetrievingService implements ModuleConfigurat
             /** @var ModuleConfigurationAnnotation $annotation */
             $annotation = $this->classMetadataReader->getAnnotationForClass($configurationClassName, ModuleConfigurationAnnotation::class);
             $configurationVariables = $this->getConfigurationVariablesForAnnotation($annotation);
+            /** @var RequiredReferenceAnnotation $requiredReference */
+            foreach ($annotation->requiredReferences as $requiredReference) {
+                $this->configurationObserver->notifyRequiredAvailableReference($requiredReference->requiredReferenceName);
+            }
 
             if (!is_subclass_of($configurationClassName, AnnotationConfiguration::class)) {
                 throw ConfigurationException::create("Can't register module {$configurationClassName} it doesn't extend " . AnnotationConfiguration::class);

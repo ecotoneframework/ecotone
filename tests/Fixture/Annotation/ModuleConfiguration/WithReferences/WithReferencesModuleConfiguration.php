@@ -1,6 +1,6 @@
 <?php
 
-namespace Fixture\Annotation\ModuleConfiguration\WithVariables;
+namespace Fixture\Annotation\ModuleConfiguration\WithReferences;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ConfigurationVariableAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfigurationAnnotation;
@@ -10,42 +10,25 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassMetadataRead
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\RequiredReferenceAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class WithVariablesModuleConfiguration
  * @package Fixture\Annotation\ModuleConfiguration\WithVariables
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleConfigurationAnnotation(moduleName="with-variables-module-configuration", variables={
- *      @ConfigurationVariableAnnotation(variableName="token", description="token variable"),
- *      @ConfigurationVariableAnnotation(variableName="autologout", defaultValue="true", description="is auto logged off")
+ * @ModuleConfigurationAnnotation(moduleName="with-variables-module-configuration", requiredReferences={
+ *      @RequiredReferenceAnnotation(requiredReferenceName="some-service", description="this server is needed to work")
  * })
  */
-class WithVariablesModuleConfiguration implements AnnotationConfiguration
+class WithReferencesModuleConfiguration implements AnnotationConfiguration
 {
-    /**
-     * @var array
-     */
-    private $variables;
-
-    /**
-     * WithVariablesModuleConfiguration constructor.
-     * @param array $variables
-     */
-    private function __construct(array $variables)
-    {
-        $this->variables = $variables;
-    }
-
     /**
      * @inheritDoc
      */
     public static function createAnnotationConfiguration(array $moduleConfigurationExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader): AnnotationConfiguration
     {
-        return new self([
-            "token" => $configurationVariableRetrievingService->get("token"),
-            "autologout" => $configurationVariableRetrievingService->get("autologout")
-        ]);
+        return new self();
     }
 
     /**
@@ -70,10 +53,5 @@ class WithVariablesModuleConfiguration implements AnnotationConfiguration
     public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem): void
     {
         // TODO: Implement postConfigure() method.
-    }
-
-    public function getVariables() : array
-    {
-        return $this->variables;
     }
 }

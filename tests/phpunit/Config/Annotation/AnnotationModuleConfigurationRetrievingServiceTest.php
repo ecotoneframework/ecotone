@@ -6,11 +6,13 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Annotation\ModuleConfiguration\WithExtensions\SimpleExtensionModuleConfiguration;
 use Fixture\Annotation\ModuleConfiguration\WithExtensions\WithExtensionsModuleConfiguration;
 use Fixture\Annotation\ModuleConfiguration\WithVariables\WithVariablesModuleConfiguration;
+use Fixture\Configuration\DumbConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModuleConfigurationRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\DoctrineClassMetadataReader;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\FileSystemClassLocator;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\AnnotationApplicationContextConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
@@ -119,12 +121,29 @@ class AnnotationModuleConfigurationRetrievingServiceTest extends MessagingTest
         $this->createAnnotationConfigurationRetrievingService("ModuleConfiguration\WrongExtension", $variables)->findAllModuleConfigurations();
     }
 
+    public function test_informing_observer_about_required_service_references()
+    {
+        $configurationObserver = DumbConfigurationObserver::create();
+        $this->createAnnotationConfigurationRetrievingServiceWithObserver("ModuleConfiguration\WithReferences", [], $configurationObserver)->findAllModuleConfigurations();
+
+        $this->assertEquals(
+            ["some-service"],
+            $configurationObserver->getRequiredReferences()
+        );
+    }
+
     private function createAnnotationConfigurationRetrievingService(string $namespacePart, array $configurationVariables) : AnnotationModuleConfigurationRetrievingService
+    {
+        return $this->createAnnotationConfigurationRetrievingServiceWithObserver($namespacePart, $configurationVariables, DumbConfigurationObserver::create());
+    }
+
+    private function createAnnotationConfigurationRetrievingServiceWithObserver(string $namespacePart, array $configurationVariables, ConfigurationObserver $configurationObserver) : AnnotationModuleConfigurationRetrievingService
     {
         $annotationReader = new AnnotationReader();
 
         return new AnnotationModuleConfigurationRetrievingService(
             InMemoryConfigurationVariableRetrievingService::create($configurationVariables),
+            $configurationObserver,
             new FileSystemClassLocator(
                 $annotationReader,
                 [

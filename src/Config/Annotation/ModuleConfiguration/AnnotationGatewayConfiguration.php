@@ -18,6 +18,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToStaticHeaderConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class AnnotationGatewayConfiguration
@@ -90,6 +91,14 @@ class AnnotationGatewayConfiguration implements AnnotationConfiguration
 
             $configuration->registerGatewayBuilder($gateway);
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function configure(ReferenceSearchService $referenceSearchService): void
+    {
+        return;
     }
 
     /**

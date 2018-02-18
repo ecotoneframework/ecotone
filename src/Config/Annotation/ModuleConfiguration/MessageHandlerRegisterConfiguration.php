@@ -10,6 +10,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class BaseAnnotationConfiguration
@@ -69,6 +70,14 @@ abstract class MessageHandlerRegisterConfiguration implements AnnotationConfigur
 
             $configuration->registerMessageHandler($messageHandlerBuilder);
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function configure(ReferenceSearchService $referenceSearchService): void
+    {
+        return;
     }
 
     /**

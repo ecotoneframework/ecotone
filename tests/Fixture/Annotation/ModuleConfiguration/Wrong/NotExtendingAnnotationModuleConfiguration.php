@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class NotExtendingAnnotationModuleConfiguration
@@ -17,6 +18,14 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleMessagingConfiguration
  */
 class NotExtendingAnnotationModuleConfiguration implements ModuleMessagingConfiguration
 {
+    /**
+     * @inheritDoc
+     */
+    public function configure(ReferenceSearchService $referenceSearchService): void
+    {
+        return;
+    }
+
     /**
      * @inheritDoc
      */

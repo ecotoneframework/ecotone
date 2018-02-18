@@ -173,6 +173,10 @@ final class MessagingSystemConfiguration implements Configuration
             $gateways[] = GatewayReference::createWith($gatewayBuilder, $channelResolver);
         }
 
+        foreach ($this->moduleConfigurations as $moduleMessagingConfiguration) {
+            $moduleMessagingConfiguration->configure($referenceSearchService);
+        }
+
         $messagingSystem = MessagingSystem::create($consumers, $gateways, $channelResolver);
         $this->configurationObserver->notifyConfigurationWasFinished($messagingSystem);
         foreach ($this->moduleConfigurations as $moduleMessagingConfiguration) {

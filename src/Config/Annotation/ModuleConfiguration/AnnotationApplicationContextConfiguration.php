@@ -14,6 +14,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetriev
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
@@ -85,6 +86,14 @@ class AnnotationApplicationContextConfiguration implements AnnotationConfigurati
                 throw InvalidArgumentException::create(get_class($messagingComponent) . " is not known component to register");
             }
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function configure(ReferenceSearchService $referenceSearchService): void
+    {
+        return;
     }
 
     /**

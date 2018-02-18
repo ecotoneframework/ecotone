@@ -9,6 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetriev
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\NullableMessageChannel;
 
@@ -37,6 +38,14 @@ class BasicMessagingConfiguration implements AnnotationConfiguration
         $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory());
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function configure(ReferenceSearchService $referenceSearchService): void
+    {
+        return;
     }
 
     /**

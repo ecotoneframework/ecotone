@@ -1,12 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter;
+namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter;
 
 use Fixture\Handler\Splitter\ServiceSplittingArrayPayload;
 use Fixture\Handler\Splitter\WrongSplittingService;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter\SplitterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;

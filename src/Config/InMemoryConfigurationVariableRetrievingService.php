@@ -53,7 +53,7 @@ class InMemoryConfigurationVariableRetrievingService implements ConfigurationVar
     /**
      * @inheritDoc
      */
-    public function get(string $variableName): string
+    public function get(string $variableName)
     {
         if (!$this->has($variableName)) {
             throw InvalidArgumentException::create("Expected configuration variable with name '{$variableName}' but got none.");

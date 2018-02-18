@@ -19,8 +19,8 @@ interface ConfigurationVariableRetrievingService
 
     /**
      * @param string $variableName
-     * @return string
+     * @return mixed everything but not object
      * @throws InvalidArgumentException if variable not found
      */
-    public function get(string $variableName) : string;
+    public function get(string $variableName);
 }

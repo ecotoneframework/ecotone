@@ -26,4 +26,12 @@ final class NullableMessageChannel implements MessageChannel
     {
         return;
     }
+
+    /**
+     * @inheritDoc
+     */
+    function __toString()
+    {
+        return "nullable channel";
+    }
 }

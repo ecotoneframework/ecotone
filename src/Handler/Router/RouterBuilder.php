@@ -95,6 +95,23 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @param string $handlerName
      * @param string $inputChannelName
+     * @param $customRouterObject
+     * @param string $methodName
+     * @return RouterBuilder
+     */
+    public static function createRouterFromObject(string $handlerName, string $inputChannelName, $customRouterObject, string $methodName) : self
+    {
+        Assert::isObject($customRouterObject, "Custom router must be object");
+
+        $routerBuilder = self::create($handlerName, $inputChannelName, "", $methodName);
+        $routerBuilder->setObjectToInvoke($customRouterObject);
+
+        return $routerBuilder;
+    }
+
+    /**
+     * @param string $handlerName
+     * @param string $inputChannelName
      * @param string $headerName
      * @param array $headerValueToChannelMapping
      * @return RouterBuilder

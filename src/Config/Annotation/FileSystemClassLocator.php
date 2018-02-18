@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
-use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\Reader;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 
 /**
@@ -25,16 +25,16 @@ class FileSystemClassLocator implements ClassLocator {
      */
     private $namespacesToUse;
     /**
-     * @var AnnotationReader
+     * @var Reader
      */
     private $annotationReader;
 
     /**
-     * @param AnnotationReader $annotationReader
+     * @param Reader $annotationReader
      * @param string|array $paths One or multiple paths where mapping documents can be found.
      * @param array|string[] $namespaces
      */
-    public function __construct(AnnotationReader $annotationReader, array $paths, array $namespaces)
+    public function __construct(Reader $annotationReader, array $paths, array $namespaces)
     {
         $this->annotationReader = $annotationReader;
         $this->namespacesToUse = $namespaces;

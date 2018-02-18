@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
-use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\Reader;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 
 /**
@@ -13,15 +13,15 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 class DoctrineClassMetadataReader implements ClassMetadataReader
 {
     /**
-     * @var AnnotationReader
+     * @var Reader
      */
     private $annotationReader;
 
     /**
      * DoctrineClassMetadataReader constructor.
-     * @param AnnotationReader $annotationReader
+     * @param Reader $annotationReader
      */
-    public function __construct(AnnotationReader $annotationReader)
+    public function __construct(Reader $annotationReader)
     {
         $this->annotationReader = $annotationReader;
     }

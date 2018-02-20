@@ -108,7 +108,7 @@ class FileSystemClassLocator implements ClassLocator {
             }
         }
 
-        $this->projectClasses = $classes;
+        $this->projectClasses = array_unique($classes);
     }
 
 }

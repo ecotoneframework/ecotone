@@ -161,6 +161,10 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService) : ConfiguredMessagingSystem
     {
+        foreach ($this->moduleConfigurations as $moduleMessagingConfiguration) {
+            $moduleMessagingConfiguration->configure($referenceSearchService);
+        }
+
         $channelResolver = $this->createChannelResolver($referenceSearchService);
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories);
         $consumers = [];
@@ -171,10 +175,6 @@ final class MessagingSystemConfiguration implements Configuration
         $gateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
             $gateways[] = GatewayReference::createWith($gatewayBuilder, $channelResolver);
-        }
-
-        foreach ($this->moduleConfigurations as $moduleMessagingConfiguration) {
-            $moduleMessagingConfiguration->configure($referenceSearchService);
         }
 
         $messagingSystem = MessagingSystem::create($consumers, $gateways, $channelResolver);

@@ -92,6 +92,24 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     }
 
     /**
+     * @param string $consumerName
+     * @param string $inputChannelName
+     * @param object $referenceObject
+     * @param string $methodName
+     *
+     * @return TransformerBuilder
+     */
+    public static function createWithReferenceObject(string $consumerName, string $inputChannelName, $referenceObject, string $methodName) : self
+    {
+        Assert::isObject($referenceObject, "Reference object for transformer must be object");
+
+        $transformerBuilder = new self($inputChannelName, "", "", $methodName, $consumerName);
+        $transformerBuilder->setDirectObjectToInvoke($referenceObject);
+
+        return $transformerBuilder;
+    }
+
+    /**
      * @inheritDoc
      */
     public function getRequiredReferenceNames(): array

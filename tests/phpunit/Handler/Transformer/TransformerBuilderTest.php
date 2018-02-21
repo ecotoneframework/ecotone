@@ -6,6 +6,7 @@ use Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Fixture\Service\ServiceExpectingOneArgument;
 use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutReturnValue;
+use Fixture\Service\ServiceWithReturnValue;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
@@ -234,6 +235,25 @@ class TransformerBuilderTest extends MessagingTest
                 ->setHeader('correlation-id', 1)
                 ->build(),
             $outputChannel->receive()
+        );
+    }
+
+    public function test_transforming_with_transformer_instance_of_object()
+    {
+        $referenceObject = ServiceWithReturnValue::create();
+
+        $transformer = TransformerBuilder::createWithReferenceObject('test', "inputChannel",  $referenceObject, "getName")
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+        $replyChannel = QueueChannel::create();
+        $transformer->handle(MessageBuilder::withPayload("some")->setReplyChannel($replyChannel)->build());
+
+        $this->assertEquals(
+            "johny",
+            $replyChannel->receive()->getPayload()
         );
     }
 }

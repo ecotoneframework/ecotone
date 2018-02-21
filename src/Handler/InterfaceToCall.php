@@ -47,9 +47,10 @@ class InterfaceToCall
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;
 
-        if ($this->isReturnTypeUnknown()) {
-            throw InvalidArgumentException::create("Return type for {$this} is unknown");
-        }
+// @TODO       turn off till php 7.2
+//        if ($this->isReturnTypeUnknown()) {
+//            throw InvalidArgumentException::create("Return type for {$this} is unknown");
+//        }
     }
 
     /**

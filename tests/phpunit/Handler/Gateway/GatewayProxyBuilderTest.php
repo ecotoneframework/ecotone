@@ -103,22 +103,6 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_throwing_exception_if_service_has_no_return_type()
-    {
-        $messageHandler = NoReturnMessageHandler::create();
-        $requestChannelName = "request-channel";
-        $requestChannel = DirectChannel::create();
-        $requestChannel->subscribe($messageHandler);
-
-        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceWithUnknownReturnType::class, 'sendMail', $requestChannelName);
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $gatewayProxyBuilder->build(InMemoryChannelResolver::createFromAssociativeArray([
-            $requestChannelName => $requestChannel
-        ]));
-    }
-
     public function test_time_out_without_response()
     {
         $messageHandler = NoReturnMessageHandler::create();

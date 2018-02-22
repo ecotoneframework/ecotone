@@ -40,13 +40,13 @@ class MessageToExpressionEvaluationParameterConverterBuilder implements MessageT
     /**
      * @param string                                       $parameterName
      * @param string                                       $expression
-     * @param MessageHandlerBuilderWithParameterConverters $messageHandlerBuilderWithParameterConverters
+     * @param MessageHandlerBuilderWithParameterConverters $messageHandlerBuilders
      *
      * @return MessageToExpressionEvaluationParameterConverterBuilder
      */
-    public static function createWith(string $parameterName, string $expression, MessageHandlerBuilderWithParameterConverters $messageHandlerBuilderWithParameterConverters): self
+    public static function createWith(string $parameterName, string $expression, MessageHandlerBuilderWithParameterConverters $messageHandlerBuilders): self
     {
-        $messageHandlerBuilderWithParameterConverters->registerRequiredReference(ExpressionEvaluationService::REFERENCE);
+        $messageHandlerBuilders->registerRequiredReference(ExpressionEvaluationService::REFERENCE);
         return new self($parameterName, $expression);
     }
 

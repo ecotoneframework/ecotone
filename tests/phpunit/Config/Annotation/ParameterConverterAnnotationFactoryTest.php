@@ -3,8 +3,11 @@
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToExpressionParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\ExpressionEvaluationService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToExpressionEvaluationParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
@@ -37,6 +40,40 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
             ->registerRequiredReference(\stdClass::class);
 
         $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
+        $parameterConverterAnnotationFactory->configureParameterConverters(
+            $messageHandlerBuilderToCompare,
+            $relatedClassName,
+            $methodName,
+            [$parameterConverterAnnotation]
+        );
+
+        $this->assertEquals(
+            $messageHandler,
+            $messageHandlerBuilderToCompare
+        );
+    }
+
+    public function test_converting_for_message_to_expression_evaluation()
+    {
+        $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
+        $parameterConverterAnnotation = new MessageToExpressionParameterAnnotation();
+        $parameterConverterAnnotation->parameterName = "object";
+        $parameterConverterAnnotation->expression = "payload.name";
+
+        $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
+        $methodName = "sendMessage";
+        $messageHandler = ServiceActivatorBuilder::create($relatedClassName, $methodName);
+        $messageHandler
+            ->withMethodParameterConverters([
+                MessageToExpressionEvaluationParameterConverterBuilder::createWith(
+                    $parameterConverterAnnotation->parameterName,
+                    "payload.name",
+                    $messageHandler
+                )
+            ]);
+
+        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
+
         $parameterConverterAnnotationFactory->configureParameterConverters(
             $messageHandlerBuilderToCompare,
             $relatedClassName,

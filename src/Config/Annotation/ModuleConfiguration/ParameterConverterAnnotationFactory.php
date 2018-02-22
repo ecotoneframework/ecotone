@@ -3,12 +3,15 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageParameterAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToExpressionParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToHeaderParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToExpressionEvaluationParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
@@ -58,6 +61,10 @@ class ParameterConverterAnnotationFactory
 
                 $parameterConverters[] = MessageToReferenceServiceParameterConverterBuilder::create(
                     $parameterConverterAnnotation->parameterName, $referenceName, $messageHandlerBuilder
+                );
+            }else if ($parameterConverterAnnotation instanceof MessageToExpressionParameterAnnotation) {
+                $parameterConverters[] = MessageToExpressionEvaluationParameterConverterBuilder::createWith(
+                    $parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->expression, $messageHandlerBuilder
                 );
             }
         }

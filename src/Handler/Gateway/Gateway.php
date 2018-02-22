@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class GatewayProxy
@@ -15,7 +16,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class GatewayProxy
+class Gateway
 {
     /**
      * @var string
@@ -50,7 +51,7 @@ class GatewayProxy
     }
 
     /**
-     * @param array|mixed[] $methodArgumentValues
+     * @param array|MethodArgument[] $methodArgumentValues
      * @return mixed
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
@@ -66,10 +67,16 @@ class GatewayProxy
             $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
         }
 
-        $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
-        $message = $this->requestReplyService
-                        ->prepareForSend($message, $interfaceToCall)
-                        ->build();
+        if ($interfaceToCall->hasSingleArgument() && $interfaceToCall->hasFirstParameterMessageTypeHint()) {
+            $message = $this->requestReplyService
+                ->prepareForSend(MessageBuilder::fromMessage($methodArguments[0]->value()), $interfaceToCall)
+                ->build();
+        }else {
+            $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
+            $message = $this->requestReplyService
+                ->prepareForSend($message, $interfaceToCall)
+                ->build();
+        }
 
         $this->requestReplyService->send($message);
 
@@ -80,6 +87,10 @@ class GatewayProxy
         $replyMessage = $this->requestReplyService->receiveReply();
         if (is_null($replyMessage) && !$interfaceToCall->doesItNotReturnValue() && !$interfaceToCall->canItReturnNull()) {
             throw InvalidArgumentException::create("{$interfaceToCall} expects value, but null was returned. If you defined errorChannel it's advised to change interface to nullable.");
+        }
+
+        if ($interfaceToCall->doesItReturnMessage()) {
+            return $replyMessage;
         }
 
         return $replyMessage ? $replyMessage->getPayload() : null;

@@ -27,7 +27,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Future;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxy;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;

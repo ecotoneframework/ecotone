@@ -2,6 +2,8 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+
 /**
  * Class InterfaceParameter
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler
@@ -41,6 +43,14 @@ class InterfaceParameter
     }
 
     /**
+     * @return string
+     */
+    public function getName() : string
+    {
+        return $this->parameter->getName();
+    }
+
+    /**
      * @return bool
      */
     public function isNullable() : bool
@@ -54,6 +64,14 @@ class InterfaceParameter
     public function getTypeHint() : string
     {
         return (string)$this->parameter->getType();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMessage() : bool
+    {
+        return $this->getTypeHint() === Message::class || is_subclass_of($this->getTypeHint(), Message::class);
     }
 
     /**

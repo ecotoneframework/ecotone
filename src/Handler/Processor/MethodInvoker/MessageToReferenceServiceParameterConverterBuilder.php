@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
@@ -27,24 +28,24 @@ class MessageToReferenceServiceParameterConverterBuilder implements MessageToPar
      * ReferenceServiceParameterConverterBuilder constructor.
      * @param string $parameterName
      * @param string $referenceName
-     * @param MessageHandlerBuilder $messageHandlerBuilder
      */
-    private function __construct(string $parameterName, string $referenceName, MessageHandlerBuilder $messageHandlerBuilder)
+    private function __construct(string $parameterName, string $referenceName)
     {
         $this->parameterName = $parameterName;
 
-        $this->initialize($messageHandlerBuilder, $referenceName);
+        $this->initialize($referenceName);
     }
 
     /**
      * @param string $parameterName
      * @param string $referenceName
-     * @param MessageHandlerBuilder $messageHandlerBuilder
+     * @param MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder
      * @return MessageToReferenceServiceParameterConverterBuilder
      */
-    public static function create(string $parameterName, string $referenceName, MessageHandlerBuilder $messageHandlerBuilder) : self
+    public static function create(string $parameterName, string $referenceName, MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder) : self
     {
-        return new self($parameterName, $referenceName, $messageHandlerBuilder);
+        $messageHandlerBuilder->registerRequiredReference($referenceName);
+        return new self($parameterName, $referenceName);
     }
 
     /**
@@ -56,12 +57,10 @@ class MessageToReferenceServiceParameterConverterBuilder implements MessageToPar
     }
 
     /**
-     * @param MessageHandlerBuilder $messageHandlerBuilder
      * @param string $referenceName
      */
-    private function initialize(MessageHandlerBuilder $messageHandlerBuilder, string $referenceName) : void
+    private function initialize(string $referenceName) : void
     {
-        $messageHandlerBuilder->registerRequiredReference($referenceName);
         $this->referenceName = $referenceName;
     }
 }

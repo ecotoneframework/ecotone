@@ -128,16 +128,17 @@ class InterfaceToCall
     }
 
     /**
-     * @return \ReflectionParameter
+     * @return InterfaceParameter
+     * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function getFirstParameter(): \ReflectionParameter
+    public function getFirstParameter(): InterfaceParameter
     {
         if ($this->parameterAmount() < 1) {
             throw InvalidArgumentException::create("Expecting {$this} to have at least one parameter, but got none");
         }
 
-        return $this->parameters()[0];
+        return InterfaceParameter::create($this->parameters()[0]);
     }
 
     /**
@@ -161,9 +162,7 @@ class InterfaceToCall
      */
     public function hasFirstParameterMessageTypeHint(): bool
     {
-        $firstParameter = $this->getFirstParameter();
-
-        return (string)$firstParameter->getType() == Message::class;
+        return $this->getFirstParameter()->isMessage();
     }
 
     /**
@@ -177,6 +176,14 @@ class InterfaceToCall
     /**
      * @return bool
      */
+    public function doesItReturnMessage() : bool
+    {
+        return $this->getReturnType() === Message::class || is_subclass_of($this->getReturnType(), Message::class);
+    }
+
+    /**
+     * @return bool
+     */
     public function canItReturnNull(): bool
     {
         return $this->reflectionMethod()->getReturnType()->allowsNull();
@@ -185,6 +192,7 @@ class InterfaceToCall
     /**
      * @return string
      * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function getFirstParameterTypeHint() : string
     {
@@ -192,13 +200,15 @@ class InterfaceToCall
             throw InvalidArgumentException::create("Trying to get first parameter, but has none");
         }
 
-        return (string)($this->getFirstParameter()->getType());
+        return $this->getFirstParameter()->getTypeHint();
     }
 
     /**
      * @param string $parameterName
+     *
      * @return InterfaceParameter
      * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function getParameterWithName(string $parameterName): InterfaceParameter
     {
@@ -222,7 +232,7 @@ class InterfaceToCall
     /**
      * @return bool
      */
-    public function hasSingleArguments(): bool
+    public function hasSingleArgument(): bool
     {
         return $this->parameterAmount() == 1;
     }

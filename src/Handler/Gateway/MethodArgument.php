@@ -2,12 +2,10 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
-use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
-
 /**
  * Class MethodArgument
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodArgument
 {
@@ -22,21 +20,23 @@ class MethodArgument
 
     /**
      * MethodArgument constructor.
+     *
      * @param \ReflectionParameter $parameter
-     * @param mixed $value
+     * @param mixed                $value
      */
     private function __construct(\ReflectionParameter $parameter, $value)
     {
         $this->parameter = $parameter;
-        $this->value = $value;
+        $this->value     = $value;
     }
 
     /**
      * @param \ReflectionParameter $parameterName
-     * @param mixed $value
+     * @param mixed                $value
+     *
      * @return MethodArgument
      */
-    public static function createWith(\ReflectionParameter $parameterName, $value) : self
+    public static function createWith(\ReflectionParameter $parameterName, $value): self
     {
         return new self($parameterName, $value);
     }
@@ -44,7 +44,7 @@ class MethodArgument
     /**
      * @return string
      */
-    public function getParameterName() : string
+    public function getParameterName(): string
     {
         return $this->parameter->getName();
     }
@@ -52,7 +52,7 @@ class MethodArgument
     /**
      * @return \ReflectionParameter
      */
-    public function getParameter() : \ReflectionParameter
+    public function getParameter(): \ReflectionParameter
     {
         return $this->parameter;
     }

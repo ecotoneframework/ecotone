@@ -50,12 +50,17 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
             /** @var MessageChannel $replyChannel */
             $replyChannel = $message->getHeaders()->getReplyChannel();
             if ($this->replyData) {
+                if ($this->replyData instanceof Message) {
+                    $replyChannel->send($this->replyData);
+                    return;
+                }
+
                 $replyChannel->send(MessageBuilder::withPayload($this->replyData)->build());
             }
         }
     }
 
-    public function getMessage() : ?Message
+    public function getReceivedMessage() : ?Message
     {
         return $this->message;
     }

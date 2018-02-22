@@ -205,7 +205,7 @@ class GatewayProxyBuilder implements GatewayBuilder
             $methodArgumentConverters[] = $messageConverterBuilder->build();
         }
 
-        $gateway = new GatewayProxy(
+        $gateway = new Gateway(
             $this->interfaceName, $this->methodName,
             new MethodCallToMessageConverter(
                 $this->interfaceName, $this->methodName, $methodArgumentConverters
@@ -215,15 +215,16 @@ class GatewayProxyBuilder implements GatewayBuilder
 
         $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gateway) implements AdapterInterface {
             /**
-             * @var GatewayProxy
+             * @var Gateway
              */
             private $gatewayProxy;
 
             /**
              *  constructor.
-             * @param GatewayProxy $gatewayProxy
+             *
+             * @param Gateway $gatewayProxy
              */
-            public function __construct(GatewayProxy $gatewayProxy)
+            public function __construct(Gateway $gatewayProxy)
             {
                 $this->gatewayProxy = $gatewayProxy;
             }

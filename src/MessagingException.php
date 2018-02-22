@@ -22,6 +22,8 @@ abstract class MessagingException extends \Exception
     const WRONG_HANDLER_AMOUNT_EXCEPTION = 202;
     const MESSAGE_HANDLING_EXCEPTION = 205;
 
+    const WRONG_EXPRESSION_TO_EVALUATE = 300;
+
     /**
      * @var Message
      */

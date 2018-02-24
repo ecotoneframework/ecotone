@@ -1,21 +1,26 @@
-sudo: required
-
+sudo: false
 language: php
 
-services:
-  - docker
+php:
+  - 7.1
+  - 7.2
+  - nightly
 
 before_install:
-  - docker pull simplycodedsoftware/ci:7.1
+  - phpize
+  - ./configure
+  - make
+  - make install
+  - echo "extension=ast.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - composer self-update
 
 install:
   - composer install --prefer-dist --no-interaction
 
 script:
-  - docker run --working-dir=/data/app -v $PWD:/data/app simplycodedsoftware/ci:7.1 bin/phpunit --coverage-clover ./tests/coverage/clover.xml
-  - docker run --working-dir=/data/app -v $PWD:/data/app simplycodedsoftware/ci:7.1 bin/behat
-  - docker run --working-dir=/data/app -v $PWD:/data/app simplycodedsoftware/ci:7.1 bin/phan
+  - bin/phpunit --coverage-clover ./tests/coverage/clover.xml
+  - bin/behat
+  - bin/phan
 
 after_success:
   - travis_retry php bin/coveralls -v

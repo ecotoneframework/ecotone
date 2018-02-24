@@ -7,10 +7,7 @@ php:
   - nightly
 
 before_install:
-  - phpize
-  - ./configure
-  - make
-  - make install
+  - pecl install ast
   - echo "extension=ast.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - composer self-update
 

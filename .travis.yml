@@ -1,0 +1,21 @@
+sudo: required
+
+language: php
+
+services:
+  - docker
+
+before_install:
+  - docker pull simplycodedsoftware/ci:7.1
+  - composer self-update
+
+install:
+  - composer install --prefer-dist --no-interaction
+
+script:
+  - docker run --working-dir=/data/app -v $PWD:/data/app simplycodedsoftware/ci:7.1 bin/phpunit --coverage-clover ./tests/coverage/clover.xml
+  - docker run --working-dir=/data/app -v $PWD:/data/app simplycodedsoftware/ci:7.1 bin/behat
+  - docker run --working-dir=/data/app -v $PWD:/data/app simplycodedsoftware/ci:7.1 bin/phan
+
+after_success:
+  - travis_retry php bin/coveralls -v

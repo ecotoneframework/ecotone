@@ -2,7 +2,7 @@ version: "2"
 
 services:
   app:
-    build: .
+    image: simplycodedsoftware/ci:7.1
     volumes:
       - "$PWD:/data/app"
     user: 1000:1000

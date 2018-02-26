@@ -1,8 +1,7 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Receiver;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\SendAndReceiveService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\IntegrationMessaging\Message;

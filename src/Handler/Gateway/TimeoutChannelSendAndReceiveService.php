@@ -1,9 +1,8 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Receiver;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\SendAndReceiveService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
@@ -12,8 +11,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class TimeoutChannelReplySender
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Receiver
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @internal
  */
 class TimeoutChannelSendAndReceiveService implements SendAndReceiveService
 {

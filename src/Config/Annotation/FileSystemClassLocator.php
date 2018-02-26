@@ -21,7 +21,7 @@ class FileSystemClassLocator implements ClassLocator {
      */
     private $projectClasses;
     /**
-     * @var array|string[]
+     * @var string[]
      */
     private $namespacesToUse;
     /**
@@ -31,7 +31,7 @@ class FileSystemClassLocator implements ClassLocator {
 
     /**
      * @param Reader $annotationReader
-     * @param string|array $paths One or multiple paths where mapping documents can be found.
+     * @param string[] $paths One or multiple paths where mapping documents can be found.
      * @param array|string[] $namespaces
      */
     public function __construct(Reader $annotationReader, array $paths, array $namespaces)

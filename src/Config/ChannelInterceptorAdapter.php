@@ -17,11 +17,11 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 abstract class ChannelInterceptorAdapter implements MessageChannelAdapter
 {
     /**
-     * @var MessageChannel
+     * @var MessageChannel|MessageChannelAdapter
      */
     protected $messageChannel;
     /**
-     * @var ChannelInterceptor
+     * @var ChannelInterceptor[]
      */
     protected $sortedChannelInterceptors;
 

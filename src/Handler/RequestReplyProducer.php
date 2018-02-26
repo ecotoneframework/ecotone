@@ -75,7 +75,7 @@ class RequestReplyProducer
     }
 
     /**
-     * @param string $outputChannelName
+     * @param string|null $outputChannelName
      * @param MessageProcessor $messageProcessor
      * @param ChannelResolver $channelResolver
      * @return RequestReplyProducer

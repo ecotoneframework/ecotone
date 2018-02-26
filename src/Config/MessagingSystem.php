@@ -102,7 +102,15 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      */
     public function getListOfSeparatelyRunningConsumers(): array
     {
-        // TODO: Implement getListOfSeparatelyRunningConsumers() method.
+        $list = [];
+
+        foreach ($this->consumers as $consumer) {
+            if ($consumer->isRunningInSeparateThread()) {
+                $list[] = $consumer;
+            }
+        }
+
+        return $list;
     }
 
 

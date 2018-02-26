@@ -128,7 +128,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerConsumer(ConsumerBuilder $consumerBuilder): MessagingSystemConfiguration
     {
-        // TODO: Implement registerConsumer() method.
+        return $this;
     }
 
     /**

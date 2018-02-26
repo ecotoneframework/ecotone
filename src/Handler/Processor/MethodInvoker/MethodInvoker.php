@@ -144,7 +144,7 @@ final class MethodInvoker implements MessageProcessor
     }
 
     /**
-     * @param $objectToInvokeOn
+     * @param string|object $objectToInvokeOn
      * @return string
      */
     private function objectToClassName($objectToInvokeOn): string

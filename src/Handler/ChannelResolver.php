@@ -2,7 +2,10 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
+use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\SubscribableChannel;
 
 /**
  * Interface ChannelResolver
@@ -13,7 +16,7 @@ interface ChannelResolver
 {
     /**
      * @param string|MessageChannel $channelName
-     * @return MessageChannel
+     * @return MessageChannel|PollableChannel|SubscribableChannel|DirectChannel
      *
      * @throws DestinationResolutionException
      */

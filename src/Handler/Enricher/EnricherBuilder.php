@@ -97,7 +97,7 @@ class EnricherBuilder implements MessageHandlerBuilder
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $requestGateway = GatewayProxyBuilder::create(Uuid::uuid4(), EnrichReferenceService::class, "execute", $this->requestChannelName)
+        $requestGateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichReferenceService::class, "execute", $this->requestChannelName)
                             ->build($channelResolver);
 
         $messageProcessor = MethodInvoker::createWith($requestGateway, "execute", []);

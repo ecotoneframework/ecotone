@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Channel;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 
 /**
@@ -79,7 +80,7 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
     /**
      * @inheritDoc
      */
-    public function build(): MessageChannel
+    public function build(ReferenceSearchService $referenceSearchService) : MessageChannel
     {
         return $this->messageChannel;
     }

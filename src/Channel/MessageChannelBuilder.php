@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Channel;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 
 /**
@@ -17,7 +18,8 @@ interface MessageChannelBuilder
     public function getMessageChannelName() : string;
 
     /**
+     * @param ReferenceSearchService $referenceSearchService
      * @return MessageChannel
      */
-    public function build() : MessageChannel;
+    public function build(ReferenceSearchService $referenceSearchService) : MessageChannel;
 }

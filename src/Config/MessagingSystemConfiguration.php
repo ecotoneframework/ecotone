@@ -204,7 +204,7 @@ final class MessagingSystemConfiguration implements Configuration
 
         $channels = [];
         foreach ($this->channelsBuilders as $channelsBuilder) {
-            $messageChannel = $channelsBuilder->build();
+            $messageChannel = $channelsBuilder->build($referenceSearchService);
             if (array_key_exists($channelsBuilder->getMessageChannelName(), $channelInterceptorsByChannelName)) {
                 $interceptors = $channelInterceptorsByChannelName[$channelsBuilder->getMessageChannelName()];
                 if ($messageChannel instanceof PollableChannel) {

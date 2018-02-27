@@ -22,4 +22,9 @@ interface MessageChannelBuilder
      * @return MessageChannel
      */
     public function build(ReferenceSearchService $referenceSearchService) : MessageChannel;
+
+    /**
+     * @return string[] empty string means no required reference name exists
+     */
+    public function getRequiredReferenceNames() : array;
 }

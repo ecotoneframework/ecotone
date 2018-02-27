@@ -70,6 +70,14 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
+     * @return string[] empty string means no required reference name exists
+     */
+    public function getRequiredReferenceNames() : array
+    {
+        return [];
+    }
+
+    /**
      * @inheritDoc
      */
     public function getMessageChannelName(): string

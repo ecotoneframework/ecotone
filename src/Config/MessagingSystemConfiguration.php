@@ -83,7 +83,8 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->channelsBuilders[] = $messageChannelBuilder;
         $this->configurationObserver->notifyMessageChannelWasRegistered($messageChannelBuilder->getMessageChannelName(), (string)$messageChannelBuilder);
-
+        $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
+        
         return $this;
     }
 
@@ -158,6 +159,7 @@ final class MessagingSystemConfiguration implements Configuration
      *
      * @param ReferenceSearchService $referenceSearchService
      * @return ConfiguredMessagingSystem
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      */
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService) : ConfiguredMessagingSystem
     {

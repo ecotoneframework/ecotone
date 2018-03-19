@@ -54,7 +54,7 @@ class MethodInvokerTest extends MessagingTest
         $headerValue = '123X';
 
         $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withReturnValue', [
-            MessageToHeaderParameterConverter::create('name', $headerName)
+            MessageToHeaderParameterConverter::create('name', $headerName, true)
         ]);
 
         $this->assertEquals($headerValue,
@@ -98,8 +98,8 @@ class MethodInvokerTest extends MessagingTest
         $serviceExpectingThreeArgument = ServiceExpectingThreeArguments::create();
 
         $methodInvocation = MethodInvoker::createWith($serviceExpectingThreeArgument, 'withReturnValue', [
-            MessageToHeaderParameterConverter::create('surname', 'personSurname'),
-            MessageToHeaderParameterConverter::create('age', 'personAge'),
+            MessageToHeaderParameterConverter::create('surname', 'personSurname', true),
+            MessageToHeaderParameterConverter::create('age', 'personAge', true),
             MessageToPayloadParameterConverter::create('name'),
         ]);
 

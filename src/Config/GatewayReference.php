@@ -45,6 +45,14 @@ class GatewayReference
     }
 
     /**
+     * @return string
+     */
+    public function getReferenceName() : string
+    {
+        return $this->referenceName;
+    }
+
+    /**
      * @param string $referenceName
      * @return bool
      */

@@ -4,6 +4,7 @@ namespace Fixture\Configuration;
 use PHPUnit\Framework\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\GatewayReference;
 
 /**
  * Class DumbConfigurationObserver
@@ -39,6 +40,14 @@ class DumbConfigurationObserver implements ConfigurationObserver
     public function notifyMessageChannelWasRegistered(string $messageChannelName, string $channelType): void
     {
         $this->messageChannelNotification = true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function notifyGatewayWasBuilt(GatewayReference $gatewayReference): void
+    {
+        return;
     }
 
     /**

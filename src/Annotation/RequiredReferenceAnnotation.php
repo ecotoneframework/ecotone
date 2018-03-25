@@ -17,7 +17,12 @@ class RequiredReferenceAnnotation
      * @var string
      * @Required()
      */
-    public $requiredReferenceName;
+    public $referenceName;
+    /**
+     * @var string
+     * @Required()
+     */
+    public $className;
     /**
      * @var string
      * @Required()

@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerEndpointFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilderFactory;
@@ -38,9 +39,13 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private $consumerFactories = [];
     /**
-     * @var ModuleMessagingConfiguration[]
+     * @var Module[]
      */
-    private $moduleConfigurations = [];
+    private $modules = [];
+    /**
+     * @var ModuleExtension[][]
+     */
+    private $moduleExtensions = [];
     /**
      * @var array|GatewayBuilder[]
      */
@@ -54,25 +59,32 @@ final class MessagingSystemConfiguration implements Configuration
      * Only one instance at time
      *
      * MessagingSystemConfiguration constructor.
-     * @param ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService
-     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
+     * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param ConfigurationObserver $configurationObserver
      */
-    private function __construct(ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ConfigurationObserver $configurationObserver)
+    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, ConfigurationObserver $configurationObserver)
     {
+        $this->initialize($moduleConfigurationRetrievingService);
         $this->configurationObserver = $configurationObserver;
-        $this->initialize($moduleConfigurationRetrievingService, $configurationVariableRetrievingService);
     }
 
     /**
-     * @param ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService
-     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
+     * @param ModuleRetrievingService $moduleConfigurationRetrievingService
+     * @return MessagingSystemConfiguration
+     */
+    public static function prepare(ModuleRetrievingService $moduleConfigurationRetrievingService) : self
+    {
+        return new self($moduleConfigurationRetrievingService, NullObserver::create());
+    }
+
+    /**
+     * @param ModuleRetrievingService $moduleRetrievingService
      * @param ConfigurationObserver $configurationObserver
      * @return MessagingSystemConfiguration
      */
-    public static function prepare(ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ConfigurationObserver $configurationObserver) : self
+    public static function prepareWitObserver(ModuleRetrievingService $moduleRetrievingService, ConfigurationObserver $configurationObserver) : self
     {
-        return new self($moduleConfigurationRetrievingService, $configurationVariableRetrievingService, $configurationObserver);
+        return new self($moduleRetrievingService, $configurationObserver);
     }
 
     /**
@@ -84,7 +96,7 @@ final class MessagingSystemConfiguration implements Configuration
         $this->channelsBuilders[] = $messageChannelBuilder;
         $this->configurationObserver->notifyMessageChannelWasRegistered($messageChannelBuilder->getMessageChannelName(), (string)$messageChannelBuilder);
         $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
-        
+
         return $this;
     }
 
@@ -110,18 +122,6 @@ final class MessagingSystemConfiguration implements Configuration
         $this->messageHandlerBuilders[] = $messageHandlerBuilder;
 
         return $this;
-    }
-
-    /**
-     * @param string[] $referenceNames
-     */
-    private function requireReferences(array $referenceNames) : void
-    {
-        foreach ($referenceNames as $requiredReferenceName) {
-            if ($requiredReferenceName) {
-                $this->configurationObserver->notifyRequiredAvailableReference($requiredReferenceName);
-            }
-        }
     }
 
     /**
@@ -157,16 +157,23 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * Initialize messaging system from current configuration
      *
-     * @param ReferenceSearchService $referenceSearchService
+     * @param ReferenceSearchService $externalReferenceSearchService
+     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
      * @return ConfiguredMessagingSystem
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService) : ConfiguredMessagingSystem
+    public function buildMessagingSystemFromConfiguration(ReferenceSearchService $externalReferenceSearchService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService) : ConfiguredMessagingSystem
     {
-        foreach ($this->moduleConfigurations as $moduleMessagingConfiguration) {
-            $moduleMessagingConfiguration->configure($referenceSearchService);
+        foreach ($this->modules as $module) {
+            $module->registerWithin(
+                $this,
+                $this->moduleExtensions[$module->getName()],
+                $configurationVariableRetrievingService
+            );
         }
 
+        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, $this->modules);
         $channelResolver = $this->createChannelResolver($referenceSearchService);
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories);
         $consumers = [];
@@ -176,12 +183,12 @@ final class MessagingSystemConfiguration implements Configuration
         }
         $gateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $gateways[] = GatewayReference::createWith($gatewayBuilder, $channelResolver);
+            $gateways[] = GatewayReference::createWith($gatewayBuilder, $referenceSearchService, $channelResolver);
         }
 
         $messagingSystem = MessagingSystem::create($consumers, $gateways, $channelResolver);
         $this->configurationObserver->notifyConfigurationWasFinished($messagingSystem);
-        foreach ($this->moduleConfigurations as $moduleMessagingConfiguration) {
+        foreach ($this->modules as $moduleMessagingConfiguration) {
             $moduleMessagingConfiguration->postConfigure($messagingSystem);
         }
 
@@ -223,17 +230,35 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @param ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService
-     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
+     * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      */
-    private function initialize(ModuleConfigurationRetrievingService $moduleConfigurationRetrievingService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService) : void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService) : void
     {
-        $moduleMessagingConfigurations = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
-        foreach ($moduleMessagingConfigurations as $moduleMessagingConfiguration) {
-            $moduleMessagingConfiguration->registerWithin($this, $configurationVariableRetrievingService);
+        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
+        $moduleExtensions = $moduleConfigurationRetrievingService->findAllModuleExtensionConfigurations();
+        foreach ($moduleExtensions as $moduleExtension) {
+            $this->moduleExtensions[$moduleExtension->getName()][] = $moduleExtension;
         }
 
-        $this->moduleConfigurations = $moduleMessagingConfigurations;
+        foreach ($modules as $module) {
+            if (!array_key_exists($module->getName(), $this->moduleExtensions)) {
+                $this->moduleExtensions[$module->getName()] = [];
+            }
+
+            $this->modules[$module->getName()] = $module;
+        }
+    }
+
+    /**
+     * @param string[] $referenceNames
+     */
+    private function requireReferences(array $referenceNames) : void
+    {
+        foreach ($referenceNames as $requiredReferenceName) {
+            if ($requiredReferenceName) {
+                $this->configurationObserver->notifyRequiredAvailableReference($requiredReferenceName);
+            }
+        }
     }
 
     /**

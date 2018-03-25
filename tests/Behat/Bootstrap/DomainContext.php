@@ -13,7 +13,7 @@ use Fixture\Behat\Shopping\ShoppingService;
 use Fixture\Configuration\DumbConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessagingConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
@@ -60,7 +60,7 @@ class DomainContext implements Context
     public function __construct()
     {
         $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
-        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
     }
 
     /**
@@ -86,15 +86,14 @@ class DomainContext implements Context
 
     /**
      * @Given I activate service with name :handlerName for :className with method :methodName to listen on :channelName channel
-     * @param string $handlerName
      * @param string $className
      * @param string $methodName
      * @param string $channelName
      */
-    public function iActivateServiceWithNameForWithMethodToListenOnChannel(string $handlerName, string $className, string $methodName, string $channelName)
+    public function iActivateServiceWithNameForWithMethodToListenOnChannel(string $className, string $methodName, string $channelName)
     {
         $this->getMessagingSystemConfiguration()
-                ->registerMessageHandler($this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName));
+                ->registerMessageHandler($this->createServiceActivatorBuilder($className, $methodName, $channelName));
     }
 
     /**
@@ -202,7 +201,6 @@ class DomainContext implements Context
     private function createServiceActivatorBuilder(string $handlerName, string $className, string $methodName, string $channelName): MessageHandlerBuilder
     {
         return ServiceActivatorBuilder::create($className, $methodName)
-                                        ->withConsumerName($handlerName)
                                         ->withInputMessageChannel($channelName);
     }
 
@@ -213,6 +211,7 @@ class DomainContext implements Context
      * @param string $methodName
      * @param string $requestChannelName
      * @param string $responseChannelName
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function iActivateTransformerWithNameForAndWithRequestChannelAndOutputChannel(string $name, string $className, string $methodName, string $requestChannelName, string $responseChannelName)
     {
@@ -221,7 +220,10 @@ class DomainContext implements Context
         $this->registerReference($className);
 
         $this->getMessagingSystemConfiguration()
-            ->registerMessageHandler(TransformerBuilder::create($inputChannel, $outputChannel, $className, $methodName, $name));
+            ->registerMessageHandler(
+                TransformerBuilder::create($inputChannel, $className, $methodName)
+                    ->withOutputMessageChannel($outputChannel)
+            );
     }
 
     /**
@@ -242,6 +244,7 @@ class DomainContext implements Context
     /**
      * @param string $className
      * @return null|object
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function registerReference(string $className)
     {
@@ -263,7 +266,7 @@ class DomainContext implements Context
         }
 
         $this->getMessagingSystemConfiguration()
-            ->registerMessageHandler(RouterBuilder::createHeaderValueRouter($handlerName, $inputChannelName, $headerName, $channelToValue));
+            ->registerMessageHandler(RouterBuilder::createHeaderValueRouter($inputChannelName, $headerName, $channelToValue));
     }
 
     /**
@@ -332,12 +335,12 @@ class DomainContext implements Context
         }
 
         $this->getMessagingSystemConfiguration()
-                ->registerMessageHandler(TransformerBuilder::createHeaderEnricher(
-                    $handlerName,
-                    $requestChannelName,
-                    $outputChannelName,
-                    $keyValues
-        ));
+                ->registerMessageHandler(
+                    TransformerBuilder::createHeaderEnricher(
+                        $requestChannelName,
+                        $keyValues
+                    )->withOutputMessageChannel($outputChannelName)
+                );
     }
 
     /**

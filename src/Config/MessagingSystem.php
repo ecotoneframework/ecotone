@@ -61,18 +61,19 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     /**
      * @param string $consumerName
      * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function runSeparatelyRunningConsumerBy(string $consumerName) : void
     {
         foreach ($this->consumers as $consumer) {
             if ($consumer->getConsumerName() === $consumerName) {
-                if (!$consumer->isRunningInSeparateThread()) {
-                    throw InvalidArgumentException::create("Can't run event driven consumer with name {$consumerName} in separate thread");
-                }
+                Assert::isTrue($consumer->isRunningInSeparateThread(), "Can't run event driven consumer with name {$consumerName} in separate thread");
 
                 $consumer->start();
             }
         }
+
+        throw InvalidArgumentException::create("There is no pollable consumer with name {$consumerName}");
     }
 
     /**
@@ -106,7 +107,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
 
         foreach ($this->consumers as $consumer) {
             if ($consumer->isRunningInSeparateThread()) {
-                $list[] = $consumer;
+                $list[] = $consumer->getConsumerName();
             }
         }
 

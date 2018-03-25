@@ -41,6 +41,8 @@ class ParameterConverterAnnotationFactory
      * @param string $methodName
      * @param array $parameterConverterAnnotations
      * @return void
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
      */
     public function configureParameterConverters(MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder, string $relatedClassName, string $methodName, array $parameterConverterAnnotations): void
     {

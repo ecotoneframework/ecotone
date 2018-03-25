@@ -14,7 +14,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * Class ServiceActivatorWithAllConfigurationDefined
  * @package Fixture\Annotation\MessageEndpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpointAnnotation(referenceName="message_sender")
+ * @MessageEndpointAnnotation()
  */
 class ServiceActivatorWithAllConfigurationDefined
 {

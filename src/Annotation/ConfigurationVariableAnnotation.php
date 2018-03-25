@@ -20,9 +20,9 @@ class ConfigurationVariableAnnotation
      */
     public $variableName;
     /**
-     * @var string If default value is not set, then variable is required
+     * @var bool
      */
-    public $defaultValue = "";
+    public $isRequired = true;
     /**
      * @var string
      * @Required()

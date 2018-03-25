@@ -4,6 +4,7 @@ namespace Fixture\Handler;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class DumbGatewayBuilder
@@ -48,7 +49,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver)
+    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
         return new \stdClass();
     }

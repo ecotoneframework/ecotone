@@ -47,6 +47,7 @@ class ConsumerEndpointFactory
      * @param MessageHandlerBuilder $messageHandlerBuilder
      * @return ConsumerLifecycle
      * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function createForMessageHandler(MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle
     {

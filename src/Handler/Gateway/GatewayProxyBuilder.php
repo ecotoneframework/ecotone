@@ -7,6 +7,7 @@ use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
@@ -153,6 +154,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @param array $methodArgumentConverters
      * @return GatewayProxyBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function withParameterToMessageConverters(array $methodArgumentConverters): self
     {
@@ -166,7 +168,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @inheritdoc
      */
-    public function build(ChannelResolver $channelResolver)
+    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
         $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
         $requestChannel = $channelResolver->resolve($this->requestChannelName);

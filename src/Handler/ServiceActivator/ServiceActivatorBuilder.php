@@ -45,10 +45,6 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
      */
     private $inputMessageChannelName;
     /**
-     * @var string
-     */
-    private $consumerName;
-    /**
      * @var string[]
      */
     private $requiredReferenceNames;
@@ -142,25 +138,6 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
     public function registerRequiredReference(string $referenceName): void
     {
         $this->requiredReferenceNames[] = $referenceName;
-    }
-
-    /**
-     * @param string $name
-     * @return ServiceActivatorBuilder
-     */
-    public function withConsumerName(string $name) : self
-    {
-        $this->consumerName = $name;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getConsumerName(): string
-    {
-        return $this->consumerName;
     }
 
     /**

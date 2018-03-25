@@ -31,10 +31,6 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @var string
      */
-    private $consumerName;
-    /**
-     * @var string
-     */
     private $inputMessageChannelName;
     /**
      * @var string
@@ -78,14 +74,6 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @inheritDoc
      */
-    public function getConsumerName(): string
-    {
-        return $this->consumerName;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getInputMessageChannelName(): string
     {
         return $this->inputMessageChannelName;
@@ -98,17 +86,6 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
     public function withOutputChannel(string $messageChannelName): self
     {
         $this->outputChannelName = $messageChannelName;
-
-        return $this;
-    }
-
-    /**
-     * @param string $consumerName
-     * @return SplitterBuilder
-     */
-    public function withConsumerName(string $consumerName): self
-    {
-        $this->consumerName = $consumerName;
 
         return $this;
     }

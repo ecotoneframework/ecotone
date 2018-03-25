@@ -17,6 +17,8 @@ abstract class MessagingTest extends TestCase
 {
     const FIXTURE_DIR = __DIR__ . '/../Fixture';
 
+    const ROOT_DIR = self::FIXTURE_DIR . '/../..';
+
     public function assertMessages(Message $message, Message $toCompareWith) : void
     {
         if (!MessageCompareService::areSameMessagesIgnoringIdAndTimestamp($message, $toCompareWith)) {

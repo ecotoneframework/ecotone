@@ -25,23 +25,17 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilderWithParameterCon
      */
     private $messageChannel;
     /**
-     * @var string
-     */
-    private $messageHandlerName;
-    /**
      * @var string[]
      */
     private $requiredReferenceNames = [];
 
     /**
      * DumbMessageHandlerBuilder constructor.
-     * @param string $messageHandlerName
      * @param MessageHandler $messageHandler
      * @param string $inputMessageChannelName
      */
-    private function __construct(string $messageHandlerName, MessageHandler $messageHandler, string $inputMessageChannelName)
+    private function __construct(MessageHandler $messageHandler, string $inputMessageChannelName)
     {
-        $this->messageHandlerName = $messageHandlerName;
         $this->messageHandler = $messageHandler;
         $this->messageChannel = $inputMessageChannelName;
 
@@ -49,19 +43,18 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilderWithParameterCon
     }
 
     /**
-     * @param string $messageHandlerName
      * @param MessageHandler $messageHandler
      * @param string $inputMessageChannelName
      * @return DumbMessageHandlerBuilder
      */
-    public static function create(string $messageHandlerName, MessageHandler $messageHandler, string $inputMessageChannelName) : self
+    public static function create(MessageHandler $messageHandler, string $inputMessageChannelName) : self
     {
-        return new self($messageHandlerName, $messageHandler, $inputMessageChannelName);
+        return new self($messageHandler, $inputMessageChannelName);
     }
 
     public static function createSimple() : self
     {
-        return new self("handler", NoReturnMessageHandler::create(), "inputChannel");
+        return new self(NoReturnMessageHandler::create(), "inputChannel");
     }
 
     /**
@@ -104,13 +97,6 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilderWithParameterCon
         return;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getConsumerName(): string
-    {
-        return $this->messageHandlerName;
-    }
 
     public function __toString()
     {

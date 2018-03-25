@@ -9,6 +9,20 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Support;
  */
 class Assert
 {
+
+    /**
+     * @param bool $toCheck
+     * @param string $message
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function isTrue(bool $toCheck, string $message) : void
+    {
+        if (!$toCheck) {
+            throw InvalidArgumentException::create($message);
+        }
+    }
+
     /**
      * @param $valueToCheck
      * @param string $exceptionMessage

@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
+use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
@@ -38,7 +39,7 @@ class PollOrThrowMessageHandlerConsumerBuilderFactory implements MessageHandlerC
         /** @var PollableChannel $pollableChannel */
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
-        return PollOrThrowExceptionConsumer::create($messageHandlerBuilder->getConsumerName(), $pollableChannel, $messageHandlerBuilder->build(
+        return PollOrThrowExceptionConsumer::create((string)$messageHandlerBuilder . Uuid::uuid4()->toString(), $pollableChannel, $messageHandlerBuilder->build(
             $channelResolver, $referenceSearchService
         ));
     }

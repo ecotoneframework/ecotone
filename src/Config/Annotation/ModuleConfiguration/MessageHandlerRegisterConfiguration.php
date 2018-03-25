@@ -3,93 +3,76 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationConfiguration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassLocator;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ClassMetadataReader;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class BaseAnnotationConfiguration
  * @package SimplyCodedSoftware\IntegrationMessaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @internal
  */
-abstract class MessageHandlerRegisterConfiguration implements AnnotationConfiguration
+abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
-     * @var ConfigurationVariableRetrievingService
+     * @var AnnotationRegistrationService
      */
-    private $configurationVariableRetrievingService;
+    private $annotationRegistrationService;
     /**
-     * @var ClassLocator
+     * @var ParameterConverterAnnotationFactory
      */
-    private $classLocator;
-    /**
-     * @var ClassMetadataReader
-     */
-    private $classMetadataReader;
+    private $parameterConverterAnnotationFactory;
 
     /**
      * AnnotationGatewayConfiguration constructor.
-     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
-     * @param ClassLocator $classLocator
-     * @param ClassMetadataReader $classMetadataReader
+     * @param AnnotationRegistrationService $annotationRegistrationService
+     * @param ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory
      */
-    private function __construct(ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader)
+    private function __construct(AnnotationRegistrationService $annotationRegistrationService, ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory)
     {
-        $this->configurationVariableRetrievingService = $configurationVariableRetrievingService;
-        $this->classLocator = $classLocator;
-        $this->classMetadataReader = $classMetadataReader;
+        $this->annotationRegistrationService = $annotationRegistrationService;
+        $this->parameterConverterAnnotationFactory = $parameterConverterAnnotationFactory;
     }
 
     /**
      * @inheritDoc
      */
-    public static function createAnnotationConfiguration(array $moduleConfigurationExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader): AnnotationConfiguration
+    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
-        return new static($configurationVariableRetrievingService, $classLocator, $classMetadataReader);
+        return new static($annotationRegistrationService, ParameterConverterAnnotationFactory::create());
     }
+
 
     /**
      * @inheritDoc
      */
-    public function registerWithin(Configuration $configuration, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
+    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
     {
-        $annotationMessageEndpointConfigurationFinder = new AnnotationClassesWithMethodFinder($this->classLocator, $this->classMetadataReader);
-        $parameterConvertAnnotationFactory = ParameterConverterAnnotationFactory::create();
-
-
-        foreach ($annotationMessageEndpointConfigurationFinder->findFor(MessageEndpointAnnotation::class,$this->getMessageHandlerAnnotation()) as $annotationRegistration) {
-            $annotation = $annotationRegistration->getAnnotation();
+        foreach ($this->annotationRegistrationService->findRegistrationsFor(MessageEndpointAnnotation::class, $this->getMessageHandlerAnnotation()) as $annotationRegistration) {
+            $annotation = $annotationRegistration->getAnnotationForMethod();
             $messageHandlerBuilder = $this->createMessageHandlerFrom($annotationRegistration);
 
-            $parameterConvertAnnotationFactory->configureParameterConverters($messageHandlerBuilder, $annotationRegistration->getMessageEndpointClass(), $annotationRegistration->getMethodName(), $annotation->parameterConverters);
+            $this->parameterConverterAnnotationFactory->configureParameterConverters($messageHandlerBuilder, $annotationRegistration->getClassWithAnnotation(), $annotationRegistration->getMethodName(), $annotation->parameterConverters);
 
             $configuration->registerMessageHandler($messageHandlerBuilder);
         }
     }
 
     /**
-     * @inheritDoc
+     * @return string
      */
-    public function configure(ReferenceSearchService $referenceSearchService): void
-    {
-        return;
-    }
+    public abstract function getMessageHandlerAnnotation(): string;
 
     /**
      * @param AnnotationRegistration $annotationRegistration
      * @return MessageHandlerBuilderWithParameterConverters
      */
-    public abstract function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration) : MessageHandlerBuilderWithParameterConverters;
-
-    /**
-     * @return string
-     */
-    public abstract function getMessageHandlerAnnotation() : string;
+    public abstract function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters;
 
     /**
      * @inheritDoc

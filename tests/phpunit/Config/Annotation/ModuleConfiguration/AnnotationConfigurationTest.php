@@ -2,14 +2,14 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Configuration\DumbConfigurationObserver;
-use Fixture\Configuration\DumbModuleConfigurationRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationConfiguration;
+use Fixture\Configuration\DumbModuleRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\FileSystemClassLocator;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\DoctrineClassMetadataReader;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\FileSystemClassLocator;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 /**
@@ -20,30 +20,24 @@ use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 abstract class AnnotationConfigurationTest extends MessagingTest
 {
     /**
-     * @var AnnotationConfiguration
+     * @param string $className
+     * @param string $methodName
+     * @param $classAnnotationObject
+     * @param $methodAnnotationObject
+     * @return AnnotationRegistrationService
      */
-    protected $annotationConfiguration;
-
-    public function setUp()
+    protected function createAnnotationRegistrationService(string $className, string $methodName, $classAnnotationObject, $methodAnnotationObject): AnnotationRegistrationService
     {
-        $annotationReader = new AnnotationReader();
-
-        $this->annotationConfiguration = $this->createAnnotationConfiguration()::createAnnotationConfiguration(
-            [],
-            InMemoryConfigurationVariableRetrievingService::createEmpty(),
-            new FileSystemClassLocator(
-                $annotationReader,
-                [
-                    self::FIXTURE_DIR . "/Annotation"
-                ],
-                [
-                    "Fixture\Annotation\\" . $this->getPartOfTheNamespaceForTests()
-                ]
-            ),
-            new DoctrineClassMetadataReader(
-                $annotationReader
+        return InMemoryAnnotationRegistrationService::createEmpty()
+            ->addAnnotationToClass(
+                $className,
+                $classAnnotationObject
             )
-        );
+            ->addAnnotationToClassMethod(
+                $className,
+                $methodName,
+                $methodAnnotationObject
+            );
     }
 
     /**
@@ -52,19 +46,9 @@ abstract class AnnotationConfigurationTest extends MessagingTest
     protected function createMessagingSystemConfiguration(): MessagingSystemConfiguration
     {
         return MessagingSystemConfiguration::prepare(
-            DumbModuleConfigurationRetrievingService::createEmpty(),
+            DumbModuleRetrievingService::createEmpty(),
             InMemoryConfigurationVariableRetrievingService::createEmpty(),
             DumbConfigurationObserver::create()
         );
     }
-
-    /**
-     * @return string
-     */
-    protected abstract function createAnnotationConfiguration() : string;
-
-    /**
-     * @return string
-     */
-    protected abstract function getPartOfTheNamespaceForTests() : string;
 }

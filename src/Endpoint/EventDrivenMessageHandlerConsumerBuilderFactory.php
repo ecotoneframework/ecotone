@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
+use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
@@ -38,7 +39,7 @@ class EventDrivenMessageHandlerConsumerBuilderFactory implements MessageHandlerC
         $subscribableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
         return new EventDrivenConsumer(
-            $messageHandlerBuilder->getConsumerName(),
+            (string)$messageHandlerBuilder . Uuid::uuid4()->toString(),
             $subscribableChannel,
             $messageHandlerBuilder->build($channelResolver, $referenceSearchService)
         );

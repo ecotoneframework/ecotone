@@ -1,16 +1,23 @@
 <?php
+declare(strict_types=1);
 
-namespace Fixture\Annotation\ApplicationContext;
+namespace Fixture\Annotation\ApplicationContext {
 
-/**
- * Interface Gateway
- * @package Fixture\Annotation\ApplicationContext
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
-interface GatewayExample
-{
+    use SimplyCodedSoftware\IntegrationMessaging\Annotation\GatewayAnnotation;
+    use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
+
     /**
-     * @return string
+     * Interface Gateway
+     * @package Fixture\Annotation\ApplicationContext
+     * @author Dariusz Gafka <dgafka.mail@gmail.com>
+     * @MessageEndpointAnnotation()
      */
-    public function doSomething() : string;
+    interface GatewayExample
+    {
+        /**
+         * @return string
+         * @GatewayAnnotation()
+         */
+        public function doSomething() : string;
+    }
 }

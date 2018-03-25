@@ -2,11 +2,13 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleConfigurationAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariable;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
@@ -17,14 +19,38 @@ use SimplyCodedSoftware\IntegrationMessaging\NullableMessageChannel;
  * Class BasicMessagingConfiguration
  * @package SimplyCodedSoftware\IntegrationMessaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleConfigurationAnnotation(moduleName="basic-messaging-configuration")
+ * @ModuleAnnotation()
  */
-class BasicMessagingConfiguration implements AnnotationConfiguration
+class BasicMessagingConfiguration implements AnnotationModule
 {
     /**
      * @inheritDoc
      */
-    public static function createAnnotationConfiguration(array $moduleConfigurationExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ClassLocator $classLocator, ClassMetadataReader $classMetadataReader): AnnotationConfiguration
+    public function getName(): string
+    {
+        return "basic-messaging-configuration";
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getConfigurationVariables(): array
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredReferences(): array
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
         return new self();
     }
@@ -32,7 +58,7 @@ class BasicMessagingConfiguration implements AnnotationConfiguration
     /**
      * @inheritDoc
      */
-    public function registerWithin(Configuration $configuration, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
+    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
     {
         $configuration->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory());
         $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory());

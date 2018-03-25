@@ -9,7 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\Messa
  * Class SplitterExample
  * @package Fixture\Annotation\MessageEndpoint\Splitter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpointAnnotation(referenceName="splitter")
+ * @MessageEndpointAnnotation()
  */
 class SplitterExample
 {

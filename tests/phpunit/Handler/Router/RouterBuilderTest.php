@@ -21,6 +21,10 @@ use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
  */
 class RouterBuilderTest extends MessagingTest
 {
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_routing_message_to_single_channel()
     {
         $chanelName = 'buyChannel';
@@ -28,7 +32,7 @@ class RouterBuilderTest extends MessagingTest
         $inputChannelName = "input";
         $objectToInvokeReference = "service-a";
 
-        $router = RouterBuilder::create('test', $inputChannelName, $objectToInvokeReference, 'pick')
+        $router = RouterBuilder::create( $inputChannelName, $objectToInvokeReference, 'pick')
                     ->build(
                         InMemoryChannelResolver::createFromAssociativeArray([
                             $chanelName => $targetChannel,
@@ -47,6 +51,10 @@ class RouterBuilderTest extends MessagingTest
         $this->assertMessages($message, $targetChannel->receive());
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_routing_message_to_multiple_channels()
     {
         $targetChannel1 = QueueChannel::create();
@@ -54,7 +62,7 @@ class RouterBuilderTest extends MessagingTest
         $inputChannelName = "input";
 
         $objectToInvokeReference = "service-a";
-        $router = RouterBuilder::create('test', $inputChannelName, $objectToInvokeReference, 'pick')
+        $router = RouterBuilder::create($inputChannelName, $objectToInvokeReference, 'pick')
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     'channel1' => $targetChannel1,
@@ -78,11 +86,15 @@ class RouterBuilderTest extends MessagingTest
         $this->assertMessages($message, $targetChannel2->receive());
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_throwing_exception_if_resolution_is_required()
     {
         $inputChannelName = "input";
         $objectToInvokeReference = "service-a";
-        $router = RouterBuilder::create('test', $inputChannelName, $objectToInvokeReference, 'pick')
+        $router = RouterBuilder::create($inputChannelName, $objectToInvokeReference, 'pick')
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $inputChannelName => DirectChannel::create()
@@ -100,11 +112,15 @@ class RouterBuilderTest extends MessagingTest
         $router->handle($message);
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_if_no_resolution_required_not_throwing_exception_when_no_resolution()
     {
         $inputChannelName = "input";
         $objectToInvokeReference = "service-a";
-        $router = RouterBuilder::create('test', $inputChannelName, $objectToInvokeReference, 'pick')
+        $router = RouterBuilder::create( $inputChannelName, $objectToInvokeReference, 'pick')
             ->setResolutionRequired(false)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -123,13 +139,17 @@ class RouterBuilderTest extends MessagingTest
         $this->assertTrue(true);
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_routing_with_payload_type()
     {
         $targetChannel1 = QueueChannel::create();
         $targetChannel2 = QueueChannel::create();
         $inputChannelName = "input";
 
-        $router = RouterBuilder::createPayloadTypeRouter('test', $inputChannelName, [
+        $router = RouterBuilder::createPayloadTypeRouter($inputChannelName, [
             \stdClass::class => 'channel1',
             Order::class => 'channel2'
         ])
@@ -150,6 +170,10 @@ class RouterBuilderTest extends MessagingTest
         $this->assertMessages($message, $targetChannel1->receive());
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_routing_with_header_value()
     {
         $targetChannel1 = QueueChannel::create();
@@ -157,7 +181,7 @@ class RouterBuilderTest extends MessagingTest
         $inputChannelName = "input";
         $headerName = 'type';
 
-        $router = RouterBuilder::createHeaderValueRouter('test', $inputChannelName, $headerName, [
+        $router = RouterBuilder::createHeaderValueRouter($inputChannelName, $headerName, [
             'private' => 'channel1',
             'public' => 'channel2'
         ])

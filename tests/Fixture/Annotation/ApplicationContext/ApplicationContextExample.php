@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Fixture\Annotation\ApplicationContext;
 
@@ -33,23 +34,14 @@ class ApplicationContextExample
     }
 
     /**
-     * @return MessageChannelBuilder
-     * @MessagingComponentAnnotation()
-     */
-    public function httpOutputChannel() : MessageChannelBuilder
-    {
-        return SimpleMessageChannelBuilder::createQueueChannel(self::HTTP_OUTPUT_CHANNEL);
-    }
-
-    /**
      * @return MessageHandlerBuilder
      * @MessagingComponentAnnotation()
      */
     public function enricherHttpEntry() : MessageHandlerBuilder
     {
-        return TransformerBuilder::createHeaderEnricher("http-entry-enricher", self::HTTP_INPUT_CHANNEL, self::HTTP_OUTPUT_CHANNEL, [
+        return TransformerBuilder::createHeaderEnricher(self::HTTP_INPUT_CHANNEL, [
             "token" => "abcedfg"
-        ]);
+        ])->withOutputMessageChannel(self::HTTP_OUTPUT_CHANNEL);
     }
 
     /**
@@ -59,5 +51,13 @@ class ApplicationContextExample
     public function gateway() : GatewayBuilder
     {
         return GatewayProxyBuilder::create("some-ref", GatewayExample::class, "doSomething", self::HTTP_INPUT_CHANNEL);
+    }
+
+    /**
+     * @return \stdClass
+     */
+    public function wrongMessagingComponent() : \stdClass
+    {
+        return new \stdClass();
     }
 }

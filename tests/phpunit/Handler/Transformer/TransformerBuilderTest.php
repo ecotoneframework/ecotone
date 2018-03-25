@@ -25,13 +25,19 @@ use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
  */
 class TransformerBuilderTest extends MessagingTest
 {
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_passing_message_to_transforming_class_if_there_is_type_hint_for_it()
     {
         $payload = 'some';
         $outputChannel = QueueChannel::create();
         $outputChannelName = "output";
         $objectToInvoke = "objecToInvoke";
-        $transformer = TransformerBuilder::create("someChannel", $outputChannelName, $objectToInvoke, 'send', 'test')
+        $transformer = TransformerBuilder::create("someChannel", $objectToInvoke, 'send')
+                            ->withOutputMessageChannel($outputChannelName)
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([
                                     $outputChannelName => $outputChannel
@@ -50,13 +56,19 @@ class TransformerBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_passing_message_payload_as_default()
     {
         $payload = 'someBigPayload';
         $outputChannel = QueueChannel::create();
         $outputChannelName = 'output';
         $objectToInvokeReference = "service-a";
-        $transformer = TransformerBuilder::create("inputChannel", $outputChannelName, $objectToInvokeReference, 'withReturnValue', 'test')
+        $transformer = TransformerBuilder::create("inputChannel", $objectToInvokeReference, 'withReturnValue')
+                            ->withOutputMessageChannel($outputChannelName)
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([
                                     $outputChannelName => $outputChannel
@@ -75,13 +87,18 @@ class TransformerBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_throwing_exception_if_void_method_provided_for_transformation()
     {
         $this->expectException(InvalidArgumentException::class);
 
         $outputChannelName = "outputChannelName";
         $objectToInvokeReference = "service-a";
-        TransformerBuilder::create("inputChannel", $outputChannelName, $objectToInvokeReference, 'setName', 'test')
+        TransformerBuilder::create("inputChannel", $objectToInvokeReference, 'setName')
+                            ->withOutputMessageChannel($outputChannelName)
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([
                                     $outputChannelName => QueueChannel::create()
@@ -92,12 +109,18 @@ class TransformerBuilderTest extends MessagingTest
                             );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_not_sending_message_to_output_channel_if_transforming_method_returns_null()
     {
         $outputChannel = QueueChannel::create();
         $outputChannelName = "output";
         $objectToInvokeReference = "service-a";
-        $transformer = TransformerBuilder::create(DirectChannel::create(), $outputChannelName, $objectToInvokeReference, 'withNullReturnValue', 'test')
+        $transformer = TransformerBuilder::create(DirectChannel::create(), $objectToInvokeReference, 'withNullReturnValue')
+                        ->withOutputMessageChannel($outputChannelName)
                         ->build(
                             InMemoryChannelResolver::createFromAssociativeArray([
                                 $outputChannelName => $outputChannel
@@ -112,6 +135,11 @@ class TransformerBuilderTest extends MessagingTest
         $this->assertNull($outputChannel->receive());
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_transforming_headers_if_array_returned_by_transforming_method()
     {
         $payload = 'someBigPayload';
@@ -119,7 +147,8 @@ class TransformerBuilderTest extends MessagingTest
         $inputChannelName = "input";
         $outputChannelName = "output";
         $objectToInvokeReference = "service-a";
-        $transformer = TransformerBuilder::create($inputChannelName, $outputChannelName, $objectToInvokeReference, 'withArrayReturnValue', 'test')
+        $transformer = TransformerBuilder::create($inputChannelName, $objectToInvokeReference, 'withArrayReturnValue')
+                            ->withOutputMessageChannel($outputChannelName)
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([
                                     $inputChannelName => DirectChannel::create(),
@@ -140,6 +169,11 @@ class TransformerBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_transforming_payload_if_array_returned_and_message_payload_is_also_array()
     {
         $payload = ["some payload"];
@@ -147,7 +181,8 @@ class TransformerBuilderTest extends MessagingTest
         $inputChannelName = "input";
         $outputChannelName = "output";
         $objectToInvokeReference = "service-a";
-        $transformer = TransformerBuilder::create($inputChannelName, $outputChannelName, $objectToInvokeReference, 'withArrayTypeHintAndArrayReturnValue', 'test')
+        $transformer = TransformerBuilder::create($inputChannelName, $objectToInvokeReference, 'withArrayTypeHintAndArrayReturnValue')
+                        ->withOutputMessageChannel($outputChannelName)
                         ->build(
                             InMemoryChannelResolver::createFromAssociativeArray([
                                 $inputChannelName => DirectChannel::create(),
@@ -167,6 +202,11 @@ class TransformerBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_transforming_with_custom_method_arguments_converters()
     {
         $payload = 'someBigPayload';
@@ -175,7 +215,8 @@ class TransformerBuilderTest extends MessagingTest
         $outputChannelName = 'output';
         $inputChannelName = 'input';
         $objectToInvokeReference = "service-a";
-        $transformerBuilder = TransformerBuilder::create($inputChannelName, $outputChannelName, $objectToInvokeReference, 'withReturnValue', 'test');
+        $transformerBuilder = TransformerBuilder::create($inputChannelName, $objectToInvokeReference, 'withReturnValue')
+                                ->withOutputMessageChannel($outputChannelName);
         $transformerBuilder->withMethodParameterConverters([
             MessageToPayloadParameterConverterBuilder::create('name'),
             MessageToHeaderParameterConverterBuilder::create('surname', 'token')
@@ -205,6 +246,11 @@ class TransformerBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_transforming_with_header_enricher()
     {
         $payload = 'someBigPayload';
@@ -212,10 +258,11 @@ class TransformerBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $inputChannelName = "input";
         $outputChannelName = "output";
-        $transformer = TransformerBuilder::createHeaderEnricher('test', $inputChannelName, $outputChannelName, [
+        $transformer = TransformerBuilder::createHeaderEnricher($inputChannelName, [
                 "token" => $headerValue,
                 "correlation-id" => 1
             ])
+            ->withOutputMessageChannel($outputChannelName)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $inputChannelName => DirectChannel::create(),
@@ -238,11 +285,16 @@ class TransformerBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_transforming_with_transformer_instance_of_object()
     {
         $referenceObject = ServiceWithReturnValue::create();
 
-        $transformer = TransformerBuilder::createWithReferenceObject('test', "inputChannel",  $referenceObject, "getName")
+        $transformer = TransformerBuilder::createWithReferenceObject("inputChannel",  $referenceObject, "getName")
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createEmpty()

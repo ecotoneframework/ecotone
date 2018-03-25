@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
@@ -25,6 +26,7 @@ class GatewayReference
      * GatewayReference constructor.
      * @param string $referenceName
      * @param object $gateway
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct(string $referenceName, $gateway)
     {
@@ -36,12 +38,14 @@ class GatewayReference
 
     /**
      * @param GatewayBuilder $gatewayBuilder
+     * @param ReferenceSearchService $referenceSearchService
      * @param ChannelResolver $channelResolver
      * @return GatewayReference
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createWith(GatewayBuilder $gatewayBuilder, ChannelResolver $channelResolver) : self
+    public static function createWith(GatewayBuilder $gatewayBuilder, ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver) : self
     {
-        return new self($gatewayBuilder->getReferenceName(), $gatewayBuilder->build($channelResolver));
+        return new self($gatewayBuilder->getReferenceName(), $gatewayBuilder->build($referenceSearchService, $channelResolver));
     }
 
     /**

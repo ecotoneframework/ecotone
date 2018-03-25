@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Interface Gateway
@@ -27,8 +28,9 @@ interface GatewayBuilder
     public function getInterfaceName() : string;
 
     /**
+     * @param ReferenceSearchService $referenceSearchService
      * @param ChannelResolver $channelResolver
      * @return object
      */
-    public function build(ChannelResolver $channelResolver);
+    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver);
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
@@ -17,11 +18,6 @@ interface MessageHandlerBuilder
      * @return MessageHandler
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler;
-
-    /**
-     * @return string
-     */
-    public function getConsumerName() : string;
 
     /**
      * @return string

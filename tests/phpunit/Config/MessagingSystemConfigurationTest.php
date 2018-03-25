@@ -1,22 +1,25 @@
 <?php
+declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config;
 
 use Fixture\Channel\DumbChannelInterceptor;
 use Fixture\Configuration\DumbConfigurationObserver;
+use Fixture\Configuration\FakeModule;
 use Fixture\Handler\DumbGatewayBuilder;
 use Fixture\Handler\DumbMessageHandlerBuilder;
 use Fixture\Handler\ExceptionMessageHandler;
+use Fixture\Handler\ModuleMessageHandlerBuilder;
 use Fixture\Handler\NoReturnMessageHandler;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelAdapter;
-use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageDispatchingException;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessagingConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
@@ -32,6 +35,10 @@ use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
  */
 class MessagingSystemConfigurationTest extends MessagingTest
 {
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_run_event_driven_consumer()
     {
         $subscribableChannelName = "input";
@@ -39,74 +46,94 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messageHandler = NoReturnMessageHandler::create();
 
         $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create('test', $messageHandler, $subscribableChannelName))
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $subscribableChannelName))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create($subscribableChannelName, $subscribableChannel))
             ->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory())
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $subscribableChannel->send(MessageBuilder::withPayload("a")->build());
 
         $this->assertTrue($messageHandler->wasCalled());
     }
 
+    /**
+     * @return MessagingSystemConfiguration
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function createMessagingSystemConfiguration(): MessagingSystemConfiguration
+    {
+        return MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_running_pollable_consumer()
     {
         $messageChannelName = "pollableChannel";
         $pollableChannel = QueueChannel::create();
         $messageHandler = NoReturnMessageHandler::create();
-        $pollableName = 'test';
 
         $messagingSystem = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create($pollableName, $messageHandler, $messageChannelName))
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create($messageChannelName, $pollableChannel))
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory())
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $message = MessageBuilder::withPayload("a")->build();
         $pollableChannel->send($message);
 
-        $messagingSystem->runSeparatelyRunningConsumerBy($pollableName);
+        $this->expectException(InvalidArgumentException::class);
+
+        $messagingSystem->runSeparatelyRunningConsumerBy($messagingSystem->getListOfSeparatelyRunningConsumers()[0]);
 
         $this->assertTrue($messageHandler->wasCalled());
     }
 
-    public function test_throwing_exception_if_running_event_driven_as_pollable()
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_throwing_exception_if_running_not_existing_consumer()
     {
-        $subscribableChannelName = "input";
-        $messageHandler = NoReturnMessageHandler::create();
-
-        $messageHandlerName = 'test';
         $messagingSystem = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandlerName, $messageHandler, $subscribableChannelName))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::create($subscribableChannelName, DirectChannel::create()))
-            ->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory())
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $this->expectException(InvalidArgumentException::class);
 
-        $messagingSystem->runSeparatelyRunningConsumerBy($messageHandlerName);
+        $messagingSystem->runSeparatelyRunningConsumerBy("some");
     }
 
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_notifying_observer()
     {
         $dumbConfigurationObserver = DumbConfigurationObserver::create();
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), $dumbConfigurationObserver);
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWitObserver(InMemoryModuleMessaging::createEmpty(),$dumbConfigurationObserver);
 
         $messagingSystemConfiguration
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create('some', NoReturnMessageHandler::create(), 'queue'))
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create(NoReturnMessageHandler::create(), 'queue'))
             ->registerGatewayBuilder(DumbGatewayBuilder::create())
             ->registerMessageChannel(SimpleMessageChannelBuilder::create("queue", QueueChannel::create()))
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory())
             ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create("queue", "interceptor"))
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(["interceptor" => new DumbChannelInterceptor()]));
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(["interceptor" => new DumbChannelInterceptor()]), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $this->assertTrue($dumbConfigurationObserver->wasNotifiedCorrectly(), "Configuration observer was not notified correctly");
         $this->assertEquals([NoReturnMessageHandler::class, "interceptor"], $dumbConfigurationObserver->getRequiredReferences());
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_intercepting_message_flow_before_sending()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
 
         $messageChannelName = "requestChannel";
         $referenceName = "ref-name";
@@ -117,7 +144,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelInterceptor = $this->createMock(ChannelInterceptor::class);
         $messagingSystem = $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
             $referenceName => $channelInterceptor
-        ]));
+        ]), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $message = MessageBuilder::withPayload("testMessage")->build();
         /** @var QueueChannel|MessageChannelAdapter $queueChannel */
@@ -136,9 +163,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_ordering_interception_before_sending()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
         $messageChannelName = "requestChannel";
         $referenceNameSecondToCall = "interceptor-1";
@@ -153,7 +185,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem = $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
             $referenceNameSecondToCall => $channelInterceptorSecondToCall,
             $referenceNameFirstToCall => $channelInterceptorFirstToCall
-        ]));
+        ]), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         /** @var QueueChannel|MessageChannelAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
@@ -177,9 +209,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_intercepting_by_stopping_message_flow()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
 
         $messageChannelName = "requestChannel";
         $referenceName = "ref-name";
@@ -190,7 +227,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelInterceptor = $this->createMock(ChannelInterceptor::class);
         $messagingSystem = $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
             $referenceName => $channelInterceptor
-        ]));
+        ]), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $message = MessageBuilder::withPayload("testMessage")->build();
         /** @var QueueChannel|MessageChannelAdapter $queueChannel */
@@ -208,9 +245,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_intercepting_after_sending_to_inform_it_was_successful()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
 
         $messageChannelName = "requestChannel";
         $referenceName = "ref-name";
@@ -221,7 +263,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelInterceptor = $this->createMock(ChannelInterceptor::class);
         $messagingSystem = $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
             $referenceName => $channelInterceptor
-        ]));
+        ]), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $message = MessageBuilder::withPayload("testMessage")->build();
         /** @var QueueChannel|MessageChannelAdapter $queueChannel */
@@ -239,22 +281,27 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $queueChannel->send($message);
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_intercepting_after_sending_to_inform_about_failure_handling_after_exception_occurred()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
         $messageChannelName = "requestChannel";
         $referenceName = "ref-name";
         $messagingSystemConfiguration
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel($messageChannelName))
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create("some", ExceptionMessageHandler::create(), $messageChannelName))
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create(ExceptionMessageHandler::create(), $messageChannelName))
             ->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory())
             ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create($messageChannelName, $referenceName));
 
         $channelInterceptor = $this->createMock(ChannelInterceptor::class);
         $messagingSystem = $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
             $referenceName => $channelInterceptor
-        ]));
+        ]), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $message = MessageBuilder::withPayload("testMessage")->build();
         /** @var QueueChannel|MessageChannelAdapter $queueChannel */
@@ -274,9 +321,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $queueChannel->send($message);
     }
 
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_intercepting_with_multiple_channels()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
 
         $messageChannelName1 = "requestChannel1";
         $messageChannelName2 = "requestChannel2";
@@ -293,7 +345,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem = $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
             $referenceName1 => $channelInterceptor1,
             $referenceName2 => $channelInterceptor2
-        ]));
+        ]), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $message = MessageBuilder::withPayload("testMessage")->build();
         /** @var QueueChannel|MessageChannelAdapter $queueChannel */
@@ -313,10 +365,19 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @return MessagingSystemConfiguration
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function createMessagingSystemConfiguration(): MessagingSystemConfiguration
+    public function test_register_message_handler_with_fake_module()
     {
-        return MessagingSystemConfiguration::prepare(InMemoryModuleMessagingConfiguration::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $fakeModule = FakeModule::create();
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createWith([$fakeModule], []));
+
+        $messageHandlerBuilder = ModuleMessageHandlerBuilder::create("fake", "fake");
+        $messagingSystemConfiguration->registerMessageHandler($messageHandlerBuilder);
+        $messagingSystemConfiguration->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory());
+        $messagingSystemConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("fake"));
+        $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty());
+
+        $this->assertEquals($fakeModule, $messageHandlerBuilder->getModule());
     }
 }

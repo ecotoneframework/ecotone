@@ -26,10 +26,6 @@ class EnricherBuilder implements MessageHandlerBuilder
      * @var string
      */
     private $requestChannelName;
-    /**
-     * @var string
-     */
-    private $consumerName;
 
     /**
      * EnricherBuilder constructor.
@@ -52,26 +48,6 @@ class EnricherBuilder implements MessageHandlerBuilder
     public static function create(string $inputChannelName, string $requestChannelName) : self
     {
         return new self($inputChannelName, $requestChannelName);
-    }
-
-    /**
-     * @param string $consumerName
-     *
-     * @return EnricherBuilder
-     */
-    public function setConsumerName(string $consumerName) : self
-    {
-        $this->consumerName = $consumerName;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getConsumerName(): string
-    {
-        return $this->consumerName;
     }
 
     /**
@@ -98,7 +74,7 @@ class EnricherBuilder implements MessageHandlerBuilder
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         $requestGateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichReferenceService::class, "execute", $this->requestChannelName)
-                            ->build($channelResolver);
+                            ->build($referenceSearchService, $channelResolver);
 
         $messageProcessor = MethodInvoker::createWith($requestGateway, "execute", []);
 

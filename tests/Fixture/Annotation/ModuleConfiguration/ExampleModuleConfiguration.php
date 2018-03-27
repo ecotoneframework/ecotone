@@ -5,6 +5,7 @@ namespace Fixture\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariable;
 use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class ExampleModuleConfiguration
@@ -57,7 +58,7 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
     /**
      * @inheritDoc
      */
-    public function registerWithin(\SimplyCodedSoftware\IntegrationMessaging\Config\Configuration $configuration, array $moduleExtensions, \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
+    public function registerWithin(\SimplyCodedSoftware\IntegrationMessaging\Config\Configuration $configuration, array $moduleExtensions, \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
         // TODO: Implement registerWithin() method.
     }

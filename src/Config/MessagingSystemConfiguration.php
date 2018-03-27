@@ -169,7 +169,8 @@ final class MessagingSystemConfiguration implements Configuration
             $module->registerWithin(
                 $this,
                 $this->moduleExtensions[$module->getName()],
-                $configurationVariableRetrievingService
+                $configurationVariableRetrievingService,
+                $externalReferenceSearchService
             );
         }
 

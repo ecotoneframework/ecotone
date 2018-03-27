@@ -10,6 +10,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\SplitterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\SplitterModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\TransformerModule;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter\SplitterBuilder;
 
@@ -22,6 +23,7 @@ class SplitterModuleTest extends AnnotationConfigurationTest
 {
     /**
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_transformer_builder()
     {
@@ -43,7 +45,7 @@ class SplitterModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty());
+        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
 
         $messageHandlerBuilder = SplitterBuilder::create(
             "inputChannel", SplitterExample::class,  "split"

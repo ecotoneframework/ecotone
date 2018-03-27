@@ -14,6 +14,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\ApplicationContextModule;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 
 /**
@@ -70,6 +71,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
      * @param string $methodName
      * @param Configuration $expectedConfiguration
      * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function compareWithConfiguredForMethod(string $methodName, Configuration $expectedConfiguration): void
     {
@@ -77,7 +79,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
 
         $configuration = $this->createMessagingSystemConfiguration();
 
-        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty());
+        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -88,6 +90,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
     /**
      * @param string $methodName
      * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function checkForWrongConfiguration(string $methodName) : void
     {
@@ -95,7 +98,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
 
         $annotationConfiguration = $this->createAnnotationConfiguration($methodName);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty());
+        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
     }
 
     /**

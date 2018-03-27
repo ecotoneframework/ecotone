@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Interface ExternalConfiguration
@@ -33,10 +34,11 @@ interface Module
      * @param Configuration $configuration
      * @param ModuleExtension[] $moduleExtensions
      * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
+     * @param ReferenceSearchService $referenceSearchService
      *
      * @return void
      */
-    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void;
+    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void;
 
     /**
      * Runs after messaging system was built from configuration

@@ -54,7 +54,7 @@ class FakeModule implements Module
     /**
      * @inheritDoc
      */
-    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
+    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
         $this->moduleExtensions = $moduleExtensions;
     }

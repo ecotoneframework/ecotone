@@ -58,7 +58,7 @@ class BasicMessagingConfiguration implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): void
+    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
         $configuration->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory());
         $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory());

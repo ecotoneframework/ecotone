@@ -9,6 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\Messa
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\GatewayModule;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 
 /**
  * Class AnnotationTransformerConfigurationTest
@@ -19,6 +20,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
 {
     /**
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_transformer_builder()
     {
@@ -41,7 +43,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
         );
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->registerWithin($messagingSystemConfiguration, [], InMemoryConfigurationVariableRetrievingService::createEmpty());
+        $annotationGatewayConfiguration->registerWithin($messagingSystemConfiguration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

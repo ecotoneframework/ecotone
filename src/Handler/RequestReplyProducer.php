@@ -66,6 +66,7 @@ class RequestReplyProducer
      * @param ChannelResolver $channelResolver
      * @param bool $isReplyRequired
      * @return RequestReplyProducer
+     * @throws DestinationResolutionException
      */
     public static function createRequestAndReply(string $outputChannelName, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
     {
@@ -75,10 +76,22 @@ class RequestReplyProducer
     }
 
     /**
+     * @param MessageProcessor $messageProcessor
+     * @param ChannelResolver $channelResolver
+     * @param bool $isReplyRequired
+     * @return RequestReplyProducer
+     */
+    public static function createRequestAndReplyFromHeaders(MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
+    {
+        return new self(null, $messageProcessor, $channelResolver, $isReplyRequired, self::REQUEST_REPLY_METHOD);
+    }
+
+    /**
      * @param string|null $outputChannelName
      * @param MessageProcessor $messageProcessor
      * @param ChannelResolver $channelResolver
      * @return RequestReplyProducer
+     * @throws DestinationResolutionException
      */
     public static function createRequestAndSplit(?string $outputChannelName, MessageProcessor $messageProcessor, ChannelResolver $channelResolver) : self
     {

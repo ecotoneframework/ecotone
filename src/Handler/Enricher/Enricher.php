@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
@@ -19,18 +20,18 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 class Enricher implements MessageHandler
 {
     /**
-     * @var PropertySetter[]
+     * @var RequestReplyProducer
      */
-    private $propertySetters;
+    private $replyProducer;
 
     /**
      * Enricher constructor.
      *
-     * @param PropertySetter[] $propertySetters
+     * @param RequestReplyProducer $replyProducer
      */
-    public function __construct(array $propertySetters)
+    public function __construct(RequestReplyProducer $replyProducer)
     {
-        $this->propertySetters = $propertySetters;
+        $this->replyProducer = $replyProducer;
     }
 
     /**
@@ -38,10 +39,6 @@ class Enricher implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $newPayload = $message->getPayload();
-
-        foreach ($this->propertySetters as $propertySetter) {
-
-        }
+        $this->replyProducer->handleWithReply($message);
     }
 }

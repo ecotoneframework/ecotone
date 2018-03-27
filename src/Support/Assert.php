@@ -36,6 +36,19 @@ class Assert
     }
 
     /**
+     * @param $valueToCheck
+     * @param string $exceptionMessage
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function notNull($valueToCheck, string $exceptionMessage) : void
+    {
+        if (is_null($valueToCheck)) {
+            throw InvalidArgumentException::create($exceptionMessage);
+        }
+    }
+
+    /**
      * @param array $arrayToCheck
      * @param string $className
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException

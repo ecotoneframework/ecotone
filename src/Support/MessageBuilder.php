@@ -150,9 +150,13 @@ final class MessageBuilder
         return new self($message->getPayload(), HeaderAccessor::createFrom($message->getHeaders()));
     }
 
+    /**
+     * @param $payload
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     private function initialize($payload) : void
     {
-        Assert::notNullAndEmpty($payload, "Message payload can't be empty");
+        Assert::notNull($payload, "Message payload can't be empty");
 
         $this->headerAccessor->setHeaderIfAbsent(MessageHeaders::ERROR_CHANNEL, "errorChannel");
     }

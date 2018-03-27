@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
 
@@ -9,13 +10,18 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface PropertySetter
+interface Setter
 {
     /**
-     * @param Message $message
-     * @param Message $replyMessage
+     * @param Message $enrichMessage
+     * @param Message|null $replyMessage
      *
      * @return mixed new payload
      */
-    public function evaluate(Message $message, Message $replyMessage);
+    public function evaluate(Message $enrichMessage, ?Message $replyMessage);
+
+    /**
+     * @return bool
+     */
+    public function isPayloadSetter() : bool;
 }

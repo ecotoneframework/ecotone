@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertySetter;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertySetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
@@ -11,7 +12,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class StaticPropertySetter implements PropertySetter
+class StaticSetter implements Setter
 {
     /**
      * @var string
@@ -48,9 +49,9 @@ class StaticPropertySetter implements PropertySetter
     /**
      * @inheritDoc
      */
-    public function evaluate(Message $message, Message $replyMessage)
+    public function evaluate(Message $enrichMessage, ?Message $replyMessage)
     {
-        $payload = $message->getPayload();
+        $payload = $enrichMessage->getPayload();
 
         $payload[$this->name] = $this->value;
 

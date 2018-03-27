@@ -118,4 +118,12 @@ class MessageBuilderTest extends MessagingTest
             $messageToCompare->getHeaders()->get(MessageHeaders::MESSAGE_ID)
         );
     }
+
+    public function test_creating_with_empty_array_as_payload()
+    {
+        $message = MessageBuilder::withPayload([])
+                    ->build();
+
+        $this->assertEquals([], $message->getPayload());
+    }
 }

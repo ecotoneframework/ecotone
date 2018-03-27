@@ -38,6 +38,7 @@ final class MethodInvoker implements MessageProcessor
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array|MessageToParameterConverter[] $methodParameterConverters
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters)
     {
@@ -51,6 +52,7 @@ final class MethodInvoker implements MessageProcessor
      * @param string $objectMethodName
      * @param array $methodArguments
      * @return self
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodArguments) : self
     {
@@ -69,6 +71,8 @@ final class MethodInvoker implements MessageProcessor
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array|MessageToParameterConverter[] $methodParameterConverters
+     * @throws InvalidArgumentException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function init($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters) : void

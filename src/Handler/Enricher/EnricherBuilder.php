@@ -10,7 +10,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class PayloadEnricherBuilder
@@ -28,31 +30,58 @@ class EnricherBuilder implements MessageHandlerBuilder
      */
     private $requestChannelName;
     /**
-     * @var array|PropertySetterBuilder[]
+     * @var SetterBuilder[]
      */
     private $propertySetterBuilders;
+    /**
+     * @var HeaderSetterBuilder[]
+     */
+    private $headerSetterBuilders;
 
     /**
      * EnricherBuilder constructor.
      *
      * @param string $inputChannelName
-     * @param PropertySetterBuilder[]  $propertySetterBuilders
      */
-    private function __construct(string $inputChannelName, array $propertySetterBuilders)
+    private function __construct(string $inputChannelName)
     {
         $this->inputChannelName = $inputChannelName;
-        $this->propertySetterBuilders = $propertySetterBuilders;
     }
 
     /**
      * @param string $inputChannelName
-     * @param PropertySetterBuilder[]  $propertySetterBuilders
      *
      * @return EnricherBuilder
      */
-    public static function create(string $inputChannelName, array $propertySetterBuilders) : self
+    public static function create(string $inputChannelName) : self
     {
-        return new self($inputChannelName, $propertySetterBuilders);
+        return new self($inputChannelName);
+    }
+
+    /**
+     * @param Setter[] $propertySetterBuilders
+     * @return EnricherBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function withPropertySetters(array $propertySetterBuilders) : self
+    {
+        Assert::allInstanceOfType($propertySetterBuilders, SetterBuilder::class);
+        $this->propertySetterBuilders = $propertySetterBuilders;
+
+        return $this;
+    }
+
+    /**
+     * @param array $headerSetterBuilders
+     * @return EnricherBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function withHeaderSetters(array $headerSetterBuilders) : self
+    {
+        Assert::allInstanceOfType($headerSetterBuilders, HeaderSetterBuilder::class);
+        $this->headerSetterBuilders = $headerSetterBuilders;
+
+        return $this;
     }
 
     /**
@@ -76,15 +105,22 @@ class EnricherBuilder implements MessageHandlerBuilder
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        if (empty($this->propertySetterBuilders)) {
+        if (empty($this->propertySetterBuilders) && empty($this->headerSetterBuilders)) {
             throw ConfigurationException::create("Can't configure enricher with no property setters");
         }
 
-//        $requestGateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichReferenceService::class, "execute", $this->requestChannelName)
-//                            ->build($referenceSearchService, $channelResolver);
+        $propertySetters = [];
+        foreach ($this->propertySetterBuilders as $propertySetterBuilder) {
+            $propertySetters[] = $propertySetterBuilder->build($referenceSearchService);
+        }
 
-//        $messageProcessor = MethodInvoker::createWith($requestGateway, "execute", []);
-
-        return Enricher::create($messageProcessor, $channelResolver, $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE));
+        $internalEnrichingService = new InternalEnrichingService($propertySetters);
+        return new Enricher(
+            RequestReplyProducer::createRequestAndReplyFromHeaders(
+                MethodInvoker::createWith($internalEnrichingService, "enrich", []),
+                $channelResolver,
+                false
+            )
+        );
     }
 }

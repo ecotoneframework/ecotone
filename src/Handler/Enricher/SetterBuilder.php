@@ -9,12 +9,12 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface PropertySetterBuilder
+interface SetterBuilder
 {
     /**
      * @param ReferenceSearchService $referenceSearchService
      *
-     * @return PropertySetter
+     * @return Setter
      */
-    public function build(ReferenceSearchService $referenceSearchService) : PropertySetter;
+    public function build(ReferenceSearchService $referenceSearchService) : Setter;
 }

@@ -45,7 +45,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     {
         $classes = self::$annotationRegistrationService->getAllClassesWithAnnotation(ApplicationContextAnnotation::class);
 
-        $this->assertCount(2, $classes, "File system class locator didn't find application context");
+        $this->assertNotEmpty($classes, "File system class locator didn't find application context");
     }
 
     public function test_retrieving_class_annotations()

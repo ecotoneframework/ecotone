@@ -74,14 +74,6 @@ class FakeModule implements Module
     /**
      * @inheritDoc
      */
-    public function configure(ReferenceSearchService $referenceSearchService): void
-    {
-        return;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem): void
     {
         return;

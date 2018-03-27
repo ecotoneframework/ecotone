@@ -1,16 +1,18 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
+namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariable;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\NullableMessageChannel;
@@ -28,7 +30,7 @@ class BasicMessagingConfiguration implements AnnotationModule
      */
     public function getName(): string
     {
-        return "basic-messaging-configuration";
+        return "basicMessagingConfiguration";
     }
 
     /**
@@ -44,7 +46,9 @@ class BasicMessagingConfiguration implements AnnotationModule
      */
     public function getRequiredReferences(): array
     {
-        return [];
+        return [
+            RequiredReference::create(ExpressionEvaluationService::REFERENCE, ExpressionEvaluationService::class, "Expression language evaluation service")
+        ];
     }
 
     /**
@@ -64,14 +68,6 @@ class BasicMessagingConfiguration implements AnnotationModule
         $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory());
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function configure(ReferenceSearchService $referenceSearchService): void
-    {
-        return;
     }
 
     /**

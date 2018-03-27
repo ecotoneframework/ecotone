@@ -2,17 +2,14 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\ExpressionEvaluationService;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
-use Symfony\Component\ExpressionLanguage\SyntaxError;
-use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * Class SymfonyExpressionEvaluationAdapter
  * @package Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService
+class SymfonyExpressionEvaluationAdapter implements \SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService
 {
     /**
      * @var ExpressionLanguage

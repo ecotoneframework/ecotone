@@ -6,7 +6,7 @@ use Fixture\Dto\WithCustomer\Customer;
 use Fixture\Handler\DumbMessageHandlerBuilder;
 use Fixture\Handler\NoReturnMessageHandler;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\ExpressionEvaluationService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToExpressionEvaluationParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;

@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\ExpressionEvaluationService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;

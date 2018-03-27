@@ -1,6 +1,6 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
 /**
  * Interface ExpressionEvaluationService

@@ -22,6 +22,14 @@ class NullObserver implements ConfigurationObserver
     /**
      * @inheritDoc
      */
+    public function notifyGatewayWasBuilt(GatewayReference $gatewayReference): void
+    {
+        return;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function notifyGatewayBuilderWasRegistered(string $referenceName, string $gatewayType, string $interfaceName): void
     {
         return;

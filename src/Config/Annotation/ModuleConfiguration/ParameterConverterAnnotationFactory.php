@@ -51,7 +51,7 @@ class ParameterConverterAnnotationFactory
 
         foreach ($parameterConverterAnnotations as $parameterConverterAnnotation) {
             if ($parameterConverterAnnotation instanceof MessageToHeaderParameterAnnotation) {
-                $parameterConverters[] = MessageToHeaderParameterConverterBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->headerName);
+                $parameterConverters[] = MessageToHeaderParameterConverterBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->headerName, $parameterConverterAnnotation->isRequired);
             } else if ($parameterConverterAnnotation instanceof MessageToPayloadParameterAnnotation) {
                 $parameterConverters[] = MessageToPayloadParameterConverterBuilder::create($parameterConverterAnnotation->parameterName);
             } else if ($parameterConverterAnnotation instanceof MessageParameterAnnotation) {

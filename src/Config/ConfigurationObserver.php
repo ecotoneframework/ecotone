@@ -24,6 +24,11 @@ interface ConfigurationObserver
     public function notifyMessageChannelWasRegistered(string $messageChannelName, string $channelType) : void;
 
     /**
+     * @param GatewayReference $gatewayReference
+     */
+    public function notifyGatewayWasBuilt(GatewayReference $gatewayReference) : void;
+
+    /**
      * @param ConfiguredMessagingSystem $configuredMessagingSystem
      */
     public function notifyConfigurationWasFinished(ConfiguredMessagingSystem $configuredMessagingSystem) : void;

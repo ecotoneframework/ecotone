@@ -21,6 +21,10 @@ class MessageToHeaderParameterConverterBuilder implements MessageToParameterConv
      * @var string
      */
     private $headerName;
+    /**
+     * @var bool
+     */
+    private $isRequired = true;
 
     /**
      * HeaderParameterConverterBuilder constructor.
@@ -33,9 +37,27 @@ class MessageToHeaderParameterConverterBuilder implements MessageToParameterConv
         $this->headerName = $headerName;
     }
 
+    /**
+     * @param string $parameterName
+     * @param string $headerName
+     *
+     * @return MessageToHeaderParameterConverterBuilder
+     */
     public static function create(string $parameterName, string $headerName) : self
     {
         return new self($parameterName, $headerName);
+    }
+
+    /**
+     * @param bool $isRequired
+     *
+     * @return MessageToHeaderParameterConverterBuilder
+     */
+    public function setRequired(bool $isRequired) : self
+    {
+        $this->isRequired = $isRequired;
+
+        return $this;
     }
 
     /**
@@ -43,6 +65,6 @@ class MessageToHeaderParameterConverterBuilder implements MessageToParameterConv
      */
     public function build(ReferenceSearchService $referenceSearchService): MessageToParameterConverter
     {
-        return MessageToHeaderParameterConverter::create($this->parameterName, $this->headerName);
+        return MessageToHeaderParameterConverter::create($this->parameterName, $this->headerName, $this->isRequired);
     }
 }

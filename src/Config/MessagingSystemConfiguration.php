@@ -176,15 +176,18 @@ final class MessagingSystemConfiguration implements Configuration
 
         $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, $this->modules);
         $channelResolver = $this->createChannelResolver($referenceSearchService);
+        $gateways = [];
+        foreach ($this->gatewayBuilders as $gatewayBuilder) {
+            $gatewayReference = GatewayReference::createWith($gatewayBuilder, $referenceSearchService, $channelResolver);
+            $gateways[]       = $gatewayReference;
+            $this->configurationObserver->notifyGatewayWasBuilt($gatewayReference);
+        }
+
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories);
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder);
-        }
-        $gateways = [];
-        foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $gateways[] = GatewayReference::createWith($gatewayBuilder, $referenceSearchService, $channelResolver);
         }
 
         $messagingSystem = MessagingSystem::create($consumers, $gateways, $channelResolver);

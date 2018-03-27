@@ -20,26 +20,35 @@ class MessageToHeaderParameterConverter implements MessageToParameterConverter
      * @var string
      */
     private $parameterName;
+    /**
+     * @var bool
+     */
+    private $isRequired;
 
     /**
      * HeaderArgument constructor.
+     *
      * @param string $parameterName
      * @param string $headerName
+     * @param bool   $isRequired
      */
-    private function __construct(string $parameterName, string $headerName)
+    private function __construct(string $parameterName, string $headerName, bool $isRequired)
     {
         $this->parameterName = $parameterName;
         $this->headerName = $headerName;
+        $this->isRequired = $isRequired;
     }
 
     /**
      * @param string $parameterName
      * @param string $headerName
+     * @param bool   $isRequired
+     *
      * @return MessageToHeaderParameterConverter
      */
-    public static function create(string $parameterName, string $headerName) : self
+    public static function create(string $parameterName, string $headerName, bool $isRequired) : self
     {
-        return new self($parameterName, $headerName);
+        return new self($parameterName, $headerName, $isRequired);
     }
 
     /**
@@ -47,6 +56,10 @@ class MessageToHeaderParameterConverter implements MessageToParameterConverter
      */
     public function getArgumentFrom(Message $message)
     {
+        if (!$this->isRequired && !$message->getHeaders()->containsKey($this->headerName)) {
+            return null;
+        }
+
         return $message->getHeaders()->get($this->headerName);
     }
 

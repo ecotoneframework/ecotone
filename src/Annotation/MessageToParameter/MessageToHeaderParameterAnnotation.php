@@ -24,4 +24,8 @@ class MessageToHeaderParameterAnnotation
      * @Required()
      */
     public $headerName;
+    /**
+     * @var bool
+     */
+    public $isRequired = true;
 }

@@ -17,21 +17,22 @@ class InternalEnrichingService
     /**
      * @var array|Setter[]
      */
-    private $propertySetters;
+    private $setters;
     /**
-     * @var array|HeaderSetter[]
+     * @var EnrichGateway|null
      */
-    private $headerSetters;
+    private $enrichGateway;
 
     /**
      * InternalEnrichingService constructor.
-     * @param Setter[] $propertySetters
-     * @param HeaderSetter[] $headerSetters
+     *
+     * @param EnrichGateway|null $enrichGateway
+     * @param Setter[]      $setters
      */
-    public function __construct(array $propertySetters, array $headerSetters)
+    public function __construct(?EnrichGateway $enrichGateway, array $setters)
     {
-        $this->propertySetters = $propertySetters;
-        $this->headerSetters = $headerSetters;
+        $this->enrichGateway = $enrichGateway;
+        $this->setters = $setters;
     }
 
     /**
@@ -42,10 +43,24 @@ class InternalEnrichingService
     {
         $enrichedMessage = MessageBuilder::fromMessage($message)
                             ->build();
-        foreach ($this->propertySetters as $propertySetter) {
-            $enrichedMessage = MessageBuilder::fromMessage($enrichedMessage)
-                                    ->setPayload($propertySetter->evaluate($enrichedMessage, null))
-                                    ->build();
+        $replyMessage = null;
+        if ($this->enrichGateway) {
+            $replyMessage = $this->enrichGateway->execute($enrichedMessage);
+        }
+
+        foreach ($this->setters as $setter) {
+            $settedMessage = MessageBuilder::fromMessage($enrichedMessage);
+            if ($setter->isPayloadSetter()) {
+                $settedMessage = $settedMessage
+                    ->setPayload($setter->evaluate($enrichedMessage, $replyMessage));
+            }else {
+                foreach ($setter->evaluate($enrichedMessage, $replyMessage) as $headerName => $headerValue) {
+                    $settedMessage = $settedMessage
+                        ->setHeader($headerName, $headerValue);
+                }
+            }
+
+            $enrichedMessage = $settedMessage->build();
         }
 
         return $enrichedMessage;

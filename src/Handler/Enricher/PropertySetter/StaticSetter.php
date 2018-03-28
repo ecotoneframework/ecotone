@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertySetter;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
@@ -15,6 +16,10 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
 class StaticSetter implements Setter
 {
     /**
+     * @var DataSetter
+     */
+    private $payloadPropertySetter;
+    /**
      * @var string
      */
     private $name;
@@ -26,11 +31,13 @@ class StaticSetter implements Setter
     /**
      * StaticPropertySetterBuilder constructor.
      *
-     * @param string $name
-     * @param string $value
+     * @param DataSetter $payloadPropertySetter
+     * @param string     $name
+     * @param string     $value
      */
-    public function __construct(string $name, string $value)
+    public function __construct(DataSetter $payloadPropertySetter, string $name, string $value)
     {
+        $this->payloadPropertySetter = $payloadPropertySetter;
         $this->name  = $name;
         $this->value = $value;
     }
@@ -43,7 +50,7 @@ class StaticSetter implements Setter
      */
     public static function createWith(string $name, string $value) : self
     {
-        return new self($name, $value);
+        return new self(DataSetter::create(), $name, $value);
     }
 
     /**
@@ -51,10 +58,14 @@ class StaticSetter implements Setter
      */
     public function evaluate(Message $enrichMessage, ?Message $replyMessage)
     {
-        $payload = $enrichMessage->getPayload();
+        return $this->payloadPropertySetter->enrichDataWith($this->name, $enrichMessage->getPayload(), $this->value);
+    }
 
-        $payload[$this->name] = $this->value;
-
-        return $payload;
+    /**
+     * @inheritDoc
+     */
+    public function isPayloadSetter(): bool
+    {
+        return true;
     }
 }

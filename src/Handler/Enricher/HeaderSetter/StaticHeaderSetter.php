@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
@@ -12,7 +13,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class StaticHeaderSetter implements HeaderSetter
+class StaticHeaderSetter implements Setter
 {
     /**
      * @var string
@@ -47,10 +48,18 @@ class StaticHeaderSetter implements HeaderSetter
     /**
      * @inheritDoc
      */
-    public function evaluate(Message $enrichedMessage, ?Message $replyMessage): array
+    public function evaluate(Message $enrichedMessage, ?Message $replyMessage)
     {
         return [
             $this->name => $this->value
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isPayloadSetter(): bool
+    {
+        return false;
     }
 }

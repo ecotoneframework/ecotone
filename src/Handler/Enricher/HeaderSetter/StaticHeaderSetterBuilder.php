@@ -5,6 +5,8 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetter
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\SetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
@@ -12,7 +14,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class StaticHeaderSetterBuilder implements HeaderSetterBuilder
+class StaticHeaderSetterBuilder implements SetterBuilder
 {
     /**
      * @var string
@@ -47,7 +49,7 @@ class StaticHeaderSetterBuilder implements HeaderSetterBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): HeaderSetter
+    public function build(ReferenceSearchService $referenceSearchService): Setter
     {
         return StaticHeaderSetter::create($this->name, $this->value);
     }

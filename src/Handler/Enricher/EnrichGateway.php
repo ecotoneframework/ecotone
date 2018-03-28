@@ -10,7 +10,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-interface EnrichReferenceService
+interface EnrichGateway
 {
     /**
      * @param Message $message

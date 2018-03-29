@@ -1,8 +1,7 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
-
-use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class PayloadPropertySetter
@@ -24,27 +23,41 @@ class DataSetter
     }
 
     /**
-     * @param string  $propertyName
+     * @param string propertyNamePath
      * @param mixed $dataToEnrich
-     * @param mixed   $value
+     * @param mixed $value
      *
      * @return mixed enriched data
      * @throws EnrichException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function enrichDataWith(string $propertyName, $dataToEnrich, $value)
+    public function enrichDataWith(string $propertyNamePath, $dataToEnrich, $value)
     {
-        preg_match("#\[([a-zA-Z0-9]*)\]#", $propertyName, $matches);
-        if ($this->hasAnyMatches($matches)) {
-            $propertyName = $matches[1];
-            $accessPropertyName = $matches[0];
-            if ($accessPropertyName !== $propertyName) {
-                $dataToEnrich = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyName, $accessPropertyName), $dataToEnrich[$propertyName], $value);
+        $propertyName = $propertyNamePath;
+        /** [0][data][worker] */
+        preg_match("#^\[([a-zA-Z0-9]*)\]#", $propertyNamePath, $startingWithPath);
+        if ($this->hasAnyMatches($startingWithPath)) {
+            $propertyName = $startingWithPath[1];
+            $accessPropertyName = $startingWithPath[0];
+            if ($accessPropertyName !== $propertyNamePath) {
+                $value = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $accessPropertyName), $dataToEnrich[$propertyName], $value);
+            }
+        }else {
+            /** worker[name] */
+            preg_match('#\b([^\[\]]*)\[[a-zA-Z0-9]*\]#', $propertyNamePath, $startingWithPropertyName);
+
+            if ($this->hasAnyMatches($startingWithPropertyName)) {
+                $propertyName = $startingWithPropertyName[1];
+
+                if ($propertyName !== $propertyNamePath) {
+                    $value = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $propertyName), $dataToEnrich[$propertyName], $value);
+                }
             }
         }
 
         if (is_array($dataToEnrich)) {
-            $newPayload                = $dataToEnrich;
+            $newPayload = $dataToEnrich;
             $newPayload[$propertyName] = $value;
 
             return $newPayload;
@@ -86,12 +99,12 @@ class DataSetter
 
     /**
      * @param string $propertyName
-     * @param        $accessPropertyName
+     * @param string $accessPropertyName
      *
      * @return bool|string
      */
-    private function cutOutCurrentAccessPropertyName(string $propertyName, $accessPropertyName)
+    private function cutOutCurrentAccessPropertyName(string $propertyName, string $accessPropertyName)
     {
-        return substr($propertyName, count($accessPropertyName) - 1, count($propertyName));
+        return substr($propertyName, strlen($accessPropertyName), strlen($propertyName));
     }
 }

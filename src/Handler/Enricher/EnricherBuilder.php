@@ -36,8 +36,9 @@ class EnricherBuilder implements MessageHandlerBuilder
     /**
      * EnricherBuilder constructor.
      *
-     * @param string          $inputChannelName
+     * @param string $inputChannelName
      * @param SetterBuilder[] $setters
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct(string $inputChannelName, array $setters)
     {
@@ -48,10 +49,11 @@ class EnricherBuilder implements MessageHandlerBuilder
     }
 
     /**
-     * @param string   $inputChannelName
+     * @param string $inputChannelName
      * @param Setter[] $setterBuilders
      *
      * @return EnricherBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function create(string $inputChannelName, array $setterBuilders): self
     {

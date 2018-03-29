@@ -230,6 +230,81 @@ class EnricherBuilderTest extends MessagingTest
         );
     }
 
+    public function test_enriching_multidimensional_array()
+    {
+        $outputChannel = QueueChannel::create();
+
+        $workerData = [
+            "name" => "johny",
+            "surname" => "franco"
+        ];
+        $this->createEnricherAndHandle(
+            MessageBuilder::withPayload(
+                [
+                    [
+                        "data" => [
+                            "workerIdentifier" => ["workerId" => 123]
+                        ]
+                    ]
+                ]
+            ),
+            $outputChannel,
+            [
+                StaticSetterBuilder::createWith("[0][data][worker]", $workerData)
+            ]
+        );
+
+        $this->assertEquals(
+            [
+                [
+                    "data" => [
+                        "workerIdentifier" => ["workerId" => 123],
+                        "worker" => $workerData
+                    ]
+                ]
+            ],
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_enriching_array_by_array_path_beginning_with_property_name()
+    {
+        $outputChannel = QueueChannel::create();
+
+        $workerName = "johny";
+        $this->createEnricherAndHandle(
+            MessageBuilder::withPayload(["worker" => []]),
+            $outputChannel,
+            [
+                StaticSetterBuilder::createWith("worker[name]", $workerName)
+            ]
+        );
+
+        $this->assertEquals(
+            ["worker" => ["name" => $workerName]],
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_enriching_multiple_values_at_once()
+    {
+        $outputChannel = QueueChannel::create();
+
+        $workerName = "johny";
+        $this->createEnricherAndHandle(
+            MessageBuilder::withPayload(["worker" => []]),
+            $outputChannel,
+            [
+                StaticSetterBuilder::createWith("[*]", $workerName)
+            ]
+        );
+
+        $this->assertEquals(
+            ["worker" => ["name" => $workerName]],
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
 //    public function test_enriching_headers_when_header_is_object()
 //    {
 //        $outputChannel = QueueChannel::create();
@@ -253,10 +328,13 @@ class EnricherBuilderTest extends MessagingTest
 //    }
 
     /**
-     * @param $inputMessage
-     * @param $outputChannel
+     * @param MessageBuilder $inputMessage
+     * @param QueueChannel $outputChannel
      * @param $replyPayload
-     * @param $setterBuilders
+     * @param array $setterBuilders
+     * @throws ConfigurationException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function createEnricherWithRequestChannelAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, $replyPayload, array $setterBuilders): void
     {
@@ -289,9 +367,12 @@ class EnricherBuilderTest extends MessagingTest
     }
 
     /**
-     * @param $inputMessage
-     * @param $outputChannel
-     * @param $setterBuilders
+     * @param MessageBuilder $inputMessage
+     * @param QueueChannel $outputChannel
+     * @param array $setterBuilders
+     * @throws ConfigurationException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function createEnricherAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, array $setterBuilders): void
     {

@@ -24,7 +24,7 @@ class StaticSetter implements Setter
      */
     private $name;
     /**
-     * @var string
+     * @var mixed
      */
     private $value;
 
@@ -33,9 +33,9 @@ class StaticSetter implements Setter
      *
      * @param DataSetter $payloadPropertySetter
      * @param string     $name
-     * @param string     $value
+     * @param mixed     $value
      */
-    public function __construct(DataSetter $payloadPropertySetter, string $name, string $value)
+    public function __construct(DataSetter $payloadPropertySetter, string $name, $value)
     {
         $this->payloadPropertySetter = $payloadPropertySetter;
         $this->name  = $name;
@@ -44,11 +44,11 @@ class StaticSetter implements Setter
 
     /**
      * @param string $name
-     * @param string $value
+     * @param mixed $value
      *
      * @return self
      */
-    public static function createWith(string $name, string $value) : self
+    public static function createWith(string $name, $value) : self
     {
         return new self(DataSetter::create(), $name, $value);
     }

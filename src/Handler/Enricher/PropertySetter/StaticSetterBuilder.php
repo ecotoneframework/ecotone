@@ -18,7 +18,7 @@ class StaticSetterBuilder implements SetterBuilder
      */
     private $name;
     /**
-     * @var string
+     * @var mixed
      */
     private $value;
 
@@ -26,9 +26,9 @@ class StaticSetterBuilder implements SetterBuilder
      * StaticPropertySetterBuilder constructor.
      *
      * @param string $name
-     * @param string $value
+     * @param mixed $value
      */
-    private function __construct(string $name, string $value)
+    private function __construct(string $name, $value)
     {
         $this->name  = $name;
         $this->value = $value;
@@ -36,11 +36,11 @@ class StaticSetterBuilder implements SetterBuilder
 
     /**
      * @param string $name
-     * @param string $value
+     * @param mixed $value
      *
      * @return StaticSetterBuilder
      */
-    public static function createWith(string $name, string $value) : self
+    public static function createWith(string $name, $value) : self
     {
         return new self($name, $value);
     }

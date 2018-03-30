@@ -45,10 +45,6 @@ abstract class AnnotationConfigurationTest extends MessagingTest
      */
     protected function createMessagingSystemConfiguration(): MessagingSystemConfiguration
     {
-        return MessagingSystemConfiguration::prepare(
-            DumbModuleRetrievingService::createEmpty(),
-            InMemoryConfigurationVariableRetrievingService::createEmpty(),
-            DumbConfigurationObserver::create()
-        );
+        return MessagingSystemConfiguration::prepare(DumbModuleRetrievingService::createEmpty());
     }
 }

@@ -48,7 +48,7 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public function getMessageHandlerAnnotation(): string
+    public static function getMessageHandlerAnnotation(): string
     {
         return SplitterAnnotation::class;
     }

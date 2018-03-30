@@ -21,22 +21,24 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
-     * @var AnnotationRegistrationService
-     */
-    private $annotationRegistrationService;
     /**
      * @var ParameterConverterAnnotationFactory
      */
     private $parameterConverterAnnotationFactory;
+    /**
+     * @var AnnotationRegistration[]
+     */
+    private $annotationRegistrations;
 
     /**
      * AnnotationGatewayConfiguration constructor.
-     * @param AnnotationRegistrationService $annotationRegistrationService
+     *
+     * @param AnnotationRegistration[] $annotationRegistrations
      * @param ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory
      */
-    private function __construct(AnnotationRegistrationService $annotationRegistrationService, ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory)
+    private function __construct(array $annotationRegistrations, ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory)
     {
-        $this->annotationRegistrationService = $annotationRegistrationService;
+        $this->annotationRegistrations = $annotationRegistrations;
         $this->parameterConverterAnnotationFactory = $parameterConverterAnnotationFactory;
     }
 
@@ -45,7 +47,10 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
-        return new static($annotationRegistrationService, ParameterConverterAnnotationFactory::create());
+        return new static(
+            $annotationRegistrationService->findRegistrationsFor(MessageEndpointAnnotation::class, static::getMessageHandlerAnnotation()),
+            ParameterConverterAnnotationFactory::create()
+        );
     }
 
 
@@ -54,7 +59,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
      */
     public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
-        foreach ($this->annotationRegistrationService->findRegistrationsFor(MessageEndpointAnnotation::class, $this->getMessageHandlerAnnotation()) as $annotationRegistration) {
+        foreach ($this->annotationRegistrations as $annotationRegistration) {
             $annotation = $annotationRegistration->getAnnotationForMethod();
             $messageHandlerBuilder = $this->createMessageHandlerFrom($annotationRegistration);
 
@@ -67,7 +72,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
     /**
      * @return string
      */
-    public abstract function getMessageHandlerAnnotation(): string;
+    public static abstract function getMessageHandlerAnnotation(): string;
 
     /**
      * @param AnnotationRegistration $annotationRegistration

@@ -46,7 +46,7 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public function getMessageHandlerAnnotation(): string
+    public static function getMessageHandlerAnnotation(): string
     {
         return TransformerAnnotation::class;
     }

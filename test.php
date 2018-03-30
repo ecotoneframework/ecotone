@@ -5,9 +5,25 @@ require __DIR__ . '/vendor/autoload.php';
 $tmp = new \Symfony\Component\ExpressionLanguage\ExpressionLanguage();
 
 $mapping = "orders[*].buyerId";
-$placeUnderKey = "buyer";
-$inputMappingName = "buyerId";
+$placeUnderKey = "";
+
+$replyExpression = "payload";
 $replyMappingName = "personId";
+
+$inputMessage =
+    [
+        [
+            "buyerId" => "123"
+        ],
+        [
+            "buyerId" => "129"
+        ]
+    ];
+$inputMessage =
+    [
+        "123", "129"
+    ];
+
 
 $result = [
     [

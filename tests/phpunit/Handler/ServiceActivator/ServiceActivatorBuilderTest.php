@@ -23,7 +23,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $objectToInvokeOnReference = "service-a";
         $objectToInvoke = ServiceExpectingOneArgument::create();
 
-        $serviceActivator = ServiceActivatorBuilder::create($objectToInvokeOnReference, 'withoutReturnValue')
+        $serviceActivator = ServiceActivatorBuilder::create("some", $objectToInvokeOnReference, 'withoutReturnValue')
                                 ->build(
                                     InMemoryChannelResolver::createEmpty(),
                                     InMemoryReferenceSearchService::createWith([
@@ -40,7 +40,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
     {
         $reference = StaticallyCalledService::class;
 
-        $serviceActivator = ServiceActivatorBuilder::create($reference, "run")
+        $serviceActivator = ServiceActivatorBuilder::create("some", $reference, "run")
                                 ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
 
 

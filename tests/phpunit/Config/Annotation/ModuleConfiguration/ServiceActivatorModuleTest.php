@@ -63,7 +63,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
         $configuration = $this->createMessagingSystemConfiguration();
         $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
 
-        $serviceActivatorBuilder = ServiceActivatorBuilder::create(ServiceActivatorWithAllConfigurationDefined::class, "sendMessage");
+        $serviceActivatorBuilder = ServiceActivatorBuilder::create("inputChannel", ServiceActivatorWithAllConfigurationDefined::class, "sendMessage");
         $serviceActivatorBuilder->withMethodParameterConverters([
             MessageToHeaderParameterConverterBuilder::create("to", "sendTo"),
             MessageToPayloadParameterConverterBuilder::create("content"),
@@ -77,7 +77,6 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerMessageHandler(
                     $serviceActivatorBuilder
-                        ->withInputMessageChannel("inputChannel")
                         ->withOutputChannel('outputChannel')
                         ->withRequiredReply(true)
                 )

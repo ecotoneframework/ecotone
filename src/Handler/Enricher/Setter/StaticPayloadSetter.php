@@ -1,28 +1,29 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertySetter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class StaticPropertySetter
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertySetter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class StaticSetter implements Setter
+class StaticPayloadSetter implements Setter
 {
     /**
      * @var DataSetter
      */
     private $payloadPropertySetter;
     /**
-     * @var string
+     * @var PropertyPath
      */
-    private $name;
+    private $propertyPath;
     /**
      * @var mixed
      */
@@ -32,25 +33,25 @@ class StaticSetter implements Setter
      * StaticPropertySetterBuilder constructor.
      *
      * @param DataSetter $payloadPropertySetter
-     * @param string     $name
-     * @param mixed     $value
+     * @param PropertyPath     $propertyPath
+     * @param mixed      $value
      */
-    public function __construct(DataSetter $payloadPropertySetter, string $name, $value)
+    public function __construct(DataSetter $payloadPropertySetter, PropertyPath $propertyPath, $value)
     {
         $this->payloadPropertySetter = $payloadPropertySetter;
-        $this->name  = $name;
-        $this->value = $value;
+        $this->propertyPath          = $propertyPath;
+        $this->value                 = $value;
     }
 
     /**
-     * @param string $name
-     * @param mixed $value
+     * @param PropertyPath $propertyPath
+     * @param mixed  $value
      *
      * @return self
      */
-    public static function createWith(string $name, $value) : self
+    public static function createWith(PropertyPath $propertyPath, $value) : self
     {
-        return new self(DataSetter::create(), $name, $value);
+        return new self(DataSetter::create(), $propertyPath, $value);
     }
 
     /**
@@ -58,7 +59,7 @@ class StaticSetter implements Setter
      */
     public function evaluate(Message $enrichMessage, ?Message $replyMessage)
     {
-        return $this->payloadPropertySetter->enrichDataWith($this->name, $enrichMessage->getPayload(), $this->value);
+        return $this->payloadPropertySetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $this->value);
     }
 
     /**

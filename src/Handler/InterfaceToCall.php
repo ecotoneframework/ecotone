@@ -54,16 +54,6 @@ class InterfaceToCall
     }
 
     /**
-     * @return bool
-     */
-    private function isReturnTypeUnknown(): bool
-    {
-        $returnType = $this->getReturnType();
-
-        return is_null($returnType) || $returnType === '';
-    }
-
-    /**
      * @return string
      */
     private function getReturnType(): string
@@ -96,6 +86,21 @@ class InterfaceToCall
     }
 
     /**
+     * @param string|object $unknownType
+     * @param string $methodName
+     *
+     * @return InterfaceToCall
+     */
+    public static function createFromUnknownType($unknownType, string $methodName) : self
+    {
+        if (is_object($unknownType)) {
+            return self::createFromObject($unknownType, $methodName);
+        }
+
+        return self::create($unknownType, $methodName);
+    }
+
+    /**
      * @return bool
      */
     public function isStaticallyCalled() : bool
@@ -106,9 +111,9 @@ class InterfaceToCall
     /**
      * @return bool
      */
-    public function doesItNotReturnValue(): bool
+    public function hasReturnValue() : bool
     {
-        return $this->getReturnType() == 'void';
+        return !($this->getReturnType() == 'void');
     }
 
     /**
@@ -232,6 +237,14 @@ class InterfaceToCall
     /**
      * @return bool
      */
+    public function hasNoParameters() : bool
+    {
+        return $this->parameterAmount() == 0;
+    }
+
+    /**
+     * @return bool
+     */
     public function hasSingleArgument(): bool
     {
         return $this->parameterAmount() == 1;
@@ -240,5 +253,15 @@ class InterfaceToCall
     public function __toString()
     {
         return "Interface {$this->interfaceName} with method {$this->methodName}";
+    }
+
+    /**
+     * @return bool
+     */
+    private function isReturnTypeUnknown(): bool
+    {
+        $returnType = $this->getReturnType();
+
+        return is_null($returnType) || $returnType === '';
     }
 }

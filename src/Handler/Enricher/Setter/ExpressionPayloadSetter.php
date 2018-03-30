@@ -1,44 +1,52 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertySetter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class ExpressionSetter
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertySetter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class ExpressionSetter implements Setter
+class ExpressionPayloadSetter implements Setter
 {
     /**
      * @var ExpressionEvaluationService
      */
     private $expressionEvaluationService;
     /**
-     * @var string
+     * @var PropertyPath
      */
-    private $name;
+    private $propertyPath;
     /**
      * @var string
      */
     private $expression;
+    /**
+     * @var DataSetter
+     */
+    private $dataSetter;
 
     /**
      * ExpressionSetter constructor.
      *
      * @param ExpressionEvaluationService $expressionEvaluationService
-     * @param string                      $name
+     * @param DataSetter                  $dataSetter
+     * @param PropertyPath                $propertyPath
      * @param string                      $expression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, string $name, string $expression)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, DataSetter $dataSetter, PropertyPath $propertyPath, string $expression)
     {
         $this->expressionEvaluationService = $expressionEvaluationService;
-        $this->name       = $name;
-        $this->expression = $expression;
+        $this->propertyPath                = $propertyPath;
+        $this->expression                  = $expression;
+        $this->dataSetter = $dataSetter;
     }
 
     /**
@@ -46,14 +54,13 @@ class ExpressionSetter implements Setter
      */
     public function evaluate(Message $enrichMessage, ?Message $replyMessage)
     {
-        $payload = $enrichMessage->getPayload();
-
-        $payload[$this->name] = $this->expressionEvaluationService->evaluate($this->expression, [
+        $dataToEnrich = $this->expressionEvaluationService->evaluate(
+            $this->expression, [
             "payload" => $replyMessage->getPayload(),
             "headers" => $replyMessage->getHeaders()->headers()
         ]);
 
-        return $payload;
+        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $dataToEnrich);
     }
 
     /**

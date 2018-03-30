@@ -26,7 +26,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
         $methodName = "sendMessage";
-        $messageHandler = ServiceActivatorBuilder::create($relatedClassName, $methodName);
+        $messageHandler = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
         $messageHandler
             ->withMethodParameterConverters([
                 MessageToReferenceServiceParameterConverterBuilder::create(
@@ -38,7 +38,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
         $messageHandler
             ->registerRequiredReference(\stdClass::class);
 
-        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
+        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
         $parameterConverterAnnotationFactory->configureParameterConverters(
             $messageHandlerBuilderToCompare,
             $relatedClassName,
@@ -61,7 +61,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
         $methodName = "sendMessage";
-        $messageHandler = ServiceActivatorBuilder::create($relatedClassName, $methodName);
+        $messageHandler = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
         $messageHandler
             ->withMethodParameterConverters([
                 MessageToExpressionEvaluationParameterConverterBuilder::createWith(
@@ -71,7 +71,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                 )
             ]);
 
-        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
+        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
 
         $parameterConverterAnnotationFactory->configureParameterConverters(
             $messageHandlerBuilderToCompare,

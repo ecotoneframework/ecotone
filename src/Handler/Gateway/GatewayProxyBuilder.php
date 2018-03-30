@@ -194,7 +194,7 @@ class GatewayProxyBuilder implements GatewayBuilder
             $replyReceiver = new TimeoutChannelSendAndReceiveService($requestChannel, $replyChannel, $errorChannel, $this->milliSecondsTimeout);
         }
 
-        if ($interfaceToCall->doesItNotReturnValue() && $this->replyChannelName) {
+        if (!$interfaceToCall->hasReturnValue() && $this->replyChannelName) {
             throw InvalidArgumentException::create("Can't set reply channel for {$interfaceToCall}");
         }
 

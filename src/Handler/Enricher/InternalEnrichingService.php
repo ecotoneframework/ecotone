@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
@@ -22,17 +23,29 @@ class InternalEnrichingService
      * @var EnrichGateway|null
      */
     private $enrichGateway;
+    /**
+     * @var string|null
+     */
+    private $requestPayloadExpression;
+    /**
+     * @var ExpressionEvaluationService
+     */
+    private $expressionEvaluationService;
 
     /**
      * InternalEnrichingService constructor.
      *
-     * @param EnrichGateway|null $enrichGateway
-     * @param Setter[]      $setters
+     * @param EnrichGateway|null          $enrichGateway
+     * @param ExpressionEvaluationService $expressionEvaluationService
+     * @param Setter[]                    $setters
+     * @param string                      $requestPayloadExpression
      */
-    public function __construct(?EnrichGateway $enrichGateway, array $setters)
+    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, array $setters, ?string $requestPayloadExpression)
     {
         $this->enrichGateway = $enrichGateway;
         $this->setters = $setters;
+        $this->expressionEvaluationService = $expressionEvaluationService;
+        $this->requestPayloadExpression = $requestPayloadExpression;
     }
 
     /**
@@ -45,7 +58,19 @@ class InternalEnrichingService
                             ->build();
         $replyMessage = null;
         if ($this->enrichGateway) {
-            $replyMessage = $this->enrichGateway->execute($enrichedMessage);
+            $requestMessage = $enrichedMessage;
+            if ($this->requestPayloadExpression) {
+                $requestPayload = $this->expressionEvaluationService->evaluate($this->requestPayloadExpression, [
+                    "headers" => $requestMessage->getHeaders()->headers(),
+                    "payload" => $requestMessage->getPayload()
+                ]);
+
+                $requestMessage = MessageBuilder::fromMessage($requestMessage)
+                                    ->setPayload($requestPayload)
+                                    ->build();
+            }
+
+            $replyMessage = $this->enrichGateway->execute($requestMessage);
         }
 
         foreach ($this->setters as $setter) {

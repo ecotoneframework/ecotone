@@ -85,7 +85,7 @@ class Gateway
         }
 
         $replyMessage = $this->requestReplyService->receiveReply();
-        if (is_null($replyMessage) && !$interfaceToCall->doesItNotReturnValue() && !$interfaceToCall->canItReturnNull()) {
+        if (is_null($replyMessage) && $interfaceToCall->hasReturnValue() && !$interfaceToCall->canItReturnNull()) {
             throw InvalidArgumentException::create("{$interfaceToCall} expects value, but null was returned. If you defined errorChannel it's advised to change interface to nullable.");
         }
 

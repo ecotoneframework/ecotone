@@ -58,4 +58,22 @@ class SplitterBuilderTest extends MessagingTest
             ])
         );
     }
+
+    public function test_creating_splitter_with_direct_reference()
+    {
+        $inputChannelName = "inputChannel";
+        $splitter = SplitterBuilder::createWithDirectObject($inputChannelName, new ServiceSplittingArrayPayload(), "splitToPayload");
+
+        $splitter = $splitter->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createEmpty()
+        );
+
+        $outputChannel = QueueChannel::create();
+        $splitter->handle(MessageBuilder::withPayload([1, 2])->setReplyChannel($outputChannel)->build());
+
+        $payload = $outputChannel->receive()->getPayload();
+        $this->assertEquals(2, $payload);
+        $this->assertEquals(1, $outputChannel->receive()->getPayload());
+    }
 }

@@ -7,6 +7,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnota
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
@@ -27,17 +28,18 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
     public const MODULE_NAME = "applicationContextModule";
 
     /**
-     * @var AnnotationRegistrationService
+     * @var AnnotationRegistration[]
      */
-    private $annotationRegistrationService;
+    private $messagingComponentsRegistrations;
 
     /**
      * AnnotationGatewayConfiguration constructor.
-     * @param AnnotationRegistrationService $annotationRegistrationService
+     *
+     * @param AnnotationRegistration[] $messagingComponents
      */
-    private function __construct(AnnotationRegistrationService $annotationRegistrationService)
+    private function __construct(array $messagingComponents)
     {
-        $this->annotationRegistrationService = $annotationRegistrationService;
+        $this->messagingComponentsRegistrations = $messagingComponents;
     }
 
     /**
@@ -45,7 +47,7 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
-        return new self($annotationRegistrationService);
+        return new self($annotationRegistrationService->findRegistrationsFor(ApplicationContextAnnotation::class, MessagingComponentAnnotation::class));
     }
 
     /**
@@ -62,7 +64,7 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
     public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
         $classes = [];
-        foreach ($this->annotationRegistrationService->findRegistrationsFor(ApplicationContextAnnotation::class, MessagingComponentAnnotation::class) as $annotationRegistration) {
+        foreach ($this->messagingComponentsRegistrations as $annotationRegistration) {
             if (!array_key_exists($annotationRegistration->getClassWithAnnotation(), $classes)) {
                 $classToInstantiate = $annotationRegistration->getClassWithAnnotation();
                 $classes[$annotationRegistration->getClassWithAnnotation()] = new $classToInstantiate();

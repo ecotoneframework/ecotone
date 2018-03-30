@@ -46,6 +46,10 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @var string[]
      */
     private $requiredReferenceNames = [];
+    /**
+     * @var string|null
+     */
+    private $defaultResolution = null;
 
     /**
      * RouterBuilder constructor.
@@ -104,6 +108,19 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 
     /**
      * @param string $inputChannelName
+     *
+     * @return RouterBuilder
+     */
+    public static function createPayloadTypeRouterByClassName(string $inputChannelName) : self
+    {
+        $routerBuilder = self::create($inputChannelName, "", 'route');
+        $routerBuilder->setObjectToInvoke(PayloadTypeRouter::createWithRoutingByClass());
+
+        return $routerBuilder;
+    }
+
+    /**
+     * @param string $inputChannelName
      * @param string $headerName
      * @param array $headerValueToChannelMapping
      * @return RouterBuilder
@@ -146,6 +163,13 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         $this->methodParameterConverters = $methodParameterConverterBuilders;
     }
 
+    public function withDefaultResolutionChannel(string $channelName) : self
+    {
+        $this->defaultResolution = $channelName;
+
+        return $this;
+    }
+
     /**
      * @inheritDoc
      */
@@ -163,7 +187,8 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
             $objectToInvoke,
             $this->methodName,
             $this->resolutionRequired,
-            $methodParameterConverters
+            $methodParameterConverters,
+            $this->defaultResolution
         );
     }
 

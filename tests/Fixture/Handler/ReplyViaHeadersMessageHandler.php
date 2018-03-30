@@ -49,7 +49,7 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
         if ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
             /** @var MessageChannel $replyChannel */
             $replyChannel = $message->getHeaders()->getReplyChannel();
-            if ($this->replyData) {
+            if (!is_null($this->replyData)) {
                 if ($this->replyData instanceof Message) {
                     $replyChannel->send($this->replyData);
                     return;

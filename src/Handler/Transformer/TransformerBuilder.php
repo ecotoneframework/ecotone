@@ -141,7 +141,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         $objectToInvokeOn = $this->object ? $this->object : $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
         $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
 
-        if ($interfaceToCall->doesItNotReturnValue()) {
+        if (!$interfaceToCall->hasReturnValue()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 

@@ -34,14 +34,14 @@ class RouterModule extends MessageHandlerRegisterConfiguration
         /** @var RouterAnnotation $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
-        return RouterBuilder::create($annotationRegistration->getReferenceName(), $annotation->inputChannel, $annotationRegistration->getReferenceName(), $annotationRegistration->getMethodName())
+        return RouterBuilder::create($annotation->inputChannel, $annotationRegistration->getReferenceName(), $annotationRegistration->getMethodName())
                 ->setResolutionRequired($annotation->isResolutionRequired);
     }
 
     /**
      * @inheritDoc
      */
-    public function getMessageHandlerAnnotation(): string
+    public static function getMessageHandlerAnnotation(): string
     {
         return RouterAnnotation::class;
     }

@@ -109,7 +109,8 @@ final class MethodInvoker implements MessageProcessor
         }
 
         if (!$this->hasEnoughArguments($passedArgumentsCount, $requiredArgumentsCount)) {
-            throw InvalidArgumentException::create("Object {$this->objectToClassName($objectToInvokeOn)} requires {$requiredArgumentsCount}, but passed {$passedArgumentsCount}");
+            $interfaceToCall = InterfaceToCall::createFromUnknownType($objectToInvokeOn, $objectMethodName);
+            throw InvalidArgumentException::create("Object {$interfaceToCall} requires {$requiredArgumentsCount} parameters converters, but passed {$passedArgumentsCount}");
         }
 
         $orderedMethodArguments = [];

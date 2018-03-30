@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\SetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class StaticHeaderSetterBuilder
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class StaticHeaderSetterBuilder implements SetterBuilder
@@ -51,6 +51,6 @@ class StaticHeaderSetterBuilder implements SetterBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): Setter
     {
-        return StaticHeaderSetter::create($this->name, $this->value);
+        return StaticHeaderSetter::create(PropertyPath::createWith($this->name), $this->value);
     }
 }

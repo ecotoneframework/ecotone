@@ -51,23 +51,28 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
 
     /**
      * ServiceActivatorBuilder constructor.
+     *
+     * @param string $inputMessageChannelName
      * @param string $objectToInvokeOnReferenceName
      * @param string $methodName
      */
-    private function __construct(string $objectToInvokeOnReferenceName, string $methodName)
+    private function __construct(string $inputMessageChannelName, string $objectToInvokeOnReferenceName, string $methodName)
     {
         $this->objectToInvokeReferenceName = $objectToInvokeOnReferenceName;
         $this->methodName = $methodName;
+        $this->inputMessageChannelName = $inputMessageChannelName;
     }
 
     /**
+     * @param string $inputMessageChannelName
      * @param string $objectToInvokeOnReferenceName
      * @param string $methodName
+     *
      * @return ServiceActivatorBuilder
      */
-    public static function create(string $objectToInvokeOnReferenceName, string $methodName): self
+    public static function create(string $inputMessageChannelName, string $objectToInvokeOnReferenceName, string $methodName): self
     {
-        return new self($objectToInvokeOnReferenceName, $methodName);
+        return new self($inputMessageChannelName, $objectToInvokeOnReferenceName, $methodName);
     }
 
     /**
@@ -100,17 +105,6 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
         Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
 
         $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
-    }
-
-    /**
-     * @param string $inputMessageChannelName
-     * @return ServiceActivatorBuilder
-     */
-    public function withInputMessageChannel(string $inputMessageChannelName) : self
-    {
-        $this->inputMessageChannelName = $inputMessageChannelName;
-
-        return $this;
     }
 
     /**

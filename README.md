@@ -20,6 +20,17 @@ Keep in my mind, that API may change.
 
 @TODO
 
+### Messaging Components
+
+### Enricher
+
+A Enricher defines an endpoint that passes a Message to the exposed request channel and then expects a reply message. The reply message then becomes the root object for evaluation of expressions to enrich the target payload.  
+Basically by defining the request channel, the Payload Enricher acts as a Gateway, waiting for the message that were sent to the request channel to return, and the Enricher then augments the message’s payload with the data provided by the reply message.  
+When sending messages to the request channel you also have the option to only send a subset of the original payload using the `request-payload-expression` attribute.  
+
+#### Example
+
+
 ### Messaging Configuration
 
 Messaging Configuration is divined in three forms.  

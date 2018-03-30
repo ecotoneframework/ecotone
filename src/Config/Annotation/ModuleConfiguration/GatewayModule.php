@@ -9,6 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\ParameterToMessage\Param
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ParameterToMessage\ParameterToPayloadAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ParameterToMessage\ParameterToStaticHeaderAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
@@ -33,14 +34,19 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
      * @var AnnotationRegistrationService
      */
     private $annotationRegistrationService;
+    /**
+     * @var AnnotationRegistration[]
+     */
+    private $gatewayRegistrations;
 
     /**
      * AnnotationGatewayConfiguration constructor.
-     * @param AnnotationRegistrationService $annotationRegistrationService
+     *
+     * @param AnnotationRegistration[] $gatewayRegistrations
      */
-    private function __construct(AnnotationRegistrationService $annotationRegistrationService)
+    private function __construct(array $gatewayRegistrations)
     {
-        $this->annotationRegistrationService = $annotationRegistrationService;
+        $this->gatewayRegistrations = $gatewayRegistrations;
     }
 
     /**
@@ -48,7 +54,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
-        return new self($annotationRegistrationService);
+        return new self($annotationRegistrationService->findRegistrationsFor(MessageEndpointAnnotation::class, GatewayAnnotation::class));
     }
 
     /**
@@ -64,7 +70,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
      */
     public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
-        foreach ($this->annotationRegistrationService->findRegistrationsFor(MessageEndpointAnnotation::class, GatewayAnnotation::class) as $annotationRegistration) {
+        foreach ($this->gatewayRegistrations as $annotationRegistration) {
             /** @var GatewayAnnotation $annotation */
             $annotation = $annotationRegistration->getAnnotationForMethod();
 

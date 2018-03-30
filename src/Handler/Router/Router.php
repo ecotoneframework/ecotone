@@ -9,6 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\Met
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
  * Class Router
@@ -30,31 +31,40 @@ final class Router implements MessageHandler
      * @var bool
      */
     private $isResolutionRequired;
+    /**
+     * @var null|string
+     */
+    private $defaultResolutionChannelName;
 
     /**
      * RouterBuilder constructor.
+     *
      * @param ChannelResolver $channelResolver
-     * @param MethodInvoker $methodInvoker
-     * @param bool $isResolutionRequired
+     * @param MethodInvoker   $methodInvoker
+     * @param bool            $isResolutionRequired
+     * @param null|string     $defaultResolutionChannelName
      */
-    private function __construct(ChannelResolver $channelResolver, MethodInvoker $methodInvoker, bool $isResolutionRequired)
+    private function __construct(ChannelResolver $channelResolver, MethodInvoker $methodInvoker, bool $isResolutionRequired, ?string $defaultResolutionChannelName)
     {
         $this->channelResolver = $channelResolver;
         $this->methodInvoker = $methodInvoker;
         $this->isResolutionRequired = $isResolutionRequired;
+        $this->defaultResolutionChannelName = $defaultResolutionChannelName;
     }
 
     /**
-     * @param ChannelResolver $channelResolver
-     * @param $objectToInvoke
-     * @param string $methodName
-     * @param bool $isResolutionRequired
+     * @param ChannelResolver                     $channelResolver
+     * @param                                     $objectToInvoke
+     * @param string                              $methodName
+     * @param bool                                $isResolutionRequired
      * @param array|MessageToParameterConverter[] $methodArguments
+     * @param null|string                         $defaultResolutionChannel
+     *
      * @return Router
      */
-    public static function create(ChannelResolver $channelResolver, $objectToInvoke, string $methodName, bool $isResolutionRequired, array $methodArguments) : self
+    public static function create(ChannelResolver $channelResolver, $objectToInvoke, string $methodName, bool $isResolutionRequired, array $methodArguments, ?string $defaultResolutionChannel) : self
     {
-        return new self($channelResolver, MethodInvoker::createWith($objectToInvoke, $methodName, $methodArguments), $isResolutionRequired);
+        return new self($channelResolver, MethodInvoker::createWith($objectToInvoke, $methodName, $methodArguments), $isResolutionRequired, $defaultResolutionChannel);
     }
 
     /**
@@ -66,6 +76,9 @@ final class Router implements MessageHandler
 
         if (!is_array($resolutionChannels)) {
             $resolutionChannels = [$resolutionChannels];
+        }
+        if (empty($resolutionChannels) && $this->defaultResolutionChannelName) {
+            $resolutionChannels[] = $this->defaultResolutionChannelName;
         }
 
         if (empty($resolutionChannels) && $this->isResolutionRequired) {

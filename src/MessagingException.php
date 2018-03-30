@@ -29,7 +29,7 @@ abstract class MessagingException extends \Exception
      */
     private $failedMessage;
     /**
-     * @var \Throwable
+     * @var \Throwable|null
      */
     private $cause;
 
@@ -90,5 +90,18 @@ abstract class MessagingException extends \Exception
     protected function setCausationException(\Throwable $cause) : void
     {
         $this->cause = $cause;
+    }
+
+    /**
+     * @return null|\Throwable
+     */
+    public function getCause() : ?\Throwable
+    {
+        $cause = $this->cause;
+        if ($cause instanceof MessagingException && $cause->getCause()) {
+            $cause = $this->getCause();
+        }
+
+        return $cause;
     }
 }

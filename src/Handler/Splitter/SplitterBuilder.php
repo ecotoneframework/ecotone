@@ -44,6 +44,10 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @var string[]
      */
     private $requiredReferenceNames = [];
+    /**
+     * @var object
+     */
+    private $directObject;
 
     /**
      * ServiceActivatorBuilder constructor.
@@ -57,7 +61,9 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
         $this->referenceName = $referenceName;
         $this->methodName = $methodName;
 
-        $this->requiredReferenceNames[] = $referenceName;
+        if ($referenceName) {
+            $this->requiredReferenceNames[] = $referenceName;
+        }
     }
 
     /**
@@ -69,6 +75,22 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
     public static function create(string $inputChannelName, string $referenceName, string $methodName): self
     {
         return new self($inputChannelName, $referenceName, $methodName);
+    }
+
+    /**
+     * @param string $inputChannelName
+     * @param object $directReferenceObject
+     * @param string $methodName
+     * @return SplitterBuilder
+     */
+    public static function createWithDirectObject(string $inputChannelName, $directReferenceObject, string $methodName): self
+    {
+        Assert::isObject($directReferenceObject, "Direct reference must be object");
+
+        $splitterBuilder = new self($inputChannelName, "", $methodName);
+        $splitterBuilder->setDirectObject($directReferenceObject);
+
+        return $splitterBuilder;
     }
 
     /**
@@ -121,7 +143,7 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $objectToInvokeOn = $referenceSearchService->findByReference($this->referenceName);
+        $objectToInvokeOn = $this->directObject ? $this->directObject : $referenceSearchService->findByReference($this->referenceName);
         $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
 
         if (!$interfaceToCall->doesItReturnArray()) {
@@ -145,5 +167,13 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
                 $channelResolver
             )
         );
+    }
+
+    /**
+     * @param object $object
+     */
+    private function setDirectObject($object) : void
+    {
+        $this->directObject = $object;
     }
 }

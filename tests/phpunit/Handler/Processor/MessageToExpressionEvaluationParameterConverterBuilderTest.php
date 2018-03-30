@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToExpressionEvaluationParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\SymfonyExpressionEvaluationAdapter;
 
 /**
  * Class MessageToExpressionEvaluationParameterConverterBuilderTest

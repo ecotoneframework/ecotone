@@ -11,6 +11,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\DestinationResolutionException;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
@@ -170,6 +171,52 @@ class RouterBuilderTest extends MessagingTest
         $this->assertMessages($message, $targetChannel1->receive());
     }
 
+    public function test_routing_to_default_when_not_hit()
+    {
+        $targetChannel = QueueChannel::create();
+
+        $defaultResolutionChannel = 'default';
+        $router                   = RouterBuilder::createPayloadTypeRouter("input", [
+            Order::class => 'channel2'
+        ])
+            ->withDefaultResolutionChannel($defaultResolutionChannel)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $defaultResolutionChannel => $targetChannel
+                ]),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+        $message = MessageBuilder::withPayload(new \stdClass())
+            ->build();
+
+        $router->handle($message);
+
+        $this->assertMessages($message, $targetChannel->receive());
+    }
+
+    public function test_routing_by_payload_type_without_mapping()
+    {
+        $targetChannel = QueueChannel::create();
+        $inputChannelName = "input";
+
+        $router = RouterBuilder::createPayloadTypeRouterByClassName($inputChannelName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    \stdClass::class => $targetChannel,
+                    $inputChannelName => DirectChannel::create()
+                ]),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+        $message = MessageBuilder::withPayload(new \stdClass())
+            ->build();
+
+        $router->handle($message);
+
+        $this->assertMessages($message, $targetChannel->receive());
+    }
+
     /**
      * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
@@ -201,5 +248,21 @@ class RouterBuilderTest extends MessagingTest
         $router->handle($message);
 
         $this->assertMessages($message, $targetChannel1->receive());
+    }
+
+    public function test_throwing_exception_if_payload_is_not_object()
+    {
+        $router = RouterBuilder::createPayloadTypeRouterByClassName("some")
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+        $message = MessageBuilder::withPayload("some")
+            ->build();
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $router->handle($message);
     }
 }

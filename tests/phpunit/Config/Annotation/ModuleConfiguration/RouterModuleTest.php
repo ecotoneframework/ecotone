@@ -48,7 +48,7 @@ class RouterModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
 
 
-        $router = RouterBuilder::create($objectToInvokeReference, "inputChannel", $objectToInvokeReference, "route")
+        $router = RouterBuilder::create("inputChannel", $objectToInvokeReference, "route")
                         ->setResolutionRequired(false);
         $router->withMethodParameterConverters([
             MessageToPayloadParameterConverterBuilder::create("content")

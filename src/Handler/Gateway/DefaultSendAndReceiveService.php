@@ -68,7 +68,7 @@ class DefaultSendAndReceiveService implements SendAndReceiveService
      */
     public function prepareForSend(MessageBuilder $messageBuilder, InterfaceToCall $interfaceToCall): MessageBuilder
     {
-        if ($interfaceToCall->doesItNotReturnValue()) {
+        if (!$interfaceToCall->hasReturnValue()) {
             return $messageBuilder;
         }
 

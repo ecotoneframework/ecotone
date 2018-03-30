@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -28,6 +29,10 @@ class EnricherBuilder implements MessageHandlerBuilder
      * @var string
      */
     private $requestChannelName;
+    /**
+     * @var string|null
+     */
+    private $requestPayloadExpression;
     /**
      * @var SetterBuilder[]
      */
@@ -81,6 +86,18 @@ class EnricherBuilder implements MessageHandlerBuilder
     }
 
     /**
+     * @param string $requestPayloadExpression
+     *
+     * @return EnricherBuilder
+     */
+    public function withRequestPayloadExpression(string $requestPayloadExpression) : self
+    {
+        $this->requestPayloadExpression = $requestPayloadExpression;
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function getRequiredReferenceNames(): array
@@ -110,7 +127,7 @@ class EnricherBuilder implements MessageHandlerBuilder
                         ->build($referenceSearchService, $channelResolver);
         }
 
-        $internalEnrichingService = new InternalEnrichingService($gateway, $propertySetters);
+        $internalEnrichingService = new InternalEnrichingService($gateway, $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE), $propertySetters, $this->requestPayloadExpression);
 
         return new Enricher(
             RequestReplyProducer::createRequestAndReplyFromHeaders(

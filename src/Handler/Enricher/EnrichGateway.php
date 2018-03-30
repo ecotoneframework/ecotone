@@ -13,9 +13,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
 interface EnrichGateway
 {
     /**
-     * @param Message $message
+     * @param Message|null $message
      *
      * @return Message
      */
-    public function execute(Message $message) : Message;
+    public function execute(Message $message) : ?Message;
 }

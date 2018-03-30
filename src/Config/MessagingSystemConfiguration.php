@@ -66,6 +66,10 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->initialize($moduleConfigurationRetrievingService);
         $this->configurationObserver = $configurationObserver;
+
+        foreach ($this->modules as $module) {
+            $module->preConfigure($this->moduleExtensions[$module->getName()], $configurationObserver);
+        }
     }
 
     /**
@@ -139,7 +143,6 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder) : self
     {
         $this->gatewayBuilders[] = $gatewayBuilder;
-        $this->configurationObserver->notifyGatewayBuilderWasRegistered($gatewayBuilder->getReferenceName(), (string)$gatewayBuilder, $gatewayBuilder->getInterfaceName());
 
         return $this;
     }

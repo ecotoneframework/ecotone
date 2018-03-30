@@ -12,6 +12,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
@@ -30,10 +31,6 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
 {
     public const MODULE_NAME = 'gatewayModule';
 
-    /**
-     * @var AnnotationRegistrationService
-     */
-    private $annotationRegistrationService;
     /**
      * @var AnnotationRegistration[]
      */
@@ -63,6 +60,16 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     public function getName(): string
     {
         return self::MODULE_NAME;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function preConfigure(array $moduleExtensions, ConfigurationObserver $configurationObserver): void
+    {
+        foreach ($this->gatewayRegistrations as $gatewayRegistration) {
+            $configurationObserver->notifyGatewayBuilderWasRegistered($gatewayRegistration->getReferenceName(), $gatewayRegistration->getClassWithAnnotation(), $gatewayRegistration->getClassWithAnnotation());
+        }
     }
 
     /**

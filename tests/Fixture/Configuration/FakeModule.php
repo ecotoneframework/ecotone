@@ -3,6 +3,7 @@
 namespace Fixture\Configuration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Module;
@@ -49,6 +50,14 @@ class FakeModule implements Module
     public function getRequiredReferences(): array
     {
         return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function preConfigure(array $moduleExtensions, ConfigurationObserver $configurationObserver) : void
+    {
+        // TODO: Implement preConfigure() method.
     }
 
     /**

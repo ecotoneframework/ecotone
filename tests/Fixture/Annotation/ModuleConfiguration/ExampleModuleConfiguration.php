@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace Fixture\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariable;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
@@ -37,6 +39,14 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
     public function getConfigurationVariables(): array
     {
         // TODO: Implement getConfigurationVariables() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function preConfigure(array $moduleExtensions, ConfigurationObserver $configurationObserver) : void
+    {
+        // TODO: Implement preConfigure() method.
     }
 
     /**

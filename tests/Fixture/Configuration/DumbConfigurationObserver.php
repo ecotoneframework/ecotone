@@ -60,7 +60,7 @@ class DumbConfigurationObserver implements ConfigurationObserver
 
     public function wasNotifiedCorrectly() : bool
     {
-        return $this->gatewayNotification && $this->messageChannelNotification && $this->configurationNotification;
+        return $this->messageChannelNotification && $this->configurationNotification;
     }
 
     /**

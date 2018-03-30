@@ -29,6 +29,14 @@ interface Module
     public function getRequiredReferences(): array;
 
     /**
+     * @param ModuleExtension[]     $moduleExtensions
+     * @param ConfigurationObserver $configurationObserver
+     *
+     * @return void
+     */
+    public function preConfigure(array $moduleExtensions, ConfigurationObserver $configurationObserver) : void;
+
+    /**
      * Runs on messaging configuration startup
      *
      * @param Configuration $configuration

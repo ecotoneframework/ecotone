@@ -39,7 +39,7 @@ class PollOrThrowMessageHandlerConsumerBuilderFactory implements MessageHandlerC
         /** @var PollableChannel $pollableChannel */
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
-        return PollOrThrowExceptionConsumer::create((string)$messageHandlerBuilder . Uuid::uuid4()->toString(), $pollableChannel, $messageHandlerBuilder->build(
+        return PollOrThrowExceptionConsumer::create(get_class($messageHandlerBuilder) . Uuid::uuid4()->toString(), $pollableChannel, $messageHandlerBuilder->build(
             $channelResolver, $referenceSearchService
         ));
     }

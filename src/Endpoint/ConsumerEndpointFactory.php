@@ -57,6 +57,7 @@ class ConsumerEndpointFactory
             }
         }
 
-        throw NoConsumerFactoryForBuilderException::create("No consumer factory found for {$messageHandlerBuilder}");
+        $class = get_class($messageHandlerBuilder);
+        throw NoConsumerFactoryForBuilderException::create("No consumer factory found for {$class}");
     }
 }

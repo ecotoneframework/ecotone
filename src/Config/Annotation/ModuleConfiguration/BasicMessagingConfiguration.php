@@ -25,7 +25,7 @@ use SimplyCodedSoftware\IntegrationMessaging\NullableMessageChannel;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
-class BasicMessagingConfiguration implements AnnotationModule
+class BasicMessagingConfiguration extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @inheritDoc
@@ -38,18 +38,14 @@ class BasicMessagingConfiguration implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function getConfigurationVariables(): array
+    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
     {
-        return [];
+        $configuration->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory());
+        $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory());
+        $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
+        $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function preConfigure(array $moduleExtensions, ConfigurationObserver $configurationObserver) : void
-    {
-        return;
-    }
 
     /**
      * @inheritDoc
@@ -67,24 +63,5 @@ class BasicMessagingConfiguration implements AnnotationModule
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
         return new self();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
-    {
-        $configuration->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory());
-        $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory());
-        $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
-        $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem): void
-    {
-        return;
     }
 }

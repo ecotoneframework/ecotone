@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\Messa
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\RouterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\RouterModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
@@ -45,7 +46,7 @@ class RouterModuleTest extends AnnotationConfigurationTest
             )
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
 
 
         $router = RouterBuilder::create("inputChannel", $objectToInvokeReference, "route")

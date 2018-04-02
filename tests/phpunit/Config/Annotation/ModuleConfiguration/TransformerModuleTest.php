@@ -10,6 +10,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\TransformerAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\RouterModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\TransformerModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
@@ -44,7 +45,7 @@ class TransformerModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
 
         $messageHandlerBuilder = TransformerBuilder::create(
             "inputChannel", TransformerWithMethodParameterExample::class, "send"

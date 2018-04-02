@@ -68,7 +68,7 @@ final class MessagingSystemConfiguration implements Configuration
         $this->configurationObserver = $configurationObserver;
 
         foreach ($this->modules as $module) {
-            $module->preConfigure($this->moduleExtensions[$module->getName()], $configurationObserver);
+            $module->prepare($this, $this->moduleExtensions[$module->getName()], $configurationObserver);
         }
     }
 
@@ -143,6 +143,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder) : self
     {
         $this->gatewayBuilders[] = $gatewayBuilder;
+        $this->configurationObserver->notifyGatewayBuilderWasRegistered($gatewayBuilder->getReferenceName(), (string)$gatewayBuilder, $gatewayBuilder->getInterfaceName());
 
         return $this;
     }
@@ -169,7 +170,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $externalReferenceSearchService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService) : ConfiguredMessagingSystem
     {
         foreach ($this->modules as $module) {
-            $module->registerWithin(
+            $module->configure(
                 $this,
                 $this->moduleExtensions[$module->getName()],
                 $configurationVariableRetrievingService,

@@ -13,6 +13,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\ApplicationContextModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
@@ -79,7 +80,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
 
         $configuration = $this->createMessagingSystemConfiguration();
 
-        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -98,7 +99,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
 
         $annotationConfiguration = $this->createAnnotationConfiguration($methodName);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
     }
 
     /**

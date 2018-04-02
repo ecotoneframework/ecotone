@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotatio
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\GatewayModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 
@@ -43,7 +44,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
         );
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->registerWithin($messagingSystemConfiguration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], NullObserver::create());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

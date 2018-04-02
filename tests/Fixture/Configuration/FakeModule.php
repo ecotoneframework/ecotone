@@ -55,15 +55,15 @@ class FakeModule implements Module
     /**
      * @inheritDoc
      */
-    public function preConfigure(array $moduleExtensions, ConfigurationObserver $configurationObserver) : void
+    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
     {
-        // TODO: Implement preConfigure() method.
+        return;
     }
 
     /**
      * @inheritDoc
      */
-    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
+    public function configure(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
         $this->moduleExtensions = $moduleExtensions;
     }

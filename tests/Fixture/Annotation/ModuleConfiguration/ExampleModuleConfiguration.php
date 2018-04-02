@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Fixture\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariable;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
@@ -44,9 +45,9 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
     /**
      * @inheritDoc
      */
-    public function preConfigure(array $moduleExtensions, ConfigurationObserver $configurationObserver) : void
+    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
     {
-        // TODO: Implement preConfigure() method.
+        return;
     }
 
     /**
@@ -68,7 +69,7 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
     /**
      * @inheritDoc
      */
-    public function registerWithin(\SimplyCodedSoftware\IntegrationMessaging\Config\Configuration $configuration, array $moduleExtensions, \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
+    public function configure(\SimplyCodedSoftware\IntegrationMessaging\Config\Configuration $configuration, array $moduleExtensions, \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
         // TODO: Implement registerWithin() method.
     }

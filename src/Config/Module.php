@@ -29,15 +29,21 @@ interface Module
     public function getRequiredReferences(): array;
 
     /**
+     * In here you can register all message handlers, gateways, message channels
+     *
+     * @param Configuration         $configuration
      * @param ModuleExtension[]     $moduleExtensions
      * @param ConfigurationObserver $configurationObserver
      *
      * @return void
      */
-    public function preConfigure(array $moduleExtensions, ConfigurationObserver $configurationObserver) : void;
+    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver) : void;
+
+//    @TODO change preConfigure for prepare and registerWithin for configure.
+// Prepare should register all handlers, later it should stay locked
 
     /**
-     * Runs on messaging configuration startup
+     * Runs during configuration phase, when all handlers must be defined
      *
      * @param Configuration $configuration
      * @param ModuleExtension[] $moduleExtensions
@@ -46,7 +52,7 @@ interface Module
      *
      * @return void
      */
-    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void;
+    public function configure(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void;
 
     /**
      * Runs after messaging system was built from configuration

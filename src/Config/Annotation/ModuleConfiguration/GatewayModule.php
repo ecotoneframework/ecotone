@@ -15,6 +15,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverterBuilder;
@@ -65,17 +66,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @inheritDoc
      */
-    public function preConfigure(array $moduleExtensions, ConfigurationObserver $configurationObserver): void
-    {
-        foreach ($this->gatewayRegistrations as $gatewayRegistration) {
-            $configurationObserver->notifyGatewayBuilderWasRegistered($gatewayRegistration->getReferenceName(), $gatewayRegistration->getClassWithAnnotation(), $gatewayRegistration->getClassWithAnnotation());
-        }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function registerWithin(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
+    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
     {
         foreach ($this->gatewayRegistrations as $annotationRegistration) {
             /** @var GatewayAnnotation $annotation */
@@ -98,13 +89,5 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
 
             $configuration->registerGatewayBuilder($gateway);
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem): void
-    {
-        return;
     }
 }

@@ -11,6 +11,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\Messa
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivatorAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
@@ -61,7 +62,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->registerWithin($configuration, [], InMemoryConfigurationVariableRetrievingService::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::create("inputChannel", ServiceActivatorWithAllConfigurationDefined::class, "sendMessage");
         $serviceActivatorBuilder->withMethodParameterConverters([

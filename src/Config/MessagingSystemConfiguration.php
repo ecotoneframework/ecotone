@@ -66,6 +66,14 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->initialize($moduleConfigurationRetrievingService, $configurationObserver);
         $this->configurationObserver = $configurationObserver;
+
+        foreach ($this->modules as $module) {
+            $module->prepare(
+                $this,
+                $this->moduleExtensions[$module->getName()],
+                $configurationObserver
+            );
+        }
     }
 
     /**

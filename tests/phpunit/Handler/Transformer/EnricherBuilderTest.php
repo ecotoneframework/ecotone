@@ -9,6 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\ExpressionHeaderSetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\ExpressionPayloadSetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\MultipleExpressionPayloadSetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\StaticHeaderSetterBuilder;
@@ -460,6 +461,47 @@ class EnricherBuilderTest extends MessagingTest
         $enricher->handle($inputMessage);
 
         $this->assertEquals([], $messageHandler->getReceivedMessage()->getPayload());
+    }
+
+    public function test_sending_request_message_and_enriched_with_new_header()
+    {
+        $outputChannel = QueueChannel::create();
+        $replyPayload = MessageBuilder::withPayload("some")
+                            ->setHeader("userId", 123)
+                            ->build();
+        $setterBuilders = [
+            ExpressionHeaderSetterBuilder::createWith("user", "headers['userId']")
+        ];
+
+        $inputMessage       = MessageBuilder::withPayload("some")
+            ->setReplyChannel($outputChannel)
+            ->build();
+        $requestChannelName = "requestChannel";
+        $requestChannel     = DirectChannel::create();
+        $messageHandler     = ReplyViaHeadersMessageHandler::create($replyPayload);
+        $requestChannel->subscribe($messageHandler);
+
+        $enricher = EnricherBuilder::create(
+            "some",
+            $setterBuilders
+        )
+            ->withRequestMessageChannel($requestChannelName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray(
+                    [
+                        $requestChannelName => $requestChannel
+                    ]
+                ),
+                InMemoryReferenceSearchService::createWith(
+                    [
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                    ]
+                )
+            );
+
+        $enricher->handle($inputMessage);
+
+        $this->assertEquals(123, $outputChannel->receive()->getHeaders()->get("user"));
     }
 
     public function test_extracting_unique_values_from_arrays_for_request_message()

@@ -99,7 +99,7 @@ abstract class MessagingException extends \Exception
     {
         $cause = $this->cause;
         if ($cause instanceof MessagingException && $cause->getCause()) {
-            $cause = $this->getCause();
+            $cause = $cause->getCause();
         }
 
         return $cause;

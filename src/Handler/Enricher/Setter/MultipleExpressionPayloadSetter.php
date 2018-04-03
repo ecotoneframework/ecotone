@@ -72,7 +72,7 @@ class MultipleExpressionPayloadSetter implements Setter
     public function evaluate(Message $enrichMessage, ?Message $replyMessage)
     {
         $dataToBeEnriched   = $enrichMessage->getPayload();
-        $replyData = $this->expressionEvaluationService->evaluate(
+        $elementsFromReplyMessage = $this->expressionEvaluationService->evaluate(
             $this->expression,
             [
                 "payload" => $replyMessage->getPayload(),
@@ -80,12 +80,15 @@ class MultipleExpressionPayloadSetter implements Setter
             ]
         );
 
-        $contexts = $this->expressionEvaluationService->evaluate($this->pathToEnrichedContext, $dataToBeEnriched);
+        $contexts = $dataToBeEnriched;
+        if ($this->pathToEnrichedContext) {
+            $contexts = $this->expressionEvaluationService->evaluate($this->pathToEnrichedContext, $dataToBeEnriched);
+        }
 
         foreach ($contexts as $key => $context) {
             $propertyToSaveUnder = PropertyPath::createWith($this->pathToEnrichedContext . "[{$key}][{$this->propertyPath}]");
             $hasBeenEnriched = false;
-            foreach ($replyData as $dataToEnrich) {
+            foreach ($elementsFromReplyMessage as $dataToEnrich) {
                 if ($this->expressionEvaluationService->evaluate($this->dataMappingExpression, ["context" => $context, "reply" => $dataToEnrich]) === true) {
                     $dataToBeEnriched    = $this->dataSetter->enrichDataWith($propertyToSaveUnder, $dataToBeEnriched, $dataToEnrich);
                     $hasBeenEnriched = true;

@@ -375,6 +375,55 @@ class EnricherBuilderTest extends MessagingTest
         );
     }
 
+    public function test_enriching_root_array_with_multiple_values_at_once_by_mapping()
+    {
+        $outputChannel = QueueChannel::create();
+        $inputMessage = MessageBuilder::withPayload(
+            [
+                ["orderId"=>1, "personId"=>1],
+                ["orderId"=>2, "personId"=>4]
+            ]
+        );
+        $replyPayload = [
+            [
+                "personId" => 1,
+                "name" => "johny"
+            ],
+            [
+                "personId" => 4,
+                "name" => "franco"
+            ]
+        ];
+        $setterBuilders = [
+            MultipleExpressionPayloadSetterBuilder::createWithMapping("person", "payload", "", "context['personId'] == reply['personId']")
+        ];
+        $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, $replyPayload, $setterBuilders);
+
+        $this->assertEquals(
+            [
+                [
+                    "orderId" => 1,
+                    "personId" => 1,
+                    "person" =>
+                        [
+                            "personId" => 1,
+                            "name" => "johny"
+                        ]
+                ],
+                [
+                    "orderId" => 2,
+                    "personId" => 4,
+                    "person" =>
+                        [
+                            "personId" => 4,
+                            "name" => "franco"
+                        ]
+                ]
+            ],
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
     public function test_throwing_exception_if_enriching_multiple_values_but_there_was_no_enough_data_to_be_mapped()
     {
         $outputChannel = QueueChannel::create();

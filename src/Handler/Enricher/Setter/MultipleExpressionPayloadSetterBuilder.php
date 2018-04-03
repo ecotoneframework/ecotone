@@ -50,16 +50,16 @@ class MultipleExpressionPayloadSetterBuilder implements SetterBuilder
     }
 
     /**
-     * @param string $contextPropertyPath under what key data will be enriched
-     * @param string $expression  path to array that will be iterated to enrich (e.g. `payload`, if payload is enriched array)
-     * @param string $pathToEnrichedContext context inside array element which will be enriched
-     * @param string $dataMappingExpression Must return array. e.g "context['personId'] = reply.personId", where reply is reply message and personId is property from pathToEnrichedArray context
+     * @param string $pathToEnrichInContext              path inside context, which will be enriched with mapped data
+     * @param string $expressionToElementsInReplyMessage path to elements from reply message that will be added to current message. Must return array
+     * @param string $pathToElementInInputMessagePayload Path to enriched context from input message. Must return array.
+     * @param string $dataMappingExpression              Must return array. e.g "context['personId'] = reply.personId", where reply is reply message and personId is property from pathToEnrichedArray context
      *
      * @return MultipleExpressionPayloadSetterBuilder
      */
-    public static function createWithMapping(string $contextPropertyPath, string $expression, string $pathToEnrichedContext, string $dataMappingExpression) : self
+    public static function createWithMapping(string $pathToEnrichInContext, string $expressionToElementsInReplyMessage, string $pathToElementInInputMessagePayload, string $dataMappingExpression) : self
     {
-        return new self($contextPropertyPath, $expression, $pathToEnrichedContext, $dataMappingExpression);
+        return new self($pathToEnrichInContext, $expressionToElementsInReplyMessage, $pathToElementInInputMessagePayload, $dataMappingExpression);
     }
 
     /**

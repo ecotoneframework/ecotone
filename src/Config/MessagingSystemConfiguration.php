@@ -69,6 +69,9 @@ final class MessagingSystemConfiguration implements Configuration
 
         foreach ($this->modules as $module) {
             $module->prepare($this, $this->moduleExtensions[$module->getName()], $configurationObserver);
+            foreach ($module->getRequiredReferences() as $requiredReference) {
+                $this->configurationObserver->notifyRequiredAvailableReference($requiredReference->getReferenceName());
+            }
         }
     }
 

@@ -39,9 +39,6 @@ interface Module
      */
     public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver) : void;
 
-//    @TODO change preConfigure for prepare and registerWithin for configure.
-// Prepare should register all handlers, later it should stay locked
-
     /**
      * Runs during configuration phase, when all handlers must be defined
      *

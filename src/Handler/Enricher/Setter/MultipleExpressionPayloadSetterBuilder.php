@@ -50,10 +50,10 @@ class MultipleExpressionPayloadSetterBuilder implements SetterBuilder
     }
 
     /**
-     * @param string $contextPropertyPath
-     * @param string $expression
-     * @param string $pathToEnrichedContext context which will be enriched
-     * @param string $dataMappingExpression Must return array. e.g "personId = reply.personId", where reply is reply message and personId is property from pathToEnrichedArray context
+     * @param string $contextPropertyPath under what key data will be enriched
+     * @param string $expression  path to array that will be iterated to enrich (e.g. `payload`, if payload is enriched array)
+     * @param string $pathToEnrichedContext context inside array element which will be enriched
+     * @param string $dataMappingExpression Must return array. e.g "context['personId'] = reply.personId", where reply is reply message and personId is property from pathToEnrichedArray context
      *
      * @return MultipleExpressionPayloadSetterBuilder
      */

@@ -463,6 +463,45 @@ class EnricherBuilderTest extends MessagingTest
         $this->assertEquals([], $messageHandler->getReceivedMessage()->getPayload());
     }
 
+    public function test_sending_request_messages_with_appended_new_headers()
+    {
+        $outputChannel = QueueChannel::create();
+        $inputMessage = MessageBuilder::withPayload(["orders" => []]);
+        $replyPayload = [];
+        $setterBuilders = [StaticPayloadSetterBuilder::createWith("some", "test")];
+
+        $inputMessage       = $inputMessage
+            ->setReplyChannel($outputChannel)
+            ->build();
+        $requestChannelName = "requestChannel";
+        $requestChannel     = DirectChannel::create();
+        $messageHandler     = ReplyViaHeadersMessageHandler::create($replyPayload);
+        $requestChannel->subscribe($messageHandler);
+
+        $enricher = EnricherBuilder::create(
+            "some",
+            $setterBuilders
+        )
+            ->withRequestMessageChannel($requestChannelName)
+            ->withRequestHeaderExpression("token", "123")
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray(
+                    [
+                        $requestChannelName => $requestChannel
+                    ]
+                ),
+                InMemoryReferenceSearchService::createWith(
+                    [
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                    ]
+                )
+            );
+
+        $enricher->handle($inputMessage);
+
+        $this->assertEquals(123, $messageHandler->getReceivedMessage()->getHeaders()->get("token"));
+    }
+
     public function test_sending_request_message_and_enriched_with_new_header()
     {
         $outputChannel = QueueChannel::create();

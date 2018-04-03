@@ -37,6 +37,10 @@ class EnricherBuilder implements MessageHandlerBuilder
      * @var SetterBuilder[]
      */
     private $setterBuilders;
+    /**
+     * @var string[]
+     */
+    private $requestHeaderExpressions = [];
 
     /**
      * EnricherBuilder constructor.
@@ -98,6 +102,19 @@ class EnricherBuilder implements MessageHandlerBuilder
     }
 
     /**
+     * @param string $headerName
+     * @param string $expression
+     *
+     * @return EnricherBuilder
+     */
+    public function withRequestHeaderExpression(string $headerName, string $expression) : self
+    {
+        $this->requestHeaderExpressions[$headerName] = $expression;
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function getRequiredReferenceNames(): array
@@ -127,7 +144,7 @@ class EnricherBuilder implements MessageHandlerBuilder
                         ->build($referenceSearchService, $channelResolver);
         }
 
-        $internalEnrichingService = new InternalEnrichingService($gateway, $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE), $propertySetters, $this->requestPayloadExpression);
+        $internalEnrichingService = new InternalEnrichingService($gateway, $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE), $propertySetters, $this->requestPayloadExpression, $this->requestHeaderExpressions);
 
         return new Enricher(
             RequestReplyProducer::createRequestAndReplyFromHeaders(

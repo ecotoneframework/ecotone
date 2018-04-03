@@ -31,6 +31,10 @@ class InternalEnrichingService
      * @var ExpressionEvaluationService
      */
     private $expressionEvaluationService;
+    /**
+     * @var string[]
+     */
+    private $requestHeaderExpressions;
 
     /**
      * InternalEnrichingService constructor.
@@ -39,13 +43,15 @@ class InternalEnrichingService
      * @param ExpressionEvaluationService $expressionEvaluationService
      * @param Setter[]                    $setters
      * @param string                      $requestPayloadExpression
+     * @param string[]                       $requestHeaderExpressions
      */
-    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, array $setters, ?string $requestPayloadExpression)
+    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, array $setters, ?string $requestPayloadExpression, array $requestHeaderExpressions)
     {
         $this->enrichGateway = $enrichGateway;
         $this->setters = $setters;
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->requestPayloadExpression = $requestPayloadExpression;
+        $this->requestHeaderExpressions = $requestHeaderExpressions;
     }
 
     /**
@@ -58,19 +64,27 @@ class InternalEnrichingService
                             ->build();
         $replyMessage = null;
         if ($this->enrichGateway) {
-            $requestMessage = $enrichedMessage;
+            $requestMessage = MessageBuilder::fromMessage($enrichedMessage);
+
             if ($this->requestPayloadExpression) {
                 $requestPayload = $this->expressionEvaluationService->evaluate($this->requestPayloadExpression, [
-                    "headers" => $requestMessage->getHeaders()->headers(),
-                    "payload" => $requestMessage->getPayload()
+                    "headers" => $enrichedMessage->getHeaders()->headers(),
+                    "payload" => $enrichedMessage->getPayload()
                 ]);
 
-                $requestMessage = MessageBuilder::fromMessage($requestMessage)
-                                    ->setPayload($requestPayload)
-                                    ->build();
+                $requestMessage->setPayload($requestPayload);
             }
 
-            $replyMessage = $this->enrichGateway->execute($requestMessage);
+            $extraHeaders = [];
+            foreach ($this->requestHeaderExpressions as $requestHeaderName => $requestHeaderExpression) {
+                $extraHeaders[$requestHeaderName] = $this->expressionEvaluationService->evaluate($requestHeaderExpression, [
+                    "headers" => $enrichedMessage->getHeaders()->headers(),
+                    "payload" => $enrichedMessage->getPayload()
+                ]);
+            }
+            $requestMessage->setMultipleHeaders($extraHeaders);
+
+            $replyMessage = $this->enrichGateway->execute($requestMessage->build());
         }
 
         foreach ($this->setters as $setter) {

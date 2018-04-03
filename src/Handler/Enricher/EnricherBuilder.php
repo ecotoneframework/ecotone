@@ -28,6 +28,10 @@ class EnricherBuilder implements MessageHandlerBuilder
     /**
      * @var string
      */
+    private $outputChannelName = "";
+    /**
+     * @var string
+     */
     private $requestChannelName;
     /**
      * @var string|null
@@ -102,6 +106,18 @@ class EnricherBuilder implements MessageHandlerBuilder
     }
 
     /**
+     * @param string $outputChannelName
+     *
+     * @return EnricherBuilder
+     */
+    public function withOutputMessageChannel(string $outputChannelName) : self
+    {
+        $this->outputChannelName = $outputChannelName;
+
+        return $this;
+    }
+
+    /**
      * @param string $headerName
      * @param string $value
      *
@@ -147,7 +163,8 @@ class EnricherBuilder implements MessageHandlerBuilder
         $internalEnrichingService = new InternalEnrichingService($gateway, $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE), $propertySetters, $this->requestPayloadExpression, $this->requestHeaders);
 
         return new Enricher(
-            RequestReplyProducer::createRequestAndReplyFromHeaders(
+            RequestReplyProducer::createRequestAndReply(
+                $this->outputChannelName,
                 MethodInvoker::createWith($internalEnrichingService, "enrich", []),
                 $channelResolver,
                 false

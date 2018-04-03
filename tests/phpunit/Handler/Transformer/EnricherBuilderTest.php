@@ -309,6 +309,38 @@ class EnricherBuilderTest extends MessagingTest
         );
     }
 
+    public function test_enriching_with_output_channel_defined()
+    {
+        $outputChannel = QueueChannel::create();
+
+        $workerName = "johny";
+        $inputMessage = MessageBuilder::withPayload(["worker" => []])
+            ->build();
+
+        $enricher = EnricherBuilder::create(
+            "some",
+            [StaticPayloadSetterBuilder::createWith("worker[name]", $workerName)]
+        )
+            ->withOutputMessageChannel("outputChannel")
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    "outputChannel" => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createWith(
+                    [
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                    ]
+                )
+            );
+
+        $enricher->handle($inputMessage);
+
+        $this->assertEquals(
+            ["worker" => ["name" => $workerName]],
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
     public function test_throwing_exception_if_property_path_contains_dots()
     {
         $this->expectException(InvalidArgumentException::class);

@@ -64,15 +64,8 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, ConfigurationObserver $configurationObserver)
     {
-        $this->initialize($moduleConfigurationRetrievingService);
+        $this->initialize($moduleConfigurationRetrievingService, $configurationObserver);
         $this->configurationObserver = $configurationObserver;
-
-        foreach ($this->modules as $module) {
-            $module->prepare($this, $this->moduleExtensions[$module->getName()], $configurationObserver);
-            foreach ($module->getRequiredReferences() as $requiredReference) {
-                $this->configurationObserver->notifyRequiredAvailableReference($requiredReference->getReferenceName());
-            }
-        }
     }
 
     /**
@@ -242,16 +235,24 @@ final class MessagingSystemConfiguration implements Configuration
 
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
+     * @param ConfigurationObserver   $configurationObserver
      */
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService) : void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, ConfigurationObserver $configurationObserver) : void
     {
         $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
         $moduleExtensions = $moduleConfigurationRetrievingService->findAllModuleExtensionConfigurations();
         foreach ($moduleExtensions as $moduleExtension) {
             $this->moduleExtensions[$moduleExtension->getName()][] = $moduleExtension;
+            foreach ($moduleExtension->getRequiredReferences() as $requiredReference) {
+                $configurationObserver->notifyRequiredAvailableReference($requiredReference->getReferenceName());
+            }
         }
 
         foreach ($modules as $module) {
+            foreach ($module->getRequiredReferences() as $requiredReference) {
+                $configurationObserver->notifyRequiredAvailableReference($requiredReference->getReferenceName());
+            }
+
             if (!array_key_exists($module->getName(), $this->moduleExtensions)) {
                 $this->moduleExtensions[$module->getName()] = [];
             }

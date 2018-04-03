@@ -483,7 +483,7 @@ class EnricherBuilderTest extends MessagingTest
             $setterBuilders
         )
             ->withRequestMessageChannel($requestChannelName)
-            ->withRequestHeaderExpression("token", "123")
+            ->withRequestHeader("token", "123")
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray(
                     [

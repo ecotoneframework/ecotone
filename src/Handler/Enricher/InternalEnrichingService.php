@@ -34,7 +34,7 @@ class InternalEnrichingService
     /**
      * @var string[]
      */
-    private $requestHeaderExpressions;
+    private $requestHeaders;
 
     /**
      * InternalEnrichingService constructor.
@@ -43,15 +43,15 @@ class InternalEnrichingService
      * @param ExpressionEvaluationService $expressionEvaluationService
      * @param Setter[]                    $setters
      * @param string                      $requestPayloadExpression
-     * @param string[]                       $requestHeaderExpressions
+     * @param string[]                    $requestHeaders
      */
-    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, array $setters, ?string $requestPayloadExpression, array $requestHeaderExpressions)
+    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, array $setters, ?string $requestPayloadExpression, array $requestHeaders)
     {
-        $this->enrichGateway = $enrichGateway;
-        $this->setters = $setters;
+        $this->enrichGateway               = $enrichGateway;
+        $this->setters                     = $setters;
         $this->expressionEvaluationService = $expressionEvaluationService;
-        $this->requestPayloadExpression = $requestPayloadExpression;
-        $this->requestHeaderExpressions = $requestHeaderExpressions;
+        $this->requestPayloadExpression    = $requestPayloadExpression;
+        $this->requestHeaders              = $requestHeaders;
     }
 
     /**
@@ -76,11 +76,8 @@ class InternalEnrichingService
             }
 
             $extraHeaders = [];
-            foreach ($this->requestHeaderExpressions as $requestHeaderName => $requestHeaderExpression) {
-                $extraHeaders[$requestHeaderName] = $this->expressionEvaluationService->evaluate($requestHeaderExpression, [
-                    "headers" => $enrichedMessage->getHeaders()->headers(),
-                    "payload" => $enrichedMessage->getPayload()
-                ]);
+            foreach ($this->requestHeaders as $requestHeaderName => $requestHeaderValue) {
+                $extraHeaders[$requestHeaderName] = $requestHeaderValue;
             }
             $requestMessage->setMultipleHeaders($extraHeaders);
 

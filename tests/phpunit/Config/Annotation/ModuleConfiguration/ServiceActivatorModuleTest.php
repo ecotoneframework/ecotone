@@ -78,7 +78,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerMessageHandler(
                     $serviceActivatorBuilder
-                        ->withOutputChannel('outputChannel')
+                        ->withOutputMessageChannel('outputChannel')
                         ->withRequiredReply(true)
                 )
         );

@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -18,7 +19,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
+class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
     /**
      * @var string
@@ -105,7 +106,7 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @param string $messageChannelName
      * @return self
      */
-    public function withOutputChannel(string $messageChannelName): self
+    public function withOutputMessageChannel(string $messageChannelName): self
     {
         $this->outputChannelName = $messageChannelName;
 

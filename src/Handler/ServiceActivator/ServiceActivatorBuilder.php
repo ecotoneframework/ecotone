@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
@@ -18,7 +19,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConverters
+class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
     /**
      * @var string
@@ -90,7 +91,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
      * @param string $messageChannelName
      * @return ServiceActivatorBuilder
      */
-    public function withOutputChannel(string $messageChannelName): self
+    public function withOutputMessageChannel(string $messageChannelName): self
     {
         $this->outputChannelName = $messageChannelName;
 

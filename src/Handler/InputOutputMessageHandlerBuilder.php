@@ -9,7 +9,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
+abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithOutputChannel
 {
     /**
      * @var string

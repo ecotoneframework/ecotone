@@ -51,7 +51,7 @@ class SplitterModuleTest extends AnnotationConfigurationTest
         $messageHandlerBuilder = SplitterBuilder::create(
             "inputChannel", SplitterExample::class,  "split"
         )
-            ->withOutputChannel("outputChannel");
+            ->withOutputMessageChannel("outputChannel");
         $messageHandlerBuilder->withMethodParameterConverters([
             MessageToPayloadParameterConverterBuilder::create("payload")
         ]);

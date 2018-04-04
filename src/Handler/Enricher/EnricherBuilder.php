@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
@@ -19,7 +20,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EnricherBuilder implements MessageHandlerBuilder
+class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
 {
     /**
      * @var string

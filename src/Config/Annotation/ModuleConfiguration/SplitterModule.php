@@ -41,7 +41,7 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
                 $annotationRegistration->getReferenceName(),
                 $annotationRegistration->getMethodName()
             )
-            ->withOutputChannel($annotation->outputChannelName)
+            ->withOutputMessageChannel($annotation->outputChannelName)
         ;
     }
 

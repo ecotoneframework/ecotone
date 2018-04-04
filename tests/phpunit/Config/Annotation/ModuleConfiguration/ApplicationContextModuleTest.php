@@ -6,6 +6,7 @@ use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
 use Fixture\Annotation\ApplicationContext\GatewayExample;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
@@ -72,6 +73,15 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
             ])->withOutputMessageChannel(ApplicationContextExample::HTTP_OUTPUT_CHANNEL));
 
         $this->compareWithConfiguredForMethod("withMultipleMessageComponents", $expectedConfiguration);
+    }
+
+    public function test_configuring_with_channel_interceptors()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel(ApplicationContextExample::HTTP_INPUT_CHANNEL))
+            ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create(ApplicationContextExample::HTTP_INPUT_CHANNEL, "ref"));
+
+        $this->compareWithConfiguredForMethod("withChannelInterceptors", $expectedConfiguration);
     }
 
     /**

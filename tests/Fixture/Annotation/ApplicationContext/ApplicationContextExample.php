@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Fixture\Annotation\ApplicationContext;
 
+use Fixture\Channel\DumbChannelInterceptor;
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
@@ -62,6 +64,18 @@ class ApplicationContextExample
         return [
             $this->httpEntryChannel(),
             $this->enricherHttpEntry()
+        ];
+    }
+
+    /**
+     * @return array
+     * @MessagingComponentAnnotation()
+     */
+    public function withChannelInterceptors() : array
+    {
+        return [
+            $this->httpEntryChannel(),
+            SimpleChannelInterceptorBuilder::create(self::HTTP_INPUT_CHANNEL, "ref")
         ];
     }
 

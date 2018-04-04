@@ -5,6 +5,8 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfi
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
@@ -95,14 +97,16 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
 
     /**
      * @param Configuration $configuration
-     * @param               $messagingComponent
+     * @param object $messagingComponent
      *
      * @throws ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function registerMessagingComponent(Configuration $configuration, $messagingComponent): void
     {
-        if ($messagingComponent instanceof MessageHandlerBuilder) {
+        if ($messagingComponent instanceof ChannelInterceptorBuilder) {
+            $configuration->registerChannelInterceptor($messagingComponent);
+        } else if ($messagingComponent instanceof MessageHandlerBuilder) {
             $configuration->registerMessageHandler($messagingComponent);
         } else if ($messagingComponent instanceof MessageChannelBuilder) {
             $configuration->registerMessageChannel($messagingComponent);

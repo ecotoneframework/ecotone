@@ -63,6 +63,20 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
     /**
      * @throws ConfigurationException
      */
+    public function test_configuring_multiple_components_from_application_context()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel(ApplicationContextExample::HTTP_INPUT_CHANNEL))
+            ->registerMessageHandler(TransformerBuilder::createHeaderEnricher(ApplicationContextExample::HTTP_INPUT_CHANNEL, [
+                "token" => "abcedfg"
+            ])->withOutputMessageChannel(ApplicationContextExample::HTTP_OUTPUT_CHANNEL));
+
+        $this->compareWithConfiguredForMethod("withMultipleMessageComponents", $expectedConfiguration);
+    }
+
+    /**
+     * @throws ConfigurationException
+     */
     public function test_throwing_exception_if_trying_to_register_not_known_messaging_component()
     {
         $this->checkForWrongConfiguration("wrongMessagingComponent");

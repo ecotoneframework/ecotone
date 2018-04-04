@@ -54,6 +54,18 @@ class ApplicationContextExample
     }
 
     /**
+     * @return array
+     * @MessagingComponentAnnotation()
+     */
+    public function withMultipleMessageComponents() : array
+    {
+        return [
+            $this->httpEntryChannel(),
+            $this->enricherHttpEntry()
+        ];
+    }
+
+    /**
      * @return \stdClass
      */
     public function wrongMessagingComponent() : \stdClass

@@ -74,14 +74,13 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
             $classToRun = $classes[$annotationRegistration->getClassWithAnnotation()];
             $messagingComponent = $classToRun->{$annotationRegistration->getMethodName()}();
 
-            if ($messagingComponent instanceof MessageHandlerBuilder) {
-                $configuration->registerMessageHandler($messagingComponent);
-            } else if ($messagingComponent instanceof MessageChannelBuilder) {
-                $configuration->registerMessageChannel($messagingComponent);
-            } else if ($messagingComponent instanceof GatewayBuilder) {
-                $configuration->registerGatewayBuilder($messagingComponent);
-            } else {
-                throw ConfigurationException::create(get_class($messagingComponent) . " is not known component to register");
+            if(!is_array($messagingComponent)) {
+                $this->registerMessagingComponent($configuration, $messagingComponent);
+                break;
+            }
+
+            foreach ($messagingComponent as $singleMessagingCompoenent) {
+                $this->registerMessagingComponent($configuration, $singleMessagingCompoenent);
             }
         }
     }
@@ -92,5 +91,25 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
     public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem): void
     {
         return;
+    }
+
+    /**
+     * @param Configuration $configuration
+     * @param               $messagingComponent
+     *
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function registerMessagingComponent(Configuration $configuration, $messagingComponent): void
+    {
+        if ($messagingComponent instanceof MessageHandlerBuilder) {
+            $configuration->registerMessageHandler($messagingComponent);
+        } else if ($messagingComponent instanceof MessageChannelBuilder) {
+            $configuration->registerMessageChannel($messagingComponent);
+        } else if ($messagingComponent instanceof GatewayBuilder) {
+            $configuration->registerGatewayBuilder($messagingComponent);
+        } else {
+            throw ConfigurationException::create(get_class($messagingComponent) . " is not known component to register");
+        }
     }
 }

@@ -9,6 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\SubscribableChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
@@ -173,7 +174,7 @@ class GatewayProxyBuilder implements GatewayBuilder
         $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
         $requestChannel = $channelResolver->resolve($this->requestChannelName);
         /** @var DirectChannel $requestChannel */
-        Assert::isSubclassOf($requestChannel, DirectChannel::class, "Gateway request channel ");
+        Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel ");
         if ($replyChannel) {
             /** @var PollableChannel $replyChannel */
             Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");

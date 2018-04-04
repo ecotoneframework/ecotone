@@ -2,7 +2,6 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
-use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
@@ -19,7 +18,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 class DefaultSendAndReceiveService implements SendAndReceiveService
 {
     /**
-     * @var DirectChannel
+     * @var MessageChannel
      */
     private $requestChannel;
     /**
@@ -33,11 +32,11 @@ class DefaultSendAndReceiveService implements SendAndReceiveService
 
     /**
      * DefaultReplySender constructor.
-     * @param DirectChannel $requestChannel
+     * @param MessageChannel $requestChannel
      * @param PollableChannel $replyChannel
      * @param null|MessageChannel $errorChannel
      */
-    private function __construct(DirectChannel $requestChannel, PollableChannel $replyChannel, ?MessageChannel $errorChannel)
+    private function __construct(MessageChannel $requestChannel, PollableChannel $replyChannel, ?MessageChannel $errorChannel)
     {
         $this->replyChannel = $replyChannel;
         $this->requestChannel = $requestChannel;
@@ -45,12 +44,12 @@ class DefaultSendAndReceiveService implements SendAndReceiveService
     }
 
     /**
-     * @param DirectChannel $requestChannel
+     * @param MessageChannel $requestChannel
      * @param null|PollableChannel $replyChannel
      * @param null|MessageChannel $errorChannel
      * @return DefaultSendAndReceiveService
      */
-    public static function create(DirectChannel $requestChannel, ?PollableChannel $replyChannel, ?MessageChannel $errorChannel) : self
+    public static function create(MessageChannel $requestChannel, ?PollableChannel $replyChannel, ?MessageChannel $errorChannel) : self
     {
         return new self($requestChannel, $replyChannel ? $replyChannel : QueueChannel::create(), $errorChannel);
     }

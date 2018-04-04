@@ -78,7 +78,7 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
 
             if(!is_array($messagingComponent)) {
                 $this->registerMessagingComponent($configuration, $messagingComponent);
-                break;
+                continue;
             }
 
             foreach ($messagingComponent as $singleMessagingCompoenent) {

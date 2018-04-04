@@ -76,6 +76,14 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilderWithParameterCon
     /**
      * @inheritDoc
      */
+    public function withInputChannelName(string $inputChannelName): self
+    {
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getRequiredReferenceNames(): array
     {
         return $this->requiredReferenceNames;

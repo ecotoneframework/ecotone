@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
@@ -55,6 +56,6 @@ class NamedMessageChannel
      */
     public function hasName(?string $channelName) : bool
     {
-        return $this->channelName === $channelName;
+        return $this->channelName == $channelName;
     }
 }

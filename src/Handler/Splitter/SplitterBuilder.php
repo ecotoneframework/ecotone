@@ -103,6 +103,16 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
     }
 
     /**
+     * @inheritDoc
+     */
+    public function withInputChannelName(string $inputChannelName): self
+    {
+        $this->inputMessageChannelName = $inputChannelName;
+
+        return $this;
+    }
+
+    /**
      * @param string $messageChannelName
      * @return self
      */

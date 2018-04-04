@@ -83,6 +83,16 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
     }
 
     /**
+     * @inheritDoc
+     */
+    public function withInputChannelName(string $inputChannelName): self
+    {
+        $this->inputChannelName = $inputChannelName;
+
+        return $this;
+    }
+
+    /**
      * @param string $requestChannelName
      *
      * @return EnricherBuilder

@@ -163,6 +163,20 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         $this->methodParameterConverters = $methodParameterConverterBuilders;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function withInputChannelName(string $inputChannelName): self
+    {
+        $this->inputMessageChannelName = $inputChannelName;
+
+        return $this;
+    }
+
+    /**
+     * @param string $channelName
+     * @return RouterBuilder
+     */
     public function withDefaultResolutionChannel(string $channelName) : self
     {
         $this->defaultResolution = $channelName;

@@ -61,6 +61,16 @@ class ModuleMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
+    public function withInputChannelName(string $inputChannelName): self
+    {
+        $this->channelName = $inputChannelName;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getInputMessageChannelName(): string
     {
         return $this->channelName;

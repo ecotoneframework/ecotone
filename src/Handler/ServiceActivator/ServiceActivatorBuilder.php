@@ -119,6 +119,16 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
     /**
      * @inheritDoc
      */
+    public function withInputChannelName(string $inputChannelName): self
+    {
+        $this->inputMessageChannelName = $inputChannelName;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getRequiredReferenceNames(): array
     {
         $requiredReferenceNames = $this->requiredReferenceNames;

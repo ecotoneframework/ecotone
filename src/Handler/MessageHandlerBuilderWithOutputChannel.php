@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
@@ -14,5 +15,5 @@ interface MessageHandlerBuilderWithOutputChannel extends MessageHandlerBuilder
      *
      * @return static
      */
-    public function withOutputMessageChannel(string $messageChannelName) : self;
+    public function withOutputMessageChannel(string $messageChannelName);
 }

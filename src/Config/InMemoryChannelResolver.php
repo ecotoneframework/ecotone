@@ -18,10 +18,15 @@ class InMemoryChannelResolver implements ChannelResolver
      * @var array|NamedMessageChannel[]
      */
     private $resolvableChannels;
+    /**
+     * @var ChannelResolver
+     */
+    private $externalChannelResolver;
 
     /**
      * InMemoryChannelResolver constructor.
      * @param array|NamedMessageChannel[] $resolvableChannels
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct(array $resolvableChannels)
     {
@@ -40,6 +45,7 @@ class InMemoryChannelResolver implements ChannelResolver
     /**
      * @param array|string[] $resolvableChannelsArray
      * @return InMemoryChannelResolver
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function createFromAssociativeArray(array $resolvableChannelsArray) : self
     {
@@ -52,6 +58,20 @@ class InMemoryChannelResolver implements ChannelResolver
         }
 
         return new self($resolvableChannels);
+    }
+
+    /**
+     * @param ChannelResolver $channelResolver
+     * @param array $associativeAdditionalChannels
+     * @return InMemoryChannelResolver
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createWithChanneResolver(ChannelResolver $channelResolver, array $associativeAdditionalChannels) : self
+    {
+        $self = self::createFromAssociativeArray($associativeAdditionalChannels);
+        $self->withExternalChannelResolver($channelResolver);
+
+        return $self;
     }
 
     /**
@@ -77,16 +97,29 @@ class InMemoryChannelResolver implements ChannelResolver
             }
         }
 
+        if ($this->externalChannelResolver) {
+            return $this->externalChannelResolver->resolve($channelName);
+        }
+
         throw DestinationResolutionException::create("Channel with name {$channelName} can't be resolved");
     }
 
     /**
      * @param array|NamedMessageChannel[] $namedMessageChannels
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function initialize($namedMessageChannels) : void
     {
         Assert::allInstanceOfType($namedMessageChannels, NamedMessageChannel::class);
 
         $this->resolvableChannels = $namedMessageChannels;
+    }
+
+    /**
+     * @param ChannelResolver $channelResolver
+     */
+    private function withExternalChannelResolver(ChannelResolver $channelResolver) : void
+    {
+        $this->externalChannelResolver = $channelResolver;
     }
 }

@@ -20,6 +20,13 @@ interface MessageHandlerBuilder
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler;
 
     /**
+     * @param string $inputChannelName
+     *
+     * @return static
+     */
+    public function withInputChannelName(string $inputChannelName);
+
+    /**
      * @return string
      */
     public function getInputMessageChannelName() : string;

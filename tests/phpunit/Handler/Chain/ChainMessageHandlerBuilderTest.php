@@ -109,6 +109,14 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
+    public function test_passing_references_objects_to_top_handler()
+    {
+        $chainBuilder = ChainMessageHandlerBuilder::createWith("some")
+                        ->chain(TransformerBuilder::create("", "some", "method"));
+
+        $this->assertEquals(["some"], $chainBuilder->getRequiredReferenceNames());
+    }
+
     /**
      * @param $messageHandlers
      * @param $requestPayload

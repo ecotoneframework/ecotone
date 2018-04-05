@@ -24,6 +24,10 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      * @var MessageHandlerBuilderWithOutputChannel[]
      */
     private $messageHandlerBuilders;
+    /**
+     * @var string[]
+     */
+    private $requiredReferences = [];
 
     /**
      * ChainMessageHandlerBuilder constructor.
@@ -50,6 +54,9 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     public function chain(MessageHandlerBuilderWithOutputChannel $messageHandler) : self
     {
         $this->messageHandlerBuilders[] = $messageHandler;
+        foreach ($messageHandler->getRequiredReferenceNames() as $referenceName) {
+            $this->requiredReferences[] = $referenceName;
+        }
 
         return $this;
     }
@@ -99,7 +106,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     public function getRequiredReferenceNames(): array
     {
-        return [];
+        return $this->requiredReferences;
     }
 
     /**

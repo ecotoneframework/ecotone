@@ -46,6 +46,12 @@ class SymfonyExpressionEvaluationAdapter implements \SimplyCodedSoftware\Integra
             ];
         });
 
+        $expressionLanguage->register('isset', function ($str) {
+            return $str;
+        }, function ($arguments, array $array, string $key) use ($expressionLanguage) {
+            return isset($array[$key]);
+        });
+
         $this->language = $expressionLanguage;
     }
 

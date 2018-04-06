@@ -191,7 +191,7 @@ class InterfaceToCall
      */
     public function canItReturnNull(): bool
     {
-        return $this->reflectionMethod()->getReturnType()->allowsNull();
+        return is_null($this->reflectionMethod()->getReturnType()) || $this->reflectionMethod()->getReturnType()->allowsNull();
     }
 
     /**

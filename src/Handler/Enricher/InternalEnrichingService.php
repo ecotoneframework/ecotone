@@ -62,7 +62,7 @@ class InternalEnrichingService
     {
         $enrichedMessage = MessageBuilder::fromMessage($message)
                             ->build();
-        $replyMessage = null;
+        $replyMessage = $message;
         if ($this->enrichGateway) {
             $requestMessage = MessageBuilder::fromMessage($enrichedMessage);
 

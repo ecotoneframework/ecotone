@@ -3,12 +3,21 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Chain;
 
+use Fixture\Handler\Transformer\PassThroughTransformer;
+use Fixture\Handler\Transformer\StdClassTransformer;
+use Fixture\Handler\Transformer\StringTransformer;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Chain\ChainMessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\ExpressionHeaderSetterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\StaticHeaderSetterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\StaticPayloadSetterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
@@ -79,6 +88,77 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
+    public function test_chaining_payload_transformers()
+    {
+        $replyChannel = QueueChannel::create();
+        $requestPayload = "x";
+
+        $this->createChainHandlerAndHandle(
+            [
+                TransformerBuilder::createWithReferenceObject("", new StdClassTransformer(), "transform"),
+                TransformerBuilder::createWithReferenceObject("", new StringTransformer(), "transform"),
+            ],
+            $requestPayload,
+            $replyChannel
+        );
+
+        $this->assertEquals(
+            "some",
+            $replyChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_chaining_with_other_chain_inside()
+    {
+        $replyChannel = QueueChannel::create();
+        $requestPayload = "x";
+
+        $this->createChainHandlerAndHandle(
+            [
+                TransformerBuilder::createWithReferenceObject("", new StdClassTransformer(), "transform"),
+                TransformerBuilder::createWithReferenceObject("", new StringTransformer(), "transform"),
+                ChainMessageHandlerBuilder::createWith("")
+                    ->chain(TransformerBuilder::createWithReferenceObject("", new StdClassTransformer(), "transform"))
+            ],
+            $requestPayload,
+            $replyChannel
+        );
+
+        $this->assertEquals(
+            new \stdClass(),
+            $replyChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_chaining_with_other_chain_at_the_beginning_of_flow()
+    {
+        $replyChannel = QueueChannel::create();
+        $requestPayload = ["some" => "bla"];
+
+        $this->createChainHandlerAndHandle(
+            [
+                EnricherBuilder::create("", [
+                   StaticHeaderSetterBuilder::create("awesome", "yes")
+                ]),
+                ChainMessageHandlerBuilder::createWith("")
+                    ->chain(TransformerBuilder::createWithReferenceObject("", new StdClassTransformer(), "transform")),
+                TransformerBuilder::createWithReferenceObject("", new PassThroughTransformer(), "transform"),
+            ],
+            $requestPayload,
+            $replyChannel
+        );
+
+        $message = $replyChannel->receive();
+        $this->assertEquals(
+            new \stdClass(),
+            $message->getPayload()
+        );
+        $this->assertEquals(
+            "yes",
+            $message->getHeaders()->get("awesome")
+        );
+    }
+
     /**
      * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
@@ -109,6 +189,39 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
+    public function test_chaining_with_three_levels()
+    {
+        $replyChannel = QueueChannel::create();
+        $requestPayload = "x";
+
+        $this->createChainHandlerAndHandle(
+            [
+                ChainMessageHandlerBuilder::createWith("")
+                    ->chain(
+                        ChainMessageHandlerBuilder::createWith("")
+                            ->chain(EnricherBuilder::create("", [
+                                ExpressionHeaderSetterBuilder::createWith("some", "false")
+                            ]))
+                            ->chain(EnricherBuilder::create("", [
+                                ExpressionHeaderSetterBuilder::createWith("some2", "payload")
+                            ]))
+                    )
+            ],
+            $requestPayload,
+            $replyChannel
+        );
+
+        $message = $replyChannel->receive();
+        $this->assertEquals(
+            false,
+            $message->getHeaders()->get("some")
+        );
+        $this->assertEquals(
+            "x",
+            $message->getHeaders()->get("some2")
+        );
+    }
+
     public function test_passing_references_objects_to_top_handler()
     {
         $chainBuilder = ChainMessageHandlerBuilder::createWith("some")
@@ -132,7 +245,9 @@ class ChainMessageHandlerBuilderTest extends TestCase
         }
 
         $chainHandler = $chainHandler
-            ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+            ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ]));
 
         $chainHandler->handle(
             MessageBuilder::withPayload($requestPayload)

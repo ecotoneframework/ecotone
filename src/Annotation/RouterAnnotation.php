@@ -12,13 +12,8 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"METHOD"})
  */
-class RouterAnnotation
+class RouterAnnotation extends EndpointAnnotation
 {
-    /**
-     * @var string
-     * @Required()
-     */
-    public $inputChannel;
     /**
      * @var bool
      */

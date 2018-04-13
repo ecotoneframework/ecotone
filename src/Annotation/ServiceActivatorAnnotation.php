@@ -12,17 +12,12 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"METHOD"})
  */
-class ServiceActivatorAnnotation
+class ServiceActivatorAnnotation extends EndpointAnnotation
 {
     /**
      * @var string
-     * @Required()
      */
-    public $inputChannel = '';
-    /**
-     * @var string
-     */
-    public $outputChannel = '';
+    public $outputChannelName = '';
     /**
      * @var bool
      */

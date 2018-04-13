@@ -12,13 +12,8 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"METHOD"})
  */
-class TransformerAnnotation
+class TransformerAnnotation extends EndpointAnnotation
 {
-    /**
-     * @var string
-     * @Required()
-     */
-    public $inputChannelName;
     /**
      * @var string
      */

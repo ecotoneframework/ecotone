@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Interface ConsumerBuilder
@@ -12,15 +13,10 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 interface ConsumerBuilder
 {
     /**
-     * Will be called before building
+     * @param ChannelResolver        $channelResolver
+     * @param ReferenceSearchService $referenceSearchService
      *
-     * @param ChannelResolver $channelResolver
-     * @return void
-     */
-    public function setChannelResolver(ChannelResolver $channelResolver) : void;
-
-    /**
      * @return ConsumerLifecycle
      */
-    public function build() : ConsumerLifecycle;
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : ConsumerLifecycle;
 }

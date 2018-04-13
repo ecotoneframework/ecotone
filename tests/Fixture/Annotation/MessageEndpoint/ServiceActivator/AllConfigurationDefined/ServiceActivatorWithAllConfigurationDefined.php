@@ -24,7 +24,7 @@ class ServiceActivatorWithAllConfigurationDefined
      * @param Message $message
      * @param \stdClass $object
      * @return void
-     * @ServiceActivatorAnnotation(inputChannel="inputChannel", outputChannel="outputChannel", requiresReply=true, parameterConverters={
+     * @ServiceActivatorAnnotation(inputChannelName="inputChannel", outputChannelName="outputChannel", requiresReply=true, parameterConverters={
      *     @MessageToHeaderParameterAnnotation(parameterName="to", headerName="sendTo"),
      *     @MessageToPayloadParameterAnnotation(parameterName="content"),
      *     @MessageParameterAnnotation(parameterName="message"),

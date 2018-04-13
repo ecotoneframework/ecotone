@@ -45,6 +45,7 @@ interface Configuration
 
     /**
      * @param ConsumerBuilder $consumerBuilder
+     *
      * @return MessagingSystemConfiguration
      */
     public function registerConsumer(ConsumerBuilder $consumerBuilder) : MessagingSystemConfiguration;

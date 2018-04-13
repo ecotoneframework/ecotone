@@ -32,17 +32,17 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
      */
     public function test_creating_service_activator_builder_from_annotation()
     {
-        $serviceActivatorAnnotation = new ServiceActivatorAnnotation();
-        $serviceActivatorAnnotation->inputChannel = "inputChannel";
-        $serviceActivatorAnnotation->outputChannel = "outputChannel";
-        $serviceActivatorAnnotation->requiresReply = true;
-        $messageToHeaderConverter = new MessageToHeaderParameterAnnotation();
-        $messageToHeaderConverter->parameterName = "to";
-        $messageToHeaderConverter->headerName = "sendTo";
-        $payloadParameterConverter = new MessageToPayloadParameterAnnotation();
-        $payloadParameterConverter->parameterName = "content";
-        $messageParameterConverter = new MessageParameterAnnotation();
-        $messageParameterConverter->parameterName = "message";
+        $serviceActivatorAnnotation                    = new ServiceActivatorAnnotation();
+        $serviceActivatorAnnotation->inputChannelName  = "inputChannel";
+        $serviceActivatorAnnotation->outputChannelName = "outputChannel";
+        $serviceActivatorAnnotation->requiresReply     = true;
+        $messageToHeaderConverter                      = new MessageToHeaderParameterAnnotation();
+        $messageToHeaderConverter->parameterName       = "to";
+        $messageToHeaderConverter->headerName          = "sendTo";
+        $payloadParameterConverter                     = new MessageToPayloadParameterAnnotation();
+        $payloadParameterConverter->parameterName      = "content";
+        $messageParameterConverter                     = new MessageParameterAnnotation();
+        $messageParameterConverter->parameterName      = "message";
         $referenceServiceConverter = new MessageToReferenceServiceAnnotation();
         $referenceServiceConverter->parameterName = "object";
         $referenceServiceConverter->referenceName = "reference";

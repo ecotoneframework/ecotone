@@ -26,13 +26,13 @@ class RouterModuleTest extends AnnotationConfigurationTest
      */
     public function test_creating_router_builder_from_annotation()
     {
-        $objectToInvokeReference = RouterWithNoResolutionRequiredExample::class;
-        $routerAnnotation = new RouterAnnotation();
-        $routerAnnotation->inputChannel = "inputChannel";
-        $routerAnnotation->isResolutionRequired = false;
-        $messageToPayloadParameterAnnotation = new MessageToPayloadParameterAnnotation();
+        $objectToInvokeReference                            = RouterWithNoResolutionRequiredExample::class;
+        $routerAnnotation                                   = new RouterAnnotation();
+        $routerAnnotation->inputChannelName                 = "inputChannel";
+        $routerAnnotation->isResolutionRequired             = false;
+        $messageToPayloadParameterAnnotation                = new MessageToPayloadParameterAnnotation();
         $messageToPayloadParameterAnnotation->parameterName = "content";
-        $routerAnnotation->parameterConverters = [
+        $routerAnnotation->parameterConverters              = [
             $messageToPayloadParameterAnnotation
         ];
 

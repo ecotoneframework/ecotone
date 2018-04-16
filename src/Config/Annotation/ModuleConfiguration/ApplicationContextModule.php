@@ -19,6 +19,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class AnnotationApplicationContextConfiguration
@@ -77,12 +78,12 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
             $messagingComponent = $classToRun->{$annotationRegistration->getMethodName()}();
 
             if(!is_array($messagingComponent)) {
-                $this->registerMessagingComponent($configuration, $messagingComponent);
+                $this->registerMessagingComponent($configuration, $messagingComponent, $moduleExtensions);
                 continue;
             }
 
             foreach ($messagingComponent as $singleMessagingCompoenent) {
-                $this->registerMessagingComponent($configuration, $singleMessagingCompoenent);
+                $this->registerMessagingComponent($configuration, $singleMessagingCompoenent, $moduleExtensions);
             }
         }
     }
@@ -98,12 +99,15 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
     /**
      * @param Configuration $configuration
      * @param object $messagingComponent
+     * @param ApplicationContextModuleExtension[] $moduleExtensions
      *
      * @throws ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function registerMessagingComponent(Configuration $configuration, $messagingComponent): void
+    private function registerMessagingComponent(Configuration $configuration, $messagingComponent, array $moduleExtensions): void
     {
+        Assert::allInstanceOfType($moduleExtensions, ApplicationContextModuleExtension::class);
+
         if ($messagingComponent instanceof ChannelInterceptorBuilder) {
             $configuration->registerChannelInterceptor($messagingComponent);
         } else if ($messagingComponent instanceof MessageHandlerBuilder) {
@@ -113,6 +117,13 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
         } else if ($messagingComponent instanceof GatewayBuilder) {
             $configuration->registerGatewayBuilder($messagingComponent);
         } else {
+            foreach ($moduleExtensions as $moduleExtension) {
+                if ($moduleExtension->canHandle($messagingComponent)) {
+                    $moduleExtension->registerMessagingComponent($configuration, $messagingComponent);
+                    return;
+                }
+            }
+
             throw ConfigurationException::create(get_class($messagingComponent) . " is not known component to register");
         }
     }

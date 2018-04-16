@@ -81,6 +81,15 @@ class ApplicationContextExample
 
     /**
      * @return \stdClass
+     * @MessagingComponentAnnotation()
+     */
+    public function withStdClassConverterByExtension() : \stdClass
+    {
+        return new \stdClass();
+    }
+
+    /**
+     * @return \stdClass
      */
     public function wrongMessagingComponent() : \stdClass
     {

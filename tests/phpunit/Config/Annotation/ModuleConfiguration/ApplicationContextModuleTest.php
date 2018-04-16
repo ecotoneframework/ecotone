@@ -3,6 +3,7 @@
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
+use Fixture\Annotation\ApplicationContext\ApplicationContextModuleExtensionExample;
 use Fixture\Annotation\ApplicationContext\GatewayExample;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
@@ -90,6 +91,22 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
     public function test_throwing_exception_if_trying_to_register_not_known_messaging_component()
     {
         $this->checkForWrongConfiguration("wrongMessagingComponent");
+    }
+
+    public function test_registering_from_extensions()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("extension"));
+
+        $annotationConfiguration = $this->createAnnotationConfiguration("withStdClassConverterByExtension");
+
+        $configuration = $this->createMessagingSystemConfiguration();
+        $annotationConfiguration->prepare($configuration, [ApplicationContextModuleExtensionExample::create(InMemoryAnnotationRegistrationService::createEmpty())], NullObserver::create());
+
+        $this->assertEquals(
+            $expectedConfiguration,
+            $configuration
+        );
     }
 
     /**

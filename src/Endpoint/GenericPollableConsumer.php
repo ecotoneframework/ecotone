@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
-use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
+
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 
 /**
@@ -25,32 +25,32 @@ class GenericPollableConsumer implements ConsumerLifecycle
      */
     private $inputChannel;
     /**
-     * @var MessageChannel
+     * @var GenericPollableGateway
      */
-    private $outputChannel;
+    private $gateway;
 
     /**
      * GenericPollableConsumer constructor.
      * @param string $consumerName
      * @param PollableChannel $inputChannel
-     * @param MessageChannel $outputChannel
+     * @param GenericPollableGateway $gateway
      */
-    private function __construct(string $consumerName, PollableChannel $inputChannel, MessageChannel $outputChannel)
+    private function __construct(string $consumerName, PollableChannel $inputChannel, GenericPollableGateway $gateway)
     {
         $this->consumerName = $consumerName;
         $this->inputChannel = $inputChannel;
-        $this->outputChannel = $outputChannel;
+        $this->gateway = $gateway;
     }
 
     /**
      * @param string $consumerName
      * @param PollableChannel $inputChannel
-     * @param MessageChannel $outputChannel
+     * @param GenericPollableGateway $gateway
      * @return GenericPollableConsumer
      */
-    public static function createWith(string $consumerName, PollableChannel $inputChannel, MessageChannel $outputChannel) : self
+    public static function createWith(string $consumerName, PollableChannel $inputChannel, GenericPollableGateway $gateway) : self
     {
-        return new self($consumerName, $inputChannel, $outputChannel);
+        return new self($consumerName, $inputChannel, $gateway);
     }
 
     /**
@@ -64,7 +64,7 @@ class GenericPollableConsumer implements ConsumerLifecycle
             $receivedMessage = $this->inputChannel->receive();
 
             if ($receivedMessage) {
-                $this->outputChannel->send($receivedMessage);
+                $this->gateway->runFlow($receivedMessage);
             }
         }
     }

@@ -15,6 +15,8 @@ use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceWithFutureReceive;
 use Fixture\Service\ServiceInterface\ServiceInterfaceWithUnknownReturnType;
 use Fixture\Service\ServiceInterface\ServiceReceivingMessageAndReturningMessage;
+use Fixture\Transaction\FakeTransaction;
+use Fixture\Transaction\FakeTransactionFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
@@ -26,6 +28,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageC
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\ErrorMessage;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
@@ -518,5 +521,85 @@ class GatewayProxyBuilderTest extends MessagingTest
             $replyData,
             $replyMessage
         );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_calling_gateway_with_success_transactions()
+    {
+        $messageHandler     = NoReturnMessageHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+        $transactionFactoryReferenceNames = ["trans1", "trans2"];
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName)
+                                ->withTransactionFactories($transactionFactoryReferenceNames);
+
+        $this->assertEquals($transactionFactoryReferenceNames, $gatewayProxyBuilder->getRequiredReferences());
+
+
+        /** @var ServiceInterfaceSendOnly $gatewayProxy */
+        $transactionFactoryOne = FakeTransactionFactory::create();
+        $transactionFactoryTwo = FakeTransactionFactory::create();
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createWith([
+                "trans1" => $transactionFactoryOne,
+                "trans2" => $transactionFactoryTwo
+            ]),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                ]
+            )
+        );
+
+        $this->assertNull($transactionFactoryOne->getCurrentTransaction());
+        $this->assertNull($transactionFactoryTwo->getCurrentTransaction());
+
+        $gatewayProxy->sendMail('test');
+
+        $this->assertTrue($transactionFactoryOne->getCurrentTransaction()->isCommitted());
+        $this->assertTrue($transactionFactoryTwo->getCurrentTransaction()->isCommitted());
+    }
+
+    public function test_calling_gateway_with_failure_transactions()
+    {
+        $messageHandler     = ExceptionMessageHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+        $transactionFactoryReferenceNames = ["trans1"];
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName)
+            ->withTransactionFactories($transactionFactoryReferenceNames);
+
+        $this->assertEquals($transactionFactoryReferenceNames, $gatewayProxyBuilder->getRequiredReferences());
+
+        /** @var ServiceInterfaceSendOnly $gatewayProxy */
+        $transactionFactoryOne = FakeTransactionFactory::create();
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createWith([
+                "trans1" => $transactionFactoryOne
+            ]),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                ]
+            )
+        );
+
+        $this->assertNull($transactionFactoryOne->getCurrentTransaction());
+
+        try {
+            $gatewayProxy->sendMail('test');
+        }catch (MessagingException $e) {
+            $this->assertTrue($transactionFactoryOne->getCurrentTransaction()->isRolledBack());
+            return;
+        }
+
+        $this->assertTrue(false, "Transaction was not rolled back");
     }
 }

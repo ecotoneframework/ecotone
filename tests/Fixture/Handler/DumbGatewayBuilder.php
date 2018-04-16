@@ -13,8 +13,20 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  */
 class DumbGatewayBuilder implements GatewayBuilder
 {
+    /**
+     * @var array
+     */
+    private $requiredReferences = [];
+
     private function __construct()
     {
+    }
+
+    public function withRequiredReference(string $referenceName) : self
+    {
+        $this->requiredReferences[] = $referenceName;
+
+        return $this;
     }
 
     public static function create() : self
@@ -36,6 +48,14 @@ class DumbGatewayBuilder implements GatewayBuilder
     public function getRequestChannelName(): string
     {
         // TODO: Implement getInputChannelName() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredReferences(): array
+    {
+        return $this->requiredReferences;
     }
 
     /**

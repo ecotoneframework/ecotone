@@ -50,6 +50,14 @@ class FakeTransactionFactory implements TransactionFactory
      */
     public function begin(): Transaction
     {
-        return $this->transactionToReturn ? $this->transactionToReturn : FakeTransaction::begin();
+        $this->transactionToReturn = $this->transactionToReturn ? $this->transactionToReturn : FakeTransaction::begin();
+
+
+        return $this->transactionToReturn;
+    }
+
+    public function getCurrentTransaction() : ?Transaction
+    {
+        return $this->transactionToReturn;
     }
 }

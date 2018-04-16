@@ -13,9 +13,16 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 interface GatewayBuilder
 {
     /**
+     * Name to be registered under
+     *
      * @return string
      */
     public function getReferenceName() : string;
+
+    /**
+     * @return string[]
+     */
+    public function getRequiredReferences() : array;
 
     /**
      * @return string

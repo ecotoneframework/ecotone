@@ -56,6 +56,14 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @var string
      */
     private $errorChannelName;
+    /**
+     * @var string[]
+     */
+    private $transactionFactoryReferenceNames = [];
+    /**
+     * @var string[]
+     */
+    private $requiredReferenceNames = [];
 
     /**
      * GatewayProxyBuilder constructor.
@@ -120,6 +128,14 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
+    public function getRequiredReferences(): array
+    {
+        return $this->requiredReferenceNames;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getReferenceName(): string
     {
         return $this->referenceName;
@@ -167,10 +183,26 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @param string[] $transactionFactoryReferenceNames
+     * @return GatewayProxyBuilder
+     */
+    public function withTransactionFactories(array $transactionFactoryReferenceNames) : self
+    {
+        $this->transactionFactoryReferenceNames = $transactionFactoryReferenceNames;
+        foreach ($transactionFactoryReferenceNames as $transactionFactoryReferenceName) {
+            $this->requiredReferenceNames[] = $transactionFactoryReferenceName;
+        }
+
+        return $this;
+    }
+
+    /**
      * @inheritdoc
      */
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
+        Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName}");
+
         $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
         $requestChannel = $channelResolver->resolve($this->requestChannelName);
         /** @var DirectChannel $requestChannel */
@@ -204,12 +236,18 @@ class GatewayProxyBuilder implements GatewayBuilder
             $methodArgumentConverters[] = $messageConverterBuilder->build();
         }
 
+        $transactionFactories = [];
+        foreach ($this->transactionFactoryReferenceNames as $referenceName) {
+            $transactionFactories[] = $referenceSearchService->findByReference($referenceName);
+        }
+
         $gateway = new Gateway(
             $this->interfaceName, $this->methodName,
             new MethodCallToMessageConverter(
                 $this->interfaceName, $this->methodName, $methodArgumentConverters
             ),
-            ErrorSendAndReceiveService::create($replyReceiver, $errorChannel)
+            ErrorSendAndReceiveService::create($replyReceiver, $errorChannel),
+            $transactionFactories
         );
 
         $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gateway) implements AdapterInterface {

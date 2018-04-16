@@ -35,10 +35,6 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private $messageHandlerBuilders = [];
     /**
-     * @var MessageHandlerConsumerBuilderFactory[]
-     */
-    private $consumerFactories = [];
-    /**
      * @var Module[]
      */
     private $modules = [];
@@ -50,6 +46,14 @@ final class MessagingSystemConfiguration implements Configuration
      * @var array|GatewayBuilder[]
      */
     private $gatewayBuilders = [];
+    /**
+     * @var MessageHandlerConsumerBuilderFactory[]
+     */
+    private $consumerFactories = [];
+    /**
+     * @var ConsumerBuilder[]
+     */
+    private $consumerBuilders = [];
     /**
      * @var ConfigurationObserver
      */
@@ -137,6 +141,8 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerConsumer(ConsumerBuilder $consumerBuilder): MessagingSystemConfiguration
     {
+        $this->consumerBuilders[] = $consumerBuilder;
+
         return $this;
     }
 
@@ -148,6 +154,7 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->gatewayBuilders[] = $gatewayBuilder;
         $this->configurationObserver->notifyGatewayBuilderWasRegistered($gatewayBuilder->getReferenceName(), (string)$gatewayBuilder, $gatewayBuilder->getInterfaceName());
+        $this->requireReferences($gatewayBuilder->getRequiredReferences());
 
         return $this;
     }
@@ -196,6 +203,9 @@ final class MessagingSystemConfiguration implements Configuration
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder);
+        }
+        foreach ($this->consumerBuilders as $consumerBuilder) {
+            $consumers[] = $consumerBuilder->build($channelResolver, $referenceSearchService);
         }
 
         $messagingSystem = MessagingSystem::create($consumers, $gateways, $channelResolver);

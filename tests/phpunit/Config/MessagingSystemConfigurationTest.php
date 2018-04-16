@@ -116,14 +116,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $messagingSystemConfiguration
             ->registerMessageHandler(DumbMessageHandlerBuilder::create(NoReturnMessageHandler::create(), 'queue'))
-            ->registerGatewayBuilder(DumbGatewayBuilder::create())
+            ->registerGatewayBuilder(DumbGatewayBuilder::create()->withRequiredReference("some"))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create("queue", QueueChannel::create()))
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory())
             ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create("queue", "interceptor"))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(["interceptor" => new DumbChannelInterceptor()]), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
         $this->assertTrue($dumbConfigurationObserver->wasNotifiedCorrectly(), "Configuration observer was not notified correctly");
-        $this->assertEquals([NoReturnMessageHandler::class, "interceptor"], $dumbConfigurationObserver->getRequiredReferences());
+        $this->assertEquals([NoReturnMessageHandler::class, "some", "interceptor"], $dumbConfigurationObserver->getRequiredReferences());
     }
 
     /**

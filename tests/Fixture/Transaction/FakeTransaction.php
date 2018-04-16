@@ -61,7 +61,7 @@ class FakeTransaction implements Transaction
             throw TransactionException::createWith("Can't rollback not active transaction");
         }
 
-        $this->status = self::MARKED_ROLLBACK;
+        $this->status = self::ROLLED_BACK;
     }
 
     /**

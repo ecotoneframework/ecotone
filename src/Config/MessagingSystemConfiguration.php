@@ -106,7 +106,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): self
     {
         $this->channelsBuilders[] = $messageChannelBuilder;
-        $this->configurationObserver->notifyMessageChannelWasRegistered($messageChannelBuilder->getMessageChannelName(), (string)$messageChannelBuilder);
+        $this->configurationObserver->notifyMessageChannelWasRegistered($messageChannelBuilder->getMessageChannelName(), get_class($messageChannelBuilder));
         $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
 
         return $this;

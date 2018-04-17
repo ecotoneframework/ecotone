@@ -142,6 +142,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerConsumer(ConsumerBuilder $consumerBuilder): MessagingSystemConfiguration
     {
         $this->consumerBuilders[] = $consumerBuilder;
+        $this->requireReferences($consumerBuilder->getRequiredReferences());
 
         return $this;
     }

@@ -13,6 +13,11 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 interface ConsumerBuilder
 {
     /**
+     * @return string[]
+     */
+    public function getRequiredReferences() : array;
+
+    /**
      * @param ChannelResolver        $channelResolver
      * @param ReferenceSearchService $referenceSearchService
      *

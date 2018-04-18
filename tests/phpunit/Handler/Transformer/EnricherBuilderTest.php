@@ -309,16 +309,21 @@ class EnricherBuilderTest extends MessagingTest
         );
     }
 
-    public function test_throwing_exception_if_property_path_contains_dots()
+    public function test_setting_property_path_containing_dots()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $outputChannel = QueueChannel::create();
 
         $this->createEnricherAndHandle(
-            MessageBuilder::withPayload(["order" => OrderExample::createFromId(100)]),
-            QueueChannel::create(),
+            MessageBuilder::withPayload([]),
+            $outputChannel,
             [
                 StaticPayloadSetterBuilder::createWith("order.orderId", "some")
             ]
+        );
+
+        $this->assertEquals(
+            ["order.orderId" => "some"],
+            $outputChannel->receive()->getPayload()
         );
     }
 

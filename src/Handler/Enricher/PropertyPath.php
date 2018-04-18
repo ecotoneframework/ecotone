@@ -52,7 +52,7 @@ class PropertyPath
      */
     private function initialize(string $path) : void
     {
-        if (preg_match("#[\'\\\"\.]#", $path)) {
+        if (preg_match("#[\'\\\"]#", $path)) {
             throw InvalidArgumentException::create("Passed property path {$path} is wrong. It should be in format like: `order[orderId]`. Remember it's not expression language, so do not use `'` or `\"` or `.`");
         }
 

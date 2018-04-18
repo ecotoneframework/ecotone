@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 
 services:
   app:
@@ -10,14 +10,3 @@ services:
     command: sleep 99999
     networks:
       - default
-  rabbitmq:
-    image: rabbitmq:3.6-management-alpine
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
-    networks:
-      - default
-
-networks:
-  default:
-    driver: bridge

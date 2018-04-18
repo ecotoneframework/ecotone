@@ -237,13 +237,18 @@ final class MessagingSystemConfiguration implements Configuration
         $channels = [];
         foreach ($this->channelsBuilders as $channelsBuilder) {
             $messageChannel = $channelsBuilder->build($referenceSearchService);
-            if (array_key_exists($channelsBuilder->getMessageChannelName(), $channelInterceptorsByChannelName)) {
-                $interceptors = $channelInterceptorsByChannelName[$channelsBuilder->getMessageChannelName()];
-                if ($messageChannel instanceof PollableChannel) {
-                    $messageChannel = new PollableChannelInterceptorAdapter($messageChannel, $interceptors);
-                } else {
-                    $messageChannel = new EventDrivenChannelInterceptorAdapter($messageChannel, $interceptors);
+            $interceptorsForChannel = [];
+            foreach ($channelInterceptorsByChannelName as $channelName => $interceptors) {
+                $regexChannel = str_replace("*", ".*", $channelName);
+                if (preg_match("#^{$regexChannel}$#", $channelsBuilder->getMessageChannelName())) {
+                    $interceptorsForChannel = array_merge($interceptorsForChannel, $interceptors);
                 }
+            }
+
+            if ($messageChannel instanceof PollableChannel) {
+                $messageChannel = new PollableChannelInterceptorAdapter($messageChannel, $interceptorsForChannel);
+            } else {
+                $messageChannel = new EventDrivenChannelInterceptorAdapter($messageChannel, $interceptorsForChannel);
             }
 
             $channels[] = NamedMessageChannel::create($channelsBuilder->getMessageChannelName(), $messageChannel);

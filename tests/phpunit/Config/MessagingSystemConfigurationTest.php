@@ -380,4 +380,41 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $this->assertEquals($fakeModule, $messageHandlerBuilder->getModule());
     }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_registering_channel_interceptor_with_regex()
+    {
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+
+        $messageChannelName = "requestChannel";
+        $referenceName = "ref-name";
+        $messagingSystemConfiguration
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($messageChannelName))
+            ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create("request*", $referenceName));
+
+        $channelInterceptor = $this->createMock(ChannelInterceptor::class);
+        $messagingSystem = $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
+            $referenceName => $channelInterceptor
+        ]), InMemoryConfigurationVariableRetrievingService::createEmpty());
+
+        $message = MessageBuilder::withPayload("testMessage")->build();
+        /** @var QueueChannel|MessageChannelAdapter $queueChannel */
+        $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
+
+        $preSendModifiedMessage = MessageBuilder::withPayload("preSend")->build();
+        $channelInterceptor->method("preSend")
+            ->with($message, $queueChannel->getInternalMessageChannel())
+            ->willReturn($preSendModifiedMessage);
+
+        $queueChannel->send($message);
+
+        $this->assertEquals(
+            $preSendModifiedMessage,
+            $queueChannel->receive()
+        );
+    }
 }

@@ -7,7 +7,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging;
  * @package SimplyCodedSoftware\IntegrationMessaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class NullableMessageChannel implements MessageChannel
+final class NullableMessageChannel implements SubscribableChannel
 {
     const CHANNEL_NAME = 'nullChannel';
 
@@ -26,6 +26,23 @@ final class NullableMessageChannel implements MessageChannel
     {
         return;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function subscribe(MessageHandler $messageHandler): void
+    {
+        return;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function unsubscribe(MessageHandler $messageHandler): void
+    {
+        return;
+    }
+
 
     /**
      * @inheritDoc

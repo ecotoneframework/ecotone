@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\SubscribableChannel;
 
 /**
  * Class CustomSendAndReceiveService
@@ -14,9 +15,9 @@ use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 interface CustomSendAndReceiveService extends SendAndReceiveService
 {
     /**
-     * @param DirectChannel $requestChannel
+     * @param SubscribableChannel $requestChannel
      * @param null|PollableChannel $replyChannel
      * @param null|MessageChannel $errorChannel
      */
-    public function setSendAndReceive(DirectChannel $requestChannel, ?PollableChannel $replyChannel, ?MessageChannel $errorChannel) : void;
+    public function setSendAndReceive(SubscribableChannel $requestChannel, ?PollableChannel $replyChannel, ?MessageChannel $errorChannel) : void;
 }

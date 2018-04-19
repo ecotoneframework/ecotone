@@ -134,11 +134,13 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
     /**
      * @inheritDoc
      */
-    public function withMethodParameterConverters(array $methodParameterConverterBuilders): void
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders)
     {
         Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
 
         $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
+
+        return $this;
     }
 
     /**

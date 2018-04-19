@@ -123,14 +123,16 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
 
     /**
      * @param array|MessageToParameterConverter[] $methodParameterConverterBuilders
-     * @return void
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     *
+     * @return TransformerBuilder
      */
-    public function withMethodParameterConverters(array $methodParameterConverterBuilders) : void
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders) : self
     {
         Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
 
        $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
+
+       return $this;
     }
 
     /**

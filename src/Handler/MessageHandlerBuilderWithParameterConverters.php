@@ -17,7 +17,7 @@ interface MessageHandlerBuilderWithParameterConverters extends MessageHandlerBui
 
     /**
      * @param array|MessageToParameterConverter[] $methodParameterConverterBuilders
-     * @return void
+     * @return static
      */
-    public function withMethodParameterConverters(array $methodParameterConverterBuilders) : void;
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders);
 }

@@ -100,9 +100,9 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilderWithParameterCon
     /**
      * @inheritDoc
      */
-    public function withMethodParameterConverters(array $methodParameterConverterBuilders): void
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders)
     {
-        return;
+        return $this;
     }
 
 

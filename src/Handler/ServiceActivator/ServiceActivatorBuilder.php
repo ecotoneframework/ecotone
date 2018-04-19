@@ -101,11 +101,13 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
     /**
      * @inheritDoc
      */
-    public function withMethodParameterConverters(array $methodParameterConverterBuilders): void
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders): self
     {
         Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
 
         $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
+
+        return $this;
     }
 
     /**

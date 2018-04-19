@@ -156,11 +156,13 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @inheritDoc
      */
-    public function withMethodParameterConverters(array $methodParameterConverterBuilders): void
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders) : self
     {
         Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
 
         $this->methodParameterConverters = $methodParameterConverterBuilders;
+
+        return $this;
     }
 
     /**

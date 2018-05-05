@@ -1,9 +1,8 @@
 <?php
+declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Config;
+namespace SimplyCodedSoftware\IntegrationMessaging\Channel;
 
-use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
-use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
@@ -29,6 +28,7 @@ abstract class ChannelInterceptorAdapter implements MessageChannelAdapter
      * ChannelInterceptorAdapter constructor.
      * @param MessageChannel $messageChannel
      * @param ChannelInterceptor[] $sortedChannelInterceptors
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function __construct(MessageChannel $messageChannel, array $sortedChannelInterceptors)
     {

@@ -221,6 +221,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param ReferenceSearchService $referenceSearchService
      * @return ChannelResolver
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function createChannelResolver(ReferenceSearchService $referenceSearchService) : ChannelResolver
     {

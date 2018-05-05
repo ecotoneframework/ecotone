@@ -417,4 +417,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
             $queueChannel->receive()
         );
     }
+
+
 }

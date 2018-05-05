@@ -36,6 +36,7 @@ class InMemoryChannelResolver implements ChannelResolver
     /**
      * @param array|NamedMessageChannel[] $namedMessageChannels
      * @return InMemoryChannelResolver
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function create(array $namedMessageChannels) : self
     {
@@ -76,6 +77,7 @@ class InMemoryChannelResolver implements ChannelResolver
 
     /**
      * @return InMemoryChannelResolver
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function createEmpty() : self
     {

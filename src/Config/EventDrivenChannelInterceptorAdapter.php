@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
+use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 use SimplyCodedSoftware\IntegrationMessaging\SubscribableChannel;

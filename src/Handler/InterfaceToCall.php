@@ -119,6 +119,14 @@ class InterfaceToCall
     /**
      * @return bool
      */
+    public function hasReturnValueBoolean() : bool
+    {
+        return $this->getReturnType() == "bool";
+    }
+
+    /**
+     * @return bool
+     */
     public function doesItReturnArray() : bool
     {
         return $this->getReturnType() == "array";

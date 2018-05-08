@@ -49,6 +49,10 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
      * @var string[]
      */
     private $requiredReferenceNames;
+    /**
+     * @var object
+     */
+    private $directObjectReference;
 
     /**
      * ServiceActivatorBuilder constructor.
@@ -74,6 +78,19 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
     public static function create(string $inputMessageChannelName, string $objectToInvokeOnReferenceName, string $methodName): self
     {
         return new self($inputMessageChannelName, $objectToInvokeOnReferenceName, $methodName);
+    }
+
+    /**
+     * @param string $inputMessageChannelName
+     * @param object $directObjectReference
+     * @param string $methodName
+     *
+     * @return ServiceActivatorBuilder
+     */
+    public static function createWithDirectReference(string $inputMessageChannelName, $directObjectReference, string $methodName) : self
+    {
+        return self::create($inputMessageChannelName, "", $methodName)
+                                ->withDirectObjectReference($directObjectReference);
     }
 
     /**
@@ -159,7 +176,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
 
         $objectToInvoke = $this->objectToInvokeReferenceName;
         if (!$this->isStaticallyCalled()) {
-            $objectToInvoke = $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
+            $objectToInvoke = $this->directObjectReference ? $this->directObjectReference : $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
         }
 
         return new ServiceActivatingHandler(
@@ -195,5 +212,19 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
         }
 
         return false;
+    }
+
+    /**
+     * @param object $object
+     *
+     * @return ServiceActivatorBuilder
+     */
+    private function withDirectObjectReference($object) : self
+    {
+        Assert::isObject($object, "Direct reference passed to service activator must be object");
+
+        $this->directObjectReference = $object;
+
+        return $this;
     }
 }

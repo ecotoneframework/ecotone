@@ -67,6 +67,8 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
         $this->referenceName     = $referenceName;
         $this->methodName        = $methodName;
         $this->outputChannelName = $outputChannelName;
+
+        $this->initialize();
     }
 
     /**
@@ -156,5 +158,11 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
         )->withOutputMessageChannel($this->outputChannelName);
 
         return $serviceActivatorBuilder->build($channelResolver, $referenceSearchService);
+    }
+
+
+    private function initialize() : void
+    {
+        $this->registerRequiredReference($this->referenceName);
     }
 }

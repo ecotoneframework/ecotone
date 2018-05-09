@@ -10,9 +10,11 @@ use Fixture\Service\ServiceWithReturnValue;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
@@ -306,6 +308,31 @@ class TransformerBuilderTest extends MessagingTest
         $this->assertEquals(
             "johny",
             $replyChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_transforming_payload_using_expression()
+    {
+        $payload = 13;
+        $outputChannel = QueueChannel::create();
+
+        $transformer = TransformerBuilder::createWithExpression("someChannel", "payload + 3")
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createWith([
+                    ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                ])
+            );
+
+        $transformer->handle(
+            MessageBuilder::withPayload($payload)
+                ->setReplyChannel($outputChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            16,
+            $outputChannel->receive()->getPayload()
         );
     }
 }

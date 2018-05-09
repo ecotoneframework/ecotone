@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
@@ -45,6 +46,10 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      * @var string[]
      */
     private $requiredReferenceNames = [];
+    /**
+     * @var string
+     */
+    private $expression;
 
     /**
      * TransformerBuilder constructor.
@@ -103,6 +108,21 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     }
 
     /**
+     * Replace payload with result of expression evaluation
+     *
+     * @param string $inputChannelName
+     * @param string $expression
+     *
+     * @return TransformerBuilder
+     */
+    public static function createWithExpression(string $inputChannelName, string $expression) : self
+    {
+        $transformerBuilder = new self($inputChannelName, "", "transform");
+
+        return $transformerBuilder->setExpression($expression);
+    }
+
+    /**
      * @inheritDoc
      */
     public function getRequiredReferenceNames(): array
@@ -140,6 +160,14 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
     {
+        if ($this->expression) {
+            $expressionEvaluationService = $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE);
+            /** @var ExpressionEvaluationService $expressionEvaluationService */
+            Assert::isSubclassOf($expressionEvaluationService, ExpressionEvaluationService::class, "Expected expression service " . ExpressionEvaluationService::REFERENCE . " but got something else.");
+
+            $this->object = new ExpressionTransformer($this->expression, $expressionEvaluationService);
+        }
+
         $objectToInvokeOn = $this->object ? $this->object : $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
         $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
 
@@ -181,5 +209,17 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     private function setDirectObjectToInvoke($objectToInvoke) : void
     {
         $this->object = $objectToInvoke;
+    }
+
+    /**
+     * @param string $expression
+     *
+     * @return TransformerBuilder
+     */
+    private function setExpression(string $expression) : self
+    {
+        $this->expression = $expression;
+
+        return $this;
     }
 }

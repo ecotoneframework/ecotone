@@ -7,6 +7,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\Messa
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToHeaderParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToStaticValueParameterAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageParameterConverterBuilder;
@@ -14,6 +15,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\Mes
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToStaticValueParameterConverterBuilder;
 
 /**
  * Class ParameterConverterAnnotationFactory
@@ -81,6 +83,8 @@ class ParameterConverterAnnotationFactory
                 $parameterConverters[] = MessageToExpressionEvaluationParameterConverterBuilder::createWith(
                     $parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->expression, $messageHandlerBuilder
                 );
+            } else if ($parameterConverterAnnotation instanceof MessageToStaticValueParameterAnnotation) {
+                $parameterConverters[] = MessageToStaticValueParameterConverterBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->value);
             }
         }
 

@@ -197,6 +197,16 @@ class InterfaceToCall
     /**
      * @return bool
      */
+    public function isReturnTypeUnknown(): bool
+    {
+        $returnType = $this->getReturnType();
+
+        return is_null($returnType) || $returnType === '';
+    }
+
+    /**
+     * @return bool
+     */
     public function doesItReturnMessage() : bool
     {
         return $this->getReturnType() === Message::class || is_subclass_of($this->getReturnType(), Message::class);
@@ -269,15 +279,5 @@ class InterfaceToCall
     public function __toString()
     {
         return "Interface {$this->interfaceName} with method {$this->methodName}";
-    }
-
-    /**
-     * @return bool
-     */
-    private function isReturnTypeUnknown(): bool
-    {
-        $returnType = $this->getReturnType();
-
-        return is_null($returnType) || $returnType === '';
     }
 }

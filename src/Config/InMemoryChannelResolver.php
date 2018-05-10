@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\DestinationResolutionException;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
+use SimplyCodedSoftware\IntegrationMessaging\NullableMessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
@@ -112,7 +113,7 @@ class InMemoryChannelResolver implements ChannelResolver
     {
         Assert::allInstanceOfType($namedMessageChannels, NamedMessageChannel::class);
 
-        $this->resolvableChannels = $namedMessageChannels;
+        $this->resolvableChannels = array_merge($namedMessageChannels, [NamedMessageChannel::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create())]);
     }
 
     /**

@@ -18,4 +18,24 @@ class SymfonyExpressionEvaluationAdapterTest extends TestCase
         $this->assertTrue($expressionLanguage->evaluate("isArray([])", []));
         $this->assertFalse($expressionLanguage->evaluate("isArray('some')", []));
     }
+
+    public function test_do_for_each_element_in_array()
+    {
+        $expressionLanguage = SymfonyExpressionEvaluationAdapter::create();
+
+        $this->assertEquals(
+            [
+                [
+                    "id" => 1
+                ],
+                [
+                    "id" => 2
+                ],
+                [
+                    "id" => 3
+                ]
+            ],
+            $expressionLanguage->evaluate("each(payload, 'createArray(\'id\', element)')", ["payload" => [1, 2, 3]])
+        );
+    }
 }

@@ -38,6 +38,17 @@ class SymfonyExpressionEvaluationAdapter implements \SimplyCodedSoftware\Integra
             return array_unique($extractedValues);
         });
 
+        $expressionLanguage->register('each', function ($str) {
+            return $str;
+        }, function ($arguments, array $payload, string $expression) use ($expressionLanguage) {
+            $transformedElements = [];
+            foreach ($payload as $item) {
+                $transformedElements[] = $expressionLanguage->evaluate($expression, ["element" => $item]);
+            }
+
+            return $transformedElements;
+        });
+
         $expressionLanguage->register('createArray', function ($str) {
             return $str;
         }, function ($arguments, string $key, $value) use ($expressionLanguage) {

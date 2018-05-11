@@ -79,6 +79,18 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
     }
 
     /**
+     * Splits directly from message payload, without using any service
+     *
+     * @param string $inputChannelName
+     *
+     * @return SplitterBuilder
+     */
+    public static function createMessagePayloadSplitter(string $inputChannelName) : self
+    {
+        return self::createWithDirectObject($inputChannelName, new DirectMessageSplitter(), "split");
+    }
+
+    /**
      * @param string $inputChannelName
      * @param object $directReferenceObject
      * @param string $methodName

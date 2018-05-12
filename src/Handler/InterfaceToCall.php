@@ -213,6 +213,22 @@ class InterfaceToCall
     }
 
     /**
+     * @return string
+     */
+    public function getMethodName() : string
+    {
+        return $this->methodName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInterfaceName() : string
+    {
+        return $this->interfaceName;
+    }
+
+    /**
      * @return bool
      */
     public function canItReturnNull(): bool

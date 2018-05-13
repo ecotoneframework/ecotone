@@ -20,6 +20,10 @@ class GatewayAnnotation
      */
     public $requestChannel;
     /**
+     * @var string
+     */
+    public $errorChannel = "";
+    /**
      * @var array
      */
     public $parameterConverters = [];

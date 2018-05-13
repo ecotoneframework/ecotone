@@ -23,4 +23,8 @@ class GatewayAnnotation
      * @var array
      */
     public $parameterConverters = [];
+    /**
+     * @var array
+     */
+    public $transactionFactories = [];
 }

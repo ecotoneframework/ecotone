@@ -31,19 +31,11 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     /**
      * @var string
      */
-    private $inputChannelName;
-    /**
-     * @var string
-     */
     private $referenceName;
     /**
      * @var string
      */
     private $methodName;
-    /**
-     * @var string
-     */
-    private $outputChannelName;
     /**
      * @var string
      */
@@ -63,10 +55,10 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     private function __construct(string $inputChannelName, string $outputChannelName, string $referenceName, string $methodName)
     {
-        $this->inputChannelName  = $inputChannelName;
         $this->referenceName     = $referenceName;
         $this->methodName        = $methodName;
-        $this->outputChannelName = $outputChannelName;
+        $this->withInputChannelName($inputChannelName);
+        $this->withOutputMessageChannel($outputChannelName);
 
         $this->initialize();
     }
@@ -152,10 +144,10 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
         $discardChannel = $this->discardChannelName ? $channelResolver->resolve($this->discardChannelName) : null;
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::createWithDirectReference(
-            $this->inputChannelName,
+            $this->inputMessageChannelName,
             new MessageFilter(MethodInvoker::createWith($messageSelector, $this->methodName, $parameterConverters), $discardChannel, $this->throwExceptionOnDiscard),
             "handle"
-        )->withOutputMessageChannel($this->outputChannelName);
+        )->withOutputMessageChannel($this->outputMessageChannelName);
 
         return $serviceActivatorBuilder->build($channelResolver, $referenceSearchService);
     }

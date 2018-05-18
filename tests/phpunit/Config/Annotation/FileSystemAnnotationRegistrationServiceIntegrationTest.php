@@ -66,6 +66,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $messageToPayloadParameter = new MessageToPayloadParameterAnnotation();
         $messageToPayloadParameter->parameterName = "orderId";
         $gatewayAnnotation->parameterConverters = [$messageToPayloadParameter];
+        $gatewayAnnotation->transactionFactories = ["dbalTransaction"];
 
         $this->assertEquals(
             [

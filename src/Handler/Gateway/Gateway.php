@@ -7,6 +7,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
+use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
@@ -116,6 +117,10 @@ class Gateway
             return $replyMessage ? $replyMessage->getPayload() : null;
         }catch (\Throwable $e) {
             $this->rollbackTransactions($transactions);
+
+            if ($e instanceof MessagingException && $e->getCause()) {
+                throw $e->getCause();
+            }
 
             throw $e;
         }

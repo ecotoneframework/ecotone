@@ -18,9 +18,13 @@ interface GatewayWithReplyChannelExample
      * @param string $orderId
      * @return bool
      *
-     * @GatewayAnnotation(requestChannel="requestChannel", parameterConverters={
-     *  @MessageToPayloadParameterAnnotation(parameterName="orderId")
-     * })
+     * @GatewayAnnotation(
+     *      requestChannel="requestChannel",
+     *      parameterConverters={
+     *          @MessageToPayloadParameterAnnotation(parameterName="orderId")
+     *      },
+     *      transactionFactories={"dbalTransaction"}
+     * )
      */
     public function buy(string $orderId) : bool;
 }

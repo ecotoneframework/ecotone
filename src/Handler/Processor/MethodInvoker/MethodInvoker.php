@@ -50,7 +50,7 @@ final class MethodInvoker implements MessageProcessor
     /**
      * @param $objectToInvokeOn
      * @param string $objectMethodName
-     * @param array $methodArguments
+     * @param array|MessageToParameterConverter[] $methodArguments
      * @return self
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */

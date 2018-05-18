@@ -57,4 +57,19 @@ class ServiceActivatorBuilderTest extends MessagingTest
             $replyChannel->receive()->getPayload()
         );
     }
+
+    public function test_calling_direct_object_reference()
+    {
+        $objectToInvoke = ServiceExpectingOneArgument::create();
+
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference("some", $objectToInvoke, 'withoutReturnValue')
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+        $serviceActivator->handle(MessageBuilder::withPayload('some')->build());
+
+        $this->assertTrue($objectToInvoke->wasCalled());
+    }
 }

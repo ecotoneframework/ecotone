@@ -27,7 +27,8 @@ class GatewayModuleTest extends AnnotationConfigurationTest
     {
         $gatewayAnnotation = new GatewayAnnotation();
         $gatewayAnnotation->requestChannel = "requestChannel";
-
+        $gatewayAnnotation->transactionFactories = ['dbalTransaction'];
+        $gatewayAnnotation->errorChannel = "someErrorChannel";
         $messageToPayloadParameterAnnotation = new MessageToPayloadParameterAnnotation();
         $messageToPayloadParameterAnnotation->parameterName = "orderId";
         $gatewayAnnotation->parameterConverters = [
@@ -48,10 +49,15 @@ class GatewayModuleTest extends AnnotationConfigurationTest
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
-                ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                ->registerGatewayBuilder(
+                    GatewayProxyBuilder::create(
                     GatewayWithReplyChannelExample::class, GatewayWithReplyChannelExample::class,
                     "buy", "requestChannel"
-                )->withMillisecondTimeout(1)),
+                    )
+                    ->withErrorChannel("someErrorChannel")
+                    ->withMillisecondTimeout(1)
+                    ->withTransactionFactories(['dbalTransaction'])
+                ),
             $messagingSystemConfiguration
         );
     }

@@ -315,7 +315,7 @@ class GatewayProxyBuilderTest extends MessagingTest
             )
         );
 
-        $this->expectException(MessageHandlingException::class);
+        $this->expectException(\Exception::class);
 
         $gatewayProxy->getById(1);
     }
@@ -434,29 +434,6 @@ class GatewayProxyBuilderTest extends MessagingTest
             "extended reply",
             $gatewayProxy->sendMail()
         );
-    }
-
-    public function test_exception_containing_original_message()
-    {
-        $requestChannelName = "request-channel";
-        $requestChannel     = DirectChannel::create();
-        $requestChannel->subscribe(ExceptionMessageHandler::create());
-
-        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName);
-
-        /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
-        $gatewayProxy = $gatewayProxyBuilder->build(
-            InMemoryReferenceSearchService::createEmpty(),
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    $requestChannelName => $requestChannel
-                ]
-            )
-        );
-
-        $this->expectExceptionObject(MessageHandlingException::fromOtherException(new \InvalidArgumentException("test"), MessageBuilder::withPayload("empty")->build()));
-
-        $gatewayProxy->sendMail();
     }
 
     public function test_propagating_error_to_error_channel()
@@ -595,7 +572,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         try {
             $gatewayProxy->sendMail('test');
-        }catch (MessagingException $e) {
+        }catch (\InvalidArgumentException $e) {
             $this->assertTrue($transactionFactoryOne->getCurrentTransaction()->isRolledBack());
             return;
         }

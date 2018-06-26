@@ -11,6 +11,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\DestinationResolutionException;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
@@ -250,6 +251,10 @@ class RouterBuilderTest extends MessagingTest
         $this->assertMessages($message, $targetChannel1->receive());
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_throwing_exception_if_payload_is_not_object()
     {
         $router = RouterBuilder::createPayloadTypeRouterByClassName("some")
@@ -264,5 +269,72 @@ class RouterBuilderTest extends MessagingTest
         $this->expectException(InvalidArgumentException::class);
 
         $router->handle($message);
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \Exception
+     */
+    public function test_recipient_list_router()
+    {
+        $channel1 = QueueChannel::create();
+        $channel2 = QueueChannel::create();
+
+        $inputChannelName = "inputChannel";
+        $router           = RouterBuilder::createRecipientListRouter(
+            $inputChannelName,
+            ["channel1", "channel2"]
+        )
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    "channel1" => $channel1,
+                    "channel2" => $channel2,
+                    $inputChannelName => DirectChannel::create()
+                ]),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+        $message = MessageBuilder::withPayload("some")->build();
+
+        $router->handle($message);
+
+        $this->assertEquals($message, $channel1->receive());
+        $this->assertEquals($message, $channel2->receive());
+    }
+
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_applying_sequence_to_recipient_list()
+    {
+        $channel1 = QueueChannel::create();
+        $channel2 = QueueChannel::create();
+
+        $inputChannelName = "inputChannel";
+        $router           = RouterBuilder::createRecipientListRouter(
+            $inputChannelName,
+            ["channel1", "channel2"]
+        )
+            ->withApplySequence(true)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    "channel1" => $channel1,
+                    "channel2" => $channel2,
+                    $inputChannelName => DirectChannel::create()
+                ]),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+        $message = MessageBuilder::withPayload("some")->build();
+
+        $router->handle($message);
+
+        $firstMessage = $channel1->receive();
+        $this->assertEquals(1, $firstMessage->getHeaders()->get(MessageHeaders::SEQUENCE_NUMBER));
+        $this->assertEquals(2, $firstMessage->getHeaders()->get(MessageHeaders::SEQUENCE_SIZE));
+        $secondMessage = $channel2->receive();
+        $this->assertEquals(2, $secondMessage->getHeaders()->get(MessageHeaders::SEQUENCE_NUMBER));
+        $this->assertEquals(2, $secondMessage->getHeaders()->get(MessageHeaders::SEQUENCE_SIZE));
     }
 }

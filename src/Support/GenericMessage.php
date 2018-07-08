@@ -23,11 +23,19 @@ class GenericMessage implements Message
 
     /**
      * GenericMessage constructor.
-     * @param mixed $payload
+     *
+     * @param mixed          $payload
      * @param MessageHeaders $messageHeaders
+     *
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct($payload, MessageHeaders $messageHeaders)
     {
+        if (is_null($payload)) {
+            throw InvalidArgumentException::create("Trying to create message with null payload. Message must always contain payload");
+        }
+
         $this->payload = $payload;
         $this->messageHeaders = $messageHeaders;
     }

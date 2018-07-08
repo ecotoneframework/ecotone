@@ -9,7 +9,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\Met
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class Router
@@ -35,6 +37,10 @@ final class Router implements MessageHandler
      * @var null|string
      */
     private $defaultResolutionChannelName;
+    /**
+     * @var bool
+     */
+    private $applySequence;
 
     /**
      * RouterBuilder constructor.
@@ -43,13 +49,15 @@ final class Router implements MessageHandler
      * @param MethodInvoker   $methodInvoker
      * @param bool            $isResolutionRequired
      * @param null|string     $defaultResolutionChannelName
+     * @param bool            $applySequence
      */
-    private function __construct(ChannelResolver $channelResolver, MethodInvoker $methodInvoker, bool $isResolutionRequired, ?string $defaultResolutionChannelName)
+    private function __construct(ChannelResolver $channelResolver, MethodInvoker $methodInvoker, bool $isResolutionRequired, ?string $defaultResolutionChannelName, bool $applySequence)
     {
         $this->channelResolver = $channelResolver;
         $this->methodInvoker = $methodInvoker;
         $this->isResolutionRequired = $isResolutionRequired;
         $this->defaultResolutionChannelName = $defaultResolutionChannelName;
+        $this->applySequence = $applySequence;
     }
 
     /**
@@ -60,11 +68,14 @@ final class Router implements MessageHandler
      * @param array|MessageToParameterConverter[] $methodArguments
      * @param null|string                         $defaultResolutionChannel
      *
+     * @param bool                                $applySequence
+     *
      * @return Router
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function create(ChannelResolver $channelResolver, $objectToInvoke, string $methodName, bool $isResolutionRequired, array $methodArguments, ?string $defaultResolutionChannel) : self
+    public static function create(ChannelResolver $channelResolver, $objectToInvoke, string $methodName, bool $isResolutionRequired, array $methodArguments, ?string $defaultResolutionChannel, bool $applySequence) : self
     {
-        return new self($channelResolver, MethodInvoker::createWith($objectToInvoke, $methodName, $methodArguments), $isResolutionRequired, $defaultResolutionChannel);
+        return new self($channelResolver, MethodInvoker::createWith($objectToInvoke, $methodName, $methodArguments), $isResolutionRequired, $defaultResolutionChannel, $applySequence);
     }
 
     /**
@@ -85,10 +96,20 @@ final class Router implements MessageHandler
             throw DestinationResolutionException::create("Can't resolve destination, because there are no channels to send message to.");
         }
 
+        $sequenceSize = count($resolutionChannels);
+        $sequenceNumber = 1;
         foreach ($resolutionChannels as $resolutionChannel) {
             $outputChannel = $this->channelResolver->resolve($resolutionChannel);
 
-            $outputChannel->send($message);
+            $messageToSend = $this->applySequence
+                                ? MessageBuilder::fromMessage($message)
+                                    ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber)
+                                    ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
+                                    ->build()
+                                : $message;
+
+            $outputChannel->send($messageToSend);
+            $sequenceNumber++;
         }
     }
 }

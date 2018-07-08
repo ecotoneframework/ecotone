@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Support;
 use SimplyCodedSoftware\IntegrationMessaging\Support\GenericMessage;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
 
@@ -36,5 +37,12 @@ class GenericMessageTest extends MessagingTest
             $message->getPayload(),
             $payload
         );
+    }
+
+    public function test_throwing_exception_if_payload_is_null()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        GenericMessage::createWithEmptyHeaders(null);
     }
 }

@@ -50,6 +50,10 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @var string|null
      */
     private $defaultResolution = null;
+    /**
+     * @var bool
+     */
+    private $applySequence = false;
 
     /**
      * RouterBuilder constructor.
@@ -110,11 +114,27 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @param string $inputChannelName
      *
      * @return RouterBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function createPayloadTypeRouterByClassName(string $inputChannelName) : self
     {
         $routerBuilder = self::create($inputChannelName, "", 'route');
         $routerBuilder->setObjectToInvoke(PayloadTypeRouter::createWithRoutingByClass());
+
+        return $routerBuilder;
+    }
+
+    /**
+     * @param string $inputChannelName
+     * @param array  $recipientLists
+     *
+     * @return RouterBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createRecipientListRouter(string $inputChannelName, array $recipientLists) : self
+    {
+        $routerBuilder = self::create($inputChannelName, "", 'route');
+        $routerBuilder->setObjectToInvoke(new RecipientListRouter($recipientLists));
 
         return $routerBuilder;
     }
@@ -204,7 +224,8 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
             $this->methodName,
             $this->resolutionRequired,
             $methodParameterConverters,
-            $this->defaultResolution
+            $this->defaultResolution,
+            $this->applySequence
         );
     }
 
@@ -215,6 +236,18 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     public function setResolutionRequired(bool $resolutionRequired) : self
     {
         $this->resolutionRequired = $resolutionRequired;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $applySequence
+     *
+     * @return RouterBuilder
+     */
+    public function withApplySequence(bool $applySequence) : self
+    {
+        $this->applySequence = $applySequence;
 
         return $this;
     }

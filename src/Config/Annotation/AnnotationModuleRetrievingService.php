@@ -11,6 +11,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariable;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Module;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
@@ -26,6 +27,10 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
      * @var AnnotationRegistrationService
      */
     private $annotationRegistrationService;
+    /**
+     * @var ModuleExtension[]|Module[]
+     */
+    private $registeredModules = [];
 
     /**
      * AnnotationModuleConfigurationRetrievingService constructor.
@@ -61,9 +66,15 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
         $moduleClassNames = $this->annotationRegistrationService->getAllClassesWithAnnotation($annotationClassName);
 
         $modules = [];
-        /** @var AnnotationModule $moduleClassName */
+        /** @var AnnotationModule|string $moduleClassName */
         foreach ($moduleClassNames as $moduleClassName) {
-            $modules[] = ($moduleClassName)::create($this->annotationRegistrationService);
+            if (array_key_exists($moduleClassName, $this->registeredModules)) {
+                $modules[] = $this->registeredModules[$moduleClassName];
+                continue;
+            }
+
+            $this->registeredModules[$moduleClassName] = ($moduleClassName)::create($this->annotationRegistrationService);
+            $modules[] = $this->registeredModules[$moduleClassName];
         }
 
         return $modules;

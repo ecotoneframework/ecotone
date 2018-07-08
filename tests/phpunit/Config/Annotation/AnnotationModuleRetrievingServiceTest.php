@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
+use Fixture\Annotation\ModuleConfiguration\ExampleModuleAndModuleExtensionConfiguration;
 use Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
 use Fixture\Annotation\ModuleConfiguration\ExampleModuleConfigurationExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModuleRetrievingService;
@@ -49,5 +50,43 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
             ],
             $annotationModuleRetrievingServie->findAllModuleExtensionConfigurations()
         );
+    }
+
+    /**
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     */
+    public function test_registering_separately()
+    {
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+            ExampleModuleConfigurationExtension::class, ExampleModuleConfiguration::class
+        ]));
+
+        $this->assertEquals(
+            [
+                ExampleModuleConfiguration::createEmpty()
+            ],
+            $annotationModuleRetrievingServie->findAllModuleConfigurations()
+        );
+
+        $this->assertEquals(
+            [
+                ExampleModuleConfigurationExtension::createEmpty()
+            ],
+            $annotationModuleRetrievingServie->findAllModuleExtensionConfigurations()
+        );
+    }
+
+    /**
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     */
+    public function test_creating_module_and_extension_as_same_instance()
+    {
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+            ExampleModuleAndModuleExtensionConfiguration::class
+        ]));
+
+        $this->assertSame($annotationModuleRetrievingServie->findAllModuleConfigurations(), $annotationModuleRetrievingServie->findAllModuleExtensionConfigurations());
     }
 }

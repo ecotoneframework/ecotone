@@ -9,25 +9,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface Module
+interface Module extends ModuleExtension
 {
-    /**
-     * @return string
-     */
-    public function getName(): string;
-
-    /**
-     * @return ConfigurationVariable[]
-     */
-    public function getConfigurationVariables(): array;
-
-    /**
-     * Which will be available during build configure phase
-     *
-     * @return RequiredReference[]
-     */
-    public function getRequiredReferences(): array;
-
     /**
      * In here you can register all message handlers, gateways, message channels
      *

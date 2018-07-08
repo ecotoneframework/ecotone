@@ -14,7 +14,7 @@ interface AnnotationModule extends Module
 {
     /**
      * @param AnnotationRegistrationService $annotationRegistrationService
-     * @return AnnotationModule
+     * @return self
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule;
+    public static function create(AnnotationRegistrationService $annotationRegistrationService);
 }

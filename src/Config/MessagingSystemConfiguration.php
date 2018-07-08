@@ -190,7 +190,12 @@ final class MessagingSystemConfiguration implements Configuration
             );
         }
 
-        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, $this->modules);
+
+        $modulesWithKeysAsNames = [];
+        foreach ($this->modules as $module) {
+            $modulesWithKeysAsNames[$module->getName()] = $module;
+        }
+        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, $modulesWithKeysAsNames);
         $channelResolver = $this->createChannelResolver($referenceSearchService);
         $gateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
@@ -282,7 +287,7 @@ final class MessagingSystemConfiguration implements Configuration
                 $this->moduleExtensions[$module->getName()] = [];
             }
 
-            $this->modules[$module->getName()] = $module;
+            $this->modules[] = $module;
         }
     }
 

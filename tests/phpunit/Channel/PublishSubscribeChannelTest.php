@@ -27,17 +27,4 @@ class PublishSubscribeChannelTest extends TestCase
 
         $this->assertTrue($messageHandler->wasCalled(), 'Message handler for direct channel was not called');
     }
-
-    public function test_throwing_exception_if_no_handler_exists_for_dispatch()
-    {
-        $directChannel = new PublishSubscribeChannel(BroadcastingDispatcher::create());
-
-        $messageHandler = NoReturnMessageHandler::create();
-        $directChannel->subscribe($messageHandler);
-        $directChannel->unsubscribe($messageHandler);
-
-        $this->expectException(MessageDispatchingException::class);
-
-        $directChannel->send(MessageBuilder::withPayload('some')->build());
-    }
 }

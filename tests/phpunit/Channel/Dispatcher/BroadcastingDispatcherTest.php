@@ -51,13 +51,4 @@ class BroadcastingDispatcherTest extends TestCase
         $broadcastingDispatcher->removeHandler($messageHandler);
         $this->assertEquals(1, $broadcastingDispatcher->getHandlerCount());
     }
-
-    public function test_throwing_exception_when_dispatching_without_handler()
-    {
-        $broadcastingDispatcher = new BroadcastingDispatcher();
-
-        $this->expectException(MessageDispatchingException::class);
-
-        $broadcastingDispatcher->dispatch(MessageBuilder::withPayload('test')->build());
-    }
 }

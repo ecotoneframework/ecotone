@@ -54,10 +54,6 @@ class BroadcastingDispatcher implements MessageDispatcher
      */
     public function dispatch(Message $message): void
     {
-        if (!$this->messageHandlers) {
-            throw MessageDispatchingException::create("There is no message handler registered for dispatching");
-        }
-
         foreach ($this->messageHandlers as $messageHandler) {
             $messageHandler->handle($message);
         }

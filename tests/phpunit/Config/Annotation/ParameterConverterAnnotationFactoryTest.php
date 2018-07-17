@@ -31,7 +31,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
         $methodName = "sendMessage";
-        $messageHandler = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
+        $messageHandler = ServiceActivatorBuilder::create($relatedClassName, $methodName);
         $messageHandler
             ->withMethodParameterConverters([
                 ReferenceBuilder::create(
@@ -42,7 +42,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
         $messageHandler
             ->registerRequiredReference(\stdClass::class);
 
-        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
+        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
         $parameterConverterAnnotationFactory->configureParameterConverters(
             $messageHandlerBuilderToCompare,
             $relatedClassName,
@@ -69,7 +69,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
         $methodName = "sendMessage";
-        $messageHandler = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
+        $messageHandler = ServiceActivatorBuilder::create($relatedClassName, $methodName);
         $messageHandler
             ->withMethodParameterConverters([
                 ExpressionBuilder::create(
@@ -78,7 +78,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                 )
             ]);
 
-        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
+        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
 
         $parameterConverterAnnotationFactory->configureParameterConverters(
             $messageHandlerBuilderToCompare,

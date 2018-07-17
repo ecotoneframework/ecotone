@@ -18,12 +18,16 @@ use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
  */
 class ServiceActivatorBuilderTest extends MessagingTest
 {
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_building_service_activator()
     {
         $objectToInvokeOnReference = "service-a";
         $objectToInvoke = ServiceExpectingOneArgument::create();
 
-        $serviceActivator = ServiceActivatorBuilder::create("some", $objectToInvokeOnReference, 'withoutReturnValue')
+        $serviceActivator = ServiceActivatorBuilder::create($objectToInvokeOnReference, 'withoutReturnValue')
                                 ->build(
                                     InMemoryChannelResolver::createEmpty(),
                                     InMemoryReferenceSearchService::createWith([
@@ -40,7 +44,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
     {
         $reference = StaticallyCalledService::class;
 
-        $serviceActivator = ServiceActivatorBuilder::create("some", $reference, "run")
+        $serviceActivator = ServiceActivatorBuilder::create($reference, "run")
                                 ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
 
 
@@ -62,7 +66,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
     {
         $objectToInvoke = ServiceExpectingOneArgument::create();
 
-        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference("some", $objectToInvoke, 'withoutReturnValue')
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withoutReturnValue')
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createEmpty()

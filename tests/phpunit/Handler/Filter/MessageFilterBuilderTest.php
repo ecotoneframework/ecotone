@@ -18,12 +18,18 @@ use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
  */
 class MessageFilterBuilderTest extends MessagingTest
 {
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_forwarding_message_if_selector_returns_true()
     {
         $outputChannelName = "outputChannel";
         $outputChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName("inputChannel", $outputChannelName, MessageSelectorExample::class, "accept")
+        $messageFilter = MessageFilterBuilder::createWithReferenceName( MessageSelectorExample::class, "accept")
+                            ->withOutputMessageChannel($outputChannelName)
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([
                                     $outputChannelName => $outputChannel
@@ -48,7 +54,8 @@ class MessageFilterBuilderTest extends MessagingTest
         $outputChannelName = "outputChannel";
         $outputChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName("inputChannel", $outputChannelName, MessageSelectorExample::class, "refuse")
+        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, "refuse")
+            ->withOutputMessageChannel($outputChannelName)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $outputChannelName => $outputChannel
@@ -65,6 +72,9 @@ class MessageFilterBuilderTest extends MessagingTest
         $this->assertNull($outputChannel->receive());
     }
 
+    /**
+     * @throws MessagingException
+     */
     public function test_throwing_exception_if_selector_return_type_is_different_than_boolean()
     {
         $outputChannelName = "outputChannel";
@@ -72,7 +82,8 @@ class MessageFilterBuilderTest extends MessagingTest
 
         $this->expectException(InvalidArgumentException::class);
 
-        MessageFilterBuilder::createWithReferenceName("inputChannel", $outputChannelName, MessageSelectorExample::class, "wrongReturnType")
+        MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, "wrongReturnType")
+            ->withOutputMessageChannel($outputChannelName)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $outputChannelName => $outputChannel
@@ -83,6 +94,9 @@ class MessageFilterBuilderTest extends MessagingTest
             );
     }
 
+    /**
+     * @throws MessagingException
+     */
     public function test_publishing_message_to_discard_channel_if_defined()
     {
         $outputChannelName = "outputChannel";
@@ -90,7 +104,8 @@ class MessageFilterBuilderTest extends MessagingTest
         $discardChannelName = "discardChannel";
         $discardChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName("inputChannel", $outputChannelName, MessageSelectorExample::class, "refuse")
+        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, "refuse")
+            ->withOutputMessageChannel($outputChannelName)
             ->withDiscardChannelName($discardChannelName)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -110,12 +125,16 @@ class MessageFilterBuilderTest extends MessagingTest
         $this->assertEquals($message, $discardChannel->receive());
     }
 
+    /**
+     * @throws MessagingException
+     */
     public function test_throwing_exception_on_discard_if_defined()
     {
         $outputChannelName = "outputChannel";
         $outputChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName("inputChannel", $outputChannelName, MessageSelectorExample::class, "refuse")
+        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, "refuse")
+            ->withOutputMessageChannel($outputChannelName)
             ->withThrowingExceptionOnDiscard(true)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([

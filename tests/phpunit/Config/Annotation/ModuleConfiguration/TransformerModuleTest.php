@@ -46,8 +46,10 @@ class TransformerModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration->prepare($configuration, [], NullObserver::create());
 
         $messageHandlerBuilder = TransformerBuilder::create(
-            "inputChannel", TransformerWithMethodParameterExample::class, "send"
-        )->withOutputMessageChannel("outputChannel");
+            TransformerWithMethodParameterExample::class, "send"
+        )
+            ->withInputChannelName("inputChannel")
+            ->withOutputMessageChannel("outputChannel");
         $messageHandlerBuilder->withMethodParameterConverters([
             PayloadBuilder::create("message")
         ]);

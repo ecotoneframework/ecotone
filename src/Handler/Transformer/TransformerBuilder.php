@@ -53,55 +53,49 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
 
     /**
      * TransformerBuilder constructor.
-     * @param string $inputChannelName
      * @param string $objectToInvokeReference
      * @param string $methodName
      */
-    private function __construct(string $inputChannelName, string $objectToInvokeReference, string $methodName)
+    private function __construct(string $objectToInvokeReference, string $methodName)
     {
         $this->objectToInvokeReferenceName = $objectToInvokeReference;
         $this->methodName = $methodName;
-
-        $this->withInputMessageChannel($inputChannelName);
     }
 
     /**
-     * @param string $inputChannelName
      * @param string $objectToInvokeReference
      * @param string $methodName
      * @return TransformerBuilder
      */
-    public static function create(string $inputChannelName, string $objectToInvokeReference, string $methodName): self
+    public static function create(string $objectToInvokeReference, string $methodName): self
     {
-        return new self($inputChannelName, $objectToInvokeReference, $methodName);
+        return new self($objectToInvokeReference, $methodName);
     }
 
     /**
-     * @param string $inputChannelName
      * @param array|string[] $messageHeaders
      * @return TransformerBuilder
      */
-    public static function createHeaderEnricher(string $inputChannelName, array $messageHeaders) : self
+    public static function createHeaderEnricher(array $messageHeaders) : self
     {
-        $transformerBuilder = new self($inputChannelName, "", "transform");
+        $transformerBuilder = new self( "", "transform");
         $transformerBuilder->setDirectObjectToInvoke(HeaderEnricher::create($messageHeaders));
 
         return $transformerBuilder;
     }
 
     /**
-     * @param string $inputChannelName
      * @param object $referenceObject
      * @param string $methodName
      *
      * @return TransformerBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createWithReferenceObject(string $inputChannelName, $referenceObject, string $methodName) : self
+    public static function createWithReferenceObject($referenceObject, string $methodName) : self
     {
         Assert::isObject($referenceObject, "Reference object for transformer must be object");
 
-        $transformerBuilder = new self($inputChannelName,  "", $methodName);
+        $transformerBuilder = new self(  "", $methodName);
         $transformerBuilder->setDirectObjectToInvoke($referenceObject);
 
         return $transformerBuilder;
@@ -110,14 +104,13 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     /**
      * Replace payload with result of expression evaluation
      *
-     * @param string $inputChannelName
      * @param string $expression
      *
      * @return TransformerBuilder
      */
-    public static function createWithExpression(string $inputChannelName, string $expression) : self
+    public static function createWithExpression(string $expression) : self
     {
-        $transformerBuilder = new self($inputChannelName, "", "transform");
+        $transformerBuilder = new self( "", "transform");
 
         return $transformerBuilder->setExpression($expression);
     }

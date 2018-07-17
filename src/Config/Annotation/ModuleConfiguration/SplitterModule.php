@@ -37,10 +37,10 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
 
         return
             SplitterBuilder::create(
-                $annotation->inputChannelName,
                 $annotationRegistration->getReferenceName(),
                 $annotationRegistration->getMethodName()
             )
+            ->withInputChannelName($annotation->inputChannelName)
             ->withOutputMessageChannel($annotation->outputChannelName)
         ;
     }

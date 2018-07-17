@@ -36,10 +36,10 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return TransformerBuilder::create(
-            $annotation->inputChannelName,
             $annotationRegistration->getReferenceName(),
             $annotationRegistration->getMethodName()
         )
+            ->withInputChannelName($annotation->inputChannelName)
             ->withOutputMessageChannel($annotation->outputChannelName);
     }
 

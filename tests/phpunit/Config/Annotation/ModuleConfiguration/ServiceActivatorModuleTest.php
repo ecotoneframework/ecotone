@@ -61,7 +61,8 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
         $configuration = $this->createMessagingSystemConfiguration();
         $annotationConfiguration->prepare($configuration, [], NullObserver::create());
 
-        $serviceActivatorBuilder = ServiceActivatorBuilder::create("inputChannel", ServiceActivatorWithAllConfigurationDefined::class, "sendMessage");
+        $serviceActivatorBuilder = ServiceActivatorBuilder::create(ServiceActivatorWithAllConfigurationDefined::class, "sendMessage")
+                                    ->withInputChannelName("inputChannel");
         $serviceActivatorBuilder->withMethodParameterConverters([
             HeaderBuilder::create("to", "sendTo"),
             PayloadBuilder::create("content"),

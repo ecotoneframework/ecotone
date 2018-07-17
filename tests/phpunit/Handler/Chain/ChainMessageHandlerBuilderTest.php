@@ -36,7 +36,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
     {
         $replyChannel = QueueChannel::create();
         $requestPayload = "some";
-        $messageHandler = TransformerBuilder::createHeaderEnricher("", [
+        $messageHandler = TransformerBuilder::createHeaderEnricher([
             "token" => "123"
         ]);
 
@@ -46,13 +46,6 @@ class ChainMessageHandlerBuilderTest extends TestCase
             "123",
             $replyChannel->receive()->getHeaders()->get("token")
         );
-    }
-
-    public function test_returning_input_channel()
-    {
-        $chainBuilder = ChainMessageHandlerBuilder::createWith("some");
-
-        $this->assertEquals("some", $chainBuilder->getInputMessageChannelName());
     }
 
     /**
@@ -66,10 +59,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $this->createChainHandlerAndHandle(
             [
-                TransformerBuilder::createHeaderEnricher("", [
+                TransformerBuilder::createHeaderEnricher([
                     "token" => "123"
                 ]),
-                TransformerBuilder::createHeaderEnricher("", [
+                TransformerBuilder::createHeaderEnricher([
                     "hax" => "x"
                 ])
             ],
@@ -95,8 +88,8 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $this->createChainHandlerAndHandle(
             [
-                TransformerBuilder::createWithReferenceObject("", new StdClassTransformer(), "transform"),
-                TransformerBuilder::createWithReferenceObject("", new StringTransformer(), "transform"),
+                TransformerBuilder::createWithReferenceObject(new StdClassTransformer(), "transform"),
+                TransformerBuilder::createWithReferenceObject( new StringTransformer(), "transform"),
             ],
             $requestPayload,
             $replyChannel
@@ -108,6 +101,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_chaining_with_other_chain_inside()
     {
         $replyChannel = QueueChannel::create();
@@ -115,10 +112,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $this->createChainHandlerAndHandle(
             [
-                TransformerBuilder::createWithReferenceObject("", new StdClassTransformer(), "transform"),
-                TransformerBuilder::createWithReferenceObject("", new StringTransformer(), "transform"),
-                ChainMessageHandlerBuilder::createWith("")
-                    ->chain(TransformerBuilder::createWithReferenceObject("", new StdClassTransformer(), "transform"))
+                TransformerBuilder::createWithReferenceObject(new StdClassTransformer(), "transform"),
+                TransformerBuilder::createWithReferenceObject( new StringTransformer(), "transform"),
+                ChainMessageHandlerBuilder::create()
+                    ->chain(TransformerBuilder::createWithReferenceObject(new StdClassTransformer(), "transform"))
             ],
             $requestPayload,
             $replyChannel
@@ -130,6 +127,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_chaining_with_other_chain_at_the_beginning_of_flow()
     {
         $replyChannel = QueueChannel::create();
@@ -137,12 +138,12 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $this->createChainHandlerAndHandle(
             [
-                EnricherBuilder::create("", [
+                EnricherBuilder::create([
                    EnricherHeaderValueBuilder::create("awesome", "yes")
                 ]),
-                ChainMessageHandlerBuilder::createWith("")
-                    ->chain(TransformerBuilder::createWithReferenceObject("", new StdClassTransformer(), "transform")),
-                TransformerBuilder::createWithReferenceObject("", new PassThroughTransformer(), "transform"),
+                ChainMessageHandlerBuilder::create()
+                    ->chain(TransformerBuilder::createWithReferenceObject( new StdClassTransformer(), "transform")),
+                TransformerBuilder::createWithReferenceObject(new PassThroughTransformer(), "transform"),
             ],
             $requestPayload,
             $replyChannel
@@ -169,8 +170,8 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $outputChannel = QueueChannel::create();
         $requestPayload = "some";
 
-        $chainHandler = ChainMessageHandlerBuilder::createWith("some")
-            ->chain(TransformerBuilder::createHeaderEnricher("", [
+        $chainHandler = ChainMessageHandlerBuilder::create()
+            ->chain(TransformerBuilder::createHeaderEnricher([
                 "token" => "123"
             ]))
             ->withOutputMessageChannel($outputChannelName)
@@ -189,6 +190,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_chaining_with_three_levels()
     {
         $replyChannel = QueueChannel::create();
@@ -196,13 +201,13 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $this->createChainHandlerAndHandle(
             [
-                ChainMessageHandlerBuilder::createWith("")
+                ChainMessageHandlerBuilder::create()
                     ->chain(
-                        ChainMessageHandlerBuilder::createWith("")
-                            ->chain(EnricherBuilder::create("", [
+                        ChainMessageHandlerBuilder::create()
+                            ->chain(EnricherBuilder::create([
                                 EnricherExpressionHeaderBuilder::createWith("some", "false")
                             ]))
-                            ->chain(EnricherBuilder::create("", [
+                            ->chain(EnricherBuilder::create([
                                 EnricherExpressionHeaderBuilder::createWith("some2", "payload")
                             ]))
                     )
@@ -224,11 +229,13 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     public function test_passing_references_objects_to_top_handler()
     {
-        $chainBuilder = ChainMessageHandlerBuilder::createWith("some")
-                        ->chain(TransformerBuilder::create("", "some", "method"));
+        $chainBuilder = ChainMessageHandlerBuilder::create()
+                        ->chain(TransformerBuilder::create("some", "method"));
 
         $this->assertEquals(["some"], $chainBuilder->getRequiredReferenceNames());
     }
+
+
 
     /**
      * @param $messageHandlers
@@ -239,7 +246,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      */
     private function createChainHandlerAndHandle(array $messageHandlers, $requestPayload, $replyChannel): void
     {
-        $chainHandler = ChainMessageHandlerBuilder::createWith("some");
+        $chainHandler = ChainMessageHandlerBuilder::create();
         foreach ($messageHandlers as $messageHandler) {
             $chainHandler = $chainHandler->chain($messageHandler);
         }
@@ -255,5 +262,4 @@ class ChainMessageHandlerBuilderTest extends TestCase
                 ->build()
         );
     }
-
 }

@@ -49,32 +49,26 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     /**
      * MessageFilterBuilder constructor.
      *
-     * @param string $inputChannelName
-     * @param string $outputChannelName
      * @param string $referenceName
      * @param string $methodName
      */
-    private function __construct(string $inputChannelName, string $outputChannelName, string $referenceName, string $methodName)
+    private function __construct(string $referenceName, string $methodName)
     {
         $this->referenceName     = $referenceName;
         $this->methodName        = $methodName;
-        $this->withInputChannelName($inputChannelName);
-        $this->withOutputMessageChannel($outputChannelName);
 
         $this->initialize();
     }
 
     /**
-     * @param string $inputChannelName
-     * @param string $outputChannelName
      * @param string $referenceName
      * @param string $methodName
      *
      * @return MessageFilterBuilder
      */
-    public static function createWithReferenceName(string $inputChannelName, string $outputChannelName, string $referenceName, string $methodName): self
+    public static function createWithReferenceName(string $referenceName, string $methodName): self
     {
-        return new self($inputChannelName, $outputChannelName, $referenceName, $methodName);
+        return new self($referenceName, $methodName);
     }
 
     /**
@@ -149,10 +143,11 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
         $discardChannel = $this->discardChannelName ? $channelResolver->resolve($this->discardChannelName) : null;
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::createWithDirectReference(
-            $this->inputMessageChannelName,
             new MessageFilter(MethodInvoker::createWith($messageSelector, $this->methodName, $this->parameterConverters, $referenceSearchService), $discardChannel, $this->throwExceptionOnDiscard),
             "handle"
-        )->withOutputMessageChannel($this->outputMessageChannelName);
+            )
+            ->withInputChannelName($this->inputMessageChannelName)
+            ->withOutputMessageChannel($this->outputMessageChannelName);
 
         return $serviceActivatorBuilder->build($channelResolver, $referenceSearchService);
     }

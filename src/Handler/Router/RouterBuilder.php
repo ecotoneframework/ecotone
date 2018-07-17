@@ -58,98 +58,89 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 
     /**
      * RouterBuilder constructor.
-     * @param string $inputChannel
      * @param string $objectToInvokeReference
      * @param string $methodName
      */
-    private function __construct(string $inputChannel, string $objectToInvokeReference, string $methodName)
+    private function __construct(string $objectToInvokeReference, string $methodName)
     {
-        $this->inputMessageChannelName = $inputChannel;
         $this->objectToInvokeReference = $objectToInvokeReference;
         $this->methodName = $methodName;
     }
 
     /**
-     * @param string $inputChannelName
      * @param string $objectToInvokeReference
      * @param string $methodName
      * @return RouterBuilder
      */
-    public static function create(string $inputChannelName, string $objectToInvokeReference, string $methodName) : self
+    public static function create(string $objectToInvokeReference, string $methodName) : self
     {
-        return new self($inputChannelName, $objectToInvokeReference, $methodName);
+        return new self($objectToInvokeReference, $methodName);
     }
 
     /**
-     * @param string $inputChannelName
      * @param array $typeToChannelMapping
      * @return RouterBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createPayloadTypeRouter(string $inputChannelName, array $typeToChannelMapping) : self
+    public static function createPayloadTypeRouter(array $typeToChannelMapping) : self
     {
-        $routerBuilder = self::create($inputChannelName, "", 'route');
+        $routerBuilder = self::create("", 'route');
         $routerBuilder->setObjectToInvoke(PayloadTypeRouter::create($typeToChannelMapping));
 
         return $routerBuilder;
     }
 
     /**
-     * @param string $inputChannelName
      * @param $customRouterObject
      * @param string $methodName
      * @return RouterBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createRouterFromObject(string $inputChannelName, $customRouterObject, string $methodName) : self
+    public static function createRouterFromObject($customRouterObject, string $methodName) : self
     {
         Assert::isObject($customRouterObject, "Custom router must be object");
 
-        $routerBuilder = self::create($inputChannelName, "", $methodName);
+        $routerBuilder = self::create( "", $methodName);
         $routerBuilder->setObjectToInvoke($customRouterObject);
 
         return $routerBuilder;
     }
 
     /**
-     * @param string $inputChannelName
-     *
      * @return RouterBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createPayloadTypeRouterByClassName(string $inputChannelName) : self
+    public static function createPayloadTypeRouterByClassName() : self
     {
-        $routerBuilder = self::create($inputChannelName, "", 'route');
+        $routerBuilder = self::create("", 'route');
         $routerBuilder->setObjectToInvoke(PayloadTypeRouter::createWithRoutingByClass());
 
         return $routerBuilder;
     }
 
     /**
-     * @param string $inputChannelName
      * @param array  $recipientLists
      *
      * @return RouterBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createRecipientListRouter(string $inputChannelName, array $recipientLists) : self
+    public static function createRecipientListRouter(array $recipientLists) : self
     {
-        $routerBuilder = self::create($inputChannelName, "", 'route');
+        $routerBuilder = self::create( "", 'route');
         $routerBuilder->setObjectToInvoke(new RecipientListRouter($recipientLists));
 
         return $routerBuilder;
     }
 
     /**
-     * @param string $inputChannelName
      * @param string $headerName
      * @param array $headerValueToChannelMapping
      * @return RouterBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createHeaderValueRouter(string $inputChannelName, string $headerName, array $headerValueToChannelMapping) : self
+    public static function createHeaderValueRouter(string $headerName, array $headerValueToChannelMapping) : self
     {
-        $routerBuilder = self::create($inputChannelName, "", 'route');
+        $routerBuilder = self::create("", 'route');
         $routerBuilder->setObjectToInvoke(HeaderValueRouter::create($headerName, $headerValueToChannelMapping));
 
         return $routerBuilder;

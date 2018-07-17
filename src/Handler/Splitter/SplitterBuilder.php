@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
@@ -20,7 +21,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
+class SplitterBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
     /**
      * @var string
@@ -30,14 +31,6 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
      * @var string
      */
     private $methodName;
-    /**
-     * @var string
-     */
-    private $inputMessageChannelName;
-    /**
-     * @var string
-     */
-    private $outputChannelName = "";
     /**
      * @var array|\SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder[]
      */
@@ -53,13 +46,11 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
 
     /**
      * ServiceActivatorBuilder constructor.
-     * @param string $inputChannelName
      * @param string $referenceName
      * @param string $methodName
      */
-    private function __construct(string $inputChannelName, string $referenceName, string $methodName)
+    private function __construct(string $referenceName, string $methodName)
     {
-        $this->inputMessageChannelName = $inputChannelName;
         $this->referenceName = $referenceName;
         $this->methodName = $methodName;
 
@@ -69,73 +60,40 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
     }
 
     /**
-     * @param string $inputChannelName
      * @param string $referenceName
      * @param string $methodName
      * @return SplitterBuilder
      */
-    public static function create(string $inputChannelName, string $referenceName, string $methodName): self
+    public static function create(string $referenceName, string $methodName): self
     {
-        return new self($inputChannelName, $referenceName, $methodName);
+        return new self($referenceName, $methodName);
     }
 
     /**
      * Splits directly from message payload, without using any service
      *
-     * @param string $inputChannelName
-     *
      * @return SplitterBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createMessagePayloadSplitter(string $inputChannelName) : self
+    public static function createMessagePayloadSplitter() : self
     {
-        return self::createWithDirectObject($inputChannelName, new DirectMessageSplitter(), "split");
+        return self::createWithDirectObject(new DirectMessageSplitter(), "split");
     }
 
     /**
-     * @param string $inputChannelName
      * @param object $directReferenceObject
      * @param string $methodName
      * @return SplitterBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createWithDirectObject(string $inputChannelName, $directReferenceObject, string $methodName): self
+    public static function createWithDirectObject($directReferenceObject, string $methodName): self
     {
         Assert::isObject($directReferenceObject, "Direct reference must be object");
 
-        $splitterBuilder = new self($inputChannelName, "", $methodName);
+        $splitterBuilder = new self("", $methodName);
         $splitterBuilder->setDirectObject($directReferenceObject);
 
         return $splitterBuilder;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getInputMessageChannelName(): string
-    {
-        return $this->inputMessageChannelName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withInputChannelName(string $inputChannelName): self
-    {
-        $this->inputMessageChannelName = $inputChannelName;
-
-        return $this;
-    }
-
-    /**
-     * @param string $messageChannelName
-     * @return self
-     */
-    public function withOutputMessageChannel(string $messageChannelName): self
-    {
-        $this->outputChannelName = $messageChannelName;
-
-        return $this;
     }
 
     /**
@@ -188,7 +146,7 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
 
         return new Splitter(
             RequestReplyProducer::createRequestAndSplit(
-                $this->outputChannelName,
+                $this->outputMessageChannelName,
                 MethodInvoker::createWith(
                     $objectToInvokeOn,
                     $this->methodName,

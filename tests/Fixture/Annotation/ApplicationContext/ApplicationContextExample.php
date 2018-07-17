@@ -60,9 +60,11 @@ class ApplicationContextExample
      */
     public function enricherHttpEntry(): MessageHandlerBuilder
     {
-        return TransformerBuilder::createHeaderEnricher(self::HTTP_INPUT_CHANNEL, [
+        return TransformerBuilder::createHeaderEnricher([
             "token" => "abcedfg"
-        ])->withOutputMessageChannel(self::HTTP_OUTPUT_CHANNEL);
+        ])
+            ->withInputChannelName(self::HTTP_INPUT_CHANNEL)
+            ->withOutputMessageChannel(self::HTTP_OUTPUT_CHANNEL);
     }
 
     /**

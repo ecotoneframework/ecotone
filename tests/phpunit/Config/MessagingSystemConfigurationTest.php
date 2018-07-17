@@ -102,7 +102,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem = MessagingSystemConfiguration::prepareWitObserver(InMemoryModuleMessaging::createEmpty(), $configurationObserver);
 
         $messagingSystem->registerMessageHandler(
-            ServiceActivatorBuilder::create("", "ref-a", "method-a")
+            ServiceActivatorBuilder::create( "ref-a", "method-a")
                 ->withMethodParameterConverters([
                     ReferenceBuilder::create("some", "ref-b")
                 ])

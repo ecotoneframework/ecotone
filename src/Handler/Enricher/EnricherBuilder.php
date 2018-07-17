@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
 
@@ -25,7 +26,7 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
     /**
      * @var string
      */
-    private $inputChannelName;
+    private $inputChannelName = "";
     /**
      * @var string
      */
@@ -50,28 +51,25 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
     /**
      * EnricherBuilder constructor.
      *
-     * @param string $inputChannelName
      * @param SetterBuilder[] $setters
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function __construct(string $inputChannelName, array $setters)
+    private function __construct(array $setters)
     {
         Assert::allInstanceOfType($setters, SetterBuilder::class);
 
-        $this->inputChannelName = $inputChannelName;
         $this->setterBuilders   = $setters;
     }
 
     /**
-     * @param string $inputChannelName
      * @param Setter[] $setterBuilders
      *
      * @return EnricherBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function create(string $inputChannelName, array $setterBuilders): self
+    public static function create(array $setterBuilders): self
     {
-        return new self($inputChannelName, $setterBuilders);
+        return new self($setterBuilders);
     }
 
     /**
@@ -166,7 +164,7 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
         $gateway = null;
         if ($this->requestChannelName) {
             /** @var EnrichGateway $gateway */
-            $gateway = GatewayProxyBuilder::create(Uuid::uuid4(), EnrichGateway::class, "execute", $this->requestChannelName)
+                $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichGateway::class, "execute", $this->requestChannelName)
                         ->withMillisecondTimeout(1)
                         ->build($referenceSearchService, $channelResolver);
         }

@@ -44,9 +44,11 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
     public function test_configuring_message_handler_from_application_context()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler(TransformerBuilder::createHeaderEnricher(ApplicationContextExample::HTTP_INPUT_CHANNEL, [
+            ->registerMessageHandler(TransformerBuilder::createHeaderEnricher([
                 "token" => "abcedfg"
-            ])->withOutputMessageChannel(ApplicationContextExample::HTTP_OUTPUT_CHANNEL));
+            ])
+                ->withInputChannelName(ApplicationContextExample::HTTP_INPUT_CHANNEL)
+                ->withOutputMessageChannel(ApplicationContextExample::HTTP_OUTPUT_CHANNEL));
 
         $this->compareWithConfiguredForMethod("enricherHttpEntry", $expectedConfiguration);
     }
@@ -69,9 +71,11 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel(ApplicationContextExample::HTTP_INPUT_CHANNEL))
-            ->registerMessageHandler(TransformerBuilder::createHeaderEnricher(ApplicationContextExample::HTTP_INPUT_CHANNEL, [
+            ->registerMessageHandler(TransformerBuilder::createHeaderEnricher([
                 "token" => "abcedfg"
-            ])->withOutputMessageChannel(ApplicationContextExample::HTTP_OUTPUT_CHANNEL));
+            ])
+                ->withInputChannelName(ApplicationContextExample::HTTP_INPUT_CHANNEL)
+                ->withOutputMessageChannel(ApplicationContextExample::HTTP_OUTPUT_CHANNEL));
 
         $this->compareWithConfiguredForMethod("withMultipleMessageComponents", $expectedConfiguration);
     }

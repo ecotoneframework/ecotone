@@ -31,20 +31,17 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
     /**
      * ChainMessageHandlerBuilder constructor.
-     * @param string $inputChannelName
      */
-    private function __construct(string $inputChannelName)
+    private function __construct()
     {
-        $this->withInputChannelName($inputChannelName);
     }
 
     /**
-     * @param string $inputChannelName
      * @return ChainMessageHandlerBuilder
      */
-    public static function createWith(string $inputChannelName) : self
+    public static function create() : self
     {
-        return new self($inputChannelName);
+        return new self();
     }
 
     /**

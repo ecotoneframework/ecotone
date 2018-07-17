@@ -22,9 +22,8 @@ class SplitterBuilderTest extends MessagingTest
 {
     public function test_splitting_incoming_message_where_service_returns_payloads()
     {
-        $inputChannelName = "inputChannel";
         $referenceName = "ref-a";
-        $splitter = SplitterBuilder::create($inputChannelName, $referenceName, "splitToPayload");
+        $splitter = SplitterBuilder::create($referenceName, "splitToPayload");
 
         $service = new ServiceSplittingArrayPayload();
         $splitter = $splitter->build(
@@ -44,9 +43,8 @@ class SplitterBuilderTest extends MessagingTest
 
     public function test_throwing_exception_if_splitter_does_not_return_array()
     {
-        $inputChannelName = "inputChannel";
         $referenceName = "ref-a";
-        $splitter = SplitterBuilder::create($inputChannelName, $referenceName, "splittingWithReturnString");
+        $splitter = SplitterBuilder::create($referenceName, "splittingWithReturnString");
 
         $service = new WrongSplittingService();
 
@@ -62,8 +60,7 @@ class SplitterBuilderTest extends MessagingTest
 
     public function test_creating_splitter_with_direct_reference()
     {
-        $inputChannelName = "inputChannel";
-        $splitter = SplitterBuilder::createWithDirectObject($inputChannelName, new ServiceSplittingArrayPayload(), "splitToPayload");
+        $splitter = SplitterBuilder::createWithDirectObject(new ServiceSplittingArrayPayload(), "splitToPayload");
 
         $splitter = $splitter->build(
             InMemoryChannelResolver::createEmpty(),
@@ -78,10 +75,14 @@ class SplitterBuilderTest extends MessagingTest
         $this->assertEquals(1, $outputChannel->receive()->getPayload());
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_splitting_directly_from_message_without_service()
     {
-        $inputChannelName = "inputChannel";
-        $splitter = SplitterBuilder::createMessagePayloadSplitter($inputChannelName);
+        $splitter = SplitterBuilder::createMessagePayloadSplitter();
 
         $splitter = $splitter->build(
             InMemoryChannelResolver::createEmpty(),
@@ -95,10 +96,14 @@ class SplitterBuilderTest extends MessagingTest
         $this->assertNotNull($outputChannel->receive());
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_throwing_exception_if_message_for_payload_splitter_do_not_contains_array()
     {
-        $inputChannelName = "inputChannel";
-        $splitter = SplitterBuilder::createMessagePayloadSplitter($inputChannelName);
+        $splitter = SplitterBuilder::createMessagePayloadSplitter();
 
         $splitter = $splitter->build(
             InMemoryChannelResolver::createEmpty(),

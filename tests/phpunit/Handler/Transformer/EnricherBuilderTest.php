@@ -38,7 +38,7 @@ class EnricherBuilderTest extends MessagingTest
     {
         $this->expectException(ConfigurationException::class);
 
-        $enricher = EnricherBuilder::create("some", []);
+        $enricher = EnricherBuilder::create([]);
 
         $enricher->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
     }
@@ -468,10 +468,8 @@ class EnricherBuilderTest extends MessagingTest
         $messageHandler     = ReplyViaHeadersMessageHandler::create($replyPayload);
         $requestChannel->subscribe($messageHandler);
 
-        $enricher = EnricherBuilder::create(
-            "some",
-            $setterBuilders
-        )
+        $enricher = EnricherBuilder::create($setterBuilders)
+            ->withInputChannelName("some")
             ->withRequestMessageChannel($requestChannelName)
             ->withRequestPayloadExpression("payload['orders']")
             ->build(
@@ -492,6 +490,11 @@ class EnricherBuilderTest extends MessagingTest
         $this->assertEquals([], $messageHandler->getReceivedMessage()->getPayload());
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_extracting_unique_values_from_arrays_for_request_message()
     {
         $outputChannel = QueueChannel::create();
@@ -521,10 +524,8 @@ class EnricherBuilderTest extends MessagingTest
         $messageHandler     = ReplyViaHeadersMessageHandler::create($replyPayload);
         $requestChannel->subscribe($messageHandler);
 
-        $enricher = EnricherBuilder::create(
-            "some",
-            $setterBuilders
-        )
+        $enricher = EnricherBuilder::create($setterBuilders)
+            ->withInputChannelName("some")
             ->withRequestMessageChannel($requestChannelName)
             ->withRequestPayloadExpression("extract(payload['orders'], 'orderId')")
             ->build(
@@ -545,6 +546,11 @@ class EnricherBuilderTest extends MessagingTest
         $this->assertEquals([1, 2], $messageHandler->getReceivedMessage()->getPayload());
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_extracting_not_unique_values_from_arrays_for_request_message()
     {
         $outputChannel = QueueChannel::create();
@@ -574,10 +580,8 @@ class EnricherBuilderTest extends MessagingTest
         $messageHandler     = ReplyViaHeadersMessageHandler::create($replyPayload);
         $requestChannel->subscribe($messageHandler);
 
-        $enricher = EnricherBuilder::create(
-            "some",
-            $setterBuilders
-        )
+        $enricher = EnricherBuilder::create($setterBuilders)
+            ->withInputChannelName("some")
             ->withRequestMessageChannel($requestChannelName)
             ->withRequestPayloadExpression("createArray('ids', extract(payload['orders'], 'orderId', false))")
             ->build(
@@ -616,10 +620,8 @@ class EnricherBuilderTest extends MessagingTest
         $requestChannel     = DirectChannel::create();
         $requestChannel->subscribe(ReplyViaHeadersMessageHandler::create($replyPayload));
 
-        $enricher = EnricherBuilder::create(
-            "some",
-            $setterBuilders
-        )
+        $enricher = EnricherBuilder::create($setterBuilders)
+            ->withInputChannelName("some")
             ->withRequestMessageChannel($requestChannelName)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray(
@@ -651,10 +653,8 @@ class EnricherBuilderTest extends MessagingTest
             ->setReplyChannel($outputChannel)
             ->build();
 
-        $enricher = EnricherBuilder::create(
-            "some",
-            $setterBuilders
-        )
+        $enricher = EnricherBuilder::create($setterBuilders)
+            ->withInputChannelName("some")
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createWith(

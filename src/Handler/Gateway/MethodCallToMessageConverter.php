@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\OnlyPayloadConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
@@ -20,7 +21,7 @@ class MethodCallToMessageConverter
      */
     private $interfaceToCall;
     /**
-     * @var array|ParameterToMessageConverter[]
+     * @var array|GatewayParameterConverter[]
      */
     private $methodArgumentConverters;
 
@@ -28,7 +29,8 @@ class MethodCallToMessageConverter
      * MethodCallToMessageConverter constructor.
      * @param string $interfaceToCall
      * @param string $methodName
-     * @param array|ParameterToMessageConverter[] $methodArgumentConverters
+     * @param array|GatewayParameterConverter[] $methodArgumentConverters
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function __construct(string $interfaceToCall, string $methodName, array $methodArgumentConverters)
     {
@@ -38,6 +40,7 @@ class MethodCallToMessageConverter
     /**
      * @param array|MethodArgument[] $methodArguments
      * @return MessageBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function convertFor(array $methodArguments) : MessageBuilder
     {
@@ -58,12 +61,12 @@ class MethodCallToMessageConverter
     /**
      * @param string $interfaceToCall
      * @param string $methodName
-     * @param array|ParameterToMessageConverter[] $methodArgumentConverters
+     * @param array|GatewayParameterConverter[] $methodArgumentConverters
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function initialize(string $interfaceToCall, string $methodName, array $methodArgumentConverters) : void
     {
-        Assert::allInstanceOfType($methodArgumentConverters, ParameterToMessageConverter::class);
+        Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverter::class);
 
         $this->interfaceToCall = InterfaceToCall::create($interfaceToCall, $methodName);
 
@@ -72,7 +75,7 @@ class MethodCallToMessageConverter
         }
 
         if (empty($methodArgumentConverters) && $this->interfaceToCall->hasSingleArgument()) {
-            $methodArgumentConverters = [new OnlyPayloadConverter()];
+            $methodArgumentConverters = [GatewayPayloadBuilder::create($this->interfaceToCall->getFirstParameterName())->build()];
         }
 
         $this->methodArgumentConverters = $methodArgumentConverters;

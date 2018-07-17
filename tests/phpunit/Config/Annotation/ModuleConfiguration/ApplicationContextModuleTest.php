@@ -6,7 +6,7 @@ use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
 use Fixture\Annotation\ApplicationContext\ApplicationContextModuleExtensionExample;
 use Fixture\Annotation\ApplicationContext\GatewayExample;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponent;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
@@ -157,7 +157,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
             ->addAnnotationToClassMethod(
                 ApplicationContextExample::class,
                 $methodName,
-                new MessagingComponentAnnotation()
+                new MessagingComponent()
             );
 
         $annotationConfiguration = ApplicationContextModule::create($annotationRegistrationService);

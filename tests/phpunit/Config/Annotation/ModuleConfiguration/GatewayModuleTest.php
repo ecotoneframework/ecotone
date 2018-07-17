@@ -1,16 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Fixture\Annotation\MessageEndpoint\Gateway\GatewayWithReplyChannelExample;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\GatewayAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\GatewayModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 
 /**
  * Class AnnotationTransformerConfigurationTest
@@ -20,16 +19,14 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchServ
 class GatewayModuleTest extends AnnotationConfigurationTest
 {
     /**
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_transformer_builder()
     {
-        $gatewayAnnotation = new GatewayAnnotation();
+        $gatewayAnnotation = new Gateway();
         $gatewayAnnotation->requestChannel = "requestChannel";
         $gatewayAnnotation->transactionFactories = ['dbalTransaction'];
         $gatewayAnnotation->errorChannel = "someErrorChannel";
-        $messageToPayloadParameterAnnotation = new MessageToPayloadParameterAnnotation();
+        $messageToPayloadParameterAnnotation = new Payload();
         $messageToPayloadParameterAnnotation->parameterName = "orderId";
         $gatewayAnnotation->parameterConverters = [
             $messageToPayloadParameterAnnotation
@@ -39,7 +36,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
             $this->createAnnotationRegistrationService(
                 GatewayWithReplyChannelExample::class,
                 "buy",
-                new MessageEndpointAnnotation(),
+                new MessageEndpoint(),
                 $gatewayAnnotation
             )
         );

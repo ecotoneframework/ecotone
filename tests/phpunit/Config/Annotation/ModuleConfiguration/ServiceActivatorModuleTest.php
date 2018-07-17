@@ -3,20 +3,19 @@
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageParameterAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToHeaderParameterAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivatorAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Header;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\MessageParameter;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Reference;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivator;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageParameterConverterBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\HeaderBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 /**
@@ -27,23 +26,21 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceAct
 class ServiceActivatorModuleTest extends AnnotationConfigurationTest
 {
     /**
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_service_activator_builder_from_annotation()
     {
-        $serviceActivatorAnnotation                    = new ServiceActivatorAnnotation();
-        $serviceActivatorAnnotation->inputChannelName  = "inputChannel";
+        $serviceActivatorAnnotation = new ServiceActivator();
+        $serviceActivatorAnnotation->inputChannelName = "inputChannel";
         $serviceActivatorAnnotation->outputChannelName = "outputChannel";
-        $serviceActivatorAnnotation->requiresReply     = true;
-        $messageToHeaderConverter                      = new MessageToHeaderParameterAnnotation();
-        $messageToHeaderConverter->parameterName       = "to";
-        $messageToHeaderConverter->headerName          = "sendTo";
-        $payloadParameterConverter                     = new MessageToPayloadParameterAnnotation();
-        $payloadParameterConverter->parameterName      = "content";
-        $messageParameterConverter                     = new MessageParameterAnnotation();
-        $messageParameterConverter->parameterName      = "message";
-        $referenceServiceConverter = new MessageToReferenceServiceAnnotation();
+        $serviceActivatorAnnotation->requiresReply = true;
+        $messageToHeaderConverter = new Header();
+        $messageToHeaderConverter->parameterName = "to";
+        $messageToHeaderConverter->headerName = "sendTo";
+        $payloadParameterConverter = new Payload();
+        $payloadParameterConverter->parameterName = "content";
+        $messageParameterConverter = new MessageParameter();
+        $messageParameterConverter->parameterName = "message";
+        $referenceServiceConverter = new Reference();
         $referenceServiceConverter->parameterName = "object";
         $referenceServiceConverter->referenceName = "reference";
         $parameterConverters = [
@@ -55,7 +52,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
             $this->createAnnotationRegistrationService(
                 ServiceActivatorWithAllConfigurationDefined::class,
                 "sendMessage",
-                new MessageEndpointAnnotation(),
+                new MessageEndpoint(),
                 $serviceActivatorAnnotation
 
             )
@@ -66,10 +63,10 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::create("inputChannel", ServiceActivatorWithAllConfigurationDefined::class, "sendMessage");
         $serviceActivatorBuilder->withMethodParameterConverters([
-            MessageToHeaderParameterConverterBuilder::create("to", "sendTo"),
-            MessageToPayloadParameterConverterBuilder::create("content"),
-            MessageParameterConverterBuilder::create("message"),
-            MessageToReferenceServiceParameterConverterBuilder::create("object", "reference", $serviceActivatorBuilder)
+            HeaderBuilder::create("to", "sendTo"),
+            PayloadBuilder::create("content"),
+            MessageConverterBuilder::create("message"),
+            ReferenceBuilder::create("object", "reference")
         ]);
         $serviceActivatorBuilder->registerRequiredReference("reference");
 

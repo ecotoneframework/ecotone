@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
@@ -16,8 +17,13 @@ interface MessageHandlerBuilderWithParameterConverters extends MessageHandlerBui
     public function registerRequiredReference(string $referenceName) : void;
 
     /**
-     * @param array|MessageToParameterConverter[] $methodParameterConverterBuilders
+     * @param array|ParameterConverter[] $methodParameterConverterBuilders
      * @return static
      */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders);
+
+    /**
+     * @return ParameterConverterBuilder[]
+     */
+    public function getParameterConverters() : array;
 }

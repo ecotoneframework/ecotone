@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter;
 
@@ -6,7 +7,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
@@ -38,7 +39,7 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
      */
     private $outputChannelName = "";
     /**
-     * @var array|\SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder[]
+     * @var array|\SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder[]
      */
     private $methodParameterConverterBuilders = [];
     /**
@@ -84,6 +85,7 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
      * @param string $inputChannelName
      *
      * @return SplitterBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function createMessagePayloadSplitter(string $inputChannelName) : self
     {
@@ -95,6 +97,7 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
      * @param object $directReferenceObject
      * @param string $methodName
      * @return SplitterBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function createWithDirectObject(string $inputChannelName, $directReferenceObject, string $methodName): self
     {
@@ -146,9 +149,17 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
     /**
      * @inheritDoc
      */
+    public function getParameterConverters(): array
+    {
+        return $this->methodParameterConverterBuilders;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders)
     {
-        Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
+        Assert::allInstanceOfType($methodParameterConverterBuilders, ParameterConverterBuilder::class);
 
         $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
 
@@ -175,18 +186,14 @@ class SplitterBuilder implements MessageHandlerBuilderWithParameterConverters, M
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
-        $methodParameterConverters = [];
-        foreach ($this->methodParameterConverterBuilders as $methodParameterConverterBuilder) {
-            $methodParameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
-        }
-
         return new Splitter(
             RequestReplyProducer::createRequestAndSplit(
                 $this->outputChannelName,
                 MethodInvoker::createWith(
                     $objectToInvokeOn,
                     $this->methodName,
-                    $methodParameterConverters
+                    $this->methodParameterConverterBuilders,
+                    $referenceSearchService
                 )
                 ,
                 $channelResolver

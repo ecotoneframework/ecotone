@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Filter;
 
@@ -6,7 +7,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -21,7 +22,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {
     /**
-     * @var MessageToParameterConverterBuilder[]
+     * @var ParameterConverterBuilder[]
      */
     private $parameterConverters = [];
     /**
@@ -103,6 +104,14 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getParameterConverters(): array
+    {
+        return $this->parameterConverters;
+    }
+
+    /**
      * @param string $discardChannelName
      *
      * @return MessageFilterBuilder
@@ -131,10 +140,6 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $parameterConverters = [];
-        foreach ($this->parameterConverters as $parameterConverter) {
-            $parameterConverters[] = $parameterConverter->build($referenceSearchService);
-        }
         $messageSelector = $referenceSearchService->findByReference($this->referenceName);
 
         if (!InterfaceToCall::createFromObject($messageSelector, $this->methodName)->hasReturnValueBoolean()) {
@@ -145,7 +150,7 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::createWithDirectReference(
             $this->inputMessageChannelName,
-            new MessageFilter(MethodInvoker::createWith($messageSelector, $this->methodName, $parameterConverters), $discardChannel, $this->throwExceptionOnDiscard),
+            new MessageFilter(MethodInvoker::createWith($messageSelector, $this->methodName, $this->parameterConverters, $referenceSearchService), $discardChannel, $this->throwExceptionOnDiscard),
             "handle"
         )->withOutputMessageChannel($this->outputMessageChannelName);
 

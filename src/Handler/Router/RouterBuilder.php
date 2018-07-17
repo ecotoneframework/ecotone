@@ -5,8 +5,9 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Router;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
@@ -35,7 +36,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     private $methodName;
     /**
-     * @var array|MessageToParameterConverterBuilder[]
+     * @var array|ParameterConverterBuilder[]
      */
     private $methodParameterConverters = [];
     /**
@@ -178,11 +179,19 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders) : self
     {
-        Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
+        Assert::allInstanceOfType($methodParameterConverterBuilders, ParameterConverterBuilder::class);
 
         $this->methodParameterConverters = $methodParameterConverterBuilders;
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getParameterConverters(): array
+    {
+        return $this->methodParameterConverters;
     }
 
     /**
@@ -213,17 +222,10 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     {
         $objectToInvoke = $this->objectToInvoke ? $this->objectToInvoke : $referenceSearchService->findByReference($this->objectToInvokeReference);
 
-        $methodParameterConverters = [];
-        foreach ($this->methodParameterConverters as $methodParameterConverterBuilder) {
-            $methodParameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
-        }
-
         return Router::create(
             $channelResolver,
-            $objectToInvoke,
-            $this->methodName,
+            MethodInvoker::createWith($objectToInvoke, $this->methodName, $this->methodParameterConverters, $referenceSearchService),
             $this->resolutionRequired,
-            $methodParameterConverters,
             $this->defaultResolution,
             $this->applySequence
         );

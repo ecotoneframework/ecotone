@@ -33,6 +33,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @param iterable|ConsumerLifecycle[] $consumers
      * @param object[]|array $gateways
      * @param ChannelResolver $channelResolver
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct(iterable $consumers, array $gateways, ChannelResolver $channelResolver)
     {
@@ -51,6 +52,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @param object[]|array $gateways
      * @param ChannelResolver $channelResolver
      * @return MessagingSystem
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      * @internal
      */
     public static function create(iterable $consumers, array $gateways, ChannelResolver $channelResolver) : self

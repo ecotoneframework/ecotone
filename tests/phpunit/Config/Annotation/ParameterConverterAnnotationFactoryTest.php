@@ -3,11 +3,12 @@
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToExpressionParameterAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToReferenceServiceAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Expression;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Reference;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToExpressionEvaluationParameterConverterBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToReferenceServiceParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
@@ -18,10 +19,14 @@ use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
  */
 class ParameterConverterAnnotationFactoryTest extends MessagingTest
 {
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
+     */
     public function test_creating_with_class_name_as_reference_name_if_no_reference_passed()
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
-        $parameterConverterAnnotation = new MessageToReferenceServiceAnnotation();
+        $parameterConverterAnnotation = new Reference();
         $parameterConverterAnnotation->parameterName = "object";
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
@@ -29,10 +34,9 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
         $messageHandler = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
         $messageHandler
             ->withMethodParameterConverters([
-                MessageToReferenceServiceParameterConverterBuilder::create(
+                ReferenceBuilder::create(
                     $parameterConverterAnnotation->parameterName,
-                    \stdClass::class,
-                    $messageHandler
+                    \stdClass::class
                 )
             ]);
         $messageHandler
@@ -52,10 +56,14 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
+     */
     public function test_converting_for_message_to_expression_evaluation()
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
-        $parameterConverterAnnotation = new MessageToExpressionParameterAnnotation();
+        $parameterConverterAnnotation = new Expression();
         $parameterConverterAnnotation->parameterName = "object";
         $parameterConverterAnnotation->expression = "payload.name";
 
@@ -64,10 +72,9 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
         $messageHandler = ServiceActivatorBuilder::create("some", $relatedClassName, $methodName);
         $messageHandler
             ->withMethodParameterConverters([
-                MessageToExpressionEvaluationParameterConverterBuilder::createWith(
+                ExpressionBuilder::create(
                     $parameterConverterAnnotation->parameterName,
-                    "payload.name",
-                    $messageHandler
+                    "payload.name"
                 )
             ]);
 

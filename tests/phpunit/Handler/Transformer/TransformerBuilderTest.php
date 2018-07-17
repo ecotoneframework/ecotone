@@ -12,8 +12,10 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\HeaderBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
@@ -220,8 +222,8 @@ class TransformerBuilderTest extends MessagingTest
         $transformerBuilder = TransformerBuilder::create($inputChannelName, $objectToInvokeReference, 'withReturnValue')
                                 ->withOutputMessageChannel($outputChannelName);
         $transformerBuilder->withMethodParameterConverters([
-            MessageToPayloadParameterConverterBuilder::create('name'),
-            MessageToHeaderParameterConverterBuilder::create('surname', 'token')
+            PayloadBuilder::create('name'),
+            HeaderBuilder::create('surname', 'token')
         ]);
         $transformer = $transformerBuilder
             ->build(

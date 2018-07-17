@@ -8,8 +8,8 @@ use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithThreeArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\MethodArgument;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\MethodCallToMessageConverter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToHeaderConverter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\ParameterToPayloadConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
@@ -26,7 +26,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
         $parameterName = 'content';
         $methodCallToMessageConverter = new MethodCallToMessageConverter(
             ServiceInterfaceSendOnly::class, 'sendMail',
-            [ParameterToPayloadConverter::create($parameterName)]
+            [GatewayPayloadConverter::create($parameterName)]
         );
 
         $argumentValue = "Hello Johny";
@@ -48,8 +48,8 @@ class MethodCallToMessageConverterTest extends MessagingTest
         $methodCallToMessageConverter = new MethodCallToMessageConverter(
             ServiceInterfaceSendOnlyWithTwoArguments::class, 'sendMail',
             [
-                ParameterToPayloadConverter::create($payloadParameterName),
-                ParameterToHeaderConverter::create(
+                GatewayPayloadConverter::create($payloadParameterName),
+                GatewayHeaderConverter::create(
                     $personIdName, $personIdName
                 )
             ]
@@ -82,11 +82,11 @@ class MethodCallToMessageConverterTest extends MessagingTest
         $methodCallToMessageConverter = new MethodCallToMessageConverter(
             ServiceInterfaceSendOnlyWithThreeArguments::class, 'calculate',
             [
-                ParameterToPayloadConverter::create($numberParameterName),
-                ParameterToHeaderConverter::create(
+                GatewayPayloadConverter::create($numberParameterName),
+                GatewayHeaderConverter::create(
                     $multiplyParameterName, $multiplyHeaderName
                 ),
-                ParameterToHeaderConverter::create(
+                GatewayHeaderConverter::create(
                     $percentageParameterName, $percentageHeaderName
                 )
             ]
@@ -112,7 +112,7 @@ class MethodCallToMessageConverterTest extends MessagingTest
 
         new MethodCallToMessageConverter(
             ServiceInterfaceSendOnly::class, 'wrongMethodName',
-            [ParameterToPayloadConverter::create('some')]
+            [GatewayPayloadConverter::create('some')]
         );
     }
 

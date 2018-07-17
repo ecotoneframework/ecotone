@@ -176,7 +176,7 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
         return new Enricher(
             RequestReplyProducer::createRequestAndReply(
                 $this->outputChannelName,
-                MethodInvoker::createWith($internalEnrichingService, "enrich", []),
+                MethodInvoker::createWith($internalEnrichingService, "enrich", [], $referenceSearchService),
                 $channelResolver,
                 false
             )

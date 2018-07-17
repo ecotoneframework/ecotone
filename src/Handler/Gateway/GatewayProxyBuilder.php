@@ -45,7 +45,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     private $replyChannelName;
     /**
-     * @var array|ParameterToMessageConverterBuilder[]
+     * @var array|GatewayParameterConverterBuilder[]
      */
     private $methodArgumentConverters = [];
     /**
@@ -175,7 +175,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     public function withParameterToMessageConverters(array $methodArgumentConverters): self
     {
-        Assert::allInstanceOfType($methodArgumentConverters, ParameterToMessageConverterBuilder::class);
+        Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverterBuilder::class);
 
         $this->methodArgumentConverters = $methodArgumentConverters;
 

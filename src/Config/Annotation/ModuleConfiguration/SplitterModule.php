@@ -3,8 +3,8 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\SplitterAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\TransformerAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Splitter;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Transformer;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter\SplitterBuilder;
@@ -32,7 +32,7 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
      */
     public function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
-        /** @var TransformerAnnotation $annotation */
+        /** @var Transformer $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return
@@ -50,6 +50,6 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
      */
     public static function getMessageHandlerAnnotation(): string
     {
-        return SplitterAnnotation::class;
+        return Splitter::class;
     }
 }

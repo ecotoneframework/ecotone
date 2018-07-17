@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
@@ -50,7 +50,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
         return new static(
-            $annotationRegistrationService->findRegistrationsFor(MessageEndpointAnnotation::class, static::getMessageHandlerAnnotation()),
+            $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, static::getMessageHandlerAnnotation()),
             ParameterConverterAnnotationFactory::create()
         );
     }

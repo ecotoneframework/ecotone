@@ -4,7 +4,8 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Router;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\DestinationResolutionException;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
@@ -26,7 +27,7 @@ final class Router implements MessageHandler
      */
     private $channelResolver;
     /**
-     * @var MethodInvoker
+     * @var MessageProcessor
      */
     private $methodInvoker;
     /**
@@ -46,12 +47,12 @@ final class Router implements MessageHandler
      * RouterBuilder constructor.
      *
      * @param ChannelResolver $channelResolver
-     * @param MethodInvoker   $methodInvoker
+     * @param MessageProcessor   $methodInvoker
      * @param bool            $isResolutionRequired
      * @param null|string     $defaultResolutionChannelName
      * @param bool            $applySequence
      */
-    private function __construct(ChannelResolver $channelResolver, MethodInvoker $methodInvoker, bool $isResolutionRequired, ?string $defaultResolutionChannelName, bool $applySequence)
+    private function __construct(ChannelResolver $channelResolver, MessageProcessor $methodInvoker, bool $isResolutionRequired, ?string $defaultResolutionChannelName, bool $applySequence)
     {
         $this->channelResolver = $channelResolver;
         $this->methodInvoker = $methodInvoker;
@@ -61,21 +62,18 @@ final class Router implements MessageHandler
     }
 
     /**
-     * @param ChannelResolver                     $channelResolver
-     * @param                                     $objectToInvoke
-     * @param string                              $methodName
-     * @param bool                                $isResolutionRequired
-     * @param array|MessageToParameterConverter[] $methodArguments
-     * @param null|string                         $defaultResolutionChannel
+     * @param ChannelResolver $channelResolver
+     * @param MessageProcessor $messageProcessor
+     * @param bool $isResolutionRequired
+     * @param null|string $defaultResolutionChannel
      *
-     * @param bool                                $applySequence
+     * @param bool $applySequence
      *
      * @return Router
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function create(ChannelResolver $channelResolver, $objectToInvoke, string $methodName, bool $isResolutionRequired, array $methodArguments, ?string $defaultResolutionChannel, bool $applySequence) : self
+    public static function create(ChannelResolver $channelResolver, MessageProcessor $messageProcessor, bool $isResolutionRequired, ?string $defaultResolutionChannel, bool $applySequence) : self
     {
-        return new self($channelResolver, MethodInvoker::createWith($objectToInvoke, $methodName, $methodArguments), $isResolutionRequired, $defaultResolutionChannel, $applySequence);
+        return new self($channelResolver, $messageProcessor, $isResolutionRequired, $defaultResolutionChannel, $applySequence);
     }
 
     /**

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Fixture\Annotation\ApplicationContext;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponentAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponent;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
@@ -26,7 +26,7 @@ class ApplicationContextExample
 
     /**
      * @return GatewayBuilder
-     * @MessagingComponentAnnotation()
+     * @MessagingComponent()
      */
     public function gateway(): GatewayBuilder
     {
@@ -35,7 +35,7 @@ class ApplicationContextExample
 
     /**
      * @return array
-     * @MessagingComponentAnnotation()
+     * @MessagingComponent()
      */
     public function withMultipleMessageComponents(): array
     {
@@ -47,7 +47,7 @@ class ApplicationContextExample
 
     /**
      * @return MessageChannelBuilder
-     * @MessagingComponentAnnotation()
+     * @MessagingComponent()
      */
     public function httpEntryChannel(): MessageChannelBuilder
     {
@@ -56,7 +56,7 @@ class ApplicationContextExample
 
     /**
      * @return MessageHandlerBuilder
-     * @MessagingComponentAnnotation()
+     * @MessagingComponent()
      */
     public function enricherHttpEntry(): MessageHandlerBuilder
     {
@@ -67,7 +67,7 @@ class ApplicationContextExample
 
     /**
      * @return array
-     * @MessagingComponentAnnotation()
+     * @MessagingComponent()
      */
     public function withChannelInterceptors(): array
     {
@@ -79,7 +79,7 @@ class ApplicationContextExample
 
     /**
      * @return \stdClass
-     * @MessagingComponentAnnotation()
+     * @MessagingComponent()
      */
     public function withStdClassConverterByExtension(): \stdClass
     {

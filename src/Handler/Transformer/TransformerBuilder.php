@@ -8,11 +8,11 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBu
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
@@ -39,7 +39,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     private $methodName;
     /**
-     * @var MessageToParameterConverterBuilder[]|array
+     * @var ParameterConverterBuilder[]|array
      */
     private $methodParameterConverterBuilders = [];
     /**
@@ -142,17 +142,26 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     }
 
     /**
-     * @param array|MessageToParameterConverter[] $methodParameterConverterBuilders
+     * @param array|ParameterConverter[] $methodParameterConverterBuilders
      *
      * @return TransformerBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders) : self
     {
-        Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
+        Assert::allInstanceOfType($methodParameterConverterBuilders, ParameterConverterBuilder::class);
 
        $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
 
        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getParameterConverters(): array
+    {
+        return $this->methodParameterConverterBuilders;
     }
 
     /**
@@ -175,11 +184,6 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
-        $methodParameterConverters = [];
-        foreach ($this->methodParameterConverterBuilders as $methodParameterConverterBuilder) {
-            $methodParameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
-        }
-
         return new Transformer(
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
@@ -187,7 +191,8 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
                     MethodInvoker::createWith(
                         $objectToInvokeOn,
                         $this->methodName,
-                        $methodParameterConverters
+                        $this->methodParameterConverterBuilders,
+                        $referenceSearchService
                     )
                 ),
                 $channelResolver,

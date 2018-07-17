@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator;
 
@@ -6,8 +7,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
@@ -38,7 +39,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
      */
     private $isReplyRequired = false;
     /**
-     * @var array|\SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverterBuilder[]
+     * @var array|\SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder[]
      */
     private $methodParameterConverterBuilders = [];
     /**
@@ -120,7 +121,7 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
      */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders): self
     {
-        Assert::allInstanceOfType($methodParameterConverterBuilders, MessageToParameterConverterBuilder::class);
+        Assert::allInstanceOfType($methodParameterConverterBuilders, ParameterConverterBuilder::class);
 
         $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
 
@@ -165,15 +166,18 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getParameterConverters(): array
+    {
+        return $this->methodParameterConverterBuilders;
+    }
+
+    /**
      * @inheritdoc
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
     {
-        $parameterConverters = [];
-        foreach ($this->methodParameterConverterBuilders as $methodParameterConverterBuilder) {
-            $parameterConverters[] = $methodParameterConverterBuilder->build($referenceSearchService);
-        }
-
         $objectToInvoke = $this->objectToInvokeReferenceName;
         if (!$this->isStaticallyCalled()) {
             $objectToInvoke = $this->directObjectReference ? $this->directObjectReference : $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
@@ -185,7 +189,8 @@ class ServiceActivatorBuilder implements MessageHandlerBuilderWithParameterConve
                 MethodInvoker::createWith(
                     $objectToInvoke,
                     $this->methodName,
-                    $parameterConverters
+                    $this->methodParameterConverterBuilders,
+                    $referenceSearchService
                 ),
                 $channelResolver,
                 $this->isReplyRequired

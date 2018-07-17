@@ -3,7 +3,7 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivatorAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivator;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
@@ -32,7 +32,7 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
      */
     public function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
-        /** @var ServiceActivatorAnnotation $annotation */
+        /** @var ServiceActivator $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return ServiceActivatorBuilder::create($annotation->inputChannelName, $annotationRegistration->getReferenceName(), $annotationRegistration->getMethodName())
@@ -45,6 +45,6 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
      */
     public static function getMessageHandlerAnnotation(): string
     {
-        return ServiceActivatorAnnotation::class;
+        return ServiceActivator::class;
     }
 }

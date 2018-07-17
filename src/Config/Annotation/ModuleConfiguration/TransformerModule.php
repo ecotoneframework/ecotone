@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\TransformerAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Transformer;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
@@ -32,7 +32,7 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
      */
     public function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
-        /** @var TransformerAnnotation $annotation */
+        /** @var Transformer $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return TransformerBuilder::create(
@@ -48,6 +48,6 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
      */
     public static function getMessageHandlerAnnotation(): string
     {
-        return TransformerAnnotation::class;
+        return Transformer::class;
     }
 }

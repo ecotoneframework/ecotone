@@ -4,15 +4,13 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\TransformerAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\RouterModule;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Transformer;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\TransformerModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageToPayloadParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 
 /**
@@ -28,10 +26,10 @@ class TransformerModuleTest extends AnnotationConfigurationTest
      */
     public function test_creating_transformer_builder()
     {
-        $transformerAnnotation = new TransformerAnnotation();
+        $transformerAnnotation = new Transformer();
         $transformerAnnotation->inputChannelName = "inputChannel";
         $transformerAnnotation->outputChannelName = "outputChannel";
-        $messageToPayload = new MessageToPayloadParameterAnnotation();
+        $messageToPayload = new Payload();
         $messageToPayload->parameterName = "message";
         $transformerAnnotation->parameterConverters = [$messageToPayload];
 
@@ -39,7 +37,7 @@ class TransformerModuleTest extends AnnotationConfigurationTest
             $this->createAnnotationRegistrationService(
                 TransformerWithMethodParameterExample::class,
                 "send",
-                new MessageEndpointAnnotation(),
+                new MessageEndpoint(),
                 $transformerAnnotation
             )
         );
@@ -51,7 +49,7 @@ class TransformerModuleTest extends AnnotationConfigurationTest
             "inputChannel", TransformerWithMethodParameterExample::class, "send"
         )->withOutputMessageChannel("outputChannel");
         $messageHandlerBuilder->withMethodParameterConverters([
-            MessageToPayloadParameterConverterBuilder::create("message")
+            PayloadBuilder::create("message")
         ]);
 
         $this->assertEquals(

@@ -2,23 +2,23 @@
 
 namespace Fixture\Annotation\MessageEndpoint\Router;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\RouterAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Router;
 
 /**
  * Class RouterWithNoResolutionRequiredExample
  * @package Fixture\Annotation\MessageEndpoint\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpointAnnotation()
+ * @MessageEndpoint()
  */
 class RouterWithNoResolutionRequiredExample
 {
     /**
      * @param $content
      * @return string
-     * @RouterAnnotation(inputChannelName="inputChannel", isResolutionRequired=false, parameterConverters={
-     *     @MessageToPayloadParameterAnnotation(parameterName="content")
+     * @Router(inputChannelName="inputChannel", isResolutionRequired=false, parameterConverters={
+     *     @Payload(parameterName="content")
      * })
      */
     public function route($content) : string

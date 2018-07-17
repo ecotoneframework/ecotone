@@ -24,6 +24,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
@@ -62,7 +64,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      */
     private function createMessagingSystemConfiguration(): MessagingSystemConfiguration
     {
-        return MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        return MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
     }
 
     /**
@@ -89,6 +91,27 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem->runSeparatelyRunningConsumerBy($messagingSystem->getListOfSeparatelyRunningConsumers()[0]);
 
         $this->assertTrue($messageHandler->wasCalled());
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_informing_observer_about_required_references()
+    {
+        $configurationObserver = DumbConfigurationObserver::create();
+        $messagingSystem = MessagingSystemConfiguration::prepareWitObserver(InMemoryModuleMessaging::createEmpty(), $configurationObserver);
+
+        $messagingSystem->registerMessageHandler(
+            ServiceActivatorBuilder::create("", "ref-a", "method-a")
+                ->withMethodParameterConverters([
+                    ReferenceBuilder::create("some", "ref-b")
+                ])
+        );
+
+        $this->assertEquals(
+            ["ref-a", "ref-b"],
+            $configurationObserver->getRequiredReferences()
+        );
     }
 
     /**

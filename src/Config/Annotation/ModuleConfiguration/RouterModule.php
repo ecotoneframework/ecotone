@@ -3,7 +3,7 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\RouterAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Router;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
@@ -31,7 +31,7 @@ class RouterModule extends MessageHandlerRegisterConfiguration
      */
     public function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
-        /** @var RouterAnnotation $annotation */
+        /** @var Router $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return RouterBuilder::create($annotation->inputChannelName, $annotationRegistration->getReferenceName(), $annotationRegistration->getMethodName())
@@ -43,6 +43,6 @@ class RouterModule extends MessageHandlerRegisterConfiguration
      */
     public static function getMessageHandlerAnnotation(): string
     {
-        return RouterAnnotation::class;
+        return Router::class;
     }
 }

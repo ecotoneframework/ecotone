@@ -12,6 +12,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchServ
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerEndpointFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 
@@ -130,6 +131,12 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder) : self
     {
         $this->requireReferences($messageHandlerBuilder->getRequiredReferenceNames());
+
+        if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithParameterConverters) {
+            foreach ($messageHandlerBuilder->getParameterConverters() as $parameterConverter) {
+                $this->requireReferences($parameterConverter->getRequiredReferences());
+            }
+        }
 
         $this->messageHandlerBuilders[] = $messageHandlerBuilder;
 

@@ -5,7 +5,7 @@ namespace Fixture\Handler;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageToParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 
@@ -95,6 +95,14 @@ class DumbMessageHandlerBuilder implements MessageHandlerBuilderWithParameterCon
     public function registerRequiredReference(string $referenceName): void
     {
         $this->requiredReferenceNames[] = $referenceName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getParameterConverters(): array
+    {
+        return [];
     }
 
     /**

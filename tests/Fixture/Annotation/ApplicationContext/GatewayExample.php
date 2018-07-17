@@ -3,20 +3,20 @@ declare(strict_types=1);
 
 namespace Fixture\Annotation\ApplicationContext {
 
-    use SimplyCodedSoftware\IntegrationMessaging\Annotation\GatewayAnnotation;
-    use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpointAnnotation;
+    use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
+    use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 
     /**
      * Interface Gateway
      * @package Fixture\Annotation\ApplicationContext
      * @author Dariusz Gafka <dgafka.mail@gmail.com>
-     * @MessageEndpointAnnotation()
+     * @MessageEndpoint()
      */
     interface GatewayExample
     {
         /**
          * @return string
-         * @GatewayAnnotation()
+         * @Gateway()
          */
         public function doSomething() : string;
     }

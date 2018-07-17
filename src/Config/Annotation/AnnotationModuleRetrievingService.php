@@ -2,19 +2,10 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ConfigurationVariableAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleExtensionAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\RequiredReferenceAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariable;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Module;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
 
 /**
  * Class AnnotationModuleConfigurationRetrievingService
@@ -28,7 +19,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
      */
     private $annotationRegistrationService;
     /**
-     * @var ModuleExtension[]|Module[]
+     * @var ModuleExtensionAnnotation[]|Module[]
      */
     private $registeredModules = [];
 
@@ -47,14 +38,6 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
     public function findAllModuleConfigurations(): array
     {
         return $this->createAnnotationClasses(ModuleAnnotation::class);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function findAllModuleExtensionConfigurations(): array
-    {
-        return $this->createAnnotationClasses(ModuleExtensionAnnotation::class);
     }
 
     /**
@@ -78,5 +61,13 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
         }
 
         return $modules;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function findAllModuleExtensionConfigurations(): array
+    {
+        return $this->createAnnotationClasses(ModuleExtensionAnnotation::class);
     }
 }

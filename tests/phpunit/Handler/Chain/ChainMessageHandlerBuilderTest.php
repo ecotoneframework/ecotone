@@ -17,8 +17,10 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherHea
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherPayloadValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
@@ -235,7 +237,48 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $this->assertEquals(["some"], $chainBuilder->getRequiredReferenceNames());
     }
 
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \Exception
+     */
+    public function test_chaining_with_router_at_the_end()
+    {
+        $outputChannelName = "outputChannel";
+        $outputChannel = QueueChannel::create();
+        $chainBuilder = ChainMessageHandlerBuilder::create()
+            ->chain(TransformerBuilder::createWithExpression( "1 + 1"))
+            ->withOutputMessageHandler(RouterBuilder::createRecipientListRouter([$outputChannelName]))
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $outputChannelName => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()])
+            );
 
+        $chainBuilder->handle(MessageBuilder::withPayload("some1")->build());
+
+        $this->assertEquals(
+            2,
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_throwing_exception_if_configured_output_channel_and_output_handler()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ChainMessageHandlerBuilder::create()
+            ->chain(TransformerBuilder::createWithExpression( "1 + 1"))
+            ->withOutputMessageHandler(RouterBuilder::createRecipientListRouter(["some"]))
+            ->withOutputMessageChannel("some")
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+    }
 
     /**
      * @param $messageHandlers

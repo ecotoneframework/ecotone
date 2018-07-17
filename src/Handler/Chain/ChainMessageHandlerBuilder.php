@@ -9,9 +9,11 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NamedMessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
  * Class ChainMessageHandlerBuilder
@@ -28,6 +30,10 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      * @var string[]
      */
     private $requiredReferences = [];
+    /**
+     * @var MessageHandlerBuilder
+     */
+    private $outputMessageHandler;
 
     /**
      * ChainMessageHandlerBuilder constructor.
@@ -59,34 +65,57 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     }
 
     /**
+     * Do not combine with outputMessageChannel. Output message handler can be router and should contain output channel by his own
+     *
+     * @param MessageHandlerBuilder $outputMessageHandler
+     * @return ChainMessageHandlerBuilder
+     */
+    public function withOutputMessageHandler(MessageHandlerBuilder $outputMessageHandler) : self
+    {
+        $this->outputMessageHandler = $outputMessageHandler;
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
+        if ($this->outputMessageHandler && $this->outputMessageChannelName) {
+            throw InvalidArgumentException::create("Can't configure output message handler and output message channel for chain handler");
+        }
+
         /** @var DirectChannel[] $bridgeChannels */
         $bridgeChannels = [];
-        for ($key = 1; $key < count($this->messageHandlerBuilders); $key++) {
+        $messageHandlersToChain = $this->messageHandlerBuilders;
+
+        if ($this->outputMessageHandler) {
+            $messageHandlersToChain[] = $this->outputMessageHandler;
+        }
+
+        for ($key = 1; $key < count($messageHandlersToChain); $key++) {
             $bridgeChannels[$key] = DirectChannel::create();
         }
 
         $customChannelResolver = InMemoryChannelResolver::createWithChanneResolver($channelResolver, $bridgeChannels);
         $firstMessageHandler = null;
-        for ($key = 0; $key < count($this->messageHandlerBuilders); $key++) {
-            $messageHandlerBuilder = $this->messageHandlerBuilders[$key];
+        for ($key = 0; $key < count($messageHandlersToChain); $key++) {
+            $messageHandlerBuilder = $messageHandlersToChain[$key];
             $nextHandlerKey = $key + 1;
             $previousHandlerKey = $key - 1;
 
-            if ($this->hasNextHandler($nextHandlerKey)) {
+            if ($this->hasNextHandler($messageHandlersToChain, $nextHandlerKey)) {
                 $messageHandlerBuilder->withOutputMessageChannel((string)($nextHandlerKey));
             }
-            if (!$this->hasNextHandler($nextHandlerKey) && $this->outputMessageChannelName) {
+            if (!$this->hasNextHandler($messageHandlersToChain, $nextHandlerKey) && ($this->outputMessageChannelName)) {
                 $messageHandlerBuilder = $messageHandlerBuilder
                                             ->withOutputMessageChannel($this->outputMessageChannelName);
             }
 
             $messageHandler = $messageHandlerBuilder->build($customChannelResolver, $referenceSearchService);
 
-            if ($this->hasPreviousHandler($previousHandlerKey)) {
+            if ($this->hasPreviousHandler($messageHandlersToChain, $previousHandlerKey)) {
                 $customChannelResolver->resolve($key)->subscribe($messageHandler);
             }
 
@@ -107,20 +136,22 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     }
 
     /**
+     * @param array $messageHandlersToChain
      * @param $nextHandlerKey
      * @return bool
      */
-    private function hasNextHandler($nextHandlerKey): bool
+    private function hasNextHandler(array $messageHandlersToChain, $nextHandlerKey): bool
     {
-        return isset($this->messageHandlerBuilders[$nextHandlerKey]);
+        return isset($messageHandlersToChain[$nextHandlerKey]);
     }
 
     /**
+     * @param array $messageHandlersToChain
      * @param $previousHandlerKey
      * @return bool
      */
-    private function hasPreviousHandler($previousHandlerKey): bool
+    private function hasPreviousHandler(array $messageHandlersToChain, $previousHandlerKey): bool
     {
-        return isset($this->messageHandlerBuilders[$previousHandlerKey]);
+        return isset($messageHandlersToChain[$previousHandlerKey]);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
@@ -120,7 +121,7 @@ class RequestReplyProducer
         if (!is_null($replyData)) {
             $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $this->channelResolver->resolve($message->getHeaders()->getReplyChannel()) : null);
             if (!$replyChannel) {
-                throw MessageDeliveryException::createWithFailedMessage("Can't process {$message}, no output channel during delivery using {$this->messageProcessor}", $message);
+                throw MessageDeliveryException::createWithFailedMessage("Can't process {$message}, no output channel during delivery", $message);
             }
 
             if ($this->method === self::REQUEST_REPLY_METHOD) {

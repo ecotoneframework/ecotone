@@ -2,7 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponent;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
@@ -51,7 +51,7 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
-        return new self($annotationRegistrationService->findRegistrationsFor(ApplicationContextAnnotation::class, MessagingComponent::class));
+        return new self($annotationRegistrationService->findRegistrationsFor(ApplicationContext::class, MessagingComponent::class));
     }
 
     /**

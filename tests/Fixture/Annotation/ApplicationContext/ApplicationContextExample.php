@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Fixture\Annotation\ApplicationContext;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponent;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleChannelInterceptorBuilder;
@@ -17,7 +17,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuil
  * Class ApplicationContext
  * @package Fixture\Annotation\ApplicationContext
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ApplicationContextAnnotation()
+ * @ApplicationContext()
  */
 class ApplicationContextExample
 {

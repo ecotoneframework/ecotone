@@ -5,7 +5,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Module
 use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
 use Fixture\Annotation\ApplicationContext\ApplicationContextModuleExtensionExample;
 use Fixture\Annotation\ApplicationContext\GatewayExample;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponent;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
@@ -152,7 +152,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createEmpty()
             ->addAnnotationToClass(
                 ApplicationContextExample::class,
-                new ApplicationContextAnnotation()
+                new ApplicationContext()
             )
             ->addAnnotationToClassMethod(
                 ApplicationContextExample::class,

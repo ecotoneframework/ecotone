@@ -6,7 +6,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
 use Fixture\Annotation\MessageEndpoint\Gateway\GatewayWithReplyChannelExample;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
@@ -62,7 +62,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
 
     public function test_retrieving_all_classes_with_annotation()
     {
-        $classes = self::$annotationRegistrationService->getAllClassesWithAnnotation(ApplicationContextAnnotation::class);
+        $classes = self::$annotationRegistrationService->getAllClassesWithAnnotation(ApplicationContext::class);
 
         $this->assertNotEmpty($classes, "File system class locator didn't find application context");
     }
@@ -70,8 +70,8 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     public function test_retrieving_class_annotations()
     {
         $this->assertEquals(
-            new ApplicationContextAnnotation(),
-            self::$annotationRegistrationService->getAnnotationForClass(ApplicationContextExample::class, ApplicationContextAnnotation::class)
+            new ApplicationContext(),
+            self::$annotationRegistrationService->getAnnotationForClass(ApplicationContextExample::class, ApplicationContext::class)
         );
     }
 

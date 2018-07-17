@@ -2,13 +2,13 @@
 
 namespace FixtureAutoloadTest;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContextAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
 
 /**
  * Class ApplicationContextExample
  * @package FixtureAutoloadTest
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ApplicationContextAnnotation()
+ * @ApplicationContext()
  */
 class ApplicationContextExamplePSR0
 {

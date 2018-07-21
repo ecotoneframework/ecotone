@@ -12,8 +12,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetriev
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
@@ -40,8 +40,8 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
      */
     public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
     {
-        $configuration->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory());
-        $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory());
+        $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
+        $configuration->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder());
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
     }

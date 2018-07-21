@@ -20,13 +20,9 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      */
     protected $outputMessageChannelName = "";
     /**
-     * @var MessageHandlerBuilderWithOutputChannel[]
+     * @var string
      */
-    protected $preCallInterceptors = [];
-    /**
-     * @var MessageHandlerBuilderWithOutputChannel[]
-     */
-    protected $postCallInterceptors = [];
+    private $name;
 
     /**
      * @param string $messageChannelName
@@ -70,36 +66,18 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function withPreCallInterceptors(array $preCallInterceptors)
+    public function getName(): string
     {
-        $this->preCallInterceptors = $preCallInterceptors;
+        return $this->name;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withName(string $messageHandlerName) : self
+    {
+        $this->name = $messageHandlerName;
 
         return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withPostCallInterceptors(array $postCallInterceptors)
-    {
-        $this->postCallInterceptors = $postCallInterceptors;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getPreCallInterceptors(): array
-    {
-        return $this->preCallInterceptors;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getPostCallInterceptors(): array
-    {
-        return $this->postCallInterceptors;
     }
 }

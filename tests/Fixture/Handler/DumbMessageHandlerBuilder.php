@@ -3,6 +3,7 @@
 namespace Fixture\Handler;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
@@ -14,7 +15,7 @@ use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
  * @package Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class DumbMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
+class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {
     /**
      * @var MessageHandler

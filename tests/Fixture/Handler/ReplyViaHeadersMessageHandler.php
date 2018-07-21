@@ -24,19 +24,34 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
      * @var mixed
      */
     private $replyData;
+    /**
+     * @var bool
+     */
+    private $shouldAdd;
 
     /**
      * StubHttpResponseMessageHandler constructor.
      * @param $replyData
+     * @param bool $shouldAdd
      */
-    private function __construct($replyData)
+    private function __construct($replyData, bool $shouldAdd)
     {
         $this->replyData = $replyData;
+        $this->shouldAdd = $shouldAdd;
     }
 
     public static function create($replyData) : self
     {
-        return new self($replyData);
+        return new self($replyData, false);
+    }
+
+    /**
+     * @param $toAdd
+     * @return ReplyViaHeadersMessageHandler
+     */
+    public static function createAdditionToPayload($toAdd) : self
+    {
+        return new self($toAdd, true);
     }
 
     /**

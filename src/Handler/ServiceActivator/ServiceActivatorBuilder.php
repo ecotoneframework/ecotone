@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
@@ -47,6 +48,10 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      * @var object
      */
     private $directObjectReference;
+    /**
+     * @var bool
+     */
+    private $shouldPassThroughMessage = false;
 
     /**
      * ServiceActivatorBuilder constructor.
@@ -76,6 +81,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      * @param string $methodName
      *
      * @return ServiceActivatorBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function createWithDirectReference($directObjectReference, string $methodName) : self
     {
@@ -102,6 +108,19 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         Assert::allInstanceOfType($methodParameterConverterBuilders, ParameterConverterBuilder::class);
 
         $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
+
+        return $this;
+    }
+
+    /**
+     * If service is void, message will passed through to next channel
+     *
+     * @param bool $shouldPassThroughMessage
+     * @return ServiceActivatorBuilder
+     */
+    public function withPassThroughMessage(bool $shouldPassThroughMessage) : self
+    {
+        $this->shouldPassThroughMessage = $shouldPassThroughMessage;
 
         return $this;
     }
@@ -142,16 +161,27 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         if (!$this->isStaticallyCalled()) {
             $objectToInvoke = $this->directObjectReference ? $this->directObjectReference : $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
         }
+        $interfaceToCall = InterfaceToCall::createFromUnknownType($objectToInvoke, $this->methodName);
+
+        $methodToInvoke = MethodInvoker::createWith(
+            $objectToInvoke,
+            $this->methodName,
+            $this->methodParameterConverterBuilders,
+            $referenceSearchService
+        );
+        if ($this->shouldPassThroughMessage && $interfaceToCall->hasReturnTypeVoid()) {
+            $methodToInvoke = MethodInvoker::createWith(
+                new PassThroughService($methodToInvoke),
+                "invoke",
+                [],
+                $referenceSearchService
+            );
+        }
 
         return new ServiceActivatingHandler(
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
-                MethodInvoker::createWith(
-                    $objectToInvoke,
-                    $this->methodName,
-                    $this->methodParameterConverterBuilders,
-                    $referenceSearchService
-                ),
+                $methodToInvoke,
                 $channelResolver,
                 $this->isReplyRequired
             )
@@ -165,6 +195,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
 
     /**
      * @return bool
+     * @throws \ReflectionException
      */
     private function isStaticallyCalled(): bool
     {
@@ -183,6 +214,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      * @param object $object
      *
      * @return ServiceActivatorBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function withDirectObjectReference($object) : self
     {

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
@@ -14,7 +15,7 @@ use SimplyCodedSoftware\IntegrationMessaging\SubscribableChannel;
  * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EventDrivenMessageHandlerConsumerBuilderFactory implements MessageHandlerConsumerBuilderFactory
+class EventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
 {
     /**
      * @inheritDoc

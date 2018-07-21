@@ -55,6 +55,10 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @var bool
      */
     private $applySequence = false;
+    /**
+     * @var string
+     */
+    private $name;
 
     /**
      * RouterBuilder constructor.
@@ -251,6 +255,24 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     public function getInputMessageChannelName(): string
     {
         return $this->inputMessageChannelName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withName(string $messageHandlerName)
+    {
+        $this->name = $messageHandlerName;
+
+        return $this;
     }
 
     public function __toString()

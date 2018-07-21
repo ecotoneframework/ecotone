@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
@@ -11,7 +12,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface MessageHandlerConsumerBuilderFactory
+interface MessageHandlerConsumerBuilder
 {
     /**
      * @param ChannelResolver $channelResolver

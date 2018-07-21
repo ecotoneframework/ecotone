@@ -16,7 +16,7 @@ use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
  * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PollOrThrowMessageHandlerConsumerBuilderFactory implements MessageHandlerConsumerBuilderFactory
+class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumerBuilder
 {
     /**
      * @inheritDoc

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Fixture\Handler;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
@@ -12,7 +13,7 @@ use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
  * @package Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ModuleMessageHandlerBuilder implements MessageHandlerBuilder
+class ModuleMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
 {
     /**
      * @var object

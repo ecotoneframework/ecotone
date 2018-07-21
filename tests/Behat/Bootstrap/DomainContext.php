@@ -14,7 +14,7 @@ use Fixture\Configuration\DumbConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessaging;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenMessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceNotFoundException;
@@ -25,7 +25,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Future;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
@@ -177,8 +177,8 @@ class DomainContext implements Context
     public function iRunMessagingSystem()
     {
         $this->messagingSystem = $this->getMessagingSystemConfiguration()
-                                    ->registerConsumerFactory(new EventDrivenMessageHandlerConsumerBuilderFactory())
-                                    ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilderFactory())
+                                    ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+                                    ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
                                     ->buildMessagingSystemFromConfiguration($this->inMemoryReferenceSearchService);
     }
 

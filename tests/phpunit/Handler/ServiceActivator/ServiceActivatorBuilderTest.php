@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator;
 use Fixture\Service\ServiceExpectingOneArgument;
@@ -40,6 +41,10 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $this->assertTrue($objectToInvoke->wasCalled());
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_activating_statically_called_service()
     {
         $reference = StaticallyCalledService::class;
@@ -62,6 +67,10 @@ class ServiceActivatorBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_calling_direct_object_reference()
     {
         $objectToInvoke = ServiceExpectingOneArgument::create();
@@ -75,5 +84,61 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $serviceActivator->handle(MessageBuilder::withPayload('some')->build());
 
         $this->assertTrue($objectToInvoke->wasCalled());
+    }
+
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_passing_through_on_void()
+    {
+        $objectToInvoke = ServiceExpectingOneArgument::create();
+
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withoutReturnValue')
+            ->withPassThroughMessage(true)
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+
+        $replyChannel = QueueChannel::create();
+        $message = MessageBuilder::withPayload("test")
+            ->setReplyChannel($replyChannel)
+            ->build();
+        $serviceActivator->handle($message);
+
+        $this->assertEquals(
+            $message,
+            $replyChannel->receive()
+        );
+    }
+
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_ignoring_passing_through_when_service_not_void()
+    {
+        $objectToInvoke = ServiceExpectingOneArgument::create();
+
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withReturnValue')
+            ->withPassThroughMessage(true)
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+
+        $replyChannel = QueueChannel::create();
+        $message = MessageBuilder::withPayload("test")
+            ->setReplyChannel($replyChannel)
+            ->build();
+        $serviceActivator->handle($message);
+
+        $receivedMessage = $replyChannel->receive();
+
+        $this->assertNotNull($receivedMessage);
+        $this->assertNotEquals($message,$receivedMessage);
     }
 }

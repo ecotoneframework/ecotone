@@ -5,13 +5,13 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerEndpointFactory;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
@@ -48,13 +48,13 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private $gatewayBuilders = [];
     /**
-     * @var MessageHandlerConsumerBuilderFactory[]
+     * @var MessageHandlerConsumerBuilder[]
      */
     private $consumerFactories = [];
     /**
-     * @var ConsumerBuilder[]
+     * @var ChannelAdapterConsumerBuilder[]
      */
-    private $consumerBuilders = [];
+    private $channelAdapters = [];
     /**
      * @var ConfigurationObserver
      */
@@ -146,9 +146,9 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
-    public function registerConsumer(ConsumerBuilder $consumerBuilder): MessagingSystemConfiguration
+    public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder): MessagingSystemConfiguration
     {
-        $this->consumerBuilders[] = $consumerBuilder;
+        $this->channelAdapters[] = $consumerBuilder;
         $this->requireReferences($consumerBuilder->getRequiredReferences());
 
         return $this;
@@ -170,7 +170,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
-    public function registerConsumerFactory(MessageHandlerConsumerBuilderFactory $consumerFactory): MessagingSystemConfiguration
+    public function registerConsumerFactory(MessageHandlerConsumerBuilder $consumerFactory): MessagingSystemConfiguration
     {
         $this->consumerFactories[] = $consumerFactory;
 
@@ -217,8 +217,8 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder);
         }
-        foreach ($this->consumerBuilders as $consumerBuilder) {
-            $consumers[] = $consumerBuilder->build($channelResolver, $referenceSearchService);
+        foreach ($this->channelAdapters as $channelAdapter) {
+            $consumers[] = $channelAdapter->build($channelResolver, $referenceSearchService);
         }
 
         $messagingSystem = MessagingSystem::create($consumers, $gateways, $channelResolver);

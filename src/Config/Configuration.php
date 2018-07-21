@@ -11,8 +11,8 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilderFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ChannelAdapterConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
@@ -44,17 +44,17 @@ interface Configuration
     public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder) : MessagingSystemConfiguration;
 
     /**
-     * @param ConsumerBuilder $consumerBuilder
+     * @param ChannelAdapterConsumerBuilder $consumerBuilder
      *
      * @return MessagingSystemConfiguration
      */
-    public function registerConsumer(ConsumerBuilder $consumerBuilder) : MessagingSystemConfiguration;
+    public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder) : MessagingSystemConfiguration;
 
     /**
-     * @param MessageHandlerConsumerBuilderFactory $consumerFactory
+     * @param MessageHandlerConsumerBuilder $consumerFactory
      * @return MessagingSystemConfiguration
      */
-    public function registerConsumerFactory(MessageHandlerConsumerBuilderFactory $consumerFactory) : MessagingSystemConfiguration;
+    public function registerConsumerFactory(MessageHandlerConsumerBuilder $consumerFactory) : MessagingSystemConfiguration;
 
     /**
      * @param GatewayBuilder $gatewayBuilder

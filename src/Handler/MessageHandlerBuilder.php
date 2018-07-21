@@ -29,6 +29,18 @@ interface MessageHandlerBuilder
     /**
      * @return string
      */
+    public function getName() : string;
+
+    /**
+     * @param string $messageHandlerName
+     *
+     * @return static
+     */
+    public function withName(string $messageHandlerName);
+
+    /**
+     * @return string
+     */
     public function getInputMessageChannelName() : string;
 
     /**

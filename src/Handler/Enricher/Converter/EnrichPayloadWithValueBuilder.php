@@ -1,18 +1,19 @@
 <?php
+declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\SetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class StaticPropertySetterBuilder
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EnricherPayloadValueBuilder implements SetterBuilder
+class EnrichPayloadWithValueBuilder implements EnricherConverterBuilder
 {
     /**
      * @var string
@@ -39,7 +40,7 @@ class EnricherPayloadValueBuilder implements SetterBuilder
      * @param string $propertyPath
      * @param mixed  $value
      *
-     * @return EnricherPayloadValueBuilder
+     * @return EnrichPayloadWithValueBuilder
      */
     public static function createWith(string $propertyPath, $value) : self
     {
@@ -49,8 +50,8 @@ class EnricherPayloadValueBuilder implements SetterBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): Setter
+    public function build(ReferenceSearchService $referenceSearchService): EnricherConverter
     {
-        return EnricherPayloadValueSetter::createWith(PropertyPath::createWith($this->propertyPath), $this->value);
+        return EnrichPayloadWithValueConverter::createWith(PropertyPath::createWith($this->propertyPath), $this->value);
     }
 }

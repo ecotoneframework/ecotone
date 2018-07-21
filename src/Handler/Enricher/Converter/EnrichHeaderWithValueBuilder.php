@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\SetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class StaticHeaderSetterBuilder
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EnricherHeaderValueBuilder implements SetterBuilder
+class EnrichHeaderWithValueBuilder implements EnricherConverterBuilder
 {
     /**
      * @var string
@@ -49,8 +49,8 @@ class EnricherHeaderValueBuilder implements SetterBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): Setter
+    public function build(ReferenceSearchService $referenceSearchService): EnricherConverter
     {
-        return EnricherHeaderValueSetter::create(PropertyPath::createWith($this->name), $this->value);
+        return EnrichHeaderWithValueConverter::create(PropertyPath::createWith($this->name), $this->value);
     }
 }

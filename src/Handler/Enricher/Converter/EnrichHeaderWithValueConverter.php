@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
  * Class StaticHeaderHeader
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class EnricherHeaderValueSetter implements Setter
+class EnrichHeaderWithValueConverter implements EnricherConverter
 {
     /**
      * @var string
@@ -47,7 +47,7 @@ class EnricherHeaderValueSetter implements Setter
      * @param PropertyPath $propertyPath
      * @param mixed $value
      *
-     * @return EnricherHeaderValueSetter
+     * @return EnrichHeaderWithValueConverter
      */
     public static function create(PropertyPath $propertyPath, $value) : self
     {

@@ -16,4 +16,28 @@ interface MessageHandlerBuilderWithOutputChannel extends MessageHandlerBuilder
      * @return static
      */
     public function withOutputMessageChannel(string $messageChannelName);
+
+    /**
+     * @param MessageHandlerBuilderWithOutputChannel[] $preCallInterceptors
+     *
+     * @return static
+     */
+    public function withPreCallInterceptors(array $preCallInterceptors);
+
+    /**
+     * @param MessageHandlerBuilderWithOutputChannel[] $postCallInterceptors
+     *
+     * @return static
+     */
+    public function withPostCallInterceptors(array $postCallInterceptors);
+
+    /**
+     * @return MessageHandlerBuilderWithOutputChannel[]
+     */
+    public function getPreCallInterceptors() : array;
+
+    /**
+     * @return MessageHandlerBuilderWithOutputChannel[]
+     */
+    public function getPostCallInterceptors() : array;
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Annotation;
 
@@ -14,4 +15,17 @@ abstract class EndpointAnnotation
      * @Required()
      */
     public $inputChannelName;
+
+    /**
+     * List of method level pre interceptors
+     *
+     * @var array
+     */
+    public $preCallInterceptors = [];
+    /**
+     * List of method level post interceptors
+     *
+     * @var array
+     */
+    public $postCallInterceptors = [];
 }

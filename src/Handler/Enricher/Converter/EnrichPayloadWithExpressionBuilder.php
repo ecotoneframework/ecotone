@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\SetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
- * Class ExpressionHeaderSetterBuilder
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
+ * Class ExpressionSetterBuilder
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EnricherExpressionHeaderBuilder implements SetterBuilder
+class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
 {
     /**
      * @var string
@@ -42,7 +42,7 @@ class EnricherExpressionHeaderBuilder implements SetterBuilder
      * @param string $propertyPath
      * @param string $expression
      *
-     * @return self
+     * @return EnrichPayloadWithExpressionBuilder
      */
     public static function createWith(string $propertyPath, string $expression) : self
     {
@@ -52,12 +52,12 @@ class EnricherExpressionHeaderBuilder implements SetterBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): Setter
+    public function build(ReferenceSearchService $referenceSearchService): EnricherConverter
     {
         /** @var ExpressionEvaluationService $expressionEvaluationService */
         $expressionEvaluationService = $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE);
 
-        return new EnricherExpressionHeaderSetter(
+        return new EnrichPayloadWithExpressionConverter(
             $expressionEvaluationService,
             DataSetter::create(),
             PropertyPath::createWith($this->propertyPath),

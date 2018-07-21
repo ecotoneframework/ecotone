@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\SetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class ExpressionSetterBuilder
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EnricherCompositeExpressionPayloadBuilder implements SetterBuilder
+class EnrichPayloadWithCompositeExpressionBuilder implements EnricherConverterBuilder
 {
     /**
      * @var string
@@ -56,7 +56,7 @@ class EnricherCompositeExpressionPayloadBuilder implements SetterBuilder
      * @param string $pathToElementInInputMessagePayload Path to enriched context from input message. Must return array.
      * @param string $dataMappingExpression              Must return array. e.g "context['personId'] = reply.personId", where reply is reply message and personId is property from pathToEnrichedArray context
      *
-     * @return EnricherCompositeExpressionPayloadBuilder
+     * @return EnrichPayloadWithCompositeExpressionBuilder
      */
     public static function createWithMapping(string $pathToEnrichInContext, string $expressionToElementsInReplyMessage, string $pathToElementInInputMessagePayload, string $dataMappingExpression) : self
     {
@@ -66,9 +66,9 @@ class EnricherCompositeExpressionPayloadBuilder implements SetterBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): Setter
+    public function build(ReferenceSearchService $referenceSearchService): EnricherConverter
     {
-        return new EnricherCompositeExpressionPayloadSetter(
+        return new EnrichPayloadWithCompositeExpressionConverter(
             $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE),
             DataSetter::create(),
             PropertyPath::createWith($this->propertyPath),

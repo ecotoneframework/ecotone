@@ -7,14 +7,12 @@ use Fixture\Handler\Transformer\PassThroughTransformer;
 use Fixture\Handler\Transformer\StdClassTransformer;
 use Fixture\Handler\Transformer\StringTransformer;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Chain\ChainMessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherExpressionHeaderBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherHeaderValueBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherPayloadValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
@@ -141,7 +139,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $this->createChainHandlerAndHandle(
             [
                 EnricherBuilder::create([
-                   EnricherHeaderValueBuilder::create("awesome", "yes")
+                   EnrichHeaderWithValueBuilder::create("awesome", "yes")
                 ]),
                 ChainMessageHandlerBuilder::create()
                     ->chain(TransformerBuilder::createWithReferenceObject( new StdClassTransformer(), "transform")),
@@ -207,10 +205,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
                     ->chain(
                         ChainMessageHandlerBuilder::create()
                             ->chain(EnricherBuilder::create([
-                                EnricherExpressionHeaderBuilder::createWith("some", "false")
+                                EnrichHeaderWithExpressionBuilder::createWith("some", "false")
                             ]))
                             ->chain(EnricherBuilder::create([
-                                EnricherExpressionHeaderBuilder::createWith("some2", "payload")
+                                EnrichHeaderWithExpressionBuilder::createWith("some2", "payload")
                             ]))
                     )
             ],

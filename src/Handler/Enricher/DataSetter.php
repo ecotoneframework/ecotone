@@ -5,7 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
 
 /**
  * Class PayloadPropertySetter
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DataSetter

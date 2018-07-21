@@ -8,18 +8,17 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithCompositeExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherExpressionHeaderBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherExpressionPayloadBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherCompositeExpressionPayloadBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherHeaderValueBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter\EnricherPayloadValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
-use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
@@ -56,8 +55,8 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload([]),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("token", "123"),
-                EnricherPayloadValueBuilder::createWith("password", "secret")
+                EnrichPayloadWithValueBuilder::createWith("token", "123"),
+                EnrichPayloadWithValueBuilder::createWith("password", "secret")
             ]
         );
 
@@ -84,7 +83,7 @@ class EnricherBuilderTest extends MessagingTest
                 ->setHeader("user", 1),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("token", "123")
+                EnrichPayloadWithValueBuilder::createWith("token", "123")
             ]
         );
 
@@ -101,7 +100,7 @@ class EnricherBuilderTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
         $this->createEnricherAndHandle(MessageBuilder::withPayload("some"), $outputChannel, [
-            EnricherHeaderValueBuilder::create("token", "123")
+            EnrichHeaderWithValueBuilder::create("token", "123")
         ]);
 
         $this->assertEquals(
@@ -116,7 +115,7 @@ class EnricherBuilderTest extends MessagingTest
         $inputMessage = MessageBuilder::withPayload(["surname" => "levis"]);
         $replyPayload = "johny";
         $setterBuilders = [
-            EnricherExpressionPayloadBuilder::createWith("name", "payload")
+            EnrichPayloadWithExpressionBuilder::createWith("name", "payload")
         ];
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, $replyPayload, $setterBuilders);
 
@@ -138,7 +137,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload(OrderExample::createFromId(100)),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("buyerName", $buyerNameToSet)
+                EnrichPayloadWithValueBuilder::createWith("buyerName", $buyerNameToSet)
             ]
         );
 
@@ -159,7 +158,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload(OrderExample::createFromId(100)),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("orderId", $newOrderId)
+                EnrichPayloadWithValueBuilder::createWith("orderId", $newOrderId)
             ]
         );
 
@@ -181,7 +180,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload(OrderExample::createFromId(100)),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("notExisting", "some")
+                EnrichPayloadWithValueBuilder::createWith("notExisting", "some")
             ]
         );
     }
@@ -195,7 +194,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload(["workerId" => 123]),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("[workerId]", $newWorkerId)
+                EnrichPayloadWithValueBuilder::createWith("[workerId]", $newWorkerId)
             ]
         );
 
@@ -217,7 +216,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload([["workerId" => 123]]),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("[0][workerId]", $newWorkerId)
+                EnrichPayloadWithValueBuilder::createWith("[0][workerId]", $newWorkerId)
             ]
         );
 
@@ -241,7 +240,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload(["order" => OrderExample::createFromId(1)]),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("[order][buyerName]", $buyerName)
+                EnrichPayloadWithValueBuilder::createWith("[order][buyerName]", $buyerName)
             ]
         );
 
@@ -273,7 +272,7 @@ class EnricherBuilderTest extends MessagingTest
             ),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("[0][data][worker]", $workerData)
+                EnrichPayloadWithValueBuilder::createWith("[0][data][worker]", $workerData)
             ]
         );
 
@@ -299,7 +298,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload(["worker" => []]),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("worker[name]", $workerName)
+                EnrichPayloadWithValueBuilder::createWith("worker[name]", $workerName)
             ]
         );
 
@@ -317,7 +316,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload([]),
             $outputChannel,
             [
-                EnricherPayloadValueBuilder::createWith("order.orderId", "some")
+                EnrichPayloadWithValueBuilder::createWith("order.orderId", "some")
             ]
         );
 
@@ -349,7 +348,7 @@ class EnricherBuilderTest extends MessagingTest
             ]
         ];
         $setterBuilders = [
-            EnricherCompositeExpressionPayloadBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
+            EnrichPayloadWithCompositeExpressionBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
         ];
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, $replyPayload, $setterBuilders);
 
@@ -385,8 +384,8 @@ class EnricherBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $inputMessage = MessageBuilder::withPayload(["surname" => "levis"]);
         $setterBuilders = [
-            EnricherExpressionPayloadBuilder::createWith("name", "payload['surname']"),
-            EnricherExpressionHeaderBuilder::createWith("toUpload", "false")
+            EnrichPayloadWithExpressionBuilder::createWith("name", "payload['surname']"),
+            EnrichHeaderWithExpressionBuilder::createWith("toUpload", "false")
         ];
         $this->createEnricherAndHandle($inputMessage, $outputChannel, $setterBuilders);
 
@@ -416,7 +415,7 @@ class EnricherBuilderTest extends MessagingTest
         );
         $replyPayload = [];
         $setterBuilders = [
-            EnricherCompositeExpressionPayloadBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
+            EnrichPayloadWithCompositeExpressionBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
         ];
 
         $this->expectException(MessagingException::class);
@@ -434,7 +433,7 @@ class EnricherBuilderTest extends MessagingTest
         );
         $replyPayload = [];
         $setterBuilders = [
-            EnricherCompositeExpressionPayloadBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
+            EnrichPayloadWithCompositeExpressionBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
         ];
 
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, $replyPayload, $setterBuilders);
@@ -457,7 +456,7 @@ class EnricherBuilderTest extends MessagingTest
         );
         $replyPayload = [];
         $setterBuilders = [
-            EnricherCompositeExpressionPayloadBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
+            EnrichPayloadWithCompositeExpressionBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
         ];
 
         $inputMessage       = $inputMessage
@@ -514,7 +513,7 @@ class EnricherBuilderTest extends MessagingTest
             ]
         );
         $replyPayload = [];
-        $setterBuilders = [EnricherExpressionPayloadBuilder::createWith("test", "1")];
+        $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith("test", "1")];
 
         $inputMessage       = $inputMessage
             ->setReplyChannel($outputChannel)
@@ -570,7 +569,7 @@ class EnricherBuilderTest extends MessagingTest
             ]
         );
         $replyPayload = [];
-        $setterBuilders = [EnricherExpressionPayloadBuilder::createWith("test", "1")];
+        $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith("test", "1")];
 
         $inputMessage       = $inputMessage
             ->setReplyChannel($outputChannel)

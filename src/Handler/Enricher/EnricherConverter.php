@@ -10,7 +10,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface Setter
+interface EnricherConverter
 {
     /**
      * @param Message $enrichMessage

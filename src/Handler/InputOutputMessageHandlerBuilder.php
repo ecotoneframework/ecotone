@@ -19,6 +19,14 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      * @var string
      */
     protected $outputMessageChannelName = "";
+    /**
+     * @var MessageHandlerBuilderWithOutputChannel[]
+     */
+    protected $preCallInterceptors = [];
+    /**
+     * @var MessageHandlerBuilderWithOutputChannel[]
+     */
+    protected $postCallInterceptors = [];
 
     /**
      * @param string $messageChannelName
@@ -57,5 +65,41 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     public function getInputMessageChannelName(): string
     {
         return $this->inputMessageChannelName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withPreCallInterceptors(array $preCallInterceptors)
+    {
+        $this->preCallInterceptors = $preCallInterceptors;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withPostCallInterceptors(array $postCallInterceptors)
+    {
+        $this->postCallInterceptors = $postCallInterceptors;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPreCallInterceptors(): array
+    {
+        return $this->preCallInterceptors;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPostCallInterceptors(): array
+    {
+        return $this->postCallInterceptors;
     }
 }

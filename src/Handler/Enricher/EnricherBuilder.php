@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -21,16 +22,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
+class EnricherBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithOutputChannel
 {
-    /**
-     * @var string
-     */
-    private $inputChannelName = "";
-    /**
-     * @var string
-     */
-    private $outputChannelName = "";
     /**
      * @var string
      */
@@ -40,7 +33,7 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
      */
     private $requestPayloadExpression;
     /**
-     * @var SetterBuilder[]
+     * @var EnricherConverterBuilder[]
      */
     private $setterBuilders;
     /**
@@ -51,18 +44,18 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
     /**
      * EnricherBuilder constructor.
      *
-     * @param SetterBuilder[] $setters
+     * @param EnricherConverterBuilder[] $setters
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct(array $setters)
     {
-        Assert::allInstanceOfType($setters, SetterBuilder::class);
+        Assert::allInstanceOfType($setters, EnricherConverterBuilder::class);
 
         $this->setterBuilders   = $setters;
     }
 
     /**
-     * @param Setter[] $setterBuilders
+     * @param EnricherConverter[] $setterBuilders
      *
      * @return EnricherBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
@@ -70,24 +63,6 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
     public static function create(array $setterBuilders): self
     {
         return new self($setterBuilders);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getInputMessageChannelName(): string
-    {
-        return $this->inputChannelName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withInputChannelName(string $inputChannelName): self
-    {
-        $this->inputChannelName = $inputChannelName;
-
-        return $this;
     }
 
     /**
@@ -110,18 +85,6 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
     public function withRequestPayloadExpression(string $requestPayloadExpression) : self
     {
         $this->requestPayloadExpression = $requestPayloadExpression;
-
-        return $this;
-    }
-
-    /**
-     * @param string $outputChannelName
-     *
-     * @return EnricherBuilder
-     */
-    public function withOutputMessageChannel(string $outputChannelName) : self
-    {
-        $this->outputChannelName = $outputChannelName;
 
         return $this;
     }
@@ -173,7 +136,7 @@ class EnricherBuilder implements MessageHandlerBuilderWithOutputChannel
 
         return new Enricher(
             RequestReplyProducer::createRequestAndReply(
-                $this->outputChannelName,
+                $this->outputMessageChannelName,
                 MethodInvoker::createWith($internalEnrichingService, "enrich", [], $referenceSearchService),
                 $channelResolver,
                 false

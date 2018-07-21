@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
+namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
- * Class ExpressionHeaderSetter
- * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Setter
+ * Class ExpressionSetter
+ * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class EnricherExpressionHeaderSetter implements Setter
+class EnrichPayloadWithExpressionConverter implements EnricherConverter
 {
     /**
      * @var ExpressionEvaluationService
@@ -61,7 +61,7 @@ class EnricherExpressionHeaderSetter implements Setter
             "headers" => $replyMessage->getHeaders()->headers()
         ]);
 
-        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getHeaders()->headers(), $dataToEnrich);
+        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $dataToEnrich);
     }
 
     /**
@@ -69,6 +69,6 @@ class EnricherExpressionHeaderSetter implements Setter
      */
     public function isPayloadSetter(): bool
     {
-        return false;
+        return true;
     }
 }

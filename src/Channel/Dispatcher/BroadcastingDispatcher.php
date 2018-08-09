@@ -17,7 +17,7 @@ class BroadcastingDispatcher implements MessageDispatcher
     /**
      * @var MessageHandler[]
      */
-    private $messageHandlers;
+    private $messageHandlers = [];
 
     public static function create() : self
     {

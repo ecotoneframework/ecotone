@@ -8,7 +8,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Scheduling;
  * @package SimplyCodedSoftware\IntegrationMessaging\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class UTCBasedClock implements Clock
+class EpochBasedClock implements Clock
 {
     /**
      * @inheritDoc

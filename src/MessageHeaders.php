@@ -206,7 +206,7 @@ class MessageHeaders
     {
         return new static(array_merge($headers, [
             self::MESSAGE_ID => Uuid::uuid4()->toString(),
-            self::TIMESTAMP => time()
+            self::TIMESTAMP => (int)round(microtime(true))
         ]));
     }
 }

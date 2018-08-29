@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Support;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaderDoesNotExistsException;

@@ -16,7 +16,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Scheduling\PeriodicTrigger;
 use SimplyCodedSoftware\IntegrationMessaging\Scheduling\SyncTaskScheduler;
 use SimplyCodedSoftware\IntegrationMessaging\Scheduling\TaskExecutor;
 use SimplyCodedSoftware\IntegrationMessaging\Scheduling\Trigger;
-use SimplyCodedSoftware\IntegrationMessaging\Scheduling\UTCBasedClock;
+use SimplyCodedSoftware\IntegrationMessaging\Scheduling\EpochBasedClock;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
@@ -205,7 +205,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
 
         return new InboundChannelAdapter(
             $this->consumerName ? $this->consumerName : $this->referenceName,
-            SyncTaskScheduler::createWithEmptyTriggerContext(new UTCBasedClock()),
+            SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
             $trigger,
             $forwardGateway
         );

@@ -27,6 +27,7 @@ final class MessageBuilder
      * MessageBuilder constructor.
      * @param $payload
      * @param HeaderAccessor $headerAccessor
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct($payload, HeaderAccessor $headerAccessor)
     {

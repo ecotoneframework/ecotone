@@ -22,7 +22,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @var string
      */
-    private $name;
+    private $name = "";
 
     /**
      * @param string $messageChannelName

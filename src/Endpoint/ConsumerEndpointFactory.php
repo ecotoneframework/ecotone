@@ -81,11 +81,12 @@ class ConsumerEndpointFactory
                     return $consumerFactory->create(
                         $this->channelResolver,
                         $this->referenceSearchService,
-                        InterceptedMessageHandler::create($messageHandlerBuilder, $preCallInterceptors, $postCallInterceptors)
+                        InterceptedMessageHandler::create($messageHandlerBuilder, $preCallInterceptors, $postCallInterceptors),
+                        null
                     );
                 }
 
-                return $consumerFactory->create($this->channelResolver, $this->referenceSearchService, $messageHandlerBuilder);
+                return $consumerFactory->create($this->channelResolver, $this->referenceSearchService, $messageHandlerBuilder, null);
             }
         }
 

@@ -5,13 +5,11 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
 use Fixture\Service\CalculatingService;
 use Fixture\Service\ServiceExpectingOneArgument;
-use Fixture\Service\ServiceWithoutReturnValue;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerEndpointFactory;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenConsumerBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\InterceptedMessageHandler;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\Interceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
@@ -36,7 +34,7 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     public function test_creating_consumer_for_no_reply_service()
     {
         $inputChannel = DirectChannel::create();
-        $consumerBuilders = [new EventDrivenConsumerBuilder()];
+        $consumerBuilders = [new \SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
         $preCallInterceptorBuilders = [];
         $postCallInterceptorBuilders = [];
         $noReplyService = ServiceExpectingOneArgument::create();
@@ -56,7 +54,7 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     {
         $inputChannel = DirectChannel::create();
         $replyChannel = QueueChannel::create();
-        $consumerBuilders = [new EventDrivenConsumerBuilder()];
+        $consumerBuilders = [new \SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
         $preCallInterceptorBuilders = [];
         $postCallInterceptorBuilders = [];
         $firstValueForMathOperations = 0;
@@ -80,7 +78,7 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     {
         $inputChannel = DirectChannel::create();
         $replyChannel = QueueChannel::create();
-        $consumerBuilders = [new EventDrivenConsumerBuilder()];
+        $consumerBuilders = [new \SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
         $preCallInterceptorBuilders = [
             Interceptor::create("handlerName", ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
         ];
@@ -134,7 +132,7 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     {
         $inputChannel = DirectChannel::create();
         $replyChannel = QueueChannel::create();
-        $consumerBuilders = [new EventDrivenConsumerBuilder()];
+        $consumerBuilders = [new \SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
         $preCallInterceptorBuilders = [
             Interceptor::create("handlerName", ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum"))
         ];

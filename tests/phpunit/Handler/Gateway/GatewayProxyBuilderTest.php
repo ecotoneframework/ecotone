@@ -258,6 +258,55 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals($content, $message->getHeaders()->get("test2"));
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    public function test_throwing_exception_if_gateway_expect_reply_and_request_channel_is_queue()
+    {
+        $requestChannelName = "requestChannel";
+        $requestChannel = QueueChannel::create();
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    $requestChannelName => $requestChannel
+                ]
+            )
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    public function test_creating_with_queue_channel_when_gateway_does_not_expect_reply()
+    {
+        $requestChannelName = "requestChannel";
+        $requestChannel = QueueChannel::create();
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName);
+
+        /** @var ServiceInterfaceSendOnly $gateway */
+        $gateway = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    $requestChannelName => $requestChannel
+                ]
+            )
+        );
+        $gateway->sendMail('some');
+
+        $this->assertEquals(
+              $requestChannel->receive()->getPayload(),
+              'some'
+        );
+    }
+
     public function test_resolving_response_in_future()
     {
         $messageHandler     = NoReturnMessageHandler::create();

@@ -205,15 +205,18 @@ class GatewayProxyBuilder implements GatewayBuilder
 
         $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
         $requestChannel = $channelResolver->resolve($this->requestChannelName);
-        /** @var DirectChannel $requestChannel */
-        Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel ");
+        $interfaceToCall = InterfaceToCall::create($this->interfaceName, $this->methodName);
+
+        if (!$interfaceToCall->hasReturnTypeVoid()) {
+            /** @var DirectChannel $requestChannel */
+            Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel should not be pollable if expecting reply");
+        }
+
         if ($replyChannel) {
             /** @var PollableChannel $replyChannel */
             Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");
         }
         $errorChannel = $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null;
-
-        $interfaceToCall = InterfaceToCall::create($this->interfaceName, $this->methodName);
 
         $replyReceiver = DefaultSendAndReceiveService::create($requestChannel, $replyChannel, $errorChannel);
         if ($this->customSendAndReceiveService) {

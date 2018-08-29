@@ -71,6 +71,7 @@ class InterceptedMessageHandler extends InputOutputMessageHandlerBuilder impleme
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
+        /** @var ChainMessageHandlerBuilder $chainMessageHandler */
         $chainMessageHandler = ChainMessageHandlerBuilder::create()
                                 ->withOutputMessageChannel($this->outputMessageChannelName);
 

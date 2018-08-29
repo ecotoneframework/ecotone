@@ -1,13 +1,17 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Scheduling;
 
 /**
- * Class ScheduledFuture
+ * Interface Clock
  * @package SimplyCodedSoftware\IntegrationMessaging\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface ScheduledFuture
+interface Clock
 {
-
+    /**
+     * @return integer Milliseconds since Epoch
+     */
+    public function unixTimeInMilliseconds() : int;
 }

@@ -25,7 +25,8 @@ interface MessageHandlerConsumerBuilder
      * @param ChannelResolver $channelResolver
      * @param ReferenceSearchService $referenceSearchService
      * @param MessageHandlerBuilder $messageHandlerBuilder
+     * @param null|PollingMetadata $pollingMetadata
      * @return ConsumerLifecycle
      */
-    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle;
+    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, ?PollingMetadata $pollingMetadata) : ConsumerLifecycle;
 }

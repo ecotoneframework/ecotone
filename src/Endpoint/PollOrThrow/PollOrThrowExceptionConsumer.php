@@ -1,7 +1,8 @@
 <?php
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
+namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrow;
 
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\IntegrationMessaging\MessageDeliveryException;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;

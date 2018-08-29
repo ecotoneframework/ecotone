@@ -46,7 +46,7 @@ class FakeTransaction implements Transaction
     public function commit(): void
     {
         if (!$this->isActive()) {
-            throw TransactionException::createWith("Can't rollback not active transaction");
+            throw TransactionException::createWith("Can't commit not active transaction");
         }
 
         $this->status = self::COMMITTED;

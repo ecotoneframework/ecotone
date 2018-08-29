@@ -5,7 +5,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 use Fixture\Handler\NoReturnMessageHandler;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenConsumer;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumer;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
@@ -47,7 +47,7 @@ class EventDrivenConsumerTest extends MessagingTest
     {
         $directChannel = DirectChannel::create();
         $handler = NoReturnMessageHandler::create();
-        $eventDrivenConsumer = new EventDrivenConsumer('some', $directChannel, $handler);
+        $eventDrivenConsumer = new \SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumer('some', $directChannel, $handler);
 
         $this->assertEquals("some", $eventDrivenConsumer->getConsumerName());
     }

@@ -4,15 +4,17 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Scheduling;
 
 /**
- * Interface TaskScheduler
+ * Class UTCBasedClock
  * @package SimplyCodedSoftware\IntegrationMessaging\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface TaskScheduler
+class UTCBasedClock implements Clock
 {
     /**
-     * @param TaskExecutor $taskExecutor
-     * @param Trigger $trigger
+     * @inheritDoc
      */
-    public function schedule(TaskExecutor $taskExecutor, Trigger $trigger): void;
+    public function unixTimeInMilliseconds(): int
+    {
+        return (int)round(microtime(true) * 1000);
+    }
 }

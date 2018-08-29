@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
 
-namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
+namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven;
 
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 use SimplyCodedSoftware\IntegrationMessaging\SubscribableChannel;
 

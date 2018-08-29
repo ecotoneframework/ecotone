@@ -11,29 +11,23 @@ use Fixture\Behat\Ordering\OrderingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
 use Fixture\Configuration\DumbConfigurationObserver;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessaging;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDrivenConsumerBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceNotFoundException;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrowMessageHandlerConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Future;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
-use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 
 /**
  * Defines application features from the specific context.

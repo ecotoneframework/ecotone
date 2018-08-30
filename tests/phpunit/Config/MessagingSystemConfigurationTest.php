@@ -441,5 +441,53 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_creating_implicit_direct_channel_if_not_exists()
+    {
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
+        $inputMessageChannelName = "inputChannelName";
+        $messageHandler = NoReturnMessageHandler::create();
+        $messagingSystem = $messagingSystemConfiguration
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName))
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->buildMessagingSystemFromConfiguration(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryConfigurationVariableRetrievingService::createEmpty()
+            );
+
+        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
+            ->send(MessageBuilder::withPayload("some")->build());
+
+        $this->assertTrue($messageHandler->wasCalled());
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_replacing_with_real_channel_if_passed()
+    {
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+
+        $inputMessageChannelName = "inputChannelName";
+        $messageHandler = NoReturnMessageHandler::create();
+        $messagingSystem = $messagingSystemConfiguration
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName))
+            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
+            ->buildMessagingSystemFromConfiguration(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryConfigurationVariableRetrievingService::createEmpty()
+            );
+
+        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
+            ->send(MessageBuilder::withPayload("some")->build());
+
+        $this->assertFalse($messageHandler->wasCalled(), "Queue channel was registered, so without explicit calling the consumer it should not be ever called");
+    }
 }

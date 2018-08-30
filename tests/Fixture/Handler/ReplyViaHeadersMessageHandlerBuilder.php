@@ -65,24 +65,6 @@ class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuil
     /**
      * @inheritDoc
      */
-    public function withInputChannelName(string $inputChannelName)
-    {
-        $this->inputChannelName = $inputChannelName;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getInputMessageChannelName(): string
-    {
-        return $this->inputChannelName;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getRequiredReferenceNames(): array
     {
         return [];

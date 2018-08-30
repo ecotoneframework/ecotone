@@ -5,7 +5,9 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ChannelAdapterConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
@@ -35,6 +37,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var MessageHandlerBuilder[]
      */
     private $messageHandlerBuilders = [];
+    /**
+     * @var PollingMetadata[]
+     */
+    private $messageHandlerPollingMetadata = [];
     /**
      * @var Module[]
      */
@@ -101,14 +107,12 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @param MessageChannelBuilder $messageChannelBuilder
+     * @param PollingMetadata $pollingMetadata
      * @return MessagingSystemConfiguration
      */
-    public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): self
+    public function registerPollingMetadata(PollingMetadata $pollingMetadata) : self
     {
-        $this->channelsBuilders[] = $messageChannelBuilder;
-        $this->configurationObserver->notifyMessageChannelWasRegistered($messageChannelBuilder->getMessageChannelName(), get_class($messageChannelBuilder));
-        $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
+        $this->messageHandlerPollingMetadata[] = $pollingMetadata;
 
         return $this;
     }
@@ -138,7 +142,24 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
+        if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelsBuilders)) {
+            $this->channelsBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
+        }
+
         $this->messageHandlerBuilders[] = $messageHandlerBuilder;
+
+        return $this;
+    }
+
+    /**
+     * @param MessageChannelBuilder $messageChannelBuilder
+     * @return MessagingSystemConfiguration
+     */
+    public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): self
+    {
+        $this->channelsBuilders[$messageChannelBuilder->getMessageChannelName()] = $messageChannelBuilder;
+        $this->configurationObserver->notifyMessageChannelWasRegistered($messageChannelBuilder->getMessageChannelName(), get_class($messageChannelBuilder));
+        $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
 
         return $this;
     }

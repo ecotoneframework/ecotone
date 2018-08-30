@@ -18,6 +18,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchServ
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Scheduling\CronTrigger;
 use SimplyCodedSoftware\IntegrationMessaging\Scheduling\PeriodicTrigger;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
@@ -49,6 +50,7 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
     {
         $className = get_class($messageHandlerBuilder);
         Assert::notNull($messageHandlerBuilder->getName(), "Message Endpoint name can't be empty for {$className}");
+
         $messageHandler = $messageHandlerBuilder->build($channelResolver, $referenceSearchService);
         $connectionChannel = DirectChannel::create();
         $connectionChannel->subscribe($messageHandler);
@@ -82,7 +84,11 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
         )
             ->withTransactionFactories($pollingMetadata->getTransactionFactoryReferenceNames())
             ->withErrorChannel($pollingMetadata->getErrorChannelName())
-            ->withTrigger(PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds()))
+            ->withTrigger(
+                $pollingMetadata->getCron()
+                ? CronTrigger::createWith($pollingMetadata->getCron())
+                : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds())
+            )
             ->build($channelResolver, $referenceSearchService);
     }
 }

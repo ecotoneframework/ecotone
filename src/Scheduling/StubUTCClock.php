@@ -65,6 +65,6 @@ class StubUTCClock implements Clock
      */
     private static function createEpochTimeInMilliseconds(string $dateTimeAsString): int
     {
-        return (int)round((new \DateTimeImmutable($dateTimeAsString, new \DateTimeZone('UTC')))->format('U') * 1000);
+        return (int)round((new \DateTime($dateTimeAsString, new \DateTimeZone('UTC')))->format('U') * 1000);
     }
 }

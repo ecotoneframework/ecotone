@@ -50,6 +50,7 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
     {
         $className = get_class($messageHandlerBuilder);
         Assert::notNull($messageHandlerBuilder->getName(), "Message Endpoint name can't be empty for {$className}");
+        Assert::notNull($pollingMetadata, "No polling meta data defined for polling endpoint {$messageHandlerBuilder->getName()}");
 
         $messageHandler = $messageHandlerBuilder->build($channelResolver, $referenceSearchService);
         $connectionChannel = DirectChannel::create();
@@ -82,6 +83,7 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
                 $gateway
             )
         )
+            ->withConsumerName($messageHandlerBuilder->getName())
             ->withTransactionFactories($pollingMetadata->getTransactionFactoryReferenceNames())
             ->withErrorChannel($pollingMetadata->getErrorChannelName())
             ->withTrigger(

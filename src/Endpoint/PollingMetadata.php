@@ -232,6 +232,14 @@ class PollingMetadata
     }
 
     /**
+     * @return string
+     */
+    public function getMessageHandlerName(): string
+    {
+        return $this->messageHandlerName;
+    }
+
+    /**
      * @return PollingMetadata
      */
     private function createCopy() : self

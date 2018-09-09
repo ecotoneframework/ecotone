@@ -185,12 +185,15 @@ class ConsumerEndpointFactoryTest extends MessagingTest
      */
     private function createConsumerAndSendMessage(MessageChannel $inputChannel, array $consumerBuilders, array $preCallInterceptorBuilders, array $postCallInterceptorBuilders, MessageHandlerBuilder $messageHandler, Message $message): void
     {
-        $consumerEndpointFactory = new ConsumerEndpointFactory(InMemoryChannelResolver::createFromAssociativeArray([
-            self::INPUT_CHANNEL_NAME => $inputChannel
-        ]), InMemoryReferenceSearchService::createEmpty(),
+        $consumerEndpointFactory = new ConsumerEndpointFactory(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                self::INPUT_CHANNEL_NAME => $inputChannel
+            ]),
+            InMemoryReferenceSearchService::createEmpty(),
             $consumerBuilders,
             $preCallInterceptorBuilders,
-            $postCallInterceptorBuilders
+            $postCallInterceptorBuilders,
+            []
         );
 
         $messageHandler = $messageHandler

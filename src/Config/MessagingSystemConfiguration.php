@@ -112,7 +112,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerPollingMetadata(PollingMetadata $pollingMetadata) : self
     {
-        $this->messageHandlerPollingMetadata[] = $pollingMetadata;
+        $this->messageHandlerPollingMetadata[$pollingMetadata->getMessageHandlerName()] = $pollingMetadata;
 
         return $this;
     }
@@ -232,7 +232,7 @@ final class MessagingSystemConfiguration implements Configuration
             $this->configurationObserver->notifyGatewayWasBuilt($gatewayReference);
         }
 
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories);
+        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories, [], [], $this->messageHandlerPollingMetadata);
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {

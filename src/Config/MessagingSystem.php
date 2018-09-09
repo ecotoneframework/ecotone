@@ -75,7 +75,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             }
         }
 
-        throw InvalidArgumentException::create("There is no pollable consumer with name {$consumerName}");
+        throw InvalidArgumentException::create("There is no pollable consumer with name {$consumerName} to run");
     }
 
     /**

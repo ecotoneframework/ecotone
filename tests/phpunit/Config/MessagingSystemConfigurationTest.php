@@ -22,6 +22,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariabl
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
@@ -470,7 +472,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function test_replacing_with_real_channel_if_passed()
+    public function test_replacing_implicit_direct_channel_with_real_channel_if_passed()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -489,5 +491,38 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->send(MessageBuilder::withPayload("some")->build());
 
         $this->assertFalse($messageHandler->wasCalled(), "Queue channel was registered, so without explicit calling the consumer it should not be ever called");
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_registering_polling_consumer_with_metadata()
+    {
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+
+        $inputMessageChannelName = "inputChannelName";
+        $messageHandler = ExceptionMessageHandler::create();
+        $endpointName = "pollableName";
+        $messagingSystem = $messagingSystemConfiguration
+            ->registerMessageHandler(
+                DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName)
+                    ->withName($endpointName)
+            )
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
+            ->registerPollingMetadata(PollingMetadata::create($endpointName))
+            ->buildMessagingSystemFromConfiguration(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryConfigurationVariableRetrievingService::createEmpty()
+            );
+
+        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
+            ->send(MessageBuilder::withPayload("some")->build());
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $messagingSystem->runSeparatelyRunningConsumerBy($endpointName);
     }
 }

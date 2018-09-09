@@ -40,26 +40,34 @@ class ConsumerEndpointFactory
      * @var Interceptor[]
      */
     private $postCallInterceptors;
+    /**
+     * @var array|PollingMetadata[]
+     */
+    private $pollingMetadataMessageHandlers;
 
     /**
      * ConsumerEndpointFactory constructor.
      * @param ChannelResolver $channelResolver
      * @param ReferenceSearchService $referenceSearchService
-     * @param array $consumerFactories
+     * @param MessageHandlerConsumerBuilder[] $consumerFactories
      * @param Interceptor[] $preCallInterceptors
      * @param Interceptor[] $postCallInterceptors
+     * @param PollingMetadata[] $pollingMetadataMessageHandlers
      * @throws MessagingException
      */
-    public function __construct(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $consumerFactories, array $preCallInterceptors = [], array $postCallInterceptors = [])
+    public function __construct(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $consumerFactories, array $preCallInterceptors = [], array $postCallInterceptors = [], array $pollingMetadataMessageHandlers)
     {
         Assert::allInstanceOfType($preCallInterceptors, Interceptor::class);
         Assert::allInstanceOfType($postCallInterceptors, Interceptor::class);
+        Assert::allInstanceOfType($pollingMetadataMessageHandlers, PollingMetadata::class);
+        Assert::allInstanceOfType($consumerFactories, MessageHandlerConsumerBuilder::class);
 
         $this->channelResolver = $channelResolver;
         $this->consumerFactories = $consumerFactories;
         $this->referenceSearchService = $referenceSearchService;
         $this->preCallInterceptors = $preCallInterceptors;
         $this->postCallInterceptors = $postCallInterceptors;
+        $this->pollingMetadataMessageHandlers = $pollingMetadataMessageHandlers;
     }
 
     /**
@@ -78,15 +86,25 @@ class ConsumerEndpointFactory
                 if ($preCallInterceptors || $postCallInterceptors) {
                     Assert::isTrue(\assert($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel), "Problem with {$messageHandlerBuilder->getName()}. Only Message Handlers with possible output channels can be intercepted.");
 
+
                     return $consumerFactory->create(
                         $this->channelResolver,
                         $this->referenceSearchService,
                         InterceptedMessageHandler::create($messageHandlerBuilder, $preCallInterceptors, $postCallInterceptors),
-                        null
+                        array_key_exists($messageHandlerBuilder->getName(), $this->pollingMetadataMessageHandlers)
+                            ? $this->pollingMetadataMessageHandlers[$messageHandlerBuilder->getName()]
+                            : null
                     );
                 }
 
-                return $consumerFactory->create($this->channelResolver, $this->referenceSearchService, $messageHandlerBuilder, null);
+                return $consumerFactory->create(
+                    $this->channelResolver,
+                    $this->referenceSearchService,
+                    $messageHandlerBuilder,
+                    array_key_exists($messageHandlerBuilder->getName(), $this->pollingMetadataMessageHandlers)
+                        ? $this->pollingMetadataMessageHandlers[$messageHandlerBuilder->getName()]
+                        : null
+                );
             }
         }
 

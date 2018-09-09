@@ -2,7 +2,15 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
+use Builder\Annotation\EndpointIdTestBuilder;
+use Builder\Annotation\HeaderTestBuilder;
+use Builder\Annotation\Interceptor\ServiceActivatorInterceptorTestBuilder;
+use Builder\Annotation\MessageParameterTestBuilder;
+use Builder\Annotation\PayloadTestBuilder;
+use Builder\Annotation\ReferenceTestBuilder;
+use Builder\Annotation\ServiceActivatorTestBuilder;
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\EndpointId;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Header;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\MessageParameter;
@@ -29,24 +37,18 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
      */
     public function test_creating_service_activator_builder_from_annotation()
     {
-        $serviceActivatorAnnotation = new ServiceActivator();
-        $serviceActivatorAnnotation->inputChannelName = "inputChannel";
-        $serviceActivatorAnnotation->outputChannelName = "outputChannel";
-        $serviceActivatorAnnotation->requiresReply = true;
-        $messageToHeaderConverter = new Header();
-        $messageToHeaderConverter->parameterName = "to";
-        $messageToHeaderConverter->headerName = "sendTo";
-        $payloadParameterConverter = new Payload();
-        $payloadParameterConverter->parameterName = "content";
-        $messageParameterConverter = new MessageParameter();
-        $messageParameterConverter->parameterName = "message";
-        $referenceServiceConverter = new Reference();
-        $referenceServiceConverter->parameterName = "object";
-        $referenceServiceConverter->referenceName = "reference";
-        $parameterConverters = [
-            $messageToHeaderConverter, $payloadParameterConverter, $messageParameterConverter, $referenceServiceConverter
-        ];
-        $serviceActivatorAnnotation->parameterConverters = $parameterConverters;
+        $serviceActivatorAnnotation = ServiceActivatorTestBuilder::create()
+            ->withEndpointId("test-name")
+            ->withInputChannelName("inputChannel")
+            ->withOutputChannelName("outputChannel")
+            ->withRequiresReply(true)
+            ->withParameterConverters([
+                HeaderTestBuilder::create("to", "sendTo"),
+                PayloadTestBuilder::create("content"),
+                MessageParameterTestBuilder::create("message"),
+                ReferenceTestBuilder::create("object", "reference")
+            ])
+            ->build();
 
         $annotationConfiguration = ServiceActivatorModule::create(
             $this->createAnnotationRegistrationService(
@@ -54,29 +56,27 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
                 "sendMessage",
                 new MessageEndpoint(),
                 $serviceActivatorAnnotation
-
             )
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
         $annotationConfiguration->prepare($configuration, [], NullObserver::create());
 
-        $serviceActivatorBuilder = ServiceActivatorBuilder::create(ServiceActivatorWithAllConfigurationDefined::class, "sendMessage")
-                                    ->withInputChannelName("inputChannel");
-        $serviceActivatorBuilder->withMethodParameterConverters([
-            HeaderBuilder::create("to", "sendTo"),
-            PayloadBuilder::create("content"),
-            MessageConverterBuilder::create("message"),
-            ReferenceBuilder::create("object", "reference")
-        ]);
-        $serviceActivatorBuilder->registerRequiredReference("reference");
-
         $this->assertEquals(
             $configuration,
             $this->createMessagingSystemConfiguration()
                 ->registerMessageHandler(
-                    $serviceActivatorBuilder
+                    ServiceActivatorBuilder::create(ServiceActivatorWithAllConfigurationDefined::class, "sendMessage")
+                        ->withEndpointId("test-name")
+                        ->withInputChannelName("inputChannel")
                         ->withOutputMessageChannel('outputChannel')
+                        ->withMethodParameterConverters([
+                            HeaderBuilder::create("to", "sendTo"),
+                            PayloadBuilder::create("content"),
+                            MessageConverterBuilder::create("message"),
+                            ReferenceBuilder::create("object", "reference")
+                        ])
+                        ->registerRequiredReference("reference")
                         ->withRequiredReply(true)
                 )
         );

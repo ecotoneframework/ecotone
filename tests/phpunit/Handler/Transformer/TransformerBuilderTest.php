@@ -338,7 +338,7 @@ class TransformerBuilderTest extends MessagingTest
         $this->assertEquals(
             TransformerBuilder::create("ref-name", "method-name")
                 ->withInputChannelName($inputChannelName)
-                ->withName($endpointName),
+                ->withEndpointId($endpointName),
             sprintf("Transformer - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
         );
     }

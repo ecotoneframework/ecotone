@@ -12,20 +12,11 @@ abstract class EndpointAnnotation
 {
     /**
      * @var string
+     */
+    public $endpointId = "";
+    /**
+     * @var string
      * @Required()
      */
     public $inputChannelName;
-
-    /**
-     * List of method level pre interceptors
-     *
-     * @var array
-     */
-    public $preCallInterceptors = [];
-    /**
-     * List of method level post interceptors
-     *
-     * @var array
-     */
-    public $postCallInterceptors = [];
 }

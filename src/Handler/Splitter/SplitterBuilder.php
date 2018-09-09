@@ -127,9 +127,11 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * @inheritDoc
      */
-    public function registerRequiredReference(string $referenceName): void
+    public function registerRequiredReference(string $referenceName)
     {
         $this->requiredReferenceNames[] = $referenceName;
+
+        return $this;
     }
 
     /**
@@ -171,6 +173,6 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     {
         $reference = $this->referenceName ? $this->referenceName : get_class($this->directObject);
 
-        return sprintf("Splitter - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getName(), $this->getInputMessageChannelName());
+        return sprintf("Splitter - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 }

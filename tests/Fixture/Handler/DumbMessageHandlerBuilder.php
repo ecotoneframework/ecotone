@@ -93,9 +93,11 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
     /**
      * @inheritDoc
      */
-    public function registerRequiredReference(string $referenceName): void
+    public function registerRequiredReference(string $referenceName)
     {
         $this->requiredReferenceNames[] = $referenceName;
+
+        return $this;
     }
 
     /**

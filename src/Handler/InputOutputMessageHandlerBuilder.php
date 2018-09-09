@@ -25,20 +25,9 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     private $name = "";
 
     /**
-     * @param string $messageChannelName
-     * @return self|static
-     */
-    public function withInputMessageChannel(string $messageChannelName) : self
-    {
-        $this->inputMessageChannelName = $messageChannelName;
-
-        return $this;
-    }
-
-    /**
      * @inheritDoc
      */
-    public function withOutputMessageChannel(string $messageChannelName) : self
+    public function withOutputMessageChannel(string $messageChannelName)
     {
         $this->outputMessageChannelName = $messageChannelName;
 
@@ -48,7 +37,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function withInputChannelName(string $inputChannelName): self
+    public function withInputChannelName(string $inputChannelName)
     {
         $this->inputMessageChannelName = $inputChannelName;
 
@@ -66,7 +55,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getName(): string
+    public function getEndpointId(): string
     {
         return $this->name;
     }
@@ -74,15 +63,15 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function withName(string $messageHandlerName) : self
+    public function withEndpointId(string $endpointId)
     {
-        $this->name = $messageHandlerName;
+        $this->name = $endpointId;
 
         return $this;
     }
 
     public function __toString()
     {
-        return sprintf("Handler of type %s with name `%s` for input channel `%s`", get_class($this), $this->getName(), $this->getInputMessageChannelName());
+        return sprintf("Handler of type %s with name `%s` for input channel `%s`", get_class($this), $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 }

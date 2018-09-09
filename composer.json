@@ -19,7 +19,8 @@
         "psr-4": {
             "Test\\SimplyCodedSoftware\\IntegrationMessaging\\": "tests/phpunit",
             "Behat\\Bootstrap\\": "tests/Behat/Bootstrap",
-            "Fixture\\": "tests/Fixture"
+            "Fixture\\": "tests/Fixture",
+            "Builder\\": "tests/Builder"
         },
         "psr-0": {
             "FixtureAutoloadTest\\": "tests"

@@ -164,9 +164,11 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @inheritDoc
      */
-    public function registerRequiredReference(string $referenceName): void
+    public function registerRequiredReference(string $referenceName)
     {
         $this->requiredReferenceNames[] = $referenceName;
+
+        return $this;
     }
 
     /**
@@ -260,7 +262,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @inheritDoc
      */
-    public function getName(): string
+    public function getEndpointId(): string
     {
         return $this->name;
     }
@@ -268,9 +270,9 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @inheritDoc
      */
-    public function withName(string $messageHandlerName)
+    public function withEndpointId(string $endpointId)
     {
-        $this->name = $messageHandlerName;
+        $this->name = $endpointId;
 
         return $this;
     }
@@ -291,6 +293,6 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     public function __toString()
     {
-        return sprintf("Router for input channel `%s` with name `%s`", $this->inputMessageChannelName, $this->getName());
+        return sprintf("Router for input channel `%s` with name `%s`", $this->inputMessageChannelName, $this->getEndpointId());
     }
 }

@@ -171,7 +171,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerPostCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor): self
     {
-        $this->postCallMethodInterceptors = $methodInterceptor;
+        $this->postCallMethodInterceptors[] = $methodInterceptor;
 
         return $this;
     }
@@ -289,7 +289,6 @@ final class MessagingSystemConfiguration implements Configuration
             );
         }
 
-
         $modulesWithKeysAsNames = [];
         foreach ($this->modules as $module) {
             $modulesWithKeysAsNames[$module->getName()] = $module;
@@ -303,7 +302,7 @@ final class MessagingSystemConfiguration implements Configuration
             $this->configurationObserver->notifyGatewayWasBuilt($gatewayReference);
         }
 
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories, [], [], $this->messageHandlerPollingMetadata);
+        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories, $this->preCallMethodInterceptors, $this->postCallMethodInterceptors, $this->messageHandlerPollingMetadata);
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {

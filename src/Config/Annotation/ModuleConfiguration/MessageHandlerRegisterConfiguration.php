@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
@@ -22,7 +23,6 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  */
 abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurationModule implements AnnotationModule
 {
-    /**
     /**
      * @var ParameterConverterAnnotationFactory
      */

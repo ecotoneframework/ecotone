@@ -2,6 +2,7 @@
 
 namespace Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined;
 
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\EndpointId;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Header;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\MessageParameter;
@@ -27,7 +28,7 @@ class ServiceActivatorWithAllConfigurationDefined
      * @param string    $name
      *
      * @return void
-     * @ServiceActivator(inputChannelName="inputChannel", outputChannelName="outputChannel", requiresReply=true, parameterConverters={
+     * @ServiceActivator(endpointId="test-name", inputChannelName="inputChannel", outputChannelName="outputChannel", requiresReply=true, parameterConverters={
      *     @Header(parameterName="to", headerName="sendTo"),
      *     @Payload(parameterName="content"),
      *     @MessageParameter(parameterName="message"),

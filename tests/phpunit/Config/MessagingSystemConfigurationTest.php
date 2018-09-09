@@ -11,6 +11,7 @@ use Fixture\Handler\DumbMessageHandlerBuilder;
 use Fixture\Handler\ExceptionMessageHandler;
 use Fixture\Handler\ModuleMessageHandlerBuilder;
 use Fixture\Handler\NoReturnMessageHandler;
+use Fixture\Service\CalculatingService;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelAdapter;
@@ -508,7 +509,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem = $messagingSystemConfiguration
             ->registerMessageHandler(
                 DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName)
-                    ->withName($endpointName)
+                    ->withEndpointId($endpointName)
             )
             ->registerConsumerFactory(new PollingConsumerBuilder())
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
@@ -531,10 +532,41 @@ class MessagingSystemConfigurationTest extends MessagingTest
      */
     public function test_registering_pre_method_call_interceptor()
     {
-//        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
-//                        ->registerPreCallMethodInterceptor(
-//                            MethodInterceptor::create()
-//                        )
+        $endpointName = "endpointName";
+        $inputChannelName = "inputChannel";
+        $messagingSystemConfiguration =
+            MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+                ->registerMessageHandler(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
+                        ->withInputChannelName($inputChannelName)
+                        ->withEndpointId($endpointName)
+                )
+                ->registerPreCallMethodInterceptor(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
+                        ->withEndpointId($endpointName)
+                )
+                ->registerPostCallMethodInterceptor(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
+                        ->withEndpointId($endpointName)
+                )
+                ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+                ->buildMessagingSystemFromConfiguration(
+                    InMemoryReferenceSearchService::createEmpty(),
+                    InMemoryConfigurationVariableRetrievingService::createEmpty()
+                );
 
+        $messageChannel = $messagingSystemConfiguration->getMessageChannelByName($inputChannelName);
+        $outputChannel = QueueChannel::create();
+
+        $messageChannel->send(
+            MessageBuilder::withPayload(5)
+                ->setReplyChannel($outputChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            21,
+            $outputChannel->receive()->getPayload()
+        );
     }
 }

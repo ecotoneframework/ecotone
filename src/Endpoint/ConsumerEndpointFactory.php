@@ -85,7 +85,7 @@ class ConsumerEndpointFactory
 
                 $messageHandlerBuilderToUse = $messageHandlerBuilder;
                 if ($preCallInterceptors || $postCallInterceptors) {
-                    Assert::isTrue(\assert($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel), "Problem with {$messageHandlerBuilder->getName()}. Only Message Handlers with possible output channels can be intercepted.");
+                    Assert::isTrue(\assert($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel), "Problem with {$messageHandlerBuilder->getEndpointId()}. Only Message Handlers with possible output channels can be intercepted.");
 
                     $messageHandlerBuilderToUse = InterceptedMessageHandler::create($messageHandlerBuilder, $preCallInterceptors, $postCallInterceptors);
                 }
@@ -94,8 +94,8 @@ class ConsumerEndpointFactory
                     $this->channelResolver,
                     $this->referenceSearchService,
                     $messageHandlerBuilderToUse,
-                    array_key_exists($messageHandlerBuilder->getName(), $this->pollingMetadataMessageHandlers)
-                        ? $this->pollingMetadataMessageHandlers[$messageHandlerBuilder->getName()]
+                    array_key_exists($messageHandlerBuilder->getEndpointId(), $this->pollingMetadataMessageHandlers)
+                        ? $this->pollingMetadataMessageHandlers[$messageHandlerBuilder->getEndpointId()]
                         : null
                 );
             }
@@ -114,7 +114,7 @@ class ConsumerEndpointFactory
         $preCallInterceptors = [];
 
         foreach ($this->preCallInterceptors as $preCallInterceptor) {
-            if ($preCallInterceptor->getName() === $interceptedMessageHandlerBuilder->getName()) {
+            if ($preCallInterceptor->getEndpointId() === $interceptedMessageHandlerBuilder->getEndpointId()) {
                 $preCallInterceptors[] = $preCallInterceptor;
             }
         }
@@ -131,7 +131,7 @@ class ConsumerEndpointFactory
         $postCallInterceptors = [];
 
         foreach ($this->postCallInterceptors as $postCallInterceptor) {
-            if ($postCallInterceptor->getName() === $interceptedMessageHandlerBuilder->getName()) {
+            if ($postCallInterceptor->getEndpointId() === $interceptedMessageHandlerBuilder->getEndpointId()) {
                 $postCallInterceptors[] = $postCallInterceptor;
             }
         }

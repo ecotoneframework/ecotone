@@ -312,7 +312,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $this->assertEquals(
             ChainMessageHandlerBuilder::create()
                 ->withInputChannelName($inputChannelName)
-                ->withName($endpointName),
+                ->withEndpointId($endpointName),
             sprintf("Handler of type %s with name `%s` for input channel `%s`", ChainMessageHandlerBuilder::class, $endpointName, $inputChannelName)
         );
     }

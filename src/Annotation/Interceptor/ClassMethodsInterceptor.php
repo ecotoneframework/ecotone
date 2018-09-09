@@ -4,14 +4,23 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor;
 
 /**
- * Class InterceptorConfiguration
+ * Class ClassInterceptor
  * @package SimplyCodedSoftware\IntegrationMessaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @Annotation
  */
-class InterceptorConfiguration
+class ClassMethodsInterceptor
 {
     /**
      * @var array
      */
-    public $classInterceptors = [];
+    public $preCallInterceptors = [];
+    /**
+     * @var array
+     */
+    public $postCallInterceptors = [];
+    /**
+     * @var string[]
+     */
+    public $excludedMethods = [];
 }

@@ -129,9 +129,11 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     /**
      * @inheritDoc
      */
-    public function registerRequiredReference(string $referenceName): void
+    public function registerRequiredReference(string $referenceName)
     {
         $this->requiredReferenceNames[] = $referenceName;
+
+        return $this;
     }
 
     /**
@@ -218,6 +220,6 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     {
         $reference = $this->objectToInvokeReferenceName ? $this->objectToInvokeReferenceName : get_class($this->object);
 
-        return sprintf("Transformer - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getName(), $this->getInputMessageChannelName());
+        return sprintf("Transformer - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 }

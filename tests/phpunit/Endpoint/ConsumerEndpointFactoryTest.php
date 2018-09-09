@@ -82,11 +82,11 @@ class ConsumerEndpointFactoryTest extends MessagingTest
         $endpointName = "handlerName";
         $preCallInterceptorBuilders = [
             ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
-                ->withName($endpointName)
+                ->withEndpointId($endpointName)
         ];
         $postCallInterceptorBuilders = [];
         $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-                            ->withName($endpointName);
+                            ->withEndpointId($endpointName);
 
         $message = $this->buildMessageWithReplyChannel(0, $replyChannel);
         $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);
@@ -109,11 +109,11 @@ class ConsumerEndpointFactoryTest extends MessagingTest
         $consumerBuilders = [new EventDrivenConsumerBuilder()];
         $preCallInterceptorBuilders = [
             ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
-                ->withName("someOtherName")
+                ->withEndpointId("someOtherName")
         ];
         $postCallInterceptorBuilders = [];
         $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-            ->withName("handlerName");
+            ->withEndpointId("handlerName");
 
         $message = $this->buildMessageWithReplyChannel(0, $replyChannel);
         $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);
@@ -137,14 +137,14 @@ class ConsumerEndpointFactoryTest extends MessagingTest
         $messageHandlerName = "handlerName";
         $preCallInterceptorBuilders = [
             ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum")
-                ->withName($messageHandlerName)
+                ->withEndpointId($messageHandlerName)
         ];
         $postCallInterceptorBuilders = [
             ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")
-                ->withName($messageHandlerName)
+                ->withEndpointId($messageHandlerName)
         ];
         $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
-            ->withName($messageHandlerName);
+            ->withEndpointId($messageHandlerName);
 
         $message = $this->buildMessageWithReplyChannel(0, $replyChannel);
         $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);

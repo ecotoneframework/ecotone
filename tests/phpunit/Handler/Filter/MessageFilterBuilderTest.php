@@ -160,7 +160,7 @@ class MessageFilterBuilderTest extends MessagingTest
         $this->assertEquals(
             MessageFilterBuilder::createWithReferenceName("ref-name", "method-name")
                 ->withInputChannelName($inputChannelName)
-                ->withName($endpointName),
+                ->withEndpointId($endpointName),
             sprintf("Message filter - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
         );
     }

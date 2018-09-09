@@ -333,7 +333,7 @@ class RouterBuilderTest extends MessagingTest
         $this->assertEquals(
             RouterBuilder::create("ref-name", "method-name")
                 ->withInputChannelName($inputChannelName)
-                ->withName($endpointName),
+                ->withEndpointId($endpointName),
             sprintf("Router for input channel `%s` with name `%s`", $inputChannelName, $endpointName)
         );
     }

@@ -35,7 +35,7 @@ class UnicastingDispatcher implements MessageDispatcher
     public function addHandler(MessageHandler $messageHandler): void
     {
         if ($this->messageHandler) {
-            throw WrongHandlerAmountException::create("Message handler " . get_class($messageHandler) . " can't be registered as second handler for unicasting dispatcher");
+            throw WrongHandlerAmountException::create("{$messageHandler} can't be registered as second handler for unicasting dispatcher. The first is {$this->messageHandler}");
         }
 
         $this->messageHandler = $messageHandler;
@@ -55,7 +55,7 @@ class UnicastingDispatcher implements MessageDispatcher
     public function dispatch(Message $message): void
     {
         if (!$this->messageHandler) {
-            throw MessageDispatchingException::create("There is no message handler registered for dispatching");
+            throw MessageDispatchingException::create("There is no message handler registered for dispatching Message {$message}");
         }
 
         $this->messageHandler->handle($message);

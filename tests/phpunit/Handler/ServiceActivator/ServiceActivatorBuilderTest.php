@@ -150,7 +150,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $this->assertEquals(
             ServiceActivatorBuilder::create("ref-name", "method-name")
                 ->withInputChannelName($inputChannelName)
-                ->withName($endpointName),
+                ->withEndpointId($endpointName),
             sprintf("Service Activator - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
         );
     }

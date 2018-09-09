@@ -29,14 +29,14 @@ interface MessageHandlerBuilder
     /**
      * @return string
      */
-    public function getName() : string;
+    public function getEndpointId() : string;
 
     /**
-     * @param string $messageHandlerName
+     * @param string $endpointId
      *
      * @return static
      */
-    public function withName(string $messageHandlerName);
+    public function withEndpointId(string $endpointId);
 
     /**
      * @return string

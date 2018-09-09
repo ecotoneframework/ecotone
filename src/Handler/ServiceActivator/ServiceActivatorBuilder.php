@@ -139,9 +139,11 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     /**
      * @inheritDoc
      */
-    public function registerRequiredReference(string $referenceName): void
+    public function registerRequiredReference(string $referenceName)
     {
         $this->requiredReferenceNames[] = $referenceName;
+
+        return $this;
     }
 
     /**
@@ -224,6 +226,6 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     {
         $reference = $this->objectToInvokeReferenceName ? $this->objectToInvokeReferenceName : get_class($this->directObjectReference);
 
-        return sprintf("Service Activator - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getName(), $this->getInputMessageChannelName());
+        return sprintf("Service Activator - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 }

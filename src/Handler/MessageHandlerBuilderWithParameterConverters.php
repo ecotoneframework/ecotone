@@ -12,9 +12,9 @@ interface MessageHandlerBuilderWithParameterConverters extends MessageHandlerBui
 {
     /**
      * @param string $referenceName
-     * @return void
+     * @return static
      */
-    public function registerRequiredReference(string $referenceName) : void;
+    public function registerRequiredReference(string $referenceName);
 
     /**
      * @param array|ParameterConverter[] $methodParameterConverterBuilders

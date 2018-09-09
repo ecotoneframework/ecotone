@@ -31,12 +31,14 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
         InboundChannelAdapterBuilder::create(
             "channelName", "someRef", "withReturnValue"
-        )->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
-                "someRef" => ServiceExpectingOneArgument::create()
-            ])
-        );
+        )
+            ->withConsumerName("test")
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createWith([
+                    "someRef" => ServiceExpectingOneArgument::create()
+                ])
+            );
     }
 
     /**
@@ -49,12 +51,14 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
         InboundChannelAdapterBuilder::create(
             "channelName", "someRef", "withoutReturnValue"
-        )->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
-                "someRef" => ServiceExpectingNoArguments::create()
-            ])
-        );
+        )
+            ->withConsumerName("test")
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createWith([
+                    "someRef" => ServiceExpectingNoArguments::create()
+                ])
+            );
     }
 
     /**
@@ -71,6 +75,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $inputChannelName, "someRef", "execute"
         )
+            ->withConsumerName("test")
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $inputChannelName => $inputChannel
@@ -102,6 +107,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $inputChannelName, "someRef", "execute"
         )
+            ->withConsumerName("test")
             ->withTrigger(PeriodicTrigger::create(1, 0))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -137,6 +143,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         InboundChannelAdapterBuilder::create(
             $inputChannelName, "someRef", "notExistingMethod"
         )
+            ->withConsumerName("test")
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $inputChannelName => $inputChannel
@@ -162,6 +169,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $inputChannelName, "someRef", "execute"
         )
+            ->withConsumerName("test")
             ->withTransactionFactories(["tx"])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([

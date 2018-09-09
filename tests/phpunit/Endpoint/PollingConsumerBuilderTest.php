@@ -39,7 +39,8 @@ class PollingConsumerBuilderTest extends MessagingTest
 
         $directObjectReference = ConsumerStoppingService::create(null);
         $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "executeNoReturn")
-                                                        ->withInputChannelName($inputChannelName);
+                                                    ->withName("test")
+                                                    ->withInputChannelName($inputChannelName);
         $pollingConsumer = $pollingConsumerBuilder->create(
             InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => $inputChannel
@@ -71,6 +72,7 @@ class PollingConsumerBuilderTest extends MessagingTest
 
         $directObjectReference = ConsumerStoppingService::create(null);
         $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "executeNoReturn")
+            ->withName("test")
             ->withInputChannelName($inputChannelName);
         $pollingConsumer = $pollingConsumerBuilder->create(
             InMemoryChannelResolver::createFromAssociativeArray([
@@ -104,6 +106,7 @@ class PollingConsumerBuilderTest extends MessagingTest
 
         $directObjectReference = ConsumerThrowingExceptionService::create();
         $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "execute")
+            ->withName("test")
             ->withInputChannelName($inputChannelName);
         $pollingConsumer = $pollingConsumerBuilder->create(
             InMemoryChannelResolver::createFromAssociativeArray([

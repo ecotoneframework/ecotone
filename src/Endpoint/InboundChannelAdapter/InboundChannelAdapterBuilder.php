@@ -164,6 +164,8 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): ConsumerLifecycle
     {
+        Assert::notNullAndEmpty($this->consumerName, "Consumer name for inbound channel adapter can't be empty");
+
         $taskExecutor = $this->taskExecutor;
         $forwardChannel = DirectChannel::create();
         /** @var TaskExecutor $forwardGateway */
@@ -204,7 +206,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
         $trigger = $this->trigger ? $this->trigger : PeriodicTrigger::create(5, 0);
 
         return new InboundChannelAdapter(
-            $this->consumerName ? $this->consumerName : $this->referenceName,
+            $this->consumerName,
             SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
             $trigger,
             $forwardGateway

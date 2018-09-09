@@ -10,7 +10,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerEndpointFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\Interceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MethodInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -79,12 +79,14 @@ class ConsumerEndpointFactoryTest extends MessagingTest
         $inputChannel = DirectChannel::create();
         $replyChannel = QueueChannel::create();
         $consumerBuilders = [new \SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
+        $endpointName = "handlerName";
         $preCallInterceptorBuilders = [
-            Interceptor::create("handlerName", ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
+                ->withName($endpointName)
         ];
         $postCallInterceptorBuilders = [];
         $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-                            ->withName("handlerName");
+                            ->withName($endpointName);
 
         $message = $this->buildMessageWithReplyChannel(0, $replyChannel);
         $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);
@@ -99,7 +101,6 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     /**
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
      */
     public function test_omitting_interceptor_when_handler_name_is_different()
     {
@@ -107,7 +108,8 @@ class ConsumerEndpointFactoryTest extends MessagingTest
         $replyChannel = QueueChannel::create();
         $consumerBuilders = [new EventDrivenConsumerBuilder()];
         $preCallInterceptorBuilders = [
-            Interceptor::create("someOtherName", ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
+                ->withName("someOtherName")
         ];
         $postCallInterceptorBuilders = [];
         $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
@@ -126,21 +128,23 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     /**
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
      */
     public function test_intercepting_after_service_call()
     {
         $inputChannel = DirectChannel::create();
         $replyChannel = QueueChannel::create();
         $consumerBuilders = [new \SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
+        $messageHandlerName = "handlerName";
         $preCallInterceptorBuilders = [
-            Interceptor::create("handlerName", ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum"))
+            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum")
+                ->withName($messageHandlerName)
         ];
         $postCallInterceptorBuilders = [
-            Interceptor::create("handlerName", ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")
+                ->withName($messageHandlerName)
         ];
         $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
-            ->withName("handlerName");
+            ->withName($messageHandlerName);
 
         $message = $this->buildMessageWithReplyChannel(0, $replyChannel);
         $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);

@@ -33,11 +33,11 @@ class ConsumerEndpointFactory
      */
     private $referenceSearchService;
     /**
-     * @var Interceptor[]
+     * @var MessageHandlerBuilderWithOutputChannel[]
      */
     private $preCallInterceptors;
     /**
-     * @var Interceptor[]
+     * @var MessageHandlerBuilderWithOutputChannel[]
      */
     private $postCallInterceptors;
     /**
@@ -50,15 +50,15 @@ class ConsumerEndpointFactory
      * @param ChannelResolver $channelResolver
      * @param ReferenceSearchService $referenceSearchService
      * @param MessageHandlerConsumerBuilder[] $consumerFactories
-     * @param Interceptor[] $preCallInterceptors
-     * @param Interceptor[] $postCallInterceptors
+     * @param MessageHandlerBuilderWithOutputChannel[] $preCallInterceptors
+     * @param MessageHandlerBuilderWithOutputChannel[] $postCallInterceptors
      * @param PollingMetadata[] $pollingMetadataMessageHandlers
      * @throws MessagingException
      */
-    public function __construct(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $consumerFactories, array $preCallInterceptors = [], array $postCallInterceptors = [], array $pollingMetadataMessageHandlers)
+    public function __construct(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $consumerFactories, array $preCallInterceptors, array $postCallInterceptors, array $pollingMetadataMessageHandlers)
     {
-        Assert::allInstanceOfType($preCallInterceptors, Interceptor::class);
-        Assert::allInstanceOfType($postCallInterceptors, Interceptor::class);
+        Assert::allInstanceOfType($preCallInterceptors, MessageHandlerBuilderWithOutputChannel::class);
+        Assert::allInstanceOfType($postCallInterceptors, MessageHandlerBuilderWithOutputChannel::class);
         Assert::allInstanceOfType($pollingMetadataMessageHandlers, PollingMetadata::class);
         Assert::allInstanceOfType($consumerFactories, MessageHandlerConsumerBuilder::class);
 
@@ -83,24 +83,17 @@ class ConsumerEndpointFactory
                 $preCallInterceptors = $this->findPreCallInterceptorsFor($messageHandlerBuilder);
                 $postCallInterceptors = $this->findPostCallInterceptorsFor($messageHandlerBuilder);
 
+                $messageHandlerBuilderToUse = $messageHandlerBuilder;
                 if ($preCallInterceptors || $postCallInterceptors) {
                     Assert::isTrue(\assert($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel), "Problem with {$messageHandlerBuilder->getName()}. Only Message Handlers with possible output channels can be intercepted.");
 
-
-                    return $consumerFactory->create(
-                        $this->channelResolver,
-                        $this->referenceSearchService,
-                        InterceptedMessageHandler::create($messageHandlerBuilder, $preCallInterceptors, $postCallInterceptors),
-                        array_key_exists($messageHandlerBuilder->getName(), $this->pollingMetadataMessageHandlers)
-                            ? $this->pollingMetadataMessageHandlers[$messageHandlerBuilder->getName()]
-                            : null
-                    );
+                    $messageHandlerBuilderToUse = InterceptedMessageHandler::create($messageHandlerBuilder, $preCallInterceptors, $postCallInterceptors);
                 }
 
                 return $consumerFactory->create(
                     $this->channelResolver,
                     $this->referenceSearchService,
-                    $messageHandlerBuilder,
+                    $messageHandlerBuilderToUse,
                     array_key_exists($messageHandlerBuilder->getName(), $this->pollingMetadataMessageHandlers)
                         ? $this->pollingMetadataMessageHandlers[$messageHandlerBuilder->getName()]
                         : null
@@ -121,8 +114,8 @@ class ConsumerEndpointFactory
         $preCallInterceptors = [];
 
         foreach ($this->preCallInterceptors as $preCallInterceptor) {
-            if ($preCallInterceptor->getInterceptedMessageHandlerName() === $interceptedMessageHandlerBuilder->getName()) {
-                $preCallInterceptors[] = $preCallInterceptor->getInterceptorMessageHandler();
+            if ($preCallInterceptor->getName() === $interceptedMessageHandlerBuilder->getName()) {
+                $preCallInterceptors[] = $preCallInterceptor;
             }
         }
 
@@ -138,8 +131,8 @@ class ConsumerEndpointFactory
         $postCallInterceptors = [];
 
         foreach ($this->postCallInterceptors as $postCallInterceptor) {
-            if ($postCallInterceptor->getInterceptedMessageHandlerName() === $interceptedMessageHandlerBuilder->getName()) {
-                $postCallInterceptors[] = $postCallInterceptor->getInterceptorMessageHandler();
+            if ($postCallInterceptor->getName() === $interceptedMessageHandlerBuilder->getName()) {
+                $postCallInterceptors[] = $postCallInterceptor;
             }
         }
 

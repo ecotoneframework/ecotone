@@ -104,7 +104,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem = MessagingSystemConfiguration::prepareWitObserver(InMemoryModuleMessaging::createEmpty(), $configurationObserver);
 
         $messagingSystem->registerMessageHandler(
-            ServiceActivatorBuilder::create( "ref-a", "method-a")
+            ServiceActivatorBuilder::create("ref-a", "method-a")
                 ->withMethodParameterConverters([
                     ReferenceBuilder::create("some", "ref-b")
                 ])
@@ -137,7 +137,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     public function test_notifying_observer()
     {
         $dumbConfigurationObserver = DumbConfigurationObserver::create();
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWitObserver(InMemoryModuleMessaging::createEmpty(),$dumbConfigurationObserver);
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWitObserver(InMemoryModuleMessaging::createEmpty(), $dumbConfigurationObserver);
 
         $messagingSystemConfiguration
             ->registerMessageHandler(DumbMessageHandlerBuilder::create(NoReturnMessageHandler::create(), 'queue'))
@@ -158,7 +158,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      */
     public function test_intercepting_message_flow_before_sending()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
         $messageChannelName = "requestChannel";
         $referenceName = "ref-name";
@@ -193,7 +193,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function test_ordering_interception_before_sending()
+    public function test_ordering_channel_interceptors_before_sending()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -241,7 +241,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      */
     public function test_intercepting_by_stopping_message_flow()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
         $messageChannelName = "requestChannel";
         $referenceName = "ref-name";
@@ -277,7 +277,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      */
     public function test_intercepting_after_sending_to_inform_it_was_successful()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
         $messageChannelName = "requestChannel";
         $referenceName = "ref-name";
@@ -353,7 +353,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      */
     public function test_intercepting_with_multiple_channels()
     {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
         $messageChannelName1 = "requestChannel1";
         $messageChannelName2 = "requestChannel2";
@@ -524,5 +524,17 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->expectException(\InvalidArgumentException::class);
 
         $messagingSystem->runSeparatelyRunningConsumerBy($endpointName);
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_registering_pre_method_call_interceptor()
+    {
+//        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+//                        ->registerPreCallMethodInterceptor(
+//                            MethodInterceptor::create()
+//                        )
+
     }
 }

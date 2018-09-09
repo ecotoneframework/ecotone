@@ -13,7 +13,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
  * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class Interceptor
+class MethodInterceptor
 {
     /**
      * @var string
@@ -38,7 +38,7 @@ class Interceptor
     /**
      * @param string $interceptedMessageHandlerName
      * @param MessageHandlerBuilder $interceptorMessageHandler
-     * @return Interceptor
+     * @return MethodInterceptor
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
      */

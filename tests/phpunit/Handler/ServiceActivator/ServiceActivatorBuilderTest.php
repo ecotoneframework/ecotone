@@ -141,4 +141,17 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $this->assertNotNull($receivedMessage);
         $this->assertNotEquals($message,$receivedMessage);
     }
+
+    public function test_converting_to_string()
+    {
+        $inputChannelName = 'inputChannel';
+        $endpointName = "someName";
+
+        $this->assertEquals(
+            ServiceActivatorBuilder::create("ref-name", "method-name")
+                ->withInputChannelName($inputChannelName)
+                ->withName($endpointName),
+            sprintf("Service Activator - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
+        );
+    }
 }

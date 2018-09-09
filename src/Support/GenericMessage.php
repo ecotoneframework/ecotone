@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Support;
 
@@ -87,6 +88,9 @@ class GenericMessage implements Message
 
     public function __toString()
     {
-        return "Message with id " . (string)$this->getHeaders()->get(MessageHeaders::MESSAGE_ID);
+        return \json_encode([
+            "payload" => $this->payload,
+            "headers" => $this->getHeaders()->headers()
+        ]);
     }
 }

@@ -283,6 +283,6 @@ class GatewayProxyBuilder implements GatewayBuilder
 
     public function __toString()
     {
-        return "gateway proxy";
+        return sprintf("Gateway - %s:%s with reference name `%s` for request channel `%s`", $this->interfaceName, $this->methodName, $this->referenceName, $this->requestChannelName);
     }
 }

@@ -103,8 +103,11 @@ class RequestReplyProducer
 
     /**
      * @param Message $message
+     * @throws DestinationResolutionException
      * @throws MessageDeliveryException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws MessageHandlingException
+     * @throws MessagingException
+     * @throws \Exception
      */
     public function handleWithReply(Message $message): void
     {

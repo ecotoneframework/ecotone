@@ -188,11 +188,6 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         );
     }
 
-    public function __toString()
-    {
-        return "service activator";
-    }
-
     /**
      * @return bool
      * @throws \ReflectionException
@@ -223,5 +218,12 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         $this->directObjectReference = $object;
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        $reference = $this->objectToInvokeReferenceName ? $this->objectToInvokeReferenceName : get_class($this->directObjectReference);
+
+        return sprintf("Service Activator - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getName(), $this->getInputMessageChannelName());
     }
 }

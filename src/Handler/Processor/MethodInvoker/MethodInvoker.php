@@ -140,6 +140,7 @@ final class MethodInvoker implements MessageProcessor
     /**
      * @param Message $message
      * @return array
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\InvalidMessageHeaderException
      */
     private function getMethodArguments(Message $message) : array
     {

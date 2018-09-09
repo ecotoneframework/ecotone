@@ -324,4 +324,17 @@ class RouterBuilderTest extends MessagingTest
         $this->assertEquals(2, $secondMessage->getHeaders()->get(MessageHeaders::SEQUENCE_NUMBER));
         $this->assertEquals(2, $secondMessage->getHeaders()->get(MessageHeaders::SEQUENCE_SIZE));
     }
+
+    public function test_converting_to_string()
+    {
+        $inputChannelName = 'inputChannel';
+        $endpointName = "someName";
+
+        $this->assertEquals(
+            RouterBuilder::create("ref-name", "method-name")
+                ->withInputChannelName($inputChannelName)
+                ->withName($endpointName),
+            sprintf("Router for input channel `%s` with name `%s`", $inputChannelName, $endpointName)
+        );
+    }
 }

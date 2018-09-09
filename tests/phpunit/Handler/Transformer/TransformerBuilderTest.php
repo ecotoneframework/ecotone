@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer;
 
@@ -326,6 +327,19 @@ class TransformerBuilderTest extends MessagingTest
         $this->assertEquals(
             16,
             $outputChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_converting_to_string()
+    {
+        $inputChannelName = 'inputChannel';
+        $endpointName = "someName";
+
+        $this->assertEquals(
+            TransformerBuilder::create("ref-name", "method-name")
+                ->withInputChannelName($inputChannelName)
+                ->withName($endpointName),
+            sprintf("Transformer - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
         );
     }
 }

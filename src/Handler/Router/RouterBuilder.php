@@ -275,11 +275,6 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         return $this;
     }
 
-    public function __toString()
-    {
-        return "router";
-    }
-
     /**
      * @param object $objectToInvoke
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
@@ -289,5 +284,13 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         Assert::isObject($objectToInvoke, "Object to invoke in router must be object");
 
         $this->objectToInvoke = $objectToInvoke;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return sprintf("Router for input channel `%s` with name `%s`", $this->inputMessageChannelName, $this->getName());
     }
 }

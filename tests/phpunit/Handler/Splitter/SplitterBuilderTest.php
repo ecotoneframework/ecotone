@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter;
 
@@ -20,6 +21,11 @@ use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
  */
 class SplitterBuilderTest extends MessagingTest
 {
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_splitting_incoming_message_where_service_returns_payloads()
     {
         $referenceName = "ref-a";
@@ -41,6 +47,10 @@ class SplitterBuilderTest extends MessagingTest
         $this->assertEquals(1, $outputChannel->receive()->getPayload());
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
     public function test_throwing_exception_if_splitter_does_not_return_array()
     {
         $referenceName = "ref-a";
@@ -58,6 +68,11 @@ class SplitterBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_creating_splitter_with_direct_reference()
     {
         $splitter = SplitterBuilder::createWithDirectObject(new ServiceSplittingArrayPayload(), "splitToPayload");
@@ -113,5 +128,18 @@ class SplitterBuilderTest extends MessagingTest
         $this->expectException(MessagingException::class);
 
         $splitter->handle(MessageBuilder::withPayload("test")->setReplyChannel(QueueChannel::create())->build());
+    }
+
+    public function test_converting_to_string()
+    {
+        $inputChannelName = 'inputChannel';
+        $endpointName = "someName";
+
+        $this->assertEquals(
+            SplitterBuilder::create("ref-name", "method-name")
+                ->withInputChannelName($inputChannelName)
+                ->withName($endpointName),
+            sprintf("Splitter - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
+        );
     }
 }

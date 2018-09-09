@@ -151,4 +151,17 @@ class MessageFilterBuilderTest extends MessagingTest
 
         $messageFilter->handle($message);
     }
+
+    public function test_converting_to_string()
+    {
+        $inputChannelName = 'inputChannel';
+        $endpointName = "someName";
+
+        $this->assertEquals(
+            MessageFilterBuilder::createWithReferenceName("ref-name", "method-name")
+                ->withInputChannelName($inputChannelName)
+                ->withName($endpointName),
+            sprintf("Message filter - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
+        );
+    }
 }

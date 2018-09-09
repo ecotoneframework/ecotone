@@ -2,38 +2,10 @@
 declare(strict_types=1);
 require __DIR__ . '/vendor/autoload.php';
 
-$tmp = new \Symfony\Component\ExpressionLanguage\ExpressionLanguage();
+$message = \SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder::withPayload(new \stdClass())
+            ->setHeader("jhony", \SimplyCodedSoftware\IntegrationMessaging\Handler\Filter\MessageFilterBuilder::createWithReferenceName("some", "bla"))
+            ->build();
 
-$mapping = "orders[*].buyerId";
-$placeUnderKey = "";
-
-$replyExpression = "payload";
-$replyMappingName = "personId";
-
-$inputMessage =
-    [
-        [
-            "buyerId" => "123"
-        ],
-        [
-            "buyerId" => "129"
-        ]
-    ];
-$inputMessage =
-    [
-        "123", "129"
-    ];
-
-
-$result = [
-    [
-        'personId' => "123",
-        "name" => "jonhy",
-        "surname" => "macarony"
-    ],
-    [
-        'personId' => "129",
-        "name" => "sylvia",
-        "surname" => "rumulo"
-    ]
-];
+$tmp = \json_encode($message->getPayload());
+var_dump(\json_encode($message->getPayload()));
+var_dump(\json_encode($message->getHeaders()->headers()));

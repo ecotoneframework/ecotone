@@ -194,13 +194,6 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         );
     }
 
-
-
-    public function __toString()
-    {
-        return "transformer";
-    }
-
     /**
      * @param object $objectToInvoke
      */
@@ -219,5 +212,12 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         $this->expression = $expression;
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        $reference = $this->objectToInvokeReferenceName ? $this->objectToInvokeReferenceName : get_class($this->object);
+
+        return sprintf("Transformer - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getName(), $this->getInputMessageChannelName());
     }
 }

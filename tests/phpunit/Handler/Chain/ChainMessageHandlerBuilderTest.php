@@ -303,4 +303,17 @@ class ChainMessageHandlerBuilderTest extends TestCase
                 ->build()
         );
     }
+
+    public function test_converting_to_string()
+    {
+        $inputChannelName = 'inputChannel';
+        $endpointName = "someName";
+
+        $this->assertEquals(
+            ChainMessageHandlerBuilder::create()
+                ->withInputChannelName($inputChannelName)
+                ->withName($endpointName),
+            sprintf("Handler of type %s with name `%s` for input channel `%s`", ChainMessageHandlerBuilder::class, $endpointName, $inputChannelName)
+        );
+    }
 }

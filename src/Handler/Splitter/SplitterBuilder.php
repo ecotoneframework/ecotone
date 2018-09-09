@@ -166,4 +166,11 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     {
         $this->directObject = $object;
     }
+
+    public function __toString()
+    {
+        $reference = $this->referenceName ? $this->referenceName : get_class($this->directObject);
+
+        return sprintf("Splitter - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getName(), $this->getInputMessageChannelName());
+    }
 }

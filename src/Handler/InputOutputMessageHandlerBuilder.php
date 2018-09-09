@@ -80,4 +80,9 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
 
         return $this;
     }
+
+    public function __toString()
+    {
+        return sprintf("Handler of type %s with name `%s` for input channel `%s`", get_class($this), $this->getName(), $this->getInputMessageChannelName());
+    }
 }

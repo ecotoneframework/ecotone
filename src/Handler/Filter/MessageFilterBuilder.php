@@ -157,4 +157,12 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     {
         $this->registerRequiredReference($this->referenceName);
     }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return sprintf("Message filter - %s:%s with name `%s` for input channel `%s`", $this->referenceName, $this->methodName, $this->getName(), $this->inputMessageChannelName);
+    }
 }

@@ -628,4 +628,15 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $this->assertTrue(false, "Transaction was not rolled back");
     }
+
+    public function test_converting_to_string()
+    {
+        $requestChannelName = 'inputChannel';
+        $referenceName = 'ref-name';
+
+        $this->assertEquals(
+            GatewayProxyBuilder::create($referenceName, ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName),
+            sprintf("Gateway - %s:%s with reference name `%s` for request channel `%s`", ServiceInterfaceSendOnly::class, "sendMail", $referenceName, $requestChannelName)
+        );
+    }
 }

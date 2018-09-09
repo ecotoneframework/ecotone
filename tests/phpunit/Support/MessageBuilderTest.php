@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Support;
 
@@ -125,5 +126,17 @@ class MessageBuilderTest extends MessagingTest
                     ->build();
 
         $this->assertEquals([], $message->getPayload());
+    }
+
+    public function test_converting_to_string()
+    {
+        $this->assertEquals(
+            "some",
+            \json_decode(
+                (string)MessageBuilder::withPayload("some")
+                    ->build(),
+                true
+            )['payload']
+        );
     }
 }

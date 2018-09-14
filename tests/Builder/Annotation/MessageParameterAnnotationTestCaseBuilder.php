@@ -9,7 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\MessageParamet
  * @package Builder\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MessageParameterTestBuilder
+class MessageParameterAnnotationTestCaseBuilder
 {
     /**
      * @var string
@@ -27,7 +27,7 @@ class MessageParameterTestBuilder
 
     /**
      * @param string $parameterName
-     * @return MessageParameterTestBuilder
+     * @return MessageParameterAnnotationTestCaseBuilder
      */
     public static function create(string $parameterName) : self
     {

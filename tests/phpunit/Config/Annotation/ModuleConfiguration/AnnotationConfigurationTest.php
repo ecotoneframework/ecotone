@@ -40,6 +40,13 @@ abstract class AnnotationConfigurationTest extends MessagingTest
             );
     }
 
+    /**
+     * @param string $className
+     * @param string $methodName
+     * @param array $classAnnotations
+     * @param array $methodAnnotations
+     * @return AnnotationRegistrationService
+     */
     protected function createMultipleAnnotationRegistrationService(string $className, string $methodName, array $classAnnotations, array $methodAnnotations) : AnnotationRegistrationService
     {
         $inMemoryAnnotationRegistrationService = InMemoryAnnotationRegistrationService::createEmpty();

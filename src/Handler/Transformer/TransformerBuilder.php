@@ -60,6 +60,10 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     {
         $this->objectToInvokeReferenceName = $objectToInvokeReference;
         $this->methodName = $methodName;
+
+        if ($objectToInvokeReference) {
+            $this->registerRequiredReference($objectToInvokeReference);
+        }
     }
 
     /**

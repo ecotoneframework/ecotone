@@ -89,7 +89,7 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
 
             foreach ($this->annotationsForClass[$class] as $methodName => $methodAnnotations) {
                 foreach ($methodAnnotations as $methodAnnotation) {
-                    if (get_class($methodAnnotation) == $methodAnnotationClassName) {
+                    if (get_class($methodAnnotation) == $methodAnnotationClassName  || $methodAnnotation instanceof $methodAnnotationClassName) {
                         $registrations[] = AnnotationRegistration::create(
                             $this->annotationsForClass[self::CLASS_ANNOTATIONS][$class][$classAnnotationName],
                             $methodAnnotation,
@@ -152,7 +152,20 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
      */
     public function addAnnotationToClassMethod(string $className, string $methodName, $methodAnnotationObject): self
     {
-        $this->annotationsForClass[$className][$methodName][] = $methodAnnotationObject;
+        $this->annotationsForClass[$className][$methodName][get_class($methodAnnotationObject)] = $methodAnnotationObject;
+
+        return $this;
+    }
+
+    /**
+     * @param string $className
+     * @param string $methodName
+     * @param string $annotationClassName
+     * @return InMemoryAnnotationRegistrationService
+     */
+    public function resetClassMethodAnnotation(string $className, string $methodName, string $annotationClassName) : self
+    {
+        unset($this->annotationsForClass[$className][$methodName][$annotationClassName]);
 
         return $this;
     }

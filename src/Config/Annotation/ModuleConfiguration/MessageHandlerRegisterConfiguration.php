@@ -64,7 +64,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
             $annotation = $annotationRegistration->getAnnotationForMethod();
             $messageHandlerBuilder = $this->createMessageHandlerFrom($annotationRegistration);
 
-            $this->parameterConverterAnnotationFactory->configureParameterConverters($messageHandlerBuilder, $annotationRegistration->getClassWithAnnotation(), $annotationRegistration->getMethodName(), $annotation->parameterConverters);
+            $this->parameterConverterAnnotationFactory->configureParameterConverters($messageHandlerBuilder, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->parameterConverters);
 
             $configuration->registerMessageHandler($messageHandlerBuilder);
         }

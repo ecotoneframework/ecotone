@@ -69,6 +69,10 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     {
         $this->objectToInvokeReference = $objectToInvokeReference;
         $this->methodName = $methodName;
+
+        if ($objectToInvokeReference) {
+            $this->registerRequiredReference($objectToInvokeReference);
+        }
     }
 
     /**

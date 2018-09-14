@@ -9,7 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Reference;
  * @package Builder\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ReferenceTestBuilder
+class ReferenceAnnotationTestCaseBuilder
 {
     /**
      * @var string
@@ -34,7 +34,7 @@ class ReferenceTestBuilder
     /**
      * @param string $parameterName
      * @param string $referenceName
-     * @return ReferenceTestBuilder
+     * @return ReferenceAnnotationTestCaseBuilder
      */
     public static function create(string $parameterName, string $referenceName) : self
     {

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Fixture\Annotation\Interceptor;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ClassMethodsInterceptor;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnricherInterceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ClassInterceptors;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivator;
 
@@ -13,13 +13,13 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivator;
  * @package Fixture\Annotation\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  *
- * @ClassMethodsInterceptor(
- *     preCallInterceptors={
- *        @ServiceActivatorInterceptor(referenceName="authorizationService", methodName="check"),
- *        @EnricherInterceptor(requestMessageChannel="addCurrentUserId", converters={})
- *     },
- *     excludedMethods={"notIntercepted"}
- * )
+ * @ClassInterceptors({
+ *    @MethodInterceptors(
+ *       preCallInterceptors={@ServiceActivatorInterceptor(referenceName="authorizationService", methodName="check")},
+ *       postCallInterceptors={@ServiceActivatorInterceptor(referenceName="authorizationService", methodName="check")},
+ *       excludedMethods={"notIntercepted"}
+ *    )
+ * })
  */
 class ClassLevelInterceptorsExample
 {

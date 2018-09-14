@@ -49,11 +49,10 @@ class ParameterConverterAnnotationFactory
      */
     public function configureParameterConverters(MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder, string $relatedClassName, string $methodName, array $parameterConverterAnnotations): void
     {
-        $messageHandlerBuilder->withMethodParameterConverters($this->createParameterConverters($messageHandlerBuilder, $relatedClassName, $methodName, $parameterConverterAnnotations));
+        $messageHandlerBuilder->withMethodParameterConverters($this->createParameterConverters($relatedClassName, $methodName, $parameterConverterAnnotations));
     }
 
     /**
-     * @param MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder
      * @param string $relatedClassName
      * @param string $methodName
      * @param array $parameterConverterAnnotations
@@ -62,7 +61,7 @@ class ParameterConverterAnnotationFactory
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
      */
-    public function createParameterConverters(MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder, string $relatedClassName, string $methodName, array $parameterConverterAnnotations): array
+    public function createParameterConverters(string $relatedClassName, string $methodName, array $parameterConverterAnnotations): array
     {
         $interfaceToCall = InterfaceToCall::create($relatedClassName, $methodName);
         $parameterConverters = [];
@@ -81,7 +80,6 @@ class ParameterConverterAnnotationFactory
             } else if ($parameterConverterAnnotation instanceof Reference) {
                 $parameter = $interfaceToCall->getParameterWithName($parameterConverterAnnotation->parameterName);
                 $referenceName = $parameterConverterAnnotation->referenceName ? $parameterConverterAnnotation->referenceName : $parameter->getTypeHint();
-                $messageHandlerBuilder->registerRequiredReference($referenceName);
 
                 $parameterConverters[] = ReferenceBuilder::create($parameterConverterAnnotation->parameterName, $referenceName);
             } else if ($parameterConverterAnnotation instanceof Expression) {

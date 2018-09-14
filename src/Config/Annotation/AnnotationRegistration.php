@@ -27,7 +27,7 @@ class AnnotationRegistration
      *
      * @var string
      */
-    private $classWithAnnotation;
+    private $className;
     /**
      * Reference name to object
      *
@@ -43,21 +43,21 @@ class AnnotationRegistration
      * AnnotationRegistration constructor.
      * @param object $annotationForClass
      * @param object $annotationForMethod
-     * @param string $classNameWithAnnotation
+     * @param string $className
      * @param string $methodName
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function __construct($annotationForClass, $annotationForMethod, string $classNameWithAnnotation, string $methodName)
+    public function __construct($annotationForClass, $annotationForMethod, string $className, string $methodName)
     {
         Assert::isObject($annotationForClass, "Annotation for class should be object");
         Assert::isObject($annotationForMethod, "Found annotation should be object");
 
         $this->annotationForClass = $annotationForClass;
         $this->annotationForMethod = $annotationForMethod;
-        $this->classWithAnnotation = $classNameWithAnnotation;
+        $this->className = $className;
         $this->methodName = $methodName;
 
-        $this->initialize($annotationForClass, $classNameWithAnnotation);
+        $this->initialize($annotationForClass, $className);
     }
 
     /**
@@ -92,9 +92,9 @@ class AnnotationRegistration
     /**
      * @return string
      */
-    public function getClassWithAnnotation(): string
+    public function getClassName(): string
     {
-        return $this->classWithAnnotation;
+        return $this->className;
     }
 
     /**

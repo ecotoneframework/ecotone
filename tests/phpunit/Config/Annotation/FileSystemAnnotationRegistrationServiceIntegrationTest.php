@@ -6,10 +6,13 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
 use Fixture\Annotation\MessageEndpoint\Gateway\GatewayWithReplyChannelExample;
+use Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\EndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Splitter;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\FileSystemAnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
@@ -38,26 +41,6 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         if (!self::$annotationRegistrationService) {
             self::$annotationRegistrationService = $this->createAnnotationRegistrationService("Fixture");
         }
-    }
-
-    /**
-     * @param string $namespace
-     * @return FileSystemAnnotationRegistrationService
-     * @throws ConfigurationException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    private function createAnnotationRegistrationService(string $namespace): FileSystemAnnotationRegistrationService
-    {
-        $fileSystemAnnotationRegistrationService = new FileSystemAnnotationRegistrationService(
-            new AnnotationReader(),
-            self::ROOT_DIR,
-            [
-                $namespace
-            ],
-            false
-        );
-        return $fileSystemAnnotationRegistrationService;
     }
 
     public function test_retrieving_all_classes_with_annotation()
@@ -98,5 +81,54 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
             ],
             self::$annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Gateway::class)
         );
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_retrieving_subclass_annotation()
+    {
+        $annotation = new Splitter();
+        $annotation->inputChannelName = "inputChannel";
+        $annotation->outputChannelName = "outputChannel";
+        $messageToPayloadParameter = new Payload();
+        $messageToPayloadParameter->parameterName = "payload";
+        $annotation->parameterConverters = [$messageToPayloadParameter];
+
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Fixture\Annotation\MessageEndpoint\Splitter");
+
+        $this->assertEquals(
+            [
+                AnnotationRegistration::create(
+                    new MessageEndpoint(),
+                    $annotation,
+                    SplitterExample::class,
+                    "split"
+                )
+            ],
+            $fileSystemAnnotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EndpointAnnotation::class)
+        );
+    }
+
+    /**
+     * @param string $namespace
+     * @return FileSystemAnnotationRegistrationService
+     * @throws ConfigurationException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function createAnnotationRegistrationService(string $namespace): FileSystemAnnotationRegistrationService
+    {
+        $fileSystemAnnotationRegistrationService = new FileSystemAnnotationRegistrationService(
+            new AnnotationReader(),
+            self::ROOT_DIR,
+            [
+                $namespace
+            ],
+            false
+        );
+        return $fileSystemAnnotationRegistrationService;
     }
 }

@@ -55,7 +55,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
         $this->methodName = $methodName;
 
         if ($referenceName) {
-            $this->requiredReferenceNames[] = $referenceName;
+            $this->registerRequiredReference($referenceName);
         }
     }
 

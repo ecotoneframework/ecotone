@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
@@ -29,6 +30,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
 {
     /**
      * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_configuring_message_channel_from_application_context()
     {

@@ -51,7 +51,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
             foreach (get_class_methods($className) as $method) {
                 $methodAnnotations = $this->getMethodAnnotations($className, $method, $methodAnnotationClassName);
                 foreach ($methodAnnotations as $methodAnnotation) {
-                    if (get_class($methodAnnotation) === $methodAnnotationClassName) {
+                    if (get_class($methodAnnotation) === $methodAnnotationClassName || $methodAnnotation instanceof $methodAnnotationClassName) {
                         $registrations[] = AnnotationRegistration::create(
                                 $this->getAnnotationForClass($className, $classAnnotationName),
                                 $methodAnnotation,
@@ -137,12 +137,11 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
                         $namespace = isset($results[1][0]) ? trim($results[1][0]) : "";
                         $namespace = trim($namespace);
 
-                        $classes[] = trim($namespace) . '\\' . $fileName;
 //                        Add all in resolved paths
-//                        if ($this->isInAvailableNamespaces($namespaces, $namespace)) {
+                        if ($this->isInAvailableNamespaces($namespaces, $namespace)) {
                             $classes[] = trim($namespace) . '\\' . $fileName;
                             break;
-//                        }
+                        }
                     }
 
                     $file->next();
@@ -228,7 +227,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     {
         foreach ($namespaces as $namespaceToUse) {
             $namespaceToUse = trim($namespaceToUse);
-            if (substr($namespace, 0, strlen($namespaceToUse)) == $namespaceToUse) {
+            if (strpos($namespace, trim($namespaceToUse)) !== false) {
                 return true;
             }
         }

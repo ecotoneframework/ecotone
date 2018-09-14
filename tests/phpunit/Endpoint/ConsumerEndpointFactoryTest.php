@@ -10,7 +10,6 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ConsumerEndpointFactory;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MethodInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -47,6 +46,45 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     }
 
     /**
+     * @return Message
+     */
+    private function buildMessage(): Message
+    {
+        return MessageBuilder::withPayload("some")
+            ->build();
+    }
+
+    /**
+     * @param MessageChannel $inputChannel
+     * @param array $consumerBuilders
+     * @param array $preCallInterceptorBuilders
+     * @param array $postCallInterceptorBuilders
+     * @param MessageHandlerBuilder $messageHandler
+     * @param Message $message
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function createConsumerAndSendMessage(MessageChannel $inputChannel, array $consumerBuilders, array $preCallInterceptorBuilders, array $postCallInterceptorBuilders, MessageHandlerBuilder $messageHandler, Message $message): void
+    {
+        $consumerEndpointFactory = new ConsumerEndpointFactory(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                self::INPUT_CHANNEL_NAME => $inputChannel
+            ]),
+            InMemoryReferenceSearchService::createEmpty(),
+            $consumerBuilders,
+            $preCallInterceptorBuilders,
+            $postCallInterceptorBuilders,
+            []
+        );
+
+        $messageHandler = $messageHandler
+            ->withInputChannelName(self::INPUT_CHANNEL_NAME);
+        $consumer = $consumerEndpointFactory->createForMessageHandler($messageHandler);
+        $consumer->start();
+        $inputChannel->send($message);
+    }
+
+    /**
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
@@ -71,6 +109,18 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     }
 
     /**
+     * @param $payload
+     * @param MessageChannel $replyChannel
+     * @return Message
+     */
+    private function buildMessageWithReplyChannel($payload, MessageChannel $replyChannel): Message
+    {
+        return MessageBuilder::withPayload($payload)
+            ->setReplyChannel($replyChannel)
+            ->build();
+    }
+
+    /**
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
@@ -86,7 +136,7 @@ class ConsumerEndpointFactoryTest extends MessagingTest
         ];
         $postCallInterceptorBuilders = [];
         $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-                            ->withEndpointId($endpointName);
+            ->withEndpointId($endpointName);
 
         $message = $this->buildMessageWithReplyChannel(0, $replyChannel);
         $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);
@@ -154,56 +204,5 @@ class ConsumerEndpointFactoryTest extends MessagingTest
             $expectedResult,
             $replyChannel->receive()->getPayload()
         );
-    }
-
-    /**
-     * @param $payload
-     * @param MessageChannel $replyChannel
-     * @return Message
-     */
-    private function buildMessageWithReplyChannel($payload, MessageChannel $replyChannel): Message
-    {
-        return MessageBuilder::withPayload($payload)
-            ->setReplyChannel($replyChannel)
-            ->build();
-    }
-
-    /**
-     * @return Message
-     */
-    private function buildMessage() : Message
-    {
-        return MessageBuilder::withPayload("some")
-            ->build();
-    }
-
-    /**
-     * @param MessageChannel $inputChannel
-     * @param array $consumerBuilders
-     * @param array $preCallInterceptorBuilders
-     * @param array $postCallInterceptorBuilders
-     * @param MessageHandlerBuilder $messageHandler
-     * @param Message $message
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    private function createConsumerAndSendMessage(MessageChannel $inputChannel, array $consumerBuilders, array $preCallInterceptorBuilders, array $postCallInterceptorBuilders, MessageHandlerBuilder $messageHandler, Message $message): void
-    {
-        $consumerEndpointFactory = new ConsumerEndpointFactory(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                self::INPUT_CHANNEL_NAME => $inputChannel
-            ]),
-            InMemoryReferenceSearchService::createEmpty(),
-            $consumerBuilders,
-            $preCallInterceptorBuilders,
-            $postCallInterceptorBuilders,
-            []
-        );
-
-        $messageHandler = $messageHandler
-            ->withInputChannelName(self::INPUT_CHANNEL_NAME);
-        $consumer = $consumerEndpointFactory->createForMessageHandler($messageHandler);
-        $consumer->start();
-        $inputChannel->send($message);
     }
 }

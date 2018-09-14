@@ -9,7 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Value;
  * @package Builder\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ValueTestBuilder
+class ValueAnnotationTestCaseBuilder
 {
     /**
      * @var string
@@ -34,7 +34,7 @@ class ValueTestBuilder
     /**
      * @param string $parameterName
      * @param string $value
-     * @return ValueTestBuilder
+     * @return ValueAnnotationTestCaseBuilder
      */
     public static function create(string $parameterName, $value) : self
     {

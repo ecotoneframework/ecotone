@@ -2,13 +2,13 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
-use Builder\Annotation\EndpointIdTestBuilder;
-use Builder\Annotation\HeaderTestBuilder;
+use Builder\Annotation\EndpointIdAnnotationTestCaseBuilder;
+use Builder\Annotation\HeaderAnnotationTestCaseBuilder;
 use Builder\Annotation\Interceptor\ServiceActivatorInterceptorTestBuilder;
-use Builder\Annotation\MessageParameterTestBuilder;
-use Builder\Annotation\PayloadTestBuilder;
-use Builder\Annotation\ReferenceTestBuilder;
-use Builder\Annotation\ServiceActivatorTestBuilder;
+use Builder\Annotation\MessageParameterAnnotationTestCaseBuilder;
+use Builder\Annotation\PayloadAnnotationTestCaseBuilder;
+use Builder\Annotation\ReferenceAnnotationTestCaseBuilder;
+use Builder\Annotation\ServiceActivatorAnnotationTestCaseBuilder;
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\EndpointId;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
@@ -37,16 +37,16 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
      */
     public function test_creating_service_activator_builder_from_annotation()
     {
-        $serviceActivatorAnnotation = ServiceActivatorTestBuilder::create()
+        $serviceActivatorAnnotation = ServiceActivatorAnnotationTestCaseBuilder::create()
             ->withEndpointId("test-name")
             ->withInputChannelName("inputChannel")
             ->withOutputChannelName("outputChannel")
             ->withRequiresReply(true)
             ->withParameterConverters([
-                HeaderTestBuilder::create("to", "sendTo"),
-                PayloadTestBuilder::create("content"),
-                MessageParameterTestBuilder::create("message"),
-                ReferenceTestBuilder::create("object", "reference")
+                HeaderAnnotationTestCaseBuilder::create("to", "sendTo"),
+                PayloadAnnotationTestCaseBuilder::create("content"),
+                MessageParameterAnnotationTestCaseBuilder::create("message"),
+                ReferenceAnnotationTestCaseBuilder::create("object", "reference")
             ])
             ->build();
 
@@ -76,7 +76,6 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
                             MessageConverterBuilder::create("message"),
                             ReferenceBuilder::create("object", "reference")
                         ])
-                        ->registerRequiredReference("reference")
                         ->withRequiredReply(true)
                 )
         );

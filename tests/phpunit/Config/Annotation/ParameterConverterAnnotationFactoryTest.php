@@ -40,8 +40,6 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                     \stdClass::class
                 )
             ]);
-        $messageHandler
-            ->registerRequiredReference(\stdClass::class);
 
         $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
         $parameterConverterAnnotationFactory->configureParameterConverters(

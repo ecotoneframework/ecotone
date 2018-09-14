@@ -13,12 +13,8 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"METHOD"})
  */
-class Transformer extends EndpointAnnotation
+class Transformer extends InputOutputEndpointAnnotation
 {
-    /**
-     * @var string
-     */
-    public $outputChannelName = '';
     /**
      * @var array
      */

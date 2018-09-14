@@ -13,8 +13,10 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\MessageHandlerConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 
@@ -42,6 +44,24 @@ interface Configuration
      * @return MessagingSystemConfiguration
      */
     public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder) : MessagingSystemConfiguration;
+
+    /**
+     * @param PollingMetadata $pollingMetadata
+     * @return MessagingSystemConfiguration
+     */
+    public function registerPollingMetadata(PollingMetadata $pollingMetadata): MessagingSystemConfiguration;
+
+    /**
+     * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
+     * @return MessagingSystemConfiguration
+     */
+    public function registerPreCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor): MessagingSystemConfiguration;
+
+    /**
+     * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
+     * @return MessagingSystemConfiguration
+     */
+    public function registerPostCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor): MessagingSystemConfiguration;
 
     /**
      * @param ChannelAdapterConsumerBuilder $consumerBuilder

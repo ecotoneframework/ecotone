@@ -9,7 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Header;
  * @package Builder\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class HeaderTestBuilder
+class HeaderAnnotationTestCaseBuilder
 {
     /**
      * @var string
@@ -38,7 +38,7 @@ class HeaderTestBuilder
     /**
      * @param string $parameterName
      * @param string $headerName
-     * @return HeaderTestBuilder
+     * @return HeaderAnnotationTestCaseBuilder
      */
     public static function create(string $parameterName, string $headerName) : self
     {
@@ -47,7 +47,7 @@ class HeaderTestBuilder
 
     /**
      * @param bool $isRequired
-     * @return HeaderTestBuilder
+     * @return HeaderAnnotationTestCaseBuilder
      */
     public function withRequired(bool $isRequired) : self
     {

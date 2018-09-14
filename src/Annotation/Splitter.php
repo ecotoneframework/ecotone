@@ -13,12 +13,8 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"METHOD"})
  */
-class Splitter extends EndpointAnnotation
+class Splitter extends InputOutputEndpointAnnotation
 {
-    /**
-     * @var string
-     */
-    public $outputChannelName = '';
     /**
      * @var array
      */

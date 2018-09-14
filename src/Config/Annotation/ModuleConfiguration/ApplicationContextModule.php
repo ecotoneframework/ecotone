@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
@@ -69,12 +70,12 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
     {
         $classes = [];
         foreach ($this->messagingComponentsRegistrations as $annotationRegistration) {
-            if (!array_key_exists($annotationRegistration->getClassWithAnnotation(), $classes)) {
-                $classToInstantiate = $annotationRegistration->getClassWithAnnotation();
-                $classes[$annotationRegistration->getClassWithAnnotation()] = new $classToInstantiate();
+            if (!array_key_exists($annotationRegistration->getClassName(), $classes)) {
+                $classToInstantiate = $annotationRegistration->getClassName();
+                $classes[$annotationRegistration->getClassName()] = new $classToInstantiate();
             }
 
-            $classToRun = $classes[$annotationRegistration->getClassWithAnnotation()];
+            $classToRun = $classes[$annotationRegistration->getClassName()];
             $messagingComponent = $classToRun->{$annotationRegistration->getMethodName()}();
 
             if(!is_array($messagingComponent)) {

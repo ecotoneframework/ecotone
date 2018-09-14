@@ -9,7 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Expression;
  * @package Builder\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ExpressionTestBuilder
+class ExpressionAnnotationTestCaseBuilder
 {
     /**
      * @var string
@@ -34,7 +34,7 @@ class ExpressionTestBuilder
     /**
      * @param string $parameterName
      * @param string $expression
-     * @return ExpressionTestBuilder
+     * @return ExpressionAnnotationTestCaseBuilder
      */
     public static function create(string $parameterName, string $expression) : self
     {

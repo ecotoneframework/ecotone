@@ -157,7 +157,9 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
 
     private function initialize() : void
     {
-        $this->registerRequiredReference($this->referenceName);
+        if ($this->referenceName) {
+            $this->registerRequiredReference($this->referenceName);
+        }
     }
 
     /**

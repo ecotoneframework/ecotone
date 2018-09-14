@@ -61,6 +61,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             $this->requiredReferences[] = $referenceName;
         }
 
+        $this->requiredReferences = array_unique($this->requiredReferences);
         return $this;
     }
 

@@ -9,7 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
  * @package Builder\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PayloadTestBuilder
+class PayloadAnnotationTestCaseBuilder
 {
     /**
      * @var string
@@ -27,7 +27,7 @@ class PayloadTestBuilder
 
     /**
      * @param string $parameterName
-     * @return PayloadTestBuilder
+     * @return PayloadAnnotationTestCaseBuilder
      */
     public static function create(string $parameterName) : self
     {

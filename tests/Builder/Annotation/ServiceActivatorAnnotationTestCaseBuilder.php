@@ -9,7 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivator;
  * @package Builder\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ServiceActivatorTestBuilder
+class ServiceActivatorAnnotationTestCaseBuilder
 {
     /**
      * @var string
@@ -51,9 +51,9 @@ class ServiceActivatorTestBuilder
 
     /**
      * @param string $endpointId
-     * @return ServiceActivatorTestBuilder
+     * @return ServiceActivatorAnnotationTestCaseBuilder
      */
-    public function withEndpointId(string $endpointId): ServiceActivatorTestBuilder
+    public function withEndpointId(string $endpointId): ServiceActivatorAnnotationTestCaseBuilder
     {
         $this->endpointId = $endpointId;
         return $this;
@@ -61,9 +61,9 @@ class ServiceActivatorTestBuilder
 
     /**
      * @param string $outputChannelName
-     * @return ServiceActivatorTestBuilder
+     * @return ServiceActivatorAnnotationTestCaseBuilder
      */
-    public function withOutputChannelName(string $outputChannelName): ServiceActivatorTestBuilder
+    public function withOutputChannelName(string $outputChannelName): ServiceActivatorAnnotationTestCaseBuilder
     {
         $this->outputChannelName = $outputChannelName;
         return $this;
@@ -71,9 +71,9 @@ class ServiceActivatorTestBuilder
 
     /**
      * @param bool $requiresReply
-     * @return ServiceActivatorTestBuilder
+     * @return ServiceActivatorAnnotationTestCaseBuilder
      */
-    public function withRequiresReply(bool $requiresReply): ServiceActivatorTestBuilder
+    public function withRequiresReply(bool $requiresReply): ServiceActivatorAnnotationTestCaseBuilder
     {
         $this->requiresReply = $requiresReply;
         return $this;
@@ -81,9 +81,9 @@ class ServiceActivatorTestBuilder
 
     /**
      * @param array $parameterConverters
-     * @return ServiceActivatorTestBuilder
+     * @return ServiceActivatorAnnotationTestCaseBuilder
      */
-    public function withParameterConverters(array $parameterConverters): ServiceActivatorTestBuilder
+    public function withParameterConverters(array $parameterConverters): ServiceActivatorAnnotationTestCaseBuilder
     {
         $this->parameterConverters = $parameterConverters;
         return $this;
@@ -91,9 +91,9 @@ class ServiceActivatorTestBuilder
 
     /**
      * @param array $preCallInterceptors
-     * @return ServiceActivatorTestBuilder
+     * @return ServiceActivatorAnnotationTestCaseBuilder
      */
-    public function withPreCallInterceptors(array $preCallInterceptors): ServiceActivatorTestBuilder
+    public function withPreCallInterceptors(array $preCallInterceptors): ServiceActivatorAnnotationTestCaseBuilder
     {
         $this->preCallInterceptors = $preCallInterceptors;
         return $this;
@@ -101,9 +101,9 @@ class ServiceActivatorTestBuilder
 
     /**
      * @param array $postCallInterceptors
-     * @return ServiceActivatorTestBuilder
+     * @return ServiceActivatorAnnotationTestCaseBuilder
      */
-    public function withPostCallInterceptors(array $postCallInterceptors): ServiceActivatorTestBuilder
+    public function withPostCallInterceptors(array $postCallInterceptors): ServiceActivatorAnnotationTestCaseBuilder
     {
         $this->postCallInterceptors = $postCallInterceptors;
         return $this;
@@ -111,9 +111,9 @@ class ServiceActivatorTestBuilder
 
     /**
      * @param string $inputChannelName
-     * @return ServiceActivatorTestBuilder
+     * @return ServiceActivatorAnnotationTestCaseBuilder
      */
-    public function withInputChannelName(string $inputChannelName): ServiceActivatorTestBuilder
+    public function withInputChannelName(string $inputChannelName): ServiceActivatorAnnotationTestCaseBuilder
     {
         $this->inputChannelName = $inputChannelName;
         return $this;

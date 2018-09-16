@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 
+use Builder\Handler\InterfaceParameterTestCaseBuilder;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
@@ -18,11 +20,12 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 class ExpressionBuilderTest extends TestCase
 {
     /**
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_payload_expression()
     {
-        $converter = ExpressionBuilder::create("some", "payload ~ 1");
+        $converter = ExpressionBuilder::create("x", "payload ~ 1");
         $converter = $converter->build(InMemoryReferenceSearchService::createWith([
             ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
         ]));
@@ -30,7 +33,10 @@ class ExpressionBuilderTest extends TestCase
         $payload = "rabbit";
         $this->assertEquals(
             $payload . "1",
-            $converter->getArgumentFrom(MessageBuilder::withPayload($payload)->build())
+            $converter->getArgumentFrom(
+                InterfaceParameterTestCaseBuilder::create()->build(),
+                MessageBuilder::withPayload($payload)->build()
+            )
         );
     }
 }

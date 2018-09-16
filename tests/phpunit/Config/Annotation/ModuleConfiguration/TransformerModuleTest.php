@@ -21,7 +21,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuil
 class TransformerModuleTest extends AnnotationConfigurationTest
 {
     /**
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
+     * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_transformer_builder()

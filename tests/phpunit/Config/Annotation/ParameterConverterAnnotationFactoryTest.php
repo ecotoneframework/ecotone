@@ -7,6 +7,7 @@ use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Expression;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Reference;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
@@ -32,26 +33,18 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
         $methodName = "sendMessage";
-        $messageHandler = ServiceActivatorBuilder::create($relatedClassName, $methodName);
-        $messageHandler
-            ->withMethodParameterConverters([
+
+        $this->assertEquals(
+            [
                 ReferenceBuilder::create(
                     $parameterConverterAnnotation->parameterName,
                     \stdClass::class
                 )
-            ]);
-
-        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
-        $parameterConverterAnnotationFactory->configureParameterConverters(
-            $messageHandlerBuilderToCompare,
-            $relatedClassName,
-            $methodName,
-            [$parameterConverterAnnotation]
-        );
-
-        $this->assertEquals(
-            $messageHandler,
-            $messageHandlerBuilderToCompare
+            ],
+            $parameterConverterAnnotationFactory->createParameterConverters(
+                InterfaceToCall::create($relatedClassName, $methodName),
+                [$parameterConverterAnnotation]
+            )
         );
     }
 
@@ -68,27 +61,18 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
         $methodName = "sendMessage";
-        $messageHandler = ServiceActivatorBuilder::create($relatedClassName, $methodName);
-        $messageHandler
-            ->withMethodParameterConverters([
+
+        $this->assertEquals(
+            [
                 ExpressionBuilder::create(
                     $parameterConverterAnnotation->parameterName,
                     "payload.name"
                 )
-            ]);
-
-        $messageHandlerBuilderToCompare = ServiceActivatorBuilder::create($relatedClassName, $methodName);
-
-        $parameterConverterAnnotationFactory->configureParameterConverters(
-            $messageHandlerBuilderToCompare,
-            $relatedClassName,
-            $methodName,
-            [$parameterConverterAnnotation]
-        );
-
-        $this->assertEquals(
-            $messageHandler,
-            $messageHandlerBuilderToCompare
+            ],
+            $parameterConverterAnnotationFactory->createParameterConverters(
+                InterfaceToCall::create($relatedClassName, $methodName),
+                [$parameterConverterAnnotation]
+            )
         );
     }
 }

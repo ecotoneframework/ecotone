@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 
+use Builder\Handler\InterfaceParameterTestCaseBuilder;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ValueBuilder;
@@ -16,18 +17,21 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 class StaticBuilderTest extends TestCase
 {
     /**
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\InvalidMessageHeaderException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_static_value()
     {
         $value = new \stdClass();
-        $converter = ValueBuilder::create("some", $value);
+        $converter = ValueBuilder::create("x", $value);
         $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $value,
-            $converter->getArgumentFrom(MessageBuilder::withPayload("a")->build())
+            $converter->getArgumentFrom(
+                InterfaceParameterTestCaseBuilder::create()->build(),
+                MessageBuilder::withPayload("a")->build()
+            )
         );
     }
 }

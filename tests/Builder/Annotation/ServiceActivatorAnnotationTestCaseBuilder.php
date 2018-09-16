@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Builder\Annotation;
+use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivator;
 
 /**
@@ -135,7 +136,7 @@ class ServiceActivatorAnnotationTestCaseBuilder
         $serviceActivator->inputChannelName = $this->inputChannelName;
         $serviceActivator->outputChannelName = $this->outputChannelName;
         $serviceActivator->parameterConverters = $parameterConverters;
-        $serviceActivator->endpointId = $this->endpointId;
+        $serviceActivator->endpointId = $this->endpointId ? $this->endpointId : Uuid::uuid4()->toString();
 
         return $serviceActivator;
     }

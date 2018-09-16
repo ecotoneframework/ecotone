@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 
+use Builder\Handler\InterfaceParameterTestCaseBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
@@ -22,6 +23,7 @@ use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 class PayloadBuilderTest extends MessagingTest
 {
     /**
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_payload_converter()
@@ -32,7 +34,10 @@ class PayloadBuilderTest extends MessagingTest
         $payload = "rabbit";
         $this->assertEquals(
               $payload,
-              $converter->getArgumentFrom(MessageBuilder::withPayload($payload)->build())
+              $converter->getArgumentFrom(
+                  InterfaceParameterTestCaseBuilder::create()->build(),
+                  MessageBuilder::withPayload($payload)->build()
+              )
         );
     }
 }

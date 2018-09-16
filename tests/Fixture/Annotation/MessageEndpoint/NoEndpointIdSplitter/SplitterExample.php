@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace Fixture\Annotation\MessageEndpoint\Splitter;
+namespace Fixture\Annotation\MessageEndpoint\NoEndpointIdSplitter;
+
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Splitter;
@@ -17,7 +18,7 @@ class SplitterExample
     /**
      * @param string $payload
      * @return array
-     * @Splitter(endpointId="testId", inputChannelName="inputChannel", outputChannelName="outputChannel", parameterConverters={
+     * @Splitter(inputChannelName="inputChannel", outputChannelName="outputChannel", parameterConverters={
      *      @Payload(parameterName="payload")
      * })
      */

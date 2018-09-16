@@ -46,11 +46,6 @@ class InterfaceToCall
 
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;
-
-// @TODO       turn off till php 7.2
-//        if ($this->isReturnTypeUnknown()) {
-//            throw InvalidArgumentException::create("Return type for {$this} is unknown");
-//        }
     }
 
     /**
@@ -160,6 +155,21 @@ class InterfaceToCall
         }
 
         return InterfaceParameter::create($this->parameters()[0]);
+    }
+
+    /**
+     * @param int $index
+     * @return InterfaceParameter
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function getParameterAtIndex(int $index) : InterfaceParameter
+    {
+        if (!array_key_exists($index, $this->parameters())) {
+            throw InvalidArgumentException::create("There is no parameter at index {$index} for {$this}");
+        }
+
+        return InterfaceParameter::create($this->parameters()[$index]);
     }
 
     /**

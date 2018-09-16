@@ -39,31 +39,15 @@ class ParameterConverterAnnotationFactory
     }
 
     /**
-     * @param MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder
-     * @param string $relatedClassName
-     * @param string $methodName
-     * @param array $parameterConverterAnnotations
-     * @return void
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
-     */
-    public function configureParameterConverters(MessageHandlerBuilderWithParameterConverters $messageHandlerBuilder, string $relatedClassName, string $methodName, array $parameterConverterAnnotations): void
-    {
-        $messageHandlerBuilder->withMethodParameterConverters($this->createParameterConverters($relatedClassName, $methodName, $parameterConverterAnnotations));
-    }
-
-    /**
-     * @param string $relatedClassName
-     * @param string $methodName
+     * @param InterfaceToCall|null $relatedClassInterface
      * @param array $parameterConverterAnnotations
      *
      * @return array
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
      */
-    public function createParameterConverters(string $relatedClassName, string $methodName, array $parameterConverterAnnotations): array
+    public function createParameterConverters(?InterfaceToCall $relatedClassInterface, array $parameterConverterAnnotations): array
     {
-        $interfaceToCall = InterfaceToCall::create($relatedClassName, $methodName);
         $parameterConverters = [];
 
         foreach ($parameterConverterAnnotations as $parameterConverterAnnotation) {
@@ -78,10 +62,13 @@ class ParameterConverterAnnotationFactory
             } else if ($parameterConverterAnnotation instanceof MessageParameter) {
                 $parameterConverters[] = MessageConverterBuilder::create($parameterConverterAnnotation->parameterName);
             } else if ($parameterConverterAnnotation instanceof Reference) {
-                $parameter = $interfaceToCall->getParameterWithName($parameterConverterAnnotation->parameterName);
-                $referenceName = $parameterConverterAnnotation->referenceName ? $parameterConverterAnnotation->referenceName : $parameter->getTypeHint();
-
-                $parameterConverters[] = ReferenceBuilder::create($parameterConverterAnnotation->parameterName, $referenceName);
+                if ($parameterConverterAnnotation->referenceName) {
+                    $parameterConverters[] = ReferenceBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->referenceName);
+                }elseif ($relatedClassInterface) {
+                    $parameterConverters[] = ReferenceBuilder::createFromParameterTypeHint($parameterConverterAnnotation->parameterName, $relatedClassInterface);
+                }else {
+                    $parameterConverters[] = ReferenceBuilder::createWithDynamicResolve($parameterConverterAnnotation->parameterName);
+                }
             } else if ($parameterConverterAnnotation instanceof Expression) {
                 $parameterConverters[] = ExpressionBuilder::create(
                     $parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->expression

@@ -18,25 +18,19 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivator;
  * @ClassInterceptors({
  *    @MethodInterceptors(
  *       preCallInterceptors={@ServiceActivatorInterceptor(referenceName="authorizationService", methodName="check")},
- *       postCallInterceptors={@ServiceActivatorInterceptor(referenceName="test", methodName="check")},
- *       excludedMethods={"notIntercepted"}
+ *       postCallInterceptors={@ServiceActivatorInterceptor(referenceName="test", methodName="check")}
  *    )
  * })
  */
-class ClassLevelInterceptorsExample
+class ClassLevelInterceptorsAndMethodsExample
 {
     /**
      * @ServiceActivator(endpointId="some-id", inputChannelName="test")
+     * @MethodInterceptors(
+     *     preCallInterceptors={@ServiceActivatorInterceptor(referenceName="validationCheck", methodName="check")}
+     * )
      */
     public function intercepted() : void
-    {
-
-    }
-
-    /**
-     * @ServiceActivator(inputChannelName="test")
-     */
-    public function notIntercepted() : void
     {
 
     }

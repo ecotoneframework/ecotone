@@ -2,8 +2,10 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
+use Builder\Handler\InterfaceParameterTestCaseBuilder;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
@@ -15,6 +17,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 class ReferenceBuilderTest extends TestCase
 {
     /**
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_reference_converter()
@@ -28,7 +31,31 @@ class ReferenceBuilderTest extends TestCase
 
         $this->assertEquals(
             $value,
-            $converter->getArgumentFrom(MessageBuilder::withPayload("some")->build())
+            $converter->getArgumentFrom(
+                InterfaceParameterTestCaseBuilder::create()->build(),
+                MessageBuilder::withPayload("paramName")->build()
+            )
+        );
+    }
+
+    /**
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_creating_with_dynamic_reference_resolution()
+    {
+        $value = new \stdClass();
+        $converter = ReferenceBuilder::createWithDynamicResolve("param")
+            ->build(InMemoryReferenceSearchService::createWith([
+                \stdClass::class => $value
+            ]));
+
+        $this->assertEquals(
+            $value,
+            $converter->getArgumentFrom(
+                InterfaceParameter::create(new \ReflectionParameter(function (\stdClass $param){}, "param")),
+                MessageBuilder::withPayload("paramName")->build()
+            )
         );
     }
 }

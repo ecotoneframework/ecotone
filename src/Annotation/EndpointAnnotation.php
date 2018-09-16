@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Annotation;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class EndpointAnnotation
@@ -13,10 +14,25 @@ abstract class EndpointAnnotation
     /**
      * @var string
      */
-    public $endpointId = "";
+    public $endpointId;
     /**
      * @var string
      * @Required()
      */
     public $inputChannelName;
+
+    /**
+     * EndpointAnnotation constructor.
+     * @param array $values
+     */
+    public function __construct(array $values = [])
+    {
+        foreach ($values as $propertyName => $value) {
+            $this->{$propertyName} = $value;
+        }
+
+        if (!$this->endpointId) {
+            $this->endpointId = Uuid::uuid4()->toString();
+        }
+    }
 }

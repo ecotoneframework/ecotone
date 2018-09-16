@@ -86,11 +86,13 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     /**
      * @throws ConfigurationException
      * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_retrieving_subclass_annotation()
     {
         $annotation = new Splitter();
+        $annotation->endpointId = "testId";
         $annotation->inputChannelName = "inputChannel";
         $annotation->outputChannelName = "outputChannel";
         $messageToPayloadParameter = new Payload();
@@ -110,6 +112,23 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
             ],
             $fileSystemAnnotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EndpointAnnotation::class)
         );
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_retrieving_with_random_endpoint_id_if_not_defined()
+    {
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Fixture\Annotation\MessageEndpoint\NoEndpointIdSplitter");
+
+        /** @var AnnotationRegistration[] $annotationRegistrations */
+        $annotationRegistrations = $fileSystemAnnotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EndpointAnnotation::class);
+        /** @var Splitter $annotationForMethod */
+        $annotationForMethod = $annotationRegistrations[0]->getAnnotationForMethod();
+
+        $this->assertNotEmpty($annotationForMethod->endpointId);
     }
 
     /**

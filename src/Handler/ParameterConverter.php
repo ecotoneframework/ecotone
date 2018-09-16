@@ -14,11 +14,11 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
 interface ParameterConverter
 {
     /**
+     * @param InterfaceParameter $relatedParameter
      * @param Message $message
      * @return mixed
-     * @throws InvalidMessageHeaderException
      */
-    public function getArgumentFrom(Message $message);
+    public function getArgumentFrom(InterfaceParameter $relatedParameter, Message $message);
 
     /**
      * @param \ReflectionParameter $reflectionParameter

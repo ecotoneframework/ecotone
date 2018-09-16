@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
@@ -57,7 +58,7 @@ class ValueConverter implements ParameterConverter
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(Message $message)
+    public function getArgumentFrom(InterfaceParameter $relatedParameter, Message $message)
     {
         return $this->staticValue;
     }

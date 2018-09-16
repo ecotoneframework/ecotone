@@ -5,7 +5,6 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfi
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\EndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\InputOutputEndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ClassInterceptors;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\MethodInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
@@ -15,7 +14,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistr
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ClassMethodInterceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
@@ -54,12 +53,30 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     public static function create(AnnotationRegistrationService $annotationRegistrationService) : MethodInterceptorModule
     {
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
-        $classMethodInterceptors = $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, ClassInterceptors::class);
+        $multipleClassInterceptors = $annotationRegistrationService->getAllClassesWithAnnotation(ClassInterceptors::class);
         $multipleMethodsInterceptors = $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, MethodInterceptors::class);
-        $endpoints = $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, InputOutputEndpointAnnotation::class);;
+        $endpoints = $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, InputOutputEndpointAnnotation::class);
 
         $preCallInterceptors = [];
         $postCallInterceptors = [];
+        foreach ($endpoints as $endpoint) {
+            if (in_array($endpoint->getClassName(), $multipleClassInterceptors)) {
+                /** @var EndpointAnnotation $endpointAnnotation */
+                $endpointAnnotation = $endpoint->getAnnotationForMethod();
+                /** @var ClassInterceptors $classInterceptors */
+                $classInterceptors = $annotationRegistrationService->getAnnotationForClass($endpoint->getClassName(), ClassInterceptors::class);
+
+                /** @var MethodInterceptors $methodInterceptors */
+                foreach ($classInterceptors->classMethodsInterceptors as $methodInterceptors) {
+                    if (in_array($endpoint->getMethodName(), $methodInterceptors->excludedMethods)) {
+                        continue;
+                    }
+
+                    $preCallInterceptors = array_merge($preCallInterceptors, self::createInterceptorList($endpointAnnotation->endpointId, true, $methodInterceptors, $parameterConverterFactory));
+                    $postCallInterceptors = array_merge($postCallInterceptors, self::createInterceptorList($endpointAnnotation->endpointId,false, $methodInterceptors, $parameterConverterFactory));
+                }
+            }
+        }
 
         foreach ($multipleMethodsInterceptors as $methodInterceptorsRegistration) {
             $relatedEndpointIds = [];
@@ -78,12 +95,8 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
             }
 
             foreach ($relatedEndpointIds as $relatedEndpointId) {
-                if (!$relatedEndpointId) {
-                    throw ConfigurationException::create("EndpointId must not be empty for {$methodInterceptorsRegistration->getClassName()}:{$methodInterceptorsRegistration->getMethodName()}. If method interceptors are used it must be defined");
-                }
-
-                $preCallInterceptors = self::createInterceptorList($relatedEndpointId, true, $methodInterceptorsRegistration, $parameterConverterFactory);
-                $postCallInterceptors = self::createInterceptorList($relatedEndpointId,false, $methodInterceptorsRegistration, $parameterConverterFactory);
+                $preCallInterceptors = array_merge($preCallInterceptors, self::createInterceptorList($relatedEndpointId,true, $methodInterceptorsRegistration->getAnnotationForMethod(), $parameterConverterFactory));
+                $postCallInterceptors = array_merge($postCallInterceptors, self::createInterceptorList($relatedEndpointId,false, $methodInterceptorsRegistration->getAnnotationForMethod(), $parameterConverterFactory));
             }
         }
 
@@ -93,16 +106,14 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     /**
      * @param string $endpointId
      * @param bool $forPreCall
-     * @param AnnotationRegistration $annotationRegistration
+     * @param MethodInterceptors $methodInterceptors
      * @param ParameterConverterAnnotationFactory $parameterConverterFactory
      * @return array|MessageHandlerBuilderWithOutputChannel[]
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
      */
-    private static function createInterceptorList(string $endpointId, bool $forPreCall, AnnotationRegistration $annotationRegistration, ParameterConverterAnnotationFactory $parameterConverterFactory): array
+    private static function createInterceptorList(string $endpointId, bool $forPreCall, MethodInterceptors $methodInterceptors, ParameterConverterAnnotationFactory $parameterConverterFactory): array
     {
-        /** @var MethodInterceptors $methodInterceptors */
-        $methodInterceptors = $annotationRegistration->getAnnotationForMethod();
         Assert::isTrue($methodInterceptors instanceof MethodInterceptors, "Annotation must be MethodInterceptor");
 
         $interceptors = [];
@@ -112,7 +123,11 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 case ServiceActivatorInterceptor::class: {
                     $interceptors[] = ServiceActivatorBuilder::create($interceptor->referenceName, $interceptor->methodName)
                         ->withEndpointId($endpointId)
-                        ->withMethodParameterConverters($parameterConverterFactory->createParameterConverters($annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $interceptor->parameterConverters));
+                        ->withMethodParameterConverters(
+                            $parameterConverterFactory->createParameterConverters(
+                                null, $interceptor->parameterConverters
+                            )
+                        );
                 }
             }
         }

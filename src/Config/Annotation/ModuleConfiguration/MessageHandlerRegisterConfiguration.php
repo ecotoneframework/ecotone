@@ -12,6 +12,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
@@ -64,7 +65,9 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
             $annotation = $annotationRegistration->getAnnotationForMethod();
             $messageHandlerBuilder = $this->createMessageHandlerFrom($annotationRegistration);
 
-            $this->parameterConverterAnnotationFactory->configureParameterConverters($messageHandlerBuilder, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->parameterConverters);
+            $messageHandlerBuilder->withMethodParameterConverters(
+                $this->parameterConverterAnnotationFactory->createParameterConverters(InterfaceToCall::create($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()), $annotation->parameterConverters)
+            );
 
             $configuration->registerMessageHandler($messageHandlerBuilder);
         }

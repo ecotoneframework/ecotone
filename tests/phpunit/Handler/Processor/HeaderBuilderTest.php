@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
+use Builder\Handler\InterfaceParameterTestCaseBuilder;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\HeaderBuilder;
@@ -15,32 +16,38 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 class HeaderBuilderTest extends TestCase
 {
     /**
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\InvalidMessageHeaderException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_header_converter()
     {
-        $converter = HeaderBuilder::create("some", "token");
+        $converter = HeaderBuilder::create("x", "token");
         $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             123,
-            $converter->getArgumentFrom(MessageBuilder::withPayload("a")->setHeader("token", 123)->build())
+            $converter->getArgumentFrom(
+                InterfaceParameterTestCaseBuilder::create()->build(),
+                MessageBuilder::withPayload("a")->setHeader("token", 123)->build()
+            )
         );
     }
 
     /**
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\InvalidMessageHeaderException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_optional_header_converter()
     {
-        $converter = HeaderBuilder::createOptional("some", "token");
+        $converter = HeaderBuilder::createOptional("x", "token");
         $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             null,
-            $converter->getArgumentFrom(MessageBuilder::withPayload("a")->build())
+            $converter->getArgumentFrom(
+                InterfaceParameterTestCaseBuilder::create()->build(),
+                MessageBuilder::withPayload("a")->build()
+            )
         );
     }
 }

@@ -569,4 +569,30 @@ class MessagingSystemConfigurationTest extends MessagingTest
             $outputChannel->receive()->getPayload()
         );
     }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_throwing_exception_if_passed_pre_call_interceptor_without_endpoint_name()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerPreCallMethodInterceptor(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
+            );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_throwing_exception_if_passed_post_call_interceptor_without_endpoint_name()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerPostCallMethodInterceptor(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
+            );
+    }
 }

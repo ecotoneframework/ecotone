@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use Builder\Annotation\ServiceActivatorAnnotationTestCaseBuilder;
+use Fixture\Annotation\Interceptor\ClassLevelInterceptorsAndMethodsExample;
+use Fixture\Annotation\Interceptor\ClassLevelInterceptorsExample;
 use Fixture\Annotation\Interceptor\ServiceActivatorMethodLevelInterceptorExample;
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
@@ -61,14 +63,12 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function test_throwing_exception_if_endpoint_id_is_empty()
+    public function test_throwing_exception_if_lack_of_endpoints_for_interceptors()
     {
-        $serviceActivatorAnnotation = ServiceActivatorAnnotationTestCaseBuilder::create()
-                                        ->build();
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
             ServiceActivatorMethodLevelInterceptorExample::class
         ])
-            ->addAnnotationToClassMethod(ServiceActivatorMethodLevelInterceptorExample::class, "send", $serviceActivatorAnnotation);
+            ->resetClassMethodAnnotation(ServiceActivatorMethodLevelInterceptorExample::class, "send", ServiceActivator::class);
 
         $this->expectException(ConfigurationException::class);
 
@@ -83,17 +83,63 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function test_throwing_exception_if_lack_of_endpoints_for_interceptors()
+    public function test_registering_class_level_interceptors()
     {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerPreCallMethodInterceptor(
+                ServiceActivatorBuilder::create("authorizationService", "check")
+                    ->withEndpointId("some-id")
+            )
+            ->registerPostCallMethodInterceptor(
+                ServiceActivatorBuilder::create("test", "check")
+                    ->withEndpointId("some-id")
+            );
+
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
-            ServiceActivatorMethodLevelInterceptorExample::class
-        ])
-            ->resetClassMethodAnnotation(ServiceActivatorMethodLevelInterceptorExample::class, "send", ServiceActivator::class);
-
-        $this->expectException(ConfigurationException::class);
-
+            ClassLevelInterceptorsExample::class
+        ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
         $annotationConfiguration->prepare($configuration, [], NullObserver::create());
+
+        $this->assertEquals(
+            $expectedConfiguration,
+            $configuration
+        );
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_registering_class_level_and_methods_together_interceptors()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerPreCallMethodInterceptor(
+                ServiceActivatorBuilder::create("authorizationService", "check")
+                    ->withEndpointId("some-id")
+            )
+            ->registerPreCallMethodInterceptor(
+                ServiceActivatorBuilder::create("validationCheck", "check")
+                    ->withEndpointId("some-id")
+            )
+            ->registerPostCallMethodInterceptor(
+                ServiceActivatorBuilder::create("test", "check")
+                    ->withEndpointId("some-id")
+            );
+
+        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
+            ClassLevelInterceptorsAndMethodsExample::class
+        ]);
+        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
+        $configuration = $this->createMessagingSystemConfiguration();
+        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
+
+        $this->assertEquals(
+            $expectedConfiguration,
+            $configuration
+        );
     }
 }

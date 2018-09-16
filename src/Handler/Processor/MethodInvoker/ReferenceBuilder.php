@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
@@ -45,13 +46,35 @@ class ReferenceBuilder implements ParameterConverterBuilder
     }
 
     /**
+     * @param string $parameterName
+     * @return ReferenceBuilder
+     */
+    public static function createWithDynamicResolve(string $parameterName) : self
+    {
+        return new self($parameterName, "");
+    }
+
+    /**
+     * @param string $parameterName
+     * @param InterfaceToCall $referenceClass
+     * @return ReferenceBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
+     */
+    public static function createFromParameterTypeHint(string $parameterName, InterfaceToCall $referenceClass) : self
+    {
+        return new self($parameterName, $referenceClass->getParameterWithName($parameterName)->getTypeHint());
+    }
+
+    /**
      * @inheritDoc
      */
     public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
     {
         return ReferenceConverter::create(
+            $referenceSearchService,
             $this->parameterName,
-            $referenceSearchService->findByReference($this->referenceServiceName)
+            $this->referenceServiceName
         );
     }
 

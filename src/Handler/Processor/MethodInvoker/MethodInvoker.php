@@ -78,7 +78,7 @@ final class MethodInvoker implements MessageProcessor
      */
     public function processMessage(Message $message)
     {
-        return call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $this->getMethodArguments($message));
+        return call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $this->getMethodArguments(InterfaceToCall::createFromUnknownType($this->objectToInvokeOn, $this->objectMethodName), $message));
     }
 
     /**
@@ -138,16 +138,21 @@ final class MethodInvoker implements MessageProcessor
     }
 
     /**
+     * @param InterfaceToCall $interfaceToCall
      * @param Message $message
      * @return array
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\InvalidMessageHeaderException
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function getMethodArguments(Message $message) : array
+    private function getMethodArguments(InterfaceToCall $interfaceToCall, Message $message) : array
     {
         $methodArguments = [];
+        $count = count($this->orderedMethodArguments);
 
-        foreach ($this->orderedMethodArguments as $methodArgument) {
-            $methodArguments[] = $methodArgument->getArgumentFrom($message);
+        for ($index = 0; $index < $count; $index++) {
+            $methodArguments[] = $this->orderedMethodArguments[$index]->getArgumentFrom(
+                $interfaceToCall->getParameterAtIndex($index), $message
+            );
         }
 
         return $methodArguments;

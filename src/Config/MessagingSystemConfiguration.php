@@ -157,9 +157,15 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
      * @return MessagingSystemConfiguration
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function registerPreCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor): self
     {
+        if (!$methodInterceptor->getEndpointId()) {
+            throw ConfigurationException::create("Interceptor {$methodInterceptor} lack of endpoint id");
+        }
+
         $this->preCallMethodInterceptors[] = $methodInterceptor;
 
         return $this;
@@ -168,9 +174,15 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
      * @return MessagingSystemConfiguration
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function registerPostCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor): self
     {
+        if (!$methodInterceptor->getEndpointId()) {
+            throw ConfigurationException::create("Interceptor {$methodInterceptor} lack of endpoint id");
+        }
+
         $this->postCallMethodInterceptors[] = $methodInterceptor;
 
         return $this;

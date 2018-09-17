@@ -27,6 +27,11 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     private $registeredClasses;
 
     /**
+     * @var array|AnnotationRegistration[]
+     */
+    private $initializedRegistrations = [];
+
+    /**
      * FileSystemAnnotationRegistrationService constructor.
      * @param Reader $annotationReader
      * @param string $rootProjectDir
@@ -51,13 +56,23 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
             foreach (get_class_methods($className) as $method) {
                 $methodAnnotations = $this->getMethodAnnotations($className, $method, $methodAnnotationClassName);
                 foreach ($methodAnnotations as $methodAnnotation) {
+                    $annotationReference = $className . get_class($methodAnnotation);
+                    if (array_key_exists($annotationReference, $this->initializedRegistrations)) {
+                        $registrations[] = $this->initializedRegistrations[$annotationReference];
+
+                        continue;
+                    }
+
                     if (get_class($methodAnnotation) === $methodAnnotationClassName || $methodAnnotation instanceof $methodAnnotationClassName) {
-                        $registrations[] = AnnotationRegistration::create(
-                                $this->getAnnotationForClass($className, $classAnnotationName),
-                                $methodAnnotation,
-                                $className,
-                                $method
+                        $annotationRegistration = AnnotationRegistration::create(
+                            $this->getAnnotationForClass($className, $classAnnotationName),
+                            $methodAnnotation,
+                            $className,
+                            $method
                         );
+
+                        $registrations[] = $annotationRegistration;
+                        $this->initializedRegistrations[$annotationReference] = $annotationRegistration;
                     }
                 }
             }

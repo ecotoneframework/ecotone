@@ -20,6 +20,10 @@ abstract class EndpointAnnotation
      * @Required()
      */
     public $inputChannelName;
+    /**
+     * @var Poller|null
+     */
+    public $poller;
 
     /**
      * EndpointAnnotation constructor.

@@ -595,4 +595,16 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
             );
     }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_throwing_exception_if_registering_handlers_with_same_endpoint_id()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple())
+            ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple());
+    }
 }

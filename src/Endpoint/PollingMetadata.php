@@ -10,16 +10,16 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
  */
 class PollingMetadata
 {
-    private const DEFAULT_MAX_MESSAGES_PER_POLL = 1;
+    const DEFAULT_MAX_MESSAGES_PER_POLL = 1;
 
-    private const DEFAULT_FIXED_RATE = 1000;
+    const DEFAULT_FIXED_RATE = 1000;
 
-    private const DEFAULT_INITIAL_DELAY = 0;
+    const DEFAULT_INITIAL_DELAY = 0;
 
     /**
      * @var string
      */
-    private $messageHandlerName;
+    private $endpointId;
     /**
      * @var string
      */
@@ -55,20 +55,20 @@ class PollingMetadata
 
     /**
      * PollingMetadata constructor.
-     * @param string $messageHandlerName
+     * @param string $endpointId
      */
-    private function __construct(string $messageHandlerName)
+    private function __construct(string $endpointId)
     {
-        $this->messageHandlerName = $messageHandlerName;
+        $this->endpointId = $endpointId;
     }
 
     /**
-     * @param string $messageHandlerName
+     * @param string $endpointId
      * @return PollingMetadata
      */
-    public static function create(string $messageHandlerName) : self
+    public static function create(string $endpointId) : self
     {
-        return new self($messageHandlerName);
+        return new self($endpointId);
     }
 
     /**
@@ -234,9 +234,9 @@ class PollingMetadata
     /**
      * @return string
      */
-    public function getMessageHandlerName(): string
+    public function getEndpointId(): string
     {
-        return $this->messageHandlerName;
+        return $this->endpointId;
     }
 
     /**

@@ -10,6 +10,7 @@ use Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\EndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\InputOutputEndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Splitter;
@@ -126,9 +127,19 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         /** @var AnnotationRegistration[] $annotationRegistrations */
         $annotationRegistrations = $fileSystemAnnotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EndpointAnnotation::class);
         /** @var Splitter $annotationForMethod */
-        $annotationForMethod = $annotationRegistrations[0]->getAnnotationForMethod();
+        $annotationForMethodRetrievedAsEndpoint = $annotationRegistrations[0]->getAnnotationForMethod();
 
-        $this->assertNotEmpty($annotationForMethod->endpointId);
+        $this->assertNotEmpty($annotationForMethodRetrievedAsEndpoint->endpointId);
+
+        /** @var AnnotationRegistration[] $annotationRegistrations */
+        $annotationRegistrations = $fileSystemAnnotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, InputOutputEndpointAnnotation::class);
+        /** @var Splitter $annotationForMethod */
+        $annotationForMethodRetrievedAsInputOutput = $annotationRegistrations[0]->getAnnotationForMethod();
+
+        $this->assertEquals(
+            $annotationForMethodRetrievedAsEndpoint->endpointId,
+            $annotationForMethodRetrievedAsInputOutput->endpointId
+        );
     }
 
     /**

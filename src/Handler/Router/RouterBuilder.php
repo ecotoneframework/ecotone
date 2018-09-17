@@ -58,7 +58,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @var string
      */
-    private $name;
+    private $endpointId = "";
 
     /**
      * RouterBuilder constructor.
@@ -268,7 +268,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     public function getEndpointId(): string
     {
-        return $this->name;
+        return $this->endpointId;
     }
 
     /**
@@ -276,7 +276,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     public function withEndpointId(string $endpointId)
     {
-        $this->name = $endpointId;
+        $this->endpointId = $endpointId;
 
         return $this;
     }

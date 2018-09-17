@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ClassInterce
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
@@ -23,6 +24,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
  * Class MethodInterceptorModule
  * @package SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @ModuleAnnotation()
  */
 class MethodInterceptorModule extends NoExternalConfigurationModule implements AnnotationModule
 {

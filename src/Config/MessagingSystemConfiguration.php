@@ -149,7 +149,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerPollingMetadata(PollingMetadata $pollingMetadata): self
     {
-        $this->messageHandlerPollingMetadata[$pollingMetadata->getMessageHandlerName()] = $pollingMetadata;
+        $this->messageHandlerPollingMetadata[$pollingMetadata->getEndpointId()] = $pollingMetadata;
 
         return $this;
     }
@@ -214,9 +214,15 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param MessageHandlerBuilder $messageHandlerBuilder
      * @return MessagingSystemConfiguration
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): self
     {
+        if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->messageHandlerBuilders)) {
+            throw ConfigurationException::create("Trying to register endpoints with same id. {$messageHandlerBuilder} and {$this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()]}");
+        }
+
         $this->requireReferences($messageHandlerBuilder->getRequiredReferenceNames());
 
         if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithParameterConverters) {
@@ -229,7 +235,7 @@ final class MessagingSystemConfiguration implements Configuration
             $this->channelsBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
         }
 
-        $this->messageHandlerBuilders[] = $messageHandlerBuilder;
+        $this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()] = $messageHandlerBuilder;
 
         return $this;
     }

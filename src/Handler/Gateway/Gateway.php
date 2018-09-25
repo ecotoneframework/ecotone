@@ -74,7 +74,7 @@ class Gateway
         $methodArguments = [];
         $interfaceToCall = InterfaceToCall::create($this->className, $this->methodName);
 
-        $parameters = $interfaceToCall->parameters();
+        $parameters = $interfaceToCall->getParameters();
         $countArguments = count($methodArgumentValues);
         for ($index = 0; $index < $countArguments; $index++) {
             $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);

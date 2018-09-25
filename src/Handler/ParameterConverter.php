@@ -21,8 +21,8 @@ interface ParameterConverter
     public function getArgumentFrom(InterfaceParameter $relatedParameter, Message $message);
 
     /**
-     * @param \ReflectionParameter $reflectionParameter
+     * @param InterfaceParameter $parameter
      * @return bool
      */
-    public function isHandling(\ReflectionParameter $reflectionParameter) : bool;
+    public function isHandling(InterfaceParameter $parameter) : bool;
 }

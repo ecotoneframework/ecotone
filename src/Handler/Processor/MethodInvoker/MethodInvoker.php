@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder;
@@ -105,18 +105,17 @@ final class MethodInvoker implements MessageProcessor
             throw InvalidArgumentException::create("Object {$this->objectToClassName($objectToInvokeOn)} does not contain method {$objectMethodName}");
         }
 
-        $objectToInvokeReflection = new \ReflectionMethod($objectToInvokeOn, $objectMethodName);
-        $parametersForObjectToInvoke = $objectToInvokeReflection->getParameters();
+        $interfaceToCall = InterfaceToCall::createFromUnknownType($objectToInvokeOn, $objectMethodName);
+        $parametersForObjectToInvoke = $interfaceToCall->getParameters();
         $passedArgumentsCount = count($methodParameterConverters);
-        $requiredArgumentsCount = count($objectToInvokeReflection->getParameters());
+        $requiredArgumentsCount = count($interfaceToCall->getParameters());
 
         if ($this->canBeInvokedWithDefaultArgument($passedArgumentsCount, $requiredArgumentsCount)) {
-            $firstArgument = $parametersForObjectToInvoke[0];
-
-            if ((string)$firstArgument->getType() === Message::class) {
-                $methodParameterConverters = [MessageConverter::create($firstArgument->getName())];
+            $firstParameter = $interfaceToCall->getFirstParameter();
+            if ($interfaceToCall->getFirstParameterTypeHint() === Message::class) {
+                $methodParameterConverters = [MessageConverter::create($firstParameter->getName())];
             }else {
-                $methodParameterConverters = [PayloadConverter::create($firstArgument->getName())];
+                $methodParameterConverters = [PayloadConverter::create($firstParameter->getName())];
             }
 
             $passedArgumentsCount = 1;
@@ -200,12 +199,12 @@ final class MethodInvoker implements MessageProcessor
     /**
      * @param string $invokedClass
      * @param string $methodToInvoke
-     * @param \ReflectionParameter $invokeParameter
+     * @param InterfaceParameter $invokeParameter
      * @param array|ParameterConverter[] $methodParameterConverters
      * @return ParameterConverter
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function getMethodArgumentFor(string $invokedClass, string $methodToInvoke, \ReflectionParameter $invokeParameter, array $methodParameterConverters): ParameterConverter
+    private function getMethodArgumentFor(string $invokedClass, string $methodToInvoke, InterfaceParameter $invokeParameter, array $methodParameterConverters): ParameterConverter
     {
         foreach ($methodParameterConverters as $methodParameterConverter) {
             if ($methodParameterConverter->isHandling($invokeParameter)) {

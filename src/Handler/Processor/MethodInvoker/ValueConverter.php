@@ -50,9 +50,9 @@ class ValueConverter implements ParameterConverter
     /**
      * @inheritDoc
      */
-    public function isHandling(\ReflectionParameter $reflectionParameter): bool
+    public function isHandling(InterfaceParameter $parameter): bool
     {
-        return $reflectionParameter->getName() == $this->parameterName;
+        return $parameter->getName() == $this->parameterName;
     }
 
     /**

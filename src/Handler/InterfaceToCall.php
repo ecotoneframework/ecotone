@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
 use SimplyCodedSoftware\IntegrationMessaging\Future;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
@@ -21,11 +23,30 @@ class InterfaceToCall
      * @var string
      */
     private $methodName;
+    /**
+     * @var array|InterfaceParameter[]
+     */
+    private $parameters;
+    /**
+     * @var string
+     */
+    private $returnType;
+    /**
+     * @var bool
+     */
+    private $doesReturnTypeAllowNulls;
+    /**
+     * @var bool
+     */
+    private $isStaticallyCalled;
 
     /**
      * InterfaceToCall constructor.
      * @param string $interfaceName
      * @param string $methodName
+     * @throws InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct(string $interfaceName, string $methodName)
     {
@@ -35,34 +56,34 @@ class InterfaceToCall
     /**
      * @param string $interfaceName
      * @param string $methodName
+     * @throws InvalidArgumentException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function initialize(string $interfaceName, string $methodName): void
     {
-        $interfaceReflection = new \ReflectionClass($interfaceName);
-        if (!$interfaceReflection->hasMethod($methodName)) {
+        $reflectionClass = new \ReflectionClass($interfaceName);
+        if (!$reflectionClass->hasMethod($methodName)) {
             throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
+        }
+
+        $parameters = [];
+        $reflectionMethod = $reflectionClass->getMethod($methodName);
+        foreach ($reflectionMethod->getParameters() as $parameter) {
+            $parameters[] = InterfaceParameter::create(
+                $parameter->getName(),
+                $parameter->getType() ? $parameter->getType()->getName() : InterfaceParameter::UNKNOWN,
+                $parameter->getType() ? $parameter->getType()->allowsNull() : true,
+                []
+            );
         }
 
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;
-    }
-
-    /**
-     * @return string
-     */
-    private function getReturnType(): string
-    {
-        return (string)$this->reflectionMethod()->getReturnType();
-    }
-
-    /**
-     * @return \ReflectionMethod
-     */
-    private function reflectionMethod(): \ReflectionMethod
-    {
-        $reflectionMethod = new \ReflectionMethod($this->interfaceName, $this->methodName);
-        return $reflectionMethod;
+        $this->parameters = $parameters;
+        $this->returnType = (string)$reflectionMethod->getReturnType();
+        $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
+        $this->isStaticallyCalled = $reflectionMethod->isStatic();
     }
 
     /**
@@ -75,8 +96,18 @@ class InterfaceToCall
         return new self($interfaceName, $methodName);
     }
 
+    /**
+     * @param $object
+     * @param string $methodName
+     * @return InterfaceToCall
+     * @throws InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public static function createFromObject($object, string $methodName): self
     {
+        Assert::isObject($object, "Passed value to InterfaceToCall is not object");
+
         return new self(get_class($object), $methodName);
     }
 
@@ -100,7 +131,7 @@ class InterfaceToCall
      */
     public function isStaticallyCalled() : bool
     {
-        return $this->reflectionMethod()->isStatic();
+        return $this->isStaticallyCalled;
     }
 
     /**
@@ -137,6 +168,8 @@ class InterfaceToCall
 
     /**
      * @return string
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function getFirstParameterName(): string
     {
@@ -154,7 +187,7 @@ class InterfaceToCall
             throw InvalidArgumentException::create("Expecting {$this} to have at least one parameter, but got none");
         }
 
-        return InterfaceParameter::create($this->parameters()[0]);
+        return $this->parameters()[0];
     }
 
     /**
@@ -169,7 +202,7 @@ class InterfaceToCall
             throw InvalidArgumentException::create("There is no parameter at index {$index} for {$this}");
         }
 
-        return InterfaceParameter::create($this->parameters()[$index]);
+        return $this->parameters[$index];
     }
 
     /**
@@ -181,15 +214,17 @@ class InterfaceToCall
     }
 
     /**
-     * @return array|\ReflectionParameter[]
+     * @return array|InterfaceParameter[]
      */
     public function parameters(): array
     {
-        return $this->reflectionMethod()->getParameters();
+        return $this->parameters;
     }
 
     /**
      * @return bool
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function hasFirstParameterMessageTypeHint(): bool
     {
@@ -243,7 +278,7 @@ class InterfaceToCall
      */
     public function canItReturnNull(): bool
     {
-        return is_null($this->reflectionMethod()->getReturnType()) || $this->reflectionMethod()->getReturnType()->allowsNull();
+        return is_null($this->returnType) || $this->doesReturnTypeAllowNulls;
     }
 
     /**
@@ -271,7 +306,7 @@ class InterfaceToCall
     {
         foreach ($this->parameters() as $parameter) {
             if ($parameter->getName() == $parameterName) {
-                return InterfaceParameter::create($parameter);
+                return $parameter;
             }
         }
 
@@ -300,6 +335,14 @@ class InterfaceToCall
     public function hasSingleArgument(): bool
     {
         return $this->parameterAmount() == 1;
+    }
+
+    /**
+     * @return string
+     */
+    private function getReturnType(): string
+    {
+        return $this->returnType;
     }
 
     public function __toString()

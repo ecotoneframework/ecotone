@@ -6,6 +6,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 use Builder\Handler\InterfaceParameterTestCaseBuilder;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
@@ -29,7 +30,7 @@ class StaticBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameterTestCaseBuilder::create()->build(),
+                InterfaceParameter::create("x", "string", true, []),
                 MessageBuilder::withPayload("a")->build()
             )
         );

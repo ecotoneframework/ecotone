@@ -1,6 +1,7 @@
 <?php
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 
 /**
  * Class MethodArgument
@@ -10,7 +11,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 class MethodArgument
 {
     /**
-     * @var \ReflectionParameter
+     * @var InterfaceParameter
      */
     private $parameter;
     /**
@@ -21,22 +22,22 @@ class MethodArgument
     /**
      * MethodArgument constructor.
      *
-     * @param \ReflectionParameter $parameter
+     * @param InterfaceParameter $parameter
      * @param mixed                $value
      */
-    private function __construct(\ReflectionParameter $parameter, $value)
+    private function __construct(InterfaceParameter $parameter, $value)
     {
         $this->parameter = $parameter;
         $this->value     = $value;
     }
 
     /**
-     * @param \ReflectionParameter $parameterName
+     * @param InterfaceParameter $parameterName
      * @param mixed                $value
      *
      * @return MethodArgument
      */
-    public static function createWith(\ReflectionParameter $parameterName, $value): self
+    public static function createWith(InterfaceParameter $parameterName, $value): self
     {
         return new self($parameterName, $value);
     }
@@ -50,9 +51,9 @@ class MethodArgument
     }
 
     /**
-     * @return \ReflectionParameter
+     * @return InterfaceParameter
      */
-    public function getParameter(): \ReflectionParameter
+    public function getParameter(): InterfaceParameter
     {
         return $this->parameter;
     }

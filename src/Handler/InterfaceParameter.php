@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
@@ -9,37 +10,62 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InterfaceParameter
+final class InterfaceParameter
 {
-    /**
-     * @var \ReflectionParameter
-     */
-    private $parameter;
+    const INTEGER = "int";
+    const FLOAT = "float";
+    const BOOL = "bool";
+    const STRING = "string";
+
+    const ARRAY = "array";
+    const ITERABLE = "iterable";
+    const CALLABLE = "callable";
+    const OBJECT = "object";
+
+    const UNKNOWN = "unknown";
 
     /**
-     * InterfaceParameter constructor.
-     * @param \ReflectionParameter $reflectionParameter
+     * @var string
      */
-    private function __construct(\ReflectionParameter $reflectionParameter)
+    private $name;
+    /**
+     * @var string
+     */
+    private $type;
+    /**
+     * @var string[]
+     */
+    private $docCommentTypes;
+    /**
+     * @var bool
+     */
+    private $doesAllowNulls;
+
+    /**
+     * TypeHint constructor.
+     * @param string $name
+     * @param string $type
+     * @param bool $doesAllowNulls
+     * @param string[] $docCommentTypes
+     */
+    private function __construct(string $name, string $type, bool $doesAllowNulls, array $docCommentTypes)
     {
-        $this->parameter = $reflectionParameter;
+        $this->name = $name;
+        $this->type = $type;
+        $this->docCommentTypes = $docCommentTypes;
+        $this->doesAllowNulls = $doesAllowNulls;
     }
 
     /**
-     * @param \ReflectionParameter $reflectionParameter
-     * @return InterfaceParameter
+     * @param string $name
+     * @param string $type
+     * @param bool $doesAllowNulls
+     * @param array $docCommentType
+     * @return self
      */
-    public static function create(\ReflectionParameter $reflectionParameter) : self
+    public static function create(string $name, string $type, bool $doesAllowNulls, array $docCommentType) : self
     {
-        return new self($reflectionParameter);
-    }
-
-    /**
-     * @return \ReflectionParameter
-     */
-    public function getReflectionParameter() : \ReflectionParameter
-    {
-        return $this->parameter;
+        return new self($name, $type, $doesAllowNulls, $docCommentType);
     }
 
     /**
@@ -47,15 +73,15 @@ class InterfaceParameter
      */
     public function getName() : string
     {
-        return $this->parameter->getName();
+        return $this->name;
     }
 
     /**
      * @return bool
      */
-    public function isNullable() : bool
+    public function doesAllowNulls() : bool
     {
-        return $this->parameter->allowsNull();
+        return $this->doesAllowNulls;
     }
 
     /**
@@ -63,7 +89,7 @@ class InterfaceParameter
      */
     public function getTypeHint() : string
     {
-        return (string)$this->parameter->getType();
+        return $this->type;
     }
 
     /**

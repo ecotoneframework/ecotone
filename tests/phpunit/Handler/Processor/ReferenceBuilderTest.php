@@ -32,7 +32,7 @@ class ReferenceBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameterTestCaseBuilder::create()->build(),
+                InterfaceParameter::create("x", \stdClass::class, true, []),
                 MessageBuilder::withPayload("paramName")->build()
             )
         );
@@ -53,7 +53,7 @@ class ReferenceBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameter::create(new \ReflectionParameter(function (\stdClass $param){}, "param")),
+                InterfaceParameter::create("x", \stdClass::class, true, []),
                 MessageBuilder::withPayload("paramName")->build()
             )
         );

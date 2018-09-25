@@ -6,6 +6,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 use Builder\Handler\InterfaceParameterTestCaseBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\HeaderBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadBuilder;
@@ -35,7 +36,7 @@ class PayloadBuilderTest extends MessagingTest
         $this->assertEquals(
               $payload,
               $converter->getArgumentFrom(
-                  InterfaceParameterTestCaseBuilder::create()->build(),
+                  InterfaceParameter::create("x", "string", true, []),
                   MessageBuilder::withPayload($payload)->build()
               )
         );

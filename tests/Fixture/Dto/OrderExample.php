@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace Fixture\Dto;
+
+use Fixture\Dto\WithCustomer\Customer;
 
 /**
  * Class Order
@@ -46,6 +49,23 @@ class OrderExample
     public static function createWith(int $orderId, int $quantity, string $buyName) : self
     {
         return new self($orderId, $quantity, $buyName);
+    }
+
+    /**
+     * @param OrderExample $orderExample
+     * @return bool
+     */
+    public function isSameAs(OrderExample $orderExample) : bool
+    {
+        return $this == $orderExample;
+    }
+
+    /**
+     * @param Customer $customer
+     */
+    public function changeBuyer(Customer $customer) : void
+    {
+        $this->buyerName = $customer->getUsername();
     }
 
     /**

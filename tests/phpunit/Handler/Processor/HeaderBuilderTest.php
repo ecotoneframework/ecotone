@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 use Builder\Handler\InterfaceParameterTestCaseBuilder;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\HeaderBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
@@ -16,7 +17,6 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 class HeaderBuilderTest extends TestCase
 {
     /**
-     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_header_converter()
@@ -27,14 +27,13 @@ class HeaderBuilderTest extends TestCase
         $this->assertEquals(
             123,
             $converter->getArgumentFrom(
-                InterfaceParameterTestCaseBuilder::create()->build(),
+                InterfaceParameter::create("x", "string", true, []),
                 MessageBuilder::withPayload("a")->setHeader("token", 123)->build()
             )
         );
     }
 
     /**
-     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_optional_header_converter()
@@ -45,7 +44,7 @@ class HeaderBuilderTest extends TestCase
         $this->assertEquals(
             null,
             $converter->getArgumentFrom(
-                InterfaceParameterTestCaseBuilder::create()->build(),
+                InterfaceParameter::create("x", "string", true, []),
                 MessageBuilder::withPayload("a")->build()
             )
         );

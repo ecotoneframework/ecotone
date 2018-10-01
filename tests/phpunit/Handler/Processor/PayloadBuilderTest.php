@@ -36,7 +36,7 @@ class PayloadBuilderTest extends MessagingTest
         $this->assertEquals(
               $payload,
               $converter->getArgumentFrom(
-                  InterfaceParameter::create("x", "string", true, []),
+                  InterfaceParameter::create("x", "string", true, ""),
                   MessageBuilder::withPayload($payload)->build()
               )
         );

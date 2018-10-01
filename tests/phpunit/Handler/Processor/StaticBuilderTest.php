@@ -30,7 +30,7 @@ class StaticBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", "string", true, []),
+                InterfaceParameter::create("x", "string", true, ""),
                 MessageBuilder::withPayload("a")->build()
             )
         );

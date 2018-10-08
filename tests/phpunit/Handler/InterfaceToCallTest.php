@@ -10,6 +10,7 @@ use Fixture\Conversion\User;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDescriptor;
 
 /**
  * Class InterfaceToCallTest
@@ -29,7 +30,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("name", "string", false, ""),
+            InterfaceParameter::create("name", TypeDescriptor::create("string", false, "")),
             $interfaceToCall->getParameterWithName("name")
         );
     }
@@ -45,7 +46,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("password", Password::class, false, "\\" . Password::class),
+            InterfaceParameter::create("password", TypeDescriptor::create(Password::class, false, "\\" . Password::class)),
             $interfaceToCall->getParameterWithName("password")
         );
     }
@@ -61,7 +62,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("details", InterfaceParameter::UNKNOWN, true, "\\stdClass"),
+            InterfaceParameter::create("details", TypeDescriptor::create(TypeDescriptor::UNKNOWN, true, "\\stdClass")),
             $interfaceToCall->getParameterWithName("details")
         );
     }
@@ -77,7 +78,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("favourites", InterfaceParameter::ARRAY, false, "array<Fixture\Conversion\Extra\Favourite>"),
+            InterfaceParameter::create("favourites", TypeDescriptor::create(TypeDescriptor::ARRAY, false, "array<Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
@@ -93,7 +94,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("favourite", Favourite::class, false, "\Fixture\Conversion\Extra\Favourite"),
+            InterfaceParameter::create("favourite", TypeDescriptor::create(Favourite::class, false, "\Fixture\Conversion\Extra\Favourite")),
             $interfaceToCall->getParameterWithName("favourite")
         );
     }
@@ -109,7 +110,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("favourites", InterfaceParameter::ARRAY, false, "array<\Fixture\Conversion\Extra\Favourite>"),
+            InterfaceParameter::create("favourites", TypeDescriptor::create(TypeDescriptor::ARRAY, false, "array<\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
@@ -125,7 +126,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("favourites", InterfaceParameter::ARRAY, false, "array<\Fixture\Conversion\Extra\Favourite>"),
+            InterfaceParameter::create("favourites", TypeDescriptor::create(TypeDescriptor::ARRAY, false, "array<\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
@@ -141,7 +142,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("adminPermission", Permission::class, false, "\\" . Permission::class),
+            InterfaceParameter::create("adminPermission", TypeDescriptor::create(Permission::class, false, "\\" . Permission::class)),
             $interfaceToCall->getParameterWithName("adminPermission")
         );
     }
@@ -157,7 +158,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("ratings", InterfaceParameter::ITERABLE, false, "array<int>"),
+            InterfaceParameter::create("ratings", TypeDescriptor::create(TypeDescriptor::ITERABLE, false, "array<int>")),
             $interfaceToCall->getParameterWithName("ratings")
         );
     }
@@ -173,7 +174,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("rating", InterfaceParameter::INTEGER, false, "int"),
+            InterfaceParameter::create("rating", TypeDescriptor::create(TypeDescriptor::INTEGER, false, "int")),
             $interfaceToCall->getParameterWithName("rating")
         );
     }
@@ -189,7 +190,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("random", InterfaceParameter::UNKNOWN, true, "array"),
+            InterfaceParameter::create("random",TypeDescriptor::create( TypeDescriptor::UNKNOWN, true, "array")),
             $interfaceToCall->getParameterWithName("random")
         );
     }
@@ -205,7 +206,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("phones", InterfaceParameter::UNKNOWN, true, "array<string>"),
+            InterfaceParameter::create("phones", TypeDescriptor::create(TypeDescriptor::UNKNOWN, true, "array<string>")),
             $interfaceToCall->getParameterWithName("phones")
         );
     }
@@ -221,7 +222,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("email", InterfaceParameter::UNKNOWN, true, "\\" . Email::class),
+            InterfaceParameter::create("email", TypeDescriptor::create(TypeDescriptor::UNKNOWN, true, "\\" . Email::class)),
             $interfaceToCall->getParameterWithName("email")
         );
     }

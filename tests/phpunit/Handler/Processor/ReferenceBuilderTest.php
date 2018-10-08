@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
@@ -32,7 +33,7 @@ class ReferenceBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", \stdClass::class, true, ""),
+                InterfaceParameter::create("x", TypeDescriptor::create(\stdClass::class, true, "")),
                 MessageBuilder::withPayload("paramName")->build()
             )
         );
@@ -53,7 +54,7 @@ class ReferenceBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", \stdClass::class, true, ""),
+                InterfaceParameter::create("x", TypeDescriptor::create(\stdClass::class, true, "")),
                 MessageBuilder::withPayload("paramName")->build()
             )
         );

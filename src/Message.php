@@ -15,7 +15,7 @@ interface Message
     public function getHeaders() : MessageHeaders;
 
     /**
-     * @return object|string|array
+     * @return mixed
      */
     public function getPayload();
 }

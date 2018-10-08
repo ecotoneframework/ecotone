@@ -10,6 +10,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchServ
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
@@ -34,7 +35,7 @@ class ExpressionBuilderTest extends TestCase
         $this->assertEquals(
             $payload . "1",
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", "string", true, ""),
+                InterfaceParameter::create("x", TypeDescriptor::create("string", true, "")),
                 MessageBuilder::withPayload($payload)->build()
             )
         );

@@ -21,7 +21,6 @@ class InterfaceToCall
     private const GUESSED_COMPOUND_TYPE_RANK = 3;
     private const GUESSED_SCALAR_TYPE_RANK = 1;
     private const GUESSED_COLLECTION_TYPE_RANK = 4;
-    private const GUESSED_CLASS_TYPE_RANK = 2;
     /**
      * @var string
      */
@@ -80,9 +79,11 @@ class InterfaceToCall
         foreach ($reflectionMethod->getParameters() as $parameter) {
             $parameters[] = InterfaceParameter::create(
                 $parameter->getName(),
-                $parameter->getType() ? $parameter->getType()->getName() : InterfaceParameter::UNKNOWN,
-                $parameter->getType() ? $parameter->getType()->allowsNull() : true,
-                array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
+                TypeDescriptor::create(
+                    $parameter->getType() ? $parameter->getType()->getName() : null,
+                    $parameter->getType() ? $parameter->getType()->allowsNull() : true,
+                    array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
+                )
             );
         }
 
@@ -112,6 +113,10 @@ class InterfaceToCall
         $matchAmount = count($matchedDocBlockParameterTypes[0]);
         for ($matchIndex = 0; $matchIndex < $matchAmount; $matchIndex++) {
             $parameterTypeHint = $this->guessParameterTypeHint($matchedDocBlockParameterTypes[1][$matchIndex]);
+
+            if (!$parameterTypeHint) {
+                continue;
+            }
 
             $docBlockParameterTypeHints[$matchedDocBlockParameterTypes[2][$matchIndex]] =
                 $this->isInGlobalNamespace($parameterTypeHint)
@@ -340,7 +345,7 @@ class InterfaceToCall
      */
     public function doesItReturnMessage() : bool
     {
-        return $this->getReturnType() === Message::class || is_subclass_of($this->getReturnType(), Message::class);
+        return $this->getReturnType() === Message::class || $this->getReturnType() === "\\" . Message::class || is_subclass_of($this->getReturnType(), Message::class);
     }
 
     /**
@@ -442,12 +447,12 @@ class InterfaceToCall
      */
     private function isInGlobalNamespace(string $className): bool
     {
-        if (InterfaceParameter::isPrimitiveType($className)) {
+        if (TypeDescriptor::isPrimitiveType($className)) {
             return true;
         }
 
         if (preg_match(self::COLLECTION_TYPE_REGEX, $className, $matches)) {
-            return InterfaceParameter::isScalar($matches[1]);
+            return TypeDescriptor::isScalar($matches[1]);
         }
 
         return count(explode("\\", $className)) == 2;
@@ -509,14 +514,14 @@ class InterfaceToCall
 
         $typeHintRank = 0;
         foreach ($multipleTypeHints as $typeHint) {
-            if (strpos($typeHint, "[]") !== false) {
+            if (strpos($typeHint, "[]") !==  false) {
                 $typeHint = "array<" . str_replace("[]", "", $typeHint) . ">";
             }
 
-            if (InterfaceParameter::isScalar($typeHint) && $typeHintRank < self::GUESSED_SCALAR_TYPE_RANK) {
+            if (TypeDescriptor::isScalar($typeHint) && $typeHintRank < self::GUESSED_SCALAR_TYPE_RANK) {
                 $parameterTypeHint = $typeHint;
                 $typeHintRank = self::GUESSED_SCALAR_TYPE_RANK;
-            }else if (InterfaceParameter::isCompoundType($typeHint) && $typeHintRank < self::GUESSED_COMPOUND_TYPE_RANK) {
+            }else if (TypeDescriptor::isPrimitiveCompoundType($typeHint) && $typeHintRank < self::GUESSED_COMPOUND_TYPE_RANK) {
                 $parameterTypeHint = $typeHint;
                 $typeHintRank = self::GUESSED_COMPOUND_TYPE_RANK;
             } else if (preg_match(self::COLLECTION_TYPE_REGEX, $typeHint) && $typeHintRank < self::GUESSED_COLLECTION_TYPE_RANK) {

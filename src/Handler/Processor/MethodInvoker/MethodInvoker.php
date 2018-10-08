@@ -112,7 +112,7 @@ final class MethodInvoker implements MessageProcessor
 
         if ($this->canBeInvokedWithDefaultArgument($passedArgumentsCount, $requiredArgumentsCount)) {
             $firstParameter = $interfaceToCall->getFirstParameter();
-            if ($interfaceToCall->getFirstParameterTypeHint() === Message::class) {
+            if ($interfaceToCall->hasFirstParameterMessageTypeHint()) {
                 $methodParameterConverters = [MessageConverter::create($firstParameter->getName())];
             }else {
                 $methodParameterConverters = [PayloadConverter::create($firstParameter->getName())];

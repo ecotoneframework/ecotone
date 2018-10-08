@@ -14,92 +14,34 @@ final class InterfaceParameter
 {
     /** http://php.net/manual/en/language.types.intro.php */
 
-//    scalar types
-    const INTEGER = "int";
-    const FLOAT = "float";
-    const BOOL = "bool";
-    const STRING = "string";
-
-//    compound types
-    const ARRAY = "array";
-    const ITERABLE = "iterable";
-    const CALLABLE = "callable";
-    const OBJECT = "object";
-
-//    resource
-    const RESOURCE = "resource";
-
-    const UNKNOWN = "unknown";
-
     /**
      * @var string
      */
     private $name;
     /**
-     * @var string
+     * @var TypeDescriptor
      */
-    private $type;
-    /**
-     * @var string
-     */
-    private $docBlockLeadingType;
-    /**
-     * @var bool
-     */
-    private $doesAllowNulls;
-
-    /**
-     * @param string $type
-     * @return bool
-     */
-    public static function isCompoundType(string $type) : bool
-    {
-        return in_array($type, [self::ARRAY, self::ITERABLE, self::CALLABLE, self::OBJECT]);
-    }
-
-    /**
-     * @param string $type
-     * @return bool
-     */
-    public static function isScalar(string $type) : bool
-    {
-        return in_array($type, [self::INTEGER, self::FLOAT, self::BOOL, self::STRING]);
-    }
-
-    /**
-     * @param string $type
-     * @return bool
-     */
-    public static function isPrimitiveType(string $type) : bool
-    {
-        return self::isCompoundType($type) || self::isScalar($type) || $type === self::RESOURCE;
-    }
+    private $typeDescriptor;
 
     /**
      * TypeHint constructor.
      * @param string $name
-     * @param string $type
-     * @param bool $doesAllowNulls
-     * @param string $docBlockLeadingType
+     * @param TypeDescriptor $typeDescriptor
      */
-    private function __construct(string $name, string $type, bool $doesAllowNulls, string $docBlockLeadingType)
+    private function __construct(string $name, TypeDescriptor $typeDescriptor)
     {
         $this->name = $name;
-        $this->type = $type;
-        $this->docBlockLeadingType = $docBlockLeadingType;
-        $this->doesAllowNulls = $doesAllowNulls;
+        $this->typeDescriptor = $typeDescriptor;
     }
 
     /**
      * @param string $name
-     * @param string $type
-     * @param bool $doesAllowNulls
-     * @param string $docBlockLeadingType
+     * @param TypeDescriptor $typeDescriptor
      * @return self
      */
-    public static function create(string $name, string $type, bool $doesAllowNulls, string $docBlockLeadingType) : self
+    public static function create(string $name, TypeDescriptor $typeDescriptor) : self
     {
-        return new self($name, $type, $doesAllowNulls, $docBlockLeadingType);
+        return new self($name, $typeDescriptor);
     }
 
     /**
@@ -115,7 +57,7 @@ final class InterfaceParameter
      */
     public function doesAllowNulls() : bool
     {
-        return $this->doesAllowNulls;
+        return $this->typeDescriptor->doesAllowNulls();
     }
 
     /**
@@ -123,7 +65,7 @@ final class InterfaceParameter
      */
     public function getTypeHint() : string
     {
-        return $this->type;
+        return $this->typeDescriptor->getTypeHint();
     }
 
     /**
@@ -131,15 +73,7 @@ final class InterfaceParameter
      */
     public function isMessage() : bool
     {
-        return $this->getTypeHint() === Message::class || is_subclass_of($this->getTypeHint(), Message::class);
-    }
-
-    /**
-     * @return string
-     */
-    public function getDocBlockLeadingType(): string
-    {
-        return $this->docBlockLeadingType;
+        return $this->getTypeHint() === Message::class || $this->getTypeHint() === ("\\" . Message::class) || is_subclass_of($this->getTypeHint(), Message::class);
     }
 
     /**

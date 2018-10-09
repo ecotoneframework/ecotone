@@ -79,7 +79,7 @@ class InterfaceToCall
         foreach ($reflectionMethod->getParameters() as $parameter) {
             $parameters[] = InterfaceParameter::create(
                 $parameter->getName(),
-                TypeDescriptor::create(
+                TypeDescriptor::createWithDocBlock(
                     $parameter->getType() ? $parameter->getType()->getName() : null,
                     $parameter->getType() ? $parameter->getType()->allowsNull() : true,
                     array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
@@ -97,36 +97,65 @@ class InterfaceToCall
 
     /**
      * @param \ReflectionClass $reflectionClass
-     * @param \ReflectionMethod $interfaceReflection
+     * @param \ReflectionMethod $methodReflection
      * @return array
+     * @throws \ReflectionException
      */
-    private function getMethodDocBlockParameterTypeHints(\ReflectionClass $reflectionClass, \ReflectionMethod $interfaceReflection) : array
+    private function getMethodDocBlockParameterTypeHints(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection) : array
     {
         $statements = $this->getClassUseStatements($reflectionClass);
-        if (!$interfaceReflection->getDocComment()) {
+        $docComment = $methodReflection->getDocComment();
+        if (!$docComment) {
             return [];
         }
 
-        preg_match_all(self::METHOD_DOC_BLOCK_PARAMETERS_REGEX, $interfaceReflection->getDocComment(), $matchedDocBlockParameterTypes);
+        if (preg_match("/@inheritDoc/", $docComment)) {
+            foreach ($reflectionClass->getInterfaceNames() as $interfaceName) {
+                if (method_exists($interfaceName, $methodReflection->getName())) {
+                    $docComment = (new \ReflectionMethod($interfaceName, $methodReflection->getName()))->getDocComment();
+                }
+            }
+            if ($reflectionClass->getParentClass() && $reflectionClass->getParentClass()->hasMethod($methodReflection->getName())) {
+                $docComment = $reflectionClass->getParentClass()->getMethod($methodReflection->getName())->getDocComment();
+            }
+        }
+
+        preg_match_all(self::METHOD_DOC_BLOCK_PARAMETERS_REGEX, $docComment, $matchedDocBlockParameterTypes);
 
         $docBlockParameterTypeHints = [];
         $matchAmount = count($matchedDocBlockParameterTypes[0]);
         for ($matchIndex = 0; $matchIndex < $matchAmount; $matchIndex++) {
-            $parameterTypeHint = $this->guessParameterTypeHint($matchedDocBlockParameterTypes[1][$matchIndex]);
-
-            if (!$parameterTypeHint) {
-                continue;
-            }
-
-            $docBlockParameterTypeHints[$matchedDocBlockParameterTypes[2][$matchIndex]] =
-                $this->isInGlobalNamespace($parameterTypeHint)
-                    ? $parameterTypeHint
-                    : ($this->isFromDifferentNamespace($parameterTypeHint, $statements)
-                        ? $this->getTypeHintFromUseNamespace($parameterTypeHint, $statements)
-                        : $this->getWithClassNamespace($reflectionClass, $parameterTypeHint));
+            $docBlockParameterTypeHints[$matchedDocBlockParameterTypes[2][$matchIndex]] = $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][$matchIndex], $statements, $reflectionClass);
         }
 
         return $docBlockParameterTypeHints;
+    }
+
+    /**
+     * @param string $parameterTypeHint
+     * @param array $statements
+     * @param \ReflectionClass $reflectionClass
+     * @return string
+     */
+    private function expandParameterTypeHint(string $parameterTypeHint, array $statements, \ReflectionClass $reflectionClass) : string
+    {
+        $multipleTypeHints = explode("|", $parameterTypeHint);
+        $multipleTypeHints = is_array($multipleTypeHints) ? $multipleTypeHints : [$multipleTypeHints];
+
+        $fullNames = [];
+        foreach ($multipleTypeHints as $typeHint) {
+            if (strpos($typeHint, "[]") !==  false) {
+                $typeHint = "array<" . str_replace("[]", "", $typeHint) . ">";
+            }
+
+            $fullNames[] = $this->isInGlobalNamespace($typeHint)
+                ? $typeHint
+                : ($this->isFromDifferentNamespace($typeHint, $statements)
+                    ? $this->getTypeHintFromUseNamespace($typeHint, $statements)
+                    : $this->getWithClassNamespace($reflectionClass, $typeHint));
+        }
+
+        return implode("|", $fullNames);
     }
 
     /**
@@ -487,7 +516,7 @@ class InterfaceToCall
         if (strpos($classNameTypeHint, "[]") !== false) {
             $classNameTypeHint = str_replace("[]", "", $classNameTypeHint);
         }
-        if (preg_match(self::COLLECTION_TYPE_REGEX, $classNameTypeHint, $classNameMatch)) {
+        if (preg_match(TypeDescriptor::COLLECTION_TYPE_REGEX, $classNameTypeHint, $classNameMatch)) {
             $classNameTypeHint = $classNameMatch[1];
         }
 
@@ -501,39 +530,6 @@ class InterfaceToCall
     private function hasUseStatementAlias($alias): bool
     {
         return count($alias) === 2;
-    }
-
-    /**
-     * @param string $parameterTypeHint
-     * @return string
-     */
-    private function guessParameterTypeHint(string $parameterTypeHint) : string
-    {
-        $multipleTypeHints = explode("|", $parameterTypeHint);
-        $multipleTypeHints = is_array($multipleTypeHints) ? $multipleTypeHints : [$multipleTypeHints];
-
-        $typeHintRank = 0;
-        foreach ($multipleTypeHints as $typeHint) {
-            if (strpos($typeHint, "[]") !==  false) {
-                $typeHint = "array<" . str_replace("[]", "", $typeHint) . ">";
-            }
-
-            if (TypeDescriptor::isScalar($typeHint) && $typeHintRank < self::GUESSED_SCALAR_TYPE_RANK) {
-                $parameterTypeHint = $typeHint;
-                $typeHintRank = self::GUESSED_SCALAR_TYPE_RANK;
-            }else if (TypeDescriptor::isPrimitiveCompoundType($typeHint) && $typeHintRank < self::GUESSED_COMPOUND_TYPE_RANK) {
-                $parameterTypeHint = $typeHint;
-                $typeHintRank = self::GUESSED_COMPOUND_TYPE_RANK;
-            } else if (preg_match(self::COLLECTION_TYPE_REGEX, $typeHint) && $typeHintRank < self::GUESSED_COLLECTION_TYPE_RANK) {
-                $parameterTypeHint = $typeHint;
-                $typeHintRank = self::GUESSED_COLLECTION_TYPE_RANK;
-            }else if ($typeHintRank < 1) {
-                $parameterTypeHint = $typeHint;
-                $typeHintRank = self::GUESSED_SCALAR_TYPE_RANK;
-            }
-        }
-
-        return $parameterTypeHint;
     }
 
     /**

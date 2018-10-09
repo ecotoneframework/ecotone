@@ -10,7 +10,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
  */
 class TypeDescriptor
 {
-    private const COLLECTION_TYPE_REGEX = "/[a-zA-Z0-9]*<([^<]*)>/";
+    const COLLECTION_TYPE_REGEX = "/[a-zA-Z0-9]*<([^<]*)>/";
 
     //    scalar types
     const INTEGER = "int";
@@ -69,6 +69,15 @@ class TypeDescriptor
      * @param string $type
      * @return bool
      */
+    public static function isCollection(string $type) : bool
+    {
+        return (bool)preg_match(self::COLLECTION_TYPE_REGEX, $type);
+    }
+
+    /**
+     * @param string $type
+     * @return bool
+     */
     public static function isResource(string $type) : bool
     {
         return $type == self::RESOURCE;
@@ -121,7 +130,10 @@ class TypeDescriptor
             ($this->isCompoundClass($typeHint) && $this->isClassOrInterface($docBlockTypeDescription))
             || ($this->isClassOrInterface($typeHint) && $this->isClassOrInterface($docBlockTypeDescription))
         ) {
-            $type = substr( $docBlockTypeDescription, 0, 1 ) !== "\\" ? "\\" . $docBlockTypeDescription : $docBlockTypeDescription;
+            $type = $docBlockTypeDescription;
+        }
+        if ($this->isUnknown($typeHint) && $this->isResolvableType($docBlockTypeDescription)) {
+            $type = $docBlockTypeDescription;
         }
 
         if (strpos($docBlockTypeDescription, "[]") !==  false) {
@@ -140,6 +152,10 @@ class TypeDescriptor
             $type = $docBlockTypeDescription;
         }
 
+        if ($this->isClassOrInterface($type)) {
+            $type = substr($type, 0, 1) !== "\\" ? ("\\" . $type) : $type;
+        }
+
         $this->type = $type;
     }
 
@@ -151,11 +167,22 @@ class TypeDescriptor
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function create(?string $type, bool $doesAllowNulls, ?string $docBlockTypeDescription) : self
+    public static function createWithDocBlock(?string $type, bool $doesAllowNulls, ?string $docBlockTypeDescription) : self
     {
         return new self($type ? $type : self::UNKNOWN, $doesAllowNulls, $docBlockTypeDescription ? $docBlockTypeDescription : "");
     }
 
+    /**
+     * @param string $type
+     * @param bool $doesAllowNulls
+     * @return TypeDescriptor
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function create(?string $type, bool $doesAllowNulls) : self
+    {
+        return new self($type ? $type : self::UNKNOWN, $doesAllowNulls, "");
+    }
 
     /**
      * @return bool
@@ -179,7 +206,7 @@ class TypeDescriptor
      */
     private function isResolvableType(string $typeToCheck): bool
     {
-        return self::isPrimitiveType($typeToCheck) || class_exists($typeToCheck) || interface_exists($typeToCheck) || $typeToCheck == self::UNKNOWN;
+        return self::isPrimitiveType($typeToCheck) || class_exists($typeToCheck) || interface_exists($typeToCheck) || $typeToCheck == self::UNKNOWN || self::isCollection($typeToCheck);
     }
 
     /**

@@ -33,7 +33,7 @@ class ReferenceBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", TypeDescriptor::create(\stdClass::class, true, "")),
+                InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock(\stdClass::class, true, "")),
                 MessageBuilder::withPayload("paramName")->build()
             )
         );
@@ -48,13 +48,13 @@ class ReferenceBuilderTest extends TestCase
         $value = new \stdClass();
         $converter = ReferenceBuilder::createWithDynamicResolve("param")
             ->build(InMemoryReferenceSearchService::createWith([
-                \stdClass::class => $value
+                "\\" . \stdClass::class => $value
             ]));
 
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", TypeDescriptor::create(\stdClass::class, true, "")),
+                InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock(\stdClass::class, true, "")),
                 MessageBuilder::withPayload("paramName")->build()
             )
         );

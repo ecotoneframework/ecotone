@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler;
 use Fixture\Conversion\Email;
 use Fixture\Conversion\Extra\Favourite;
 use Fixture\Conversion\Extra\Permission;
+use Fixture\Conversion\OnlineShop;
 use Fixture\Conversion\Password;
 use Fixture\Conversion\User;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +31,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("name", TypeDescriptor::create("string", false, "")),
+            InterfaceParameter::create("name", TypeDescriptor::create(TypeDescriptor::STRING, false)),
             $interfaceToCall->getParameterWithName("name")
         );
     }
@@ -46,7 +47,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("password", TypeDescriptor::create(Password::class, false, "\\" . Password::class)),
+            InterfaceParameter::create("password", TypeDescriptor::create("\\" . Password::class, false)),
             $interfaceToCall->getParameterWithName("password")
         );
     }
@@ -62,7 +63,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("details", TypeDescriptor::create(TypeDescriptor::UNKNOWN, true, "\\stdClass")),
+            InterfaceParameter::create("details", TypeDescriptor::create("\\stdClass", true)),
             $interfaceToCall->getParameterWithName("details")
         );
     }
@@ -78,7 +79,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("favourites", TypeDescriptor::create(TypeDescriptor::ARRAY, false, "array<Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::create("favourites", TypeDescriptor::create("array<Fixture\Conversion\Extra\Favourite>", false)),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
@@ -94,7 +95,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("favourite", TypeDescriptor::create(Favourite::class, false, "\Fixture\Conversion\Extra\Favourite")),
+            InterfaceParameter::create("favourite", TypeDescriptor::create("\Fixture\Conversion\Extra\Favourite", false)),
             $interfaceToCall->getParameterWithName("favourite")
         );
     }
@@ -110,7 +111,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("favourites", TypeDescriptor::create(TypeDescriptor::ARRAY, false, "array<\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::create("favourites", TypeDescriptor::create("array<\Fixture\Conversion\Extra\Favourite>", false)),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
@@ -126,7 +127,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("favourites", TypeDescriptor::create(TypeDescriptor::ARRAY, false, "array<\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::create("favourites", TypeDescriptor::create("array<\Fixture\Conversion\Extra\Favourite>", false)),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
@@ -142,7 +143,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("adminPermission", TypeDescriptor::create(Permission::class, false, "\\" . Permission::class)),
+            InterfaceParameter::create("adminPermission", TypeDescriptor::create(Permission::class, false)),
             $interfaceToCall->getParameterWithName("adminPermission")
         );
     }
@@ -158,7 +159,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("ratings", TypeDescriptor::create(TypeDescriptor::ITERABLE, false, "array<int>")),
+            InterfaceParameter::create("ratings", TypeDescriptor::create("array<int>", false)),
             $interfaceToCall->getParameterWithName("ratings")
         );
     }
@@ -174,7 +175,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("rating", TypeDescriptor::create(TypeDescriptor::INTEGER, false, "int")),
+            InterfaceParameter::create("rating", TypeDescriptor::create(TypeDescriptor::INTEGER, false)),
             $interfaceToCall->getParameterWithName("rating")
         );
     }
@@ -190,7 +191,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("random",TypeDescriptor::create( TypeDescriptor::UNKNOWN, true, "array")),
+            InterfaceParameter::create("random",TypeDescriptor::create( TypeDescriptor::INTEGER, true)),
             $interfaceToCall->getParameterWithName("random")
         );
     }
@@ -199,14 +200,14 @@ class InterfaceToCallTest extends TestCase
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
      */
-    public function test_guessing_parameter_type_hint_from_compound_and_collection()
+    public function test_guessing_parameter_first_type_hint_from_method_annotation()
     {
         $interfaceToCall = InterfaceToCall::create(
             User::class, "addPhones"
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("phones", TypeDescriptor::create(TypeDescriptor::UNKNOWN, true, "array<string>")),
+            InterfaceParameter::create("phones", TypeDescriptor::create(TypeDescriptor::ARRAY, true)),
             $interfaceToCall->getParameterWithName("phones")
         );
     }
@@ -222,8 +223,42 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::create("email", TypeDescriptor::create(TypeDescriptor::UNKNOWN, true, "\\" . Email::class)),
+            InterfaceParameter::create("email", TypeDescriptor::create("\\" . Email::class, true)),
             $interfaceToCall->getParameterWithName("email")
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
+     */
+    public function test_guessing_parameter_from_interface_inherit_doc()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            OnlineShop::class, "buy"
+        );
+
+        $this->assertEquals(
+            InterfaceParameter::create("productId", TypeDescriptor::create("\\" . \stdClass::class, true)),
+            $interfaceToCall->getParameterWithName("productId")
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
+     */
+    public function test_guessing_parameter_from_abstract_class_inherit_doc()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            OnlineShop::class, "findGame"
+        );
+
+        $this->assertEquals(
+            InterfaceParameter::create("gameId", TypeDescriptor::create(TypeDescriptor::STRING, true)),
+            $interfaceToCall->getParameterWithName("gameId")
         );
     }
 }

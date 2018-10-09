@@ -37,7 +37,7 @@ class PayloadBuilderTest extends MessagingTest
         $this->assertEquals(
               $payload,
               $converter->getArgumentFrom(
-                  InterfaceParameter::create("x", TypeDescriptor::create("string", true, "")),
+                  InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock("string", true, "")),
                   MessageBuilder::withPayload($payload)->build()
               )
         );

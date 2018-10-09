@@ -142,7 +142,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
         $objectToInvokeOn = $this->directObject ? $this->directObject : $referenceSearchService->findByReference($this->referenceName);
         $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
 
-        if (!$interfaceToCall->doesItReturnArray()) {
+        if (!$interfaceToCall->doesItReturnIterable()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 

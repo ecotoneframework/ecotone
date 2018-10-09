@@ -18,9 +18,8 @@ class InterfaceToCall
     private const COLLECTION_TYPE_REGEX = "/[a-zA-Z0-9]*<([^<]*)>/";
     private const CODE_USE_STATEMENTS_REGEX = '/use[\s]*([^;]*)[\s]*;/';
     private const METHOD_DOC_BLOCK_PARAMETERS_REGEX = '~@param[\s]*([^\n\$\s]*)[\s]*\$([a-zA-Z0-9]*)~';
-    private const GUESSED_COMPOUND_TYPE_RANK = 3;
-    private const GUESSED_SCALAR_TYPE_RANK = 1;
-    private const GUESSED_COLLECTION_TYPE_RANK = 4;
+    private const METHOD_RETURN_TYPE_REGEX = '~@return[\s]*([^\n\$\s]*)~';
+
     /**
      * @var string
      */
@@ -34,7 +33,7 @@ class InterfaceToCall
      */
     private $parameters;
     /**
-     * @var string
+     * @var TypeDescriptor
      */
     private $returnType;
     /**
@@ -62,6 +61,125 @@ class InterfaceToCall
     /**
      * @param string $interfaceName
      * @param string $methodName
+     * @return InterfaceToCall
+     */
+    public static function create(string $interfaceName, string $methodName): self
+    {
+        return new self($interfaceName, $methodName);
+    }
+
+    /**
+     * @param $object
+     * @param string $methodName
+     * @return InterfaceToCall
+     * @throws InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createFromObject($object, string $methodName): self
+    {
+        Assert::isObject($object, "Passed value to InterfaceToCall is not object");
+
+        return new self(get_class($object), $methodName);
+    }
+
+    /**
+     * @param string|object $unknownType
+     * @param string $methodName
+     *
+     * @return InterfaceToCall
+     */
+    public static function createFromUnknownType($unknownType, string $methodName) : self
+    {
+        if (is_object($unknownType)) {
+            return self::createFromObject($unknownType, $methodName);
+        }
+
+        return self::create($unknownType, $methodName);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStaticallyCalled() : bool
+    {
+        return $this->isStaticallyCalled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasReturnValue() : bool
+    {
+        return !$this->getReturnType()->isVoid();
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasReturnTypeVoid() : bool
+    {
+        return $this->getReturnType()->isVoid();
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasReturnValueBoolean() : bool
+    {
+        return $this->getReturnType()->isBoolean();
+    }
+
+    /**
+     * @return bool
+     */
+    public function doesItReturnIterable() : bool
+    {
+        return $this->getReturnType()->isIterable();
+    }
+
+    /**
+     * @return string
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function getFirstParameterName(): string
+    {
+        return $this->getFirstParameter()->getName();
+    }
+
+    /**
+     * @return InterfaceParameter
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function getFirstParameter(): InterfaceParameter
+    {
+        if ($this->parameterAmount() < 1) {
+            throw InvalidArgumentException::create("Expecting {$this} to have at least one parameter, but got none");
+        }
+
+        return $this->getParameters()[0];
+    }
+
+    /**
+     * @param int $index
+     * @return InterfaceParameter
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function getParameterAtIndex(int $index) : InterfaceParameter
+    {
+        if (!array_key_exists($index, $this->getParameters())) {
+            throw InvalidArgumentException::create("There is no parameter at index {$index} for {$this}");
+        }
+
+        return $this->parameters[$index];
+    }
+
+    /**
+     * @param string $interfaceName
+     * @param string $methodName
      * @throws InvalidArgumentException
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
@@ -74,8 +192,9 @@ class InterfaceToCall
         }
 
         $parameters = [];
+        $statements = $this->getClassUseStatements($reflectionClass);
         $reflectionMethod = $reflectionClass->getMethod($methodName);
-        $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($reflectionClass, $reflectionMethod);
+        $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($reflectionClass, $reflectionMethod, $statements);
         foreach ($reflectionMethod->getParameters() as $parameter) {
             $parameters[] = InterfaceParameter::create(
                 $parameter->getName(),
@@ -87,10 +206,14 @@ class InterfaceToCall
             );
         }
 
+        $returnType = $this->getReturnTypeDocBlockParameterTypeHint($reflectionClass, $reflectionMethod, $statements);
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;
         $this->parameters = $parameters;
-        $this->returnType = (string)$reflectionMethod->getReturnType();
+        $this->returnType = TypeDescriptor::create(
+            $returnType ? $returnType : (string)$reflectionMethod->getReturnType(),
+            $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true
+        );
         $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
         $this->isStaticallyCalled = $reflectionMethod->isStatic();
     }
@@ -98,28 +221,13 @@ class InterfaceToCall
     /**
      * @param \ReflectionClass $reflectionClass
      * @param \ReflectionMethod $methodReflection
+     * @param string[] $statements
      * @return array
      * @throws \ReflectionException
      */
-    private function getMethodDocBlockParameterTypeHints(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection) : array
+    private function getMethodDocBlockParameterTypeHints(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection, array $statements) : array
     {
-        $statements = $this->getClassUseStatements($reflectionClass);
-        $docComment = $methodReflection->getDocComment();
-        if (!$docComment) {
-            return [];
-        }
-
-        if (preg_match("/@inheritDoc/", $docComment)) {
-            foreach ($reflectionClass->getInterfaceNames() as $interfaceName) {
-                if (method_exists($interfaceName, $methodReflection->getName())) {
-                    $docComment = (new \ReflectionMethod($interfaceName, $methodReflection->getName()))->getDocComment();
-                }
-            }
-            if ($reflectionClass->getParentClass() && $reflectionClass->getParentClass()->hasMethod($methodReflection->getName())) {
-                $docComment = $reflectionClass->getParentClass()->getMethod($methodReflection->getName())->getDocComment();
-            }
-        }
-
+        $docComment = $this->getDocComment($reflectionClass, $methodReflection);
         preg_match_all(self::METHOD_DOC_BLOCK_PARAMETERS_REGEX, $docComment, $matchedDocBlockParameterTypes);
 
         $docBlockParameterTypeHints = [];
@@ -129,6 +237,26 @@ class InterfaceToCall
         }
 
         return $docBlockParameterTypeHints;
+    }
+
+    /**
+     * @param \ReflectionClass $reflectionClass
+     * @param \ReflectionMethod $methodReflection
+     * @param string[] $statements
+     * @return string
+     * @throws \ReflectionException
+     */
+    private function getReturnTypeDocBlockParameterTypeHint(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection, array $statements) : ?string
+    {
+        $docComment = $this->getDocComment($reflectionClass, $methodReflection);
+
+        preg_match(self::METHOD_RETURN_TYPE_REGEX, $docComment, $matchedDocBlockReturnType);
+
+        if (isset($matchedDocBlockReturnType[1])) {
+            return $this->expandParameterTypeHint($matchedDocBlockReturnType[1], $statements, $reflectionClass);
+        }
+
+        return null;
     }
 
     /**
@@ -185,11 +313,11 @@ class InterfaceToCall
         $useStatements = [];
         $matchAmount = count($foundUseStatements[0]);
         for ($matchIndex = 0; $matchIndex < $matchAmount; $matchIndex++) {
-            $className = $foundUseStatements[self::GUESSED_SCALAR_TYPE_RANK][$matchIndex];
+            $className = $foundUseStatements[1][$matchIndex];
             $classNameAlias = null;
             if (($alias = explode(" as ", $className)) && $this->hasUseStatementAlias($alias)) {
                 $className = $alias[0];
-                $classNameAlias = $alias[self::GUESSED_SCALAR_TYPE_RANK];
+                $classNameAlias = $alias[1];
             }
 
             $splittedClassName = explode("\\", $className);
@@ -204,125 +332,6 @@ class InterfaceToCall
         }
 
         return $useStatements;
-    }
-
-    /**
-     * @param string $interfaceName
-     * @param string $methodName
-     * @return InterfaceToCall
-     */
-    public static function create(string $interfaceName, string $methodName): self
-    {
-        return new self($interfaceName, $methodName);
-    }
-
-    /**
-     * @param $object
-     * @param string $methodName
-     * @return InterfaceToCall
-     * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    public static function createFromObject($object, string $methodName): self
-    {
-        Assert::isObject($object, "Passed value to InterfaceToCall is not object");
-
-        return new self(get_class($object), $methodName);
-    }
-
-    /**
-     * @param string|object $unknownType
-     * @param string $methodName
-     *
-     * @return InterfaceToCall
-     */
-    public static function createFromUnknownType($unknownType, string $methodName) : self
-    {
-        if (is_object($unknownType)) {
-            return self::createFromObject($unknownType, $methodName);
-        }
-
-        return self::create($unknownType, $methodName);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isStaticallyCalled() : bool
-    {
-        return $this->isStaticallyCalled;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasReturnValue() : bool
-    {
-        return !($this->getReturnType() == 'void');
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasReturnTypeVoid() : bool
-    {
-        return $this->getReturnType() == 'void';
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasReturnValueBoolean() : bool
-    {
-        return $this->getReturnType() == "bool";
-    }
-
-    /**
-     * @return bool
-     */
-    public function doesItReturnArray() : bool
-    {
-        return $this->getReturnType() == "array";
-    }
-
-    /**
-     * @return string
-     * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    public function getFirstParameterName(): string
-    {
-        return $this->getFirstParameter()->getName();
-    }
-
-    /**
-     * @return InterfaceParameter
-     * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    public function getFirstParameter(): InterfaceParameter
-    {
-        if ($this->parameterAmount() < 1) {
-            throw InvalidArgumentException::create("Expecting {$this} to have at least one parameter, but got none");
-        }
-
-        return $this->getParameters()[0];
-    }
-
-    /**
-     * @param int $index
-     * @return InterfaceParameter
-     * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    public function getParameterAtIndex(int $index) : InterfaceParameter
-    {
-        if (!array_key_exists($index, $this->getParameters())) {
-            throw InvalidArgumentException::create("There is no parameter at index {$index} for {$this}");
-        }
-
-        return $this->parameters[$index];
     }
 
     /**
@@ -356,7 +365,7 @@ class InterfaceToCall
      */
     public function doesItReturnFuture(): bool
     {
-        return $this->getReturnType() == Future::class;
+        return $this->getReturnType()->isClassOfType(Future::class);
     }
 
     /**
@@ -364,9 +373,7 @@ class InterfaceToCall
      */
     public function isReturnTypeUnknown(): bool
     {
-        $returnType = $this->getReturnType();
-
-        return is_null($returnType) || $returnType === '';
+        return $this->getReturnType()->isUnknown();
     }
 
     /**
@@ -374,7 +381,7 @@ class InterfaceToCall
      */
     public function doesItReturnMessage() : bool
     {
-        return $this->getReturnType() === Message::class || $this->getReturnType() === "\\" . Message::class || is_subclass_of($this->getReturnType(), Message::class);
+        return $this->getReturnType()->isClassOfType(Message::class);
     }
 
     /**
@@ -458,9 +465,9 @@ class InterfaceToCall
     }
 
     /**
-     * @return string
+     * @return TypeDescriptor
      */
-    private function getReturnType(): string
+    private function getReturnType(): TypeDescriptor
     {
         return $this->returnType;
     }
@@ -476,12 +483,12 @@ class InterfaceToCall
      */
     private function isInGlobalNamespace(string $className): bool
     {
-        if (TypeDescriptor::isPrimitiveType($className)) {
+        if (TypeDescriptor::isItTypeOfPrimitive($className) || TypeDescriptor::isItTypeOfVoid($className)) {
             return true;
         }
 
         if (preg_match(self::COLLECTION_TYPE_REGEX, $className, $matches)) {
-            return TypeDescriptor::isScalar($matches[1]);
+            return TypeDescriptor::isItTypeOfScalar($matches[1]) || TypeDescriptor::isItTypeOfExistingClassOrInterface($matches[1]);
         }
 
         return count(explode("\\", $className)) == 2;
@@ -546,5 +553,32 @@ class InterfaceToCall
         }
 
         return $typeHint;
+    }
+
+    /**
+     * @param \ReflectionClass $reflectionClass
+     * @param \ReflectionMethod $methodReflection
+     * @return string
+     * @throws \ReflectionException
+     */
+    private function getDocComment(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection) : string
+    {
+        $docComment = $methodReflection->getDocComment();
+        if (!$docComment) {
+            return "";
+        }
+
+        if (preg_match("/@inheritDoc/", $docComment)) {
+            foreach ($reflectionClass->getInterfaceNames() as $interfaceName) {
+                if (method_exists($interfaceName, $methodReflection->getName())) {
+                    $docComment = (new \ReflectionMethod($interfaceName, $methodReflection->getName()))->getDocComment();
+                }
+            }
+            if ($reflectionClass->getParentClass() && $reflectionClass->getParentClass()->hasMethod($methodReflection->getName())) {
+                $docComment = $reflectionClass->getParentClass()->getMethod($methodReflection->getName())->getDocComment();
+            }
+        }
+
+        return $docComment;
     }
 }

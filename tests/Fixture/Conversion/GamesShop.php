@@ -12,7 +12,7 @@ abstract class GamesShop
 {
     /**
      * @param string $gameId
-     * @return array
+     * @return \stdClass[]
      */
-    public abstract function findGame($gameId) : array;
+    public abstract function findGames($gameId);
 }

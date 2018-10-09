@@ -28,6 +28,7 @@ class TypeDescriptor
     const RESOURCE = "resource";
 
     const UNKNOWN = "unknown";
+    const VOID = "void";
 
     /**
      * @var string
@@ -42,7 +43,7 @@ class TypeDescriptor
      * @param string $type
      * @return bool
      */
-    public static function isPrimitiveCompoundType(string $type) : bool
+    public static function isItTypeOfCompoundType(string $type) : bool
     {
         return in_array($type, [self::ARRAY, self::ITERABLE, self::CALLABLE, self::OBJECT]);
     }
@@ -51,7 +52,7 @@ class TypeDescriptor
      * @param string $type
      * @return bool
      */
-    public static function isScalar(string $type) : bool
+    public static function isItTypeOfScalar(string $type) : bool
     {
         return in_array($type, [self::INTEGER, self::FLOAT, self::BOOL, self::STRING]);
     }
@@ -60,16 +61,16 @@ class TypeDescriptor
      * @param string $type
      * @return bool
      */
-    public static function isPrimitiveType(string $type) : bool
+    public static function isItTypeOfPrimitive(string $type) : bool
     {
-        return self::isPrimitiveCompoundType($type) || self::isScalar($type) || $type === self::RESOURCE;
+        return self::isItTypeOfCompoundType($type) || self::isItTypeOfScalar($type) || $type === self::RESOURCE;
     }
 
     /**
      * @param string $type
      * @return bool
      */
-    public static function isCollection(string $type) : bool
+    public static function isItTypeOfCollection(string $type) : bool
     {
         return (bool)preg_match(self::COLLECTION_TYPE_REGEX, $type);
     }
@@ -78,9 +79,27 @@ class TypeDescriptor
      * @param string $type
      * @return bool
      */
-    public static function isResource(string $type) : bool
+    public static function isItTypeOfResource(string $type) : bool
     {
         return $type == self::RESOURCE;
+    }
+
+    /**
+     * @param string $typeToCompare
+     * @return bool
+     */
+    public static function isItTypeOfVoid(string $typeToCompare) : bool
+    {
+        return $typeToCompare === self::VOID;
+    }
+
+    /**
+     * @param string $typeHint
+     * @return bool
+     */
+    public static function isItTypeOfExistingClassOrInterface(string $typeHint) : bool
+    {
+        return class_exists($typeHint) || interface_exists($typeHint);
     }
 
     /**
@@ -108,6 +127,11 @@ class TypeDescriptor
         $typeHint = trim($typeHint);
         $docBlockTypeDescription = trim($docBlockTypeDescription);
 
+        if ($typeHint === self::VOID) {
+            $this->type = self::VOID;
+            return;
+        }
+
         if (
             $this->isScalarAndCompound($typeHint, $docBlockTypeDescription)
             || $this->isCompoundAndScalar($typeHint, $docBlockTypeDescription)
@@ -132,7 +156,7 @@ class TypeDescriptor
         ) {
             $type = $docBlockTypeDescription;
         }
-        if ($this->isUnknown($typeHint) && $this->isResolvableType($docBlockTypeDescription)) {
+        if ($this->isUnknownType($typeHint) && $this->isResolvableType($docBlockTypeDescription)) {
             $type = $docBlockTypeDescription;
         }
 
@@ -140,7 +164,7 @@ class TypeDescriptor
             $type = "array<" . str_replace("[]", "", $docBlockTypeDescription) . ">";
         }
         if (preg_match(self::COLLECTION_TYPE_REGEX, $docBlockTypeDescription, $match)) {
-            if (!($this->isUnknown($typeHint) || $this->isCompoundArray($typeHint))) {
+            if (!($this->isUnknownType($typeHint) || $this->isCompoundArray($typeHint))) {
                 throw TypeDefinitionException::create("Passed type hint {$typeHint} is not compatible with doc block type {$docBlockTypeDescription}");
             }
 
@@ -201,12 +225,53 @@ class TypeDescriptor
     }
 
     /**
+     * @param string $interfaceName
+     * @return bool
+     */
+    public function isClassOfType(string $interfaceName) : bool
+    {
+        return self::isItTypeOfExistingClassOrInterface($this->type) && ($this->type === $interfaceName || $this->type === "\\" . $interfaceName || is_subclass_of($this->type, $interfaceName));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIterable() : bool
+    {
+        return $this->type === self::ARRAY || $this->type === self::ITERABLE || self::isItTypeOfCollection($this->type);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBoolean() : bool
+    {
+        return $this->type === self::BOOL;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVoid() : bool
+    {
+        return $this->type === self::VOID;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUnknown() : bool
+    {
+        return $this->type === self::UNKNOWN;
+    }
+
+    /**
      * @param string $typeToCheck
      * @return bool
      */
     private function isResolvableType(string $typeToCheck): bool
     {
-        return self::isPrimitiveType($typeToCheck) || class_exists($typeToCheck) || interface_exists($typeToCheck) || $typeToCheck == self::UNKNOWN || self::isCollection($typeToCheck);
+        return self::isItTypeOfPrimitive($typeToCheck) || class_exists($typeToCheck) || interface_exists($typeToCheck) || $typeToCheck == self::UNKNOWN || self::isItTypeOfCollection($typeToCheck);
     }
 
     /**
@@ -231,7 +296,7 @@ class TypeDescriptor
      * @param string $typeHint
      * @return bool
      */
-    private function isUnknown(string $typeHint) : bool
+    private function isUnknownType(string $typeHint) : bool
     {
         return $typeHint === self::UNKNOWN;
     }
@@ -243,7 +308,7 @@ class TypeDescriptor
      */
     private function isScalarAndCompound(string $typeHint, string $docBlockTypeDescription): bool
     {
-        return self::isScalar($typeHint) && self::isPrimitiveCompoundType($docBlockTypeDescription);
+        return self::isItTypeOfScalar($typeHint) && self::isItTypeOfCompoundType($docBlockTypeDescription);
     }
 
     /**
@@ -253,7 +318,7 @@ class TypeDescriptor
      */
     private function isCompoundAndScalar(string $typeHint, string $docBlockTypeDescription): bool
     {
-        return self::isPrimitiveCompoundType($typeHint) && self::isScalar($docBlockTypeDescription);
+        return self::isItTypeOfCompoundType($typeHint) && self::isItTypeOfScalar($docBlockTypeDescription);
     }
 
     /**
@@ -263,7 +328,7 @@ class TypeDescriptor
      */
     private function isResourceAndScalar(string $typeHint, string $docBlockTypeDescription): bool
     {
-        return self::isResource($typeHint) && self::isScalar($docBlockTypeDescription);
+        return self::isItTypeOfResource($typeHint) && self::isItTypeOfScalar($docBlockTypeDescription);
     }
 
     /**
@@ -273,7 +338,7 @@ class TypeDescriptor
      */
     private function isScalarAndResource(string $typeHint, string $docBlockTypeDescription): bool
     {
-        return self::isScalar($typeHint) && self::isResource($docBlockTypeDescription);
+        return self::isItTypeOfScalar($typeHint) && self::isItTypeOfResource($docBlockTypeDescription);
     }
 
     /**
@@ -283,7 +348,7 @@ class TypeDescriptor
      */
     private function isResourceAndCompound(string $typeHint, string $docBlockTypeDescription): bool
     {
-        return self::isResource($typeHint) && self::isPrimitiveCompoundType($docBlockTypeDescription);
+        return self::isItTypeOfResource($typeHint) && self::isItTypeOfCompoundType($docBlockTypeDescription);
     }
 
     /**
@@ -293,7 +358,7 @@ class TypeDescriptor
      */
     private function isCompoundAndResource(string $typeHint, string $docBlockTypeDescription): bool
     {
-        return self::isPrimitiveCompoundType($typeHint) && self::isResource($docBlockTypeDescription);
+        return self::isItTypeOfCompoundType($typeHint) && self::isItTypeOfResource($docBlockTypeDescription);
     }
 
     /**
@@ -303,7 +368,7 @@ class TypeDescriptor
      */
     private function isCompoundAndClass(string $typeHint, string $docBlockTypeDescription): bool
     {
-        return self::isPrimitiveCompoundType($typeHint) && self::isClassOrInterface($docBlockTypeDescription) && !$this->isCompoundClass($typeHint);
+        return self::isItTypeOfCompoundType($typeHint) && self::isClassOrInterface($docBlockTypeDescription) && !$this->isCompoundClass($typeHint);
     }
 
     /**

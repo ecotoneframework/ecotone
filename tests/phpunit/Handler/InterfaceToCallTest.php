@@ -253,12 +253,26 @@ class InterfaceToCallTest extends TestCase
     public function test_guessing_parameter_from_abstract_class_inherit_doc()
     {
         $interfaceToCall = InterfaceToCall::create(
-            OnlineShop::class, "findGame"
+            OnlineShop::class, "findGames"
         );
 
         $this->assertEquals(
             InterfaceParameter::create("gameId", TypeDescriptor::create(TypeDescriptor::STRING, true)),
             $interfaceToCall->getParameterWithName("gameId")
         );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_guessing_return_type_based_on_inherit_doc_annotation()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            OnlineShop::class, "findGames"
+        );
+
+        $this->assertTrue($interfaceToCall->doesItReturnIterable());
+//        $this->assertEquals(TypeDescriptor::create("array<\stdClass>", false), $interfaceToCall->getReturnType());
     }
 }

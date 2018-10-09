@@ -240,4 +240,12 @@ class TypeDescriptorTest extends TestCase
             TypeDescriptor::create(TypeDescriptor::OBJECT, false)->getTypeHint()
         );
     }
+
+    public function test_creating_for_void_return_type_hint()
+    {
+        $this->assertEquals(
+            TypeDescriptor::VOID,
+            TypeDescriptor::create(TypeDescriptor::VOID, false)->getTypeHint()
+        );
+    }
 }

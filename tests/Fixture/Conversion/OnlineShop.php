@@ -21,7 +21,7 @@ class OnlineShop extends GamesShop implements Shop
     /**
      * @inheritDoc
      */
-    public function findGame($gameId): array
+    public function findGames($gameId)
     {
         // TODO: Implement findGame() method.
     }

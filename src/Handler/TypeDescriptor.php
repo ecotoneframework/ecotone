@@ -8,7 +8,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class TypeDescriptor
+final class TypeDescriptor
 {
     const COLLECTION_TYPE_REGEX = "/[a-zA-Z0-9]*<([^<]*)>/";
 
@@ -117,6 +117,37 @@ class TypeDescriptor
     }
 
     /**
+     * @param $variable
+     * @return TypeDescriptor
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createFromVariable($variable) : self
+    {
+        $type = gettype($variable);
+
+        if ($type === "double") {
+            $type = self::FLOAT;
+        }else if ($type === "integer") {
+            $type = self::INTEGER;
+        }else if ($type === self::ARRAY) {
+            $type = self::ITERABLE;
+        }else if (is_callable($variable)){
+            $type = self::CALLABLE;
+        }else if ($type === self::OBJECT) {
+            $type = get_class($variable);
+        }else if ($type === self::STRING) {
+            $type = self::STRING;
+        }else if ($type === self::RESOURCE){
+            $type = self::RESOURCE;
+        }else {
+            $type = self::UNKNOWN;
+        }
+
+        return new self($type, true, "");
+    }
+
+    /**
      * @param string $typeHint
      * @param string $docBlockTypeDescription
      * @throws TypeDefinitionException
@@ -197,6 +228,17 @@ class TypeDescriptor
     }
 
     /**
+     * @param string $className
+     * @return TypeDescriptor
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createCollection(string $className) : self
+    {
+        return new self("array<$className>", true, "");
+    }
+
+    /**
      * @param string $type
      * @param bool $doesAllowNulls
      * @return TypeDescriptor
@@ -255,6 +297,22 @@ class TypeDescriptor
     public function isVoid() : bool
     {
         return $this->type === self::VOID;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isString() : bool
+    {
+        return $this->type === self::STRING;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isObject() : bool
+    {
+        return $this->type === self::OBJECT || $this->isClassOrInterface($this->type);
     }
 
     /**
@@ -378,5 +436,13 @@ class TypeDescriptor
     private function isCompoundClass(string $typeHint): bool
     {
         return $typeHint === self::OBJECT;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->type;
     }
 }

@@ -36,6 +36,20 @@ class Assert
     }
 
     /**
+     * @param array $array
+     * @param string|int $requiredKey
+     * @param string $exceptionMessage
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function keyExists(array $array, $requiredKey, string $exceptionMessage) : void
+    {
+        if (!isset($array[$requiredKey])) {
+            throw InvalidArgumentException::create($exceptionMessage);
+        }
+    }
+
+    /**
      * @param $valueToCheck
      * @param string $exceptionMessage
      * @throws InvalidArgumentException

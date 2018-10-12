@@ -233,6 +233,10 @@ class TypeDescriptorTest extends TestCase
         );
     }
 
+    /**
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_creating_with_compound_object_type_hint()
     {
         $this->assertEquals(
@@ -241,11 +245,52 @@ class TypeDescriptorTest extends TestCase
         );
     }
 
+    /**
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_creating_for_void_return_type_hint()
     {
         $this->assertEquals(
             TypeDescriptor::VOID,
             TypeDescriptor::create(TypeDescriptor::VOID, false)->getTypeHint()
         );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_creating_with_mixed_type_result_in_unknown_type_hint()
+    {
+        $this->assertEquals(
+            TypeDescriptor::UNKNOWN,
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::UNKNOWN, false, "mixed")->getTypeHint()
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_creating_guessing_type_from_variable()
+    {
+        $this->assertEquals(TypeDescriptor::FLOAT, TypeDescriptor::createFromVariable(1.21));
+        $this->assertEquals(TypeDescriptor::INTEGER, TypeDescriptor::createFromVariable(121));
+        $this->assertEquals(TypeDescriptor::STRING, TypeDescriptor::createFromVariable("text"));
+        $this->assertEquals(TypeDescriptor::ITERABLE, TypeDescriptor::createFromVariable([]));
+        $this->assertEquals("\\" . \stdClass::class, TypeDescriptor::createFromVariable(new \stdClass()));
+        $this->assertEquals(TypeDescriptor::RESOURCE, TypeDescriptor::createFromVariable(fopen('file', 'w+')));
+        $this->assertEquals(TypeDescriptor::UNKNOWN, TypeDescriptor::createFromVariable(null));
+        $this->assertEquals(TypeDescriptor::CALLABLE, TypeDescriptor::createFromVariable(function (){}));
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function createCollectionType()
+    {
+        $this->assertEquals("array<\stdClass>", TypeDescriptor::createCollection(\stdClass::class));
     }
 }

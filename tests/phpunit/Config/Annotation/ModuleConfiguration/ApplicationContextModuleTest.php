@@ -107,7 +107,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration = $this->createAnnotationConfiguration("withStdClassConverterByExtension");
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [ApplicationContextModuleExtensionExample::create(InMemoryAnnotationRegistrationService::createEmpty())], NullObserver::create());
+        $annotationConfiguration->prepare($configuration, [ApplicationContextModuleExtensionExample::create(InMemoryAnnotationRegistrationService::createEmpty())]);
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -127,7 +127,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
 
         $configuration = $this->createMessagingSystemConfiguration();
 
-        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -146,7 +146,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
 
         $annotationConfiguration = $this->createAnnotationConfiguration($methodName);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
+        $annotationConfiguration->prepare($configuration, []);
     }
 
     /**

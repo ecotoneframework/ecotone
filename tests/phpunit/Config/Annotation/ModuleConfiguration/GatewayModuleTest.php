@@ -42,18 +42,18 @@ class GatewayModuleTest extends AnnotationConfigurationTest
         );
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], NullObserver::create());
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, []);
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
                 ->registerGatewayBuilder(
                     GatewayProxyBuilder::create(
-                    GatewayWithReplyChannelExample::class, GatewayWithReplyChannelExample::class,
-                    "buy", "requestChannel"
+                        GatewayWithReplyChannelExample::class, GatewayWithReplyChannelExample::class,
+                        "buy", "requestChannel"
                     )
-                    ->withErrorChannel("someErrorChannel")
-                    ->withMillisecondTimeout(1)
-                    ->withTransactionFactories(['dbalTransaction'])
+                        ->withErrorChannel("someErrorChannel")
+                        ->withMillisecondTimeout(1)
+                        ->withTransactionFactories(['dbalTransaction'])
                 ),
             $messagingSystemConfiguration
         );

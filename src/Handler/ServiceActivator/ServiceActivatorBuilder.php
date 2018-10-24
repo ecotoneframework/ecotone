@@ -170,6 +170,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
             $objectToInvoke,
             $this->methodName,
             $this->methodParameterConverterBuilders,
+            false,
             $referenceSearchService
         );
         if ($this->shouldPassThroughMessage && $interfaceToCall->hasReturnTypeVoid()) {
@@ -177,6 +178,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
                 new PassThroughService($methodToInvoke),
                 "invoke",
                 [],
+                true,
                 $referenceSearchService
             );
         }

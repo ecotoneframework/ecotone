@@ -25,13 +25,13 @@ class RouterModuleTest extends AnnotationConfigurationTest
      */
     public function test_creating_router_builder_from_annotation()
     {
-        $objectToInvokeReference                            = RouterWithNoResolutionRequiredExample::class;
-        $routerAnnotation                                   = new Router();
-        $routerAnnotation->inputChannelName                 = "inputChannel";
-        $routerAnnotation->isResolutionRequired             = false;
-        $messageToPayloadParameterAnnotation                = new Payload();
+        $objectToInvokeReference = RouterWithNoResolutionRequiredExample::class;
+        $routerAnnotation = new Router();
+        $routerAnnotation->inputChannelName = "inputChannel";
+        $routerAnnotation->isResolutionRequired = false;
+        $messageToPayloadParameterAnnotation = new Payload();
         $messageToPayloadParameterAnnotation->parameterName = "content";
-        $routerAnnotation->parameterConverters              = [
+        $routerAnnotation->parameterConverters = [
             $messageToPayloadParameterAnnotation
         ];
 
@@ -45,12 +45,12 @@ class RouterModuleTest extends AnnotationConfigurationTest
             )
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
+        $annotationConfiguration->prepare($configuration, []);
 
 
-        $router = RouterBuilder::create( $objectToInvokeReference, "route")
-                        ->withInputChannelName("inputChannel")
-                        ->setResolutionRequired(false);
+        $router = RouterBuilder::create($objectToInvokeReference, "route")
+            ->withInputChannelName("inputChannel")
+            ->setResolutionRequired(false);
         $router->withMethodParameterConverters([
             PayloadBuilder::create("content")
         ]);

@@ -66,7 +66,7 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver) : void
+    public function prepare(Configuration $configuration, array $moduleExtensions) : void
     {
         $classes = [];
         foreach ($this->messagingComponentsRegistrations as $annotationRegistration) {
@@ -87,14 +87,6 @@ class ApplicationContextModule extends NoExternalConfigurationModule implements 
                 $this->registerMessagingComponent($configuration, $singleMessagingCompoenent, $moduleExtensions);
             }
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem): void
-    {
-        return;
     }
 
     /**

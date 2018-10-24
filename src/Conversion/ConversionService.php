@@ -11,6 +11,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDescriptor;
  */
 class ConversionService
 {
+    const REFERENCE_NAME = "conversionService";
+
     /**
      * @var Converter[]
      */
@@ -20,9 +22,26 @@ class ConversionService
      * ConversionService constructor.
      * @param Converter[] $converters
      */
-    public function __construct(array $converters)
+    private function __construct(array $converters)
     {
-        $this->converters = $converters;
+        $this->initialize($converters);
+    }
+
+    /**
+     * @param Converter[] $converters
+     * @return ConversionService
+     */
+    public static function createWith(array $converters) : self
+    {
+        return new self($converters);
+    }
+
+    /**
+     * @return ConversionService
+     */
+    public static function createEmpty() : self
+    {
+        return new self([]);
     }
 
     /**
@@ -68,5 +87,17 @@ class ConversionService
         }
 
         return null;
+    }
+
+    /**
+     * @param Converter[] $converters
+     */
+    private function initialize(array $converters) : void
+    {
+        $this->converters = $converters;
+
+        foreach ($converters as $converter) {
+            $this->converters[] = CollectionConverter::createForConverter($converter);
+        }
     }
 }

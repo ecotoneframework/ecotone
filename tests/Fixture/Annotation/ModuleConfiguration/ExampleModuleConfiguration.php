@@ -45,7 +45,7 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
+    public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
         return;
     }
@@ -72,13 +72,5 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
     public function configure(\SimplyCodedSoftware\IntegrationMessaging\Config\Configuration $configuration, array $moduleExtensions, \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
         // TODO: Implement registerWithin() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postConfigure(\SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem $configuredMessagingSystem): void
-    {
-        // TODO: Implement postConfigure() method.
     }
 }

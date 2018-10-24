@@ -35,7 +35,7 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
+    public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
         $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         $configuration->registerConsumerFactory(new PollingConsumerBuilder());

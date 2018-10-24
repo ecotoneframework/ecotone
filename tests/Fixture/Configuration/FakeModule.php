@@ -3,7 +3,6 @@
 namespace Fixture\Configuration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Module;
@@ -23,9 +22,21 @@ class FakeModule implements Module
     private $moduleExtensions;
 
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
+    }
+
+    /**
+     * @param array $extensions
+     * @return FakeModule
+     */
+    public static function createWithExtensions(array $extensions): self
+    {
+        $fakeModuleConfiguration = new self();
+        $fakeModuleConfiguration->moduleExtensions = $extensions;
+
+        return $fakeModuleConfiguration;
     }
 
     /**
@@ -55,7 +66,7 @@ class FakeModule implements Module
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
+    public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
         return;
     }
@@ -66,25 +77,5 @@ class FakeModule implements Module
     public function configure(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
     {
         $this->moduleExtensions = $moduleExtensions;
-    }
-
-    /**
-     * @param array $extensions
-     * @return FakeModule
-     */
-    public static function createWithExtensions(array $extensions) : self
-    {
-        $fakeModuleConfiguration = new self();
-        $fakeModuleConfiguration->moduleExtensions = $extensions;
-
-        return $fakeModuleConfiguration;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem): void
-    {
-        return;
     }
 }

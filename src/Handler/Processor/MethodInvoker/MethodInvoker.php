@@ -3,15 +3,21 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\ConversionService;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\MediaType;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class MethodInvocation
@@ -36,76 +42,60 @@ final class MethodInvoker implements MessageProcessor
      * @var bool
      */
     private $isCalledStatically;
+    /**
+     * @var ConversionService
+     */
+    private $conversionService;
+    /**
+     * @var bool
+     */
+    private $extractReplyPayload;
+    /**
+     * @var InterfaceToCall
+     */
+    private $interfaceToCall;
 
     /**
      * MethodInvocation constructor.
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array|ParameterConverter[] $methodParameterConverters
+     * @param bool $extractReplyPayload
+     * @param InterfaceToCall $interfaceToCall
+     * @param ConversionService $conversionService
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters)
+    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, bool $extractReplyPayload, InterfaceToCall $interfaceToCall, ConversionService $conversionService)
     {
         Assert::allInstanceOfType($methodParameterConverters, ParameterConverter::class);
 
-        $this->init($objectToInvokeOn, $objectMethodName, $methodParameterConverters);
-    }
-
-    /**
-     * @param $objectToInvokeOn
-     * @param string $objectMethodName
-     * @param array|ParameterConverterBuilder[] $methodParameters
-     * @param ReferenceSearchService $referenceSearchService
-     * @return self
-     * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService) : self
-    {
-        $messageConverters = [];
-        foreach ($methodParameters as $methodParameter) {
-            $messageConverters[] = $methodParameter->build($referenceSearchService);
-        }
-
-        return new self($objectToInvokeOn, $objectMethodName, $messageConverters);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function processMessage(Message $message)
-    {
-        return call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $this->getMethodArguments(InterfaceToCall::createFromUnknownType($this->objectToInvokeOn, $this->objectMethodName), $message));
+        $this->init($objectToInvokeOn, $objectMethodName, $methodParameterConverters, $interfaceToCall);
+        $this->objectToInvokeOn = $objectToInvokeOn;
+        $this->conversionService = $conversionService;
+        $this->objectMethodName = $objectMethodName;
+        $this->extractReplyPayload = $extractReplyPayload;
+        $this->interfaceToCall = $interfaceToCall;
     }
 
     /**
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array|ParameterConverter[] $methodParameterConverters
+     * @param InterfaceToCall $interfaceToCall
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function init($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters) : void
+    private function init($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall): void
     {
         $this->isCalledStatically = false;
         if (!is_object($objectToInvokeOn)) {
-            $interfaceToCall = InterfaceToCall::create($objectToInvokeOn, $objectMethodName);
-
             if (!$interfaceToCall->isStaticallyCalled()) {
                 throw InvalidArgumentException::create("Reference to invoke must be object given {$objectToInvokeOn}");
             }
             $this->isCalledStatically = true;
         }
 
-        if (!$this->hasObjectMethod($objectToInvokeOn, $objectMethodName)) {
-            throw InvalidArgumentException::create("Object {$this->objectToClassName($objectToInvokeOn)} does not contain method {$objectMethodName}");
-        }
-
-        $interfaceToCall = InterfaceToCall::createFromUnknownType($objectToInvokeOn, $objectMethodName);
         $parametersForObjectToInvoke = $interfaceToCall->getParameters();
         $passedArgumentsCount = count($methodParameterConverters);
         $requiredArgumentsCount = count($interfaceToCall->getParameters());
@@ -114,7 +104,7 @@ final class MethodInvoker implements MessageProcessor
             $firstParameter = $interfaceToCall->getFirstParameter();
             if ($interfaceToCall->hasFirstParameterMessageTypeHint()) {
                 $methodParameterConverters = [MessageConverter::create($firstParameter->getName())];
-            }else {
+            } else {
                 $methodParameterConverters = [PayloadConverter::create($firstParameter->getName())];
             }
 
@@ -122,7 +112,6 @@ final class MethodInvoker implements MessageProcessor
         }
 
         if (!$this->hasEnoughArguments($passedArgumentsCount, $requiredArgumentsCount)) {
-            $interfaceToCall = InterfaceToCall::createFromUnknownType($objectToInvokeOn, $objectMethodName);
             throw InvalidArgumentException::create("Object {$interfaceToCall} requires {$requiredArgumentsCount} parameters converters, but passed {$passedArgumentsCount}");
         }
 
@@ -137,43 +126,13 @@ final class MethodInvoker implements MessageProcessor
     }
 
     /**
-     * @param InterfaceToCall $interfaceToCall
-     * @param Message $message
-     * @return array
-     * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    private function getMethodArguments(InterfaceToCall $interfaceToCall, Message $message) : array
-    {
-        $methodArguments = [];
-        $count = count($this->orderedMethodArguments);
-
-        for ($index = 0; $index < $count; $index++) {
-            $methodArguments[] = $this->orderedMethodArguments[$index]->getArgumentFrom(
-                $interfaceToCall->getParameterAtIndex($index), $message
-            );
-        }
-
-        return $methodArguments;
-    }
-
-    /**
-     * @param $objectToInvokeOn
-     * @param string $objectMethodName
+     * @param $requiredArgumentsCount
+     * @param $passedArgumentsCount
      * @return bool
      */
-    private function hasObjectMethod($objectToInvokeOn, string $objectMethodName): bool
+    private function canBeInvokedWithDefaultArgument(int $passedArgumentsCount, int $requiredArgumentsCount): bool
     {
-        return method_exists($objectToInvokeOn, $objectMethodName);
-    }
-
-    /**
-     * @param string|object $objectToInvokeOn
-     * @return string
-     */
-    private function objectToClassName($objectToInvokeOn): string
-    {
-        return $this->isCalledStatically ? $objectToInvokeOn : get_class($objectToInvokeOn);
+        return $requiredArgumentsCount === 1 && $passedArgumentsCount === 0;
     }
 
     /**
@@ -184,16 +143,6 @@ final class MethodInvoker implements MessageProcessor
     private function hasEnoughArguments(int $passedArgumentsCount, int $requiredArgumentsCount): bool
     {
         return $passedArgumentsCount === $requiredArgumentsCount;
-    }
-
-    /**
-     * @param $requiredArgumentsCount
-     * @param $passedArgumentsCount
-     * @return bool
-     */
-    private function canBeInvokedWithDefaultArgument(int $passedArgumentsCount, int $requiredArgumentsCount): bool
-    {
-        return $requiredArgumentsCount === 1 && $passedArgumentsCount === 0;
     }
 
     /**
@@ -213,6 +162,145 @@ final class MethodInvoker implements MessageProcessor
         }
 
         throw InvalidArgumentException::create("Invoked object {$invokedClass} with method {$methodToInvoke} has no converter for {$invokeParameter->getName()}");
+    }
+
+    /**
+     * @param string|object $objectToInvokeOn
+     * @return string
+     */
+    private function objectToClassName($objectToInvokeOn): string
+    {
+        return $this->isCalledStatically ? $objectToInvokeOn : get_class($objectToInvokeOn);
+    }
+
+    /**
+     * @param $objectToInvokeOn
+     * @param string $objectMethodName
+     * @param array|ParameterConverterBuilder[] $methodParameters
+     * @param bool $extractReplyPayload should the reply message payload be extracted when returned
+     * @param ReferenceSearchService $referenceSearchService
+     * @return self
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceNotFoundException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodParameters, bool $extractReplyPayload, ReferenceSearchService $referenceSearchService): self
+    {
+        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
+        $interfaceToCallRegistry = $referenceSearchService->findByReference(InterfaceToCallRegistry::REFERENCE_NAME);
+        /** @var ConversionService $conversionService */
+        $conversionService = $referenceSearchService->findByReference(ConversionService::REFERENCE_NAME);
+        $messageConverters = [];
+        foreach ($methodParameters as $methodParameter) {
+            $messageConverters[] = $methodParameter->build($referenceSearchService);
+        }
+
+        return new self($objectToInvokeOn, $objectMethodName, $messageConverters, $extractReplyPayload, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function processMessage(Message $message)
+    {
+        $payload = call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $this->getMethodArguments($message));
+
+        if (is_null($payload)) {
+            return null;
+        }
+
+        if ($payload instanceof Message) {
+            return $payload;
+        }
+
+        if ($this->extractReplyPayload) {
+            return $payload;
+        }
+
+        return MessageBuilder::fromMessage($message)
+            ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($this->interfaceToCall->getReturnType()->toString())->toString())
+            ->setPayload($payload)
+            ->build();
+    }
+
+    /**
+     * @param Message $message
+     * @return array
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function getMethodArguments(Message $message): array
+    {
+        $sourceMediaType = $message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE)
+            ? MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE))
+            : MediaType::createApplicationXPHPObject();
+        $replyMediaType = MediaType::createApplicationXPHPObject();
+
+        $methodArguments = [];
+        $count = count($this->orderedMethodArguments);
+
+        for ($index = 0; $index < $count; $index++) {
+            $data = $this->orderedMethodArguments[$index]->getArgumentFrom($this->interfaceToCall->getParameterAtIndex($index), $message);
+            $isPayloadConverter = $this->orderedMethodArguments[$index] instanceof PayloadConverter;
+            $sourceTypeDescriptor = $isPayloadConverter && $sourceMediaType->hasParameter("type")
+                ? TypeDescriptor::create($sourceMediaType->getParameter("type"), false)
+                : TypeDescriptor::createFromVariable($data);
+
+            if ($this->canConvertParameter(
+                $index,
+                $sourceTypeDescriptor,
+                $isPayloadConverter ? $sourceMediaType : MediaType::createApplicationXPHPObject(),
+                $replyMediaType
+            )) {
+                $data = $this->doConversion($data, $index, $sourceTypeDescriptor, $sourceMediaType, $replyMediaType);
+            }
+
+            $methodArguments[] = $data;
+        }
+
+        return $methodArguments;
+    }
+
+    /**
+     * @param int $index
+     * @param MediaType $requestMediaType
+     * @param MediaType $replyMediaType
+     * @param TypeDescriptor $requestType
+     * @return bool
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function canConvertParameter(int $index, TypeDescriptor $requestType, MediaType $requestMediaType, MediaType $replyMediaType): bool
+    {
+        return $this->conversionService->canConvert(
+            $requestType,
+            $requestMediaType,
+            $this->interfaceToCall->getParameterAtIndex($index)->getTypeDescriptor(),
+            $replyMediaType
+        );
+    }
+
+    /**
+     * @param $data
+     * @param int $index
+     * @param MediaType $requestMediaType
+     * @param MediaType $replyMediaType
+     * @param TypeDescriptor $requestType
+     * @return mixed
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function doConversion($data, int $index, TypeDescriptor $requestType, MediaType $requestMediaType, MediaType $replyMediaType)
+    {
+        $data = $this->conversionService->convert(
+            $data,
+            $requestType,
+            $requestMediaType,
+            $this->interfaceToCall->getParameterAtIndex($index)->getTypeDescriptor(),
+            $replyMediaType
+        );
+
+        return $data;
     }
 
     public function __toString()

@@ -273,6 +273,22 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertTrue($interfaceToCall->doesItReturnIterable());
-//        $this->assertEquals(TypeDescriptor::create("array<\stdClass>", false), $interfaceToCall->getReturnType());
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
+     */
+    public function test_guessing_unknown_if_no_type_hint_information_available()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            User::class, "changeSurname"
+        );
+
+        $this->assertEquals(
+            InterfaceParameter::create("surname", TypeDescriptor::create(TypeDescriptor::UNKNOWN, true)),
+            $interfaceToCall->getParameterWithName("surname")
+        );
     }
 }

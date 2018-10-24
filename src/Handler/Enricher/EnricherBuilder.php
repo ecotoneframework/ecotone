@@ -9,6 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -137,7 +138,13 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
         return new Enricher(
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
-                MethodInvoker::createWith($internalEnrichingService, "enrich", [], $referenceSearchService),
+                MethodInvoker::createWith(
+                    $internalEnrichingService,
+                    "enrich",
+                    [],
+                    true,
+                    $referenceSearchService
+                ),
                 $channelResolver,
                 false
             )

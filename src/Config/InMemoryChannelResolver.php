@@ -54,7 +54,7 @@ class InMemoryChannelResolver implements ChannelResolver
         $resolvableChannels = [];
 
         foreach ($resolvableChannelsArray as $channelName => $messageChannel) {
-            Assert::isSubclassOf($messageChannel, MessageChannel::class, "Exepected Message Channel got " . get_class($messageChannel));
+            Assert::isSubclassOf($messageChannel, MessageChannel::class, "Expected Message Channel got " . get_class($messageChannel));
 
             $resolvableChannels[] = NamedMessageChannel::create($channelName, $messageChannel);
         }

@@ -270,6 +270,10 @@ class InterfaceToCall
         $multipleTypeHints = explode("|", $parameterTypeHint);
         $multipleTypeHints = is_array($multipleTypeHints) ? $multipleTypeHints : [$multipleTypeHints];
 
+        if (!$parameterTypeHint) {
+            return TypeDescriptor::UNKNOWN;
+        }
+
         $fullNames = [];
         foreach ($multipleTypeHints as $typeHint) {
             if (strpos($typeHint, "[]") !==  false) {
@@ -294,6 +298,10 @@ class InterfaceToCall
     private function getTypeHintFromUseNamespace(string $classNameTypeHint, array $useStatements) : string
     {
         $relatedClassName = $this->getRelatedClassNameFromTypeHint($classNameTypeHint);
+        if (TypeDescriptor::isItTypeOfCollection($classNameTypeHint)) {
+
+        }
+
         if (array_key_exists($relatedClassName, $useStatements)) {
             return str_replace($relatedClassName, $useStatements[$relatedClassName], $classNameTypeHint);
         }
@@ -467,7 +475,7 @@ class InterfaceToCall
     /**
      * @return TypeDescriptor
      */
-    private function getReturnType(): TypeDescriptor
+    public function getReturnType(): TypeDescriptor
     {
         return $this->returnType;
     }
@@ -546,13 +554,14 @@ class InterfaceToCall
      */
     private function getWithClassNamespace(\ReflectionClass $reflectionClass, $parameterTypeHint): string
     {
-        $typeHint = $reflectionClass->getNamespaceName() . "\\" . $parameterTypeHint;
+        $relatedClassName = $this->getRelatedClassNameFromTypeHint($parameterTypeHint);
+        $typeHint = $reflectionClass->getNamespaceName() . "\\" . $relatedClassName;
 
         if (substr( $typeHint, 0, 1) !== "\\") {
             $typeHint = "\\" . $typeHint;
         }
 
-        return $typeHint;
+        return str_replace($relatedClassName, $typeHint, $parameterTypeHint);
     }
 
     /**

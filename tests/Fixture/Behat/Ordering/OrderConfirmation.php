@@ -1,6 +1,8 @@
 <?php
 
 namespace Fixture\Behat\Ordering;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class OrderConfirmation
@@ -30,5 +32,14 @@ class OrderConfirmation
     public static function fromOrder(Order $order) : self
     {
         return new self($order->getOrderId());
+    }
+
+    /**
+     * @param UuidInterface $orderId
+     * @return OrderConfirmation
+     */
+    public static function createFromUuid(UuidInterface $orderId) : self
+    {
+        return new self($orderId->toString());
     }
 }

@@ -59,7 +59,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
+    public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
         foreach ($this->annotationRegistrations as $annotationRegistration) {
             $annotation = $annotationRegistration->getAnnotationForMethod();

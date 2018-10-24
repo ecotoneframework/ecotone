@@ -81,6 +81,18 @@ final class MediaType
     }
 
     /**
+     * @param string $type
+     * @return MediaType
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createApplicationXPHPObjectWithTypeParameter(string $type) : self
+    {
+        return self::parseMediaType(self::APPLICATION_X_PHP_OBJECT . ";type={$type}");
+    }
+
+
+    /**
      * @return MediaType
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
@@ -88,6 +100,16 @@ final class MediaType
     public static function createApplicationXPHPSerializedObject() : self
     {
         return self::parseMediaType(self::APPLICATION_X_PHP_SERIALIZED_OBJECT);
+    }
+
+    /**
+     * @return MediaType
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createTextPlain() : self
+    {
+        return self::parseMediaType(self::TEXT_PLAIN);
     }
 
     /**

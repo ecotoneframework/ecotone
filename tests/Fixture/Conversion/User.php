@@ -74,4 +74,9 @@ interface User
      * @param Email|Favourite $email
      */
     public function addEmail($email) : void;
+
+    /**
+     * @param $surname
+     */
+    public function changeSurname($surname) : void;
 }

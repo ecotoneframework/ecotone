@@ -145,4 +145,16 @@ class MediaTypeTest extends TestCase
                 ->isCompatibleWith(MediaType::parseMediaType(MediaType::APPLICATION_JSON))
         );
     }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_creating_x_php_object_with_type_parameter()
+    {
+        $this->assertEquals(
+            "array<string>",
+            MediaType::createApplicationXPHPObjectWithTypeParameter("array<string>")->getParameter("type")
+        );
+    }
 }

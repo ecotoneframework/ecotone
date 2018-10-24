@@ -43,12 +43,17 @@ class MessageFilterBuilderTest extends MessagingTest
 
         $messageFilter->handle($message);
 
-        $this->assertEquals(
+        $this->assertMessages(
             $message,
             $outputChannel->receive()
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_discard_message_if_selector_returns_false()
     {
         $outputChannelName = "outputChannel";

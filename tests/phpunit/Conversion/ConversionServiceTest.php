@@ -24,7 +24,7 @@ class ConversionServiceTest extends TestCase
      */
     public function test_using_php_serializing_converters()
     {
-        $conversionService = new ConversionService([
+        $conversionService = ConversionService::createWith([
             new DeserializingConverter(),
             new SerializingConverter()
         ]);

@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
  * Class TypeDescriptor
@@ -29,6 +30,8 @@ final class TypeDescriptor
 
     const UNKNOWN = "unknown";
     const VOID = "void";
+
+    private const MIXED = "mixed";
 
     /**
      * @var string
@@ -103,6 +106,15 @@ final class TypeDescriptor
     }
 
     /**
+     * @param TypeDescriptor $typeDescriptor
+     * @return bool
+     */
+    public function sameTypeAs(TypeDescriptor $typeDescriptor) : bool
+    {
+        return $this->toString() === $typeDescriptor->toString();
+    }
+
+    /**
      * TypeHint constructor.
      * @param string $type
      * @param bool $doesAllowNulls
@@ -148,70 +160,21 @@ final class TypeDescriptor
     }
 
     /**
-     * @param string $typeHint
-     * @param string $docBlockTypeDescription
-     * @throws TypeDefinitionException
+     * Should be called only, if type descriptor is collection
+     *
+     * @return TypeDescriptor[]
+     * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function initialize(string $typeHint, string $docBlockTypeDescription) : void
+    public function resolveGenericTypes() : array
     {
-        $typeHint = trim($typeHint);
-        $docBlockTypeDescription = trim($docBlockTypeDescription);
-
-        if ($typeHint === self::VOID) {
-            $this->type = self::VOID;
-            return;
+        if (!$this->isCollection()) {
+            throw InvalidArgumentException::create("Can't resolve collection type on non collection");
         }
 
-        if (
-            $this->isScalarAndCompound($typeHint, $docBlockTypeDescription)
-            || $this->isCompoundAndScalar($typeHint, $docBlockTypeDescription)
-            || $this->isResourceAndScalar($typeHint, $docBlockTypeDescription)
-            || $this->isScalarAndResource($typeHint, $docBlockTypeDescription)
-            || $this->isResourceAndCompound($typeHint, $docBlockTypeDescription)
-            || $this->isCompoundAndResource($typeHint, $docBlockTypeDescription)
-            || $this->isCompoundAndClass($typeHint, $docBlockTypeDescription)
-        ) {
-            throw TypeDefinitionException::create("Passed type hint {$typeHint} is not compatible with doc block type {$docBlockTypeDescription}");
-        }
+        preg_match(self::COLLECTION_TYPE_REGEX, $this->type, $match);
 
-        if (!$this->isResolvableType($typeHint)) {
-            throw TypeDefinitionException::create("Passed type hint is not resolvable: {$typeHint}");
-        }
-
-        $type = $typeHint;
-        $docBlockTypeDescription = explode("|", $docBlockTypeDescription)[0];
-        if (
-            ($this->isCompoundClass($typeHint) && $this->isClassOrInterface($docBlockTypeDescription))
-            || ($this->isClassOrInterface($typeHint) && $this->isClassOrInterface($docBlockTypeDescription))
-        ) {
-            $type = $docBlockTypeDescription;
-        }
-        if ($this->isUnknownType($typeHint) && $this->isResolvableType($docBlockTypeDescription)) {
-            $type = $docBlockTypeDescription;
-        }
-
-        if (strpos($docBlockTypeDescription, "[]") !==  false) {
-            $type = "array<" . str_replace("[]", "", $docBlockTypeDescription) . ">";
-        }
-        if (preg_match(self::COLLECTION_TYPE_REGEX, $docBlockTypeDescription, $match)) {
-            if (!($this->isUnknownType($typeHint) || $this->isCompoundArray($typeHint))) {
-                throw TypeDefinitionException::create("Passed type hint {$typeHint} is not compatible with doc block type {$docBlockTypeDescription}");
-            }
-
-            $collectionType = trim($match[1]);
-            if (!$this->isResolvableType($collectionType)) {
-                throw TypeDefinitionException::create("Unknown type for docblock {$docBlockTypeDescription}. Passed type hint is not resolvable: {$collectionType}.");
-            }
-
-            $type = $docBlockTypeDescription;
-        }
-
-        if ($this->isClassOrInterface($type)) {
-            $type = substr($type, 0, 1) !== "\\" ? ("\\" . $type) : $type;
-        }
-
-        $this->type = $type;
+        return [TypeDescriptor::create(trim($match[1]), false)];
     }
 
     /**
@@ -280,7 +243,15 @@ final class TypeDescriptor
      */
     public function isIterable() : bool
     {
-        return $this->type === self::ARRAY || $this->type === self::ITERABLE || self::isItTypeOfCollection($this->type);
+        return $this->type === self::ARRAY || $this->type === self::ITERABLE || $this->isCollection();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCollection(): bool
+    {
+        return self::isItTypeOfCollection($this->type);
     }
 
     /**
@@ -392,6 +363,76 @@ final class TypeDescriptor
     /**
      * @param string $typeHint
      * @param string $docBlockTypeDescription
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function initialize(string $typeHint, string $docBlockTypeDescription) : void
+    {
+        $typeHint = trim($typeHint);
+        $docBlockTypeDescription = trim($docBlockTypeDescription);
+
+        if ($typeHint === self::VOID) {
+            $this->type = self::VOID;
+            return;
+        }
+
+        if (
+            $this->isScalarAndCompound($typeHint, $docBlockTypeDescription)
+            || $this->isCompoundAndScalar($typeHint, $docBlockTypeDescription)
+            || $this->isResourceAndScalar($typeHint, $docBlockTypeDescription)
+            || $this->isScalarAndResource($typeHint, $docBlockTypeDescription)
+            || $this->isResourceAndCompound($typeHint, $docBlockTypeDescription)
+            || $this->isCompoundAndResource($typeHint, $docBlockTypeDescription)
+            || $this->isCompoundAndClass($typeHint, $docBlockTypeDescription)
+        ) {
+            throw TypeDefinitionException::create("Passed type hint {$typeHint} is not compatible with doc block type {$docBlockTypeDescription}");
+        }
+
+        $type = $this->resolveType($typeHint);
+        $docBlockType = $docBlockTypeDescription ? $this->resolveType($docBlockTypeDescription) : self::UNKNOWN;
+
+        if (self::isItTypeOfCollection($docBlockType) && (!($this->isUnknownType($type) || $this->isCompoundArray($type)))) {
+            throw TypeDefinitionException::create("Passed type hint {$typeHint} is not compatible with doc block type {$type}");
+        }
+
+        $this->type = $docBlockType !== self::UNKNOWN ? $docBlockType : $type;
+    }
+
+    /**
+     * @param string $typeHint
+     * @return string
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function resolveType(string $typeHint) : string
+    {
+        $type = explode("|", $typeHint)[0];
+
+        if (strpos($type, "[]") !== false) {
+            $type = "array<" . str_replace("[]", "", $type) . ">";
+        }
+        if ($typeHint === self::MIXED) {
+            return self::UNKNOWN;
+        }
+        if (!$this->isResolvableType($type)) {
+            throw TypeDefinitionException::create("Passed type hint is not resolvable: {$type}");
+        }
+
+        if (preg_match(self::COLLECTION_TYPE_REGEX, $type, $match)) {
+            $collectionType = $this->addSlashPrefix($match[1]);
+            if (!$this->isResolvableType($collectionType)) {
+                throw TypeDefinitionException::create("Unknown type for {$typeHint}. Passed type hint is not resolvable: {$collectionType}.");
+            }
+
+            $type = str_replace($match[1], $collectionType, $type);
+        }
+
+        return $this->addSlashPrefix($type);
+    }
+
+    /**
+     * @param string $typeHint
+     * @param string $docBlockTypeDescription
      * @return bool
      */
     private function isScalarAndResource(string $typeHint, string $docBlockTypeDescription): bool
@@ -441,8 +482,29 @@ final class TypeDescriptor
     /**
      * @return string
      */
+    public function toString() : string
+    {
+        return (string)$this;
+    }
+
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->type;
+    }
+
+    /**
+     * @param string $type
+     * @return string
+     */
+    private function addSlashPrefix(string $type): string
+    {
+        if ($this->isClassOrInterface($type)) {
+            $type = substr($type, 0, 1) !== "\\" ? ("\\" . $type) : $type;
+        }
+
+        return trim($type);
     }
 }

@@ -1,6 +1,9 @@
 <?php
 
 namespace Fixture\Behat\Ordering;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class OrderProcessor
@@ -16,6 +19,31 @@ class OrderProcessor
         }
 
         return OrderConfirmation::fromOrder($order);
+    }
+
+    /**
+     * @param Uuid[]|array $ids
+     * @return OrderConfirmation[]|array
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function buyMultiple(array $ids) : array
+    {
+        Assert::allInstanceOfType($ids, UuidInterface::class);
+        $orders = [];
+        foreach ($ids as $id) {
+            $orders[] = OrderConfirmation::createFromUuid($id);
+        }
+
+        return $orders;
+    }
+
+    /**
+     * @param UuidInterface $id
+     * @return OrderConfirmation
+     */
+    public function buyByName(UuidInterface $id) : OrderConfirmation
+    {
+        return OrderConfirmation::createFromUuid($id);
     }
 
     private function isCorrectOrder(Order $order) : bool

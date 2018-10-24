@@ -42,12 +42,4 @@ abstract class NoExternalConfigurationModule implements AnnotationModule
     {
         return [];
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem): void
-    {
-        return;
-    }
 }

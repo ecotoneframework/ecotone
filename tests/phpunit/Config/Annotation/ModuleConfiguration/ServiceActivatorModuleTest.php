@@ -60,7 +60,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $configuration,

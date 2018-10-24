@@ -43,7 +43,7 @@ class TransformerModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
+        $annotationConfiguration->prepare($configuration, []);
 
         $messageHandlerBuilder = TransformerBuilder::create(
             TransformerWithMethodParameterExample::class, "send"

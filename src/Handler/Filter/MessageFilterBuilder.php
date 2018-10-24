@@ -145,7 +145,17 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
         $discardChannel = $this->discardChannelName ? $channelResolver->resolve($this->discardChannelName) : null;
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::createWithDirectReference(
-            new MessageFilter(MethodInvoker::createWith($messageSelector, $this->methodName, $this->parameterConverters, $referenceSearchService), $discardChannel, $this->throwExceptionOnDiscard),
+            new MessageFilter(
+                MethodInvoker::createWith(
+                    $messageSelector,
+                    $this->methodName,
+                    $this->parameterConverters,
+                    true,
+                    $referenceSearchService
+                ),
+                $discardChannel,
+                $this->throwExceptionOnDiscard
+            ),
             "handle"
             )
             ->withInputChannelName($this->inputMessageChannelName)

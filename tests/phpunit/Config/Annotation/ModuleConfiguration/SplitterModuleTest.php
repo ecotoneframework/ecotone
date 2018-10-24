@@ -43,7 +43,7 @@ class SplitterModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], NullObserver::create());
+        $annotationConfiguration->prepare($configuration, []);
 
         $messageHandlerBuilder = SplitterBuilder::create(
             SplitterExample::class,  "split"

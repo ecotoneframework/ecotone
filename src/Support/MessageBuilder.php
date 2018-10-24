@@ -50,6 +50,17 @@ final class MessageBuilder
     }
 
     /**
+     * @param string $contentType
+     * @return MessageBuilder
+     */
+    public function setContentType(string $contentType) : self
+    {
+        $this->setHeader(MessageHeaders::CONTENT_TYPE, $contentType);
+
+        return $this;
+    }
+
+    /**
      * @param array|string[] $headers
      * @return MessageBuilder
      */

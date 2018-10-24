@@ -63,7 +63,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver): void
+    public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
         foreach ($this->gatewayRegistrations as $annotationRegistration) {
             /** @var Gateway $annotation */

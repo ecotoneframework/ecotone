@@ -97,27 +97,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    public function test_informing_observer_about_required_references()
-    {
-        $configurationObserver = DumbConfigurationObserver::create();
-        $messagingSystem = MessagingSystemConfiguration::prepareWitObserver(InMemoryModuleMessaging::createEmpty(), $configurationObserver);
-
-        $messagingSystem->registerMessageHandler(
-            ServiceActivatorBuilder::create("ref-a", "method-a")
-                ->withMethodParameterConverters([
-                    ReferenceBuilder::create("some", "ref-b")
-                ])
-        );
-
-        $this->assertEquals(
-            ["ref-a", "ref-b"],
-            $configurationObserver->getRequiredReferences()
-        );
-    }
-
-    /**
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
@@ -137,8 +116,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      */
     public function test_notifying_observer()
     {
-        $dumbConfigurationObserver = DumbConfigurationObserver::create();
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWitObserver(InMemoryModuleMessaging::createEmpty(), $dumbConfigurationObserver);
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
         $messagingSystemConfiguration
             ->registerMessageHandler(DumbMessageHandlerBuilder::create(NoReturnMessageHandler::create(), 'queue'))
@@ -148,8 +126,28 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create("queue", "interceptor"))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(["interceptor" => new DumbChannelInterceptor()]), InMemoryConfigurationVariableRetrievingService::createEmpty());
 
-        $this->assertTrue($dumbConfigurationObserver->wasNotifiedCorrectly(), "Configuration observer was not notified correctly");
-        $this->assertEquals([NoReturnMessageHandler::class, "some", "interceptor"], $dumbConfigurationObserver->getRequiredReferences());
+        $this->assertEquals(["dumb" => \stdClass::class], $messagingSystemConfiguration->getRegisteredGateways());
+        $this->assertEquals([NoReturnMessageHandler::class, "some", "interceptor"], $messagingSystemConfiguration->getRequiredReferences());
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_informing_exposing_required_references()
+    {
+        $messagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+
+        $messagingSystem->registerMessageHandler(
+            ServiceActivatorBuilder::create("ref-a", "method-a")
+                ->withMethodParameterConverters([
+                    ReferenceBuilder::create("some", "ref-b")
+                ])
+        );
+
+        $this->assertEquals(
+            ["ref-a", "ref-b"],
+            $messagingSystem->getRequiredReferences()
+        );
     }
 
     /**

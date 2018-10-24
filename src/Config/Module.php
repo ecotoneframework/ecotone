@@ -16,11 +16,10 @@ interface Module extends ModuleExtension
      *
      * @param Configuration         $configuration
      * @param ModuleExtension[]     $moduleExtensions
-     * @param ConfigurationObserver $configurationObserver
      *
      * @return void
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurationObserver $configurationObserver) : void;
+    public function prepare(Configuration $configuration, array $moduleExtensions) : void;
 
     /**
      * Runs during configuration phase, when all handlers must be defined
@@ -33,13 +32,4 @@ interface Module extends ModuleExtension
      * @return void
      */
     public function configure(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void;
-
-    /**
-     * Runs after messaging system was built from configuration
-     *
-     * @param ConfiguredMessagingSystem $configuredMessagingSystem
-     *
-     * @return void
-     */
-    public function postConfigure(ConfiguredMessagingSystem $configuredMessagingSystem): void;
 }

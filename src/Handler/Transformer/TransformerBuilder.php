@@ -191,6 +191,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
                         $objectToInvokeOn,
                         $this->methodName,
                         $this->methodParameterConverterBuilders,
+                        true,
                         $referenceSearchService
                     )
                 ),

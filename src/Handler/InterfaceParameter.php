@@ -69,6 +69,14 @@ final class InterfaceParameter
     }
 
     /**
+     * @return TypeDescriptor
+     */
+    public function getTypeDescriptor() : TypeDescriptor
+    {
+        return $this->typeDescriptor;
+    }
+
+    /**
      * @return bool
      */
     public function isMessage() : bool

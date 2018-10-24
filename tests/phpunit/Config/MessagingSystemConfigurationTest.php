@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config;
 
+use Fixture\Annotation\ModuleConfiguration\ExampleModuleAndModuleExtensionConfiguration;
 use Fixture\Channel\DumbChannelInterceptor;
 use Fixture\Configuration\DumbConfigurationObserver;
 use Fixture\Configuration\FakeModule;
@@ -128,6 +129,25 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $this->assertEquals(["dumb" => \stdClass::class], $messagingSystemConfiguration->getRegisteredGateways());
         $this->assertEquals([NoReturnMessageHandler::class, "some", "interceptor"], $messagingSystemConfiguration->getRequiredReferences());
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_serializing_and_deserializing()
+    {
+        $config = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createWith([ExampleModuleAndModuleExtensionConfiguration::createEmpty()], []))
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create(NoReturnMessageHandler::create(), 'queue'))
+            ->registerGatewayBuilder(DumbGatewayBuilder::create()->withRequiredReference("some"))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::create("queue", QueueChannel::create()))
+            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
+            ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create("queue", "interceptor"));
+
+        $this->assertEquals(
+            $config,
+            unserialize(serialize($config))
+        );
     }
 
     /**

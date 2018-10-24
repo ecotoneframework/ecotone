@@ -94,13 +94,6 @@ final class MessagingSystemConfiguration implements Configuration
     private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService)
     {
         $this->initialize($moduleConfigurationRetrievingService);
-
-        foreach ($this->modules as $module) {
-            $module->prepare(
-                $this,
-                $this->moduleExtensions[$module->getName()]
-            );
-        }
     }
 
     /**
@@ -123,6 +116,13 @@ final class MessagingSystemConfiguration implements Configuration
             }
 
             $this->modules[] = $module;
+        }
+
+        foreach ($this->modules as $module) {
+            $module->prepare(
+                $this,
+                $this->moduleExtensions[$module->getName()]
+            );
         }
     }
 

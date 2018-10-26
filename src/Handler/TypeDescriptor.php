@@ -230,6 +230,15 @@ final class TypeDescriptor
     }
 
     /**
+     * @param TypeDescriptor $typeDescriptor
+     * @return bool
+     */
+    public function equals(TypeDescriptor $typeDescriptor) : bool
+    {
+        return $this->getTypeHint() === $typeDescriptor->getTypeHint();
+    }
+
+    /**
      * @param string $interfaceName
      * @return bool
      */

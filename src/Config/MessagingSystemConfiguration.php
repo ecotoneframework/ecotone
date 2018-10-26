@@ -324,11 +324,17 @@ final class MessagingSystemConfiguration implements Configuration
             );
         }
 
-        $modulesWithKeysAsNames = [];
+        $extraReferences = [];
         foreach ($this->modules as $module) {
-            $modulesWithKeysAsNames[$module->getName()] = $module;
+            $extraReferences[$module->getName()] = $module;
         }
-        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, $modulesWithKeysAsNames);
+        $converters = [];
+        foreach ($this->converterBuilders as $converterBuilder) {
+            $converters[] = $converterBuilder->build($externalReferenceSearchService);
+        }
+        $extraReferences[ConversionService::REFERENCE_NAME] = ConversionService::createWith($converters);
+
+        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, $extraReferences);
         $channelResolver = $this->createChannelResolver($referenceSearchService);
         $gateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {

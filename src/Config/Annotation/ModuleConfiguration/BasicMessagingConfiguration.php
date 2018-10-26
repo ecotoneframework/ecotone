@@ -9,6 +9,10 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistr
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\DeserializingConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\SerializingConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\StringToUuidConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\UuidToStringConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
@@ -41,6 +45,10 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
         $configuration->registerConsumerFactory(new PollingConsumerBuilder());
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
+        $configuration->registerConverter(new UuidToStringConverterBuilder());
+        $configuration->registerConverter(new StringToUuidConverterBuilder());
+        $configuration->registerConverter(new SerializingConverterBuilder());
+        $configuration->registerConverter(new DeserializingConverterBuilder());
     }
 
 

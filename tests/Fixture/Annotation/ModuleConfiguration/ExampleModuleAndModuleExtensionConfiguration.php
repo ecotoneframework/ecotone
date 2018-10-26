@@ -58,7 +58,7 @@ class ExampleModuleAndModuleExtensionConfiguration implements \SimplyCodedSoftwa
      */
     public function getRequiredReferences(): array
     {
-        // TODO: Implement getRequiredReferences() method.
+        return [];
     }
 
     /**

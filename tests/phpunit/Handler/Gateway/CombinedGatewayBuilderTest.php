@@ -61,4 +61,17 @@ class CombinedGatewayBuilderTest extends TestCase
         $this->assertEquals($requestChannelGatewayTwo->receive()->getPayload(),'some2');
     }
 
+    public function test_throwing_exception_if_interface_has_no_combined_method()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $requestChannelNameGatewayOne = "requestChannel1";
+        $gatewayProxyBuilderOne = GatewayProxyBuilder::create('ref-name', MultipleMethodsGatewayExample::class, 'execute1', $requestChannelNameGatewayOne);
+
+        CombinedGatewayBuilder::create("ref-name", MultipleMethodsGatewayExample::class,
+            [
+                CombinedGatewayDefinition::create($gatewayProxyBuilderOne, "notExisting")
+            ]
+        );
+    }
 }

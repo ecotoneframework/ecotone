@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
@@ -44,6 +45,8 @@ class CombinedGatewayBuilder implements GatewayBuilder
         $this->gatewayDefinitions = $combinedGatewayDefinitions;
 
         foreach ($combinedGatewayDefinitions as $gatewayBuilder) {
+            InterfaceToCall::create($interfaceName, $gatewayBuilder->getRelatedMethod());
+
             $this->requiredReferences = array_merge($this->requiredReferences, $gatewayBuilder->getGatewayBuilder()->getRequiredReferences());
         }
     }

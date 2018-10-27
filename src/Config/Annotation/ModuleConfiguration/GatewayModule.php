@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfi
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeader;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeaderValue;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
@@ -17,6 +18,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 
@@ -71,6 +73,8 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     } else {
                         $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
                     }
+                } else if ($parameterToMessage instanceof GatewayHeaderValue) {
+                    $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
                 }
             }
 

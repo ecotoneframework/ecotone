@@ -17,6 +17,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\CombinedGatewayDefi
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 
 /**
@@ -52,7 +53,8 @@ class GatewayModuleTest extends AnnotationConfigurationTest
                         ->withParameterToMessageConverters([
                             GatewayPayloadExpressionBuilder::create("bookNumber", "upper(value)"),
                             GatewayHeaderBuilder::create("rentTill", "rentDate"),
-                            GatewayHeaderExpressionBuilder::create("cost", "cost", "value * 5")
+                            GatewayHeaderExpressionBuilder::create("cost", "cost", "value * 5"),
+                            GatewayHeaderValueBuilder::create("owner", "Johny")
                         ])
                 ),
             $messagingSystemConfiguration

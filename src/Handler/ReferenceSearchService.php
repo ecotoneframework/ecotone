@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
@@ -16,5 +17,5 @@ interface ReferenceSearchService
      * @return object
      * @throws ReferenceNotFoundException if service with passed reference was not found
      */
-    public function findByReference(string $reference);
+    public function get(string $reference);
 }

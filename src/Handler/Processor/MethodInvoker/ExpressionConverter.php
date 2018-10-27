@@ -6,6 +6,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvok
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
@@ -15,6 +16,10 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  */
 class ExpressionConverter implements ParameterConverter
 {
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
     /**
      * @var ExpressionEvaluationService
      */
@@ -31,12 +36,14 @@ class ExpressionConverter implements ParameterConverter
     /**
      * MessageToExpressionEvaluationParameterConverter constructor.
      *
+     * @param ReferenceSearchService $referenceSearchService
      * @param ExpressionEvaluationService $expressionEvaluationService
-     * @param string                      $parameterName
-     * @param string                      $expression
+     * @param string $parameterName
+     * @param string $expression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, string $parameterName, string $expression)
+    public function __construct(ReferenceSearchService $referenceSearchService, ExpressionEvaluationService $expressionEvaluationService, string $parameterName, string $expression)
     {
+        $this->referenceSearchService = $referenceSearchService;
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->parameterName = $parameterName;
         $this->expression = $expression;
@@ -59,7 +66,8 @@ class ExpressionConverter implements ParameterConverter
             $this->expression,
             [
                 "payload" => $message->getPayload(),
-                "headers" => $message->getHeaders()->headers()
+                "headers" => $message->getHeaders()->headers(),
+                "referenceService" => $this->referenceSearchService
             ]
         );
     }

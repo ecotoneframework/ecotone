@@ -3,22 +3,22 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeader;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayPayload;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeaderValue;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeader;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeaderValue;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayPayload;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeaderExpression;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\CombinedGatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 
@@ -67,6 +67,8 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
                 } else if ($parameterToMessage instanceof GatewayHeaderValue) {
                     $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
+                } else if ($parameterToMessage instanceof GatewayHeaderExpression) {
+                    $parameterConverters[] = GatewayHeaderExpressionBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue, $parameterToMessage->expression);
                 }
             }
 
@@ -84,7 +86,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
             $firstDefinition = $gatewayDefinitionsPerReference[0]->getGatewayBuilder();
             if (count($gatewayDefinitionsPerReference) == 1) {
                 $gatewaysToBuild[] = $firstDefinition;
-            }else {
+            } else {
                 $gatewaysToBuild[] = CombinedGatewayBuilder::create(
                     $firstDefinition->getReferenceName(),
                     $firstDefinition->getInterfaceName(),

@@ -54,7 +54,7 @@ class ModuleMessageHandlerBuilder extends InputOutputMessageHandlerBuilder imple
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $this->module = $referenceSearchService->findByReference($this->moduleName);
+        $this->module = $referenceSearchService->get($this->moduleName);
 
         return ReplyViaHeadersMessageHandler::create("some");
     }

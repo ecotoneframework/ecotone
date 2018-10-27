@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
@@ -75,7 +76,7 @@ class MethodCallToMessageConverter
         }
 
         if (empty($methodArgumentConverters) && $this->interfaceToCall->hasSingleArgument()) {
-            $methodArgumentConverters = [GatewayPayloadBuilder::create($this->interfaceToCall->getFirstParameterName())->build()];
+            $methodArgumentConverters = [GatewayPayloadConverter::create($this->interfaceToCall->getFirstParameterName())];
         }
 
         $this->methodArgumentConverters = $methodArgumentConverters;

@@ -55,7 +55,7 @@ class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
     public function build(ReferenceSearchService $referenceSearchService): EnricherConverter
     {
         /** @var ExpressionEvaluationService $expressionEvaluationService */
-        $expressionEvaluationService = $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE);
+        $expressionEvaluationService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
 
         return new EnrichPayloadWithExpressionConverter(
             $expressionEvaluationService,

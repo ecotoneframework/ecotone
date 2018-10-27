@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 
 use Builder\Handler\InterfaceParameterTestCaseBuilder;
+use Fixture\Service\CalculatingService;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
@@ -37,6 +38,28 @@ class ExpressionBuilderTest extends TestCase
             $converter->getArgumentFrom(
                 InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock("string", true, "")),
                 MessageBuilder::withPayload($payload)->build()
+            )
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_using_reference_service_in_expression()
+    {
+        $converter = ExpressionBuilder::create("x", "reference('calculatingService').sum(payload)");
+
+        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
+            ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+            "calculatingService" => CalculatingService::create(1)
+        ]));
+
+        $this->assertEquals(
+            2,
+            $converter->getArgumentFrom(
+                InterfaceParameter::create("x", TypeDescriptor::create("string", true)),
+                MessageBuilder::withPayload(1)->build()
             )
         );
     }

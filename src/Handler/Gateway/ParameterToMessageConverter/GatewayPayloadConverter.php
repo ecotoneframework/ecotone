@@ -11,7 +11,6 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
  * Class PayloadMessageParameter
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\Gateway\MethodParameterConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @internal
  */
 class GatewayPayloadConverter implements GatewayParameterConverter
 {

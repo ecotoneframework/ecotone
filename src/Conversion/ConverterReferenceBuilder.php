@@ -39,6 +39,6 @@ class ConverterReferenceBuilder implements ConverterBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): Converter
     {
-        return $referenceSearchService->findByReference($this->referenceName);
+        return $referenceSearchService->get($this->referenceName);
     }
 }

@@ -90,6 +90,6 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): ChannelInterceptor
     {
-        return $referenceSearchService->findByReference($this->referenceName);
+        return $referenceSearchService->get($this->referenceName);
     }
 }

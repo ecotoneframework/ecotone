@@ -139,7 +139,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $objectToInvokeOn = $this->directObject ? $this->directObject : $referenceSearchService->findByReference($this->referenceName);
+        $objectToInvokeOn = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
         $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
 
         if (!$interfaceToCall->doesItReturnIterable()) {

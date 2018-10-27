@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMe
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class StaticHeaderToMessageConverterBuilder
@@ -46,7 +47,7 @@ class GatewayHeaderValueBuilder implements GatewayParameterConverterBuilder
     /**
      * @inheritDoc
      */
-    public function build(): GatewayParameterConverter
+    public function build(ReferenceSearchService $referenceSearchService): GatewayParameterConverter
     {
         return GatewayHeaderValueConverter::create($this->headerName, $this->headerValue);
     }

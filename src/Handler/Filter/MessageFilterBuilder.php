@@ -136,7 +136,7 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $messageSelector = $referenceSearchService->findByReference($this->referenceName);
+        $messageSelector = $referenceSearchService->get($this->referenceName);
 
         if (!InterfaceToCall::createFromObject($messageSelector, $this->methodName)->hasReturnValueBoolean()) {
             throw InvalidArgumentException::create("Object with reference {$this->referenceName} should return bool for method {$this->methodName} while using Message Filter");

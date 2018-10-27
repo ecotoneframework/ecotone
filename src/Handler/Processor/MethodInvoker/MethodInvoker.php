@@ -187,9 +187,9 @@ final class MethodInvoker implements MessageProcessor
     public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodParameters, bool $extractReplyPayload, ReferenceSearchService $referenceSearchService): self
     {
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
-        $interfaceToCallRegistry = $referenceSearchService->findByReference(InterfaceToCallRegistry::REFERENCE_NAME);
+        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
         /** @var ConversionService $conversionService */
-        $conversionService = $referenceSearchService->findByReference(ConversionService::REFERENCE_NAME);
+        $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
         $messageConverters = [];
         foreach ($methodParameters as $methodParameter) {
             $messageConverters[] = $methodParameter->build($referenceSearchService);

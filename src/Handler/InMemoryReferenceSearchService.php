@@ -81,7 +81,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     /**
      * @inheritDoc
      */
-    public function findByReference(string $reference)
+    public function get(string $reference)
     {
         foreach ($this->objectsToResolve as $referenceName => $object) {
             if ($referenceName == $reference) {
@@ -90,7 +90,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
         }
 
         if ($this->referenceSearchService) {
-            return $this->referenceSearchService->findByReference($reference);
+            return $this->referenceSearchService->get($reference);
         }
 
         throw ReferenceNotFoundException::create("Reference {$reference} was not found");

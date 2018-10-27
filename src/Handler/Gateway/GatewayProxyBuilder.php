@@ -228,12 +228,12 @@ class GatewayProxyBuilder implements GatewayBuilder
 
         $methodArgumentConverters = [];
         foreach ($this->methodArgumentConverters as $messageConverterBuilder) {
-            $methodArgumentConverters[] = $messageConverterBuilder->build();
+            $methodArgumentConverters[] = $messageConverterBuilder->build($referenceSearchService);
         }
 
         $transactionFactories = [];
         foreach ($this->transactionFactoryReferenceNames as $referenceName) {
-            $transactionFactories[] = $referenceSearchService->findByReference($referenceName);
+            $transactionFactories[] = $referenceSearchService->get($referenceName);
         }
 
         $gateway = new Gateway(

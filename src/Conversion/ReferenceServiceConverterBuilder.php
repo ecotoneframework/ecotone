@@ -64,7 +64,7 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): Converter
     {
-        $object = $referenceSearchService->findByReference($this->referenceName);
+        $object = $referenceSearchService->get($this->referenceName);
 
         $interfaceToCall = InterfaceToCall::createFromUnknownType($object, $this->method);
 

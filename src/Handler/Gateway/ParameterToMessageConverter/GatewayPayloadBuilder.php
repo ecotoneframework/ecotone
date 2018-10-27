@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMe
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayParameterConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class PayloadToMessageConverterBuilder
@@ -39,7 +40,7 @@ class GatewayPayloadBuilder implements GatewayParameterConverterBuilder
     /**
      * @inheritDoc
      */
-    public function build(): GatewayParameterConverter
+    public function build(ReferenceSearchService $referenceSearchService): GatewayParameterConverter
     {
         return GatewayPayloadConverter::create($this->parameterName);
     }

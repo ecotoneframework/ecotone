@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Interface MessageFromParameterConverterBuilder
@@ -11,7 +12,8 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 interface GatewayParameterConverterBuilder
 {
     /**
+     * @param ReferenceSearchService $referenceSearchService
      * @return GatewayParameterConverter
      */
-    public function build() : GatewayParameterConverter;
+    public function build(ReferenceSearchService $referenceSearchService) : GatewayParameterConverter;
 }

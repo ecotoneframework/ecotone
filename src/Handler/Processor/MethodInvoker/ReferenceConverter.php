@@ -57,7 +57,7 @@ class ReferenceConverter implements ParameterConverter
         return new self(
             $referenceSearchService,
             $parameterName,
-            $serviceReference ? $referenceSearchService->findByReference($serviceReference) : null
+            $serviceReference ? $referenceSearchService->get($serviceReference) : null
         );
     }
 
@@ -66,7 +66,7 @@ class ReferenceConverter implements ParameterConverter
      */
     public function getArgumentFrom(InterfaceParameter $relatedParameter, Message $message)
     {
-        return $this->referenceService ? $this->referenceService : $this->referenceSearchService->findByReference($relatedParameter->getTypeHint());
+        return $this->referenceService ? $this->referenceService : $this->referenceSearchService->get($relatedParameter->getTypeHint());
     }
 
     /**

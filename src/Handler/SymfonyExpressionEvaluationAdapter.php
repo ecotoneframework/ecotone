@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
@@ -43,7 +44,7 @@ class SymfonyExpressionEvaluationAdapter implements \SimplyCodedSoftware\Integra
         }, function ($arguments, array $payload, string $expression) use ($expressionLanguage) {
             $transformedElements = [];
             foreach ($payload as $item) {
-                $transformedElements[] = $expressionLanguage->evaluate($expression, ["element" => $item]);
+                $transformedElements[] = $expressionLanguage->evaluate($expression, array_merge(["element" => $item], $arguments));
             }
 
             return $transformedElements;
@@ -67,6 +68,12 @@ class SymfonyExpressionEvaluationAdapter implements \SimplyCodedSoftware\Integra
             return $str;
         }, function ($arguments, array $array, string $key) use ($expressionLanguage) {
             return isset($array[$key]);
+        });
+
+        $expressionLanguage->register('reference', function ($str) {
+            return $str;
+        }, function ($arguments, string $referenceName) use ($expressionLanguage) {
+            return $expressionLanguage->evaluate("referenceService.get('{$referenceName}')", $arguments);
         });
 
         $this->language = $expressionLanguage;

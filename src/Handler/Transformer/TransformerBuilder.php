@@ -169,14 +169,14 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
     {
         if ($this->expression) {
-            $expressionEvaluationService = $referenceSearchService->findByReference(ExpressionEvaluationService::REFERENCE);
+            $expressionEvaluationService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
             /** @var ExpressionEvaluationService $expressionEvaluationService */
             Assert::isSubclassOf($expressionEvaluationService, ExpressionEvaluationService::class, "Expected expression service " . ExpressionEvaluationService::REFERENCE . " but got something else.");
 
             $this->object = new ExpressionTransformer($this->expression, $expressionEvaluationService);
         }
 
-        $objectToInvokeOn = $this->object ? $this->object : $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
+        $objectToInvokeOn = $this->object ? $this->object : $referenceSearchService->get($this->objectToInvokeReferenceName);
         $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
 
         if (!$interfaceToCall->hasReturnValue()) {

@@ -162,7 +162,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     {
         $objectToInvoke = $this->objectToInvokeReferenceName;
         if (!$this->isStaticallyCalled()) {
-            $objectToInvoke = $this->directObjectReference ? $this->directObjectReference : $referenceSearchService->findByReference($this->objectToInvokeReferenceName);
+            $objectToInvoke = $this->directObjectReference ? $this->directObjectReference : $referenceSearchService->get($this->objectToInvokeReferenceName);
         }
         $interfaceToCall = InterfaceToCall::createFromUnknownType($objectToInvoke, $this->methodName);
 

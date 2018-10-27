@@ -180,7 +180,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
                             );
 
         if (!$taskExecutor) {
-            $referenceService = $referenceSearchService->findByReference($this->referenceName);
+            $referenceService = $referenceSearchService->get($this->referenceName);
             $interfaceToCall = InterfaceToCall::createFromObject($referenceService, $this->methodName);
 
             if (!$interfaceToCall->hasNoParameters()) {

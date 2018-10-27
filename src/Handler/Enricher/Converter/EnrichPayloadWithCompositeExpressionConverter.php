@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnrichException;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
@@ -42,23 +43,29 @@ class EnrichPayloadWithCompositeExpressionConverter implements EnricherConverter
      * @var string
      */
     private $dataMappingExpression;
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
 
     /**
      * ExpressionSetter constructor.
      *
+     * @param ReferenceSearchService $referenceSearchService
      * @param ExpressionEvaluationService $expressionEvaluationService
-     * @param DataSetter                  $dataSetter
-     * @param PropertyPath         $propertyPath
-     * @param string                      $expression
-     * @param string                 $pathToEnrichedContext
-     * @param string                 $dataMappingExpression
+     * @param DataSetter $dataSetter
+     * @param PropertyPath $propertyPath
+     * @param string $expression
+     * @param string $pathToEnrichedContext
+     * @param string $dataMappingExpression
      */
     public function __construct(
-        ExpressionEvaluationService $expressionEvaluationService, DataSetter $dataSetter,
-        PropertyPath $propertyPath, string $expression,
+        ReferenceSearchService $referenceSearchService, ExpressionEvaluationService $expressionEvaluationService,
+        DataSetter $dataSetter, PropertyPath $propertyPath, string $expression,
         string $pathToEnrichedContext, string $dataMappingExpression
     )
     {
+        $this->referenceSearchService = $referenceSearchService;
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->dataSetter                  = $dataSetter;
         $this->propertyPath                = $propertyPath;
@@ -77,7 +84,8 @@ class EnrichPayloadWithCompositeExpressionConverter implements EnricherConverter
             $this->expression,
             [
                 "payload" => $replyMessage->getPayload(),
-                "headers" => $replyMessage->getHeaders()->headers()
+                "headers" => $replyMessage->getHeaders()->headers(),
+                "referenceService" => $this->referenceSearchService
             ]
         );
 
@@ -98,7 +106,7 @@ class EnrichPayloadWithCompositeExpressionConverter implements EnricherConverter
             }
 
             if (!$hasBeenEnriched) {
-                throw EnrichException::create("Can't enrich message, missing reply to be mapped for {$propertyToSaveUnder->getPath()}");
+                throw EnrichException::create("Can't enrich message, missing reply to be mapped for {$propertyToSaveUnder->getPath()}. Message to enrich: {$enrichMessage}, Message to enrich with: {$replyMessage}");
             }
         }
 

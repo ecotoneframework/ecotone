@@ -69,6 +69,7 @@ class EnrichPayloadWithCompositeExpressionBuilder implements EnricherConverterBu
     public function build(ReferenceSearchService $referenceSearchService): EnricherConverter
     {
         return new EnrichPayloadWithCompositeExpressionConverter(
+            $referenceSearchService,
             $referenceSearchService->get(ExpressionEvaluationService::REFERENCE),
             DataSetter::create(),
             PropertyPath::createWith($this->propertyPath),

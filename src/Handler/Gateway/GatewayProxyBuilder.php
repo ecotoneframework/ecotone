@@ -144,14 +144,6 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function getRequestChannelName(): string
-    {
-        return $this->requestChannelName;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getInterfaceName(): string
     {
         return $this->interfaceName;

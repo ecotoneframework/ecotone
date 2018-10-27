@@ -60,6 +60,8 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     }
 
     /**
+     * @throws ConfigurationException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_retrieving_annotation_registration_for_application_context()
@@ -80,7 +82,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
                     "buy"
                 )
             ],
-            self::$annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Gateway::class)
+            $this->createAnnotationRegistrationService("Fixture\\Annotation\\MessageEndpoint\Gateway")->findRegistrationsFor(MessageEndpoint::class, Gateway::class)
         );
     }
 

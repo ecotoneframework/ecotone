@@ -28,11 +28,6 @@ interface GatewayBuilder
     /**
      * @return string
      */
-    public function getRequestChannelName() : string;
-
-    /**
-     * @return string
-     */
     public function getInterfaceName() : string;
 
     /**

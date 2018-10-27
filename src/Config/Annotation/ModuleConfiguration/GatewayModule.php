@@ -14,6 +14,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistr
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\CombinedGatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\CombinedGatewayDefinition;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
@@ -30,18 +33,18 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     public const MODULE_NAME = 'gatewayModule';
 
     /**
-     * @var AnnotationRegistration[]
+     * @var GatewayBuilder[]
      */
-    private $gatewayRegistrations;
+    private $gatewayBuilders = [];
 
     /**
      * AnnotationGatewayConfiguration constructor.
      *
-     * @param AnnotationRegistration[] $gatewayRegistrations
+     * @param GatewayBuilder[] $gatewayBuilders
      */
-    private function __construct(array $gatewayRegistrations)
+    private function __construct(array $gatewayBuilders)
     {
-        $this->gatewayRegistrations = $gatewayRegistrations;
+        $this->gatewayBuilders = $gatewayBuilders;
     }
 
     /**
@@ -49,7 +52,48 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
-        return new self($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Gateway::class));
+        $gatewaysToBuild = [];
+        /** @var CombinedGatewayDefinition[][] $gatewayDefinitions */
+        $gatewayDefinitions = [];
+        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Gateway::class) as $annotationRegistration) {
+            /** @var Gateway $annotation */
+            $annotation = $annotationRegistration->getAnnotationForMethod();
+
+            $parameterConverters = [];
+            foreach ($annotation->parameterConverters as $parameterToMessage) {
+                if ($parameterToMessage instanceof GatewayPayload) {
+                    $parameterConverters[] = GatewayPayloadBuilder::create($parameterToMessage->parameterName);
+                } else if ($parameterToMessage instanceof GatewayHeader) {
+                    $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
+                } else if ($parameterToMessage instanceof GatewayHeaderValue) {
+                    $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
+                }
+            }
+
+            $gatewayDefinitions[$annotationRegistration->getReferenceName()][] =
+                CombinedGatewayDefinition::create(
+                    GatewayProxyBuilder::create($annotationRegistration->getReferenceName(), $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
+                        ->withTransactionFactories($annotation->transactionFactories)
+                        ->withErrorChannel($annotation->errorChannel)
+                        ->withParameterToMessageConverters($parameterConverters),
+                    $annotationRegistration->getMethodName()
+                );
+        }
+
+        foreach ($gatewayDefinitions as $gatewayDefinitionsPerReference) {
+            $firstDefinition = $gatewayDefinitionsPerReference[0]->getGatewayBuilder();
+            if (count($gatewayDefinitionsPerReference) == 1) {
+                $gatewaysToBuild[] = $firstDefinition;
+            }else {
+                $gatewaysToBuild[] = CombinedGatewayBuilder::create(
+                    $firstDefinition->getReferenceName(),
+                    $firstDefinition->getInterfaceName(),
+                    $gatewayDefinitionsPerReference
+                );
+            }
+        }
+
+        return new self($gatewaysToBuild);
     }
 
     /**
@@ -65,28 +109,8 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
      */
     public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
-        foreach ($this->gatewayRegistrations as $annotationRegistration) {
-            /** @var Gateway $annotation */
-            $annotation = $annotationRegistration->getAnnotationForMethod();
-
-            $parameterConverters = [];
-            foreach ($annotation->parameterConverters as $parameterToMessage) {
-                if ($parameterToMessage instanceof GatewayPayload) {
-                    $parameterConverters[] = GatewayPayloadBuilder::create($parameterToMessage->parameterName);
-                } else if ($parameterToMessage instanceof GatewayHeader) {
-                    $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
-                } else if ($parameterToMessage instanceof GatewayHeaderValue) {
-                    $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
-                }
-            }
-
-            $gateway = GatewayProxyBuilder::create($annotationRegistration->getReferenceName(), $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
-                ->withMillisecondTimeout(1)
-                ->withTransactionFactories($annotation->transactionFactories)
-                ->withErrorChannel($annotation->errorChannel)
-                ->withParameterToMessageConverters($parameterConverters);
-
-            $configuration->registerGatewayBuilder($gateway);
+        foreach ($this->gatewayBuilders as $gatewayBuilder) {
+            $configuration->registerGatewayBuilder($gatewayBuilder);
         }
     }
 }

@@ -53,4 +53,20 @@ class ConversionServiceTest extends TestCase
             )
         );
     }
+
+    public function test_not_converting_when_source_is_null()
+    {
+        $conversionService = ConversionService::createWith([new SerializingConverter()]);
+
+        $this->assertEquals(
+            null,
+            $conversionService->convert(
+                null,
+                TypeDescriptor::create(TypeDescriptor::OBJECT, false),
+                MediaType::createApplicationXPHPObject(),
+                TypeDescriptor::create(TypeDescriptor::STRING, false),
+                MediaType::createApplicationXPHPSerializedObject()
+            )
+        );
+    }
 }

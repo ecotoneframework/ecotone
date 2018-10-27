@@ -28,6 +28,10 @@ class MessageHeaders
      */
     const CONTENT_TYPE = 'contentType';
     /**
+     * Encoding of payload body
+     */
+    const CONTENT_ENCODING = 'contentEncoding';
+    /**
      * The time the message was created. Changes each time a message is mutated.
      */
     const TIMESTAMP = 'timestamp';

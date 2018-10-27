@@ -54,6 +54,10 @@ class ConversionService
      */
     public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
     {
+        if (is_null($source)) {
+            return $source;
+        }
+
         $converter = $this->getConverter($sourceType, $sourceMediaType, $targetType, $targetMediaType);
 
         return $converter->convert($source, $sourceType, $sourceMediaType, $targetType, $targetMediaType);

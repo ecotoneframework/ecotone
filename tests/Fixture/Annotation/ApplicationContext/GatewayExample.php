@@ -18,6 +18,6 @@ namespace Fixture\Annotation\ApplicationContext {
          * @return string
          * @Gateway()
          */
-        public function doSomething() : string;
+        public function doSomething(): string;
     }
 }

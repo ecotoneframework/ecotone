@@ -65,7 +65,7 @@ class ReferenceServiceConverter implements Converter
      */
     public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
     {
-        return call_user_func([$this->object, $this->method], [$source]);
+        return call_user_func([$this->object, $this->method], $source);
     }
 
     /**

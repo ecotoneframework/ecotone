@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 namespace Fixture\Handler\Gateway;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 
 /**

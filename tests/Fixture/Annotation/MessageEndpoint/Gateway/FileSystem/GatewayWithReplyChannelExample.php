@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Fixture\Annotation\MessageEndpoint\Gateway;
+namespace Fixture\Annotation\MessageEndpoint\Gateway\FileSystem;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeader;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 

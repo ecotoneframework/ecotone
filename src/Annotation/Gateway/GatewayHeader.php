@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Class HeaderToMessageAnnotation
- * @package SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway
+ * @package SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
@@ -24,4 +24,8 @@ class GatewayHeader
      * @Required()
      */
     public $headerName;
+    /**
+     * @var string
+     */
+    public $expression;
 }

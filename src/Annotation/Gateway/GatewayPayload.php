@@ -7,7 +7,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Class PayloadToMessageAnnotation
- * @package SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway
+ * @package SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation()
  */
@@ -18,4 +18,8 @@ class GatewayPayload
      * @Required()
      */
     public $parameterName;
+    /**
+     * @var string
+     */
+    public $expression;
 }

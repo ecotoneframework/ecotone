@@ -5,11 +5,12 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Fixture\Annotation\ApplicationContext\ApplicationContextExample;
-use Fixture\Annotation\MessageEndpoint\Gateway\GatewayWithReplyChannelExample;
+use Fixture\Annotation\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
 use Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\EndpointAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\InputOutputEndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
@@ -68,7 +69,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     {
         $gatewayAnnotation = new Gateway();
         $gatewayAnnotation->requestChannel = "requestChannel";
-        $messageToPayloadParameter = new Gateway\GatewayPayload();
+        $messageToPayloadParameter = new GatewayPayload();
         $messageToPayloadParameter->parameterName = "orderId";
         $gatewayAnnotation->parameterConverters = [$messageToPayloadParameter];
         $gatewayAnnotation->transactionFactories = ["dbalTransaction"];
@@ -82,7 +83,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
                     "buy"
                 )
             ],
-            $this->createAnnotationRegistrationService("Fixture\\Annotation\\MessageEndpoint\Gateway")->findRegistrationsFor(MessageEndpoint::class, Gateway::class)
+            $this->createAnnotationRegistrationService("Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem")->findRegistrationsFor(MessageEndpoint::class, Gateway::class)
         );
     }
 

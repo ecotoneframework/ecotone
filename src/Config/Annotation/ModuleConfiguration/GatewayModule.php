@@ -3,11 +3,9 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeader;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeaderValue;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayPayload;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\GatewayHeaderExpression;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
@@ -19,8 +17,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 
 /**
  * Class AnnotationGatewayConfiguration
@@ -56,19 +54,23 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
         /** @var CombinedGatewayDefinition[][] $gatewayDefinitions */
         $gatewayDefinitions = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Gateway::class) as $annotationRegistration) {
-            /** @var Gateway $annotation */
+            /** @var \SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\Gateway $annotation */
             $annotation = $annotationRegistration->getAnnotationForMethod();
 
             $parameterConverters = [];
             foreach ($annotation->parameterConverters as $parameterToMessage) {
                 if ($parameterToMessage instanceof GatewayPayload) {
-                    $parameterConverters[] = GatewayPayloadBuilder::create($parameterToMessage->parameterName);
+                    if ($parameterToMessage->expression) {
+                        $parameterConverters[] = GatewayPayloadExpressionBuilder::create($parameterToMessage->parameterName, $parameterToMessage->expression);
+                    } else {
+                        $parameterConverters[] = GatewayPayloadBuilder::create($parameterToMessage->parameterName);
+                    }
                 } else if ($parameterToMessage instanceof GatewayHeader) {
-                    $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
-                } else if ($parameterToMessage instanceof GatewayHeaderValue) {
-                    $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
-                } else if ($parameterToMessage instanceof GatewayHeaderExpression) {
-                    $parameterConverters[] = GatewayHeaderExpressionBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue, $parameterToMessage->expression);
+                    if ($parameterToMessage->expression) {
+                        $parameterConverters[] = GatewayHeaderExpressionBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName, $parameterToMessage->expression);
+                    } else {
+                        $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
+                    }
                 }
             }
 

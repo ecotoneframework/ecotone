@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
+use Fixture\Annotation\MessageEndpoint\Gateway\BookStoreGatewayExample;
 use Fixture\Annotation\MessageEndpoint\Gateway\GatewayWithReplyChannelExample;
 use Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
@@ -14,6 +15,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\CombinedGatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 
 /**
  * Class AnnotationTransformerConfigurationTest
@@ -23,26 +27,14 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder
 class GatewayModuleTest extends AnnotationConfigurationTest
 {
     /**
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function test_creating_transformer_builder()
+    public function test_registering_gateway()
     {
-        $gatewayAnnotation = new Gateway();
-        $gatewayAnnotation->requestChannel = "requestChannel";
-        $gatewayAnnotation->transactionFactories = ['dbalTransaction'];
-        $gatewayAnnotation->errorChannel = "someErrorChannel";
-        $messageToPayloadParameterAnnotation = new Payload();
-        $messageToPayloadParameterAnnotation->parameterName = "orderId";
-        $gatewayAnnotation->parameterConverters = [
-            $messageToPayloadParameterAnnotation
-        ];
-
         $annotationGatewayConfiguration = GatewayModule::create(
-            $this->createAnnotationRegistrationService(
-                GatewayWithReplyChannelExample::class,
-                "buy",
-                new MessageEndpoint(),
-                $gatewayAnnotation
-            )
+            InMemoryAnnotationRegistrationService::createFrom([BookStoreGatewayExample::class])
         );
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
@@ -52,11 +44,16 @@ class GatewayModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerGatewayBuilder(
                     GatewayProxyBuilder::create(
-                        GatewayWithReplyChannelExample::class, GatewayWithReplyChannelExample::class,
-                        "buy", "requestChannel"
+                        BookStoreGatewayExample::class, BookStoreGatewayExample::class,
+                        "rent", "requestChannel"
                     )
-                        ->withErrorChannel("someErrorChannel")
+                        ->withErrorChannel("errorChannel")
                         ->withTransactionFactories(['dbalTransaction'])
+                        ->withParameterToMessageConverters([
+                            GatewayPayloadExpressionBuilder::create("bookNumber", "upper(value)"),
+                            GatewayHeaderBuilder::create("rentTill", "rentDate"),
+                            GatewayHeaderExpressionBuilder::create("cost", "cost", "value * 5")
+                        ])
                 ),
             $messagingSystemConfiguration
         );

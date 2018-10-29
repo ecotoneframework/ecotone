@@ -109,6 +109,11 @@ class EnricherBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_enriching_with_expression_setter_from_external_message()
     {
         $outputChannel = QueueChannel::create();
@@ -185,6 +190,11 @@ class EnricherBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_enriching_array_by_array_setter_definition()
     {
         $outputChannel = QueueChannel::create();
@@ -207,6 +217,11 @@ class EnricherBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_enriching_array_by_array_of_array_by_setter_definition()
     {
         $outputChannel = QueueChannel::create();
@@ -384,8 +399,8 @@ class EnricherBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $inputMessage = MessageBuilder::withPayload(["surname" => "levis"]);
         $setterBuilders = [
-            EnrichPayloadWithExpressionBuilder::createWith("name", "payload['surname']"),
-            EnrichHeaderWithExpressionBuilder::createWith("toUpload", "false")
+            EnrichPayloadWithExpressionBuilder::createWith("name", "payload"),
+            EnrichHeaderWithExpressionBuilder::createWith("toUpload", "request['payload']['surname']")
         ];
         $this->createEnricherAndHandle($inputMessage, $outputChannel, $setterBuilders);
 
@@ -393,12 +408,12 @@ class EnricherBuilderTest extends MessagingTest
         $this->assertEquals(
             [
                 "surname" => "levis",
-                "name" => "levis"
+                "name" => null
             ],
             $message->getPayload()
         );
         $this->assertEquals(
-            false,
+            'levis',
             $message->getHeaders()->get("toUpload")
         );
     }

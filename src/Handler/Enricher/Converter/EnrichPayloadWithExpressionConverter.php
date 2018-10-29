@@ -57,8 +57,12 @@ class EnrichPayloadWithExpressionConverter implements EnricherConverter
     {
         $dataToEnrich = $this->expressionEvaluationService->evaluate(
             $this->expression, [
-            "payload" => $replyMessage->getPayload(),
-            "headers" => $replyMessage->getHeaders()->headers()
+            "payload" => $replyMessage ? $replyMessage->getPayload() : null,
+            "headers" => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
+            "request" => [
+                "payload" => $enrichMessage->getPayload(),
+                "headers" => $enrichMessage->getHeaders()
+            ]
         ]);
 
         return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $dataToEnrich);

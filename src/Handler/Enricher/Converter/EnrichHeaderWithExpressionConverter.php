@@ -56,10 +56,16 @@ class EnrichHeaderWithExpressionConverter implements EnricherConverter
     public function evaluate(Message $enrichMessage, ?Message $replyMessage)
     {
         $dataToEnrich = $this->expressionEvaluationService->evaluate(
-            $this->expression, [
-            "payload" => $replyMessage->getPayload(),
-            "headers" => $replyMessage->getHeaders()->headers()
-        ]);
+            $this->expression,
+            [
+                "payload" => $replyMessage ? $replyMessage->getPayload() : null,
+                "headers" => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
+                "request" => [
+                    "payload" => $enrichMessage->getPayload(),
+                    "headers" => $enrichMessage->getHeaders()
+                ]
+            ]
+        );
 
         return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getHeaders()->headers(), $dataToEnrich);
     }

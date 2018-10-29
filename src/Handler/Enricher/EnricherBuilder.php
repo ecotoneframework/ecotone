@@ -132,7 +132,14 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
                         ->build($referenceSearchService, $channelResolver);
         }
 
-        $internalEnrichingService = new InternalEnrichingService($gateway, $referenceSearchService->get(ExpressionEvaluationService::REFERENCE), $propertySetters, $this->requestPayloadExpression, $this->requestHeaders);
+        $internalEnrichingService = new InternalEnrichingService(
+            $gateway,
+            $referenceSearchService->get(ExpressionEvaluationService::REFERENCE),
+            $referenceSearchService,
+            $propertySetters,
+            $this->requestPayloadExpression,
+            $this->requestHeaders
+        );
 
         return new Enricher(
             RequestReplyProducer::createRequestAndReply(

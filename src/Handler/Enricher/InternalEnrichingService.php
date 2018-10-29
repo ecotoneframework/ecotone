@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
@@ -35,23 +36,29 @@ class InternalEnrichingService
      * @var string[]
      */
     private $requestHeaders;
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
 
     /**
      * InternalEnrichingService constructor.
      *
-     * @param EnrichGateway|null          $enrichGateway
+     * @param EnrichGateway|null $enrichGateway
      * @param ExpressionEvaluationService $expressionEvaluationService
-     * @param EnricherConverter[]                    $setters
-     * @param string                      $requestPayloadExpression
-     * @param string[]                    $requestHeaders
+     * @param ReferenceSearchService $referenceSearchService
+     * @param EnricherConverter[] $setters
+     * @param string $requestPayloadExpression
+     * @param string[] $requestHeaders
      */
-    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, array $setters, ?string $requestPayloadExpression, array $requestHeaders)
+    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, array $setters, ?string $requestPayloadExpression, array $requestHeaders)
     {
         $this->enrichGateway               = $enrichGateway;
         $this->setters                     = $setters;
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->requestPayloadExpression    = $requestPayloadExpression;
         $this->requestHeaders              = $requestHeaders;
+        $this->referenceSearchService = $referenceSearchService;
     }
 
     /**
@@ -62,14 +69,15 @@ class InternalEnrichingService
     {
         $enrichedMessage = MessageBuilder::fromMessage($message)
                             ->build();
-        $replyMessage = $message;
+        $replyMessage = null;
         if ($this->enrichGateway) {
             $requestMessage = MessageBuilder::fromMessage($enrichedMessage);
 
             if ($this->requestPayloadExpression) {
                 $requestPayload = $this->expressionEvaluationService->evaluate($this->requestPayloadExpression, [
                     "headers" => $enrichedMessage->getHeaders()->headers(),
-                    "payload" => $enrichedMessage->getPayload()
+                    "payload" => $enrichedMessage->getPayload(),
+                    "referenceService" => $this->referenceSearchService
                 ]);
 
                 $requestMessage->setPayload($requestPayload);

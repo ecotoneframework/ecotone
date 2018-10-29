@@ -208,7 +208,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
                                 EnrichHeaderWithExpressionBuilder::createWith("some", "false")
                             ]))
                             ->chain(EnricherBuilder::create([
-                                EnrichHeaderWithExpressionBuilder::createWith("some2", "payload")
+                                EnrichHeaderWithExpressionBuilder::createWith("some2", "request['payload']")
                             ]))
                     )
             ],

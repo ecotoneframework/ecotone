@@ -7,6 +7,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
 /**
@@ -33,21 +34,27 @@ class EnrichPayloadWithExpressionConverter implements EnricherConverter
      * @var DataSetter
      */
     private $dataSetter;
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
 
     /**
      * ExpressionSetter constructor.
      *
      * @param ExpressionEvaluationService $expressionEvaluationService
-     * @param DataSetter                  $dataSetter
-     * @param PropertyPath                $propertyPath
-     * @param string                      $expression
+     * @param ReferenceSearchService $referenceSearchService
+     * @param DataSetter $dataSetter
+     * @param PropertyPath $propertyPath
+     * @param string $expression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, DataSetter $dataSetter, PropertyPath $propertyPath, string $expression)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, DataSetter $dataSetter, PropertyPath $propertyPath, string $expression)
     {
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->propertyPath                = $propertyPath;
         $this->expression                  = $expression;
         $this->dataSetter = $dataSetter;
+        $this->referenceSearchService = $referenceSearchService;
     }
 
     /**
@@ -62,7 +69,8 @@ class EnrichPayloadWithExpressionConverter implements EnricherConverter
             "request" => [
                 "payload" => $enrichMessage->getPayload(),
                 "headers" => $enrichMessage->getHeaders()
-            ]
+            ],
+            "referenceService" => $this->referenceSearchService
         ]);
 
         return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $dataToEnrich);

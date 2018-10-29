@@ -59,6 +59,7 @@ class EnrichHeaderWithExpressionBuilder implements EnricherConverterBuilder
 
         return new EnrichHeaderWithExpressionConverter(
             $expressionEvaluationService,
+            $referenceSearchService,
             DataSetter::create(),
             PropertyPath::createWith($this->propertyPath),
             $this->expression

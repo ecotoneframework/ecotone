@@ -59,6 +59,7 @@ class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
 
         return new EnrichPayloadWithExpressionConverter(
             $expressionEvaluationService,
+            $referenceSearchService,
             DataSetter::create(),
             PropertyPath::createWith($this->propertyPath),
             $this->expression

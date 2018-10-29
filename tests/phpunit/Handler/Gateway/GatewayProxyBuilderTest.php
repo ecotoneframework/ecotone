@@ -135,7 +135,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName);
         $gatewayProxyBuilder->withReplyChannel($replyChannelName);
-        $gatewayProxyBuilder->withMillisecondTimeout(1);
+        $gatewayProxyBuilder->withReplyMillisecondTimeout(1);
 
         /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -410,7 +410,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $replyChannel     = QueueChannel::create();
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create("ref-name", ServiceInterfaceReceiveOnlyWithNull::class, 'sendMail', $requestChannelName);
-        $gatewayProxyBuilder->withMillisecondTimeout(1);
+        $gatewayProxyBuilder->withReplyMillisecondTimeout(1);
         $gatewayProxyBuilder->withReplyChannel($replyChannelName);
 
         /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
@@ -440,7 +440,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $replyChannel     = QueueChannel::create();
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName);
-        $gatewayProxyBuilder->withMillisecondTimeout(1);
+        $gatewayProxyBuilder->withReplyMillisecondTimeout(1);
         $gatewayProxyBuilder->withReplyChannel($replyChannelName);
 
         $this->expectException(InvalidArgumentException::class);

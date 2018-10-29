@@ -129,7 +129,6 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
         if ($this->requestChannelName) {
             /** @var EnrichGateway $gateway */
                 $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichGateway::class, "execute", $this->requestChannelName)
-                        ->withMillisecondTimeout(1)
                         ->build($referenceSearchService, $channelResolver);
         }
 

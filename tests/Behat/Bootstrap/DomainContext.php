@@ -135,7 +135,7 @@ class DomainContext implements Context
         $this->messagingSystemConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create($gatewayName, $interfaceName, $methodName, $requestChannel)
                 ->withReplyChannel($replyChannel)
-                ->withMillisecondTimeout(1)
+                ->withReplyMillisecondTimeout(1)
         );
     }
 

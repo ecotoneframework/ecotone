@@ -50,7 +50,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
                     )
                         ->withErrorChannel("errorChannel")
                         ->withTransactionFactories(['dbalTransaction'])
-                        ->withMillisecondTimeout(1)
+                        ->withReplyMillisecondTimeout(100)
                         ->withParameterToMessageConverters([
                             GatewayPayloadExpressionBuilder::create("bookNumber", "upper(value)"),
                             GatewayHeaderBuilder::create("rentTill", "rentDate"),
@@ -84,14 +84,14 @@ class GatewayModuleTest extends AnnotationConfigurationTest
                                 GatewayProxyBuilder::create(
                                     MultipleMethodsGatewayExample::class, MultipleMethodsGatewayExample::class,
                                     "execute1", "channel1"
-                                )->withMillisecondTimeout(1),
+                                ),
                                 "execute1"
                             ),
                             CombinedGatewayDefinition::create(
                                 GatewayProxyBuilder::create(
                                     MultipleMethodsGatewayExample::class, MultipleMethodsGatewayExample::class,
                                     "execute2", "channel2"
-                                )->withMillisecondTimeout(1),
+                                ),
                                 "execute2"
                             )
                         ]

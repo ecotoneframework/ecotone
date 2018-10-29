@@ -20,6 +20,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
  */
 class GatewayProxyBuilder implements GatewayBuilder
 {
+    const DEFAULT_REPLY_MILLISECONDS_TIMEOUT = -1;
+
     /**
      * @var string
      */
@@ -39,7 +41,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @var int
      */
-    private $milliSecondsTimeout;
+    private $replyMilliSecondsTimeout = self::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
     /**
      * @var string
      */
@@ -115,12 +117,12 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
-     * @param int $millisecondsTimeout
+     * @param int $replyMillisecondsTimeout
      * @return GatewayProxyBuilder
      */
-    public function withMillisecondTimeout(int $millisecondsTimeout): self
+    public function withReplyMillisecondTimeout(int $replyMillisecondsTimeout): self
     {
-        $this->milliSecondsTimeout = $millisecondsTimeout;
+        $this->replyMilliSecondsTimeout = $replyMillisecondsTimeout;
 
         return $this;
     }
@@ -218,8 +220,8 @@ class GatewayProxyBuilder implements GatewayBuilder
         if ($replyChannel) {
             $replyReceiver = new ChannelSendAndReceiveService($requestChannel, $replyChannel, $errorChannel);
         }
-        if ($this->replyChannelName && $this->milliSecondsTimeout > 0) {
-            $replyReceiver = new TimeoutChannelSendAndReceiveService($requestChannel, $replyChannel, $errorChannel, $this->milliSecondsTimeout);
+        if ($this->replyChannelName && $this->replyMilliSecondsTimeout > 0) {
+            $replyReceiver = new TimeoutChannelSendAndReceiveService($requestChannel, $replyChannel, $errorChannel, $this->replyMilliSecondsTimeout);
         }
 
         if (!$interfaceToCall->hasReturnValue() && $this->replyChannelName) {

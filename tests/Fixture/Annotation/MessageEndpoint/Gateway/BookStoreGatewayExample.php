@@ -32,7 +32,8 @@ interface BookStoreGatewayExample
      *          @GatewayHeader(parameterName="cost", headerName="cost", expression="value * 5"),
      *          @GatewayHeaderValue(headerName="owner", headerValue="Johny")
      *      },
-     *      transactionFactories={"dbalTransaction"}
+     *      transactionFactories={"dbalTransaction"},
+     *      replyTimeoutInMilliseconds=100
      * )
      */
     public function rent(string $bookNumber, string $rentTill, int $cost): bool;

@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Annotation\Gateway;
 
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
 
 /**
  * Class GatewayAnnotation
@@ -32,4 +33,8 @@ class Gateway
      * @var array
      */
     public $transactionFactories = [];
+    /**
+     * @var int
+     */
+    public $replyTimeoutInMilliseconds = GatewayProxyBuilder::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
 }

@@ -44,14 +44,15 @@ class EnrichPayloadWithValueConverter implements EnricherConverter
     }
 
     /**
+     * @param DataSetter $dataSetter
      * @param PropertyPath $propertyPath
-     * @param mixed  $value
+     * @param mixed $value
      *
      * @return self
      */
-    public static function createWith(PropertyPath $propertyPath, $value) : self
+    public static function createWith(DataSetter $dataSetter, PropertyPath $propertyPath, $value) : self
     {
-        return new self(DataSetter::create(), $propertyPath, $value);
+        return new self($dataSetter, $propertyPath, $value);
     }
 
     /**
@@ -59,7 +60,7 @@ class EnrichPayloadWithValueConverter implements EnricherConverter
      */
     public function evaluate(Message $enrichMessage, ?Message $replyMessage)
     {
-        return $this->payloadPropertySetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $this->value);
+        return $this->payloadPropertySetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $this->value, $enrichMessage, $replyMessage);
     }
 
     /**

@@ -38,6 +38,10 @@ class EnrichPayloadWithExpressionConverter implements EnricherConverter
      * @var ReferenceSearchService
      */
     private $referenceSearchService;
+    /**
+     * @var string
+     */
+    private $mappingExpression;
 
     /**
      * ExpressionSetter constructor.
@@ -47,14 +51,16 @@ class EnrichPayloadWithExpressionConverter implements EnricherConverter
      * @param DataSetter $dataSetter
      * @param PropertyPath $propertyPath
      * @param string $expression
+     * @param string $mappingExpression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, DataSetter $dataSetter, PropertyPath $propertyPath, string $expression)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, DataSetter $dataSetter, PropertyPath $propertyPath, string $expression, string $mappingExpression)
     {
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->propertyPath                = $propertyPath;
         $this->expression                  = $expression;
         $this->dataSetter = $dataSetter;
         $this->referenceSearchService = $referenceSearchService;
+        $this->mappingExpression = $mappingExpression;
     }
 
     /**
@@ -73,7 +79,7 @@ class EnrichPayloadWithExpressionConverter implements EnricherConverter
             "referenceService" => $this->referenceSearchService
         ]);
 
-        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $dataToEnrich);
+        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $dataToEnrich, $enrichMessage, $replyMessage);
     }
 
     /**

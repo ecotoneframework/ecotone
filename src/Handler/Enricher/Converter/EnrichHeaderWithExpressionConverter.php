@@ -75,7 +75,7 @@ class EnrichHeaderWithExpressionConverter implements EnricherConverter
             ]
         );
 
-        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getHeaders()->headers(), $dataToEnrich);
+        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getHeaders()->headers(), $dataToEnrich, $enrichMessage, $replyMessage);
     }
 
     /**

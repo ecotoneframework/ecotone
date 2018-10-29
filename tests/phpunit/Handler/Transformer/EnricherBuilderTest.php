@@ -8,7 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithCompositeExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadMapperBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
@@ -341,6 +341,11 @@ class EnricherBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Exception
+     */
     public function test_enriching_array_with_multiple_values_at_once_by_mapping()
     {
         $outputChannel = QueueChannel::create();
@@ -363,8 +368,9 @@ class EnricherBuilderTest extends MessagingTest
             ]
         ];
         $setterBuilders = [
-            EnrichPayloadWithCompositeExpressionBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
+            EnrichPayloadWithExpressionBuilder::createWithMapping("[orders][*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
         ];
+
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, $replyPayload, $setterBuilders);
 
         $this->assertEquals(
@@ -430,7 +436,7 @@ class EnricherBuilderTest extends MessagingTest
         );
         $replyPayload = [];
         $setterBuilders = [
-            EnrichPayloadWithCompositeExpressionBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
+            EnrichPayloadWithExpressionBuilder::createWithMapping("[orders][*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
         ];
 
         $this->expectException(MessagingException::class);
@@ -448,7 +454,7 @@ class EnricherBuilderTest extends MessagingTest
         );
         $replyPayload = [];
         $setterBuilders = [
-            EnrichPayloadWithCompositeExpressionBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
+            EnrichPayloadWithExpressionBuilder::createWithMapping("[orders][*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
         ];
 
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, $replyPayload, $setterBuilders);
@@ -471,7 +477,7 @@ class EnricherBuilderTest extends MessagingTest
         );
         $replyPayload = [];
         $setterBuilders = [
-            EnrichPayloadWithCompositeExpressionBuilder::createWithMapping("person", "payload", "orders", "context['personId'] == reply['personId']")
+            EnrichPayloadWithExpressionBuilder::createWithMapping("[orders][*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
         ];
 
         $inputMessage       = $inputMessage

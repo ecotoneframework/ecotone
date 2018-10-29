@@ -44,14 +44,15 @@ class EnrichHeaderWithValueConverter implements EnricherConverter
     }
 
     /**
+     * @param DataSetter $dataSetter
      * @param PropertyPath $propertyPath
      * @param mixed $value
      *
      * @return EnrichHeaderWithValueConverter
      */
-    public static function create(PropertyPath $propertyPath, $value) : self
+    public static function create(DataSetter $dataSetter, PropertyPath $propertyPath, $value) : self
     {
-        return new self(DataSetter::create(), $propertyPath, $value);
+        return new self($dataSetter, $propertyPath, $value);
     }
 
     /**
@@ -59,7 +60,7 @@ class EnrichHeaderWithValueConverter implements EnricherConverter
      */
     public function evaluate(Message $enrichedMessage, ?Message $replyMessage)
     {
-        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichedMessage->getHeaders()->headers(), $this->value);
+        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichedMessage->getHeaders()->headers(), $this->value, $enrichedMessage, $replyMessage);
     }
 
     /**

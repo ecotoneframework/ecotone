@@ -25,17 +25,23 @@ class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
      * @var string
      */
     private $expression;
+    /**
+     * @var string
+     */
+    private $mappingExpression;
 
     /**
      * ExpressionSetterBuilder constructor.
      *
      * @param string $propertyPath
      * @param string $expression
+     * @param string $mappingExpression
      */
-    private function __construct(string $propertyPath, string $expression)
+    private function __construct(string $propertyPath, string $expression, string $mappingExpression)
     {
         $this->propertyPath = $propertyPath;
         $this->expression   = $expression;
+        $this->mappingExpression = $mappingExpression;
     }
 
     /**
@@ -46,7 +52,20 @@ class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
      */
     public static function createWith(string $propertyPath, string $expression) : self
     {
-        return new self($propertyPath, $expression);
+        return new self($propertyPath, $expression, "");
+    }
+
+    /**
+     * Enrich multiple paths
+     *
+     * @param string $propertyPath path to enriched context e.g. [orders][*][person]
+     * @param string $expression should return array, that will be mapped to set in property path e.g. payload
+     * @param string $mappingExpression when evaluates to true, then specific element is put in property path e.g. context['personId'] == reply['personId']
+     * @return EnrichPayloadWithExpressionBuilder
+     */
+    public static function createWithMapping(string $propertyPath, string $expression, string $mappingExpression) : self
+    {
+        return new self($propertyPath, $expression, $mappingExpression);
     }
 
     /**
@@ -60,9 +79,10 @@ class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
         return new EnrichPayloadWithExpressionConverter(
             $expressionEvaluationService,
             $referenceSearchService,
-            DataSetter::create(),
+            DataSetter::create($expressionEvaluationService, $referenceSearchService, $this->mappingExpression),
             PropertyPath::createWith($this->propertyPath),
-            $this->expression
+            $this->expression,
+            $this->mappingExpression
         );
     }
 }

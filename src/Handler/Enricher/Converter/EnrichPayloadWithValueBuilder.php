@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
@@ -52,6 +54,13 @@ class EnrichPayloadWithValueBuilder implements EnricherConverterBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): EnricherConverter
     {
-        return EnrichPayloadWithValueConverter::createWith(PropertyPath::createWith($this->propertyPath), $this->value);
+        /** @var ExpressionEvaluationService $expressionEvaluationService */
+        $expressionEvaluationService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
+
+        return EnrichPayloadWithValueConverter::createWith(
+            DataSetter::create($expressionEvaluationService, $referenceSearchService, ""),
+            PropertyPath::createWith($this->propertyPath),
+            $this->value
+        );
     }
 }

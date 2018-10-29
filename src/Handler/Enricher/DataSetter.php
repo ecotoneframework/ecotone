@@ -2,6 +2,10 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
 /**
  * Class PayloadPropertySetter
@@ -10,16 +14,41 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
  */
 class DataSetter
 {
-    private function __construct()
+    /**
+     * @var string
+     */
+    private $mappingExpression;
+    /**
+     * @var ExpressionEvaluationService
+     */
+    private $expressionEvaluationService;
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
+
+    /**
+     * DataSetter constructor.
+     * @param ExpressionEvaluationService $expressionEvaluationService
+     * @param ReferenceSearchService $referenceSearchService
+     * @param string $mappingExpression
+     */
+    private function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, string $mappingExpression)
     {
+        $this->mappingExpression = $mappingExpression;
+        $this->expressionEvaluationService = $expressionEvaluationService;
+        $this->referenceSearchService = $referenceSearchService;
     }
 
     /**
+     * @param ExpressionEvaluationService $expressionEvaluationService
+     * @param ReferenceSearchService $referenceSearchService
+     * @param string $mappingExpression
      * @return DataSetter
      */
-    public static function create(): self
+    public static function create(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, string $mappingExpression): self
     {
-        return new self();
+        return new self($expressionEvaluationService, $referenceSearchService, $mappingExpression);
     }
 
     /**
@@ -27,21 +56,45 @@ class DataSetter
      * @param mixed $dataToEnrich
      * @param mixed $value
      *
+     * @param Message $requestMessage
+     * @param null|Message $replyMessage
      * @return mixed enriched data
      * @throws EnrichException
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function enrichDataWith(PropertyPath $propertyNamePath, $dataToEnrich, $value)
+    public function enrichDataWith(PropertyPath $propertyNamePath, $dataToEnrich, $value, Message $requestMessage, ?Message $replyMessage)
     {
         $propertyName = $propertyNamePath->getPath();
+
+        if (preg_match("#^(\[\*\])#", $propertyName)) {
+            $propertyToBeChanged = $this->cutOutCurrentAccessPropertyName($propertyNamePath, "[*]");
+            $newPayload = $dataToEnrich;
+            foreach ($dataToEnrich as $propertyKey => $context) {
+                $enriched = false;
+                foreach ($value as $replyElement) {
+                    if ($this->canBeMapped($context, $replyElement, $requestMessage, $replyMessage)) {
+                        $newPayload[$propertyKey] = $this->enrichDataWith($propertyToBeChanged, $newPayload[$propertyKey], $replyElement, $requestMessage, $replyMessage);
+                        $enriched = true;
+                        break;
+                    };
+                }
+
+                if (!$enriched) {
+                    throw InvalidArgumentException::createWithFailedMessage("Can't enrich message {$requestMessage}. Can't find mapped data for {$propertyKey} in {$replyMessage}", $requestMessage);
+                }
+            }
+
+            return $newPayload;
+        }
+
         /** [0][data][worker] */
         preg_match("#^\[([a-zA-Z0-9]*)\]#", $propertyNamePath->getPath(), $startingWithPath);
         if ($this->hasAnyMatches($startingWithPath)) {
             $propertyName = $startingWithPath[1];
             $accessPropertyName = $startingWithPath[0];
             if ($accessPropertyName !== $propertyNamePath->getPath()) {
-                $value = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $accessPropertyName), $dataToEnrich[$propertyName], $value);
+                $value = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $accessPropertyName), $dataToEnrich[$propertyName], $value, $requestMessage, $replyMessage);
             }
         }else {
             /** worker[name] */
@@ -51,7 +104,7 @@ class DataSetter
                 $propertyName = $startingWithPropertyName[1];
 
                 if ($propertyName !== $propertyNamePath->getPath()) {
-                    $value = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $propertyName), $dataToEnrich[$propertyName], $value);
+                    $value = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $propertyName), $dataToEnrich[$propertyName], $value, $requestMessage, $replyMessage);
                 }
             }
         }
@@ -106,5 +159,30 @@ class DataSetter
     private function cutOutCurrentAccessPropertyName(PropertyPath $propertyName, string $accessPropertyName) : PropertyPath
     {
         return PropertyPath::createWith(substr($propertyName->getPath(), strlen($accessPropertyName), strlen($propertyName->getPath())));
+    }
+
+    /**
+     * @param $context
+     * @param $replyElement
+     * @param Message $requestMessage
+     * @param null|Message $replyMessage
+     * @return bool
+     */
+    private function canBeMapped($context, $replyElement, Message $requestMessage, ?Message $replyMessage): bool
+    {
+        return $this->expressionEvaluationService->evaluate(
+            $this->mappingExpression,
+            [
+                "payload" => $replyMessage ? $replyMessage->getPayload() : null,
+                "headers" => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
+                "request" => [
+                    "payload" => $requestMessage->getPayload(),
+                    "headers" => $requestMessage->getHeaders()
+                ],
+                "requestContext" => $context,
+                "replyContext" => $replyElement,
+                "referenceService" => $this->referenceSearchService
+            ]
+        );
     }
 }

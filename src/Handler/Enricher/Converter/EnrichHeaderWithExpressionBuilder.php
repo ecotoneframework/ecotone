@@ -25,6 +25,10 @@ class EnrichHeaderWithExpressionBuilder implements EnricherConverterBuilder
      * @var string
      */
     private $expression;
+    /**
+     * @var string
+     */
+    private $nullResultExpression = "";
 
     /**
      * ExpressionSetterBuilder constructor.
@@ -50,6 +54,17 @@ class EnrichHeaderWithExpressionBuilder implements EnricherConverterBuilder
     }
 
     /**
+     * @param string $nullResultExpression
+     * @return EnrichHeaderWithExpressionBuilder
+     */
+    public function withNullResultExpression(string $nullResultExpression) : self
+    {
+        $this->nullResultExpression = $nullResultExpression;
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function build(ReferenceSearchService $referenceSearchService): EnricherConverter
@@ -66,6 +81,7 @@ class EnrichHeaderWithExpressionBuilder implements EnricherConverterBuilder
                 ""
             ),
             PropertyPath::createWith($this->propertyPath),
+            $this->nullResultExpression,
             $this->expression
         );
     }

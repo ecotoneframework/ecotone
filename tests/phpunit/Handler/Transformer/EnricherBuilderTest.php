@@ -467,6 +467,50 @@ class EnricherBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_using_null_expression_when_no_reply_available_on_payload_setter()
+    {
+        $outputChannel = QueueChannel::create();
+        $inputMessage = MessageBuilder::withPayload(["personId" => 1]);
+        $setterBuilders = [
+            EnrichPayloadWithExpressionBuilder::createWith("name", "payload")
+                ->withNullResultExpression("'unknown'")
+        ];
+
+        $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, null, $setterBuilders);
+
+        $this->assertEquals(
+            ["personId" => 1, "name" => "unknown"],
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_using_null_expression_when_no_reply_available_on_header_setter()
+    {
+        $outputChannel = QueueChannel::create();
+        $inputMessage = MessageBuilder::withPayload(["personId" => 1]);
+        $setterBuilders = [
+            EnrichHeaderWithExpressionBuilder::createWith("name", "payload")
+                ->withNullResultExpression("'unknown'")
+        ];
+
+        $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, null, $setterBuilders);
+
+        $this->assertEquals(
+            "unknown",
+            $outputChannel->receive()->getHeaders()->get("name")
+        );
+    }
+
     public function test_sending_request_message_evaluated_with_expression()
     {
         $outputChannel = QueueChannel::create();

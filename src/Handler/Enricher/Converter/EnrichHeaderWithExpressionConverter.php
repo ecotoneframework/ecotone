@@ -38,6 +38,10 @@ class EnrichHeaderWithExpressionConverter implements EnricherConverter
      * @var ReferenceSearchService
      */
     private $referenceSearchService;
+    /**
+     * @var string
+     */
+    private $nullResultExpression;
 
     /**
      * ExpressionSetter constructor.
@@ -46,15 +50,17 @@ class EnrichHeaderWithExpressionConverter implements EnricherConverter
      * @param ReferenceSearchService $referenceSearchService
      * @param DataSetter $dataSetter
      * @param PropertyPath $propertyPath
+     * @param string $nullResultExpression
      * @param string $expression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, DataSetter $dataSetter, PropertyPath $propertyPath, string $expression)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, DataSetter $dataSetter, PropertyPath $propertyPath, string $nullResultExpression, string $expression)
     {
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->propertyPath                = $propertyPath;
         $this->expression                  = $expression;
         $this->dataSetter = $dataSetter;
         $this->referenceSearchService = $referenceSearchService;
+        $this->nullResultExpression = $nullResultExpression;
     }
 
     /**
@@ -62,8 +68,10 @@ class EnrichHeaderWithExpressionConverter implements EnricherConverter
      */
     public function evaluate(Message $enrichMessage, ?Message $replyMessage)
     {
+        $evaluateAgainst = $this->canNullExpressionBeUsed($replyMessage) ? $this->nullResultExpression : $this->expression;
+
         $dataToEnrich = $this->expressionEvaluationService->evaluate(
-            $this->expression,
+            $evaluateAgainst,
             [
                 "payload" => $replyMessage ? $replyMessage->getPayload() : null,
                 "headers" => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
@@ -84,5 +92,14 @@ class EnrichHeaderWithExpressionConverter implements EnricherConverter
     public function isPayloadSetter(): bool
     {
         return false;
+    }
+
+    /**
+     * @param null|Message $replyMessage
+     * @return bool
+     */
+    private function canNullExpressionBeUsed(?Message $replyMessage): bool
+    {
+        return $this->nullResultExpression && !$replyMessage;
     }
 }

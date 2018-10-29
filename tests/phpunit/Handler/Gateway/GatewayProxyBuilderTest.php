@@ -7,6 +7,7 @@ use Fixture\Handler\Gateway\DumbSendAndReceiveService;
 use Fixture\Handler\NoReturnMessageHandler;
 use Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Fixture\Handler\StatefulHandler;
+use Fixture\Service\ServiceExpectingNoArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
 use Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceive;

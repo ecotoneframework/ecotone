@@ -29,6 +29,10 @@ class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
      * @var string
      */
     private $mappingExpression;
+    /**
+     * @var string
+     */
+    private $nullResultExpression = "";
 
     /**
      * ExpressionSetterBuilder constructor.
@@ -53,6 +57,17 @@ class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
     public static function createWith(string $propertyPath, string $expression) : self
     {
         return new self($propertyPath, $expression, "");
+    }
+
+    /**
+     * @param string $nullResultExpression
+     * @return EnrichPayloadWithExpressionBuilder
+     */
+    public function withNullResultExpression(string $nullResultExpression) : self
+    {
+        $this->nullResultExpression = $nullResultExpression;
+
+        return $this;
     }
 
     /**
@@ -82,6 +97,7 @@ class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
             DataSetter::create($expressionEvaluationService, $referenceSearchService, $this->mappingExpression),
             PropertyPath::createWith($this->propertyPath),
             $this->expression,
+            $this->nullResultExpression,
             $this->mappingExpression
         );
     }

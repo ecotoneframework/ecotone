@@ -10,6 +10,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\DeserializingConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\Json\ArrayToJsonConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\Json\JsonToArrayConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\SerializingConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\StringToUuidConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\UuidToStringConverterBuilder;
@@ -49,6 +51,8 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
         $configuration->registerConverter(new StringToUuidConverterBuilder());
         $configuration->registerConverter(new SerializingConverterBuilder());
         $configuration->registerConverter(new DeserializingConverterBuilder());
+        $configuration->registerConverter(new ArrayToJsonConverterBuilder());
+        $configuration->registerConverter(new JsonToArrayConverterBuilder());
     }
 
 

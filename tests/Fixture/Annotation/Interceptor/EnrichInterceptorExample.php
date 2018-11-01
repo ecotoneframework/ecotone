@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 namespace Fixture\Annotation\Interceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnricherInterceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\MethodInterceptors;
 
 /**
  * Class EnrichInterceptorExample
@@ -10,6 +12,11 @@ namespace Fixture\Annotation\Interceptor;
  */
 class EnrichInterceptorExample
 {
+    /**
+     * @MethodInterceptors(
+     *     preCallInterceptors={@EnricherInterceptor()}
+     * )
+     */
     public function execute() : void
     {
 

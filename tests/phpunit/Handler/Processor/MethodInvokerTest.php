@@ -11,7 +11,7 @@ use Fixture\Service\ServiceExpectingThreeArguments;
 use Fixture\Service\ServiceExpectingTwoArguments;
 use Fixture\Service\ServiceWithoutAnyMethods;
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\IntegrationMessaging\Conversion\ConversionService;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\DeserializingConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\MediaType;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\StringToUuidConverter;
@@ -171,7 +171,7 @@ class MethodInvokerTest extends MessagingTest
         $methodInvocation = MethodInvoker::createWith(new OrderProcessor(), 'processOrder', [
             PayloadBuilder::create('order')
         ], false, InMemoryReferenceSearchService::createWith([
-            ConversionService::REFERENCE_NAME => ConversionService::createWith([
+            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
                 new DeserializingConverter()
             ])
         ]));
@@ -200,7 +200,7 @@ class MethodInvokerTest extends MessagingTest
         $methodInvocation = MethodInvoker::createWith(new OrderProcessor(), 'buyByName', [
             HeaderBuilder::create("id", "uuid")
         ], false, InMemoryReferenceSearchService::createWith([
-            ConversionService::REFERENCE_NAME => ConversionService::createWith([
+            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
                 new StringToUuidConverter()
             ])
         ]));
@@ -232,7 +232,7 @@ class MethodInvokerTest extends MessagingTest
         $methodInvocation = MethodInvoker::createWith(new OrderProcessor(), 'buyMultiple', [
             PayloadBuilder::create("ids")
         ], false, InMemoryReferenceSearchService::createWith([
-            ConversionService::REFERENCE_NAME => ConversionService::createWith([
+            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
                 new StringToUuidConverter()
             ])
         ]));

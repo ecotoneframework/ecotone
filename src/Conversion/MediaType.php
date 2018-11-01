@@ -29,6 +29,8 @@ final class MediaType
     const APPLICATION_X_PHP_OBJECT = "application/x-php-object";
     const APPLICATION_X_PHP_SERIALIZED_OBJECT = "application/x-php-serialized-object";
 
+    private const TYPE_PARAMETER = "type";
+
     /**
      * @var string
      */
@@ -205,6 +207,24 @@ final class MediaType
     public function hasParameter(string $name) : bool
     {
         return array_key_exists($name, $this->parameters);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasTypeParameter() : bool
+    {
+        return $this->hasParameter(self::TYPE_PARAMETER);
+    }
+
+    /**
+     * @return string
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function getTypeParameter() : string
+    {
+        return $this->getParameter(self::TYPE_PARAMETER);
     }
 
     /**

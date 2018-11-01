@@ -8,10 +8,12 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\IntegrationMessaging\Conversion\ConversionService;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\AutoCollectionConversionService;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\DeserializingConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\Json\ArrayToJsonConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\Json\JsonToArrayConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\MediaType;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\SerializingConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadMapperBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
@@ -668,47 +670,6 @@ class EnricherBuilderTest extends MessagingTest
         $enricher->handle($inputMessage);
 
         $this->assertEquals(['ids' => [1, 2, 2]], $messageHandler->getReceivedMessage()->getPayload());
-    }
-
-    /**
-     * @throws ConfigurationException
-     * @throws MessagingException
-     * @throws \Exception
-     */
-    public function test_converting_to_php_format_if_content_type_is_different_and_converter_available()
-    {
-        $outputChannel = QueueChannel::create();
-        $inputMessage       = MessageBuilder::withPayload(\json_encode(["name" => "test"]))
-            ->setContentType(MediaType::APPLICATION_JSON)
-            ->setReplyChannel($outputChannel)
-            ->build();
-
-        $enricher = EnricherBuilder::create(            [
-            EnrichPayloadWithValueBuilder::createWith("token", "123")
-        ])
-            ->withInputChannelName("some")
-            ->build(
-                InMemoryChannelResolver::createEmpty(),
-                InMemoryReferenceSearchService::createWith(
-                    [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                        ConversionService::REFERENCE_NAME => ConversionService::createWith([
-                            new JsonToArrayConverter(),
-                            new ArrayToJsonConverter()
-                        ])
-                    ]
-                )
-            );
-
-        $enricher->handle($inputMessage);
-
-        $this->assertEquals(
-            \json_encode([
-                "name"  => "test",
-                "token" => "123"
-            ]),
-            $outputChannel->receive()->getPayload()
-        );
     }
 
     /**

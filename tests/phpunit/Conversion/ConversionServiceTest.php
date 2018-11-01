@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Conversion;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\IntegrationMessaging\Conversion\ConversionService;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\DeserializingConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\MediaType;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\SerializingConverter;
@@ -24,7 +24,7 @@ class ConversionServiceTest extends TestCase
      */
     public function test_using_php_serializing_converters()
     {
-        $conversionService = ConversionService::createWith([
+        $conversionService = AutoCollectionConversionService::createWith([
             new DeserializingConverter(),
             new SerializingConverter()
         ]);
@@ -56,7 +56,7 @@ class ConversionServiceTest extends TestCase
 
     public function test_not_converting_when_source_is_null()
     {
-        $conversionService = ConversionService::createWith([new SerializingConverter()]);
+        $conversionService = AutoCollectionConversionService::createWith([new SerializingConverter()]);
 
         $this->assertEquals(
             null,

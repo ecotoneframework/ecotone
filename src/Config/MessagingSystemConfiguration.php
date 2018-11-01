@@ -6,6 +6,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\ConversionService;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\ConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ChannelAdapterConsumerBuilder;
@@ -332,7 +333,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->build($externalReferenceSearchService);
         }
-        $extraReferences[ConversionService::REFERENCE_NAME] = ConversionService::createWith($converters);
+        $extraReferences[ConversionService::REFERENCE_NAME] = AutoCollectionConversionService::createWith($converters);
 
         $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, $extraReferences);
         $channelResolver = $this->createChannelResolver($referenceSearchService);

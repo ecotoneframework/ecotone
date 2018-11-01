@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler;
 
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\ConversionService;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\DeserializingConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\SerializingConverter;
@@ -112,7 +113,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
             $this->objectsToResolve[InterfaceToCallRegistry::REFERENCE_NAME] = InterfaceToCallRegistry::createEmpty();
         }
         if (!array_key_exists(ConversionService::REFERENCE_NAME, $this->objectsToResolve)) {
-            $this->objectsToResolve[ConversionService::REFERENCE_NAME] = ConversionService::createEmpty();
+            $this->objectsToResolve[ConversionService::REFERENCE_NAME] = AutoCollectionConversionService::createEmpty();
         }
     }
 }

@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher;
 
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\ConversionService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
@@ -136,6 +137,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
             $gateway,
             $referenceSearchService->get(ExpressionEvaluationService::REFERENCE),
             $referenceSearchService,
+            $referenceSearchService->get(ConversionService::REFERENCE_NAME),
             $propertySetters,
             $this->requestPayloadExpression,
             $this->requestHeaders

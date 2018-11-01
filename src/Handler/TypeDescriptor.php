@@ -191,7 +191,7 @@ final class TypeDescriptor
      */
     public static function createCollection(string $className) : self
     {
-        return new self("array<$className>", "");
+        return new self("array<{$className}>", "");
     }
 
     /**
@@ -203,6 +203,26 @@ final class TypeDescriptor
     public static function create(?string $type) : self
     {
         return new self($type ? $type : self::UNKNOWN,"");
+    }
+
+    /**
+     * @return TypeDescriptor
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createUnknown() : self
+    {
+        return new self(self::UNKNOWN, "");
+    }
+
+    /**
+     * @return TypeDescriptor
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createArray() : self
+    {
+        return new self(self::ARRAY, "");
     }
 
     /**

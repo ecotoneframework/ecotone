@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker;
 
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\ConversionService;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\MediaType;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
@@ -242,7 +243,7 @@ final class MethodInvoker implements MessageProcessor
         for ($index = 0; $index < $count; $index++) {
             $data = $this->orderedMethodArguments[$index]->getArgumentFrom($this->interfaceToCall->getParameterAtIndex($index), $message);
             $isPayloadConverter = $this->orderedMethodArguments[$index] instanceof PayloadConverter;
-            $sourceTypeDescriptor = $isPayloadConverter && $sourceMediaType->hasParameter("type")
+            $sourceTypeDescriptor = $isPayloadConverter && $sourceMediaType->hasTypeParameter()
                 ? TypeDescriptor::create($sourceMediaType->getParameter("type"))
                 : TypeDescriptor::createFromVariable($data);
 

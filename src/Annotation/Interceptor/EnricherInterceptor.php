@@ -12,10 +12,6 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor;
 class EnricherInterceptor
 {
     /**
-     * @var array
-     */
-    public $converters = [];
-    /**
      * @var string
      */
     public $requestMessageChannel = "";

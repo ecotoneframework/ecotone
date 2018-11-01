@@ -33,7 +33,7 @@ class ReferenceBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock(\stdClass::class, true, "")),
+                InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock(\stdClass::class, "")),
                 MessageBuilder::withPayload("paramName")->build()
             )
         );
@@ -54,7 +54,7 @@ class ReferenceBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock(\stdClass::class, true, "")),
+                InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock(\stdClass::class, "")),
                 MessageBuilder::withPayload("paramName")->build()
             )
         );

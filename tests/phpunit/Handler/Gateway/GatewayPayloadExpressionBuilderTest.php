@@ -39,7 +39,7 @@ class GatewayPayloadExpressionBuilderTest extends MessagingTest
             MessageBuilder::withPayload("some")
                 ->setPayload(2),
             $converter->convertToMessage(
-                MethodArgument::createWith(InterfaceParameter::create("test", TypeDescriptor::create("string", true)), 1),
+                MethodArgument::createWith(InterfaceParameter::createNullable("test", TypeDescriptor::create("string")), 1),
                 MessageBuilder::withPayload("some")
             )
         );

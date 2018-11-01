@@ -36,9 +36,9 @@ class ConversionServiceTest extends TestCase
 
         $result = $conversionService->convert(
             $serializedObject,
-            TypeDescriptor::create(TypeDescriptor::OBJECT, false),
+            TypeDescriptor::create(TypeDescriptor::OBJECT),
             MediaType::createApplicationXPHPObject(),
-            TypeDescriptor::create(TypeDescriptor::STRING, false),
+            TypeDescriptor::create(TypeDescriptor::STRING),
             MediaType::createApplicationXPHPSerializedObject()
         );
 
@@ -46,9 +46,9 @@ class ConversionServiceTest extends TestCase
             $serializedObject,
             $conversionService->convert(
                 $result,
-                TypeDescriptor::create(TypeDescriptor::STRING, false),
+                TypeDescriptor::create(TypeDescriptor::STRING),
                 MediaType::createApplicationXPHPSerializedObject(),
-                TypeDescriptor::create(\stdClass::class, false),
+                TypeDescriptor::create(\stdClass::class),
                 MediaType::createApplicationXPHPObject()
             )
         );
@@ -62,9 +62,9 @@ class ConversionServiceTest extends TestCase
             null,
             $conversionService->convert(
                 null,
-                TypeDescriptor::create(TypeDescriptor::OBJECT, false),
+                TypeDescriptor::create(TypeDescriptor::OBJECT),
                 MediaType::createApplicationXPHPObject(),
-                TypeDescriptor::create(TypeDescriptor::STRING, false),
+                TypeDescriptor::create(TypeDescriptor::STRING),
                 MediaType::createApplicationXPHPSerializedObject()
             )
         );

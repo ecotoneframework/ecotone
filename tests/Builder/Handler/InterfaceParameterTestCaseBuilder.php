@@ -33,7 +33,7 @@ class InterfaceParameterTestCaseBuilder
      */
     public function build() : InterfaceParameter
     {
-        return InterfaceParameter::create(
+        return InterfaceParameter::createNullable(
             new \ReflectionParameter(function ($x){}, "x")
         );
     }

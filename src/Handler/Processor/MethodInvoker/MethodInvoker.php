@@ -243,7 +243,7 @@ final class MethodInvoker implements MessageProcessor
             $data = $this->orderedMethodArguments[$index]->getArgumentFrom($this->interfaceToCall->getParameterAtIndex($index), $message);
             $isPayloadConverter = $this->orderedMethodArguments[$index] instanceof PayloadConverter;
             $sourceTypeDescriptor = $isPayloadConverter && $sourceMediaType->hasParameter("type")
-                ? TypeDescriptor::create($sourceMediaType->getParameter("type"), false)
+                ? TypeDescriptor::create($sourceMediaType->getParameter("type"))
                 : TypeDescriptor::createFromVariable($data);
 
             if ($this->canConvertParameter(

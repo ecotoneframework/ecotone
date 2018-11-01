@@ -28,7 +28,7 @@ class HeaderBuilderTest extends TestCase
         $this->assertEquals(
             123,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock("string", true, "")),
+                InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock("string",  "")),
                 MessageBuilder::withPayload("a")->setHeader("token", 123)->build()
             )
         );
@@ -45,7 +45,7 @@ class HeaderBuilderTest extends TestCase
         $this->assertEquals(
             null,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock("string", true, "")),
+                InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock("string",  "")),
                 MessageBuilder::withPayload("a")->build()
             )
         );

@@ -75,7 +75,7 @@ class EnrichPayloadWithExpressionBuilder implements EnricherConverterBuilder
      *
      * @param string $propertyPath path to enriched context e.g. [orders][*][person]
      * @param string $expression should return array, that will be mapped to set in property path e.g. payload
-     * @param string $mappingExpression when evaluates to true, then specific element is put in property path e.g. context['personId'] == reply['personId']
+     * @param string $mappingExpression when evaluates to true, then specific element is put in property path e.g. requestContext['personId'] == replyContext['personId']
      * @return EnrichPayloadWithExpressionBuilder
      */
     public static function createWithMapping(string $propertyPath, string $expression, string $mappingExpression) : self

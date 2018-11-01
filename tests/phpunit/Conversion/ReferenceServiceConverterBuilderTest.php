@@ -26,8 +26,8 @@ class ReferenceServiceConverterBuilderTest extends TestCase
      */
     public function test_converting_using_reference_service()
     {
-        $sourceType = TypeDescriptor::create("array<string>", false);
-        $targetType = TypeDescriptor::create("array<\stdClass>", false);
+        $sourceType = TypeDescriptor::create("array<string>");
+        $targetType = TypeDescriptor::create("array<\stdClass>");
         $referenceService = ReferenceServiceConverterBuilder::create(
             ExampleConverterService::class,
             "convert",
@@ -62,8 +62,8 @@ class ReferenceServiceConverterBuilderTest extends TestCase
         ReferenceServiceConverterBuilder::create(
             ServiceExpectingTwoArguments::class,
             "withReturnValue",
-            TypeDescriptor::create("array<string>", false),
-            TypeDescriptor::create("array<\stdClass>", false)
+            TypeDescriptor::create("array<string>"),
+            TypeDescriptor::create("array<\stdClass>")
         )->build(
             InMemoryReferenceSearchService::createWith([
                 ServiceExpectingTwoArguments::class => ServiceExpectingTwoArguments::create()

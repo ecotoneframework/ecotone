@@ -31,7 +31,7 @@ class StaticBuilderTest extends TestCase
         $this->assertEquals(
             $value,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock("string", true, null)),
+                InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock("string",null)),
                 MessageBuilder::withPayload("a")->build()
             )
         );

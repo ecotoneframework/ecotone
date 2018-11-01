@@ -4,19 +4,18 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor;
 
 /**
- * Class EnrichHeaderWithExpression
+ * Class GatewayInterceptor
  * @package SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
  */
-class EnrichHeaderWithExpression
+class GatewayInterceptor
 {
     /**
      * @var string
      */
-    public $propertyPath;
+    public $requestChannelName;
     /**
      * @var string
      */
-    public $expression;
+    public $replyChannelName;
 }

@@ -36,7 +36,7 @@ class ExpressionBuilderTest extends TestCase
         $this->assertEquals(
             $payload . "1",
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", TypeDescriptor::createWithDocBlock("string", true, "")),
+                InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock("string",  "")),
                 MessageBuilder::withPayload($payload)->build()
             )
         );
@@ -58,7 +58,7 @@ class ExpressionBuilderTest extends TestCase
         $this->assertEquals(
             2,
             $converter->getArgumentFrom(
-                InterfaceParameter::create("x", TypeDescriptor::create("string", true)),
+                InterfaceParameter::createNullable("x", TypeDescriptor::create("string")),
                 MessageBuilder::withPayload(1)->build()
             )
         );

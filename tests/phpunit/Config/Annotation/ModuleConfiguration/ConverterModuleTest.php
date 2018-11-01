@@ -36,8 +36,8 @@ class ConverterModuleTest extends AnnotationConfigurationTest
                     ReferenceServiceConverterBuilder::create(
                         ExampleConverterService::class,
                         "convert",
-                        TypeDescriptor::create("array<string>", false),
-                        TypeDescriptor::create("array<\stdClass>", false)
+                        TypeDescriptor::create("array<string>"),
+                        TypeDescriptor::create("array<\stdClass>")
                     )
                 ),
             $configuration

@@ -22,16 +22,22 @@ final class InterfaceParameter
      * @var TypeDescriptor
      */
     private $typeDescriptor;
+    /**
+     * @var bool
+     */
+    private $doesAllowNull;
 
     /**
      * TypeHint constructor.
      * @param string $name
      * @param TypeDescriptor $typeDescriptor
+     * @param bool $doesAllowNull
      */
-    private function __construct(string $name, TypeDescriptor $typeDescriptor)
+    private function __construct(string $name, TypeDescriptor $typeDescriptor, bool $doesAllowNull)
     {
         $this->name = $name;
         $this->typeDescriptor = $typeDescriptor;
+        $this->doesAllowNull = $doesAllowNull;
     }
 
     /**
@@ -39,9 +45,30 @@ final class InterfaceParameter
      * @param TypeDescriptor $typeDescriptor
      * @return self
      */
-    public static function create(string $name, TypeDescriptor $typeDescriptor) : self
+    public static function createNullable(string $name, TypeDescriptor $typeDescriptor) : self
     {
-        return new self($name, $typeDescriptor);
+        return new self($name, $typeDescriptor, true);
+    }
+
+    /**
+     * @param string $name
+     * @param TypeDescriptor $typeDescriptor
+     * @return self
+     */
+    public static function createNotNullable(string $name, TypeDescriptor $typeDescriptor) : self
+    {
+        return new self($name, $typeDescriptor, false);
+    }
+
+    /**
+     * @param string $name
+     * @param TypeDescriptor $typeDescriptor
+     * @param bool $doesAllowNull
+     * @return self
+     */
+    public static function create(string $name, TypeDescriptor $typeDescriptor, bool $doesAllowNull) : self
+    {
+        return new self($name, $typeDescriptor, $doesAllowNull);
     }
 
     /**
@@ -57,7 +84,7 @@ final class InterfaceParameter
      */
     public function doesAllowNulls() : bool
     {
-        return $this->typeDescriptor->doesAllowNulls();
+        return $this->doesAllowNull;
     }
 
     /**

@@ -200,9 +200,9 @@ class InterfaceToCall
                 $parameter->getName(),
                 TypeDescriptor::createWithDocBlock(
                     $parameter->getType() ? $parameter->getType()->getName() : null,
-                    $parameter->getType() ? $parameter->getType()->allowsNull() : true,
                     array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
-                )
+                ),
+                $parameter->getType() ? $parameter->getType()->allowsNull() : true
             );
         }
 
@@ -210,10 +210,7 @@ class InterfaceToCall
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;
         $this->parameters = $parameters;
-        $this->returnType = TypeDescriptor::create(
-            $returnType ? $returnType : (string)$reflectionMethod->getReturnType(),
-            $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true
-        );
+        $this->returnType = TypeDescriptor::create($returnType ? $returnType : (string)$reflectionMethod->getReturnType());
         $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
         $this->isStaticallyCalled = $reflectionMethod->isStatic();
     }

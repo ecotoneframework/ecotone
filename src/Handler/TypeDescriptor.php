@@ -37,10 +37,6 @@ final class TypeDescriptor
      * @var string
      */
     private $type;
-    /**
-     * @var bool
-     */
-    private $doesAllowNulls;
 
     /**
      * @param string $type
@@ -117,15 +113,13 @@ final class TypeDescriptor
     /**
      * TypeHint constructor.
      * @param string $type
-     * @param bool $doesAllowNulls
      * @param string $docBlockTypeDescription
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function __construct(string $type, bool $doesAllowNulls, string $docBlockTypeDescription)
+    private function __construct(string $type, string $docBlockTypeDescription)
     {
         $this->initialize($type, $docBlockTypeDescription);
-        $this->doesAllowNulls = $doesAllowNulls;
     }
 
     /**
@@ -156,7 +150,7 @@ final class TypeDescriptor
             $type = self::UNKNOWN;
         }
 
-        return new self($type, true, "");
+        return new self($type,  "");
     }
 
     /**
@@ -174,20 +168,19 @@ final class TypeDescriptor
 
         preg_match(self::COLLECTION_TYPE_REGEX, $this->type, $match);
 
-        return [TypeDescriptor::create(trim($match[1]), false)];
+        return [TypeDescriptor::create(trim($match[1]))];
     }
 
     /**
      * @param string $type
-     * @param bool $doesAllowNulls
      * @param string|null $docBlockTypeDescription
      * @return self
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createWithDocBlock(?string $type, bool $doesAllowNulls, ?string $docBlockTypeDescription) : self
+    public static function createWithDocBlock(?string $type, ?string $docBlockTypeDescription) : self
     {
-        return new self($type ? $type : self::UNKNOWN, $doesAllowNulls, $docBlockTypeDescription ? $docBlockTypeDescription : "");
+        return new self($type ? $type : self::UNKNOWN, $docBlockTypeDescription ? $docBlockTypeDescription : "");
     }
 
     /**
@@ -198,27 +191,18 @@ final class TypeDescriptor
      */
     public static function createCollection(string $className) : self
     {
-        return new self("array<$className>", true, "");
+        return new self("array<$className>", "");
     }
 
     /**
      * @param string $type
-     * @param bool $doesAllowNulls
      * @return TypeDescriptor
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function create(?string $type, bool $doesAllowNulls) : self
+    public static function create(?string $type) : self
     {
-        return new self($type ? $type : self::UNKNOWN, $doesAllowNulls, "");
-    }
-
-    /**
-     * @return bool
-     */
-    public function doesAllowNulls() : bool
-    {
-        return $this->doesAllowNulls;
+        return new self($type ? $type : self::UNKNOWN,"");
     }
 
     /**

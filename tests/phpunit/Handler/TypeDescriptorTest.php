@@ -20,7 +20,7 @@ class TypeDescriptorTest extends TestCase
      */
     public function test_guessing_type_hint_from_compound_type_and_array_of_scalar_type()
     {
-        $typeDescription = TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, false, "array<string>");
+        $typeDescription = TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY,  "array<string>");
 
         $this->assertEquals(
             'array<string>',
@@ -36,7 +36,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, false, "array<bla>");
+        TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY,  "array<bla>");
     }
 
     /**
@@ -47,7 +47,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock("bla", false, TypeDescriptor::ARRAY);
+        TypeDescriptor::createWithDocBlock("bla",  TypeDescriptor::ARRAY);
     }
 
     /**
@@ -58,7 +58,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::STRING, false, TypeDescriptor::ARRAY);
+        TypeDescriptor::createWithDocBlock(TypeDescriptor::STRING,  TypeDescriptor::ARRAY);
     }
 
     /**
@@ -69,7 +69,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, false, TypeDescriptor::INTEGER);
+        TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY,  TypeDescriptor::INTEGER);
     }
 
     /**
@@ -80,7 +80,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::RESOURCE, false, TypeDescriptor::INTEGER);
+        TypeDescriptor::createWithDocBlock(TypeDescriptor::RESOURCE, TypeDescriptor::INTEGER);
     }
 
     /**
@@ -91,7 +91,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::INTEGER, false, TypeDescriptor::RESOURCE);
+        TypeDescriptor::createWithDocBlock(TypeDescriptor::INTEGER,  TypeDescriptor::RESOURCE);
     }
 
     /**
@@ -102,7 +102,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::RESOURCE, false, TypeDescriptor::ARRAY);
+        TypeDescriptor::createWithDocBlock(TypeDescriptor::RESOURCE,  TypeDescriptor::ARRAY);
     }
 
     /**
@@ -113,7 +113,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE, false, TypeDescriptor::RESOURCE);
+        TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE,  TypeDescriptor::RESOURCE);
     }
 
     /**
@@ -124,7 +124,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             "array<\stdClass>",
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE, false, "\stdClass[]")->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE,  "\stdClass[]")->getTypeHint()
         );
     }
 
@@ -136,7 +136,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock(\stdClass::class, false, "array<\stdClass>");
+        TypeDescriptor::createWithDocBlock(\stdClass::class,  "array<\stdClass>");
     }
 
     /**
@@ -147,7 +147,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, false, \stdClass::class);
+        TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, \stdClass::class);
     }
 
     /**
@@ -158,7 +158,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             "array<\stdClass>",
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, false, "array<\stdClass>")->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, "array<\stdClass>")->getTypeHint()
         );
     }
 
@@ -168,7 +168,7 @@ class TypeDescriptorTest extends TestCase
      */
     public function test_choosing_doc_block_collection_type_hint_over_compound()
     {
-        $typeDescriptor = TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE, false, "\ArrayCollection<\stdClass>");
+        $typeDescriptor = TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE,  "\ArrayCollection<\stdClass>");
 
         $this->assertEquals(
             "\ArrayCollection<\stdClass>",
@@ -176,7 +176,7 @@ class TypeDescriptorTest extends TestCase
         );
 
         $this->assertEquals(
-            [TypeDescriptor::create(\stdClass::class, false)],
+            [TypeDescriptor::create(\stdClass::class)],
             $typeDescriptor->resolveGenericTypes()
         );
     }
@@ -187,7 +187,7 @@ class TypeDescriptorTest extends TestCase
      */
     public function test_throwing_exception_if_resolving_collection_type_for_non_collection()
     {
-        $typeDescriptor = TypeDescriptor::create(TypeDescriptor::STRING, false);
+        $typeDescriptor = TypeDescriptor::create(TypeDescriptor::STRING);
 
         $this->expectException(InvalidArgumentException::class);
 
@@ -201,18 +201,18 @@ class TypeDescriptorTest extends TestCase
     public function test_checking_equality()
     {
         $this->assertTrue(
-            TypeDescriptor::create(TypeDescriptor::STRING, false)
-                ->sameTypeAs(TypeDescriptor::create(TypeDescriptor::STRING, false))
+            TypeDescriptor::create(TypeDescriptor::STRING)
+                ->sameTypeAs(TypeDescriptor::create(TypeDescriptor::STRING))
         );
 
         $this->assertTrue(
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE, false, "\stdClass[]")
-                ->sameTypeAs(TypeDescriptor::create("array<\stdClass>", false))
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE,  "\stdClass[]")
+                ->sameTypeAs(TypeDescriptor::create("array<\stdClass>"))
         );
 
         $this->assertFalse(
-            TypeDescriptor::create(TypeDescriptor::OBJECT, false)
-                ->sameTypeAs(TypeDescriptor::create(TypeDescriptor::INTEGER, false))
+            TypeDescriptor::create(TypeDescriptor::OBJECT)
+                ->sameTypeAs(TypeDescriptor::create(TypeDescriptor::INTEGER))
         );
     }
 
@@ -224,7 +224,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             "\\" . \stdClass::class,
-            TypeDescriptor::createWithDocBlock(\Countable::class, false, \stdClass::class)->getTypeHint()
+            TypeDescriptor::createWithDocBlock(\Countable::class, \stdClass::class)->getTypeHint()
         );
     }
 
@@ -236,7 +236,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             "\\" . \stdClass::class,
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::OBJECT, false, \stdClass::class)->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::OBJECT, \stdClass::class)->getTypeHint()
         );
     }
 
@@ -248,7 +248,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             "\\" . \stdClass::class,
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::OBJECT, false, "\stdClass|\Countable")->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::OBJECT, "\stdClass|\Countable")->getTypeHint()
         );
     }
 
@@ -260,7 +260,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::ARRAY,
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::UNKNOWN, false, TypeDescriptor::ARRAY)->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::UNKNOWN,  TypeDescriptor::ARRAY)->getTypeHint()
         );
     }
 
@@ -272,7 +272,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             "\\" . \stdClass::class,
-            TypeDescriptor::create("\stdClass", false)->getTypeHint()
+            TypeDescriptor::create("\stdClass")->getTypeHint()
         );
     }
 
@@ -284,7 +284,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::OBJECT,
-            TypeDescriptor::create(TypeDescriptor::OBJECT, false)->getTypeHint()
+            TypeDescriptor::create(TypeDescriptor::OBJECT)->getTypeHint()
         );
     }
 
@@ -296,7 +296,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::VOID,
-            TypeDescriptor::create(TypeDescriptor::VOID, false)->getTypeHint()
+            TypeDescriptor::create(TypeDescriptor::VOID)->getTypeHint()
         );
     }
 
@@ -308,7 +308,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::UNKNOWN,
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::UNKNOWN, false, "mixed")->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::UNKNOWN,  "mixed")->getTypeHint()
         );
     }
 

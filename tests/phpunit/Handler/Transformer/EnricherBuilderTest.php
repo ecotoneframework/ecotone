@@ -80,6 +80,33 @@ class EnricherBuilderTest extends MessagingTest
      * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
+    public function test_enriching_property_with_quotes_in_names()
+    {
+        $outputChannel = QueueChannel::create();
+
+        $this->createEnricherAndHandle(
+            MessageBuilder::withPayload([]),
+            $outputChannel,
+            [
+                EnrichPayloadWithValueBuilder::createWith("'token'", "123"),
+                EnrichPayloadWithValueBuilder::createWith('"password"', "secret")
+            ]
+        );
+
+        $this->assertEquals(
+            [
+                "token" => 123,
+                "password" => "secret"
+            ],
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_copying_headers_from_input_message()
     {
         $outputChannel = QueueChannel::create();

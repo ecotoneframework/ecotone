@@ -14,7 +14,12 @@ class EnrichInterceptorExample
 {
     /**
      * @MethodInterceptors(
-     *     preCallInterceptors={@EnricherInterceptor()}
+     *     preCallInterceptors={
+     *          @EnricherInterceptor(
+     *              requestMessageChannel="requestChannel",
+     *              requestPayloadExpression="payload['name']"
+     *          )
+     *     }
      * )
      */
     public function execute() : void

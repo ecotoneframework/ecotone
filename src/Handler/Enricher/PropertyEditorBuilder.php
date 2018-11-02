@@ -10,12 +10,12 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface EnricherConverterBuilder
+interface PropertyEditorBuilder
 {
     /**
      * @param ReferenceSearchService $referenceSearchService
      *
-     * @return EnricherConverter
+     * @return PropertyEditor
      */
-    public function build(ReferenceSearchService $referenceSearchService) : EnricherConverter;
+    public function build(ReferenceSearchService $referenceSearchService) : PropertyEditor;
 }

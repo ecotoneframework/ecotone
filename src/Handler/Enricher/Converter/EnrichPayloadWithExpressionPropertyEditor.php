@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
@@ -16,7 +16,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class EnrichPayloadWithExpressionConverter implements EnricherConverter
+class EnrichPayloadWithExpressionPropertyEditor implements PropertyEditor
 {
     /**
      * @var ExpressionEvaluationService

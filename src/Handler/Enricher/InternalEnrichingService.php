@@ -21,7 +21,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 class InternalEnrichingService
 {
     /**
-     * @var array|EnricherConverter[]
+     * @var array|PropertyEditor[]
      */
     private $setters;
     /**
@@ -56,7 +56,7 @@ class InternalEnrichingService
      * @param ExpressionEvaluationService $expressionEvaluationService
      * @param ReferenceSearchService $referenceSearchService
      * @param ConversionService $conversionService
-     * @param EnricherConverter[] $setters
+     * @param PropertyEditor[] $setters
      * @param string $requestPayloadExpression
      * @param string[] $requestHeaders
      */

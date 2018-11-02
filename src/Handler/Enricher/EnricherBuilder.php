@@ -35,9 +35,9 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
      */
     private $requestPayloadExpression;
     /**
-     * @var EnricherConverterBuilder[]
+     * @var PropertyEditorBuilder[]
      */
-    private $setterBuilders;
+    private $propertyEditors;
     /**
      * @var string[]
      */
@@ -46,18 +46,18 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * EnricherBuilder constructor.
      *
-     * @param EnricherConverterBuilder[] $setters
+     * @param PropertyEditorBuilder[] $setters
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct(array $setters)
     {
-        Assert::allInstanceOfType($setters, EnricherConverterBuilder::class);
+        Assert::allInstanceOfType($setters, PropertyEditorBuilder::class);
 
-        $this->setterBuilders   = $setters;
+        $this->propertyEditors   = $setters;
     }
 
     /**
-     * @param EnricherConverter[] $setterBuilders
+     * @param PropertyEditor[] $setterBuilders
      *
      * @return EnricherBuilder
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
@@ -117,12 +117,12 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        if (empty($this->setterBuilders)) {
+        if (empty($this->propertyEditors)) {
             throw ConfigurationException::create("Can't configure enricher with no property setters");
         }
 
         $propertySetters = [];
-        foreach ($this->setterBuilders as $setterBuilder) {
+        foreach ($this->propertyEditors as $setterBuilder) {
             $propertySetters[] = $setterBuilder->build($referenceSearchService);
         }
 

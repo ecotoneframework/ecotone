@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverter;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherConverterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditor;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\HeaderSetterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
@@ -16,7 +16,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EnrichHeaderWithValueBuilder implements EnricherConverterBuilder
+class EnrichHeaderWithValueBuilder implements PropertyEditorBuilder
 {
     /**
      * @var string
@@ -51,12 +51,12 @@ class EnrichHeaderWithValueBuilder implements EnricherConverterBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): EnricherConverter
+    public function build(ReferenceSearchService $referenceSearchService): PropertyEditor
     {
         /** @var ExpressionEvaluationService $expressionEvaluationService */
         $expressionEvaluationService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
 
-        return EnrichHeaderWithValueConverter::create(
+        return EnrichHeaderWithValuePropertyEditor::create(
             DataSetter::create($expressionEvaluationService, $referenceSearchService, ""),
             PropertyPath::createWith($this->name),
             $this->value

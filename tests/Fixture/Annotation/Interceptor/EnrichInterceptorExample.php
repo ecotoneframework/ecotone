@@ -17,7 +17,10 @@ class EnrichInterceptorExample
      *     preCallInterceptors={
      *          @EnricherInterceptor(
      *              requestMessageChannel="requestChannel",
-     *              requestPayloadExpression="payload['name']"
+     *              requestPayloadExpression="payload['name']",
+     *              requestHeaders={
+     *                  "token"="1234"
+     *              },
      *          )
      *     }
      * )

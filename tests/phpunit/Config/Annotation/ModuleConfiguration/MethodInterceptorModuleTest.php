@@ -6,6 +6,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Module
 use Builder\Annotation\ServiceActivatorAnnotationTestCaseBuilder;
 use Fixture\Annotation\Interceptor\ClassLevelInterceptorsAndMethodsExample;
 use Fixture\Annotation\Interceptor\ClassLevelInterceptorsExample;
+use Fixture\Annotation\Interceptor\EnrichInterceptorExample;
 use Fixture\Annotation\Interceptor\ServiceActivatorMethodLevelInterceptorExample;
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
@@ -15,6 +16,11 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfigurati
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\ClassMethodInterceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithValueBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilderTest;
 
@@ -132,6 +138,46 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
             ClassLevelInterceptorsAndMethodsExample::class
+        ]);
+        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
+        $configuration = $this->createMessagingSystemConfiguration();
+        $annotationConfiguration->prepare($configuration, []);
+
+        $this->assertEquals(
+            $expectedConfiguration,
+            $configuration
+        );
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_registering_enrich_interceptor()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerPreCallMethodInterceptor(
+                EnricherBuilder::create([
+                    EnrichPayloadWithExpressionBuilder::createWithMapping("orders[*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
+                        ->withNullResultExpression("reference('fakeData').get()"),
+                    EnrichPayloadWithExpressionBuilder::createWith("session1", "'some1'"),
+                    EnrichPayloadWithValueBuilder::createWith("session2", "some2"),
+                    EnrichHeaderWithExpressionBuilder::createWith("token1", "'123'")
+                        ->withNullResultExpression("'1234'"),
+                    EnrichHeaderWithValueBuilder::create("token2", "1234")
+                ])
+                    ->withEndpointId("some-id")
+                    ->withRequestHeaders([
+                        "token" => "1234"
+                    ])
+                    ->withRequestPayloadExpression("payload['name']")
+                    ->withRequestMessageChannel("requestChannel")
+            );
+
+        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
+            EnrichInterceptorExample::class
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();

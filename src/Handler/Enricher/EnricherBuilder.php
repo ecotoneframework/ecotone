@@ -105,6 +105,19 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
     }
 
     /**
+     * @param array $headers
+     * @return EnricherBuilder
+     */
+    public function withRequestHeaders(array $headers) : self
+    {
+        foreach ($headers as $headerName => $value) {
+            $this->withRequestHeader($headerName, $value);
+        }
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function getRequiredReferenceNames(): array

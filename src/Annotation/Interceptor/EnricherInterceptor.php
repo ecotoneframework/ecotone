@@ -23,4 +23,8 @@ class EnricherInterceptor
      * @var array
      */
     public $requestHeaders = [];
+    /**
+     * @var array
+     */
+    public $editors;
 }

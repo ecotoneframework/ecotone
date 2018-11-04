@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor;
+use Doctrine\Common\Annotations\Annotation\Required;
 
 /**
  * Class EnrichPayloadWithExpression
@@ -13,12 +14,17 @@ class EnrichPayload
 {
     /**
      * @var string
+     * @Required()
      */
     public $propertyPath;
     /**
      * @var string
      */
-    public $expression;
+    public $expression = "";
+    /**
+     * @var string
+     */
+    public $value = "";
     /**
      * Allow for enriching multiple elements at once, using mapping between request and reply messages
      * Property path points to specific place to enrich in array context e.g. [orders][*][person]
@@ -30,5 +36,5 @@ class EnrichPayload
     /**
      * @var string
      */
-    public $nullResultExpression;
+    public $nullResultExpression = "";
 }

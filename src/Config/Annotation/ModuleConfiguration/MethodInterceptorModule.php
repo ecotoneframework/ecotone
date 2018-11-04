@@ -2,9 +2,13 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
+use Fixture\Annotation\Interceptor\EnrichInterceptorExample;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\EndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\InputOutputEndpointAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ClassInterceptors;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnricherInterceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnrichHeader;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnrichPayload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
@@ -15,6 +19,11 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistr
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithValueBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -121,16 +130,47 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $interceptors = [];
         $interceptorsToConvert = $forPreCall ? $methodInterceptors->preCallInterceptors : $methodInterceptors->postCallInterceptors;
         foreach ($interceptorsToConvert as $interceptor) {
-            switch (get_class($interceptor)) {
-                case ServiceActivatorInterceptor::class: {
-                    $interceptors[] = ServiceActivatorBuilder::create($interceptor->referenceName, $interceptor->methodName)
-                        ->withEndpointId($endpointId)
-                        ->withMethodParameterConverters(
-                            $parameterConverterFactory->createParameterConverters(
-                                null, $interceptor->parameterConverters
-                            )
-                        );
+            if ($interceptor instanceof ServiceActivatorInterceptor) {
+                $interceptors[] = ServiceActivatorBuilder::create($interceptor->referenceName, $interceptor->methodName)
+                    ->withEndpointId($endpointId)
+                    ->withMethodParameterConverters(
+                        $parameterConverterFactory->createParameterConverters(
+                            null, $interceptor->parameterConverters
+                        )
+                    );
+            }else if ($interceptor instanceof EnricherInterceptor) {
+                $propertyEditors = [];
+                foreach ($interceptor->editors as $editor) {
+                    if ($editor instanceof EnrichHeader) {
+                        if ($editor->expression) {
+                            $propertyEditors[] = EnrichHeaderWithExpressionBuilder::createWith($editor->propertyPath, $editor->expression)
+                                ->withNullResultExpression($editor->nullResultExpression);
+                        }else {
+                            $propertyEditors[] = EnrichHeaderWithValueBuilder::create($editor->propertyPath, $editor->value);
+                        }
+                    }else if ($editor instanceof EnrichPayload) {
+                        if ($editor->expression) {
+                            if ($editor->mappingExpression) {
+                                $propertyEditors[] = EnrichPayloadWithExpressionBuilder::createWithMapping($editor->propertyPath, $editor->expression, $editor->mappingExpression)
+                                    ->withNullResultExpression($editor->nullResultExpression);
+                            }else if ($editor->expression){
+                                $propertyEditors[] = EnrichPayloadWithExpressionBuilder::createWith($editor->propertyPath, $editor->expression)
+                                    ->withNullResultExpression($editor->nullResultExpression);
+                            }
+                        }else if ($editor->value) {
+                            $propertyEditors[] = EnrichPayloadWithValueBuilder::createWith($editor->propertyPath, $editor->value);
+                        }
+                    }else {
+                        $className = get_class($editor);
+                        throw ConfigurationException::create("Registered not known property editor {$className} for EnricherInterceptor");
+                    }
                 }
+
+                $interceptors[] = EnricherBuilder::create($propertyEditors)
+                    ->withEndpointId($endpointId)
+                    ->withRequestHeaders($interceptor->requestHeaders)
+                    ->withRequestPayloadExpression($interceptor->requestPayloadExpression)
+                    ->withRequestMessageChannel($interceptor->requestMessageChannel);
             }
         }
 

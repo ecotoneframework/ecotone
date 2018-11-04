@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor;
+use Doctrine\Common\Annotations\Annotation\Required;
 
 /**
  * Class EnrichHeaderWithExpression
@@ -13,14 +14,19 @@ class EnrichHeader
 {
     /**
      * @var string
+     * @Required()
      */
     public $propertyPath;
     /**
      * @var string
      */
-    public $expression;
+    public $expression = "";
     /**
      * @var string
      */
-    public $nullResultExpression;
+    public $value = "";
+    /**
+     * @var string
+     */
+    public $nullResultExpression = "";
 }

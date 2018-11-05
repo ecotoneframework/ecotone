@@ -210,7 +210,7 @@ final class MethodInvoker implements MessageProcessor
             return null;
         }
 
-        if ($payload instanceof Message) {
+        if ($payload instanceof Message || is_subclass_of($payload, Message::class)) {
             return $payload;
         }
 
@@ -222,6 +222,14 @@ final class MethodInvoker implements MessageProcessor
             ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($this->interfaceToCall->getReturnType()->toString())->toString())
             ->setPayload($payload)
             ->build();
+    }
+
+    /**
+     * @return InterfaceToCall
+     */
+    public function getInterfaceToCall() : InterfaceToCall
+    {
+        return $this->interfaceToCall;
     }
 
     /**

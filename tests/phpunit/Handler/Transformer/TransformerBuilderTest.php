@@ -11,6 +11,7 @@ use Fixture\Service\ServiceWithReturnValue;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\MediaType;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\HeaderBuilder;
@@ -19,6 +20,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\Con
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
@@ -86,6 +88,7 @@ class TransformerBuilderTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload($payload)
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING)->toString())
                 ->build(),
             $outputChannel->receive()
         );
@@ -160,11 +163,16 @@ class TransformerBuilderTest extends MessagingTest
                                 ])
                             );
 
-        $transformer->handle(MessageBuilder::withPayload($payload)->build());
+        $transformer->handle(
+            MessageBuilder::withPayload($payload)
+                ->setContentType(MediaType::APPLICATION_X_PHP_OBJECT)
+                ->build()
+        );
 
         $this->assertMessages(
             MessageBuilder::withPayload($payload)
                 ->setHeader('0', $payload)
+                ->setContentType(MediaType::APPLICATION_X_PHP_OBJECT)
                 ->build(),
             $outputChannel->receive()
         );
@@ -174,7 +182,7 @@ class TransformerBuilderTest extends MessagingTest
      * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function test_transforming_payload_if_array_returned_and_message_payload_is_also_array()
+    public function test_transforming_headers_if_array_returned_and_message_payload_is_also_array()
     {
         $payload = ["some payload"];
         $outputChannel = QueueChannel::create();
@@ -195,6 +203,7 @@ class TransformerBuilderTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload($payload)
+                ->setHeader('0', "some payload")
                 ->build(),
             $outputChannel->receive()
         );
@@ -237,6 +246,7 @@ class TransformerBuilderTest extends MessagingTest
         $this->assertMessages(
             MessageBuilder::withPayload($payload . $headerValue)
                 ->setHeader('token', $headerValue)
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING)->toString())
                 ->build(),
             $outputChannel->receive()
         );
@@ -299,9 +309,12 @@ class TransformerBuilderTest extends MessagingTest
         $replyChannel = QueueChannel::create();
         $transformer->handle(MessageBuilder::withPayload("some")->setReplyChannel($replyChannel)->build());
 
-        $this->assertEquals(
-            "johny",
-            $replyChannel->receive()->getPayload()
+        $this->assertMessages(
+            MessageBuilder::withPayload("johny")
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING)->toString())
+                ->setReplyChannel($replyChannel)
+                ->build(),
+            $replyChannel->receive()
         );
     }
 

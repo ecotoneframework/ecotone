@@ -226,6 +226,16 @@ final class TypeDescriptor
     }
 
     /**
+     * @return TypeDescriptor
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createString() : self
+    {
+        return new self(self::STRING, "");
+    }
+
+    /**
      * @return string
      */
     public function getTypeHint() : string

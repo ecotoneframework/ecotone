@@ -79,16 +79,14 @@ class InternalEnrichingService
      */
     public function enrich(Message $message) : Message
     {
-        $enrichedMessage = MessageBuilder::fromMessage($message)
-                            ->build();
         $replyMessage = null;
         if ($this->enrichGateway) {
-            $requestMessage = MessageBuilder::fromMessage($enrichedMessage);
+            $requestMessage = MessageBuilder::fromMessage($message);
 
             if ($this->requestPayloadExpression) {
                 $requestPayload = $this->expressionEvaluationService->evaluate($this->requestPayloadExpression, [
-                    "headers" => $enrichedMessage->getHeaders()->headers(),
-                    "payload" => $enrichedMessage->getPayload(),
+                    "headers" => $message->getHeaders()->headers(),
+                    "payload" => $message->getPayload(),
                     "referenceService" => $this->referenceSearchService
                 ]);
 
@@ -102,8 +100,13 @@ class InternalEnrichingService
             $requestMessage->setMultipleHeaders($extraHeaders);
 
             $replyMessage = $this->enrichGateway->execute($requestMessage->build());
+
+            if ($replyMessage) {
+                $replyMessage = $this->getConvertedMessage($replyMessage);
+            }
         }
 
+        $enrichedMessage = $this->getConvertedMessage($message);
         foreach ($this->setters as $setter) {
             $settedMessage = MessageBuilder::fromMessage($enrichedMessage);
 
@@ -121,5 +124,43 @@ class InternalEnrichingService
         }
 
         return $enrichedMessage;
+    }
+
+    /**
+     * @param Message $message
+     * @return Message|MessageBuilder
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
+     */
+    private function getConvertedMessage(Message $message)
+    {
+        $enrichedMessage = MessageBuilder::fromMessage($message);
+
+        if ($message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE)) {
+            $mediaType = MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE));
+            if (!$mediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP_OBJECT)) {
+                if ($this->conversionService->canConvert(
+                    $mediaType->hasTypeParameter() ? TypeDescriptor::create($mediaType->getTypeParameter()) : TypeDescriptor::createFromVariable($message->getPayload()),
+                    $mediaType,
+                    TypeDescriptor::createArray(),
+                    MediaType::createApplicationXPHPObject()
+                )) {
+                    $enrichedMessage = $enrichedMessage
+                        ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY)->toString())
+                        ->setPayload(
+                            $this->conversionService->convert(
+                                $message->getPayload(),
+                                TypeDescriptor::createFromVariable($message->getPayload()),
+                                $mediaType,
+                                TypeDescriptor::createArray(),
+                                MediaType::createApplicationXPHPObject()
+                            )
+                        );
+                }
+            }
+        }
+
+        return $enrichedMessage->build();
     }
 }

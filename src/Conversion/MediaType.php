@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Conversion;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 
@@ -90,6 +91,10 @@ final class MediaType
      */
     public static function createApplicationXPHPObjectWithTypeParameter(string $type) : self
     {
+        if ($type === TypeDescriptor::UNKNOWN) {
+            return self::parseMediaType(self::APPLICATION_X_PHP_OBJECT);
+        }
+
         return self::parseMediaType(self::APPLICATION_X_PHP_OBJECT . ";type={$type}");
     }
 
@@ -156,6 +161,21 @@ final class MediaType
     public function hasType(string $mediaType) : bool
     {
         return $this->type === $mediaType;
+    }
+
+    /**
+     * @param string $name
+     * @param string $value
+     * @return MediaType
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function addParameter(string $name, string $value) : self
+    {
+        return self::createWithParameters(
+            $this->type,
+            $this->subtype,
+            array_merge($this->parameters, [$name => $value])
+        );
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer;
 
+use SimplyCodedSoftware\IntegrationMessaging\Conversion\MediaType;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
@@ -53,7 +54,7 @@ class TransformerMessageProcessor implements MessageProcessor
         if (is_array($reply)) {
             if (is_array($message->getPayload())) {
                 $reply = $replyBuilder
-                    ->setPayload($reply)
+                    ->setMultipleHeaders($reply)
                     ->build();
             }else {
                 $reply = $replyBuilder
@@ -63,6 +64,7 @@ class TransformerMessageProcessor implements MessageProcessor
         }else if (!($reply instanceof Message)) {
             $reply = $replyBuilder
                 ->setPayload($reply)
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($this->methodInvoker->getInterfaceToCall()->getReturnType()->toString())->toString())
                 ->build();
         }
 

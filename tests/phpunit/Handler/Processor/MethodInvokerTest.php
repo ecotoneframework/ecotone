@@ -6,6 +6,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Processor;
 use Fixture\Behat\Ordering\Order;
 use Fixture\Behat\Ordering\OrderConfirmation;
 use Fixture\Behat\Ordering\OrderProcessor;
+use Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Fixture\Service\ServiceExpectingOneArgument;
 use Fixture\Service\ServiceExpectingThreeArguments;
 use Fixture\Service\ServiceExpectingTwoArguments;
@@ -18,6 +19,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Conversion\StringToUuidConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\HeaderBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\HeaderConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MessageConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadConverter;
@@ -73,6 +75,26 @@ class MethodInvokerTest extends MessagingTest
         $methodInvocation->processMessage(MessageBuilder::withPayload('some')->build());
 
         $this->assertTrue($serviceExpectingOneArgument->wasCalled(), "Method was not called");
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceNotFoundException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_not_changing_content_type_of_message_if_message_is_return()
+    {
+        $serviceExpectingOneArgument = ServiceExpectingMessageAndReturningMessage::create("test");
+
+        $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'send', [
+            MessageConverterBuilder::create("message")
+        ], true, InMemoryReferenceSearchService::createEmpty());
+
+        $this->assertMessages(
+            MessageBuilder::withPayload("test")
+                ->build(),
+            $methodInvocation->processMessage(MessageBuilder::withPayload('some')->build())
+        );
     }
 
     /**

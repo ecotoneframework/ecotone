@@ -7,6 +7,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor;
  * Class GatewayInterceptor
  * @package SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @Annotation
  */
 class GatewayInterceptor
 {
@@ -14,8 +15,4 @@ class GatewayInterceptor
      * @var string
      */
     public $requestChannelName;
-    /**
-     * @var string
-     */
-    public $replyChannelName;
 }

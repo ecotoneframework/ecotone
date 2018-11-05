@@ -7,6 +7,7 @@ use Builder\Annotation\ServiceActivatorAnnotationTestCaseBuilder;
 use Fixture\Annotation\Interceptor\ClassLevelInterceptorsAndMethodsExample;
 use Fixture\Annotation\Interceptor\ClassLevelInterceptorsExample;
 use Fixture\Annotation\Interceptor\EnrichInterceptorExample;
+use Fixture\Annotation\Interceptor\GatewayInterceptorExample;
 use Fixture\Annotation\Interceptor\ServiceActivatorMethodLevelInterceptorExample;
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
@@ -21,6 +22,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHe
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Test\SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilderTest;
 
@@ -178,6 +180,33 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
             EnrichInterceptorExample::class
+        ]);
+        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
+        $configuration = $this->createMessagingSystemConfiguration();
+        $annotationConfiguration->prepare($configuration, []);
+
+        $this->assertEquals(
+            $expectedConfiguration,
+            $configuration
+        );
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_registering_gateway_interceptor()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerPreCallMethodInterceptor(
+                GatewayInterceptorBuilder::create("requestChannel")
+                    ->withEndpointId("some-id")
+            );
+
+        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
+            GatewayInterceptorExample::class
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();

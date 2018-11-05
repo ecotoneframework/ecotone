@@ -9,6 +9,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ClassInterce
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnricherInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnrichHeader;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnrichPayload;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\GatewayInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
@@ -24,6 +25,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHe
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -171,6 +173,9 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                     ->withRequestHeaders($interceptor->requestHeaders)
                     ->withRequestPayloadExpression($interceptor->requestPayloadExpression)
                     ->withRequestMessageChannel($interceptor->requestMessageChannel);
+            }else if ($interceptor instanceof GatewayInterceptor) {
+                $interceptors[] = GatewayInterceptorBuilder::create($interceptor->requestChannelName)
+                    ->withEndpointId($endpointId);
             }
         }
 

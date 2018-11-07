@@ -7,6 +7,7 @@ use Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParamete
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Transformer;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\TransformerModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
@@ -26,20 +27,8 @@ class TransformerModuleTest extends AnnotationConfigurationTest
      */
     public function test_creating_transformer_builder()
     {
-        $transformerAnnotation = new Transformer();
-        $transformerAnnotation->inputChannelName = "inputChannel";
-        $transformerAnnotation->outputChannelName = "outputChannel";
-        $messageToPayload = new Payload();
-        $messageToPayload->parameterName = "message";
-        $transformerAnnotation->parameterConverters = [$messageToPayload];
-
         $annotationConfiguration = TransformerModule::create(
-            $this->createAnnotationRegistrationService(
-                TransformerWithMethodParameterExample::class,
-                "send",
-                new MessageEndpoint(),
-                $transformerAnnotation
-            )
+            InMemoryAnnotationRegistrationService::createFrom([TransformerWithMethodParameterExample::class])
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
@@ -48,6 +37,7 @@ class TransformerModuleTest extends AnnotationConfigurationTest
         $messageHandlerBuilder = TransformerBuilder::create(
             TransformerWithMethodParameterExample::class, "send"
         )
+            ->withEndpointId("some-id")
             ->withInputChannelName("inputChannel")
             ->withOutputMessageChannel("outputChannel");
         $messageHandlerBuilder->withMethodParameterConverters([

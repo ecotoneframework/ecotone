@@ -46,9 +46,10 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
     public function test_configuring_message_handler_from_application_context()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler(TransformerBuilder::createHeaderEnricher([
-                "token" => "abcedfg"
-            ])
+            ->registerMessageHandler(
+                TransformerBuilder::createHeaderEnricher([
+                    "token" => "abcedfg"
+                ])->withEndpointId("some-id")
                 ->withInputChannelName(ApplicationContextExample::HTTP_INPUT_CHANNEL)
                 ->withOutputMessageChannel(ApplicationContextExample::HTTP_OUTPUT_CHANNEL));
 
@@ -76,6 +77,7 @@ class ApplicationContextModuleTest extends AnnotationConfigurationTest
             ->registerMessageHandler(TransformerBuilder::createHeaderEnricher([
                 "token" => "abcedfg"
             ])
+                ->withEndpointId("some-id")
                 ->withInputChannelName(ApplicationContextExample::HTTP_INPUT_CHANNEL)
                 ->withOutputMessageChannel(ApplicationContextExample::HTTP_OUTPUT_CHANNEL));
 

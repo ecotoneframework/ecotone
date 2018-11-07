@@ -18,7 +18,7 @@ class TransformerWithMethodParameterExample
     /**
      * @param string $message
      *
-     * @Transformer(inputChannelName="inputChannel", outputChannelName="outputChannel", parameterConverters={
+     * @Transformer(endpointId="some-id", inputChannelName="inputChannel", outputChannelName="outputChannel", parameterConverters={
      *     @Payload(parameterName="message")
      * })
      * @return string

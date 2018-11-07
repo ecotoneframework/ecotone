@@ -622,7 +622,20 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->expectException(ConfigurationException::class);
 
         MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple()->withEndpointId("1"))
+            ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple()->withEndpointId("1"));
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_generating_random_id_if_no_endpoint_id_passed()
+    {
+        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
             ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple())
             ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple());
+
+        $this->assertTrue(true);
     }
 }

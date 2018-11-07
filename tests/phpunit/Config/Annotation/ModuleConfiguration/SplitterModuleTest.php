@@ -6,6 +6,7 @@ use Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Splitter;
+use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\SplitterModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
@@ -20,26 +21,16 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Splitter\SplitterBuilder;
 class SplitterModuleTest extends AnnotationConfigurationTest
 {
     /**
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Exception
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_creating_transformer_builder()
     {
-        $splitterAnnotation = new Splitter();
-        $splitterAnnotation->inputChannelName = "inputChannel";
-        $splitterAnnotation->outputChannelName = "outputChannel";
-        $messageToPayloadParameterAnnotation = new Payload();
-        $messageToPayloadParameterAnnotation->parameterName = "payload";
-        $splitterAnnotation->parameterConverters = [$messageToPayloadParameterAnnotation];
-
         $annotationConfiguration = SplitterModule::create(
-            $this->createAnnotationRegistrationService(
-                SplitterExample::class,
-                "split",
-                new MessageEndpoint(),
-                $splitterAnnotation
-
-            )
+            InMemoryAnnotationRegistrationService::createFrom([SplitterExample::class])
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
@@ -48,6 +39,7 @@ class SplitterModuleTest extends AnnotationConfigurationTest
         $messageHandlerBuilder = SplitterBuilder::create(
             SplitterExample::class,  "split"
         )
+            ->withEndpointId("testId")
             ->withInputChannelName("inputChannel")
             ->withOutputMessageChannel("outputChannel");
         $messageHandlerBuilder->withMethodParameterConverters([

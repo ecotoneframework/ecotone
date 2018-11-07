@@ -35,6 +35,7 @@ class RouterModule extends MessageHandlerRegisterConfiguration
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return RouterBuilder::create($annotationRegistration->getReferenceName(), $annotationRegistration->getMethodName())
+                ->withEndpointId($annotation->endpointId)
                 ->withInputChannelName($annotation->inputChannelName)
                 ->setResolutionRequired($annotation->isResolutionRequired);
     }

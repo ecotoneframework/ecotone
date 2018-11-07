@@ -64,7 +64,8 @@ class ApplicationContextExample
             "token" => "abcedfg"
         ])
             ->withInputChannelName(self::HTTP_INPUT_CHANNEL)
-            ->withOutputMessageChannel(self::HTTP_OUTPUT_CHANNEL);
+            ->withOutputMessageChannel(self::HTTP_OUTPUT_CHANNEL)
+            ->withEndpointId("some-id");
     }
 
     /**

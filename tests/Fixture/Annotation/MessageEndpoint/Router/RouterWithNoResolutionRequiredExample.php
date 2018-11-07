@@ -17,7 +17,7 @@ class RouterWithNoResolutionRequiredExample
     /**
      * @param $content
      * @return string
-     * @Router(inputChannelName="inputChannel", isResolutionRequired=false, parameterConverters={
+     * @Router(endpointId="some-id", inputChannelName="inputChannel", isResolutionRequired=false, parameterConverters={
      *     @Payload(parameterName="content")
      * })
      */

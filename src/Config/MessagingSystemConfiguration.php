@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config;
 
+use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
@@ -208,10 +209,14 @@ final class MessagingSystemConfiguration implements Configuration
      * @param MessageHandlerBuilder $messageHandlerBuilder
      * @return MessagingSystemConfiguration
      * @throws ConfigurationException
+     * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): self
     {
+        if (is_null($messageHandlerBuilder->getEndpointId()) || $messageHandlerBuilder->getEndpointId() === "") {
+            $messageHandlerBuilder->withEndpointId(Uuid::uuid4()->toString());
+        }
         if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->messageHandlerBuilders)) {
             throw ConfigurationException::create("Trying to register endpoints with same id. {$messageHandlerBuilder} and {$this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()]}");
         }

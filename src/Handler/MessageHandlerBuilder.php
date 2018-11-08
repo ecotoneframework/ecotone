@@ -27,9 +27,9 @@ interface MessageHandlerBuilder
     public function withInputChannelName(string $inputChannelName);
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getEndpointId() : string;
+    public function getEndpointId() : ?string;
 
     /**
      * @param string $endpointId

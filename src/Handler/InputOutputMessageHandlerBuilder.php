@@ -55,7 +55,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getEndpointId(): string
+    public function getEndpointId(): ?string
     {
         return $this->name;
     }

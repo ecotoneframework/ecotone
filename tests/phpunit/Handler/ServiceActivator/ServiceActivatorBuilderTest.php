@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator;
 use Fixture\Service\ServiceExpectingOneArgument;
+use Fixture\Service\ServiceReturningMessage;
 use Fixture\Service\StaticallyCalledService;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
@@ -39,6 +40,31 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $serviceActivator->handle(MessageBuilder::withPayload('some')->build());
 
         $this->assertTrue($objectToInvoke->wasCalled());
+    }
+
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_passing_same_message_as_was_reference_returned()
+    {
+        $objectToInvokeOnReference = "service-a";
+        $replyChannel = QueueChannel::create();
+        $message = MessageBuilder::withPayload("some")
+                    ->build();
+        $objectToInvoke = ServiceReturningMessage::createWith($message);
+
+        $serviceActivator = ServiceActivatorBuilder::create($objectToInvokeOnReference, 'get')
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createWith([
+                    $objectToInvokeOnReference => $objectToInvoke
+                ])
+            );
+
+        $serviceActivator->handle(MessageBuilder::withPayload('someOther')->setReplyChannel($replyChannel)->build());
+
+        $this->assertEquals($message, $replyChannel->receive());
     }
 
     /**
@@ -95,7 +121,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $objectToInvoke = ServiceExpectingOneArgument::create();
 
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withoutReturnValue')
-            ->withPassThroughMessage(true)
+            ->withPassThroughMessageOnVoidInterface(true)
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createEmpty()
@@ -123,7 +149,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $objectToInvoke = ServiceExpectingOneArgument::create();
 
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withReturnValue')
-            ->withPassThroughMessage(true)
+            ->withPassThroughMessageOnVoidInterface(true)
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createEmpty()

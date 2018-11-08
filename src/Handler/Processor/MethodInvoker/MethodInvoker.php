@@ -50,7 +50,7 @@ final class MethodInvoker implements MessageProcessor
     /**
      * @var bool
      */
-    private $extractReplyPayload;
+    private $wrapWithMessage;
     /**
      * @var InterfaceToCall
      */
@@ -61,13 +61,13 @@ final class MethodInvoker implements MessageProcessor
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array|ParameterConverter[] $methodParameterConverters
-     * @param bool $extractReplyPayload
+     * @param bool $wrapWithMessage
      * @param InterfaceToCall $interfaceToCall
      * @param ConversionService $conversionService
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, bool $extractReplyPayload, InterfaceToCall $interfaceToCall, ConversionService $conversionService)
+    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, bool $wrapWithMessage, InterfaceToCall $interfaceToCall, ConversionService $conversionService)
     {
         Assert::allInstanceOfType($methodParameterConverters, ParameterConverter::class);
 
@@ -75,7 +75,7 @@ final class MethodInvoker implements MessageProcessor
         $this->objectToInvokeOn = $objectToInvokeOn;
         $this->conversionService = $conversionService;
         $this->objectMethodName = $objectMethodName;
-        $this->extractReplyPayload = $extractReplyPayload;
+        $this->wrapWithMessage = $wrapWithMessage;
         $this->interfaceToCall = $interfaceToCall;
     }
 
@@ -178,14 +178,13 @@ final class MethodInvoker implements MessageProcessor
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array|ParameterConverterBuilder[] $methodParameters
-     * @param bool $extractReplyPayload should the reply message payload be extracted when returned
      * @param ReferenceSearchService $referenceSearchService
      * @return self
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceNotFoundException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodParameters, bool $extractReplyPayload, ReferenceSearchService $referenceSearchService): self
+    public static function createWithMessageWrapper($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService): self
     {
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
         $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
@@ -196,7 +195,31 @@ final class MethodInvoker implements MessageProcessor
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return new self($objectToInvokeOn, $objectMethodName, $messageConverters, $extractReplyPayload, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
+        return new self($objectToInvokeOn, $objectMethodName, $messageConverters, true, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
+    }
+
+    /**
+     * @param $objectToInvokeOn
+     * @param string $objectMethodName
+     * @param array $methodParameters
+     * @param ReferenceSearchService $referenceSearchService
+     * @return MethodInvoker
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceNotFoundException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService): self
+    {
+        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
+        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
+        /** @var ConversionService $conversionService */
+        $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
+        $messageConverters = [];
+        foreach ($methodParameters as $methodParameter) {
+            $messageConverters[] = $methodParameter->build($referenceSearchService);
+        }
+
+        return new self($objectToInvokeOn, $objectMethodName, $messageConverters, false, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
     }
 
     /**
@@ -214,14 +237,7 @@ final class MethodInvoker implements MessageProcessor
             return $payload;
         }
 
-        if ($this->extractReplyPayload) {
-            return $payload;
-        }
-
-        return MessageBuilder::fromMessage($message)
-            ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($this->interfaceToCall->getReturnType()->toString())->toString())
-            ->setPayload($payload)
-            ->build();
+        return $payload;
     }
 
     /**

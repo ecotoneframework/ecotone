@@ -150,7 +150,6 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
                     $messageSelector,
                     $this->methodName,
                     $this->parameterConverters,
-                    true,
                     $referenceSearchService
                 ),
                 $discardChannel,

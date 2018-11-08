@@ -23,6 +23,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\Mes
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadConverter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\WrapWithMessageBuildProcessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
@@ -44,7 +45,7 @@ class MethodInvokerTest extends MessagingTest
     {
         $this->expectException(InvalidArgumentException::class);
 
-        MethodInvoker::createWith(ServiceWithoutAnyMethods::create(), 'getName', [], true, InMemoryReferenceSearchService::createEmpty());
+        MethodInvoker::createWith(ServiceWithoutAnyMethods::create(), 'getName', [], InMemoryReferenceSearchService::createEmpty());
     }
 
     /**
@@ -56,7 +57,7 @@ class MethodInvokerTest extends MessagingTest
     {
         $this->expectException(InvalidArgumentException::class);
 
-        MethodInvoker::createWith(ServiceExpectingTwoArguments::create(), 'withoutReturnValue', [], true, InMemoryReferenceSearchService::createEmpty());
+        MethodInvoker::createWith(ServiceExpectingTwoArguments::create(), 'withoutReturnValue', [], InMemoryReferenceSearchService::createEmpty());
     }
 
     /**
@@ -70,7 +71,7 @@ class MethodInvokerTest extends MessagingTest
 
         $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
             PayloadBuilder::create('name')
-        ], true, InMemoryReferenceSearchService::createEmpty());
+        ], InMemoryReferenceSearchService::createEmpty());
 
         $methodInvocation->processMessage(MessageBuilder::withPayload('some')->build());
 
@@ -88,7 +89,7 @@ class MethodInvokerTest extends MessagingTest
 
         $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'send', [
             MessageConverterBuilder::create("message")
-        ], true, InMemoryReferenceSearchService::createEmpty());
+        ], InMemoryReferenceSearchService::createEmpty());
 
         $this->assertMessages(
             MessageBuilder::withPayload("test")
@@ -110,7 +111,7 @@ class MethodInvokerTest extends MessagingTest
 
         $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withReturnValue', [
             HeaderBuilder::create('name', $headerName)
-        ], true, InMemoryReferenceSearchService::createEmpty());
+        ], InMemoryReferenceSearchService::createEmpty());
 
         $this->assertEquals($headerValue,
             $methodInvocation->processMessage(
@@ -130,7 +131,7 @@ class MethodInvokerTest extends MessagingTest
     {
         $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();
 
-        $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withReturnValue', [], true, InMemoryReferenceSearchService::createEmpty());
+        $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'withReturnValue', [], InMemoryReferenceSearchService::createEmpty());
 
         $payload = 'some';
 
@@ -155,7 +156,7 @@ class MethodInvokerTest extends MessagingTest
 
         MethodInvoker::createWith($serviceExpectingOneArgument, 'withoutReturnValue', [
             PayloadBuilder::create('wrongName')
-        ], true, InMemoryReferenceSearchService::createEmpty());
+        ], InMemoryReferenceSearchService::createEmpty());
     }
 
     /**
@@ -171,7 +172,7 @@ class MethodInvokerTest extends MessagingTest
             HeaderBuilder::create('surname', 'personSurname'),
             HeaderBuilder::create('age', 'personAge'),
             PayloadBuilder::create('name'),
-        ], true, InMemoryReferenceSearchService::createEmpty());
+        ], InMemoryReferenceSearchService::createEmpty());
 
         $this->assertEquals("johnybilbo13",
             $methodInvocation->processMessage(
@@ -190,13 +191,19 @@ class MethodInvokerTest extends MessagingTest
      */
     public function test_invoking_with_payload_conversion()
     {
-        $methodInvocation = MethodInvoker::createWith(new OrderProcessor(), 'processOrder', [
-            PayloadBuilder::create('order')
-        ], false, InMemoryReferenceSearchService::createWith([
-            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
-                new DeserializingConverter()
-            ])
-        ]));
+        $referenceSearchService = InMemoryReferenceSearchService::createWith([
+                AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
+                    new DeserializingConverter()
+                ])
+        ]);
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                new OrderProcessor(), 'processOrder',
+                MethodInvoker::createWith(new OrderProcessor(), 'processOrder', [
+                    PayloadBuilder::create('order')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
 
         $replyMessage = $methodInvocation->processMessage(
             MessageBuilder::withPayload(serialize(Order::create('1', "correct")))
@@ -219,9 +226,9 @@ class MethodInvokerTest extends MessagingTest
      */
     public function test_invoking_with_header_conversion()
     {
-        $methodInvocation = MethodInvoker::createWith(new OrderProcessor(), 'buyByName', [
+        $methodInvocation = MethodInvoker::createWithMessageWrapper(new OrderProcessor(), 'buyByName', [
             HeaderBuilder::create("id", "uuid")
-        ], false, InMemoryReferenceSearchService::createWith([
+        ], InMemoryReferenceSearchService::createWith([
             AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
                 new StringToUuidConverter()
             ])
@@ -235,11 +242,8 @@ class MethodInvokerTest extends MessagingTest
                 ->build()
         );
 
-        $this->assertMessages(
-            MessageBuilder::withPayload(OrderConfirmation::createFromUuid(Uuid::fromString($uuid)))
-                ->setHeader("uuid", $uuid)
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("\\" . OrderConfirmation::class)->toString())
-                ->build(),
+        $this->assertEquals(
+            OrderConfirmation::createFromUuid(Uuid::fromString($uuid)),
             $replyMessage
         );
     }
@@ -251,9 +255,9 @@ class MethodInvokerTest extends MessagingTest
      */
     public function test_invoking_with_converter_for_collection_if_types_are_compatible()
     {
-        $methodInvocation = MethodInvoker::createWith(new OrderProcessor(), 'buyMultiple', [
+        $methodInvocation = MethodInvoker::createWithMessageWrapper(new OrderProcessor(), 'buyMultiple', [
             PayloadBuilder::create("ids")
-        ], false, InMemoryReferenceSearchService::createWith([
+        ], InMemoryReferenceSearchService::createWith([
             AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
                 new StringToUuidConverter()
             ])
@@ -265,10 +269,8 @@ class MethodInvokerTest extends MessagingTest
                 ->build()
         );
 
-        $this->assertMessages(
-            MessageBuilder::withPayload([OrderConfirmation::createFromUuid(Uuid::fromString("fd825894-907c-4c6c-88a9-ae1ecdf3d307")), OrderConfirmation::createFromUuid(Uuid::fromString("fd825894-907c-4c6c-88a9-ae1ecdf3d308"))])
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("array<\\" . OrderConfirmation::class . ">")->toString())
-                ->build(),
+        $this->assertEquals(
+            [OrderConfirmation::createFromUuid(Uuid::fromString("fd825894-907c-4c6c-88a9-ae1ecdf3d307")), OrderConfirmation::createFromUuid(Uuid::fromString("fd825894-907c-4c6c-88a9-ae1ecdf3d308"))],
             $replyMessage
         );
     }

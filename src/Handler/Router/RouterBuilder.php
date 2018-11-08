@@ -225,7 +225,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 
         return Router::create(
             $channelResolver,
-            MethodInvoker::createWith($objectToInvoke, $this->methodName, $this->methodParameterConverters, true, $referenceSearchService),
+            MethodInvoker::createWith($objectToInvoke, $this->methodName, $this->methodParameterConverters, $referenceSearchService),
             $this->resolutionRequired,
             $this->defaultResolution,
             $this->applySequence

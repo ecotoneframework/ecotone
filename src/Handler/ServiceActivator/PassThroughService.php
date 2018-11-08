@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageProcessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
 
@@ -14,15 +15,15 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
 class PassThroughService
 {
     /**
-     * @var MethodInvoker
+     * @var MessageProcessor
      */
     private $methodInvoker;
 
     /**
      * PassThroughService constructor.
-     * @param MethodInvoker $methodInvoker
+     * @param MessageProcessor $methodInvoker
      */
-    public function __construct(MethodInvoker $methodInvoker)
+    public function __construct(MessageProcessor $methodInvoker)
     {
         $this->methodInvoker = $methodInvoker;
     }

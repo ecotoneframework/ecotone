@@ -12,6 +12,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithPa
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\WrapWithMessageBuildProcessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
@@ -122,7 +123,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      * @param bool $shouldPassThroughMessage
      * @return ServiceActivatorBuilder
      */
-    public function withPassThroughMessage(bool $shouldPassThroughMessage) : self
+    public function withPassThroughMessageOnVoidInterface(bool $shouldPassThroughMessage) : self
     {
         $this->shouldPassThroughMessage = $shouldPassThroughMessage;
 
@@ -166,11 +167,15 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         }
         $interfaceToCall = InterfaceToCall::createFromUnknownType($objectToInvoke, $this->methodName);
 
-        $methodToInvoke = MethodInvoker::createWith(
+        $methodToInvoke = WrapWithMessageBuildProcessor::createWith(
             $objectToInvoke,
             $this->methodName,
-            $this->methodParameterConverterBuilders,
-            false,
+            MethodInvoker::createWith(
+                $objectToInvoke,
+                $this->methodName,
+                $this->methodParameterConverterBuilders,
+                $referenceSearchService
+            ),
             $referenceSearchService
         );
         if ($this->shouldPassThroughMessage && $interfaceToCall->hasReturnTypeVoid()) {
@@ -178,7 +183,6 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
                 new PassThroughService($methodToInvoke),
                 "invoke",
                 [],
-                true,
                 $referenceSearchService
             );
         }

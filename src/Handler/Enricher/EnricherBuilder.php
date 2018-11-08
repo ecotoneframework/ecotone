@@ -163,7 +163,6 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
                     $internalEnrichingService,
                     "enrich",
                     [],
-                    true,
                     $referenceSearchService
                 ),
                 $channelResolver,

@@ -191,28 +191,32 @@ class InterfaceToCall
             throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
         }
 
-        $parameters = [];
-        $statements = $this->getClassUseStatements($reflectionClass);
-        $reflectionMethod = $reflectionClass->getMethod($methodName);
-        $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($reflectionClass, $reflectionMethod, $statements);
-        foreach ($reflectionMethod->getParameters() as $parameter) {
-            $parameters[] = InterfaceParameter::create(
-                $parameter->getName(),
-                TypeDescriptor::createWithDocBlock(
-                    $parameter->getType() ? $parameter->getType()->getName() : null,
-                    array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
-                ),
-                $parameter->getType() ? $parameter->getType()->allowsNull() : true
-            );
-        }
+        try {
+            $parameters = [];
+            $statements = $this->getClassUseStatements($reflectionClass);
+            $reflectionMethod = $reflectionClass->getMethod($methodName);
+            $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($reflectionClass, $reflectionMethod, $statements);
+            foreach ($reflectionMethod->getParameters() as $parameter) {
+                $parameters[] = InterfaceParameter::create(
+                    $parameter->getName(),
+                    TypeDescriptor::createWithDocBlock(
+                        $parameter->getType() ? $parameter->getType()->getName() : null,
+                        array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
+                    ),
+                    $parameter->getType() ? $parameter->getType()->allowsNull() : true
+                );
+            }
 
-        $returnType = $this->getReturnTypeDocBlockParameterTypeHint($reflectionClass, $reflectionMethod, $statements);
-        $this->interfaceName = $interfaceName;
-        $this->methodName = $methodName;
-        $this->parameters = $parameters;
-        $this->returnType = TypeDescriptor::create($returnType ? $returnType : (string)$reflectionMethod->getReturnType());
-        $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
-        $this->isStaticallyCalled = $reflectionMethod->isStatic();
+            $returnType = $this->getReturnTypeDocBlockParameterTypeHint($reflectionClass, $reflectionMethod, $statements);
+            $this->interfaceName = $interfaceName;
+            $this->methodName = $methodName;
+            $this->parameters = $parameters;
+            $this->returnType = TypeDescriptor::create($returnType ? $returnType : (string)$reflectionMethod->getReturnType());
+            $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
+            $this->isStaticallyCalled = $reflectionMethod->isStatic();
+        }catch (TypeDefinitionException $definitionException) {
+            throw InvalidArgumentException::create("Interface {$this} has problem with type definition. {$definitionException->getMessage()}");
+        }
     }
 
     /**

@@ -22,6 +22,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOu
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
  * Class MessagingSystemConfiguration
@@ -214,6 +215,8 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): self
     {
+        Assert::notNullAndEmpty($messageHandlerBuilder->getInputMessageChannelName(), "Lack information about input message channel for {$messageHandlerBuilder}");
+
         if (is_null($messageHandlerBuilder->getEndpointId()) || $messageHandlerBuilder->getEndpointId() === "") {
             $messageHandlerBuilder->withEndpointId(Uuid::uuid4()->toString());
         }
@@ -229,10 +232,6 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
-        if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelsBuilders)) {
-            $this->channelsBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
-        }
-
         $this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()] = $messageHandlerBuilder;
 
         return $this;
@@ -241,9 +240,15 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param MessageChannelBuilder $messageChannelBuilder
      * @return MessagingSystemConfiguration
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): self
     {
+        if (array_key_exists($messageChannelBuilder->getMessageChannelName(), $this->channelsBuilders)) {
+            throw ConfigurationException::create("Trying to register message channel with name `{$messageChannelBuilder->getMessageChannelName()}` twice.");
+        }
+
         $this->channelsBuilders[$messageChannelBuilder->getMessageChannelName()] = $messageChannelBuilder;
         $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
 
@@ -321,6 +326,12 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $externalReferenceSearchService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): ConfiguredMessagingSystem
     {
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelsBuilders)) {
+                $this->channelsBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
+            }
+        }
+
         foreach ($this->modules as $module) {
             $module->configure(
                 $this,

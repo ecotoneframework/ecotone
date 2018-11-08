@@ -151,6 +151,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
+     * @throws ConfigurationException
+     * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_informing_exposing_required_references()
@@ -159,6 +161,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $messagingSystem->registerMessageHandler(
             ServiceActivatorBuilder::create("ref-a", "method-a")
+                ->withInputChannelName("someChannel")
                 ->withMethodParameterConverters([
                     ReferenceBuilder::create("some", "ref-b")
                 ])
@@ -514,6 +517,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
+     * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
@@ -637,5 +641,17 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple());
 
         $this->assertTrue(true);
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_throwing_exception_if_trying_to_register_two_channels_with_same_names()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("some"))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("some"));
     }
 }

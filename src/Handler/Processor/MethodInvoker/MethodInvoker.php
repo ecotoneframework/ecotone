@@ -48,10 +48,6 @@ final class MethodInvoker implements MessageProcessor
      */
     private $conversionService;
     /**
-     * @var bool
-     */
-    private $wrapWithMessage;
-    /**
      * @var InterfaceToCall
      */
     private $interfaceToCall;
@@ -61,13 +57,12 @@ final class MethodInvoker implements MessageProcessor
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param array|ParameterConverter[] $methodParameterConverters
-     * @param bool $wrapWithMessage
      * @param InterfaceToCall $interfaceToCall
      * @param ConversionService $conversionService
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, bool $wrapWithMessage, InterfaceToCall $interfaceToCall, ConversionService $conversionService)
+    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall, ConversionService $conversionService)
     {
         Assert::allInstanceOfType($methodParameterConverters, ParameterConverter::class);
 
@@ -75,7 +70,6 @@ final class MethodInvoker implements MessageProcessor
         $this->objectToInvokeOn = $objectToInvokeOn;
         $this->conversionService = $conversionService;
         $this->objectMethodName = $objectMethodName;
-        $this->wrapWithMessage = $wrapWithMessage;
         $this->interfaceToCall = $interfaceToCall;
     }
 
@@ -195,7 +189,7 @@ final class MethodInvoker implements MessageProcessor
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return new self($objectToInvokeOn, $objectMethodName, $messageConverters, true, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
+        return new self($objectToInvokeOn, $objectMethodName, $messageConverters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
     }
 
     /**
@@ -219,7 +213,7 @@ final class MethodInvoker implements MessageProcessor
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return new self($objectToInvokeOn, $objectMethodName, $messageConverters, false, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
+        return new self($objectToInvokeOn, $objectMethodName, $messageConverters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
     }
 
     /**

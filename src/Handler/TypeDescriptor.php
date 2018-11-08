@@ -93,6 +93,15 @@ final class TypeDescriptor
     }
 
     /**
+     * @param string $type
+     * @return bool
+     */
+    public static function isMixedType(string $type) : bool
+    {
+        return $type === self::MIXED;
+    }
+
+    /**
      * @param string $typeHint
      * @return bool
      */

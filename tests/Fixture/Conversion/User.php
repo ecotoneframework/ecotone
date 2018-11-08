@@ -79,4 +79,9 @@ interface User
      * @param $surname
      */
     public function changeSurname($surname) : void;
+
+    /**
+     * @param mixed $address
+     */
+    public function changeAddress($address) : void;
 }

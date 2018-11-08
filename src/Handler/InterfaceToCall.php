@@ -492,7 +492,7 @@ class InterfaceToCall
      */
     private function isInGlobalNamespace(string $className): bool
     {
-        if (TypeDescriptor::isItTypeOfPrimitive($className) || TypeDescriptor::isItTypeOfVoid($className)) {
+        if (TypeDescriptor::isItTypeOfPrimitive($className) || TypeDescriptor::isItTypeOfVoid($className) || TypeDescriptor::isMixedType($className)) {
             return true;
         }
 

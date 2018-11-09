@@ -84,4 +84,21 @@ interface User
      * @param mixed $address
      */
     public function changeAddress($address) : void;
+
+    /**
+     * @return self
+     */
+    public function getSelf() : self;
+
+    public function getSelfWithoutDocBlock() : self;
+
+    /**
+     * @return static
+     */
+    public function getStatic();
+
+    public function returnFullUser() : \Fixture\Conversion\User;
+
+
+    public function returnFromGlobalNamespace() : \stdClass;
 }

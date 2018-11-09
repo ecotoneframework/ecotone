@@ -2,11 +2,14 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler;
+use Fixture\Conversion\AbstractSuperAdmin;
+use Fixture\Conversion\Admin;
 use Fixture\Conversion\Email;
 use Fixture\Conversion\Extra\Favourite;
 use Fixture\Conversion\Extra\Permission;
 use Fixture\Conversion\OnlineShop;
 use Fixture\Conversion\Password;
+use Fixture\Conversion\SuperAdmin;
 use Fixture\Conversion\User;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceParameter;
@@ -292,6 +295,11 @@ class InterfaceToCallTest extends TestCase
         );
     }
 
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException
+     */
     public function test_choosing_unknown_type_if_mixed_type_hint_in_doc_block()
     {
         $interfaceToCall = InterfaceToCall::create(
@@ -301,6 +309,88 @@ class InterfaceToCallTest extends TestCase
         $this->assertEquals(
             InterfaceParameter::createNullable("address", TypeDescriptor::create(TypeDescriptor::UNKNOWN)),
             $interfaceToCall->getParameterWithName("address")
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_choosing_declaring_class_if_use_this_or_self_or_static()
+    {
+        $this->assertEquals(
+            TypeDescriptor::create("\\" . User::class),
+            (InterfaceToCall::create(User::class, "getSelf"))->getReturnType()
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create("\\" . User::class),
+            (InterfaceToCall::create(User::class, "getStatic"))->getReturnType()
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create("\\" . User::class),
+            (InterfaceToCall::create(User::class, "getSelfWithoutDocBlock"))->getReturnType()
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_guessing_type_hint_with_full_qualified_name()
+    {
+        $this->assertEquals(
+            TypeDescriptor::create("\\" . User::class),
+            (InterfaceToCall::create(User::class, "returnFullUser"))->getReturnType()
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_guessing_type_hint_from_global_namespace()
+    {
+        $this->assertEquals(
+            TypeDescriptor::create("\\" . \stdClass::class),
+            (InterfaceToCall::create(User::class, "returnFromGlobalNamespace"))->getReturnType()
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_resolving_sub_class_for_static_type_hint()
+    {
+        $this->assertEquals(
+            TypeDescriptor::create("\\" . SuperAdmin::class),
+            (InterfaceToCall::create(SuperAdmin::class, "getSuperAdmin"))->getReturnType()
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_resolving_declaring_class_for_self_type_hint_declared_in_interface()
+    {
+        $this->assertEquals(
+            TypeDescriptor::create("\\" . Admin::class),
+            (InterfaceToCall::create(SuperAdmin::class, "getAdmin"))->getReturnType()
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_resolving_declaring_class_for_self_type_hint_declared_in_abstract_class()
+    {
+        $this->assertEquals(
+            TypeDescriptor::create("\\" . AbstractSuperAdmin::class),
+            (InterfaceToCall::create(SuperAdmin::class, "getInformation"))->getReturnType()
         );
     }
 }

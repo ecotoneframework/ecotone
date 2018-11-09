@@ -19,6 +19,9 @@ class InterfaceToCall
     private const CODE_USE_STATEMENTS_REGEX = '/use[\s]*([^;]*)[\s]*;/';
     private const METHOD_DOC_BLOCK_PARAMETERS_REGEX = '~@param[\s]*([^\n\$\s]*)[\s]*\$([a-zA-Z0-9]*)~';
     private const METHOD_RETURN_TYPE_REGEX = '~@return[\s]*([^\n\$\s]*)~';
+    private const SELF_TYPE_HINT = "self";
+    private const STATIC_TYPE_HINT = "static";
+    private const THIS_TYPE_HINT = '$this';
 
     /**
      * @var string
@@ -186,6 +189,8 @@ class InterfaceToCall
      */
     private function initialize(string $interfaceName, string $methodName): void
     {
+        $this->interfaceName = $interfaceName;
+        $this->methodName = $methodName;
         $reflectionClass = new \ReflectionClass($interfaceName);
         if (!$reflectionClass->hasMethod($methodName)) {
             throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
@@ -200,7 +205,7 @@ class InterfaceToCall
                 $parameters[] = InterfaceParameter::create(
                     $parameter->getName(),
                     TypeDescriptor::createWithDocBlock(
-                        $parameter->getType() ? $parameter->getType()->getName() : null,
+                        $parameter->getType() ? $this->expandParameterTypeHint($parameter->getType()->getName(), $statements, $reflectionClass) : null,
                         array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
                     ),
                     $parameter->getType() ? $parameter->getType()->allowsNull() : true
@@ -208,10 +213,12 @@ class InterfaceToCall
             }
 
             $returnType = $this->getReturnTypeDocBlockParameterTypeHint($reflectionClass, $reflectionMethod, $statements);
-            $this->interfaceName = $interfaceName;
-            $this->methodName = $methodName;
             $this->parameters = $parameters;
-            $this->returnType = TypeDescriptor::create($returnType ? $returnType : (string)$reflectionMethod->getReturnType());
+            $this->returnType = TypeDescriptor::create(
+                $returnType
+                    ? $returnType
+                    : $this->expandParameterTypeHint((string)$reflectionMethod->getReturnType(), $statements, $reflectionClass)
+            );
             $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
             $this->isStaticallyCalled = $reflectionMethod->isStatic();
         }catch (TypeDefinitionException $definitionException) {
@@ -277,6 +284,11 @@ class InterfaceToCall
 
         $fullNames = [];
         foreach ($multipleTypeHints as $typeHint) {
+            if (class_exists($typeHint)) {
+                $fullNames[] = $typeHint;
+                continue;
+            }
+
             if (strpos($typeHint, "[]") !==  false) {
                 $typeHint = "array<" . str_replace("[]", "", $typeHint) . ">";
             }
@@ -299,9 +311,6 @@ class InterfaceToCall
     private function getTypeHintFromUseNamespace(string $classNameTypeHint, array $useStatements) : string
     {
         $relatedClassName = $this->getRelatedClassNameFromTypeHint($classNameTypeHint);
-        if (TypeDescriptor::isItTypeOfCollection($classNameTypeHint)) {
-
-        }
 
         if (array_key_exists($relatedClassName, $useStatements)) {
             return str_replace($relatedClassName, $useStatements[$relatedClassName], $classNameTypeHint);
@@ -492,6 +501,10 @@ class InterfaceToCall
      */
     private function isInGlobalNamespace(string $className): bool
     {
+        if (in_array($className, [self::SELF_TYPE_HINT, self::STATIC_TYPE_HINT, self::THIS_TYPE_HINT])) {
+            return false;
+        }
+
         if (TypeDescriptor::isItTypeOfPrimitive($className) || TypeDescriptor::isItTypeOfVoid($className) || TypeDescriptor::isMixedType($className)) {
             return true;
         }
@@ -555,6 +568,24 @@ class InterfaceToCall
      */
     private function getWithClassNamespace(\ReflectionClass $reflectionClass, $parameterTypeHint): string
     {
+        if ($parameterTypeHint === self::SELF_TYPE_HINT) {
+            foreach ($reflectionClass->getInterfaceNames() as $interfaceName) {
+                if (method_exists($interfaceName, $this->methodName)) {
+                    return $interfaceName;
+                }
+            }
+            $parentClass = $reflectionClass->getParentClass();
+            if ($parentClass && $parentClass->hasMethod($this->methodName)) {
+                return $parentClass->getName();
+            }
+
+            return $this->interfaceName;
+        }
+
+        if (in_array($parameterTypeHint, [self::STATIC_TYPE_HINT, self::THIS_TYPE_HINT])) {
+            return $this->getInterfaceName();
+        }
+
         $relatedClassName = $this->getRelatedClassNameFromTypeHint($parameterTypeHint);
         $typeHint = $reflectionClass->getNamespaceName() . "\\" . $relatedClassName;
 

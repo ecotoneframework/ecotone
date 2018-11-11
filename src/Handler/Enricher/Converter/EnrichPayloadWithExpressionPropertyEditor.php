@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditorAccessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
@@ -31,7 +31,7 @@ class EnrichPayloadWithExpressionPropertyEditor implements PropertyEditor
      */
     private $expression;
     /**
-     * @var DataSetter
+     * @var PropertyEditorAccessor
      */
     private $dataSetter;
     /**
@@ -52,13 +52,13 @@ class EnrichPayloadWithExpressionPropertyEditor implements PropertyEditor
      *
      * @param ExpressionEvaluationService $expressionEvaluationService
      * @param ReferenceSearchService $referenceSearchService
-     * @param DataSetter $dataSetter
+     * @param PropertyEditorAccessor $dataSetter
      * @param PropertyPath $propertyPath
      * @param string $expression
      * @param string $nullResultExpression
      * @param string $mappingExpression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, DataSetter $dataSetter, PropertyPath $propertyPath, string $expression, string $nullResultExpression, string $mappingExpression)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, string $expression, string $nullResultExpression, string $mappingExpression)
     {
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->propertyPath                = $propertyPath;

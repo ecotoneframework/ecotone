@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditorAccessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
@@ -17,7 +17,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Message;
 class EnrichPayloadWithValuePropertyEditor implements PropertyEditor
 {
     /**
-     * @var DataSetter
+     * @var PropertyEditorAccessor
      */
     private $payloadPropertySetter;
     /**
@@ -32,11 +32,11 @@ class EnrichPayloadWithValuePropertyEditor implements PropertyEditor
     /**
      * StaticPropertySetterBuilder constructor.
      *
-     * @param DataSetter $payloadPropertySetter
+     * @param PropertyEditorAccessor $payloadPropertySetter
      * @param PropertyPath     $propertyPath
      * @param mixed      $value
      */
-    public function __construct(DataSetter $payloadPropertySetter, PropertyPath $propertyPath, $value)
+    public function __construct(PropertyEditorAccessor $payloadPropertySetter, PropertyPath $propertyPath, $value)
     {
         $this->payloadPropertySetter = $payloadPropertySetter;
         $this->propertyPath          = $propertyPath;
@@ -44,13 +44,13 @@ class EnrichPayloadWithValuePropertyEditor implements PropertyEditor
     }
 
     /**
-     * @param DataSetter $dataSetter
+     * @param PropertyEditorAccessor $dataSetter
      * @param PropertyPath $propertyPath
      * @param mixed $value
      *
      * @return self
      */
-    public static function createWith(DataSetter $dataSetter, PropertyPath $propertyPath, $value) : self
+    public static function createWith(PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, $value) : self
     {
         return new self($dataSetter, $propertyPath, $value);
     }

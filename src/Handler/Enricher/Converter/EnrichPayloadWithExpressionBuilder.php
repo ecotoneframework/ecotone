@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditorAccessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
@@ -94,7 +94,7 @@ class EnrichPayloadWithExpressionBuilder implements PropertyEditorBuilder
         return new EnrichPayloadWithExpressionPropertyEditor(
             $expressionEvaluationService,
             $referenceSearchService,
-            DataSetter::create($expressionEvaluationService, $referenceSearchService, $this->mappingExpression),
+            PropertyEditorAccessor::create($expressionEvaluationService, $referenceSearchService, $this->mappingExpression),
             PropertyPath::createWith($this->propertyPath),
             $this->expression,
             $this->nullResultExpression,

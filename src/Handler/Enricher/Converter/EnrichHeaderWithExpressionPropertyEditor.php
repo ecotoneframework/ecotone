@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditorAccessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
@@ -31,7 +31,7 @@ class EnrichHeaderWithExpressionPropertyEditor implements PropertyEditor
      */
     private $expression;
     /**
-     * @var DataSetter
+     * @var PropertyEditorAccessor
      */
     private $dataSetter;
     /**
@@ -48,12 +48,12 @@ class EnrichHeaderWithExpressionPropertyEditor implements PropertyEditor
      *
      * @param ExpressionEvaluationService $expressionEvaluationService
      * @param ReferenceSearchService $referenceSearchService
-     * @param DataSetter $dataSetter
+     * @param PropertyEditorAccessor $dataSetter
      * @param PropertyPath $propertyPath
      * @param string $nullResultExpression
      * @param string $expression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, DataSetter $dataSetter, PropertyPath $propertyPath, string $nullResultExpression, string $expression)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, string $nullResultExpression, string $expression)
     {
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->propertyPath                = $propertyPath;

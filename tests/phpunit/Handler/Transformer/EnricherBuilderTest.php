@@ -308,7 +308,7 @@ class EnricherBuilderTest extends MessagingTest
         $payload = $outputChannel->receive()->getPayload();
         $this->assertEquals(
             $newOrderId,
-            $payload->getOrderId()
+            $payload->getId()
         );
     }
 

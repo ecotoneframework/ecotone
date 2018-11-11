@@ -12,7 +12,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
  * @package SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class DataSetter
+class PropertyEditorAccessor
 {
     /**
      * @var string
@@ -44,7 +44,7 @@ class DataSetter
      * @param ExpressionEvaluationService $expressionEvaluationService
      * @param ReferenceSearchService $referenceSearchService
      * @param string $mappingExpression
-     * @return DataSetter
+     * @return PropertyEditorAccessor
      */
     public static function create(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, string $mappingExpression): self
     {
@@ -54,7 +54,7 @@ class DataSetter
     /**
      * @param PropertyPath $propertyNamePath
      * @param mixed $dataToEnrich
-     * @param mixed $value
+     * @param mixed $dataToEnrichWith
      *
      * @param Message $requestMessage
      * @param null|Message $replyMessage
@@ -63,7 +63,7 @@ class DataSetter
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function enrichDataWith(PropertyPath $propertyNamePath, $dataToEnrich, $value, Message $requestMessage, ?Message $replyMessage)
+    public function enrichDataWith(PropertyPath $propertyNamePath, $dataToEnrich, $dataToEnrichWith, Message $requestMessage, ?Message $replyMessage)
     {
         $propertyName = $propertyNamePath->getPath();
 
@@ -72,7 +72,7 @@ class DataSetter
             $newPayload = $dataToEnrich;
             foreach ($dataToEnrich as $propertyKey => $context) {
                 $enriched = false;
-                foreach ($value as $replyElement) {
+                foreach ($dataToEnrichWith as $replyElement) {
                     if ($this->canBeMapped($context, $replyElement, $requestMessage, $replyMessage)) {
                         $newPayload[$propertyKey] = $this->enrichDataWith($propertyToBeChanged, $newPayload[$propertyKey], $replyElement, $requestMessage, $replyMessage);
                         $enriched = true;
@@ -94,7 +94,7 @@ class DataSetter
             $propertyName = $startingWithPath[1];
             $accessPropertyName = $startingWithPath[0];
             if ($accessPropertyName !== $propertyNamePath->getPath()) {
-                $value = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $accessPropertyName), $dataToEnrich[$propertyName], $value, $requestMessage, $replyMessage);
+                $dataToEnrichWith = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $accessPropertyName), $dataToEnrich[$propertyName], $dataToEnrichWith, $requestMessage, $replyMessage);
             }
         }else {
             /** worker[name] */
@@ -104,14 +104,14 @@ class DataSetter
                 $propertyName = $startingWithPropertyName[1];
 
                 if ($propertyName !== $propertyNamePath->getPath()) {
-                    $value = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $propertyName), $dataToEnrich[$propertyName], $value, $requestMessage, $replyMessage);
+                    $dataToEnrichWith = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $propertyName), $dataToEnrich[$propertyName], $dataToEnrichWith, $requestMessage, $replyMessage);
                 }
             }
         }
 
         if (is_array($dataToEnrich)) {
             $newPayload = $dataToEnrich;
-            $newPayload[$propertyName] = $value;
+            $newPayload[$propertyName] = $dataToEnrichWith;
 
             return $newPayload;
         }
@@ -120,7 +120,7 @@ class DataSetter
             $setterMethod = "set" . ucfirst($propertyName);
 
             if (method_exists($dataToEnrich, $setterMethod)) {
-                $dataToEnrich->{$setterMethod}($value);
+                $dataToEnrich->{$setterMethod}($dataToEnrichWith);
 
                 return $dataToEnrich;
             }
@@ -134,7 +134,7 @@ class DataSetter
             $classProperty = $objectReflection->getProperty($propertyName);
 
             $classProperty->setAccessible(true);
-            $classProperty->setValue($dataToEnrich, $value);
+            $classProperty->setValue($dataToEnrich, $dataToEnrichWith);
 
             return $dataToEnrich;
         }

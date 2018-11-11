@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter;
 
-use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\DataSetter;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditorAccessor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyEditor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\IntegrationMessaging\Message;
@@ -25,18 +25,18 @@ class EnrichHeaderWithValuePropertyEditor implements PropertyEditor
      */
     private $value;
     /**
-     * @var DataSetter
+     * @var PropertyEditorAccessor
      */
     private $dataSetter;
 
     /**
      * StaticHeaderSetter constructor.
      *
-     * @param DataSetter   $dataSetter
+     * @param PropertyEditorAccessor   $dataSetter
      * @param PropertyPath $propertyPath
      * @param mixed       $value
      */
-    private function __construct(DataSetter $dataSetter, PropertyPath $propertyPath, $value)
+    private function __construct(PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, $value)
     {
         $this->dataSetter = $dataSetter;
         $this->propertyPath = $propertyPath;
@@ -44,13 +44,13 @@ class EnrichHeaderWithValuePropertyEditor implements PropertyEditor
     }
 
     /**
-     * @param DataSetter $dataSetter
+     * @param PropertyEditorAccessor $dataSetter
      * @param PropertyPath $propertyPath
      * @param mixed $value
      *
      * @return EnrichHeaderWithValuePropertyEditor
      */
-    public static function create(DataSetter $dataSetter, PropertyPath $propertyPath, $value) : self
+    public static function create(PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, $value) : self
     {
         return new self($dataSetter, $propertyPath, $value);
     }

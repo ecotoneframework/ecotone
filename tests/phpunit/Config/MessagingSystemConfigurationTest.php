@@ -23,6 +23,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\IntegrationMessaging\Config\OrderedMethodInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingMetadata;
@@ -565,11 +566,13 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
                 ->registerPreCallMethodInterceptor(
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-                        ->withEndpointId($endpointName)
+                        ->withEndpointId($endpointName),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
                 )
                 ->registerPostCallMethodInterceptor(
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
-                        ->withEndpointId($endpointName)
+                        ->withEndpointId($endpointName),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
                 )
                 ->registerConsumerFactory(new EventDrivenConsumerBuilder())
                 ->buildMessagingSystemFromConfiguration(
@@ -595,13 +598,69 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
+    public function test_registering_with_weight_orders()
+    {
+        $endpointName = "endpointName";
+        $inputChannelName = "inputChannel";
+        $messagingSystemConfiguration =
+            MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+                ->registerMessageHandler(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
+                        ->withInputChannelName($inputChannelName)
+                        ->withEndpointId($endpointName)
+                )
+                ->registerPreCallMethodInterceptor(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
+                        ->withEndpointId($endpointName),
+                    3
+                )
+                ->registerPreCallMethodInterceptor(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
+                        ->withEndpointId($endpointName),
+                    1
+                )
+                ->registerPostCallMethodInterceptor(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")
+                        ->withEndpointId($endpointName),
+                    3
+                )
+                ->registerPostCallMethodInterceptor(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
+                        ->withEndpointId($endpointName),
+                    1
+                )
+                ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+                ->buildMessagingSystemFromConfiguration(
+                    InMemoryReferenceSearchService::createEmpty(),
+                    InMemoryConfigurationVariableRetrievingService::createEmpty()
+                );
+
+        $messageChannel = $messagingSystemConfiguration->getMessageChannelByName($inputChannelName);
+        $outputChannel = QueueChannel::create();
+
+        $messageChannel->send(
+            MessageBuilder::withPayload(2)
+                ->setReplyChannel($outputChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            18,
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_throwing_exception_if_passed_pre_call_interceptor_without_endpoint_name()
     {
         $this->expectException(ConfigurationException::class);
 
         MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
             ->registerPreCallMethodInterceptor(
-                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
+                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
             );
     }
 
@@ -614,7 +673,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
             ->registerPostCallMethodInterceptor(
-                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
+                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
             );
     }
 

@@ -27,4 +27,10 @@ class MethodInterceptors
      * @var array used in class level interceptors
      */
     public $excludedMethods = [];
+    /**
+     * The higher is, the faster it will be called
+     *
+     * @var int
+     */
+    public $weightOrder;
 }

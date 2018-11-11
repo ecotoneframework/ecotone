@@ -25,7 +25,7 @@ use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Support\Assert;
 
 /**
- * Class MessagingSystemConfiguration
+ * Class Configuration
  * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
@@ -34,7 +34,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @var MessageChannelBuilder[]
      */
-    private $channelsBuilders = [];
+    private $channelBuilders = [];
     /**
      * @var ChannelInterceptorBuilder[]
      */
@@ -91,7 +91,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * Only one instance at time
      *
-     * MessagingSystemConfiguration constructor.
+     * Configuration constructor.
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      */
     private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService)
@@ -131,18 +131,18 @@ final class MessagingSystemConfiguration implements Configuration
 
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public static function prepare(ModuleRetrievingService $moduleConfigurationRetrievingService): self
+    public static function prepare(ModuleRetrievingService $moduleConfigurationRetrievingService): Configuration
     {
         return new self($moduleConfigurationRetrievingService);
     }
 
     /**
      * @param PollingMetadata $pollingMetadata
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public function registerPollingMetadata(PollingMetadata $pollingMetadata): self
+    public function registerPollingMetadata(PollingMetadata $pollingMetadata): Configuration
     {
         $this->messageHandlerPollingMetadata[$pollingMetadata->getEndpointId()] = $pollingMetadata;
 
@@ -151,42 +151,67 @@ final class MessagingSystemConfiguration implements Configuration
 
     /**
      * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
-     * @return MessagingSystemConfiguration
+     * @param int $orderWeight
+     * @return Configuration
      * @throws ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function registerPreCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor): self
+    public function registerPreCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor, int $orderWeight): Configuration
     {
         if (!$methodInterceptor->getEndpointId()) {
             throw ConfigurationException::create("Interceptor {$methodInterceptor} lack of endpoint id");
         }
 
-        $this->preCallMethodInterceptors[] = $methodInterceptor;
+        $this->preCallMethodInterceptors[] = OrderedMethodInterceptor::create($methodInterceptor, $orderWeight);
+        $this->preCallMethodInterceptors = $this->orderMethodInterceptors($this->preCallMethodInterceptors);
 
         return $this;
     }
 
     /**
      * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
-     * @return MessagingSystemConfiguration
+     * @param int $orderWeight
+     * @return Configuration
      * @throws ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function registerPostCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor): self
+    public function registerPostCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor, int $orderWeight): Configuration
     {
         if (!$methodInterceptor->getEndpointId()) {
             throw ConfigurationException::create("Interceptor {$methodInterceptor} lack of endpoint id");
         }
 
-        $this->postCallMethodInterceptors[] = $methodInterceptor;
+        $this->postCallMethodInterceptors[] = OrderedMethodInterceptor::create($methodInterceptor, 1);
+        $this->postCallMethodInterceptors = $this->orderMethodInterceptors($this->postCallMethodInterceptors);
 
         return $this;
     }
 
     /**
+     * @param MessageHandlerBuilderWithOutputChannel[] $methodInterceptors
+     * @return array
+     */
+    private function orderMethodInterceptors(array $methodInterceptors) : array
+    {
+        usort($methodInterceptors, function(OrderedMethodInterceptor $methodInterceptor, OrderedMethodInterceptor $toCompare){
+            if ($methodInterceptor->getOrderWeight() === $toCompare->getOrderWeight()) {
+                return 0;
+            }
+
+            if ($methodInterceptor->getOrderWeight() > $toCompare->getOrderWeight()) {
+                return -1;
+            }
+
+            return 1;
+        });
+
+        return $methodInterceptors;
+    }
+
+    /**
      * @inheritDoc
      */
-    public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder): MessagingSystemConfiguration
+    public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder): Configuration
     {
         $this->channelInterceptorBuilders[$channelInterceptorBuilder->getImportanceOrder()][] = $channelInterceptorBuilder;
         $this->requireReferences($channelInterceptorBuilder->getRequiredReferenceNames());
@@ -208,12 +233,12 @@ final class MessagingSystemConfiguration implements Configuration
 
     /**
      * @param MessageHandlerBuilder $messageHandlerBuilder
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      * @throws ConfigurationException
      * @throws \Exception
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): self
+    public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): Configuration
     {
         Assert::notNullAndEmpty($messageHandlerBuilder->getInputMessageChannelName(), "Lack information about input message channel for {$messageHandlerBuilder}");
 
@@ -239,17 +264,17 @@ final class MessagingSystemConfiguration implements Configuration
 
     /**
      * @param MessageChannelBuilder $messageChannelBuilder
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      * @throws ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): self
+    public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): Configuration
     {
-        if (array_key_exists($messageChannelBuilder->getMessageChannelName(), $this->channelsBuilders)) {
+        if (array_key_exists($messageChannelBuilder->getMessageChannelName(), $this->channelBuilders)) {
             throw ConfigurationException::create("Trying to register message channel with name `{$messageChannelBuilder->getMessageChannelName()}` twice.");
         }
 
-        $this->channelsBuilders[$messageChannelBuilder->getMessageChannelName()] = $messageChannelBuilder;
+        $this->channelBuilders[$messageChannelBuilder->getMessageChannelName()] = $messageChannelBuilder;
         $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
 
         return $this;
@@ -258,7 +283,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
-    public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder): MessagingSystemConfiguration
+    public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder): Configuration
     {
         $this->channelAdapters[] = $consumerBuilder;
         $this->requireReferences($consumerBuilder->getRequiredReferences());
@@ -268,9 +293,9 @@ final class MessagingSystemConfiguration implements Configuration
 
     /**
      * @param GatewayBuilder $gatewayBuilder
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder): self
+    public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder): Configuration
     {
         $this->gatewayBuilders[] = $gatewayBuilder;
         $this->registeredGateways[$gatewayBuilder->getReferenceName()] = $gatewayBuilder->getInterfaceName();
@@ -282,7 +307,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
-    public function registerConsumerFactory(MessageHandlerConsumerBuilder $consumerFactory): MessagingSystemConfiguration
+    public function registerConsumerFactory(MessageHandlerConsumerBuilder $consumerFactory): Configuration
     {
         $this->consumerFactories[] = $consumerFactory;
 
@@ -308,7 +333,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
-    public function registerConverter(ConverterBuilder $converterBuilder): MessagingSystemConfiguration
+    public function registerConverter(ConverterBuilder $converterBuilder): Configuration
     {
         $this->converterBuilders[] = $converterBuilder;
 
@@ -327,8 +352,8 @@ final class MessagingSystemConfiguration implements Configuration
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $externalReferenceSearchService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): ConfiguredMessagingSystem
     {
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelsBuilders)) {
-                $this->channelsBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
+            if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelBuilders)) {
+                $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
             }
         }
 
@@ -359,7 +384,13 @@ final class MessagingSystemConfiguration implements Configuration
             $gateways[] = $gatewayReference;
         }
 
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories, $this->preCallMethodInterceptors, $this->postCallMethodInterceptors, $this->messageHandlerPollingMetadata);
+        $preCallInterceptors = array_map(function (OrderedMethodInterceptor $methodInterceptor){
+            return $methodInterceptor->getMessageHandler();
+        }, $this->preCallMethodInterceptors);
+        $postCallInterceptors = array_map(function (OrderedMethodInterceptor $methodInterceptor) {
+            return $methodInterceptor->getMessageHandler();
+        }, $this->postCallMethodInterceptors);
+        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories, $preCallInterceptors, $postCallInterceptors, $this->messageHandlerPollingMetadata);
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
@@ -392,7 +423,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $channels = [];
-        foreach ($this->channelsBuilders as $channelsBuilder) {
+        foreach ($this->channelBuilders as $channelsBuilder) {
             $messageChannel = $channelsBuilder->build($referenceSearchService);
             $interceptorsForChannel = [];
             foreach ($channelInterceptorsByChannelName as $channelName => $interceptors) {

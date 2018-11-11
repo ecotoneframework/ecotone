@@ -29,7 +29,7 @@ class RouterModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
         /** @var Router $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();

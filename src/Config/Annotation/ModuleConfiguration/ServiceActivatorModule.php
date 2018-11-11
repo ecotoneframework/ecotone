@@ -31,7 +31,7 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
         /** @var ServiceActivator $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();

@@ -30,7 +30,7 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
         /** @var Transformer $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();

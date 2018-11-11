@@ -20,6 +20,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistr
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
+use SimplyCodedSoftware\IntegrationMessaging\Config\OrderedMethodInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
@@ -188,10 +189,10 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
         foreach ($this->preCallInterceptors as $preCallInterceptor) {
-            $configuration->registerPreCallMethodInterceptor($preCallInterceptor);
+            $configuration->registerPreCallMethodInterceptor($preCallInterceptor, OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT);
         }
         foreach ($this->postCallInterceptors as $postCallInterceptor) {
-            $configuration->registerPostCallMethodInterceptor($postCallInterceptor);
+            $configuration->registerPostCallMethodInterceptor($postCallInterceptor, OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT);
         }
     }
 

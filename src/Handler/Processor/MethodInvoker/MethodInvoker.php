@@ -195,7 +195,7 @@ final class MethodInvoker implements MessageProcessor
     /**
      * @param $objectToInvokeOn
      * @param string $objectMethodName
-     * @param array $methodParameters
+     * @param ParameterConverterBuilder[] $methodParameters
      * @param ReferenceSearchService $referenceSearchService
      * @return MethodInvoker
      * @throws InvalidArgumentException
@@ -204,16 +204,32 @@ final class MethodInvoker implements MessageProcessor
      */
     public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService): self
     {
-        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
-        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
-        /** @var ConversionService $conversionService */
-        $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
         $messageConverters = [];
         foreach ($methodParameters as $methodParameter) {
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return new self($objectToInvokeOn, $objectMethodName, $messageConverters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService);
+    }
+
+    /**
+     * @param $objectToInvokeOn
+     * @param string $objectMethodName
+     * @param ParameterConverter[] $methodParameters
+     * @param ReferenceSearchService $referenceSearchService
+     * @return MethodInvoker
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceNotFoundException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public static function createWithBuiltParameterConverters($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService) : self
+    {
+        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
+        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
+        /** @var ConversionService $conversionService */
+        $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
+
+        return new self($objectToInvokeOn, $objectMethodName, $methodParameters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService);
     }
 
     /**

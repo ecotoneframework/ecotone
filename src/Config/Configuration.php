@@ -18,7 +18,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 
 /**
- * Class MessagingSystemConfiguration
+ * Class Configuration
  * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
@@ -26,58 +26,60 @@ interface Configuration
 {
     /**
      * @param MessageChannelBuilder $messageChannelBuilder
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): MessagingSystemConfiguration;
+    public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): Configuration;
 
     /**
      * @param MessageHandlerBuilder $messageHandlerBuilder
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): MessagingSystemConfiguration;
-
-    /**
-     * @param ChannelInterceptorBuilder $channelInterceptorBuilder
-     * @return MessagingSystemConfiguration
-     */
-    public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder) : MessagingSystemConfiguration;
+    public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): Configuration;
 
     /**
      * @param PollingMetadata $pollingMetadata
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public function registerPollingMetadata(PollingMetadata $pollingMetadata): MessagingSystemConfiguration;
+    public function registerPollingMetadata(PollingMetadata $pollingMetadata): Configuration;
+
+    /**
+     * @param ChannelInterceptorBuilder $channelInterceptorBuilder
+     * @return Configuration
+     */
+    public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder) : Configuration;
 
     /**
      * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
-     * @return MessagingSystemConfiguration
+     * @param int $orderWeight
+     * @return Configuration
      */
-    public function registerPreCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor): MessagingSystemConfiguration;
+    public function registerPreCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor, int $orderWeight): Configuration;
 
     /**
      * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
-     * @return MessagingSystemConfiguration
+     * @param int $orderWeight
+     * @return Configuration
      */
-    public function registerPostCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor): MessagingSystemConfiguration;
+    public function registerPostCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor, int $orderWeight): Configuration;
 
     /**
      * @param ChannelAdapterConsumerBuilder $consumerBuilder
      *
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder) : MessagingSystemConfiguration;
+    public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder) : Configuration;
 
     /**
      * @param MessageHandlerConsumerBuilder $consumerFactory
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public function registerConsumerFactory(MessageHandlerConsumerBuilder $consumerFactory) : MessagingSystemConfiguration;
+    public function registerConsumerFactory(MessageHandlerConsumerBuilder $consumerFactory) : Configuration;
 
     /**
      * @param GatewayBuilder $gatewayBuilder
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder) : MessagingSystemConfiguration;
+    public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder) : Configuration;
 
     /**
      * @return string[]
@@ -91,7 +93,7 @@ interface Configuration
 
     /**
      * @param ConverterBuilder $converterBuilder
-     * @return MessagingSystemConfiguration
+     * @return Configuration
      */
-    public function registerConverter(ConverterBuilder $converterBuilder) : MessagingSystemConfiguration;
+    public function registerConverter(ConverterBuilder $converterBuilder) : Configuration;
 }

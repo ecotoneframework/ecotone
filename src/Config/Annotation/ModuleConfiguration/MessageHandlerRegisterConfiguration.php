@@ -13,6 +13,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetriev
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
@@ -25,24 +26,18 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
-     * @var ParameterConverterAnnotationFactory
+     * @var array|MessageHandlerBuilder[]
      */
-    private $parameterConverterAnnotationFactory;
-    /**
-     * @var AnnotationRegistration[]
-     */
-    private $annotationRegistrations;
+    private $messageHandlerBuilders;
 
     /**
      * AnnotationGatewayConfiguration constructor.
      *
-     * @param AnnotationRegistration[] $annotationRegistrations
-     * @param ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory
+     * @param MessageHandlerBuilder[] $messageHandlerBuilders
      */
-    private function __construct(array $annotationRegistrations, ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory)
+    private function __construct(array $messageHandlerBuilders)
     {
-        $this->annotationRegistrations = $annotationRegistrations;
-        $this->parameterConverterAnnotationFactory = $parameterConverterAnnotationFactory;
+        $this->messageHandlerBuilders = $messageHandlerBuilders;
     }
 
     /**
@@ -50,10 +45,17 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
-        return new static(
-            $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, static::getMessageHandlerAnnotation()),
-            ParameterConverterAnnotationFactory::create()
-        );
+        $messageHandlerBuilders = [];
+        $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
+        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, static::getMessageHandlerAnnotation()) as $annotationRegistration) {
+            $annotation = $annotationRegistration->getAnnotationForMethod();
+            $messageHandlerBuilders[] = static::createMessageHandlerFrom($annotationRegistration)
+                ->withMethodParameterConverters(
+                    $parameterConverterFactory->createParameterConverters(InterfaceToCall::create($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()), $annotation->parameterConverters)
+                );
+        }
+
+        return new static($messageHandlerBuilders);
     }
 
     /**
@@ -61,14 +63,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
      */
     public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
-        foreach ($this->annotationRegistrations as $annotationRegistration) {
-            $annotation = $annotationRegistration->getAnnotationForMethod();
-            $messageHandlerBuilder = $this->createMessageHandlerFrom($annotationRegistration);
-
-            $messageHandlerBuilder->withMethodParameterConverters(
-                $this->parameterConverterAnnotationFactory->createParameterConverters(InterfaceToCall::create($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()), $annotation->parameterConverters)
-            );
-
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $configuration->registerMessageHandler($messageHandlerBuilder);
         }
     }
@@ -82,5 +77,5 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
      * @param AnnotationRegistration $annotationRegistration
      * @return MessageHandlerBuilderWithParameterConverters
      */
-    public abstract function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters;
+    public static abstract function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters;
 }

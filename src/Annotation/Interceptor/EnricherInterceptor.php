@@ -9,7 +9,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class EnricherInterceptor
+class EnricherInterceptor extends MethodInterceptorAnnotation
 {
     /**
      * @var string

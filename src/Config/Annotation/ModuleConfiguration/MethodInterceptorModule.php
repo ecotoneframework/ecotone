@@ -10,6 +10,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnricherInte
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnrichHeader;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\EnrichPayload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\GatewayInterceptor;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\MethodInterceptorAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
@@ -42,18 +43,18 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
 {
     public const MODULE_NAME = "methodInterceptorModule";
     /**
-     * @var array|MessageHandlerBuilderWithOutputChannel[]
+     * @var array|OrderedMethodInterceptor[]
      */
     private $postCallInterceptors;
     /**
-     * @var array|MessageHandlerBuilderWithOutputChannel[]
+     * @var array|OrderedMethodInterceptor[]
      */
     private $preCallInterceptors;
 
     /**
      * MethodInterceptorModule constructor.
-     * @param MessageHandlerBuilderWithOutputChannel[] $preCallInterceptors
-     * @param MessageHandlerBuilderWithOutputChannel[] $postCallInterceptors
+     * @param OrderedMethodInterceptor[] $preCallInterceptors
+     * @param OrderedMethodInterceptor[] $postCallInterceptors
      */
     private function __construct(array $preCallInterceptors, array $postCallInterceptors)
     {
@@ -132,14 +133,19 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
 
         $interceptors = [];
         $interceptorsToConvert = $forPreCall ? $methodInterceptors->preCallInterceptors : $methodInterceptors->postCallInterceptors;
+        /** @var MethodInterceptorAnnotation $interceptor */
         foreach ($interceptorsToConvert as $interceptor) {
             if ($interceptor instanceof ServiceActivatorInterceptor) {
-                $interceptors[] = ServiceActivatorBuilder::create($interceptor->referenceName, $interceptor->methodName)
-                    ->withEndpointId($endpointId)
-                    ->withMethodParameterConverters(
-                        $parameterConverterFactory->createParameterConverters(
-                            null, $interceptor->parameterConverters
-                        )
+                $interceptors[] =
+                    OrderedMethodInterceptor::create(
+                        ServiceActivatorBuilder::create($interceptor->referenceName, $interceptor->methodName)
+                            ->withEndpointId($endpointId)
+                            ->withMethodParameterConverters(
+                                $parameterConverterFactory->createParameterConverters(
+                                    null, $interceptor->parameterConverters
+                                )
+                        ),
+                        $interceptor->weightOrder
                     );
             }else if ($interceptor instanceof EnricherInterceptor) {
                 $propertyEditors = [];
@@ -169,14 +175,22 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                     }
                 }
 
-                $interceptors[] = EnricherBuilder::create($propertyEditors)
-                    ->withEndpointId($endpointId)
-                    ->withRequestHeaders($interceptor->requestHeaders)
-                    ->withRequestPayloadExpression($interceptor->requestPayloadExpression)
-                    ->withRequestMessageChannel($interceptor->requestMessageChannel);
+                $interceptors[] =
+                    OrderedMethodInterceptor::create(
+                        EnricherBuilder::create($propertyEditors)
+                            ->withEndpointId($endpointId)
+                            ->withRequestHeaders($interceptor->requestHeaders)
+                            ->withRequestPayloadExpression($interceptor->requestPayloadExpression)
+                            ->withRequestMessageChannel($interceptor->requestMessageChannel),
+                        $interceptor->weightOrder
+                    );
             }else if ($interceptor instanceof GatewayInterceptor) {
-                $interceptors[] = GatewayInterceptorBuilder::create($interceptor->requestChannelName)
-                    ->withEndpointId($endpointId);
+                $interceptors[] =
+                    OrderedMethodInterceptor::create(
+                        GatewayInterceptorBuilder::create($interceptor->requestChannelName)
+                            ->withEndpointId($endpointId),
+                        $interceptor->weightOrder
+                    );
             }
         }
 
@@ -186,14 +200,22 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         foreach ($this->preCallInterceptors as $preCallInterceptor) {
-            $configuration->registerPreCallMethodInterceptor($preCallInterceptor, OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT);
+            $configuration->registerPreCallMethodInterceptor($preCallInterceptor);
         }
         foreach ($this->postCallInterceptors as $postCallInterceptor) {
-            $configuration->registerPostCallMethodInterceptor($postCallInterceptor, OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT);
+            $configuration->registerPostCallMethodInterceptor($postCallInterceptor);
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function canHandle($extensionObject): bool
+    {
+        return false;
     }
 
     /**

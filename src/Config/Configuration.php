@@ -49,18 +49,16 @@ interface Configuration
     public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder) : Configuration;
 
     /**
-     * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
-     * @param int $orderWeight
+     * @param OrderedMethodInterceptor $methodInterceptor
      * @return Configuration
      */
-    public function registerPreCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor, int $orderWeight): Configuration;
+    public function registerPreCallMethodInterceptor(OrderedMethodInterceptor $methodInterceptor): Configuration;
 
     /**
-     * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
-     * @param int $orderWeight
+     * @param OrderedMethodInterceptor $methodInterceptor
      * @return Configuration
      */
-    public function registerPostCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor, int $orderWeight): Configuration;
+    public function registerPostCallMethodInterceptor(OrderedMethodInterceptor $methodInterceptor): Configuration;
 
     /**
      * @param ChannelAdapterConsumerBuilder $consumerBuilder

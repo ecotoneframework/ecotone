@@ -68,11 +68,19 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         foreach ($this->multiplePollingMetadata as $pollingMetadata) {
             $configuration->registerPollingMetadata($pollingMetadata);
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function canHandle($extensionObject): bool
+    {
+        return false;
     }
 
     /**

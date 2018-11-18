@@ -4,7 +4,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
 use Fixture\Annotation\ModuleConfiguration\ExampleModuleAndModuleExtensionConfiguration;
 use Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
-use Fixture\Annotation\ModuleConfiguration\ExampleModuleConfigurationExtension;
+use Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionObject;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModuleRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
@@ -41,14 +41,14 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
     public function test_creating_module_extension()
     {
         $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
-            ExampleModuleConfigurationExtension::class
+            ExampleModuleExtensionObject::class
         ]));
 
         $this->assertEquals(
             [
-                ExampleModuleConfigurationExtension::createEmpty()
+                new \stdClass()
             ],
-            $annotationModuleRetrievingServie->findAllModuleExtensionConfigurations()
+            $annotationModuleRetrievingServie->findAllExtensionObjects()
         );
     }
 
@@ -58,35 +58,22 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
      */
     public function test_registering_separately()
     {
-        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
-            ExampleModuleConfigurationExtension::class, ExampleModuleConfiguration::class
+        $annotationModuleRetrievingService = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+            ExampleModuleExtensionObject::class, ExampleModuleConfiguration::class
         ]));
 
         $this->assertEquals(
             [
                 ExampleModuleConfiguration::createEmpty()
             ],
-            $annotationModuleRetrievingServie->findAllModuleConfigurations()
+            $annotationModuleRetrievingService->findAllModuleConfigurations()
         );
 
         $this->assertEquals(
             [
-                ExampleModuleConfigurationExtension::createEmpty()
+                new \stdClass()
             ],
-            $annotationModuleRetrievingServie->findAllModuleExtensionConfigurations()
+            $annotationModuleRetrievingService->findAllExtensionObjects()
         );
-    }
-
-    /**
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     */
-    public function test_creating_module_and_extension_as_same_instance()
-    {
-        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
-            ExampleModuleAndModuleExtensionConfiguration::class
-        ]));
-
-        $this->assertSame($annotationModuleRetrievingServie->findAllModuleConfigurations(), $annotationModuleRetrievingServie->findAllModuleExtensionConfigurations());
     }
 }

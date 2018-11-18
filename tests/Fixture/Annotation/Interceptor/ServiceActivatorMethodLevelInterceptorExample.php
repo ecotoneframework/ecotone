@@ -19,8 +19,8 @@ class ServiceActivatorMethodLevelInterceptorExample
      * @param string $message
      * @ServiceActivator(endpointId="some-id", inputChannelName="inputChannel")
      * @MethodInterceptors(
-     *     preCallInterceptors={@ServiceActivatorInterceptor(referenceName="authorizationService", methodName="check")},
-     *     postCallInterceptors={@ServiceActivatorInterceptor(referenceName="test", methodName="check")}
+     *     preCallInterceptors={@ServiceActivatorInterceptor(referenceName="authorizationService", methodName="check", weightOrder=2)},
+     *     postCallInterceptors={@ServiceActivatorInterceptor(referenceName="test", methodName="check", weightOrder=1)}
      * )
      */
     public function send(string $message) : void

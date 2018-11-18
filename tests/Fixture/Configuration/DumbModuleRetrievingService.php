@@ -25,7 +25,7 @@ class DumbModuleRetrievingService implements ModuleRetrievingService
     /**
      * @inheritDoc
      */
-    public function findAllModuleExtensionConfigurations(): array
+    public function findAllExtensionObjects(): array
     {
         return [];
     }

@@ -8,14 +8,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
  * Class BaseAnnotationConfiguration
@@ -59,16 +54,6 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
     }
 
     /**
-     * @inheritDoc
-     */
-    public function prepare(Configuration $configuration, array $moduleExtensions): void
-    {
-        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            $configuration->registerMessageHandler($messageHandlerBuilder);
-        }
-    }
-
-    /**
      * @return string
      */
     public static abstract function getMessageHandlerAnnotation(): string;
@@ -78,4 +63,22 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
      * @return MessageHandlerBuilderWithParameterConverters
      */
     public static abstract function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters;
+
+    /**
+     * @inheritDoc
+     */
+    public function prepare(Configuration $configuration, array $extensionObjects): void
+    {
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            $configuration->registerMessageHandler($messageHandlerBuilder);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function canHandle($extensionObject): bool
+    {
+        return false;
+    }
 }

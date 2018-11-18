@@ -59,4 +59,12 @@ class OrderedMethodInterceptor
     {
         return $this->orderWeight;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return "{$this->getMessageHandler()}";
+    }
 }

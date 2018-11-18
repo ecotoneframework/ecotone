@@ -10,12 +10,10 @@ use Fixture\Behat\Ordering\OrderConfirmation;
 use Fixture\Behat\Ordering\OrderingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
-use Fixture\Configuration\DumbConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
@@ -54,28 +52,40 @@ class DomainContext implements Context
     public function __construct()
     {
         $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
-        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty(), InMemoryConfigurationVariableRetrievingService::createEmpty(), DumbConfigurationObserver::create());
+        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
     }
 
     /**
      * @Given I register :bookingRequestName as :type
      * @param string $channelName
      * @param string $type
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function iRegisterAs(string $channelName, string $type)
     {
         switch ($type) {
-            case "Direct Channel": {
-                $this->getMessagingSystemConfiguration()
-                    ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, DirectChannel::create()));
-                break;
-            }
-            case "Pollable Channel": {
-                $this->getMessagingSystemConfiguration()
-                    ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, QueueChannel::create()));
-                break;
-            }
+            case "Direct Channel":
+                {
+                    $this->getMessagingSystemConfiguration()
+                        ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, DirectChannel::create()));
+                    break;
+                }
+            case "Pollable Channel":
+                {
+                    $this->getMessagingSystemConfiguration()
+                        ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, QueueChannel::create()));
+                    break;
+                }
         }
+    }
+
+    /**
+     * @return MessagingSystemConfiguration
+     */
+    private function getMessagingSystemConfiguration(): MessagingSystemConfiguration
+    {
+        return $this->messagingSystemConfiguration;
     }
 
     /**
@@ -87,7 +97,19 @@ class DomainContext implements Context
     public function iActivateServiceWithNameForWithMethodToListenOnChannel(string $className, string $methodName, string $channelName)
     {
         $this->getMessagingSystemConfiguration()
-                ->registerMessageHandler($this->createServiceActivatorBuilder($className, $methodName, $channelName));
+            ->registerMessageHandler($this->createServiceActivatorBuilder($className, $methodName, $channelName));
+    }
+
+    /**
+     * @param string $handlerName
+     * @param string $className
+     * @param string $methodName
+     * @param string $channelName
+     * @return MessageHandlerBuilder
+     */
+    private function createServiceActivatorBuilder(string $handlerName, string $className, string $methodName, string $channelName): MessageHandlerBuilder
+    {
+        return ServiceActivatorBuilder::create($channelName, $className, $methodName);
     }
 
     /**
@@ -106,6 +128,16 @@ class DomainContext implements Context
             $this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName)
                 ->withOutputChannel($outputChannel)
         );
+    }
+
+    /**
+     * @param string $className
+     * @return null|object
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function registerReference(string $className)
+    {
+        $this->inMemoryReferenceSearchService->registerReferencedObject($className, new $className());
     }
 
     /**
@@ -153,6 +185,15 @@ class DomainContext implements Context
     }
 
     /**
+     * @param string $gatewayNameToFind
+     * @return object
+     */
+    private function getGatewayByName(string $gatewayNameToFind)
+    {
+        return $this->messagingSystem->getGatewayByName($gatewayNameToFind);
+    }
+
+    /**
      * @Then flat with id :flatNumber should be reserved when checked by :gatewayName
      * @param int $flatNumber
      * @param string $gatewayName
@@ -171,30 +212,9 @@ class DomainContext implements Context
     public function iRunMessagingSystem()
     {
         $this->messagingSystem = $this->getMessagingSystemConfiguration()
-                                    ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-                                    ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
-                                    ->buildMessagingSystemFromConfiguration($this->inMemoryReferenceSearchService);
-    }
-
-    /**
-     * @param string $gatewayNameToFind
-     * @return object
-     */
-    private function getGatewayByName(string $gatewayNameToFind)
-    {
-        return $this->messagingSystem->getGatewayByName($gatewayNameToFind);
-    }
-
-    /**
-     * @param string $handlerName
-     * @param string $className
-     * @param string $methodName
-     * @param string $channelName
-     * @return MessageHandlerBuilder
-     */
-    private function createServiceActivatorBuilder(string $handlerName, string $className, string $methodName, string $channelName): MessageHandlerBuilder
-    {
-        return ServiceActivatorBuilder::create($channelName, $className, $methodName);
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
+            ->buildMessagingSystemFromConfiguration($this->inMemoryReferenceSearchService);
     }
 
     /**
@@ -232,16 +252,6 @@ class DomainContext implements Context
         $bookWasReserved = $gateway->reserve($bookName);
 
         \PHPUnit\Framework\Assert::assertInstanceOf(BookWasReserved::class, $bookWasReserved, "Book must be reserved");
-    }
-
-    /**
-     * @param string $className
-     * @return null|object
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    private function registerReference(string $className)
-    {
-        $this->inMemoryReferenceSearchService->registerReferencedObject($className, new $className());
     }
 
     /**
@@ -291,7 +301,8 @@ class DomainContext implements Context
         try {
             $gateway->processOrder(Order::create($orderId, $productName));
             \PHPUnit\Framework\Assert::assertTrue(false, "Expect exception got none");
-        }catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
     }
 
     /**
@@ -310,7 +321,8 @@ class DomainContext implements Context
         try {
             $this->future->resolve();
             \PHPUnit\Framework\Assert::assertTrue(false, "Expect exception got none");
-        }catch (MessageHandlingException $e) {}
+        } catch (MessageHandlingException $e) {
+        }
     }
 
     /**
@@ -328,12 +340,12 @@ class DomainContext implements Context
         }
 
         $this->getMessagingSystemConfiguration()
-                ->registerMessageHandler(
-                    TransformerBuilder::createHeaderEnricher(
-                        $requestChannelName,
-                        $keyValues
-                    )->withOutputMessageChannel($outputChannelName)
-                );
+            ->registerMessageHandler(
+                TransformerBuilder::createHeaderEnricher(
+                    $requestChannelName,
+                    $keyValues
+                )->withOutputMessageChannel($outputChannelName)
+            );
     }
 
     /**
@@ -343,13 +355,5 @@ class DomainContext implements Context
     public function handlesMessage(string $consumerName)
     {
         $this->messagingSystem->runSeparatelyRunningConsumerBy($consumerName);
-    }
-
-    /**
-     * @return MessagingSystemConfiguration
-     */
-    private function getMessagingSystemConfiguration(): MessagingSystemConfiguration
-    {
-        return $this->messagingSystemConfiguration;
     }
 }

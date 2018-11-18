@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ExtensionObject;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleExtensionAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Module;
@@ -67,8 +69,31 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
     /**
      * @inheritDoc
      */
-    public function findAllModuleExtensionConfigurations(): array
+    public function findAllExtensionObjects(): array
     {
-        return $this->createAnnotationClasses(ModuleExtensionAnnotation::class);
+        $extensionObjectsRegistrations = $this->annotationRegistrationService->findRegistrationsFor(ApplicationContext::class, ExtensionObject::class);
+        $extensionObjects = [];
+
+        $classes = [];
+        foreach ($extensionObjectsRegistrations as $annotationRegistration) {
+            if (!array_key_exists($annotationRegistration->getClassName(), $classes)) {
+                $classToInstantiate = $annotationRegistration->getClassName();
+                $classes[$annotationRegistration->getClassName()] = new $classToInstantiate();
+            }
+
+            $classToRun = $classes[$annotationRegistration->getClassName()];
+            $extensionObjectToResolve = $classToRun->{$annotationRegistration->getMethodName()}();
+
+            if (!is_array($extensionObjectToResolve)) {
+                $extensionObjects[] = $extensionObjectToResolve;
+                continue;
+            }
+
+            foreach ($extensionObjectToResolve as $singleMessagingComponent) {
+                $extensionObjects[] = $singleMessagingComponent;
+            }
+        }
+
+        return $extensionObjects;
     }
 }

@@ -52,10 +52,6 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private $modules = [];
     /**
-     * @var ModuleExtension[][]
-     */
-    private $moduleExtensions = [];
-    /**
      * @var array|GatewayBuilder[]
      */
     private $gatewayBuilders = [];
@@ -105,17 +101,17 @@ final class MessagingSystemConfiguration implements Configuration
     private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService): void
     {
         $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
-        $moduleExtensions = $moduleConfigurationRetrievingService->findAllModuleExtensionConfigurations();
-        foreach ($moduleExtensions as $moduleExtension) {
-            $this->moduleExtensions[$moduleExtension->getName()][] = $moduleExtension;
-            $this->requireReferences($moduleExtension->getRequiredReferences());
-        }
+        $extensionObjects = $moduleConfigurationRetrievingService->findAllExtensionObjects();
+        $moduleExtensions = [];
 
         foreach ($modules as $module) {
             $this->requireReferences($module->getRequiredReferences());
 
-            if (!array_key_exists($module->getName(), $this->moduleExtensions)) {
-                $this->moduleExtensions[$module->getName()] = [];
+            $moduleExtensions[$module->getName()] = [];
+            foreach ($extensionObjects as $extensionObject) {
+                if ($module->canHandle($extensionObject)) {
+                    $moduleExtensions[$module->getName()][] = $extensionObject;
+                }
             }
 
             $this->modules[] = $module;
@@ -124,7 +120,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->modules as $module) {
             $module->prepare(
                 $this,
-                $this->moduleExtensions[$module->getName()]
+                $moduleExtensions[$module->getName()]
             );
         }
     }
@@ -150,38 +146,36 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
-     * @param int $orderWeight
+     * @param OrderedMethodInterceptor $methodInterceptor
      * @return Configuration
      * @throws ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function registerPreCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor, int $orderWeight): Configuration
+    public function registerPreCallMethodInterceptor(OrderedMethodInterceptor $methodInterceptor): Configuration
     {
-        if (!$methodInterceptor->getEndpointId()) {
+        if (!$methodInterceptor->getMessageHandler()->getEndpointId()) {
             throw ConfigurationException::create("Interceptor {$methodInterceptor} lack of endpoint id");
         }
 
-        $this->preCallMethodInterceptors[] = OrderedMethodInterceptor::create($methodInterceptor, $orderWeight);
+        $this->preCallMethodInterceptors[] = $methodInterceptor;
         $this->preCallMethodInterceptors = $this->orderMethodInterceptors($this->preCallMethodInterceptors);
 
         return $this;
     }
 
     /**
-     * @param MessageHandlerBuilderWithOutputChannel $methodInterceptor
-     * @param int $orderWeight
+     * @param OrderedMethodInterceptor $methodInterceptor
      * @return Configuration
      * @throws ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function registerPostCallMethodInterceptor(MessageHandlerBuilderWithOutputChannel $methodInterceptor, int $orderWeight): Configuration
+    public function registerPostCallMethodInterceptor(OrderedMethodInterceptor $methodInterceptor): Configuration
     {
-        if (!$methodInterceptor->getEndpointId()) {
+        if (!$methodInterceptor->getMessageHandler()->getEndpointId()) {
             throw ConfigurationException::create("Interceptor {$methodInterceptor} lack of endpoint id");
         }
 
-        $this->postCallMethodInterceptors[] = OrderedMethodInterceptor::create($methodInterceptor, 1);
+        $this->postCallMethodInterceptors[] = $methodInterceptor;
         $this->postCallMethodInterceptors = $this->orderMethodInterceptors($this->postCallMethodInterceptors);
 
         return $this;
@@ -344,12 +338,11 @@ final class MessagingSystemConfiguration implements Configuration
      * Initialize messaging system from current configuration
      *
      * @param ReferenceSearchService $externalReferenceSearchService
-     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
      * @return ConfiguredMessagingSystem
      * @throws \SimplyCodedSoftware\IntegrationMessaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function buildMessagingSystemFromConfiguration(ReferenceSearchService $externalReferenceSearchService, ConfigurationVariableRetrievingService $configurationVariableRetrievingService): ConfiguredMessagingSystem
+    public function buildMessagingSystemFromConfiguration(ReferenceSearchService $externalReferenceSearchService): ConfiguredMessagingSystem
     {
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelBuilders)) {
@@ -358,12 +351,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         foreach ($this->modules as $module) {
-            $module->configure(
-                $this,
-                $this->moduleExtensions[$module->getName()],
-                $configurationVariableRetrievingService,
-                $externalReferenceSearchService
-            );
+            $module->afterConfigure($externalReferenceSearchService);
         }
 
         $extraReferences = [];

@@ -3,6 +3,8 @@
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\ChannelInterceptorBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
@@ -19,6 +21,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenCon
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\NullableMessageChannel;
 
@@ -41,8 +45,20 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
+        foreach ($extensionObjects as $extensionObject) {
+            if ($extensionObject instanceof ChannelInterceptorBuilder) {
+                $configuration->registerChannelInterceptor($extensionObject);
+            } else if ($extensionObject instanceof MessageHandlerBuilder) {
+                $configuration->registerMessageHandler($extensionObject);
+            } else if ($extensionObject instanceof MessageChannelBuilder) {
+                $configuration->registerMessageChannel($extensionObject);
+            } else if ($extensionObject instanceof GatewayBuilder) {
+                $configuration->registerGatewayBuilder($extensionObject);
+            }
+        }
+
         $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         $configuration->registerConsumerFactory(new PollingConsumerBuilder());
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
@@ -55,6 +71,20 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
         $configuration->registerConverter(new JsonToArrayConverterBuilder());
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function canHandle($extensionObject): bool
+    {
+        return
+            $extensionObject instanceof ChannelInterceptorBuilder
+            ||
+            $extensionObject instanceof MessageHandlerBuilder
+            ||
+            $extensionObject instanceof MessageChannelBuilder
+            ||
+            $extensionObject instanceof GatewayBuilder;
+    }
 
     /**
      * @inheritDoc

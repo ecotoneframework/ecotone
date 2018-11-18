@@ -62,7 +62,15 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions): void
+    public function canHandle($extensionObject): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         foreach ($this->converterBuilders as $converterBuilder) {
             $configuration->registerConverter($converterBuilder);

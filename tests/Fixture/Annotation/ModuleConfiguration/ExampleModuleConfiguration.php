@@ -17,13 +17,28 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  */
 class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule
 {
-    private function __construct()
+    /**
+     * @var array
+     */
+    private $extensionObjects;
+
+    private function __construct(array $extensionObjects)
     {
+        $this->extensionObjects = $extensionObjects;
     }
 
     public static function createEmpty() : self
     {
-        return new self();
+        return new self([]);
+    }
+
+    /**
+     * @param array $extensionObjects
+     * @return ExampleModuleConfiguration
+     */
+    public static function createWithExtensions(array $extensionObjects) : self
+    {
+        return new self($extensionObjects);
     }
 
     /**
@@ -37,16 +52,10 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
     /**
      * @inheritDoc
      */
-    public function getConfigurationVariables(): array
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
-        // TODO: Implement getConfigurationVariables() method.
-    }
+        $this->extensionObjects = $extensionObjects;
 
-    /**
-     * @inheritDoc
-     */
-    public function prepare(Configuration $configuration, array $moduleExtensions): void
-    {
         return;
     }
 
@@ -55,7 +64,7 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
      */
     public function getRequiredReferences(): array
     {
-        // TODO: Implement getRequiredReferences() method.
+        return [];
     }
 
     /**
@@ -63,14 +72,24 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
      */
     public static function create(\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService $annotationRegistrationService): \SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule
     {
-        return new self();
+        return new self([]);
     }
 
     /**
      * @inheritDoc
      */
-    public function configure(\SimplyCodedSoftware\IntegrationMessaging\Config\Configuration $configuration, array $moduleExtensions, \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
+    public function canHandle($extensionObject): bool
+    {
+        return $extensionObject instanceof \stdClass;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterConfigure(ReferenceSearchService $referenceSearchService): void
     {
         // TODO: Implement registerWithin() method.
     }
+
+
 }

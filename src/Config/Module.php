@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Config;
+
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
@@ -9,27 +10,42 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\IntegrationMessaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface Module extends ModuleExtension
+interface Module
 {
+    /**
+     * @return string
+     */
+    public function getName(): string;
+
     /**
      * In here you can register all message handlers, gateways, message channels
      *
      * @param Configuration         $configuration
-     * @param ModuleExtension[]     $moduleExtensions
+     * @param object[]     $extensionObjects
      *
      * @return void
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions) : void;
+    public function prepare(Configuration $configuration, array $extensionObjects) : void;
 
     /**
-     * Runs during configuration phase, when all handlers must be defined
+     * @param $extensionObject
+     * @return bool
+     */
+    public function canHandle($extensionObject) : bool;
+
+    /**
+     * Which will be available during build configure phase
      *
-     * @param Configuration $configuration
-     * @param ModuleExtension[] $moduleExtensions
-     * @param ConfigurationVariableRetrievingService $configurationVariableRetrievingService
+     * @return RequiredReference[]
+     */
+    public function getRequiredReferences(): array;
+
+    /**
+     * Runs during configuration phase, when all handlers must be already defined
+     *
      * @param ReferenceSearchService $referenceSearchService
      *
      * @return void
      */
-    public function configure(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void;
+    public function afterConfigure(ReferenceSearchService $referenceSearchService): void;
 }

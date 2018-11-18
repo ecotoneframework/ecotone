@@ -2,13 +2,9 @@
 
 namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration;
 
-use Fixture\Configuration\DumbConfigurationObserver;
 use Fixture\Configuration\DumbModuleRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Annotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\FileSystemClassLocator;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryConfigurationVariableRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
@@ -47,7 +43,7 @@ abstract class AnnotationConfigurationTest extends MessagingTest
      * @param array $methodAnnotations
      * @return AnnotationRegistrationService
      */
-    protected function createMultipleAnnotationRegistrationService(string $className, string $methodName, array $classAnnotations, array $methodAnnotations) : AnnotationRegistrationService
+    protected function createMultipleAnnotationRegistrationService(string $className, string $methodName, array $classAnnotations, array $methodAnnotations): AnnotationRegistrationService
     {
         $inMemoryAnnotationRegistrationService = InMemoryAnnotationRegistrationService::createEmpty();
 

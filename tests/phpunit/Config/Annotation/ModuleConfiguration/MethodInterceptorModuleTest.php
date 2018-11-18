@@ -45,14 +45,18 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerPreCallMethodInterceptor(
-                ServiceActivatorBuilder::create("authorizationService", "check")
-                    ->withEndpointId("some-id"),
-                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                OrderedMethodInterceptor::create(
+                    ServiceActivatorBuilder::create("authorizationService", "check")
+                        ->withEndpointId("some-id"),
+                    2
+                )
             )
             ->registerPostCallMethodInterceptor(
-                ServiceActivatorBuilder::create("test", "check")
-                    ->withEndpointId("some-id"),
-                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                OrderedMethodInterceptor::create(
+                    ServiceActivatorBuilder::create("test", "check")
+                        ->withEndpointId("some-id"),
+                    1
+                )
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
@@ -98,14 +102,18 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerPreCallMethodInterceptor(
-                ServiceActivatorBuilder::create("authorizationService", "check")
-                    ->withEndpointId("some-id"),
-                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                OrderedMethodInterceptor::create(
+                    ServiceActivatorBuilder::create("authorizationService", "check")
+                        ->withEndpointId("some-id"),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                )
             )
             ->registerPostCallMethodInterceptor(
-                ServiceActivatorBuilder::create("test", "check")
-                    ->withEndpointId("some-id"),
-                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                OrderedMethodInterceptor::create(
+                    ServiceActivatorBuilder::create("test", "check")
+                        ->withEndpointId("some-id"),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                )
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
@@ -131,19 +139,25 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerPreCallMethodInterceptor(
-                ServiceActivatorBuilder::create("authorizationService", "check")
-                    ->withEndpointId("some-id"),
-                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                OrderedMethodInterceptor::create(
+                    ServiceActivatorBuilder::create("authorizationService", "check")
+                        ->withEndpointId("some-id"),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                )
             )
             ->registerPreCallMethodInterceptor(
-                ServiceActivatorBuilder::create("validationCheck", "check")
-                    ->withEndpointId("some-id"),
-                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                OrderedMethodInterceptor::create(
+                    ServiceActivatorBuilder::create("validationCheck", "check")
+                        ->withEndpointId("some-id"),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                )
             )
             ->registerPostCallMethodInterceptor(
-                ServiceActivatorBuilder::create("test", "check")
-                    ->withEndpointId("some-id"),
-                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                OrderedMethodInterceptor::create(
+                    ServiceActivatorBuilder::create("test", "check")
+                        ->withEndpointId("some-id"),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                )
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
@@ -169,22 +183,24 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerPreCallMethodInterceptor(
-                EnricherBuilder::create([
-                    EnrichPayloadWithExpressionBuilder::createWithMapping("orders[*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
-                        ->withNullResultExpression("reference('fakeData').get()"),
-                    EnrichPayloadWithExpressionBuilder::createWith("session1", "'some1'"),
-                    EnrichPayloadWithValueBuilder::createWith("session2", "some2"),
-                    EnrichHeaderWithExpressionBuilder::createWith("token1", "'123'")
-                        ->withNullResultExpression("'1234'"),
-                    EnrichHeaderWithValueBuilder::create("token2", "1234")
-                ])
-                    ->withEndpointId("some-id")
-                    ->withRequestHeaders([
-                        "token" => "1234"
+                OrderedMethodInterceptor::create(
+                    EnricherBuilder::create([
+                        EnrichPayloadWithExpressionBuilder::createWithMapping("orders[*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
+                            ->withNullResultExpression("reference('fakeData').get()"),
+                        EnrichPayloadWithExpressionBuilder::createWith("session1", "'some1'"),
+                        EnrichPayloadWithValueBuilder::createWith("session2", "some2"),
+                        EnrichHeaderWithExpressionBuilder::createWith("token1", "'123'")
+                            ->withNullResultExpression("'1234'"),
+                        EnrichHeaderWithValueBuilder::create("token2", "1234")
                     ])
-                    ->withRequestPayloadExpression("payload['name']")
-                    ->withRequestMessageChannel("requestChannel"),
-                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                        ->withEndpointId("some-id")
+                        ->withRequestHeaders([
+                            "token" => "1234"
+                        ])
+                        ->withRequestPayloadExpression("payload['name']")
+                        ->withRequestMessageChannel("requestChannel"),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                )
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
@@ -210,9 +226,11 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerPreCallMethodInterceptor(
-                GatewayInterceptorBuilder::create("requestChannel")
-                    ->withEndpointId("some-id"),
-                OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                OrderedMethodInterceptor::create(
+                    GatewayInterceptorBuilder::create("requestChannel")
+                        ->withEndpointId("some-id"),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                )
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([

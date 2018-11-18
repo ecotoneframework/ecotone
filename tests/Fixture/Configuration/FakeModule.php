@@ -3,10 +3,7 @@
 namespace Fixture\Configuration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariableRetrievingService;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Module;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
@@ -17,7 +14,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 class FakeModule implements Module
 {
     /**
-     * @var ModuleExtension[]
+     * @var object[]
      */
     private $moduleExtensions;
 
@@ -66,16 +63,24 @@ class FakeModule implements Module
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
-        return;
+        $this->moduleExtensions = $extensionObjects;
     }
 
     /**
      * @inheritDoc
      */
-    public function configure(Configuration $configuration, array $moduleExtensions, ConfigurationVariableRetrievingService $configurationVariableRetrievingService, ReferenceSearchService $referenceSearchService): void
+    public function canHandle($extensionObject): bool
     {
-        $this->moduleExtensions = $moduleExtensions;
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterConfigure(ReferenceSearchService $referenceSearchService): void
+    {
+
     }
 }

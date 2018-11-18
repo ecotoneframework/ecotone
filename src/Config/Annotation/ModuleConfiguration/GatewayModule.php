@@ -108,6 +108,14 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @inheritDoc
      */
+    public function canHandle($extensionObject): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getName(): string
     {
         return self::MODULE_NAME;
@@ -116,7 +124,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
             $configuration->registerGatewayBuilder($gatewayBuilder);

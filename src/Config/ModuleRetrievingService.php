@@ -16,7 +16,7 @@ interface ModuleRetrievingService
     public function findAllModuleConfigurations() : array;
 
     /**
-     * @return ModuleExtension[]
+     * @return object[]
      */
-    public function findAllModuleExtensionConfigurations() : array;
+    public function findAllExtensionObjects() : array;
 }

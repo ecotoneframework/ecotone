@@ -15,23 +15,22 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
      */
     private $moduleConfigurations = [];
     /**
-     * @var array|ModuleExtension[]
+     * @var array
      */
-    private $moduleExtensions;
+    private $extensionObjects;
 
     /**
      * InMemoryModuleMessagingConfiguration constructor.
      * @param array|Module[] $moduleMessagingConfigurations
-     * @param ModuleExtension[] $moduleExtensions
+     * @param array $extensionObjects
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    private function __construct(array $moduleMessagingConfigurations, array $moduleExtensions)
+    private function __construct(array $moduleMessagingConfigurations, array $extensionObjects)
     {
         Assert::allInstanceOfType($moduleMessagingConfigurations, Module::class);
-        Assert::allInstanceOfType($moduleExtensions, ModuleExtension::class);
 
         $this->moduleConfigurations = $moduleMessagingConfigurations;
-        $this->moduleExtensions = $moduleExtensions;
+        $this->extensionObjects = $extensionObjects;
     }
 
     /**
@@ -65,8 +64,8 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
     /**
      * @inheritDoc
      */
-    public function findAllModuleExtensionConfigurations(): array
+    public function findAllExtensionObjects(): array
     {
-        return $this->moduleExtensions;
+        return $this->extensionObjects;
     }
 }

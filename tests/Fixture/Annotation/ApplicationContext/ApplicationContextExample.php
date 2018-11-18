@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Fixture\Annotation\ApplicationContext;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessagingComponent;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\ExtensionObject;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
@@ -26,7 +26,7 @@ class ApplicationContextExample
 
     /**
      * @return GatewayBuilder
-     * @MessagingComponent()
+     * @ExtensionObject()
      */
     public function gateway(): GatewayBuilder
     {
@@ -34,20 +34,8 @@ class ApplicationContextExample
     }
 
     /**
-     * @return array
-     * @MessagingComponent()
-     */
-    public function withMultipleMessageComponents(): array
-    {
-        return [
-            $this->httpEntryChannel(),
-            $this->enricherHttpEntry()
-        ];
-    }
-
-    /**
      * @return MessageChannelBuilder
-     * @MessagingComponent()
+     * @ExtensionObject()
      */
     public function httpEntryChannel(): MessageChannelBuilder
     {
@@ -56,7 +44,7 @@ class ApplicationContextExample
 
     /**
      * @return MessageHandlerBuilder
-     * @MessagingComponent()
+     * @ExtensionObject()
      */
     public function enricherHttpEntry(): MessageHandlerBuilder
     {
@@ -69,20 +57,16 @@ class ApplicationContextExample
     }
 
     /**
-     * @return array
-     * @MessagingComponent()
+     * @ExtensionObject()
      */
-    public function withChannelInterceptors(): array
+    public function withChannelInterceptors()
     {
-        return [
-            $this->httpEntryChannel(),
-            SimpleChannelInterceptorBuilder::create(self::HTTP_INPUT_CHANNEL, "ref")
-        ];
+        return SimpleChannelInterceptorBuilder::create(self::HTTP_INPUT_CHANNEL, "ref");
     }
 
     /**
      * @return \stdClass
-     * @MessagingComponent()
+     * @ExtensionObject()
      */
     public function withStdClassConverterByExtension(): \stdClass
     {
@@ -92,7 +76,7 @@ class ApplicationContextExample
     /**
      * @return \stdClass
      */
-    public function wrongMessagingComponent(): \stdClass
+    public function wrongExtensionObject(): \stdClass
     {
         return new \stdClass();
     }

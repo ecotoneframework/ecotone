@@ -72,6 +72,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
                 Assert::isTrue($consumer->isRunningInSeparateThread(), "Can't run event driven consumer with name {$consumerName} in separate thread");
 
                 $consumer->start();
+                return;
             }
         }
 

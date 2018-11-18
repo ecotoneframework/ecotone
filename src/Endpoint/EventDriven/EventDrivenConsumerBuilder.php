@@ -43,7 +43,7 @@ class EventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
         $subscribableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
         return new EventDrivenConsumer(
-            get_class($messageHandlerBuilder) . Uuid::uuid4()->toString(),
+            $messageHandlerBuilder->getEndpointId(),
             $subscribableChannel,
             $messageHandlerBuilder->build($channelResolver, $referenceSearchService)
         );

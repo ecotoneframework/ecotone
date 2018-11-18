@@ -10,6 +10,7 @@ use Fixture\Behat\Ordering\OrderConfirmation;
 use Fixture\Behat\Ordering\OrderingService;
 use Fixture\Behat\Shopping\BookWasReserved;
 use Fixture\Behat\Shopping\ShoppingService;
+use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
@@ -49,6 +50,10 @@ class DomainContext implements Context
      */
     private $future;
 
+    /**
+     * DomainContext constructor.
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function __construct()
     {
         $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
@@ -89,44 +94,52 @@ class DomainContext implements Context
     }
 
     /**
-     * @Given I activate service with name :handlerName for :className with method :methodName to listen on :channelName channel
+     * @Given I activate service with name :endpointName for :className with method :methodName to listen on :channelName channel
      * @param string $className
      * @param string $methodName
      * @param string $channelName
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function iActivateServiceWithNameForWithMethodToListenOnChannel(string $className, string $methodName, string $channelName)
     {
         $this->getMessagingSystemConfiguration()
-            ->registerMessageHandler($this->createServiceActivatorBuilder($className, $methodName, $channelName));
+            ->registerMessageHandler($this->createServiceActivatorBuilder(Uuid::uuid4()->toString(), $className, $methodName, $channelName));
     }
 
     /**
-     * @param string $handlerName
+     * @param string $endpointName
      * @param string $className
      * @param string $methodName
      * @param string $channelName
-     * @return MessageHandlerBuilder
+     * @return ServiceActivatorBuilder
      */
-    private function createServiceActivatorBuilder(string $handlerName, string $className, string $methodName, string $channelName): MessageHandlerBuilder
+    private function createServiceActivatorBuilder(string $endpointName, string $className, string $methodName, string $channelName): MessageHandlerBuilder
     {
-        return ServiceActivatorBuilder::create($channelName, $className, $methodName);
+        return ServiceActivatorBuilder::create($className, $methodName)
+                ->withInputChannelName($channelName)
+                ->withEndpointId($endpointName);
     }
 
     /**
-     * @Given I activate service with name :handlerName for :className with method :methodName to listen on :channelName channel and output channel :outputChannel
-     * @param string $handlerName
+     * @Given I activate service with name :endpointName for :className with method :methodName to listen on :channelName channel and output channel :outputChannel
+     * @param string $endpointName
      * @param string $className
      * @param string $methodName
      * @param string $channelName
      * @param string $outputChannel
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function iActivateServiceWithNameForWithMethodToListenOnChannelAndOutputChannel(string $handlerName, string $className, string $methodName, string $channelName, string $outputChannel)
+    public function iActivateServiceWithNameForWithMethodToListenOnChannelAndOutputChannel(string $endpointName, string $className, string $methodName, string $channelName, string $outputChannel)
     {
         $this->registerReference($className);
 
         $this->getMessagingSystemConfiguration()->registerMessageHandler(
-            $this->createServiceActivatorBuilder($handlerName, $className, $methodName, $channelName)
-                ->withOutputChannel($outputChannel)
+            $this->createServiceActivatorBuilder($endpointName, $className, $methodName, $channelName)
+                ->withOutputMessageChannel($outputChannel)
         );
     }
 
@@ -224,6 +237,8 @@ class DomainContext implements Context
      * @param string $methodName
      * @param string $requestChannelName
      * @param string $responseChannelName
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function iActivateTransformerWithNameForAndWithRequestChannelAndOutputChannel(string $name, string $className, string $methodName, string $requestChannelName, string $responseChannelName)
@@ -234,7 +249,8 @@ class DomainContext implements Context
 
         $this->getMessagingSystemConfiguration()
             ->registerMessageHandler(
-                TransformerBuilder::create($inputChannel, $className, $methodName)
+                TransformerBuilder::create($className, $methodName)
+                    ->withInputChannelName($inputChannel)
                     ->withOutputMessageChannel($outputChannel)
             );
     }
@@ -255,13 +271,16 @@ class DomainContext implements Context
     }
 
     /**
-     * @Given I activate header router with name :handlerName and input Channel :inputChannelName for header :headerName with mapping:
-     * @param string $handlerName
+     * @Given I activate header router with name :endpointName and input Channel :inputChannelName for header :headerName with mapping:
+     * @param string $endpointName
      * @param string $inputChannelName
      * @param string $headerName
      * @param TableNode $mapping
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function iActivateHeaderRouterWithNameAndInputChannelForHeaderWithMapping(string $handlerName, string $inputChannelName, string $headerName, TableNode $mapping)
+    public function iActivateHeaderRouterWithNameAndInputChannelForHeaderWithMapping(string $endpointName, string $inputChannelName, string $headerName, TableNode $mapping)
     {
         $channelToValue = [];
         foreach ($mapping->getHash() as $headerValue) {
@@ -269,7 +288,11 @@ class DomainContext implements Context
         }
 
         $this->getMessagingSystemConfiguration()
-            ->registerMessageHandler(RouterBuilder::createHeaderValueRouter($inputChannelName, $headerName, $channelToValue));
+            ->registerMessageHandler(
+                RouterBuilder::createHeaderValueRouter($headerName, $channelToValue)
+                    ->withEndpointId($endpointName)
+                    ->withInputChannelName($inputChannelName)
+            );
     }
 
     /**
@@ -326,13 +349,16 @@ class DomainContext implements Context
     }
 
     /**
-     * @Given I activate header enricher transformer with name :handlerName with request channel :requestChannelName and output channel :outputChannelName with headers:
-     * @param string $handlerName
+     * @Given I activate header enricher transformer with name :endpointName with request channel :requestChannelName and output channel :outputChannelName with headers:
+     * @param string $endpointName
      * @param string $requestChannelName
      * @param string $outputChannelName
      * @param TableNode $headers
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function iActivateHeaderEnricherTransformerWithNameWithRequestChannelAndOutputChannelWithHeaders(string $handlerName, string $requestChannelName, string $outputChannelName, TableNode $headers)
+    public function iActivateHeaderEnricherTransformerWithNameWithRequestChannelAndOutputChannelWithHeaders(string $endpointName, string $requestChannelName, string $outputChannelName, TableNode $headers)
     {
         $keyValues = [];
         foreach ($headers->getHash() as $keyValue) {
@@ -342,9 +368,11 @@ class DomainContext implements Context
         $this->getMessagingSystemConfiguration()
             ->registerMessageHandler(
                 TransformerBuilder::createHeaderEnricher(
-                    $requestChannelName,
                     $keyValues
-                )->withOutputMessageChannel($outputChannelName)
+                )
+                    ->withEndpointId($endpointName)
+                    ->withInputChannelName($requestChannelName)
+                    ->withOutputMessageChannel($outputChannelName)
             );
     }
 

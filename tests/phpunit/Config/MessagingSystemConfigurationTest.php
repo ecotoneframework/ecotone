@@ -106,8 +106,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $message = MessageBuilder::withPayload("a")->build();
         $pollableChannel->send($message);
 
-        $this->expectException(InvalidArgumentException::class);
-
         $messagingSystem->runSeparatelyRunningConsumerBy($messagingSystem->getListOfSeparatelyRunningConsumers()[0]);
 
         $this->assertTrue($messageHandler->wasCalled());

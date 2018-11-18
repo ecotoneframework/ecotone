@@ -27,7 +27,7 @@ class TimeoutChannelSendAndReceiveService implements SendAndReceiveService
      */
     private $millisecondsTimeout;
     /**
-     * @var DirectChannel
+     * @var MessageChannel
      */
     private $requestChannel;
     /**
@@ -37,12 +37,12 @@ class TimeoutChannelSendAndReceiveService implements SendAndReceiveService
 
     /**
      * ReceivePoller constructor.
-     * @param DirectChannel $requestChannel
+     * @param MessageChannel $requestChannel
      * @param PollableChannel $replyChannel
      * @param null|MessageChannel $errorChannel
      * @param int $millisecondsTimeout
      */
-    public function __construct(DirectChannel $requestChannel, PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $millisecondsTimeout)
+    public function __construct(MessageChannel $requestChannel, PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $millisecondsTimeout)
     {
         $this->requestChannel = $requestChannel;
         $this->replyChannel = $replyChannel;

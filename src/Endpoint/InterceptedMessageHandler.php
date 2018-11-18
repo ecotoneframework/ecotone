@@ -93,5 +93,6 @@ class InterceptedMessageHandler extends InputOutputMessageHandlerBuilder impleme
     private function initialize(): void
     {
         $this->withInputChannelName($this->interceptedMessageHandlerBuilder->getInputMessageChannelName());
+        $this->withEndpointId($this->interceptedMessageHandlerBuilder->getEndpointId());
     }
 }

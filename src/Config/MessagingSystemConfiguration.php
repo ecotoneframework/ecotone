@@ -89,19 +89,20 @@ final class MessagingSystemConfiguration implements Configuration
      *
      * Configuration constructor.
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
+     * @param object[] $extensionObjects
      */
-    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService)
+    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects)
     {
-        $this->initialize($moduleConfigurationRetrievingService);
+        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects);
     }
 
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
+     * @param object[] $extensionObjects
      */
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService): void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects): void
     {
         $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
-        $extensionObjects = $moduleConfigurationRetrievingService->findAllExtensionObjects();
         $moduleExtensions = [];
 
         foreach ($modules as $module) {
@@ -131,7 +132,17 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public static function prepare(ModuleRetrievingService $moduleConfigurationRetrievingService): Configuration
     {
-        return new self($moduleConfigurationRetrievingService);
+        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects());
+    }
+
+    /**
+     * @param ModuleRetrievingService $moduleRetrievingService
+     * @param array $extensionObjects
+     * @return Configuration
+     */
+    public static function prepareWithExtensions(ModuleRetrievingService $moduleRetrievingService, array $extensionObjects) : Configuration
+    {
+        return new self($moduleRetrievingService, array_merge($moduleRetrievingService->findAllExtensionObjects(), $extensionObjects));
     }
 
     /**

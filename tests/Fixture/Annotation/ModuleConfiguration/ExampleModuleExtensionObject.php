@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Fixture\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ExtensionObject;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Extension;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModuleExtension;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 
@@ -18,7 +18,7 @@ class ExampleModuleExtensionObject
 {
     /**
      * @return \stdClass
-     * @ExtensionObject()
+     * @Extension()
      */
     public function extensionObject() : \stdClass
     {

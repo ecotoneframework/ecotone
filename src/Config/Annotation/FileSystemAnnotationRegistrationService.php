@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
 use Doctrine\Common\Annotations\Reader;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Environment;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationException;
 
 /**
@@ -30,20 +31,53 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      * @var array|AnnotationRegistration[]
      */
     private $initializedRegistrations = [];
+    /**
+     * @var array
+     */
+    private $bannedEnvironmentClassMethods = [];
 
     /**
      * FileSystemAnnotationRegistrationService constructor.
      * @param Reader $annotationReader
      * @param string $rootProjectDir
      * @param array $namespaces to autoload, if loadSrc is set then no need to provide src namespaces
+     * @param string $environmentName
      * @param bool $loadSrc
      * @throws ConfigurationException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
-    public function __construct(Reader $annotationReader, string $rootProjectDir, array $namespaces, bool $loadSrc)
+    public function __construct(Reader $annotationReader, string $rootProjectDir, array $namespaces, string $environmentName, bool $loadSrc)
     {
         $this->annotationReader = $annotationReader;
         $this->init($rootProjectDir, array_unique($namespaces), $loadSrc);
+
+        $classNamesWithEnvironment = $this->getAllClassesWithAnnotation(Environment::class);
+        foreach ($classNamesWithEnvironment as $classNameWithEnvironment) {
+            /** @var Environment $environment */
+            $environment = $this->getAnnotationForClass($classNameWithEnvironment, Environment::class);
+
+            if (!in_array($environmentName, $environment->names)) {
+                $key = array_search($classNameWithEnvironment, $this->registeredClasses);
+                if ($key) {
+                    unset($this->registeredClasses[$key]);
+                    $this->registeredClasses = array_values($this->registeredClasses);
+                }
+            }
+        }
+
+
+        foreach ($this->registeredClasses as $className) {
+            foreach (get_class_methods($className) as $method) {
+                $methodAnnotations = $this->getMethodAnnotations($className, $method, Environment::class);
+                foreach ($methodAnnotations as $methodAnnotation) {
+                    if ($methodAnnotation instanceof Environment) {
+                        if (!in_array($environmentName, $methodAnnotation->names)) {
+                            $this->bannedEnvironmentClassMethods[$className][$method] = true;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -54,6 +88,10 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
         $registrations = [];
         foreach ($this->getAllClassesWithAnnotation($classAnnotationName) as $className) {
             foreach (get_class_methods($className) as $method) {
+                if ($this->isMethodBannedFromCurrentEnvironment($className, $method)) {
+                    continue;
+                }
+
                 $methodAnnotations = $this->getMethodAnnotations($className, $method, $methodAnnotationClassName);
                 foreach ($methodAnnotations as $methodAnnotation) {
                     $annotationReference = $className . get_class($methodAnnotation);
@@ -86,6 +124,10 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      */
     public function getAllClassesWithAnnotation(string $annotationClassName): array
     {
+        if ($annotationClassName == "*") {
+            return $this->registeredClasses;
+        }
+
         $classesWithAnnotations = [];
         foreach ($this->registeredClasses as $class) {
             $classReflection = new \ReflectionClass($class);
@@ -106,6 +148,16 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     public function getAnnotationForClass(string $className, string $annotationClassName)
     {
         return $this->annotationReader->getClassAnnotation(new \ReflectionClass($className), $annotationClassName);
+    }
+
+    /**
+     * @param string $className
+     * @param string $methodName
+     * @return bool
+     */
+    private function isMethodBannedFromCurrentEnvironment(string $className, string $methodName)
+    {
+        return isset($this->bannedEnvironmentClassMethods[$className][$methodName]);
     }
 
     /**

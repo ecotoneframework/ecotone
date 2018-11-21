@@ -2,18 +2,19 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Annotation;
-
-use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
- * Class ModuleExtensionAnnotation
+ * Class Environment
  * @package SimplyCodedSoftware\IntegrationMessaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- *
- * @Annotation
- * @Target({"CLASS"})
+ * @Annotation()
+ * @Target({"CLASS", "METHOD"})
  */
-class ModuleExtensionAnnotation
+class Environment
 {
+    /**
+     * @var string[]
+     */
+    public $names = [];
 }

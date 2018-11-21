@@ -4,9 +4,8 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\IntegrationMessaging\Config\Annotation;
 
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ApplicationContext;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ExtensionObject;
+use SimplyCodedSoftware\IntegrationMessaging\Annotation\Extension;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleExtensionAnnotation;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Module;
 use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleRetrievingService;
 
@@ -22,7 +21,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
      */
     private $annotationRegistrationService;
     /**
-     * @var ModuleExtensionAnnotation[]|Module[]
+     * @var Module[]
      */
     private $registeredModules = [];
 
@@ -71,7 +70,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
      */
     public function findAllExtensionObjects(): array
     {
-        $extensionObjectsRegistrations = $this->annotationRegistrationService->findRegistrationsFor(ApplicationContext::class, ExtensionObject::class);
+        $extensionObjectsRegistrations = $this->annotationRegistrationService->findRegistrationsFor(ApplicationContext::class, Extension::class);
         $extensionObjects = [];
 
         $classes = [];

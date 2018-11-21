@@ -83,6 +83,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var ConverterBuilder[]
      */
     private $converterBuilders = [];
+    /**
+     * @var object[]
+     */
+    private $extensionReferenceObjects;
 
     /**
      * Only one instance at time
@@ -90,6 +94,7 @@ final class MessagingSystemConfiguration implements Configuration
      * Configuration constructor.
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param object[] $extensionObjects
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects)
     {
@@ -99,9 +104,11 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param object[] $extensionObjects
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects): void
     {
+        $configurableReferenceSearchService = ConfigurableReferenceSearchService::createEmpty();
         $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
         $moduleExtensions = [];
 
@@ -121,14 +128,18 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->modules as $module) {
             $module->prepare(
                 $this,
-                $moduleExtensions[$module->getName()]
+                $moduleExtensions[$module->getName()],
+                $configurableReferenceSearchService
             );
         }
+
+        $this->extensionReferenceObjects = $configurableReferenceSearchService->getReferenceObjects();
     }
 
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @return Configuration
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function prepare(ModuleRetrievingService $moduleConfigurationRetrievingService): Configuration
     {
@@ -139,6 +150,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @param ModuleRetrievingService $moduleRetrievingService
      * @param array $extensionObjects
      * @return Configuration
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public static function prepareWithExtensions(ModuleRetrievingService $moduleRetrievingService, array $extensionObjects) : Configuration
     {
@@ -365,17 +377,13 @@ final class MessagingSystemConfiguration implements Configuration
             $module->afterConfigure($externalReferenceSearchService);
         }
 
-        $extraReferences = [];
-        foreach ($this->modules as $module) {
-            $extraReferences[$module->getName()] = $module;
-        }
         $converters = [];
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->build($externalReferenceSearchService);
         }
         $extraReferences[ConversionService::REFERENCE_NAME] = AutoCollectionConversionService::createWith($converters);
 
-        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, $extraReferences);
+        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, array_merge($this->extensionReferenceObjects, $extraReferences));
         $channelResolver = $this->createChannelResolver($referenceSearchService);
         $gateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {

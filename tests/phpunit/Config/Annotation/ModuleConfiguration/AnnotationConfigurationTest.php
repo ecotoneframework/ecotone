@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Module
 use Fixture\Configuration\DumbModuleRetrievingService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\IntegrationMessaging\Config\MessagingSystemConfiguration;
 use Test\SimplyCodedSoftware\IntegrationMessaging\MessagingTest;
 
@@ -64,6 +65,6 @@ abstract class AnnotationConfigurationTest extends MessagingTest
      */
     protected function createMessagingSystemConfiguration(): MessagingSystemConfiguration
     {
-        return MessagingSystemConfiguration::prepare(DumbModuleRetrievingService::createEmpty());
+        return MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
     }
 }

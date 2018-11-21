@@ -2,12 +2,10 @@
 declare(strict_types=1);
 
 namespace Fixture\Annotation\ModuleConfiguration;
+
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ModuleAnnotation;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationVariable;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ModuleExtension;
-use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
 
 /**
@@ -27,7 +25,7 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
         $this->extensionObjects = $extensionObjects;
     }
 
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([]);
     }
@@ -36,9 +34,17 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
      * @param array $extensionObjects
      * @return ExampleModuleConfiguration
      */
-    public static function createWithExtensions(array $extensionObjects) : self
+    public static function createWithExtensions(array $extensionObjects): self
     {
         return new self($extensionObjects);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function create(\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService $annotationRegistrationService): \SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule
+    {
+        return new self([]);
     }
 
     /**
@@ -52,7 +58,7 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ConfigurableReferenceSearchService $configurableReferenceSearchService): void
     {
         $this->extensionObjects = $extensionObjects;
 
@@ -65,14 +71,6 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\IntegrationMess
     public function getRequiredReferences(): array
     {
         return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function create(\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService $annotationRegistrationService): \SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule
-    {
-        return new self([]);
     }
 
     /**

@@ -10,7 +10,7 @@ use Fixture\Configuration\FakeModule;
 use Fixture\Handler\DumbGatewayBuilder;
 use Fixture\Handler\DumbMessageHandlerBuilder;
 use Fixture\Handler\ExceptionMessageHandler;
-use Fixture\Handler\ModuleMessageHandlerBuilder;
+use Fixture\Handler\ReferenceMessageHandlerBuilderExample;
 use Fixture\Handler\NoReturnMessageHandler;
 use Fixture\Service\CalculatingService;
 use Fixture\Service\ServiceWithoutReturnValue;
@@ -423,23 +423,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
             $preSendModifiedMessage,
             $queueChannel->receive()
         );
-    }
-
-    /**
-     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
-     */
-    public function test_register_message_handler_with_fake_module()
-    {
-        $fakeModule = FakeModule::create();
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createWith([$fakeModule], []));
-
-        $messageHandlerBuilder = ModuleMessageHandlerBuilder::create("fake", "fake");
-        $messagingSystemConfiguration->registerMessageHandler($messageHandlerBuilder);
-        $messagingSystemConfiguration->registerConsumerFactory(new EventDrivenConsumerBuilder());
-        $messagingSystemConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("fake"));
-        $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $this->assertEquals($fakeModule, $messageHandlerBuilder->getModule());
     }
 
     /**

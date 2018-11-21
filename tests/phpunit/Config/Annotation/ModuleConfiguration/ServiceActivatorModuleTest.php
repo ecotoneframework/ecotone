@@ -18,6 +18,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Reference;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\ServiceActivator;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\HeaderBuilder;
@@ -60,7 +61,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $configuration,

@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Module
 use Fixture\Annotation\Converter\ExampleConverterService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\ConverterModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\ReferenceServiceConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\TypeDescriptor;
 
@@ -28,7 +29,7 @@ class ConverterModuleTest extends AnnotationConfigurationTest
                 ->registerClassWithAnnotations(ExampleConverterService::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

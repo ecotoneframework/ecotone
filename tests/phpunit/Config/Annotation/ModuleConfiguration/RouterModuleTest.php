@@ -8,6 +8,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Router;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\RouterModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\PayloadBuilder;
@@ -33,7 +34,7 @@ class RouterModuleTest extends AnnotationConfigurationTest
             InMemoryAnnotationRegistrationService::createFrom([RouterWithNoResolutionRequiredExample::class])
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
 
 
         $router = RouterBuilder::create(RouterWithNoResolutionRequiredExample::class, "route")

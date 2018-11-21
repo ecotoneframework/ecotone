@@ -13,7 +13,7 @@ use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
  * @package Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ModuleMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
+class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
 {
     /**
      * @var object
@@ -39,9 +39,9 @@ class ModuleMessageHandlerBuilder extends InputOutputMessageHandlerBuilder imple
         $this->channelName = $channelName;
     }
 
-    public static function create(string $channelName, string $moduleName) : self
+    public static function create(string $channelName, string $referenceNameToRetrieve) : self
     {
-        return new self($channelName, $moduleName);
+        return new self($channelName, $referenceNameToRetrieve);
     }
 
     public function getModule()

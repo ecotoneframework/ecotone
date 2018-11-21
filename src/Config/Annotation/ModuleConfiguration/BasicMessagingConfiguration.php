@@ -8,8 +8,8 @@ use SimplyCodedSoftware\IntegrationMessaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\AnnotationRegistrationService;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Configuration;
-use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurationObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\RequiredReference;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\ArrayToJson\ArrayToJsonConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\DeserializingConverterBuilder;
@@ -19,7 +19,6 @@ use SimplyCodedSoftware\IntegrationMessaging\Conversion\StringToUuidConverterBui
 use SimplyCodedSoftware\IntegrationMessaging\Conversion\UuidToStringConverterBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
-use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
@@ -37,6 +36,14 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     /**
      * @inheritDoc
      */
+    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
+    {
+        return new self();
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getName(): string
     {
         return "basicMessagingConfiguration";
@@ -45,7 +52,7 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ConfigurableReferenceSearchService $configurableReferenceSearchService): void
     {
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ChannelInterceptorBuilder) {
@@ -94,13 +101,5 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
         return [
             RequiredReference::create(ExpressionEvaluationService::REFERENCE, ExpressionEvaluationService::class, "Expression language evaluation service")
         ];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
-    {
-        return new self();
     }
 }

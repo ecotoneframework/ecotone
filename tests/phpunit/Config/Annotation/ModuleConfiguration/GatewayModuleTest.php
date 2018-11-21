@@ -11,6 +11,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\IntegrationMessaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\GatewayModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\CombinedGatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\CombinedGatewayDefinition;
@@ -39,7 +40,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
         );
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, []);
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], ConfigurableReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
@@ -65,13 +66,14 @@ class GatewayModuleTest extends AnnotationConfigurationTest
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_registering_gateway_with_multiple_methods()
     {
         $annotationGatewayConfiguration = GatewayModule::create(InMemoryAnnotationRegistrationService::createFrom([MultipleMethodsGatewayExample::class]));
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, []);
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], ConfigurableReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

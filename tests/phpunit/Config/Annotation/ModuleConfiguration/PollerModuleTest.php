@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\Module
 use Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller\ServiceActivatorWithPollerExample;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\Annotation\ModuleConfiguration\PollerModule;
+use SimplyCodedSoftware\IntegrationMessaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NullObserver;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingMetadata;
 
@@ -19,6 +20,7 @@ class PollerModuleTest extends AnnotationConfigurationTest
      * @return mixed
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
     public function test_registering_poller_for_endpoint()
     {
@@ -40,7 +42,7 @@ class PollerModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = PollerModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,

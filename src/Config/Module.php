@@ -20,12 +20,13 @@ interface Module
     /**
      * In here you can register all message handlers, gateways, message channels
      *
-     * @param Configuration         $configuration
-     * @param object[]     $extensionObjects
+     * @param Configuration $configuration
+     * @param object[] $extensionObjects
+     * @param ConfigurableReferenceSearchService $configurableReferenceSearchService Allow to add extra references for later build
      *
      * @return void
      */
-    public function prepare(Configuration $configuration, array $extensionObjects) : void;
+    public function prepare(Configuration $configuration, array $extensionObjects, ConfigurableReferenceSearchService $configurableReferenceSearchService) : void;
 
     /**
      * @param $extensionObject

@@ -79,4 +79,9 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
     {
         return $this->message;
     }
+
+    public function __toString()
+    {
+        return self::class;
+    }
 }

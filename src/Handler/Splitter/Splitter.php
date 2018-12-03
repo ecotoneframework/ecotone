@@ -35,4 +35,9 @@ final class Splitter implements MessageHandler
     {
         $this->requestReplyProducer->handleWithReply($message);
     }
+
+    public function __toString()
+    {
+        return "Splitter - " . (string)$this->requestReplyProducer;
+    }
 }

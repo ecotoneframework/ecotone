@@ -41,4 +41,9 @@ class Enricher implements MessageHandler
     {
         $this->replyProducer->handleWithReply($message);
     }
+
+    public function __toString()
+    {
+        return "Enricher - " . (string)$this->replyProducer;
+    }
 }

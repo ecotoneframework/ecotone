@@ -28,4 +28,9 @@ class ExceptionalMessageHandler implements MessageHandler
     {
         throw new \RuntimeException("test error, should be caught");
     }
+
+    public function __toString()
+    {
+        return self::class;
+    }
 }

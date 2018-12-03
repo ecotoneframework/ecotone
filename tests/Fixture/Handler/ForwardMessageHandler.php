@@ -41,4 +41,9 @@ class ForwardMessageHandler implements MessageHandler
     {
          $this->messageChannel->send($message);
     }
+
+    public function __toString()
+    {
+        return self::class;
+    }
 }

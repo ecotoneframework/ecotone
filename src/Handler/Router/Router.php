@@ -110,4 +110,12 @@ final class Router implements MessageHandler
             $sequenceNumber++;
         }
     }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return "Router - " . (string)$this->methodInvoker;
+    }
 }

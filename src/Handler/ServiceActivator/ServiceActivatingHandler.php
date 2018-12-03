@@ -37,4 +37,9 @@ final class ServiceActivatingHandler implements MessageHandler
     {
         $this->requestReplyProducer->handleWithReply($message);
     }
+
+    public function __toString()
+    {
+        return "Service Activator - " . (string)$this->requestReplyProducer;
+    }
 }

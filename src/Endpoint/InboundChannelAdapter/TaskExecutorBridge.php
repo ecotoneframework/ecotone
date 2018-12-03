@@ -34,4 +34,9 @@ class TaskExecutorBridge implements MessageHandler
     {
         $this->taskExecutor->execute();
     }
+
+    public function __toString()
+    {
+        return "Task Execution Bridge";
+    }
 }

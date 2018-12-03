@@ -24,4 +24,9 @@ class ExceptionMessageHandler implements MessageHandler
     {
         throw new \InvalidArgumentException("test");
     }
+
+    public function __toString()
+    {
+        return self::class;
+    }
 }

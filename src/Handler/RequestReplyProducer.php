@@ -202,4 +202,12 @@ class RequestReplyProducer
     {
         return $this->outputChannel;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string)$this->messageProcessor;
+    }
 }

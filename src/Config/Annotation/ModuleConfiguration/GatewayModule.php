@@ -76,6 +76,9 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     }
                 } else if ($parameterToMessage instanceof GatewayHeaderValue) {
                     $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
+                }else {
+                    $converterClass = get_class($parameterToMessage);
+                    throw new \InvalidArgumentException("Not known converters for gateway {$converterClass}");
                 }
             }
 

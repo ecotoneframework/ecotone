@@ -124,7 +124,7 @@ class RequestReplyProducer
         if (!is_null($replyData)) {
             $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $this->channelResolver->resolve($message->getHeaders()->getReplyChannel()) : null);
             if (!$replyChannel) {
-                throw MessageDeliveryException::createWithFailedMessage("Can't process {$message}, no output channel during delivery", $message);
+                throw MessageDeliveryException::createWithFailedMessage("Can't process {$message}, no output channel during delivery in {$this->messageProcessor}", $message);
             }
 
             if ($this->method === self::REQUEST_REPLY_METHOD) {
@@ -139,8 +139,8 @@ class RequestReplyProducer
                         ->build()
                 );
             }else {
-                if (!is_array($replyData)) {
-                    throw MessageDeliveryException::createWithFailedMessage("Can't split message {$message}, payload to split is not array", $message);
+                if (!is_iterable($replyData)) {
+                    throw MessageDeliveryException::createWithFailedMessage("Can't split message {$message}, payload to split is not iterable in {$this->messageProcessor}", $message);
                 }
 
                 $sequenceSize = count($replyData);

@@ -94,4 +94,10 @@ interface Configuration
      * @return Configuration
      */
     public function registerConverter(ConverterBuilder $converterBuilder) : Configuration;
+
+    /**
+     * @param ReferenceSearchService $externalReferenceSearchService
+     * @return ConfiguredMessagingSystem
+     */
+    public function buildMessagingSystemFromConfiguration(ReferenceSearchService $externalReferenceSearchService): ConfiguredMessagingSystem;
 }

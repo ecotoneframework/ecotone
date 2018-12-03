@@ -70,4 +70,12 @@ class TransformerMessageProcessor implements MessageProcessor
 
         return $reply;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString() : string
+    {
+        return (string)$this->methodInvoker;
+    }
 }

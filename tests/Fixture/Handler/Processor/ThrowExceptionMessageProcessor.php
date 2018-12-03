@@ -34,4 +34,12 @@ class ThrowExceptionMessageProcessor implements MessageProcessor
     {
         throw $this->exception;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString() : string
+    {
+        return self::class;
+    }
 }

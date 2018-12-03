@@ -338,10 +338,11 @@ final class MethodInvoker implements MessageProcessor
         return $data;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
-        $objectToInvokeOn = get_class($this->objectToInvokeOn);
-
-        return "Object {$objectToInvokeOn}, method {$this->objectMethodName}";
+        return (string)$this->interfaceToCall;
     }
 }

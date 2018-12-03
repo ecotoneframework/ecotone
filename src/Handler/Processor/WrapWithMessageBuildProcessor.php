@@ -75,4 +75,12 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
             ->setPayload($result)
             ->build();
     }
+
+    /**
+     * @return string
+     */
+    public function __toString() : string
+    {
+        return (string)$this->messageProcessor;
+    }
 }

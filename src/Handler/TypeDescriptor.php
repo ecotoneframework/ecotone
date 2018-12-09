@@ -32,6 +32,7 @@ final class TypeDescriptor
     const VOID = "void";
 
     private const MIXED = "mixed";
+    private const NULL = "null";
 
     /**
      * @var string
@@ -99,6 +100,15 @@ final class TypeDescriptor
     public static function isMixedType(string $type) : bool
     {
         return $type === self::MIXED;
+    }
+
+    /**
+     * @param string $type
+     * @return bool
+     */
+    public static function isNull(string $type) : bool
+    {
+        return $type === self::NULL;
     }
 
     /**
@@ -443,7 +453,8 @@ final class TypeDescriptor
         if (strpos($type, "[]") !== false) {
             $type = "array<" . str_replace("[]", "", $type) . ">";
         }
-        if ($typeHint === self::MIXED) {
+
+        if ($type === self::MIXED || $type === self::NULL) {
             return self::UNKNOWN;
         }
         if (!$this->isResolvableType($type)) {

@@ -5,15 +5,22 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Chain;
 
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Config\NamedMessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\PassThroughGateway;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\RequestReplyProducer;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
 
 /**
  * Class ChainMessageHandlerBuilder
@@ -95,29 +102,35 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             $messageHandlersToChain[] = $this->outputMessageHandler;
         }
 
+        $baseKey = Uuid::uuid4()->toString();
         for ($key = 1; $key < count($messageHandlersToChain); $key++) {
-            $bridgeChannels[$key] = DirectChannel::create();
+            $bridgeChannels[$baseKey . $key] = DirectChannel::create();
         }
+        $requestChannelName = $baseKey;
+        $requestChannel = DirectChannel::create();
+        $bridgeChannels[$baseKey] = $requestChannel;
 
         $customChannelResolver = InMemoryChannelResolver::createWithChanneResolver($channelResolver, $bridgeChannels);
         $firstMessageHandler = null;
+
         for ($key = 0; $key < count($messageHandlersToChain); $key++) {
+            $currentKey = $baseKey . $key;
             $messageHandlerBuilder = $messageHandlersToChain[$key];
-            $nextHandlerKey = $key + 1;
-            $previousHandlerKey = $key - 1;
+            $nextHandlerKey = ($key + 1);
+            $previousHandlerKey = ($key - 1);
 
             if ($this->hasNextHandler($messageHandlersToChain, $nextHandlerKey)) {
-                $messageHandlerBuilder->withOutputMessageChannel((string)($nextHandlerKey));
-            }
-            if (!$this->hasNextHandler($messageHandlersToChain, $nextHandlerKey) && ($this->outputMessageChannelName)) {
-                $messageHandlerBuilder = $messageHandlerBuilder
-                                            ->withOutputMessageChannel($this->outputMessageChannelName);
+                $messageHandlerBuilder->withOutputMessageChannel($baseKey . $nextHandlerKey);
             }
 
             $messageHandler = $messageHandlerBuilder->build($customChannelResolver, $referenceSearchService);
 
             if ($this->hasPreviousHandler($messageHandlersToChain, $previousHandlerKey)) {
-                $customChannelResolver->resolve($key)->subscribe($messageHandler);
+                $customChannelResolver->resolve($currentKey)->subscribe($messageHandler);
+            }
+
+            if ($key === 0) {
+                $requestChannel->subscribe($messageHandler);
             }
 
             if (!$firstMessageHandler) {
@@ -125,7 +138,13 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             }
         }
 
-        return $firstMessageHandler;
+        /** @var ChainGateway $gateway */
+        $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), ChainGateway::class, "execute", $requestChannelName)
+                    ->build($referenceSearchService, $customChannelResolver);
+
+        return ServiceActivatorBuilder::createWithDirectReference(new ChainForwarder($gateway), "forward")
+                ->withOutputMessageChannel($this->outputMessageChannelName)
+                ->build($channelResolver, $referenceSearchService);
     }
 
     /**

@@ -32,6 +32,23 @@ class TypeDescriptorTest extends TestCase
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
      */
+    public function test_guessing_type_hint_from_null()
+    {
+        $this->assertEquals(
+            TypeDescriptor::UNKNOWN,
+            ($typeDescription = TypeDescriptor::create("null"))->getTypeHint()
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::UNKNOWN,
+            ($typeDescription = TypeDescriptor::createWithDocBlock(TypeDescriptor::UNKNOWN, "null"))->getTypeHint()
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
     public function test_throwing_exception_if_doc_block_type_is_incorrect()
     {
         $this->expectException(TypeDefinitionException::class);

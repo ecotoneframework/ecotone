@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\DirectChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
 use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
@@ -80,9 +81,13 @@ class Gateway
             $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
         }
 
+        $replyChannel = null;
         if ($interfaceToCall->hasSingleArgument() && $interfaceToCall->hasFirstParameterMessageTypeHint()) {
+            /** @var Message $requestMessage */
+            $requestMessage = $methodArguments[0]->value();
+            $replyChannel = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
             $message = $this->requestReplyService
-                ->prepareForSend(MessageBuilder::fromMessage($methodArguments[0]->value()), $interfaceToCall)
+                ->prepareForSend(MessageBuilder::fromMessage($requestMessage), $interfaceToCall)
                 ->build();
         }else {
             $message = $this->methodCallToMessageConverter->convertFor($methodArguments);
@@ -110,8 +115,13 @@ class Gateway
             }
 
             $this->commitTransactions($transactions);
-            if ($interfaceToCall->doesItReturnMessage()) {
-                return $replyMessage;
+            if ($interfaceToCall->doesItReturnMessage() && $replyMessage) {
+                $replyMessageBuilder = MessageBuilder::fromMessage($replyMessage);
+                if ($replyChannel) {
+                    $replyMessageBuilder->setReplyChannel($replyChannel);
+                }
+
+                return $replyMessageBuilder->build();
             }
 
             return $replyMessage ? $replyMessage->getPayload() : null;

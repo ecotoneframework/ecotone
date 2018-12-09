@@ -6,6 +6,7 @@ namespace Test\SimplyCodedSoftware\IntegrationMessaging\Handler\Chain;
 use Fixture\Handler\Transformer\PassThroughTransformer;
 use Fixture\Handler\Transformer\StdClassTransformer;
 use Fixture\Handler\Transformer\StringTransformer;
+use Fixture\Service\CalculatingService;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\IntegrationMessaging\Channel\QueueChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Config\InMemoryChannelResolver;
@@ -15,7 +16,9 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\Converter\EnrichHe
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Enricher\EnricherBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Logger\LoggingHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Router\RouterBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Transformer\TransformerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
@@ -142,8 +145,9 @@ class ChainMessageHandlerBuilderTest extends TestCase
                    EnrichHeaderWithValueBuilder::create("awesome", "yes")
                 ]),
                 ChainMessageHandlerBuilder::create()
-                    ->chain(TransformerBuilder::createWithReferenceObject( new StdClassTransformer(), "transform")),
-                TransformerBuilder::createWithReferenceObject(new PassThroughTransformer(), "transform"),
+                    ->chain(TransformerBuilder::createWithReferenceObject( new StdClassTransformer(), "transform"))
+                    ->chain(TransformerBuilder::createHeaderEnricher(["superAwesome" => "no"])),
+                TransformerBuilder::createHeaderEnricher(["superAwesome" => "yes"])
             ],
             $requestPayload,
             $replyChannel
@@ -224,6 +228,66 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $this->assertEquals(
             "x",
             $message->getHeaders()->get("some2")
+        );
+    }
+
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_chaining_multiple_handlers()
+    {
+        $replyChannel = QueueChannel::create();
+        $requestPayload = 1;
+
+        $this->createChainHandlerAndHandle(
+            [
+                    ChainMessageHandlerBuilder::create()
+                        //1
+                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                        //2
+                        ->chain(
+                            ChainMessageHandlerBuilder::create()
+                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                        )
+                        //5
+                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                        //6
+                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+                        //12
+                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")),
+                        //13
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"),
+                    //14
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
+                    //28
+                    ChainMessageHandlerBuilder::create()
+                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum"))
+                        //30
+                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")),
+                        //60
+                    ChainMessageHandlerBuilder::create()
+                        ->chain(
+                            ChainMessageHandlerBuilder::create()
+                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+                                //120
+                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(10), "sum"))
+                                //130
+                        )
+                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")),
+                        //260
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
+                    //261
+            ],
+            $requestPayload,
+            $replyChannel
+        );
+
+        $message = $replyChannel->receive();
+        $this->assertEquals(
+            261,
+            $message->getPayload()
         );
     }
 

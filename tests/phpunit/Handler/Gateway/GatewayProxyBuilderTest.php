@@ -7,6 +7,7 @@ use Fixture\Handler\Gateway\DumbSendAndReceiveService;
 use Fixture\Handler\NoReturnMessageHandler;
 use Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Fixture\Handler\StatefulHandler;
+use Fixture\Service\MessageServiceExample;
 use Fixture\Service\ServiceExpectingNoArguments;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
 use Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
@@ -28,8 +29,11 @@ use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageC
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlingException;
+use SimplyCodedSoftware\IntegrationMessaging\Message;
+use SimplyCodedSoftware\IntegrationMessaging\MessageChannel;
 use SimplyCodedSoftware\IntegrationMessaging\MessageHeaders;
 use SimplyCodedSoftware\IntegrationMessaging\MessagingException;
+use SimplyCodedSoftware\IntegrationMessaging\PollableChannel;
 use SimplyCodedSoftware\IntegrationMessaging\Support\ErrorMessage;
 use SimplyCodedSoftware\IntegrationMessaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\IntegrationMessaging\Support\MessageBuilder;
@@ -486,6 +490,40 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    public function test_gateway_in_gateway_messaging()
+    {
+        $methodName = 'execute';
+        $interfaceName = ServiceReceivingMessageAndReturningMessage::class;
+        $requestChannel     = DirectChannel::create();
+
+        $internalChannel = DirectChannel::create();
+        $internalChannel->subscribe(ReplyViaHeadersMessageHandler::createAdditionToPayload(4));
+        /** @var ServiceReceivingMessageAndReturningMessage $internalGatewayProxy1 */
+        $internalGatewayProxy1 = $this->createGateway($interfaceName, $methodName, $internalChannel);
+        $internalChannel = DirectChannel::create();
+        $internalChannel->subscribe(ReplyViaHeadersMessageHandler::createAdditionToPayload(2));
+        /** @var ServiceReceivingMessageAndReturningMessage $internalGatewayProxy2 */
+        $internalGatewayProxy2 = $this->createGateway($interfaceName, $methodName, $internalChannel);
+        $requestChannel->subscribe(ReplyViaHeadersMessageHandler::createWithCallback(function(Message $message) use($internalGatewayProxy1, $internalGatewayProxy2) {
+            $result = $internalGatewayProxy1->execute($message);
+            $result = $internalGatewayProxy2->execute($result);
+
+            return $result;
+        }));
+
+        /** @var ServiceReceivingMessageAndReturningMessage $gatewayProxy */
+        $gatewayProxy = $this->createGateway($interfaceName, $methodName, $requestChannel);
+
+        $replyChannel = QueueChannel::create();
+        $message = $gatewayProxy->execute(MessageBuilder::withPayload(0)->setReplyChannel($replyChannel)->build());
+        $this->assertEquals(6, $message->getPayload());
+        $this->assertEquals($replyChannel, $message->getHeaders()->getReplyChannel());
+    }
+
     public function test_propagating_error_to_error_channel()
     {
         $requestChannelName = "request-channel";
@@ -544,7 +582,7 @@ class GatewayProxyBuilderTest extends MessagingTest
             $messageHandler->getReceivedMessage()->getHeaders()->get("token")
         );
 
-        $this->assertEquals(
+        $this->assertMessages(
             $replyData,
             $replyMessage
         );
@@ -639,5 +677,34 @@ class GatewayProxyBuilderTest extends MessagingTest
             GatewayProxyBuilder::create($referenceName, ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName),
             sprintf("Gateway - %s:%s with reference name `%s` for request channel `%s`", ServiceInterfaceSendOnly::class, "sendMail", $referenceName, $requestChannelName)
         );
+    }
+
+    /**
+     * @param $interfaceName
+     * @param $methodName
+     * @param $requestChannel
+     * @param null|PollableChannel $replyChannel
+     * @return object|\ProxyManager\Proxy\RemoteObjectInterface
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    private function createGateway($interfaceName, $methodName, $requestChannel, ?PollableChannel $replyChannel = null)
+    {
+        $gatewayProxyBuilder = GatewayProxyBuilder::create("some", $interfaceName, $methodName, "requestChannel");
+
+        if ($replyChannel) {
+            $gatewayProxyBuilder->withReplyChannel("replyChannel");
+        }
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    "requestChannel" => $requestChannel,
+                    "replyChannel" => $replyChannel ? $replyChannel : QueueChannel::create()
+                ]
+            )
+        );
+        return $gatewayProxy;
     }
 }

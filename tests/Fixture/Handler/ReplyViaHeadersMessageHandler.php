@@ -29,20 +29,33 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
      */
     private $shouldAdd;
 
+    private $callback;
+
     /**
      * StubHttpResponseMessageHandler constructor.
      * @param $replyData
      * @param bool $shouldAdd
+     * @param $callback
      */
-    private function __construct($replyData, bool $shouldAdd)
+    private function __construct($replyData, bool $shouldAdd, $callback)
     {
         $this->replyData = $replyData;
         $this->shouldAdd = $shouldAdd;
+        $this->callback = $callback;
     }
 
     public static function create($replyData) : self
     {
-        return new self($replyData, false);
+        return new self($replyData, false, null);
+    }
+
+    /**
+     * @param $callback
+     * @return ReplyViaHeadersMessageHandler
+     */
+    public static function createWithCallback($callback) : self
+    {
+        return new self(null, false, $callback);
     }
 
     /**
@@ -51,7 +64,7 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
      */
     public static function createAdditionToPayload($toAdd) : self
     {
-        return new self($toAdd, true);
+        return new self($toAdd, true, null);
     }
 
     /**
@@ -64,13 +77,21 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
         if ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
             /** @var MessageChannel $replyChannel */
             $replyChannel = $message->getHeaders()->getReplyChannel();
-            if (!is_null($this->replyData)) {
-                if ($this->replyData instanceof Message) {
-                    $replyChannel->send($this->replyData);
-                    return;
+
+            if ($this->replyData || $this->callback) {
+                $replyData = $this->replyData ? $this->replyData  : call_user_func($this->callback, $message);
+                if ($this->shouldAdd) {
+                    $replyData += $message->getPayload();
                 }
 
-                $replyChannel->send(MessageBuilder::withPayload($this->replyData)->build());
+                if (!is_null($replyData)) {
+                    if ($replyData instanceof Message) {
+                        $replyChannel->send($replyData);
+                        return;
+                    }
+
+                    $replyChannel->send(MessageBuilder::fromMessage($message)->setPayload($replyData)->build());
+                }
             }
         }
     }

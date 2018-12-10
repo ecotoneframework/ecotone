@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\IntegrationMessaging\Endpoint;
 
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\MessageHandlerBuilder;
@@ -87,7 +88,17 @@ class ConsumerEndpointFactory
                 if ($preCallInterceptors || $postCallInterceptors) {
                     Assert::isTrue(\assert($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel), "Problem with {$messageHandlerBuilder->getEndpointId()}. Only Message Handlers with possible output channels can be intercepted.");
 
-                    $messageHandlerBuilderToUse = InterceptedMessageHandlerBuilder::create($messageHandlerBuilder, $preCallInterceptors, $postCallInterceptors);
+                    $messageHandlerBuilderToUse = ChainMessageHandlerBuilder::create()
+                        ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
+                        ->withOutputMessageChannel($messageHandlerBuilder->getOutputMessageChannelName());
+                    
+                    foreach ($preCallInterceptors as $preCallInterceptor) {
+                        $messageHandlerBuilderToUse->chain($preCallInterceptor);
+                    }
+                    $messageHandlerBuilderToUse->chain($messageHandlerBuilder);
+                    foreach ($postCallInterceptors as $postCallInterceptor) {
+                        $messageHandlerBuilderToUse->chain($postCallInterceptor);
+                    }
                 }
 
                 return $consumerFactory->create(

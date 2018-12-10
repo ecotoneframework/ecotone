@@ -63,6 +63,10 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     public function chain(MessageHandlerBuilderWithOutputChannel $messageHandler) : self
     {
+        $messageHandler
+            ->withInputChannelName("")
+            ->withOutputMessageChannel("");
+
         $this->messageHandlerBuilders[] = $messageHandler;
         foreach ($messageHandler->getRequiredReferenceNames() as $referenceName) {
             $this->requiredReferences[] = $referenceName;

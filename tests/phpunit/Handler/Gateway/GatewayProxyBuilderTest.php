@@ -519,9 +519,16 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxy = $this->createGateway($interfaceName, $methodName, $requestChannel);
 
         $replyChannel = QueueChannel::create();
-        $message = $gatewayProxy->execute(MessageBuilder::withPayload(0)->setReplyChannel($replyChannel)->build());
+        $errorChannel = DirectChannel::create();
+        $message = $gatewayProxy->execute(
+            MessageBuilder::withPayload(0)
+                ->setReplyChannel($replyChannel)
+                ->setErrorChannel($errorChannel)
+                ->build()
+        );
         $this->assertEquals(6, $message->getPayload());
         $this->assertEquals($replyChannel, $message->getHeaders()->getReplyChannel());
+        $this->assertEquals($errorChannel, $message->getHeaders()->getErrorChannel());
     }
 
     public function test_propagating_error_to_error_channel()

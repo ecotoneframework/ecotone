@@ -82,10 +82,12 @@ class Gateway
         }
 
         $replyChannel = null;
+        $errorChannel = null;
         if ($interfaceToCall->hasSingleArgument() && $interfaceToCall->hasFirstParameterMessageTypeHint()) {
             /** @var Message $requestMessage */
             $requestMessage = $methodArguments[0]->value();
             $replyChannel = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
+            $errorChannel = $requestMessage->getHeaders()->containsKey(MessageHeaders::ERROR_CHANNEL) ? $requestMessage->getHeaders()->getErrorChannel() : null;
             $message = $this->requestReplyService
                 ->prepareForSend(MessageBuilder::fromMessage($requestMessage), $interfaceToCall)
                 ->build();
@@ -118,7 +120,10 @@ class Gateway
             if ($interfaceToCall->doesItReturnMessage() && $replyMessage) {
                 $replyMessageBuilder = MessageBuilder::fromMessage($replyMessage);
                 if ($replyChannel) {
-                    $replyMessageBuilder->setReplyChannel($replyChannel);
+                    $replyMessageBuilder->setHeader(MessageHeaders::REPLY_CHANNEL, $replyChannel);
+                }
+                if ($errorChannel) {
+                    $replyMessageBuilder->setHeader(MessageHeaders::ERROR_CHANNEL, $errorChannel);
                 }
 
                 return $replyMessageBuilder->build();

@@ -16,7 +16,7 @@ use SimplyCodedSoftware\IntegrationMessaging\MessageHandler;
  * @package SimplyCodedSoftware\IntegrationMessaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InterceptedMessageHandler extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithOutputChannel
+class InterceptedMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithOutputChannel
 {
     /**
      * @var MessageHandlerBuilder
@@ -51,7 +51,7 @@ class InterceptedMessageHandler extends InputOutputMessageHandlerBuilder impleme
      * @param MessageHandlerBuilderWithOutputChannel[] $preCallMessageHandlers
      * @param MessageHandlerBuilderWithOutputChannel[] $postCallMessageHandlers
      *
-     * @return InterceptedMessageHandler
+     * @return InterceptedMessageHandlerBuilder
      */
     public static function create(MessageHandlerBuilderWithOutputChannel $interceptorMessageHandlerBuilder, array $preCallMessageHandlers, array $postCallMessageHandlers): self
     {

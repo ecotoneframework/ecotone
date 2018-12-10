@@ -16,4 +16,9 @@ interface MessageHandlerBuilderWithOutputChannel extends MessageHandlerBuilder
      * @return static
      */
     public function withOutputMessageChannel(string $messageChannelName);
+
+    /**
+     * @return string
+     */
+    public function getOutputMessageChannelName() : string;
 }

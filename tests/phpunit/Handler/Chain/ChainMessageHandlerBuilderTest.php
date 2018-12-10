@@ -84,6 +84,37 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
+    /**
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_with_chain_handler_at_the_end()
+    {
+        $replyChannel = QueueChannel::create();
+        $requestPayload = 0;
+
+        $this->createChainHandlerAndHandle(
+            [
+                ChainMessageHandlerBuilder::create()
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                    ->chain(
+                        ChainMessageHandlerBuilder::create()
+                            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                    )
+            ],
+            $requestPayload,
+            $replyChannel
+        );
+
+        $message = $replyChannel->receive();
+        $this->assertEquals(
+            4,
+            $message->getPayload()
+        );
+    }
+
     public function test_chaining_payload_transformers()
     {
         $replyChannel = QueueChannel::create();

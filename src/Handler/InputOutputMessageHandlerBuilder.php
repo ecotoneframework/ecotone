@@ -37,6 +37,14 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
+    public function getOutputMessageChannelName(): string
+    {
+        return $this->outputMessageChannelName;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function withInputChannelName(string $inputChannelName)
     {
         $this->inputMessageChannelName = $inputChannelName;

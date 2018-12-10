@@ -176,9 +176,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerPreCallMethodInterceptor(OrderedMethodInterceptor $methodInterceptor): Configuration
     {
-        if (!$methodInterceptor->getMessageHandler()->getEndpointId()) {
-            throw ConfigurationException::create("Interceptor {$methodInterceptor} lack of endpoint id");
-        }
+        $this->checkIfInterceptorIsCorrect($methodInterceptor);
 
         $this->preCallMethodInterceptors[] = $methodInterceptor;
         $this->preCallMethodInterceptors = $this->orderMethodInterceptors($this->preCallMethodInterceptors);
@@ -194,9 +192,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerPostCallMethodInterceptor(OrderedMethodInterceptor $methodInterceptor): Configuration
     {
-        if (!$methodInterceptor->getMessageHandler()->getEndpointId()) {
-            throw ConfigurationException::create("Interceptor {$methodInterceptor} lack of endpoint id");
-        }
+        $this->checkIfInterceptorIsCorrect($methodInterceptor);
 
         $this->postCallMethodInterceptors[] = $methodInterceptor;
         $this->postCallMethodInterceptors = $this->orderMethodInterceptors($this->postCallMethodInterceptors);
@@ -460,5 +456,23 @@ final class MessagingSystemConfiguration implements Configuration
     private function __clone()
     {
 
+    }
+
+    /**
+     * @param OrderedMethodInterceptor $methodInterceptor
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    private function checkIfInterceptorIsCorrect(OrderedMethodInterceptor $methodInterceptor): void
+    {
+        if (!$methodInterceptor->getMessageHandler()->getEndpointId()) {
+            throw ConfigurationException::create("Interceptor {$methodInterceptor} lack of endpoint id");
+        }
+        if ($methodInterceptor->getMessageHandler()->getInputMessageChannelName()) {
+            throw ConfigurationException::create("Interceptor {$methodInterceptor} should not contain input channel. Interceptor is wired by endpoint id");
+        }
+        if ($methodInterceptor->getMessageHandler()->getOutputMessageChannelName()) {
+            throw ConfigurationException::create("Interceptor {$methodInterceptor} should not contain output channel. Interceptor is wired by endpoint id");
+        }
     }
 }

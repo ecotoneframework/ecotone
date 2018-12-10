@@ -111,7 +111,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         $bridgeChannels[$baseKey] = $requestChannel;
 
         $customChannelResolver = InMemoryChannelResolver::createWithChanneResolver($channelResolver, $bridgeChannels);
-        $firstMessageHandler = null;
 
         for ($key = 0; $key < count($messageHandlersToChain); $key++) {
             $currentKey = $baseKey . $key;
@@ -131,10 +130,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
             if ($key === 0) {
                 $requestChannel->subscribe($messageHandler);
-            }
-
-            if (!$firstMessageHandler) {
-                $firstMessageHandler = $messageHandler;
             }
         }
 

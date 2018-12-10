@@ -28,6 +28,7 @@ use SimplyCodedSoftware\IntegrationMessaging\Endpoint\EventDriven\EventDrivenCon
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\IntegrationMessaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
+use SimplyCodedSoftware\IntegrationMessaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
 use SimplyCodedSoftware\IntegrationMessaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -549,7 +550,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystemConfiguration =
             MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
                 ->registerMessageHandler(
-                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
+                    ChainMessageHandlerBuilder::create()
+                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                        ->chain(
+                            ChainMessageHandlerBuilder::create()
+                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                        )
                         ->withInputChannelName($inputChannelName)
                         ->withEndpointId($endpointName)
                 )
@@ -574,15 +582,53 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $outputChannel = QueueChannel::create();
 
         $messageChannel->send(
-            MessageBuilder::withPayload(5)
+            MessageBuilder::withPayload(0)
                 ->setReplyChannel($outputChannel)
                 ->build()
         );
 
         $this->assertEquals(
-            21,
+            18,
             $outputChannel->receive()->getPayload()
         );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_throwing_exception_if_registering_interceptor_with_input_channel()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $endpointName = "endpointName";
+        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerPostCallMethodInterceptor(
+                OrderedMethodInterceptor::create(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
+                        ->withEndpointId($endpointName)
+                        ->withInputChannelName("some"),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                )
+            );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\IntegrationMessaging\MessagingException
+     */
+    public function test_throwing_exception_if_registering_interceptor_with_output_channel()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $endpointName = "endpointName";
+        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerPostCallMethodInterceptor(
+                OrderedMethodInterceptor::create(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
+                        ->withEndpointId($endpointName)
+                        ->withOutputMessageChannel("some"),
+                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                )
+            );
     }
 
     /**

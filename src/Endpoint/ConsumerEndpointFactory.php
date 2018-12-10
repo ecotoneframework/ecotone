@@ -87,7 +87,7 @@ class ConsumerEndpointFactory
                 if ($preCallInterceptors || $postCallInterceptors) {
                     Assert::isTrue(\assert($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel), "Problem with {$messageHandlerBuilder->getEndpointId()}. Only Message Handlers with possible output channels can be intercepted.");
 
-                    $messageHandlerBuilderToUse = InterceptedMessageHandler::create($messageHandlerBuilder, $preCallInterceptors, $postCallInterceptors);
+                    $messageHandlerBuilderToUse = InterceptedMessageHandlerBuilder::create($messageHandlerBuilder, $preCallInterceptors, $postCallInterceptors);
                 }
 
                 return $consumerFactory->create(

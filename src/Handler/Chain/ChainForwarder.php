@@ -33,11 +33,6 @@ class ChainForwarder
      */
     public function forward(Message $message) : ?Message
     {
-//        $replyChannel = $message->getHeaders()->getReplyChannel();
-//        $messageWithLocalReturn = MessageBuilder::fromMessage($message)
-//                                    ->removeHeader(MessageHeaders::REPLY_CHANNEL)
-//                                    ->build();
-//
         return $this->chainGateway->execute($message);
     }
 }

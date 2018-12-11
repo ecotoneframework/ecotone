@@ -36,7 +36,7 @@ When sending messages to the request channel you also have the option to only se
 Messaging Configuration is divined in three forms.  
 
 ##### Configuration 
-The main one `SimplyCodedSoftware\IntegrationMessaging\Config\Configuration`, which expect 
+The main one `SimplyCodedSoftware\Messaging\Config\Configuration`, which expect 
 registration of all messaging components. From Configuration we build messaging system, that 
 has all messaging component defined. What it means it consumer are constructed and connected via 
 message channels.  
@@ -44,10 +44,10 @@ This is main and the only entry for registering messaging components within mess
 
 
 ##### Module
-On to of `Configuration`, we have `SimplyCodedSoftware\IntegrationMessaging\Config\Module`, which
+On to of `Configuration`, we have `SimplyCodedSoftware\Messaging\Config\Module`, which
 registers using `Configuration` his own messaging components. 
 It works as plug in system for new features. 
-Because `SimplyCodedSoftware\IntegrationMessaging\MessageHandler` and `SimplyCodedSoftware\IntegrationMessaging\MessageChannel`
+Because `SimplyCodedSoftware\Messaging\MessageHandler` and `SimplyCodedSoftware\Messaging\MessageChannel`
 are interfaces, modules can extend them in any shape they want and provide within understandable language for lower
 layer components. 
 

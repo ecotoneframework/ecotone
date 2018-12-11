@@ -12,18 +12,15 @@
     "description": "Framework to provide pipe and filters architecture and solutions to work in distributed architecture. Based on enterprise integration patterns and java spring framework.",
     "autoload": {
         "psr-4": {
-            "SimplyCodedSoftware\\IntegrationMessaging\\": "src"
+            "SimplyCodedSoftware\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Test\\SimplyCodedSoftware\\IntegrationMessaging\\": "tests/phpunit",
-            "Behat\\Bootstrap\\": "tests/Behat/Bootstrap",
-            "Fixture\\": "tests/Fixture",
-            "Builder\\": "tests/Builder"
+            "Test\\SimplyCodedSoftware\\": "tests"
         },
         "psr-0": {
-            "FixtureAutoloadTest\\": "tests"
+            "FixtureAutoloadTest\\": "tests\\Messaging"
         }
     },
     "require": {

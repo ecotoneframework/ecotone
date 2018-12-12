@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\Messaging\Support;
 
+use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\MessageChannel;
 use SimplyCodedSoftware\Messaging\MessageHeaders;
@@ -50,12 +51,12 @@ final class MessageBuilder
     }
 
     /**
-     * @param string $contentType
+     * @param MediaType $mediaType
      * @return MessageBuilder
      */
-    public function setContentType(string $contentType) : self
+    public function setContentType(MediaType $mediaType) : self
     {
-        $this->setHeader(MessageHeaders::CONTENT_TYPE, $contentType);
+        $this->setHeader(MessageHeaders::CONTENT_TYPE, $mediaType->toString());
 
         return $this;
     }

@@ -88,7 +88,7 @@ class TransformerBuilderTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload($payload)
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING)->toString())
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING))
                 ->build(),
             $outputChannel->receive()
         );
@@ -165,14 +165,14 @@ class TransformerBuilderTest extends MessagingTest
 
         $transformer->handle(
             MessageBuilder::withPayload($payload)
-                ->setContentType(MediaType::APPLICATION_X_PHP_OBJECT)
+                ->setContentType(MediaType::createApplicationXPHPObject())
                 ->build()
         );
 
         $this->assertMessages(
             MessageBuilder::withPayload($payload)
                 ->setHeader('0', $payload)
-                ->setContentType(MediaType::APPLICATION_X_PHP_OBJECT)
+                ->setContentType(MediaType::createApplicationXPHPObject())
                 ->build(),
             $outputChannel->receive()
         );
@@ -246,7 +246,7 @@ class TransformerBuilderTest extends MessagingTest
         $this->assertMessages(
             MessageBuilder::withPayload($payload . $headerValue)
                 ->setHeader('token', $headerValue)
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING)->toString())
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING))
                 ->build(),
             $outputChannel->receive()
         );
@@ -311,7 +311,7 @@ class TransformerBuilderTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload("johny")
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING)->toString())
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING))
                 ->setReplyChannel($replyChannel)
                 ->build(),
             $replyChannel->receive()

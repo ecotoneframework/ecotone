@@ -207,13 +207,13 @@ class MethodInvokerTest extends MessagingTest
 
         $replyMessage = $methodInvocation->processMessage(
             MessageBuilder::withPayload(serialize(Order::create('1', "correct")))
-                ->setContentType(MediaType::APPLICATION_X_PHP_SERIALIZED_OBJECT)
+                ->setContentType(MediaType::createApplicationXPHPSerializedObject())
                 ->build()
         );
 
         $this->assertMessages(
               MessageBuilder::withPayload(OrderConfirmation::fromOrder(Order::create('1', "correct")))
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("\\" . OrderConfirmation::class)->toString())
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("\\" . OrderConfirmation::class))
                 ->build(),
               $replyMessage
         );
@@ -238,7 +238,7 @@ class MethodInvokerTest extends MessagingTest
         $replyMessage = $methodInvocation->processMessage(
             MessageBuilder::withPayload("some")
                 ->setHeader("uuid", $uuid)
-                ->setContentType(MediaType::createTextPlain()->toString())
+                ->setContentType(MediaType::createTextPlain())
                 ->build()
         );
 
@@ -265,7 +265,7 @@ class MethodInvokerTest extends MessagingTest
 
         $replyMessage = $methodInvocation->processMessage(
             MessageBuilder::withPayload(["fd825894-907c-4c6c-88a9-ae1ecdf3d307", "fd825894-907c-4c6c-88a9-ae1ecdf3d308"])
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("array<string>")->toString())
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("array<string>"))
                 ->build()
         );
 

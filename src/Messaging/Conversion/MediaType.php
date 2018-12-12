@@ -75,6 +75,15 @@ final class MediaType
 
     /**
      * @return MediaType
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createApplicationJson() : self
+    {
+        return self::parseMediaType(self::APPLICATION_JSON);
+    }
+
+    /**
+     * @return MediaType
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */

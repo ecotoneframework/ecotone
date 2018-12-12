@@ -21,11 +21,11 @@
         timeoutForMediumTests="10"
         timeoutForLargeTests="60"
         verbose="false"
-        bootstrap="tests/Messaging/Unit/TestBootstrap.php"
+        bootstrap="tests/TestBootstrap.php"
 >
     <testsuites>
         <testsuite name="Unit Tests">
-            <directory>tests/Messaging/Unit</directory>
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
     <filter>

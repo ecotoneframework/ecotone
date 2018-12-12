@@ -88,7 +88,7 @@ class EnricherBuilderTest extends MessagingTest
 
         $this->createEnricherWithConvertersAndHandle(
             MessageBuilder::withPayload('{"name": "Franco"}')
-                ->setContentType(MediaType::APPLICATION_JSON),
+                ->setContentType(MediaType::createApplicationJson()),
             $outputChannel,
             [
                 EnrichPayloadWithValueBuilder::createWith("token", "123")
@@ -125,7 +125,7 @@ class EnricherBuilderTest extends MessagingTest
 
         $this->createEnricherWithConvertersAndHandle(
             MessageBuilder::withPayload(["name" => "Franco"])
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::OBJECT)->toString()),
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::OBJECT)),
             $outputChannel,
             [
                 EnrichPayloadWithValueBuilder::createWith("token", "123")
@@ -705,7 +705,7 @@ class EnricherBuilderTest extends MessagingTest
             ]
         );
         $replyMessage = MessageBuilder::withPayload('{"surname": "Franco"}')
-                            ->setContentType(MediaType::APPLICATION_JSON)
+                            ->setContentType(MediaType::createApplicationJson())
                             ->build();
         $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith("surname", "payload['surname']")];
 

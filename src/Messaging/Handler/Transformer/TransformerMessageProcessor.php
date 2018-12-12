@@ -64,7 +64,7 @@ class TransformerMessageProcessor implements MessageProcessor
         }else if (!($reply instanceof Message)) {
             $reply = $replyBuilder
                 ->setPayload($reply)
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($this->methodInvoker->getInterfaceToCall()->getReturnType()->toString())->toString())
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($this->methodInvoker->getInterfaceToCall()->getReturnType()->toString()))
                 ->build();
         }
 

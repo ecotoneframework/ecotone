@@ -1,8 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion;
+namespace SimplyCodedSoftware\Messaging\Conversion\UuidToString;
 use Ramsey\Uuid\UuidInterface;
+use SimplyCodedSoftware\Messaging\Conversion\Converter;
+use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 

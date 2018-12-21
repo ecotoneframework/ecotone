@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion;
+namespace SimplyCodedSoftware\Messaging\Conversion\StringToUuid;
+use SimplyCodedSoftware\Messaging\Conversion\Converter;
+use SimplyCodedSoftware\Messaging\Conversion\ConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**

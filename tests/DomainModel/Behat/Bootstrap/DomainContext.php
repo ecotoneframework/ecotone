@@ -5,28 +5,26 @@ namespace Test\SimplyCodedSoftware\DomainModel\Behat\Bootstrap;
 require_once __DIR__ . "/../../../TestBootstrap.php";
 
 use Behat\Behat\Context\Context;
+use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\DomainModel\CommandGateway;
+use SimplyCodedSoftware\DomainModel\Config\AggregateMessageRouterModule;
+use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
+use SimplyCodedSoftware\DomainModel\MessageGateway;
+use SimplyCodedSoftware\DomainModel\QueryGateway;
+use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
+use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
+use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\Messaging\Conversion\MediaType;
+use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryOrderRepositoryFactory;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\Order;
-use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
-use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Conversion\DeserializingConverterBuilder;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\DomainModel\CommandGateway;
-use SimplyCodedSoftware\DomainModel\Config\AggregateMessageRouterModule;
-use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
-use SimplyCodedSoftware\DomainModel\MessageGateway;
-use SimplyCodedSoftware\DomainModel\QueryGateway;
-use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
 
 /**
  * Defines application features from the specific context.

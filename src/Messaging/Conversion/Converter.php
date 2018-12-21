@@ -14,8 +14,8 @@ interface Converter
     /**
      * @param mixed $source
      * @param TypeDescriptor $sourceType
-     * @param TypeDescriptor $targetType
      * @param MediaType $sourceMediaType
+     * @param TypeDescriptor $targetType
      * @param MediaType $targetMediaType
      * @return mixed
      */
@@ -23,8 +23,8 @@ interface Converter
 
     /**
      * @param TypeDescriptor $sourceType
-     * @param TypeDescriptor $targetType
      * @param MediaType $sourceMediaType
+     * @param TypeDescriptor $targetType
      * @param MediaType $targetMediaType
      * @return bool
      */

@@ -1,22 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion;
+namespace SimplyCodedSoftware\Messaging\Conversion\StringToUuid;
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
+use SimplyCodedSoftware\Messaging\Conversion\Converter;
+use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 
 /**
- * Class DeserializingConverter
+ * Class StringToUuidConverter
  * @package SimplyCodedSoftware\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class DeserializingConverter implements Converter
+class StringToUuidConverter implements Converter
 {
     /**
      * @inheritDoc
      */
     public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
     {
-        return unserialize($source);
+        return Uuid::fromString($source);
     }
 
     /**
@@ -24,7 +28,6 @@ class DeserializingConverter implements Converter
      */
     public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
     {
-        return $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP_SERIALIZED_OBJECT)
-            && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP_OBJECT);
+        return $sourceType->isString() && $targetType->isClassOfType(UuidInterface::class);
     }
 }

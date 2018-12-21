@@ -5,9 +5,8 @@ namespace Test\SimplyCodedSoftware\Messaging\Unit\Conversion;
 
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\DeserializingConverter;
 use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Conversion\SerializingConverter;
+use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverter;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -26,7 +25,7 @@ class ConversionServiceTest extends TestCase
     {
         $conversionService = AutoCollectionConversionService::createWith([
             new DeserializingConverter(),
-            new SerializingConverter()
+            new \SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverter()
         ]);
 
 
@@ -56,7 +55,7 @@ class ConversionServiceTest extends TestCase
 
     public function test_not_converting_when_source_is_null()
     {
-        $conversionService = AutoCollectionConversionService::createWith([new SerializingConverter()]);
+        $conversionService = AutoCollectionConversionService::createWith([new \SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverter()]);
 
         $this->assertEquals(
             null,

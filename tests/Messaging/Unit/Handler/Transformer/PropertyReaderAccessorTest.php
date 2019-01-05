@@ -63,13 +63,30 @@ class PropertyReaderAccessorTest extends TestCase
         $this->compareReader("Johny", $path, $fromData);
     }
 
-    public function test_reading_from_object_via_reflection_if_no_public_method()
+    public function test_reading_not_existing_key_returning_null()
     {
-        $path = "orderId";
+        $path = "buyerName";
 
         $fromData = OrderExample::createWith(100, 1, "Johny");
 
-        $this->compareReader(100, $path, $fromData);
+        $this->compareReader("Johny", $path, $fromData);
+        $this->assertEquals(
+            true,
+            (new PropertyReaderAccessor())->hasPropertyValue(PropertyPath::createWith($path), $fromData)
+        );
+    }
+
+    public function test_reading_from_object_via_reflection_if_no_public_method()
+    {
+        $path = "notExistingKey";
+        $fromData = [
+            "token" => 123
+        ];
+
+        $this->assertEquals(
+            false,
+            (new PropertyReaderAccessor())->hasPropertyValue(PropertyPath::createWith($path), $fromData)
+        );
     }
 
     /**

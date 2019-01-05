@@ -33,6 +33,25 @@ class PropertyReaderAccessor
     }
 
     /**
+     * @param PropertyPath $propertyPath
+     * @param mixed $fromData
+     *
+     * @return bool
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function hasPropertyValue(PropertyPath $propertyPath, $fromData) : bool
+    {
+        try {
+            $this->getPropertyValue($propertyPath, $fromData);
+        }catch (InvalidArgumentException $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * @param mixed $fromData
      * @param string $currentAccessProperty
      * @return mixed
@@ -43,8 +62,12 @@ class PropertyReaderAccessor
     private function getValueForCurrentState($fromData, string $currentAccessProperty)
     {
         if (is_array($fromData)) {
+            if (!array_key_exists($currentAccessProperty, $fromData)) {
+                throw InvalidArgumentException::create("Can't access property at `{$currentAccessProperty}`");
+            }
+
             return $fromData[$currentAccessProperty];
-        }else {
+        }elseif (is_object($fromData)) {
             $getterMethod = "get" . ucfirst($currentAccessProperty);
 
             if (method_exists($fromData, $getterMethod)) {

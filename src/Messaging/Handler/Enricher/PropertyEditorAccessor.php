@@ -93,8 +93,21 @@ class PropertyEditorAccessor
         if ($this->hasAnyMatches($startingWithPath)) {
             $propertyName = $startingWithPath[1];
             $accessPropertyName = $startingWithPath[0];
+
+
             if ($accessPropertyName !== $propertyNamePath->getPath()) {
-                $dataToEnrichWith = $this->enrichDataWith($this->cutOutCurrentAccessPropertyName($propertyNamePath, $accessPropertyName), $dataToEnrich[$propertyName], $dataToEnrichWith, $requestMessage, $replyMessage);
+                $extractedPropertyName = $this->cutOutCurrentAccessPropertyName($propertyNamePath, $accessPropertyName);
+                if ($extractedPropertyName->getPath() === "[]") {
+                    $dataToEnrichWithAsArray = $dataToEnrich[$propertyName];
+                    if (!is_array($dataToEnrichWithAsArray)) {
+                        throw EnrichException::createWithFailedMessage("Can't enrich message {$requestMessage}. Enriched element {$accessPropertyName} should be array.", $requestMessage);
+                    }
+
+                    $dataToEnrichWithAsArray[] = $dataToEnrichWith;
+                    $dataToEnrichWith = $dataToEnrichWithAsArray;
+                }else {
+                    $dataToEnrichWith = $this->enrichDataWith($extractedPropertyName, $dataToEnrich[$propertyName], $dataToEnrichWith, $requestMessage, $replyMessage);
+                }
             }
         }else {
             /** worker[name] */

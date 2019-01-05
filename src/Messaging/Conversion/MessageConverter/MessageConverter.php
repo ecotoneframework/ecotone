@@ -29,10 +29,9 @@ interface MessageConverter
      * If the converter does not support the specified media type or cannot perform the conversion, it should return null.
      *
      * @param mixed $source
-     * @param TypeDescriptor $sourceType
      * @param array $messageHeaders
      * @param HeaderMapper $headerMapper
      * @return Message|null the new message, or null if the converter does not support the Object type or the target media type
      */
-    public function toMessage($source, TypeDescriptor $sourceType, array $messageHeaders, HeaderMapper $headerMapper) : Message;
+    public function toMessage($source, array $messageHeaders, HeaderMapper $headerMapper): Message;
 }

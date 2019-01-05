@@ -34,6 +34,14 @@ class DefaultHeaderMapper implements HeaderMapper
     }
 
     /**
+     * @return DefaultHeaderMapper
+     */
+    public static function createEmpty() : self
+    {
+        return new self([]);
+    }
+
+    /**
      * @inheritDoc
      */
     public function map(array $headersToBeMapped): array

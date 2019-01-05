@@ -84,6 +84,25 @@ final class MediaType
 
     /**
      * @return MediaType
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createMultipartFormData() : self
+    {
+        return self::parseMediaType(self::MULTIPART_FORM_DATA);
+    }
+
+    /**
+     * @return MediaType
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createApplicationOcetStream() : self
+    {
+        return self::parseMediaType(self::APPLICATION_OCTET_STREAM);
+    }
+
+    /**
+     * @return MediaType
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */

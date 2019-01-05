@@ -23,9 +23,9 @@ class PsrHttpMessageConverter implements MessageConverter
     /**
      * @inheritDoc
      */
-    public function toMessage($source, TypeDescriptor $sourceType, array $messageHeaders, HeaderMapper $headerMapper): Message
+    public function toMessage($source, TypeDescriptor $sourceMediaType, array $messageHeaders, HeaderMapper $headerMapper): Message
     {
-        if (!$sourceType->isClassOfType(RequestInterface::class)) {
+        if (!$sourceMediaType->isClassOfType(RequestInterface::class)) {
             return null;
         }
     }

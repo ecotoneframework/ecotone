@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Transformer;
 
+use SimplyCodedSoftware\Messaging\Handler\Enricher\EnrichException;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\FakeConverterService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Dto\OrderExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
@@ -457,6 +458,41 @@ class EnricherBuilderTest extends MessagingTest
         $this->assertEquals(
             ["worker" => ["name" => $workerName]],
             $outputChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_enriching_array_with_new_element()
+    {
+        $outputChannel = QueueChannel::create();
+
+        $workerName = "johny";
+        $this->createEnricherAndHandle(
+            MessageBuilder::withPayload(["worker" => ["names" => ["Edward"]]]),
+            $outputChannel,
+            [
+                EnrichPayloadWithValueBuilder::createWith("worker[names][]", $workerName)
+            ]
+        );
+
+        $this->assertEquals(
+            ["worker" => ["names" => ["Edward", $workerName]]],
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_throwing_exception_if_enriching_array_element_is_not_array()
+    {
+        $outputChannel = QueueChannel::create();
+
+        $workerName = "johny";
+        $this->expectException(MessageHandlingException::class);
+
+        $this->createEnricherAndHandle(
+            MessageBuilder::withPayload(["worker" => ["names" => "Edward"]]),
+            $outputChannel,
+            [
+                EnrichPayloadWithValueBuilder::createWith("worker[names][]", $workerName)
+            ]
         );
     }
 

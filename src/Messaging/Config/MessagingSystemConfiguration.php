@@ -5,7 +5,9 @@ namespace SimplyCodedSoftware\Messaging\Config;
 
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptorBuilder;
+use SimplyCodedSoftware\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
+use SimplyCodedSoftware\Messaging\Channel\PollableChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;

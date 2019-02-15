@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Endpoint\EventDriven;
 
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelAdapter;
+use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
@@ -27,7 +27,7 @@ class EventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
     {
         $messageChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
-        if ($messageChannel instanceof MessageChannelAdapter) {
+        if ($messageChannel instanceof MessageChannelInterceptorAdapter) {
             return $messageChannel->getInternalMessageChannel() instanceof SubscribableChannel;
         }
 

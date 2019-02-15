@@ -52,7 +52,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
                         ->withErrorChannel("errorChannel")
                         ->withTransactionFactories(['dbalTransaction'])
                         ->withReplyMillisecondTimeout(100)
-                        ->withParameterToMessageConverters([
+                        ->withParameterConverters([
                             GatewayPayloadExpressionBuilder::create("bookNumber", "upper(value)"),
                             GatewayHeaderBuilder::create("rentTill", "rentDate"),
                             GatewayHeaderExpressionBuilder::create("cost", "cost", "value * 5"),

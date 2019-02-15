@@ -16,4 +16,13 @@ interface PollableChannel extends MessageChannel
      * @return Message|null
      */
     public function receive() : ?Message;
+
+    /**
+     * Receive with timeout
+     * Tries to receive message till time out passes
+     *
+     * @param int $timeoutInMilliseconds
+     * @return null|Message
+     */
+    public function receiveWithTimeout(int $timeoutInMilliseconds) : ?Message;
 }

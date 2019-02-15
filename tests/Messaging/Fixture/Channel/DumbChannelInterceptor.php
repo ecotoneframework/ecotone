@@ -33,7 +33,7 @@ class DumbChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function preSend(?Message $message, MessageChannel $messageChannel): ?Message
+    public function preSend(Message $message, MessageChannel $messageChannel): ?Message
     {
         // TODO: Implement preSend() method.
     }
@@ -41,7 +41,7 @@ class DumbChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function postSend(?Message $message, MessageChannel $messageChannel, bool $wasSuccessful): void
+    public function postSend(Message $message, MessageChannel $messageChannel): void
     {
         // TODO: Implement postSend() method.
     }
@@ -49,7 +49,15 @@ class DumbChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function preReceive(MessageChannel $messageChannel): void
+    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
+    {
+        // TODO: Implement afterSendCompletion() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function preReceive(MessageChannel $messageChannel): bool
     {
         // TODO: Implement preReceive() method.
     }
@@ -57,8 +65,16 @@ class DumbChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function postReceive(?Message $message, MessageChannel $messageChannel): void
+    public function postReceive(Message $message, MessageChannel $messageChannel): ?Message
     {
         // TODO: Implement postReceive() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?\Throwable $exception) : void
+    {
+        // TODO: Implement afterReceiveCompletion() method.
     }
 }

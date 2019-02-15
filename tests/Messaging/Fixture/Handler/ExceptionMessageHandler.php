@@ -22,7 +22,7 @@ class ExceptionMessageHandler implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        throw new \InvalidArgumentException("test");
+        throw new \InvalidArgumentException("testing exception");
     }
 
     public function __toString()

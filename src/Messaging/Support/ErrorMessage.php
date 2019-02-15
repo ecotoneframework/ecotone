@@ -19,14 +19,14 @@ final class ErrorMessage extends GenericMessage
 
     /**
      * @param \Throwable $exception
-     * @param Message $originalMessage
+     * @param Message $failedMessage
      * @return ErrorMessage
      */
-    public static function createWithOriginalMessage(\Throwable $exception, Message $originalMessage) : self
+    public static function createWithOriginalMessage(\Throwable $exception, Message $failedMessage) : self
     {
         /** @var ErrorMessage $errorMessage */
         $errorMessage = self::create($exception, MessageHeaders::createEmpty());
-        $errorMessage->setOriginalMessage($originalMessage);
+        $errorMessage->setFailedMessage($failedMessage);
 
         return $errorMessage;
     }
@@ -34,7 +34,7 @@ final class ErrorMessage extends GenericMessage
     /**
      * @return Message|null
      */
-    public function getOriginalMessage() : ?Message
+    public function getFailedMessage() : ?Message
     {
         return $this->originalMessage;
     }
@@ -42,7 +42,7 @@ final class ErrorMessage extends GenericMessage
     /**
      * @param Message $message
      */
-    private function setOriginalMessage(Message $message) : void
+    private function setFailedMessage(Message $message) : void
     {
         $this->originalMessage = $message;
     }

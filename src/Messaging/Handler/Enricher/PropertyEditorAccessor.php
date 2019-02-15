@@ -41,14 +41,28 @@ class PropertyEditorAccessor
     }
 
     /**
-     * @param ExpressionEvaluationService $expressionEvaluationService
      * @param ReferenceSearchService $referenceSearchService
      * @param string $mappingExpression
      * @return PropertyEditorAccessor
+     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      */
-    public static function create(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, string $mappingExpression): self
+    public static function createWithMapping(ReferenceSearchService $referenceSearchService, string $mappingExpression): self
     {
-        return new self($expressionEvaluationService, $referenceSearchService, $mappingExpression);
+        return new self(
+            $referenceSearchService->get(ExpressionEvaluationService::REFERENCE),
+            $referenceSearchService,
+            $mappingExpression
+        );
+    }
+
+    /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @return PropertyEditorAccessor
+     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
+     */
+    public static function create(ReferenceSearchService $referenceSearchService) : self
+    {
+        return self::createWithMapping($referenceSearchService, "");
     }
 
     /**
@@ -193,9 +207,9 @@ class PropertyEditorAccessor
                     "headers" => $requestMessage->getHeaders()
                 ],
                 "requestContext" => $context,
-                "replyContext" => $replyElement,
-                "referenceService" => $this->referenceSearchService
-            ]
+                "replyContext" => $replyElement
+            ],
+            $this->referenceSearchService
         );
     }
 }

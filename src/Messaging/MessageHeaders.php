@@ -65,7 +65,7 @@ class MessageHeaders
     const DUPLICATE_MESSAGE = 'duplicateMessage';
 
     /**
-     * @var array|string[]
+     * @var array
      */
     private $headers;
 
@@ -97,7 +97,7 @@ class MessageHeaders
     }
 
     /**
-     * @return array|string[]
+     * @return array
      */
     final public function headers() : array
     {

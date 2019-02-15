@@ -66,9 +66,9 @@ class ExpressionConverter implements ParameterConverter
             $this->expression,
             [
                 "payload" => $message->getPayload(),
-                "headers" => $message->getHeaders()->headers(),
-                "referenceService" => $this->referenceSearchService
-            ]
+                "headers" => $message->getHeaders()->headers()
+            ],
+            $this->referenceSearchService
         );
     }
 }

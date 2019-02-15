@@ -42,6 +42,14 @@ class QueueChannel implements PollableChannel
         return array_pop($this->queue);
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message
+    {
+        return $this->receive();
+    }
+
     public function __toString()
     {
         return "queue channel";

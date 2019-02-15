@@ -85,10 +85,11 @@ class InternalEnrichingService
 
             if ($this->requestPayloadExpression) {
                 $requestPayload = $this->expressionEvaluationService->evaluate($this->requestPayloadExpression, [
-                    "headers" => $message->getHeaders()->headers(),
-                    "payload" => $message->getPayload(),
-                    "referenceService" => $this->referenceSearchService
-                ]);
+                        "headers" => $message->getHeaders()->headers(),
+                        "payload" => $message->getPayload()
+                    ],
+                    $this->referenceSearchService
+                );
 
                 $requestMessage->setPayload($requestPayload);
             }

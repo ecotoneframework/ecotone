@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Support;
 use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\MessageHeaderDoesNotExistsException;
 use SimplyCodedSoftware\Messaging\MessageHeaders;
 use SimplyCodedSoftware\Messaging\Support\Clock\ServerClock;
 
@@ -128,6 +129,28 @@ final class MessageBuilder
         $this->payload = $payload;
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCurrentHeaders() : array
+    {
+        return $this->headerAccessor->headers();
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function getHeaderWithName(string $name)
+    {
+        if (!array_key_exists($name, $this->getCurrentHeaders())) {
+            throw MessageHeaderDoesNotExistsException::create("Tries to retrieve not existing header with name {$name}");
+        }
+
+        return $this->getCurrentHeaders()[$name];
     }
 
     /**

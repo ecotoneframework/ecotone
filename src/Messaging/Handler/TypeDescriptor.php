@@ -373,6 +373,14 @@ final class TypeDescriptor
     }
 
     /**
+     * @return bool
+     */
+    public function isScalar() : bool
+    {
+        return self::isItTypeOfScalar($this->type);
+    }
+
+    /**
      * @param string $typeHint
      * @param string $docBlockTypeDescription
      * @return bool

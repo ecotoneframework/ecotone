@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer;
 
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelAdapter;
+use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
 use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenChannelAdapter;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\MessageDrivenChannelAdapter\MessageDrivenChannelAdapter;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -36,7 +36,7 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
     {
         $messageChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
-        if ($messageChannel instanceof MessageChannelAdapter) {
+        if ($messageChannel instanceof MessageChannelInterceptorAdapter) {
             return $messageChannel->getInternalMessageChannel() instanceof PollableChannel && !($messageChannel->getInternalMessageChannel() instanceof MessageDrivenChannelAdapter);
         }
 

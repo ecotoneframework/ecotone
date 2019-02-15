@@ -14,29 +14,60 @@ use SimplyCodedSoftware\Messaging\MessageChannel;
 interface ChannelInterceptor
 {
     /**
-     * @param Message|null $message
+     * Invoked before the Message is actually sent to the channel.
+     * Can return null to prevent sending message to channel
+     *
+     * @param Message $message
      * @param MessageChannel $messageChannel message channel that message will be send to
      * @return Message|null
      */
-    public function preSend(?Message $message, MessageChannel $messageChannel) : ?Message;
+    public function preSend(Message $message, MessageChannel $messageChannel) : ?Message;
 
     /**
-     * @param Message|null $message
+     * Invoked immediately after success send invocation.
+     *
+     * @param Message $message
      * @param MessageChannel $messageChannel message channel that message was sent to
-     * @param bool $wasSuccessful
      */
-    public function postSend(?Message $message, MessageChannel $messageChannel, bool $wasSuccessful) : void;
+    public function postSend(Message $message, MessageChannel $messageChannel) : void;
 
     /**
+     * Invoked after the completion of a send regardless of any exception that have been raised thus allowing for proper resource cleanup.
+     * Note that this will be invoked only if preSend did not return null.
+     *
+     * @param Message $message
+     * @param MessageChannel $messageChannel
+     * @param \Throwable|null $exception
+     */
+    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?\Throwable $exception) : void;
+
+    /**
+     * Invoked as soon as receive is called and before a Message is actually retrieved.
+     * can return false to prevent the receive operation from proceeding.
+     *
      * Before receiving from subscription channel
      *
      * @param MessageChannel $messageChannel
+     * @return bool
      */
-    public function preReceive(MessageChannel $messageChannel) : void;
+    public function preReceive(MessageChannel $messageChannel) : bool;
 
     /**
-     * @param Message|null $message message that was received
+     * Invoked immediately after a Message has been retrieved but before it is returned to the caller.
+     *
+     * @param Message $message message that was received
      * @param MessageChannel $messageChannel message channel that message was received from
+     * @return Message|null
      */
-    public function postReceive(?Message $message, MessageChannel $messageChannel) : void;
+    public function postReceive(Message $message, MessageChannel $messageChannel) : ?Message;
+
+    /**
+     * Invoked after the completion of a receive regardless of any exception that have been raised thus allowing for proper resource cleanup.
+     * This will only called when preReceive return true
+     * @param Message|null $message
+     * @param MessageChannel $messageChannel
+     * @param \Throwable|null $exception
+     * @return void
+     */
+    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?\Throwable $exception) : void;
 }

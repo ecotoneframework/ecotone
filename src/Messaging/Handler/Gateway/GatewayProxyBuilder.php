@@ -7,6 +7,7 @@ use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\SubscribableChannel;
@@ -51,10 +52,6 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     private $methodArgumentConverters = [];
     /**
-     * @var CustomSendAndReceiveService
-     */
-    private $customSendAndReceiveService;
-    /**
      * @var string
      */
     private $errorChannelName;
@@ -66,6 +63,10 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @var string[]
      */
     private $requiredReferenceNames = [];
+    /**
+     * @var string[]
+     */
+    private $messageConverterReferenceNames = [];
 
     /**
      * GatewayProxyBuilder constructor.
@@ -152,26 +153,26 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
-     * @param CustomSendAndReceiveService $sendAndReceiveService
+     * @param array $methodArgumentConverters
      * @return GatewayProxyBuilder
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function withCustomSendAndReceiveService(CustomSendAndReceiveService $sendAndReceiveService) : self
+    public function withParameterConverters(array $methodArgumentConverters): self
     {
-        $this->customSendAndReceiveService = $sendAndReceiveService;
+        Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverterBuilder::class);
+
+        $this->methodArgumentConverters = $methodArgumentConverters;
 
         return $this;
     }
 
     /**
-     * @param array $methodArgumentConverters
+     * @param string[] $messageConverterReferenceNames
      * @return GatewayProxyBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function withParameterToMessageConverters(array $methodArgumentConverters): self
+    public function withMessageConverters(array $messageConverterReferenceNames) : self
     {
-        Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverterBuilder::class);
-
-        $this->methodArgumentConverters = $methodArgumentConverters;
+        $this->messageConverterReferenceNames = $messageConverterReferenceNames;
 
         return $this;
     }
@@ -197,13 +198,15 @@ class GatewayProxyBuilder implements GatewayBuilder
     {
         Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName}");
 
+        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
+        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
         $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
         $requestChannel = $channelResolver->resolve($this->requestChannelName);
-        $interfaceToCall = InterfaceToCall::create($this->interfaceName, $this->methodName);
+        $interfaceToCall = $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName);
 
-        if (!$interfaceToCall->hasReturnTypeVoid()) {
+        if (!($interfaceToCall->canItReturnNull() || $interfaceToCall->hasReturnTypeVoid())) {
             /** @var DirectChannel $requestChannel */
-            Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel should not be pollable if expecting reply");
+            Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel should not be pollable if expected return type is not nullable");
         }
 
         if ($replyChannel) {
@@ -211,18 +214,6 @@ class GatewayProxyBuilder implements GatewayBuilder
             Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");
         }
         $errorChannel = $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null;
-
-        $replyReceiver = DefaultSendAndReceiveService::create($requestChannel, $replyChannel, $errorChannel);
-        if ($this->customSendAndReceiveService) {
-            $replyReceiver = $this->customSendAndReceiveService;
-            $this->customSendAndReceiveService->setSendAndReceive($requestChannel, $replyChannel, $errorChannel);
-        }
-        if ($replyChannel) {
-            $replyReceiver = new ChannelSendAndReceiveService($requestChannel, $replyChannel, $errorChannel);
-        }
-        if ($this->replyChannelName && $this->replyMilliSecondsTimeout > 0) {
-            $replyReceiver = new TimeoutChannelSendAndReceiveService($requestChannel, $replyChannel, $errorChannel, $this->replyMilliSecondsTimeout);
-        }
 
         if (!$interfaceToCall->hasReturnValue() && $this->replyChannelName) {
             throw InvalidArgumentException::create("Can't set reply channel for {$interfaceToCall}");
@@ -237,14 +228,22 @@ class GatewayProxyBuilder implements GatewayBuilder
         foreach ($this->transactionFactoryReferenceNames as $referenceName) {
             $transactionFactories[] = $referenceSearchService->get($referenceName);
         }
+        $messageConverters = [];
+        foreach ($this->messageConverterReferenceNames as $messageConverterReferenceName) {
+            $messageConverters[] = $referenceSearchService->get($messageConverterReferenceName);
+        }
 
         $gateway = new Gateway(
-            $this->interfaceName, $this->methodName,
+            $interfaceToCall,
             new MethodCallToMessageConverter(
-                $this->interfaceName, $this->methodName, $methodArgumentConverters
+                $interfaceToCall, $methodArgumentConverters
             ),
-            ErrorSendAndReceiveService::create($replyReceiver, $errorChannel),
-            $transactionFactories
+            $messageConverters,
+            $transactionFactories,
+            $requestChannel,
+            $replyChannel,
+            $errorChannel,
+            $this->replyMilliSecondsTimeout
         );
 
         $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gateway) implements AdapterInterface {

@@ -60,9 +60,9 @@ class GatewayPayloadExpressionConverter implements GatewayParameterConverter
                     $this->expressionEvaluationService->evaluate(
                         $this->expression,
                         [
-                            "referenceService" => $this->referenceSearchService,
                             "value" => $methodArgument->value()
-                        ]
+                        ],
+                        $this->referenceSearchService
                     )
                 );
     }

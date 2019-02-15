@@ -100,8 +100,8 @@ class SymfonyExpressionEvaluationAdapter implements \SimplyCodedSoftware\Messagi
     /**
      * @inheritDoc
      */
-    public function evaluate(string $expression, array $evaluationContext)
+    public function evaluate(string $expression, array $evaluationContext, ReferenceSearchService $referenceSearchService)
     {
-        return $this->language->evaluate($expression, $evaluationContext);
+        return $this->language->evaluate($expression, array_merge($evaluationContext, ["referenceService" => $referenceSearchService]));
     }
 }

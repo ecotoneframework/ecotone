@@ -16,7 +16,7 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelAdapter;
+use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
@@ -209,13 +209,15 @@ class MessagingSystemConfigurationTest extends MessagingTest
         ]));
 
         $message = MessageBuilder::withPayload("testMessage")->build();
-        /** @var QueueChannel|MessageChannelAdapter $queueChannel */
+        /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
         $preSendModifiedMessage = MessageBuilder::withPayload("preSend")->build();
         $channelInterceptor->method("preSend")
             ->with($message, $queueChannel->getInternalMessageChannel())
             ->willReturn($preSendModifiedMessage);
+        $channelInterceptor->method("preReceive")
+            ->willReturn(true);
 
         $queueChannel->send($message);
 
@@ -249,7 +251,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             $referenceNameFirstToCall => $channelInterceptorFirstToCall
         ]));
 
-        /** @var QueueChannel|MessageChannelAdapter $queueChannel */
+        /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
         $message = MessageBuilder::withPayload("testMessage")->build();
@@ -262,6 +264,12 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelInterceptorSecondToCall->method("preSend")
             ->with($messageFirstModification, $queueChannel->getInternalMessageChannel())
             ->willReturn($messageSecondModification);
+        $channelInterceptorSecondToCall
+            ->method("preReceive")
+            ->willReturn(true);
+        $channelInterceptorFirstToCall
+            ->method("preReceive")
+            ->willReturn(true);
 
         $queueChannel->send($message);
 
@@ -292,7 +300,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         ]));
 
         $message = MessageBuilder::withPayload("testMessage")->build();
-        /** @var QueueChannel|MessageChannelAdapter $queueChannel */
+        /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
         $channelInterceptor->method("preSend")
@@ -328,7 +336,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         ]));
 
         $message = MessageBuilder::withPayload("testMessage")->build();
-        /** @var QueueChannel|MessageChannelAdapter $queueChannel */
+        /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
         $channelInterceptor->method("preSend")
@@ -338,7 +346,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelInterceptor
             ->expects($this->once())
             ->method("postSend")
-            ->with($message, $queueChannel->getInternalMessageChannel(), true);
+            ->with($message, $queueChannel->getInternalMessageChannel());
 
         $queueChannel->send($message);
     }
@@ -366,7 +374,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         ]));
 
         $message = MessageBuilder::withPayload("testMessage")->build();
-        /** @var QueueChannel|MessageChannelAdapter $queueChannel */
+        /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
         $channelInterceptor->method("preSend")
@@ -374,11 +382,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->willReturn($message);
 
         $this->expectException(\InvalidArgumentException::class);
-
-        $channelInterceptor
-            ->expects($this->once())
-            ->method("postSend")
-            ->with($message, $queueChannel->getInternalMessageChannel(), false);
 
         $queueChannel->send($message);
     }
@@ -410,13 +413,19 @@ class MessagingSystemConfigurationTest extends MessagingTest
         ]));
 
         $message = MessageBuilder::withPayload("testMessage")->build();
-        /** @var QueueChannel|MessageChannelAdapter $queueChannel */
+        /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName2);
 
         $preSendModifiedMessage = MessageBuilder::withPayload("preSend")->build();
         $channelInterceptor2->method("preSend")
             ->with($message, $queueChannel->getInternalMessageChannel())
             ->willReturn($preSendModifiedMessage);
+        $channelInterceptor1
+            ->method("preReceive")
+            ->willReturn(true);
+        $channelInterceptor2
+            ->method("preReceive")
+            ->willReturn(true);
 
         $queueChannel->send($message);
 
@@ -447,13 +456,16 @@ class MessagingSystemConfigurationTest extends MessagingTest
         ]));
 
         $message = MessageBuilder::withPayload("testMessage")->build();
-        /** @var QueueChannel|MessageChannelAdapter $queueChannel */
+        /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
         $preSendModifiedMessage = MessageBuilder::withPayload("preSend")->build();
         $channelInterceptor->method("preSend")
             ->with($message, $queueChannel->getInternalMessageChannel())
             ->willReturn($preSendModifiedMessage);
+        $channelInterceptor
+            ->method("preReceive")
+            ->willReturn(true);
 
         $queueChannel->send($message);
 

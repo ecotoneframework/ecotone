@@ -28,25 +28,24 @@ class MethodCallToMessageConverter
 
     /**
      * MethodCallToMessageConverter constructor.
-     * @param string $interfaceToCall
-     * @param string $methodName
+     * @param InterfaceToCall $interfaceToCall
      * @param array|GatewayParameterConverter[] $methodArgumentConverters
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __construct(string $interfaceToCall, string $methodName, array $methodArgumentConverters)
+    public function __construct(InterfaceToCall $interfaceToCall, array $methodArgumentConverters)
     {
-        $this->initialize($interfaceToCall, $methodName, $methodArgumentConverters);
+        $this->initialize($interfaceToCall, $methodArgumentConverters);
     }
 
     /**
+     * @param MessageBuilder $messageBuilder
      * @param array|MethodArgument[] $methodArguments
      * @return MessageBuilder
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function convertFor(array $methodArguments) : MessageBuilder
+    public function convertFor(MessageBuilder $messageBuilder, array $methodArguments) : MessageBuilder
     {
         Assert::allInstanceOfType($methodArguments, MethodArgument::class);
-        $messageBuilder = MessageBuilder::withPayload("empty");
 
         foreach ($methodArguments as $methodArgument) {
             foreach ($this->methodArgumentConverters as $methodParameterConverter) {
@@ -60,16 +59,51 @@ class MethodCallToMessageConverter
     }
 
     /**
-     * @param string $interfaceToCall
-     * @param string $methodName
+     * @param MethodArgument[] $methodArguments
+     * @return array
+     */
+    public function getHeaders(array $methodArguments) : array
+    {
+        $messageBuilder = MessageBuilder::withPayload("");
+        foreach ($methodArguments as $methodArgument) {
+            foreach ($this->methodArgumentConverters as $methodParameterConverter) {
+                if ($methodParameterConverter->isSupporting($methodArgument) && !($methodParameterConverter instanceof GatewayPayloadConverter)) {
+                    $messageBuilder = $methodParameterConverter->convertToMessage($methodArgument, $messageBuilder);
+                }
+            }
+        }
+
+        return $messageBuilder->getCurrentHeaders();
+    }
+
+    /**
+     * @param MethodArgument[] $methodArguments
+     * @return mixed
+     */
+    public function getPayloadArgument(array $methodArguments)
+    {
+        foreach ($methodArguments as $methodArgument) {
+            foreach ($this->methodArgumentConverters as $methodParameterConverter) {
+                if ($methodParameterConverter->isSupporting($methodArgument) && $methodParameterConverter instanceof GatewayPayloadConverter) {
+                    return $methodArgument->value();
+                }
+            }
+        }
+
+        return "";
+    }
+
+    /**
+     * @param InterfaceToCall $interfaceToCall
      * @param array|GatewayParameterConverter[] $methodArgumentConverters
+     * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function initialize(string $interfaceToCall, string $methodName, array $methodArgumentConverters) : void
+    private function initialize(InterfaceToCall $interfaceToCall, array $methodArgumentConverters) : void
     {
         Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverter::class);
 
-        $this->interfaceToCall = InterfaceToCall::create($interfaceToCall, $methodName);
+        $this->interfaceToCall = $interfaceToCall;
 
         if (empty($methodArgumentConverters) && $this->interfaceToCall->hasMoreThanOneParameter()) {
             throw InvalidArgumentException::create("You need to pass method argument converts for {$this->interfaceToCall}");

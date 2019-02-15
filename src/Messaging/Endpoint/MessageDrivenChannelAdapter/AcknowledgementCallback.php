@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\MessageDrivenChannelAdapter;
+namespace SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter;
 
 /**
  * Allows to ack message
@@ -12,11 +12,6 @@ namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\MessageDrivenCh
  */
 interface AcknowledgementCallback
 {
-    /**
-     * @return bool
-     */
-    public function isAlreadyAcknowledged() : bool;
-
     /**
      * @return bool
      */

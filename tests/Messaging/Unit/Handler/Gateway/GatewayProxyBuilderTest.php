@@ -7,6 +7,8 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway\DumbSendAndReceiv
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\StatefulHandler;
+use Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter\FakeMessageConverter;
+use Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter\FakeMessageConverterGatewayExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\MessageServiceExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingNoArguments;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
@@ -125,7 +127,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_time_out_without_response()
+    public function test_calling_reply_queue_with_time_out()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = 'request-channel';
@@ -133,10 +135,13 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel->subscribe($messageHandler);
 
         $payload          = 'replyData';
-        $replyChannelName = 'reply-channel';
-        $replyChannel     = QueueChannel::create();
         $replyMessage     = MessageBuilder::withPayload($payload)->build();
-        $replyChannel->send($replyMessage);
+        $replyChannelName = 'reply-channel';
+        $replyChannel     = $this->createMock(PollableChannel::class);
+        $replyChannel
+            ->method("receiveWithTimeout")
+            ->with(1)
+            ->willReturn($replyMessage);
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName);
         $gatewayProxyBuilder->withReplyChannel($replyChannelName);
@@ -168,7 +173,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $personId            = '123';
         $content             = 'some bla content';
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnlyWithTwoArguments::class, 'sendMail', $requestChannelName);
-        $gatewayProxyBuilder->withParameterToMessageConverters(
+        $gatewayProxyBuilder->withParameterConverters(
             [
                 GatewayHeaderBuilder::create('personId', 'personId'),
                 GatewayPayloadBuilder::create('content')
@@ -206,7 +211,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $personName          = 'Johny';
         $content             = 'some bla content';
         $gatewayProxyBuilder = GatewayProxyBuilder::create("ref-name", ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName);
-        $gatewayProxyBuilder->withParameterToMessageConverters(
+        $gatewayProxyBuilder->withParameterConverters(
             [
                 GatewayHeaderValueBuilder::create('personId', $personId),
                 GatewayPayloadBuilder::create('content'),
@@ -240,7 +245,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $content             = "testContent";
         $gatewayProxyBuilder = GatewayProxyBuilder::create("ref-name", ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName);
-        $gatewayProxyBuilder->withParameterToMessageConverters(
+        $gatewayProxyBuilder->withParameterConverters(
             [
                 GatewayHeaderBuilder::create('content', "test1"),
                 GatewayHeaderBuilder::create('content', "test2")
@@ -415,7 +420,6 @@ class GatewayProxyBuilderTest extends MessagingTest
         $replyChannel     = QueueChannel::create();
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create("ref-name", ServiceInterfaceReceiveOnlyWithNull::class, 'sendMail', $requestChannelName);
-        $gatewayProxyBuilder->withReplyMillisecondTimeout(1);
         $gatewayProxyBuilder->withReplyChannel($replyChannelName);
 
         /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
@@ -445,7 +449,6 @@ class GatewayProxyBuilderTest extends MessagingTest
         $replyChannel     = QueueChannel::create();
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName);
-        $gatewayProxyBuilder->withReplyMillisecondTimeout(1);
         $gatewayProxyBuilder->withReplyChannel($replyChannelName);
 
         $this->expectException(InvalidArgumentException::class);
@@ -462,32 +465,6 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
 
         $gatewayProxy->sendMail();
-    }
-
-    public function test_creating_gateway_with_custom_reply_receiver()
-    {
-        $requestChannelName = "request-channel";
-        $requestChannel     = DirectChannel::create();
-        $requestChannel->subscribe(ReplyViaHeadersMessageHandler::create("reply"));
-        $reply = MessageBuilder::withPayload("extended reply")->build();
-
-        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnly::class, 'sendMail', $requestChannelName)
-            ->withCustomSendAndReceiveService(DumbSendAndReceiveService::create()->setMessageToReceive($reply));
-
-        /** @var ServiceInterfaceReceiveOnly $gatewayProxy */
-        $gatewayProxy = $gatewayProxyBuilder->build(
-            InMemoryReferenceSearchService::createEmpty(),
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    $requestChannelName => $requestChannel
-                ]
-            )
-        );
-
-        $this->assertEquals(
-            "extended reply",
-            $gatewayProxy->sendMail()
-        );
     }
 
     /**
@@ -683,6 +660,42 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals(
             GatewayProxyBuilder::create($referenceName, ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName),
             sprintf("Gateway - %s:%s with reference name `%s` for request channel `%s`", ServiceInterfaceSendOnly::class, "sendMail", $referenceName, $requestChannelName)
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    public function test_using_message_converter_for_transformation_according_to_interface()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $replyData          = MessageBuilder::withPayload("newMessage")->build();
+        $messageHandler     = ReplyViaHeadersMessageHandler::create($replyData);
+        $requestChannel->subscribe($messageHandler);
+
+        /** @var FakeMessageConverterGatewayExample $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', FakeMessageConverterGatewayExample::class, 'execute', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderBuilder::create("some", "some"),
+                GatewayPayloadBuilder::create("amount")
+            ])
+            ->withMessageConverters([
+                "converter"
+            ])
+            ->build(
+                InMemoryReferenceSearchService::createWith([
+                    "converter" => new FakeMessageConverter()
+                ]),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $this->assertEquals(
+            new \stdClass(),
+            $gateway->execute([], 100)
         );
     }
 

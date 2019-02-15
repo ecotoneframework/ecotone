@@ -173,7 +173,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
             /** @var ExpressionEvaluationService $expressionEvaluationService */
             Assert::isSubclassOf($expressionEvaluationService, ExpressionEvaluationService::class, "Expected expression service " . ExpressionEvaluationService::REFERENCE . " but got something else.");
 
-            $this->object = new ExpressionTransformer($this->expression, $expressionEvaluationService);
+            $this->object = new ExpressionTransformer($this->expression, $expressionEvaluationService, $referenceSearchService);
         }
 
         $objectToInvokeOn = $this->object ? $this->object : $referenceSearchService->get($this->objectToInvokeReferenceName);

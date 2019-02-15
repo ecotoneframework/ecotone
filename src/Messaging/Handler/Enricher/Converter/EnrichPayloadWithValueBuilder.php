@@ -54,11 +54,8 @@ class EnrichPayloadWithValueBuilder implements PropertyEditorBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): PropertyEditor
     {
-        /** @var ExpressionEvaluationService $expressionEvaluationService */
-        $expressionEvaluationService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
-
         return EnrichPayloadWithValuePropertyEditor::createWith(
-            PropertyEditorAccessor::create($expressionEvaluationService, $referenceSearchService, ""),
+            PropertyEditorAccessor::createWithMapping($referenceSearchService, ""),
             PropertyPath::createWith($this->propertyPath),
             $this->value
         );

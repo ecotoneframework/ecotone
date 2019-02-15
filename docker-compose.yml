@@ -10,3 +10,12 @@ services:
     command: sleep 99999
     networks:
       - default
+  rabbitmq:
+    image: rabbitmq:3.6-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - default
+    ports:
+      - "15673:15672"

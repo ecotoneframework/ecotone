@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Endpoint\PollOrThrow;
 
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelAdapter;
+use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
@@ -27,7 +27,7 @@ class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumer
     {
         $messageChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
-        if ($messageChannel instanceof MessageChannelAdapter) {
+        if ($messageChannel instanceof MessageChannelInterceptorAdapter) {
             return $messageChannel->getInternalMessageChannel() instanceof PollableChannel;
         }
 

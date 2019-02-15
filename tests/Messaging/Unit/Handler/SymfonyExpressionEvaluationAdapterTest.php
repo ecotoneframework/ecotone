@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler;
 use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 
 /**
@@ -15,8 +16,8 @@ class SymfonyExpressionEvaluationAdapterTest extends TestCase
     {
         $expressionLanguage = SymfonyExpressionEvaluationAdapter::create();
 
-        $this->assertTrue($expressionLanguage->evaluate("isArray([])", []));
-        $this->assertFalse($expressionLanguage->evaluate("isArray('some')", []));
+        $this->assertTrue($expressionLanguage->evaluate("isArray([])", [], InMemoryReferenceSearchService::createEmpty()));
+        $this->assertFalse($expressionLanguage->evaluate("isArray('some')", [], InMemoryReferenceSearchService::createEmpty()));
     }
 
     public function test_do_for_each_element_in_array()
@@ -35,7 +36,7 @@ class SymfonyExpressionEvaluationAdapterTest extends TestCase
                     "id" => 3
                 ]
             ],
-            $expressionLanguage->evaluate("each(payload, 'createArray(\'id\', element)')", ["payload" => [1, 2, 3]])
+            $expressionLanguage->evaluate("each(payload, 'createArray(\'id\', element)')", ["payload" => [1, 2, 3]], InMemoryReferenceSearchService::createEmpty())
         );
     }
 }

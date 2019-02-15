@@ -11,7 +11,6 @@ use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
  */
 class AutoCollectionConversionService implements ConversionService
 {
-
     /**
      * @var Converter[]
      */

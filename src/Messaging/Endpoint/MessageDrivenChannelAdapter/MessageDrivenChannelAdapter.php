@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\MessageDrivenChannelAdapter;
-
-use SimplyCodedSoftware\Messaging\MessageHandler;
+namespace SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter;
 
 /**
  * Interface MessageDrivenConsumer
@@ -12,8 +10,5 @@ use SimplyCodedSoftware\Messaging\MessageHandler;
  */
 interface MessageDrivenChannelAdapter
 {
-    /**
-     * @param MessageHandler $onMessageCallback
-     */
-    public function startMessageDrivenConsumer(MessageHandler $onMessageCallback) : void;
+    public function startMessageDrivenConsumer() : void;
 }

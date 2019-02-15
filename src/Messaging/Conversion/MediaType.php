@@ -86,6 +86,15 @@ final class MediaType
      * @return MediaType
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
+    public static function createApplicationXml() : self
+    {
+        return self::parseMediaType(self::APPLICATION_XML);
+    }
+
+    /**
+     * @return MediaType
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
     public static function createMultipartFormData() : self
     {
         return self::parseMediaType(self::MULTIPART_FORM_DATA);

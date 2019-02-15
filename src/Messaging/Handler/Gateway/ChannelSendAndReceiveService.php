@@ -28,18 +28,24 @@ class ChannelSendAndReceiveService implements SendAndReceiveService
      * @var null|MessageChannel
      */
     private $errorChannel;
+    /**
+     * @var int
+     */
+    private $replyMilliSecondsTimeout;
 
     /**
      * ReceivePoller constructor.
      * @param MessageChannel $requestChannel
      * @param PollableChannel $replyChannel
      * @param null|MessageChannel $errorChannel
+     * @param int $replyMilliSecondsTimeout
      */
-    public function __construct(MessageChannel $requestChannel, PollableChannel $replyChannel, ?MessageChannel $errorChannel)
+    public function __construct(MessageChannel $requestChannel, PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $replyMilliSecondsTimeout)
     {
         $this->requestChannel = $requestChannel;
         $this->replyChannel = $replyChannel;
         $this->errorChannel = $errorChannel;
+        $this->replyMilliSecondsTimeout = $replyMilliSecondsTimeout;
     }
 
     /**
@@ -55,6 +61,7 @@ class ChannelSendAndReceiveService implements SendAndReceiveService
      */
     public function prepareForSend(MessageBuilder $messageBuilder, InterfaceToCall $interfaceToCall): MessageBuilder
     {
+        return $messageBuilder;
         return $messageBuilder
                 ->setErrorChannel($this->errorChannel ? $this->errorChannel : $this->replyChannel);
     }
@@ -64,11 +71,6 @@ class ChannelSendAndReceiveService implements SendAndReceiveService
      */
     public function receiveReply(): ?Message
     {
-        $message = null;
-        while (!$message) {
-            $message = $this->replyChannel->receive();
-        }
-
-        return $message;
+        return $this->replyMilliSecondsTimeout > 0 ? $this->replyChannel->receiveWithTimeout($this->replyMilliSecondsTimeout) : $this->replyChannel->receive();
     }
 }

@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
 
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
@@ -22,17 +23,23 @@ final class ExpressionTransformer
      * @var string
      */
     private $expression;
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
 
     /**
      * ExpressionTransformer constructor.
      *
-     * @param string                      $expression
+     * @param string $expression
      * @param ExpressionEvaluationService $expressionEvaluationService
+     * @param ReferenceSearchService $referenceSearchService
      */
-    public function __construct(string $expression, ExpressionEvaluationService $expressionEvaluationService)
+    public function __construct(string $expression, ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService)
     {
         $this->expression = $expression;
         $this->expressionEvaluationService = $expressionEvaluationService;
+        $this->referenceSearchService = $referenceSearchService;
     }
 
     /**
@@ -42,10 +49,13 @@ final class ExpressionTransformer
      */
     public function transform(Message $message) : Message
     {
-        $evaluatedPayload = $this->expressionEvaluationService->evaluate($this->expression, [
-            "payload" => $message->getPayload(),
-            "headers" => $message->getHeaders()->headers()
-        ]);
+        $evaluatedPayload = $this->expressionEvaluationService->evaluate($this->expression,
+            [
+                "payload" => $message->getPayload(),
+                "headers" => $message->getHeaders()->headers()
+            ],
+            $this->referenceSearchService
+        );
 
         return MessageBuilder::fromMessage($message)
                     ->setPayload($evaluatedPayload)

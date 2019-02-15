@@ -78,9 +78,9 @@ class EnrichHeaderWithExpressionPropertyEditor implements PropertyEditor
                 "request" => [
                     "payload" => $enrichMessage->getPayload(),
                     "headers" => $enrichMessage->getHeaders()
-                ],
-                "referenceService" => $this->referenceSearchService
-            ]
+                ]
+            ],
+            $this->referenceSearchService
         );
 
         return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getHeaders()->headers(), $dataToEnrich, $enrichMessage, $replyMessage);

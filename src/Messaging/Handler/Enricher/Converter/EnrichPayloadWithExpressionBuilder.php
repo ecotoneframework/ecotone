@@ -94,7 +94,7 @@ class EnrichPayloadWithExpressionBuilder implements PropertyEditorBuilder
         return new EnrichPayloadWithExpressionPropertyEditor(
             $expressionEvaluationService,
             $referenceSearchService,
-            PropertyEditorAccessor::create($expressionEvaluationService, $referenceSearchService, $this->mappingExpression),
+            PropertyEditorAccessor::createWithMapping($referenceSearchService, $this->mappingExpression),
             PropertyPath::createWith($this->propertyPath),
             $this->expression,
             $this->nullResultExpression,

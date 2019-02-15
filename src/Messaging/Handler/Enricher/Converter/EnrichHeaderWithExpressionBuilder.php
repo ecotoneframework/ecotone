@@ -75,8 +75,7 @@ class EnrichHeaderWithExpressionBuilder implements PropertyEditorBuilder
         return new EnrichHeaderWithExpressionPropertyEditor(
             $expressionEvaluationService,
             $referenceSearchService,
-            PropertyEditorAccessor::create(
-                $expressionEvaluationService,
+            PropertyEditorAccessor::createWithMapping(
                 $referenceSearchService,
                 ""
             ),

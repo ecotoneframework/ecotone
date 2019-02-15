@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Transaction;
 
+use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Transaction\Transaction;
 use SimplyCodedSoftware\Messaging\Transaction\TransactionException;
 
@@ -43,7 +44,7 @@ class FakeTransaction implements Transaction
     /**
      * @inheritDoc
      */
-    public function commit(): void
+    public function commit(Message $requestMessage): void
     {
         if (!$this->isActive()) {
             throw TransactionException::createWith("Can't commit not active transaction");
@@ -55,7 +56,7 @@ class FakeTransaction implements Transaction
     /**
      * @inheritDoc
      */
-    public function rollback(): void
+    public function rollback(Message $message): void
     {
         if (!$this->isActive()) {
             throw TransactionException::createWith("Can't rollback not active transaction");

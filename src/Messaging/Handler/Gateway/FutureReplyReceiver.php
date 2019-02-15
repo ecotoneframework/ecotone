@@ -3,6 +3,9 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use SimplyCodedSoftware\Messaging\Future;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\PollableChannel;
+use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
 
 /**
  * Class FutureReplySender
@@ -13,26 +16,26 @@ use SimplyCodedSoftware\Messaging\Future;
 class FutureReplyReceiver implements Future
 {
     /**
-     * @var SendAndReceiveService
+     * @var callable
      */
-    private $replySender;
+    private $replyCallable;
 
     /**
      * FutureReplySender constructor.
-     * @param SendAndReceiveService $replySender
+     * @param callable $replyCallable
      */
-    private function __construct(SendAndReceiveService $replySender)
+    private function __construct(callable $replyCallable)
     {
-        $this->replySender = $replySender;
+        $this->replyCallable = $replyCallable;
     }
 
     /**
-     * @param SendAndReceiveService $replySender
+     * @param callable $replyCallable
      * @return FutureReplyReceiver
      */
-    public static function create(SendAndReceiveService $replySender) : self
+    public static function create(callable $replyCallable) : self
     {
-        return new self($replySender);
+        return new self($replyCallable);
     }
 
     /**
@@ -40,7 +43,9 @@ class FutureReplyReceiver implements Future
      */
     public function resolve()
     {
-        $message = $this->replySender->receiveReply();
+        $replyCallable = $this->replyCallable;
+        /** @var Message $message */
+        $message = $replyCallable();
 
         return $message ? $message->getPayload() : null;
     }

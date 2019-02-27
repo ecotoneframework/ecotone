@@ -72,6 +72,24 @@ final class InterfaceParameter
     }
 
     /**
+     * @param TypeDescriptor $typeDescriptor
+     * @return bool
+     */
+    public function hasType(TypeDescriptor $typeDescriptor) : bool
+    {
+        return $this->typeDescriptor->equals($typeDescriptor);
+    }
+
+    /**
+     * @param InterfaceParameter $interfaceParameter
+     * @return bool
+     */
+    public function hasSameTypeAs(InterfaceParameter $interfaceParameter) : bool
+    {
+        return $this->typeDescriptor->equals($interfaceParameter->typeDescriptor);
+    }
+
+    /**
      * @return string
      */
     public function getName() : string

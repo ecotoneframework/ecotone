@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**

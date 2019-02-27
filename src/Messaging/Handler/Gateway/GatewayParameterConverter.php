@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**

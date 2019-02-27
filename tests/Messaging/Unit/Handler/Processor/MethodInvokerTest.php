@@ -3,14 +3,19 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
 
+use Prophecy\Argument;
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverter;
 use SimplyCodedSoftware\Messaging\Conversion\StringToUuid\StringToUuidConverter;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocationException;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
@@ -19,6 +24,8 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\Order;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderProcessor;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\StubCallSavingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingThreeArguments;
@@ -223,7 +230,7 @@ class MethodInvokerTest extends MessagingTest
      */
     public function test_invoking_with_header_conversion()
     {
-        $methodInvocation = MethodInvoker::createWithMessageWrapper(new OrderProcessor(), 'buyByName', [
+        $methodInvocation = MethodInvoker::createWith(new OrderProcessor(), 'buyByName', [
             HeaderBuilder::create("id", "uuid")
         ], InMemoryReferenceSearchService::createWith([
             AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
@@ -252,7 +259,7 @@ class MethodInvokerTest extends MessagingTest
      */
     public function test_invoking_with_converter_for_collection_if_types_are_compatible()
     {
-        $methodInvocation = MethodInvoker::createWithMessageWrapper(new OrderProcessor(), 'buyMultiple', [
+        $methodInvocation = MethodInvoker::createWith(new OrderProcessor(), 'buyMultiple', [
             PayloadBuilder::create("ids")
         ], InMemoryReferenceSearchService::createWith([
             AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
@@ -272,5 +279,239 @@ class MethodInvokerTest extends MessagingTest
         );
     }
 
+    public function test_calling_with_single_around_advice_proceeding_method_invocation()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::create();
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callNoArgumentsAndReturnType', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithProceeding", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
 
+        $methodInvocation->processMessage(MessageBuilder::withPayload("some")->build());
+        $this->assertTrue($interceptedService->wasCalled());
+        $this->assertTrue($interceptingService1->wasCalled());
+    }
+
+    public function test_calling_with_multiple_around_advice_proceeding_method_invocation()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptingService2 = StubCallSavingService::create();
+        $interceptingService3 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::create();
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callNoArgumentsAndReturnType', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithProceeding", InterfaceToCallRegistry::createEmpty()),
+                AroundMethodInterceptor::createWith($interceptingService2, "callWithProceeding", InterfaceToCallRegistry::createEmpty()),
+                AroundMethodInterceptor::createWith($interceptingService3, "callWithProceeding", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $methodInvocation->processMessage(MessageBuilder::withPayload("some")->build());
+        $this->assertTrue($interceptedService->wasCalled());
+        $this->assertTrue($interceptingService1->wasCalled());
+        $this->assertTrue($interceptingService2->wasCalled());
+        $this->assertTrue($interceptingService3->wasCalled());
+    }
+
+    public function test_calling_with_method_interceptor_changing_return_value()
+    {
+        $interceptingService1 = StubCallSavingService::createWithReturnType("changed");
+        $interceptedService = StubCallSavingService::createWithReturnType("original");
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callNoArgumentsAndReturnType', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithEndingChainAndReturning", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $this->assertFalse($interceptedService->wasCalled());
+        $this->assertEquals(
+            "changed",
+            $methodInvocation->processMessage(MessageBuilder::withPayload("some")->build())
+        );
+    }
+
+    public function test_calling_with_method_interceptor_changing_return_value_at_second_call()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptingService2 = StubCallSavingService::createWithReturnType("changed");
+        $interceptedService = StubCallSavingService::createWithReturnType("original");
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithProceedingAndReturning", InterfaceToCallRegistry::createEmpty()),
+                AroundMethodInterceptor::createWith($interceptingService2, "callWithEndingChainAndReturning", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $this->assertEquals(
+            "changed",
+            $methodInvocation->processMessage(MessageBuilder::withPayload("some")->build())
+        );
+    }
+
+    public function test_calling_with_interceptor_ending_call_and_return_nothing()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("original");
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithEndingChainNoReturning", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $this->assertNull($methodInvocation->processMessage(MessageBuilder::withPayload("some")->build()));
+    }
+
+    public function test_changing_calling_arguments_from_interceptor()
+    {
+        $interceptingService1 = StubCallSavingService::createWithArgumentsToReplace(["stdClass" => new \stdClass()]);
+        $interceptedService = StubCallSavingService::create();
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithStdClassArgument', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithReplacingArguments", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $this->assertNull($methodInvocation->processMessage(MessageBuilder::withPayload("some")->build()));
+        $this->assertTrue($interceptedService->wasCalled());
+    }
+
+    public function test_calling_interceptor_with_unordered_arguments_from_intercepted_method()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::create() ;
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithStdClassAndIntArgument', [
+                PayloadBuilder::create("some"),
+                HeaderBuilder::create("number", "number")
+        ], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithUnorderedClassInvocation", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $message = MessageBuilder::withPayload(new \stdClass())
+                        ->setHeader("number", 5)
+                        ->build();
+        $methodInvocation->processMessage($message);
+
+        $this->assertTrue($interceptedService->wasCalled(), "Intercepted Service was not called");
+    }
+
+    public function test_calling_interceptor_with_multiple_unordered_arguments()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::create() ;
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithMultipleArguments', [
+            PayloadBuilder::create("some"),
+            HeaderBuilder::create("numbers", "numbers"),
+            HeaderBuilder::create("strings", "strings")
+        ], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callMultipleUnorderedArgumentsInvocation", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $message = MessageBuilder::withPayload(new \stdClass())
+            ->setHeader("numbers", [5, 1])
+            ->setHeader("strings", ["string1", "string2"])
+            ->build();
+        $methodInvocation->processMessage($message);
+
+        $this->assertTrue($interceptedService->wasCalled(), "Intercepted Service was not called");
+    }
+
+    public function test_passing_through_message_when_calling_interceptor_without_method_invocation()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("some") ;
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithPassThrough", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $this->assertEquals(
+            "some",
+            $methodInvocation->processMessage(MessageBuilder::withPayload(new \stdClass())->build())
+        );
+    }
+
+    public function test_calling_interceptor_with_intercepted_object_instance()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("some") ;
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithInterceptedObject", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $this->assertEquals(
+            "some",
+            $methodInvocation->processMessage(MessageBuilder::withPayload(new \stdClass())->build())
+        );
+    }
+
+    public function test_calling_interceptor_with_request_message()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("some") ;
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithRequestMessage", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $requestMessage = MessageBuilder::withPayload(new \stdClass())->build();
+        $this->assertEquals(
+            $requestMessage,
+            $methodInvocation->processMessage($requestMessage)
+        );
+    }
+
+    public function test_not_throwing_exception_when_can_not_resolve_argument_when_parameter_is_nullable()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("some") ;
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callWithNullableStdClass", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $requestMessage = MessageBuilder::withPayload("test")->build();
+        $this->assertNull($methodInvocation->processMessage($requestMessage));
+    }
+
+    public function test_throwing_exception_if_cannot_resolve_arguments_for_interceptor()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("some") ;
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundMethodInterceptor::createWith($interceptingService1, "callMultipleUnorderedArgumentsInvocation", InterfaceToCallRegistry::createEmpty())
+            ]
+        );
+
+        $this->expectException(MethodInvocationException::class);
+
+        $this->assertEquals(
+            "some",
+            $methodInvocation->processMessage(MessageBuilder::withPayload(new \stdClass())->build())
+        );
+    }
 }

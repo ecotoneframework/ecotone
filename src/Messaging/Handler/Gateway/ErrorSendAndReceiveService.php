@@ -59,7 +59,7 @@ class ErrorSendAndReceiveService implements SendAndReceiveService
                 throw MessageHandlingException::fromOtherException($e, $message);
             }
 
-            $this->errorChannel->send(ErrorMessage::createWithOriginalMessage($e, $message));
+            $this->errorChannel->send(ErrorMessage::createWithFailedMessage($e, $message));
         }
     }
 

@@ -8,14 +8,15 @@ use Interop\Amqp\Impl\AmqpBind;
 use Enqueue\Consumption\QueueConsumer;
 use Interop\Queue\Message;
 
-$config = [
-    "dsn" => "amqp://rabbitmq:5672",
-    "qos_prefetch_count" => 5
-];
-$factory = new AmqpConnectionFactory($config);
+$factory = new AmqpConnectionFactory(["dsn" => "amqp://rabbitmq:5672", "lazy" => false]);
 
 // default
 $context = $factory->createContext();
+//\PHPUnit\Framework\TestCase::assertNotEquals($factory->createContext(), $factory->createContext());
+
+$cachedFactory = new \Enqueue\AmqpLib\CachedAmqpConnectionFactory($factory);
+
+\PHPUnit\Framework\TestCase::assertEquals($cachedFactory->createContext(), $cachedFactory->createContext());
 
 //$producer = $context->createProducer();
 //$destination = $context->createQueue("x");

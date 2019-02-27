@@ -44,7 +44,7 @@ class FakeTransaction implements Transaction
     /**
      * @inheritDoc
      */
-    public function commit(Message $requestMessage): void
+    public function commit(): void
     {
         if (!$this->isActive()) {
             throw TransactionException::createWith("Can't commit not active transaction");
@@ -56,7 +56,7 @@ class FakeTransaction implements Transaction
     /**
      * @inheritDoc
      */
-    public function rollback(Message $message): void
+    public function rollback(): void
     {
         if (!$this->isActive()) {
             throw TransactionException::createWith("Can't rollback not active transaction");

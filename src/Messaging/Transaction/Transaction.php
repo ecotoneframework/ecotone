@@ -2,8 +2,6 @@
 
 namespace SimplyCodedSoftware\Messaging\Transaction;
 
-use SimplyCodedSoftware\Messaging\Message;
-
 /**
  * Interface Transaction
  * @package SimplyCodedSoftware\Messaging\Transaction
@@ -14,17 +12,15 @@ interface Transaction
     /**
      * Complete the transaction represented by this object
      *
-     * @param Message $requestRequestMessage
      * @return void
      */
-    public function commit(Message $requestRequestMessage) : void;
+    public function commit() : void;
 
     /**
      * Roll back the transaction
-     * @param Message $requestMessage
      * @return void
      */
-    public function rollback(Message $requestMessage) : void;
+    public function rollback() : void;
 
     /**
      * Changes the transaction that the only possible outcome of the transaction is to roll back the transaction

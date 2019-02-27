@@ -162,7 +162,7 @@ class InterfaceToCall
             throw InvalidArgumentException::create("Expecting {$this} to have at least one parameter, but got none");
         }
 
-        return $this->getParameters()[0];
+        return $this->getInterfaceParameters()[0];
     }
 
     /**
@@ -173,7 +173,7 @@ class InterfaceToCall
      */
     public function getParameterAtIndex(int $index) : InterfaceParameter
     {
-        if (!array_key_exists($index, $this->getParameters())) {
+        if (!array_key_exists($index, $this->getInterfaceParameters())) {
             throw InvalidArgumentException::create("There is no parameter at index {$index} for {$this}");
         }
 
@@ -357,13 +357,13 @@ class InterfaceToCall
      */
     private function parameterAmount(): int
     {
-        return count($this->getParameters());
+        return count($this->getInterfaceParameters());
     }
 
     /**
      * @return array|InterfaceParameter[]
      */
-    public function getParameters(): array
+    public function getInterfaceParameters(): array
     {
         return $this->parameters;
     }
@@ -449,7 +449,7 @@ class InterfaceToCall
      */
     public function getParameterWithName(string $parameterName): InterfaceParameter
     {
-        foreach ($this->getParameters() as $parameter) {
+        foreach ($this->getInterfaceParameters() as $parameter) {
             if ($parameter->getName() == $parameterName) {
                 return $parameter;
             }

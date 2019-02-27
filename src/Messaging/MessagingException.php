@@ -30,10 +30,6 @@ abstract class MessagingException extends \Exception
      */
     private $failedMessage;
     /**
-     * @var Message|null
-     */
-    private $originalMessage;
-    /**
      * @var \Throwable|null
      */
     private $cause;
@@ -74,14 +70,6 @@ abstract class MessagingException extends \Exception
     public function getFailedMessage() : ?Message
     {
         return $this->failedMessage;
-    }
-
-    /**
-     * @return Message|null
-     */
-    public function getOriginalMessage(): ?Message
-    {
-        return $this->originalMessage;
     }
 
     /**

@@ -44,7 +44,7 @@ class AcknowledgementCallbackTransaction implements Transaction
     /**
      * @inheritDoc
      */
-    public function commit(Message $requestMessage): void
+    public function commit(): void
     {
         if ($this->rollbackOnly) {
             $this->rollback($requestMessage);
@@ -58,7 +58,7 @@ class AcknowledgementCallbackTransaction implements Transaction
     /**
      * @inheritDoc
      */
-    public function rollback(Message $requestMessage): void
+    public function rollback(): void
     {
         $this->getAcknowledgeCallback($requestMessage)->requeue();
     }

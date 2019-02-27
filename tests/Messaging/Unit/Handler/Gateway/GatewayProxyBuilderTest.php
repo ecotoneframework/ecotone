@@ -538,6 +538,85 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
+    public function test_propagating_error_to_error_channel_when_exception_happen_during_receiving_reply()
+    {
+        $replyChannelName = "replyChannel";
+        $replyChannel        = $this->createMock(PollableChannel::class);
+        $exception = new \RuntimeException();
+        $replyChannel
+            ->method("receive")
+            ->willThrowException($exception);
+
+        $requestChannelName = "requestChannel";
+        $requestChannel = QueueChannel::create();
+
+        $errorChannelName    = "errorChannel";
+        $errorChannel = QueueChannel::create();
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendAndReceive::class, 'getById', $requestChannelName)
+            ->withReplyChannel($replyChannelName)
+            ->withErrorChannel($errorChannelName);
+
+        /** @var ServiceInterfaceSendAndReceive $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    $requestChannelName => $requestChannel,
+                    $replyChannelName => $replyChannel,
+                    $errorChannelName => $errorChannel
+                ]
+            )
+        );
+
+        $gatewayProxy->getById(123);
+
+        /** @var ErrorMessage $receivedMessage */
+        $receivedMessage = $errorChannel->receive();
+        $this->assertNull($receivedMessage->getFailedMessage());
+        $this->assertEquals($exception, $receivedMessage->getException());
+        $this->assertEquals(123, $receivedMessage->getOriginalMessage()->getPayload());
+    }
+
+    public function test_propagating_error_to_error_channel_when_error_message_received_from_reply_channel()
+    {
+        $replyChannelName = "replyChannel";
+        $exception = new \RuntimeException();
+        $replyChannel = QueueChannel::create();
+        $errorMessage = ErrorMessage::createWithFailedMessage($exception, MessageBuilder::withPayload("some")->build());
+        $replyChannel->send($errorMessage);
+
+        $requestChannelName = "requestChannel";
+        $requestChannel = QueueChannel::create();
+
+        $errorChannelName    = "errorChannel";
+        $errorChannel = QueueChannel::create();
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendAndReceive::class, 'getById', $requestChannelName)
+            ->withReplyChannel($replyChannelName)
+            ->withErrorChannel($errorChannelName);
+
+        /** @var ServiceInterfaceSendAndReceive $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    $requestChannelName => $requestChannel,
+                    $replyChannelName => $replyChannel,
+                    $errorChannelName => $errorChannel
+                ]
+            )
+        );
+
+        $this->assertNull($gatewayProxy->getById(123));
+
+        /** @var ErrorMessage $receivedMessage */
+        $receivedMessage = $errorChannel->receive();
+        $this->assertEquals($errorMessage->getFailedMessage(), $receivedMessage->getFailedMessage());
+        $this->assertEquals($errorMessage->getException(), $receivedMessage->getException());
+        $this->assertEquals(123, $receivedMessage->getOriginalMessage()->getPayload());
+    }
+
     public function test_requesting_with_original_message_and_returning_new_message()
     {
         $requestChannelName = "request-channel";

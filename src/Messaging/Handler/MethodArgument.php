@@ -1,7 +1,6 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
+namespace SimplyCodedSoftware\Messaging\Handler;
 
 /**
  * Class MethodArgument
@@ -32,14 +31,14 @@ class MethodArgument
     }
 
     /**
-     * @param InterfaceParameter $parameterName
+     * @param InterfaceParameter $parameter
      * @param mixed                $value
      *
      * @return MethodArgument
      */
-    public static function createWith(InterfaceParameter $parameterName, $value): self
+    public static function createWith(InterfaceParameter $parameter, $value): self
     {
-        return new self($parameterName, $value);
+        return new self($parameter, $value);
     }
 
     /**
@@ -51,11 +50,38 @@ class MethodArgument
     }
 
     /**
+     * @param InterfaceParameter $interfaceParameterToCompare
+     * @return bool
+     */
+    public function hasSameTypeAs(InterfaceParameter $interfaceParameterToCompare) : bool
+    {
+        return $this->getInterfaceParameter()->hasSameTypeAs($interfaceParameterToCompare);
+    }
+
+    /**
      * @return InterfaceParameter
      */
-    public function getParameter(): InterfaceParameter
+    public function getInterfaceParameter(): InterfaceParameter
     {
         return $this->parameter;
+    }
+
+    /**
+     * @param TypeDescriptor $typeDescriptor
+     * @return bool
+     */
+    public function hasTypeHint(TypeDescriptor $typeDescriptor) : bool
+    {
+        return $this->parameter->getTypeDescriptor()->equals($typeDescriptor);
+    }
+
+    /**
+     * @param mixed $value
+     * @return MethodArgument
+     */
+    public function replaceValue($value) : self
+    {
+        return self::createWith($this->getInterfaceParameter(), $value);
     }
 
     /**

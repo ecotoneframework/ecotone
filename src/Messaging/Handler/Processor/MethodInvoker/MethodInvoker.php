@@ -150,13 +150,33 @@ final class MethodInvoker implements MessageProcessor
      * @param string $objectMethodName
      * @param ParameterConverterBuilder[] $methodParameters
      * @param ReferenceSearchService $referenceSearchService
+     * @return MethodInvoker
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService): self
+    {
+        $messageConverters = [];
+        foreach ($methodParameters as $methodParameter) {
+            $messageConverters[] = $methodParameter->build($referenceSearchService);
+        }
+
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService);
+    }
+
+    /**
+     * @param $objectToInvokeOn
+     * @param string $objectMethodName
+     * @param ParameterConverterBuilder[] $methodParameters
+     * @param ReferenceSearchService $referenceSearchService
      * @param AroundMethodInterceptor[] $aroundMethodInterceptors
      * @return MethodInvoker
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWith($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $aroundMethodInterceptors = []): self
+    public static function createWithInterceptors($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $aroundMethodInterceptors): self
     {
         $messageConverters = [];
         foreach ($methodParameters as $methodParameter) {
@@ -165,6 +185,7 @@ final class MethodInvoker implements MessageProcessor
 
         return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, $aroundMethodInterceptors);
     }
+
 
     /**
      * @param $objectToInvokeOn

@@ -9,6 +9,7 @@ use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\Messaging\Handler\OrderedAroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -53,6 +54,10 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      * @var bool
      */
     private $shouldPassThroughMessage = false;
+    /**
+     * @var OrderedAroundInterceptorReference[]
+     */
+    private $orderedAroundInterceptorReferences = [];
 
     /**
      * ServiceActivatorBuilder constructor.
@@ -149,6 +154,24 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     }
 
     /**
+     * @param OrderedAroundInterceptorReference[] $orderedAroundInterceptorReferences
+     * @return ServiceActivatorBuilder
+     */
+    public function withOrderedAroundInterceptors(iterable $orderedAroundInterceptorReferences) : self
+    {
+        usort($orderedAroundInterceptorReferences, function(OrderedAroundInterceptorReference $element, OrderedAroundInterceptorReference $elementToCompare) {
+            if ($element->getPrecedence() == $elementToCompare->getPrecedence()) {
+                return 0;
+            }
+
+            return $element->getPrecedence() > $elementToCompare->getPrecedence() ? 1 : -1;
+        });
+        $this->orderedAroundInterceptorReferences = $orderedAroundInterceptorReferences;
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function getParameterConverters(): array
@@ -167,14 +190,20 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         }
         $interfaceToCall = InterfaceToCall::createFromUnknownType($objectToInvoke, $this->methodName);
 
+        $interceptors = [];
+        foreach ($this->orderedAroundInterceptorReferences as $orderedAroundInterceptorReference) {
+            $interceptors[] = $orderedAroundInterceptorReference->buildAroundInterceptor($referenceSearchService);
+        }
+
         $methodToInvoke = WrapWithMessageBuildProcessor::createWith(
             $objectToInvoke,
             $this->methodName,
-            MethodInvoker::createWith(
+            MethodInvoker::createWithInterceptors(
                 $objectToInvoke,
                 $this->methodName,
                 $this->methodParameterConverterBuilders,
-                $referenceSearchService
+                $referenceSearchService,
+                $interceptors
             ),
             $referenceSearchService
         );

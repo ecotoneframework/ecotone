@@ -12,6 +12,8 @@ namespace SimplyCodedSoftware\Messaging\Annotation\Aspect;
 class Before
 {
     /**
+     * The aspect returning the lower value from precedence (or the annotation value) has the higher precedence.
+     *
      * The highest precedence advice runs first "on the way in" (so given two pieces of before advice, the one with highest precedence runs first).
      * "On the way out" from a join point, the highest precedence advice runs last (so given two pieces of after advice, the one with the highest precedence will run second).
      *

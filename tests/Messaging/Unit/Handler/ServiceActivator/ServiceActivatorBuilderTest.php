@@ -2,6 +2,10 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\ServiceActivator;
+use SimplyCodedSoftware\Messaging\Handler\OrderedAroundInterceptorReference;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\CalculatingServiceInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\StubCallSavingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceReturningMessage;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\StaticallyCalledService;
@@ -178,6 +182,38 @@ class ServiceActivatorBuilderTest extends MessagingTest
                 ->withInputChannelName($inputChannelName)
                 ->withEndpointId($endpointName),
             sprintf("Service Activator - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_creating_with_interceptors()
+    {
+        $objectToInvoke = CalculatingServiceInterceptorExample::create(0);
+
+        $firstInterceptor = OrderedAroundInterceptorReference::create("calculator", "sum");
+        $secondInterceptor = OrderedAroundInterceptorReference::create("calculator", "multiply");
+        $thirdInterceptor = OrderedAroundInterceptorReference::create("calculator", "sum");
+        $replyChannel = QueueChannel::create();
+
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, "result")
+                            ->withInputChannelName("someName")
+                            ->withEndpointId("someEndpoint")
+                            ->withOrderedAroundInterceptors([
+                                $secondInterceptor,
+                                $thirdInterceptor,
+                                $firstInterceptor
+                            ])
+                            ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+                                "calculator" => CalculatingServiceInterceptorExample::create(2)
+                            ]));
+
+        $serviceActivator->handle(MessageBuilder::withPayload(1)->setReplyChannel($replyChannel)->build());
+
+        $this->assertEquals(
+            6,
+            $replyChannel->receive()->getPayload()
         );
     }
 }

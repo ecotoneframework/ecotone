@@ -61,6 +61,9 @@ class InterfaceToCall
         $this->initialize($interfaceName, $methodName);
     }
 
+//    ADD ALL EXTRACTING METHOD ANNOTATIONS
+
+
     /**
      * @param string $interfaceName
      * @param string $methodName

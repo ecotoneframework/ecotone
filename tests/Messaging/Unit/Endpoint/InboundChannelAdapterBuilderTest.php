@@ -153,38 +153,4 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                 ])
             );
     }
-
-    /**
-     * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function test_calling_with_transactions_enabled()
-    {
-        $payload = "testPayload";
-        $inputChannelName = "inputChannelName";
-        $inputChannel = QueueChannel::create();
-        $inboundChannelAdapterStoppingService = ConsumerStoppingService::create($payload);
-        $fakeTransaction = FakeTransactionFactory::create();
-
-        $inboundChannel = InboundChannelAdapterBuilder::create(
-            $inputChannelName, "someRef", "execute"
-        )
-            ->withConsumerName("test")
-            ->withTransactionFactories(["tx"])
-            ->build(
-                InMemoryChannelResolver::createFromAssociativeArray([
-                    $inputChannelName => $inputChannel
-                ]),
-                InMemoryReferenceSearchService::createWith([
-                    "someRef" => $inboundChannelAdapterStoppingService,
-                    "tx" => $fakeTransaction
-                ])
-            );
-
-        $inboundChannelAdapterStoppingService->setConsumerLifecycle($inboundChannel);
-
-        $this->assertNull($fakeTransaction->getCurrentTransaction());
-        $inboundChannel->start();
-        $this->assertTrue($fakeTransaction->getCurrentTransaction()->isCommitted(), true);
-    }
 }

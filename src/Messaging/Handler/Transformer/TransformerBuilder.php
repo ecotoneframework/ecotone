@@ -8,6 +8,7 @@ use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\Messaging\Handler\OrderedAroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageConverter;
@@ -50,6 +51,10 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      * @var string
      */
     private $expression;
+    /**
+     * @var OrderedAroundInterceptorReference[]
+     */
+    private $orderedAroundInterceptorReferences = [];
 
     /**
      * TransformerBuilder constructor.
@@ -141,6 +146,24 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     }
 
     /**
+     * @param OrderedAroundInterceptorReference[] $orderedAroundInterceptorReferences
+     * @return self
+     */
+    public function withOrderedAroundInterceptors(iterable $orderedAroundInterceptorReferences) : self
+    {
+        usort($orderedAroundInterceptorReferences, function(OrderedAroundInterceptorReference $element, OrderedAroundInterceptorReference $elementToCompare) {
+            if ($element->getPrecedence() == $elementToCompare->getPrecedence()) {
+                return 0;
+            }
+
+            return $element->getPrecedence() > $elementToCompare->getPrecedence() ? 1 : -1;
+        });
+        $this->orderedAroundInterceptorReferences = $orderedAroundInterceptorReferences;
+
+        return $this;
+    }
+
+    /**
      * @param array|ParameterConverter[] $methodParameterConverterBuilders
      *
      * @return TransformerBuilder
@@ -183,15 +206,21 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
+        $interceptors = [];
+        foreach ($this->orderedAroundInterceptorReferences as $orderedAroundInterceptorReference) {
+            $interceptors[] = $orderedAroundInterceptorReference->buildAroundInterceptor($referenceSearchService);
+        }
+
         return new Transformer(
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
                 TransformerMessageProcessor::createFrom(
-                    MethodInvoker::createWith(
+                    MethodInvoker::createWithInterceptors(
                         $objectToInvokeOn,
                         $this->methodName,
                         $this->methodParameterConverterBuilders,
-                        $referenceSearchService
+                        $referenceSearchService,
+                        $interceptors
                     )
                 ),
                 $channelResolver,

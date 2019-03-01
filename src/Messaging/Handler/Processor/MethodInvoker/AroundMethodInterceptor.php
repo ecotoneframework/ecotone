@@ -39,7 +39,7 @@ class AroundMethodInterceptor
     }
 
     /**
-     * @param $referenceToCall
+     * @param object $referenceToCall
      * @param string $methodName
      * @param InterfaceToCallRegistry $interfaceToCallRegistry
      * @return AroundMethodInterceptor

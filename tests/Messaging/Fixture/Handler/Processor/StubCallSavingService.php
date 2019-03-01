@@ -201,6 +201,16 @@ class StubCallSavingService
         return $message;
     }
 
+    public function sum(MethodInvocation $methodInvocation, int $amount) : int
+    {
+
+    }
+
+    public function multiply(MethodInvocation $methodInvocation, int $amount) : int
+    {
+
+    }
+
     /**
      * @param \stdClass|null $stdClass
      * @return \stdClass|null

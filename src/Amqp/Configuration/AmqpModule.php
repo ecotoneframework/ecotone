@@ -36,7 +36,7 @@ class AmqpModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ConfigurableReferenceSearchService $configurableReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
 
     }

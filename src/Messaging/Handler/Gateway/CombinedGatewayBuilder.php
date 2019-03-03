@@ -45,7 +45,7 @@ class CombinedGatewayBuilder implements GatewayBuilder
         $this->gatewayDefinitions = $combinedGatewayDefinitions;
 
         foreach ($combinedGatewayDefinitions as $gatewayBuilder) {
-            InterfaceToCall::create($interfaceName, $gatewayBuilder->getRelatedMethod());
+            InterfaceToCall::createWithoutCaching($interfaceName, $gatewayBuilder->getRelatedMethod());
 
             $this->requiredReferences = array_merge($this->requiredReferences, $gatewayBuilder->getGatewayBuilder()->getRequiredReferences());
         }

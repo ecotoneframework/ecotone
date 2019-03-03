@@ -61,7 +61,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $configuration,

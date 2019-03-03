@@ -34,7 +34,7 @@ class RouterModuleTest extends AnnotationConfigurationTest
             InMemoryAnnotationRegistrationService::createFrom([RouterWithNoResolutionRequiredExample::class])
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
 
 
         $router = RouterBuilder::create(RouterWithNoResolutionRequiredExample::class, "route")

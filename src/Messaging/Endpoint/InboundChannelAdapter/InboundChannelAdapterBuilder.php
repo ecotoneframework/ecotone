@@ -11,6 +11,7 @@ use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
 use SimplyCodedSoftware\Messaging\Scheduling\SyncTaskScheduler;
@@ -181,7 +182,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
 
         if (!$taskExecutor) {
             $referenceService = $referenceSearchService->get($this->referenceName);
-            $interfaceToCall = InterfaceToCall::createFromObject($referenceService, $this->methodName);
+            $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($referenceService, $this->methodName);
 
             if (!$interfaceToCall->hasNoParameters()) {
                 throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not have any parameters");

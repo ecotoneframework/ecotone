@@ -6,6 +6,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Filter;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -138,7 +139,9 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     {
         $messageSelector = $referenceSearchService->get($this->referenceName);
 
-        if (!InterfaceToCall::createFromObject($messageSelector, $this->methodName)->hasReturnValueBoolean()) {
+        /** @var InterfaceToCall $interfaceToCall */
+        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($messageSelector, $this->methodName);
+        if (!$interfaceToCall->hasReturnValueBoolean()) {
             throw InvalidArgumentException::create("Object with reference {$this->referenceName} should return bool for method {$this->methodName} while using Message Filter");
         }
 

@@ -93,7 +93,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      */
     private function initialize(string $aggregateClassName, string $handledMessageClassName): void
     {
-        $interfaceToCall = InterfaceToCall::create($this->referenceClassName, $this->methodName);
+        $interfaceToCall = InterfaceToCall::createWithoutCaching($this->referenceClassName, $this->methodName);
         $this->isFactoryMethod = $interfaceToCall->isStaticallyCalled();
         $this->isVoidMethod = $interfaceToCall->getReturnType()->isVoid();
 

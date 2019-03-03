@@ -56,7 +56,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $this->assertNotEmpty($classes, "File system class locator didn't find application context");
     }
 
-    public function test_retrieving_class_annotations()
+    public function test_retrieving_annotation_for_class()
     {
         $this->assertEquals(
             new ApplicationContext(),
@@ -88,6 +88,35 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
                 )
             ],
             $this->createAnnotationRegistrationService("Test\\SimplyCodedSoftware\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")->findRegistrationsFor(MessageEndpoint::class, Gateway::class)
+        );
+    }
+
+    public function test_retrieving_method_and_class_annotations()
+    {
+        $gatewayAnnotation = new Gateway();
+        $gatewayAnnotation->requestChannel = "requestChannel";
+        $messageToPayloadParameter = new GatewayPayload();
+        $messageToPayloadParameter->parameterName = "orderId";
+        $gatewayAnnotation->parameterConverters = [$messageToPayloadParameter];
+        $gatewayAnnotation->transactionFactories = ["dbalTransaction"];
+
+        $this->assertEquals(
+            [
+                $gatewayAnnotation
+            ],
+            $this->createAnnotationRegistrationService("Test\\SimplyCodedSoftware\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")
+                ->getAnnotationsForMethod(GatewayWithReplyChannelExample::class, "buy")
+        );
+    }
+
+    public function test_retrieving_class_annotations()
+    {
+        $this->assertEquals(
+            [
+                new MessageEndpoint()
+            ],
+            $this->createAnnotationRegistrationService("Test\\SimplyCodedSoftware\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")
+                ->getAnnotationsForClass(GatewayWithReplyChannelExample::class)
         );
     }
 

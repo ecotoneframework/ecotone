@@ -4,13 +4,14 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Config\Annotation;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
 
 /**
  * Class InMemoryAnnotationRegistrationService
  * @package SimplyCodedSoftware\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InMemoryAnnotationRegistrationService implements AnnotationRegistrationService
+class InMemoryAnnotationRegistrationService implements AnnotationRegistrationService, AnnotationParser
 {
     private const CLASS_ANNOTATIONS = "classAnnotations";
 
@@ -72,6 +73,30 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
         }
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAnnotationsForMethod(string $className, string $methodName): iterable
+    {
+        if (!isset($this->annotationsForClass[$className][$methodName])) {
+            return [];
+        }
+
+        return array_values($this->annotationsForClass[$className][$methodName]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAnnotationsForClass(string $classNameToFind): iterable
+    {
+        if (!isset($this->annotationsForClass[self::CLASS_ANNOTATIONS][$classNameToFind])) {
+            return [];
+        }
+
+        return array_values($this->annotationsForClass[self::CLASS_ANNOTATIONS][$classNameToFind]);
     }
 
     /**

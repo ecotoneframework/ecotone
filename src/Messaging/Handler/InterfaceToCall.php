@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler;
 
+use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Future;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Support\Assert;
@@ -47,61 +48,151 @@ class InterfaceToCall
      * @var bool
      */
     private $isStaticallyCalled;
+    /**
+     * @var iterable|object[]
+     */
+    private $classAnnotations;
+    /**
+     * @var iterable|object[]
+     */
+    private $methodAnnotations;
 
     /**
      * InterfaceToCall constructor.
      * @param string $interfaceName
      * @param string $methodName
+     * @param object[] $classAnnotations
+     * @param object[] $methodAnnotations
      * @throws InvalidArgumentException
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function __construct(string $interfaceName, string $methodName)
+    private function __construct(string $interfaceName, string $methodName, iterable $classAnnotations = [], iterable $methodAnnotations = [])
     {
         $this->initialize($interfaceName, $methodName);
-    }
-
-//    ADD ALL EXTRACTING METHOD ANNOTATIONS
-
-
-    /**
-     * @param string $interfaceName
-     * @param string $methodName
-     * @return InterfaceToCall
-     */
-    public static function create(string $interfaceName, string $methodName): self
-    {
-        return new self($interfaceName, $methodName);
+        $this->classAnnotations = $classAnnotations;
+        $this->methodAnnotations = $methodAnnotations;
     }
 
     /**
-     * @param $object
+     * @param $interfaceOrObjectName
      * @param string $methodName
+     * @param AnnotationParser $annotationParser
      * @return InterfaceToCall
      * @throws InvalidArgumentException
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createFromObject($object, string $methodName): self
+    public static function create($interfaceOrObjectName, string $methodName, AnnotationParser $annotationParser) : self
     {
-        Assert::isObject($object, "Passed value to InterfaceToCall is not object");
+        $interface = $interfaceOrObjectName;
+        if (is_object($interfaceOrObjectName)) {
+            $interface = get_class($interfaceOrObjectName);
+        }
 
-        return new self(get_class($object), $methodName);
+        $methodAnnotations = $annotationParser->getAnnotationsForMethod($interface, $methodName);
+        $classAnnotations = $annotationParser->getAnnotationsForClass($interface);
+
+        return new self($interface, $methodName, $classAnnotations, $methodAnnotations);
     }
 
     /**
-     * @param string|object $unknownType
+     * @param string|object $interfaceOrObjectName
      * @param string $methodName
-     *
      * @return InterfaceToCall
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createFromUnknownType($unknownType, string $methodName) : self
+    public static function createWithoutCaching($interfaceOrObjectName, string $methodName): self
     {
-        if (is_object($unknownType)) {
-            return self::createFromObject($unknownType, $methodName);
+        $interface = $interfaceOrObjectName;
+        if (is_object($interfaceOrObjectName)) {
+            $interface = get_class($interfaceOrObjectName);
         }
 
-        return self::create($unknownType, $methodName);
+        $annotationParser = InMemoryAnnotationRegistrationService::createFrom([$interface]);
+
+        return new self($interface, $methodName, $annotationParser->getAnnotationsForClass($interface), $annotationParser->getAnnotationsForMethod($interface, $methodName));
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getMethodAnnotations() : iterable
+    {
+        return $this->methodAnnotations;
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getClassAnnotations() : iterable
+    {
+        return $this->classAnnotations;
+    }
+
+    /**
+     * @param string $className
+     * @return bool
+     */
+    public function hasMethodAnnotation(string $className) : bool
+    {
+        foreach ($this->methodAnnotations as $methodAnnotation) {
+            if (get_class($methodAnnotation) == $className) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $className
+     * @return bool
+     */
+    public function hasClassAnnotation(string $className) : bool
+    {
+        foreach ($this->classAnnotations as $classAnnotation) {
+            if (get_class($classAnnotation) == $className) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $className
+     * @return object
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function getClassAnnotation(string $className)
+    {
+        foreach ($this->classAnnotations as $classAnnotation) {
+            if (get_class($classAnnotation) == $className) {
+                return $classAnnotation;
+            }
+        }
+
+        throw InvalidArgumentException::create("Trying to retrieve not existing class annotation {$className} for {$this}");
+    }
+
+    /**
+     * @param string $className
+     * @return object
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function getMethodAnnotation(string $className)
+    {
+        foreach ($this->methodAnnotations as $methodAnnotation) {
+            if (get_class($methodAnnotation) == $className) {
+                return $methodAnnotation;
+            }
+        }
+
+        throw InvalidArgumentException::create("Trying to retrieve not existing method annotation {$className} for {$this}");
     }
 
     /**

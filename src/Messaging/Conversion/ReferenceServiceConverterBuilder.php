@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Conversion;
 
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
@@ -22,7 +23,7 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
     /**
      * @var string
      */
-    private $method;
+    private $methodName;
     /**
      * @var TypeDescriptor
      */
@@ -42,7 +43,7 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
     private function __construct(string $referenceName, string $method, TypeDescriptor $sourceType, TypeDescriptor $targetType)
     {
         $this->referenceName = $referenceName;
-        $this->method = $method;
+        $this->methodName = $method;
         $this->sourceType = $sourceType;
         $this->targetType = $targetType;
     }
@@ -66,7 +67,7 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
     {
         $object = $referenceSearchService->get($this->referenceName);
 
-        $interfaceToCall = InterfaceToCall::createFromUnknownType($object, $this->method);
+        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($object, $this->methodName);
 
         if ($interfaceToCall->hasMoreThanOneParameter()) {
             throw InvalidArgumentException::create("Converter should have only single parameter: {$interfaceToCall}");
@@ -74,7 +75,7 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
 
         return ReferenceServiceConverter::create(
             $object,
-            $this->method,
+            $this->methodName,
             $this->sourceType,
             $this->targetType
         );

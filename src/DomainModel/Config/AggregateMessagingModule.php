@@ -116,14 +116,14 @@ class AggregateMessagingModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions, ConfigurableReferenceSearchService $configurableReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
             /** @var CommandHandler $annotation */
             $annotation = $registration->getAnnotationForMethod();
 
             $parameterConverters = $this->parameterConverterAnnotationFactory->createParameterConverters(
-                InterfaceToCall::createFromUnknownType($registration->getClassName(), $registration->getMethodName()),
+                InterfaceToCall::createWithoutCaching($registration->getClassName(), $registration->getMethodName()),
                 $annotation->parameterConverters
             );
 
@@ -152,7 +152,7 @@ class AggregateMessagingModule implements AnnotationModule
             $annotation = $registration->getAnnotationForMethod();
 
             $parameterConverters = $this->parameterConverterAnnotationFactory->createParameterConverters(
-                InterfaceToCall::createFromUnknownType($registration->getClassName(), $registration->getMethodName()),
+                InterfaceToCall::createWithoutCaching($registration->getClassName(), $registration->getMethodName()),
                 $annotation->parameterConverters
             );
 
@@ -188,7 +188,7 @@ class AggregateMessagingModule implements AnnotationModule
      */
     public static function getMessageClassFor(AnnotationRegistration $registration)
     {
-        $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
+        $interfaceToCall = InterfaceToCall::createWithoutCaching($registration->getClassName(), $registration->getMethodName());
         $messageClassName = $registration->getAnnotationForMethod()->messageClassName;
         if ($messageClassName) {
             return (TypeDescriptor::create($messageClassName)->getTypeHint());

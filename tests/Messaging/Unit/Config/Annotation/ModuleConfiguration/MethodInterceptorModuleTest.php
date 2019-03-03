@@ -65,7 +65,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -90,7 +90,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
 
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
     }
 
     /**
@@ -122,7 +122,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -166,7 +166,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -209,7 +209,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -239,7 +239,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $expectedConfiguration,

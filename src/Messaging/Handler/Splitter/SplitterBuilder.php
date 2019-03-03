@@ -6,6 +6,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Splitter;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
@@ -140,7 +141,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         $objectToInvokeOn = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
-        $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
+        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($objectToInvokeOn, $this->methodName);
 
         if (!$interfaceToCall->doesItReturnIterable()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");

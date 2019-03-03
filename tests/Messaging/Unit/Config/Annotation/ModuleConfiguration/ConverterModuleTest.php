@@ -29,7 +29,7 @@ class ConverterModuleTest extends AnnotationConfigurationTest
                 ->registerClassWithAnnotations(ExampleConverterService::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

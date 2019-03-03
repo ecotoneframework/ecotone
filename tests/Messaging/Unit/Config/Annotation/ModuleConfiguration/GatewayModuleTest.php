@@ -40,7 +40,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
         );
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, []);
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
@@ -73,7 +73,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
         $annotationGatewayConfiguration = GatewayModule::create(InMemoryAnnotationRegistrationService::createFrom([MultipleMethodsGatewayExample::class]));
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, []);
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

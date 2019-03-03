@@ -42,7 +42,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                 )
             ],
             $parameterConverterAnnotationFactory->createParameterConverters(
-                InterfaceToCall::create($relatedClassName, $methodName),
+                InterfaceToCall::createWithoutCaching($relatedClassName, $methodName),
                 [$parameterConverterAnnotation]
             )
         );
@@ -70,7 +70,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                 )
             ],
             $parameterConverterAnnotationFactory->createParameterConverters(
-                InterfaceToCall::create($relatedClassName, $methodName),
+                InterfaceToCall::createWithoutCaching($relatedClassName, $methodName),
                 [$parameterConverterAnnotation]
             )
         );

@@ -42,7 +42,7 @@ class PollerModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = PollerModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ConfigurableReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, []);
 
         $this->assertEquals(
             $expectedConfiguration,

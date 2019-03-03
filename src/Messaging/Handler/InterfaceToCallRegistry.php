@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler;
 
+use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+
 /**
  * Class InterfaceToCallBuilder
  * @package SimplyCodedSoftware\Messaging\Handler
@@ -16,25 +18,18 @@ class InterfaceToCallRegistry
      * @var InterfaceToCall[]
      */
     private $interfacesToCall = [];
+    /**
+     * @var AnnotationParser
+     */
+    private $annotationParser;
 
     /**
      * InterfaceToCallRegistry constructor.
-     * @param InterfaceToCall[] $interfacesToCall
+     * @param AnnotationParser $annotationParser
      */
-    private function __construct(array $interfacesToCall)
+    private function __construct(AnnotationParser $annotationParser)
     {
-        foreach ($interfacesToCall as $interfaceToCall) {
-            $this->interfacesToCall[$this->getName($interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName())] = $interfaceToCall;
-        }
-    }
-
-    /**
-     * @param array $interfacesToCall
-     * @return InterfaceToCallRegistry
-     */
-    public static function createWith(array $interfacesToCall) : self
-    {
-        return new self($interfacesToCall);
+        $this->annotationParser = $annotationParser;
     }
 
     /**
@@ -42,7 +37,16 @@ class InterfaceToCallRegistry
      */
     public static function createEmpty() : self
     {
-        return new self([]);
+        return new self(InMemoryAnnotationRegistrationService::createEmpty());
+    }
+
+    /**
+     * @param AnnotationParser $annotationParser
+     * @return InterfaceToCallRegistry
+     */
+    public static function createWith(AnnotationParser $annotationParser) : self
+    {
+        return new self($annotationParser);
     }
 
     /**
@@ -56,7 +60,7 @@ class InterfaceToCallRegistry
             return $this->interfacesToCall[$this->getName($interfaceName, $methodName)];
         }
 
-        $interfaceToCall = InterfaceToCall::createFromUnknownType($interfaceName, $methodName);
+        $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName, $this->annotationParser);
         $this->interfacesToCall[$this->getName($interfaceName, $methodName)] = $interfaceToCall;
 
         return $interfaceToCall;

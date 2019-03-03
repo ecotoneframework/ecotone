@@ -48,7 +48,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
         $converterBuilders = [];
 
         foreach ($registrations as $registration) {
-            $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
+            $interfaceToCall = InterfaceToCall::createWithoutCaching($registration->getClassName(), $registration->getMethodName());
             $converterBuilders[] = ReferenceServiceConverterBuilder::create(
                   $registration->getReferenceName(),
                   $registration->getMethodName(),
@@ -71,7 +71,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ConfigurableReferenceSearchService $configurableReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         foreach ($this->converterBuilders as $converterBuilder) {
             $configuration->registerConverter($converterBuilder);

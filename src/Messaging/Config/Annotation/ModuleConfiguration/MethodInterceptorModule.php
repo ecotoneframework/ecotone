@@ -198,7 +198,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ConfigurableReferenceSearchService $configurableReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         foreach ($this->preCallInterceptors as $preCallInterceptor) {
             $configuration->registerPreCallMethodInterceptor($preCallInterceptor);

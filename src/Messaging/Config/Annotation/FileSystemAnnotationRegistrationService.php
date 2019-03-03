@@ -6,13 +6,14 @@ namespace SimplyCodedSoftware\Messaging\Config\Annotation;
 use Doctrine\Common\Annotations\Reader;
 use SimplyCodedSoftware\Messaging\Annotation\Environment;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
+use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
 
 /**
  * Class FileSystemAnnotationRegistrationService
  * @package SimplyCodedSoftware\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class FileSystemAnnotationRegistrationService implements AnnotationRegistrationService
+class FileSystemAnnotationRegistrationService implements AnnotationRegistrationService, AnnotationParser
 {
     const INTEGRATION_MESSAGING_NAMESPACE = 'IntegrationMessaging';
     const SIMPLY_CODED_SOFTWARE_NAMESPACE = 'SimplyCodedSoftware';
@@ -117,6 +118,26 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
         }
 
         return $registrations;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAnnotationsForMethod(string $className, string $methodName): iterable
+    {
+        $reflectionMethod = new \ReflectionMethod($className, $methodName);
+
+        return $this->annotationReader->getMethodAnnotations($reflectionMethod);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAnnotationsForClass(string $className): iterable
+    {
+        $reflectionClass = new \ReflectionClass($className);
+
+        return $this->annotationReader->getClassAnnotations($reflectionClass);
     }
 
     /**

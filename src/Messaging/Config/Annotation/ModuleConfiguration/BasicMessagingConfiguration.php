@@ -19,8 +19,10 @@ use SimplyCodedSoftware\Messaging\Conversion\StringToUuid\StringToUuidConverterB
 use SimplyCodedSoftware\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\MessageHeaders;
 use SimplyCodedSoftware\Messaging\NullableMessageChannel;
@@ -52,7 +54,7 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ConfigurableReferenceSearchService $configurableReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ChannelInterceptorBuilder) {
@@ -99,7 +101,8 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     public function getRequiredReferences(): array
     {
         return [
-            RequiredReference::create(ExpressionEvaluationService::REFERENCE, ExpressionEvaluationService::class, "Expression language evaluation service")
+            RequiredReference::create(ExpressionEvaluationService::REFERENCE, ExpressionEvaluationService::class, "Expression language evaluation service"),
+            RequiredReference::create(InterfaceToCallRegistry::REFERENCE_NAME, InterfaceToCallRegistry::class, "Registry for building interface descriptions")
         ];
     }
 }

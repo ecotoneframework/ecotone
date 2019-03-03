@@ -6,6 +6,7 @@ use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\OrderedAroundInterceptorReference;
@@ -200,7 +201,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         }
 
         $objectToInvokeOn = $this->object ? $this->object : $referenceSearchService->get($this->objectToInvokeReferenceName);
-        $interfaceToCall = InterfaceToCall::createFromObject($objectToInvokeOn, $this->methodName);
+        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($objectToInvokeOn, $this->methodName);
 
         if (!$interfaceToCall->hasReturnValue()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");

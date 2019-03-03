@@ -16,9 +16,11 @@ use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerEndpointFactory;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
+use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
@@ -49,10 +51,6 @@ final class MessagingSystemConfiguration implements Configuration
      * @var PollingMetadata[]
      */
     private $messageHandlerPollingMetadata = [];
-    /**
-     * @var Module[]
-     */
-    private $modules = [];
     /**
      * @var array|GatewayBuilder[]
      */
@@ -85,10 +83,6 @@ final class MessagingSystemConfiguration implements Configuration
      * @var ConverterBuilder[]
      */
     private $converterBuilders = [];
-    /**
-     * @var object[]
-     */
-    private $extensionReferenceObjects;
 
     /**
      * Only one instance at time
@@ -96,7 +90,6 @@ final class MessagingSystemConfiguration implements Configuration
      * Configuration constructor.
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param object[] $extensionObjects
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects)
     {
@@ -106,11 +99,9 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param object[] $extensionObjects
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects): void
     {
-        $configurableReferenceSearchService = ConfigurableReferenceSearchService::createEmpty();
         $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
         $moduleExtensions = [];
 
@@ -123,19 +114,14 @@ final class MessagingSystemConfiguration implements Configuration
                     $moduleExtensions[$module->getName()][] = $extensionObject;
                 }
             }
-
-            $this->modules[] = $module;
         }
 
-        foreach ($this->modules as $module) {
+        foreach ($modules as $module) {
             $module->prepare(
                 $this,
-                $moduleExtensions[$module->getName()],
-                $configurableReferenceSearchService
+                $moduleExtensions[$module->getName()]
             );
         }
-
-        $this->extensionReferenceObjects = $configurableReferenceSearchService->getReferenceObjects();
     }
 
     /**
@@ -358,12 +344,12 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * Initialize messaging system from current configuration
      *
-     * @param ReferenceSearchService $externalReferenceSearchService
+     * @param ReferenceSearchService $referenceSearchService
      * @return ConfiguredMessagingSystem
      * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function buildMessagingSystemFromConfiguration(ReferenceSearchService $externalReferenceSearchService): ConfiguredMessagingSystem
+    public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService): ConfiguredMessagingSystem
     {
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelBuilders)) {
@@ -371,21 +357,18 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
-        foreach ($this->modules as $module) {
-            $module->afterConfigure($externalReferenceSearchService);
-        }
-
         $converters = [];
         foreach ($this->converterBuilders as $converterBuilder) {
-            $converters[] = $converterBuilder->build($externalReferenceSearchService);
+            $converters[] = $converterBuilder->build($referenceSearchService);
         }
-        $extraReferences[ConversionService::REFERENCE_NAME] = AutoCollectionConversionService::createWith($converters);
+        $referenceSearchServiceWithExtras = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
+            ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters)
+        ]);
 
-        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($externalReferenceSearchService, array_merge($this->extensionReferenceObjects, $extraReferences));
-        $channelResolver = $this->createChannelResolver($referenceSearchService);
+        $channelResolver = $this->createChannelResolver($referenceSearchServiceWithExtras);
         $gateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $gatewayReference = GatewayReference::createWith($gatewayBuilder, $referenceSearchService, $channelResolver);
+            $gatewayReference = GatewayReference::createWith($gatewayBuilder, $referenceSearchServiceWithExtras, $channelResolver);
             $gateways[] = $gatewayReference;
         }
 
@@ -395,14 +378,14 @@ final class MessagingSystemConfiguration implements Configuration
         $postCallInterceptors = array_map(function (OrderedMethodInterceptor $methodInterceptor) {
             return $methodInterceptor->getMessageHandler();
         }, $this->postCallMethodInterceptors);
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories, $preCallInterceptors, $postCallInterceptors, $this->messageHandlerPollingMetadata);
+        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchServiceWithExtras, $this->consumerFactories, $preCallInterceptors, $postCallInterceptors, $this->messageHandlerPollingMetadata);
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder);
         }
         foreach ($this->channelAdapters as $channelAdapter) {
-            $consumers[] = $channelAdapter->build($channelResolver, $referenceSearchService);
+            $consumers[] = $channelAdapter->build($channelResolver, $referenceSearchServiceWithExtras);
         }
 
         $messagingSystem = MessagingSystem::create($consumers, $gateways, $channelResolver);

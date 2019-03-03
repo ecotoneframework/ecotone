@@ -6,6 +6,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
@@ -188,7 +189,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         if (!$this->isStaticallyCalled()) {
             $objectToInvoke = $this->directObjectReference ? $this->directObjectReference : $referenceSearchService->get($this->objectToInvokeReferenceName);
         }
-        $interfaceToCall = InterfaceToCall::createFromUnknownType($objectToInvoke, $this->methodName);
+        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($objectToInvoke, $this->methodName);
 
         $interceptors = [];
         foreach ($this->orderedAroundInterceptorReferences as $orderedAroundInterceptorReference) {

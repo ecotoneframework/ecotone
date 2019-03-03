@@ -58,7 +58,7 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\Messaging\Confi
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ConfigurableReferenceSearchService $configurableReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         $this->extensionObjects = $extensionObjects;
 

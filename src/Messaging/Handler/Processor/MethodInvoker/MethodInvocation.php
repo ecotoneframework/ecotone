@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+
 /**
  * Interface MethodInvocation
  * @package SimplyCodedSoftware\Messaging\MethodInterceptor
@@ -31,6 +33,11 @@ interface MethodInvocation
      * @return string
      */
     public function getInterceptedMethodName() : string;
+
+    /**
+     * @return InterfaceToCall
+     */
+    public function getInterceptedInterface() : InterfaceToCall;
 
     /**
      * @param string $parameterName

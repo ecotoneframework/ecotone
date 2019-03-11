@@ -2,15 +2,6 @@
 
 namespace SimplyCodedSoftware\DomainModel\Config;
 
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\OrderedMethodInterceptor;
 use SimplyCodedSoftware\DomainModel\AggregateMessage;
 use SimplyCodedSoftware\DomainModel\AggregateMessageConversionServiceBuilder;
 use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
@@ -18,9 +9,15 @@ use SimplyCodedSoftware\DomainModel\AggregateRepositoryFactory;
 use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
 use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
 use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
+use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
+use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
+use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
+use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
+use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
@@ -123,7 +120,7 @@ class AggregateMessagingModule implements AnnotationModule
             $annotation = $registration->getAnnotationForMethod();
 
             $parameterConverters = $this->parameterConverterAnnotationFactory->createParameterConverters(
-                InterfaceToCall::createWithoutCaching($registration->getClassName(), $registration->getMethodName()),
+                InterfaceToCall::create($registration->getClassName(), $registration->getMethodName()),
                 $annotation->parameterConverters
             );
 
@@ -138,11 +135,12 @@ class AggregateMessagingModule implements AnnotationModule
                     ->withMethodParameterConverters($parameterConverters)
             );
 
-            $configuration->registerPreCallMethodInterceptor(
-                OrderedMethodInterceptor::create(
-                    AggregateMessageConversionServiceBuilder::createWith($inputChannelName, $handledMessageClassName)
-                        ->withEndpointId($endpointId),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR + 1
+            $configuration->registerBeforeMethodInterceptor(
+                \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                    "",
+                    AggregateMessageConversionServiceBuilder::createWith($inputChannelName, $handledMessageClassName),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    $registration->getClassName()
                 )
             );
         }
@@ -152,7 +150,7 @@ class AggregateMessagingModule implements AnnotationModule
             $annotation = $registration->getAnnotationForMethod();
 
             $parameterConverters = $this->parameterConverterAnnotationFactory->createParameterConverters(
-                InterfaceToCall::createWithoutCaching($registration->getClassName(), $registration->getMethodName()),
+                InterfaceToCall::create($registration->getClassName(), $registration->getMethodName()),
                 $annotation->parameterConverters
             );
 
@@ -169,14 +167,30 @@ class AggregateMessagingModule implements AnnotationModule
                     ->withMethodParameterConverters($parameterConverters)
             );
 
-            $configuration->registerPreCallMethodInterceptor(
-                OrderedMethodInterceptor::create(
-                    AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName)
-                        ->withEndpointId($endpointId),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR + 1
+            $configuration->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "",
+                    AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    $registration->getClassName()
                 )
             );
         }
+    }
+
+    /***
+     * @param AnnotationRegistration $registration
+     * @return string
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function getMessageChannelFor(AnnotationRegistration $registration): string
+    {
+        /** @var CommandHandler|QueryHandler $methodAnnotation */
+        $methodAnnotation = $registration->getAnnotationForMethod();
+
+        return $methodAnnotation->inputChannelName ? $methodAnnotation->inputChannelName : self::getMessageClassFor($registration);
     }
 
     /**
@@ -188,27 +202,12 @@ class AggregateMessagingModule implements AnnotationModule
      */
     public static function getMessageClassFor(AnnotationRegistration $registration)
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching($registration->getClassName(), $registration->getMethodName());
+        $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
         $messageClassName = $registration->getAnnotationForMethod()->messageClassName;
         if ($messageClassName) {
             return (TypeDescriptor::create($messageClassName)->getTypeHint());
         }
 
         return $interfaceToCall->getFirstParameterTypeHint();
-    }
-
-    /***
-     * @param AnnotationRegistration $registration
-     * @return string
-     * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public static function getMessageChannelFor(AnnotationRegistration $registration) : string
-    {
-        /** @var CommandHandler|QueryHandler $methodAnnotation */
-        $methodAnnotation = $registration->getAnnotationForMethod();
-
-        return $methodAnnotation->inputChannelName ? $methodAnnotation->inputChannelName : self::getMessageClassFor($registration);
     }
 }

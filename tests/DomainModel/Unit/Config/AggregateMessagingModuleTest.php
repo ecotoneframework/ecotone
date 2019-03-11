@@ -2,6 +2,20 @@
 
 namespace Test\SimplyCodedSoftware\DomainModel\Unit\Config;
 
+use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\DomainModel\AggregateMessage;
+use SimplyCodedSoftware\DomainModel\AggregateMessageConversionServiceBuilder;
+use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
+use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
+use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
+use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
+use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\DoStuffCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoCommandInformationConfiguration;
@@ -10,20 +24,6 @@ use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\Aggrega
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\AggregateQueryHandlerWithOutputChannelExample;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\QueryHandlerWithNoReturnValue;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\SomeQuery;
-use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Config\OrderedMethodInterceptor;
-use SimplyCodedSoftware\DomainModel\AggregateMessage;
-use SimplyCodedSoftware\DomainModel\AggregateMessageConversionServiceBuilder;
-use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
-use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
-use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class IntegrationMessagingCqrsModule
@@ -96,11 +96,12 @@ class AggregateMessagingModuleTest extends TestCase
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
-            ->registerPreCallMethodInterceptor(
-                OrderedMethodInterceptor::create(
-                    AggregateMessageConversionServiceBuilder::createWith("\\" . DoStuffCommand::class)
-                        ->withEndpointId('command-id'),
-                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR + 1
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "",
+                    AggregateMessageConversionServiceBuilder::createWith("\\" . DoStuffCommand::class),
+                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    AggregateCommandHandlerExample::class
                 )
             );
 
@@ -131,10 +132,11 @@ class AggregateMessagingModuleTest extends TestCase
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
-            ->registerPreCallMethodInterceptor(OrderedMethodInterceptor::create(
-                AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class)
-                    ->withEndpointId('some-id'),
-                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR + 1
+            ->registerBeforeMethodInterceptor(MethodInterceptor::create(
+                "",
+                AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class),
+                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                AggregateQueryHandlerExample::class
             ));
 
         $this->createModuleAndAssertConfiguration(
@@ -165,10 +167,11 @@ class AggregateMessagingModuleTest extends TestCase
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
-            ->registerPreCallMethodInterceptor(OrderedMethodInterceptor::create(
-                AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class)
-                    ->withEndpointId('some-id'),
-                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR + 1
+            ->registerBeforeMethodInterceptor(MethodInterceptor::create(
+                "",
+                AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class),
+                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                AggregateQueryHandlerWithOutputChannelExample::class
             ));
 
         $this->createModuleAndAssertConfiguration(
@@ -207,10 +210,11 @@ class AggregateMessagingModuleTest extends TestCase
                 ->addAnnotationToClassMethod(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", $customQueryHandler),
             $this->createMessagingSystemConfiguration()
                 ->registerMessageHandler($commandHandler)
-                ->registerPreCallMethodInterceptor(OrderedMethodInterceptor::create(
-                    AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class)
-                        ->withEndpointId('some-id'),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR + 1
+                ->registerBeforeMethodInterceptor(\SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                    "",
+                    AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    AggregateQueryHandlerWithOutputChannelExample::class
                 )),
             [
                 "\\" . SomeQuery::class => "inputChannel"
@@ -243,10 +247,11 @@ class AggregateMessagingModuleTest extends TestCase
                 ->addAnnotationToClassMethod(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", $customQueryHandler),
             $this->createMessagingSystemConfiguration()
                 ->registerMessageHandler($commandHandler)
-                ->registerPreCallMethodInterceptor(OrderedMethodInterceptor::create(
-                    AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class)
-                        ->withEndpointId('some-id'),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR + 1
+                ->registerBeforeMethodInterceptor(MethodInterceptor::create(
+                    "",
+                    AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    AggregateQueryHandlerWithOutputChannelExample::class
                 )),
             [
                 "\\" . SomeQuery::class => "inputChannel"
@@ -305,8 +310,7 @@ class AggregateMessagingModuleTest extends TestCase
         $extendedConfiguration = $this->createMessagingSystemConfiguration();
         $cqrsMessagingModule->prepare(
             $extendedConfiguration,
-            [],
-            ConfigurableReferenceSearchService::createEmpty()
+            []
         );
 
         return $extendedConfiguration;

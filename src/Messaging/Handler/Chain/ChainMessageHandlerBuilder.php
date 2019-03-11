@@ -8,10 +8,13 @@ use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Config\NamedMessageChannel;
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\PassThroughGateway;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -32,13 +35,13 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     /**
      * @var MessageHandlerBuilderWithOutputChannel[]
      */
-    private $messageHandlerBuilders;
+    private $chainedMessageHandlerBuilders;
     /**
      * @var string[]
      */
     private $requiredReferences = [];
     /**
-     * @var MessageHandlerBuilder
+     * @var MessageHandlerBuilder|null
      */
     private $outputMessageHandler;
 
@@ -67,7 +70,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             ->withInputChannelName("")
             ->withOutputMessageChannel("");
 
-        $this->messageHandlerBuilders[] = $messageHandler;
+        $this->chainedMessageHandlerBuilders[] = $messageHandler;
         foreach ($messageHandler->getRequiredReferenceNames() as $referenceName) {
             $this->requiredReferences[] = $referenceName;
         }
@@ -100,7 +103,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
         /** @var DirectChannel[] $bridgeChannels */
         $bridgeChannels = [];
-        $messageHandlersToChain = $this->messageHandlerBuilders;
+        $messageHandlersToChain = $this->chainedMessageHandlerBuilders;
 
         if ($this->outputMessageHandler) {
             $messageHandlersToChain[] = $this->outputMessageHandler;
@@ -141,9 +144,40 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), ChainGateway::class, "execute", $requestChannelName)
                     ->build($referenceSearchService, $customChannelResolver);
 
-        return ServiceActivatorBuilder::createWithDirectReference(new ChainForwarder($gateway), "forward")
-                ->withOutputMessageChannel($this->outputMessageChannelName)
-                ->build($channelResolver, $referenceSearchService);
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwarder($gateway), "forward")
+            ->withOutputMessageChannel($this->outputMessageChannelName);
+
+        foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
+            $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
+        }
+
+        return $serviceActivator->build($channelResolver, $referenceSearchService);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $interfaceToCallRegistry->getFor(ChainForwarder::class, "forward");
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    {
+        $relatedReferences = [];
+        if ($this->outputMessageHandler) {
+            $relatedReferences[] = $this->outputMessageHandler->resolveRelatedReference($interfaceToCallRegistry);
+        }
+
+        foreach ($this->chainedMessageHandlerBuilders as $chainedMessageHandlerBuilder) {
+            $relatedReferences[] = array_merge($relatedReferences, $chainedMessageHandlerBuilder->resolveRelatedReference($interfaceToCallRegistry));
+        }
+
+        return $relatedReferences;
     }
 
     /**

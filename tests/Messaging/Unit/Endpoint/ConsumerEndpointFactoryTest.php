@@ -34,13 +34,11 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     {
         $inputChannel = DirectChannel::create();
         $consumerBuilders = [new \SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
-        $preCallInterceptorBuilders = [];
-        $postCallInterceptorBuilders = [];
         $noReplyService = ServiceExpectingOneArgument::create();
         $messageHandler = ServiceActivatorBuilder::createWithDirectReference($noReplyService, "withoutReturnValue");
 
         $message = $this->buildMessage();
-        $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);
+        $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $messageHandler, $message);
 
         $this->assertTrue($noReplyService->wasCalled());
     }
@@ -64,7 +62,7 @@ class ConsumerEndpointFactoryTest extends MessagingTest
      * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function createConsumerAndSendMessage(MessageChannel $inputChannel, array $consumerBuilders, array $preCallInterceptorBuilders, array $postCallInterceptorBuilders, MessageHandlerBuilder $messageHandler, Message $message): void
+    private function createConsumerAndSendMessage(MessageChannel $inputChannel, array $consumerBuilders, MessageHandlerBuilder $messageHandler, Message $message): void
     {
         $consumerEndpointFactory = new ConsumerEndpointFactory(
             InMemoryChannelResolver::createFromAssociativeArray([
@@ -72,8 +70,6 @@ class ConsumerEndpointFactoryTest extends MessagingTest
             ]),
             InMemoryReferenceSearchService::createEmpty(),
             $consumerBuilders,
-            $preCallInterceptorBuilders,
-            $postCallInterceptorBuilders,
             []
         );
 
@@ -93,14 +89,12 @@ class ConsumerEndpointFactoryTest extends MessagingTest
         $inputChannel = DirectChannel::create();
         $replyChannel = QueueChannel::create();
         $consumerBuilders = [new \SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
-        $preCallInterceptorBuilders = [];
-        $postCallInterceptorBuilders = [];
         $firstValueForMathOperations = 0;
         $secondValueForMathOperations = 4;
         $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create($secondValueForMathOperations), "sum");
 
         $message = $this->buildMessageWithReplyChannel($firstValueForMathOperations, $replyChannel);
-        $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);
+        $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $messageHandler, $message);
 
         $this->assertEquals(
             4,
@@ -118,91 +112,5 @@ class ConsumerEndpointFactoryTest extends MessagingTest
         return MessageBuilder::withPayload($payload)
             ->setReplyChannel($replyChannel)
             ->build();
-    }
-
-    /**
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function test_creating_consumer_with_pre_call_interceptor()
-    {
-        $inputChannel = DirectChannel::create();
-        $replyChannel = QueueChannel::create();
-        $consumerBuilders = [new \SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
-        $endpointName = "handlerName";
-        $preCallInterceptorBuilders = [
-            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
-                ->withEndpointId($endpointName)
-        ];
-        $postCallInterceptorBuilders = [];
-        $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-            ->withEndpointId($endpointName);
-
-        $message = $this->buildMessageWithReplyChannel(0, $replyChannel);
-        $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);
-
-        $expectedResult = 3;
-        $this->assertEquals(
-            $expectedResult,
-            $replyChannel->receive()->getPayload()
-        );
-    }
-
-    /**
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function test_omitting_interceptor_when_handler_name_is_different()
-    {
-        $inputChannel = DirectChannel::create();
-        $replyChannel = QueueChannel::create();
-        $consumerBuilders = [new EventDrivenConsumerBuilder()];
-        $preCallInterceptorBuilders = [
-            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
-                ->withEndpointId("someOtherName")
-        ];
-        $postCallInterceptorBuilders = [];
-        $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-            ->withEndpointId("handlerName");
-
-        $message = $this->buildMessageWithReplyChannel(0, $replyChannel);
-        $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);
-
-        $expectedResult = 2;
-        $this->assertEquals(
-            $expectedResult,
-            $replyChannel->receive()->getPayload()
-        );
-    }
-
-    /**
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function test_intercepting_after_service_call()
-    {
-        $inputChannel = DirectChannel::create();
-        $replyChannel = QueueChannel::create();
-        $consumerBuilders = [new \SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder()];
-        $messageHandlerName = "handlerName";
-        $preCallInterceptorBuilders = [
-            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum")
-                ->withEndpointId($messageHandlerName)
-        ];
-        $postCallInterceptorBuilders = [
-            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")
-                ->withEndpointId($messageHandlerName)
-        ];
-        $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
-            ->withEndpointId($messageHandlerName);
-
-        $message = $this->buildMessageWithReplyChannel(0, $replyChannel);
-        $this->createConsumerAndSendMessage($inputChannel, $consumerBuilders, $preCallInterceptorBuilders, $postCallInterceptorBuilders, $messageHandler, $message);
-
-        $expectedResult = 6;
-        $this->assertEquals(
-            $expectedResult,
-            $replyChannel->receive()->getPayload()
-        );
     }
 }

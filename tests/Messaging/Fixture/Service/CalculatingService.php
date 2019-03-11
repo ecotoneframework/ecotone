@@ -27,6 +27,11 @@ class CalculatingService
         return $calculatingService;
     }
 
+    public function result(int $amount) : int
+    {
+        return $amount;
+    }
+
     public function sum(int $amount) : int
     {
         return $amount + $this->secondValueForMathOperations;

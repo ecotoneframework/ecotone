@@ -2,14 +2,17 @@
 
 namespace SimplyCodedSoftware\DomainModel;
 
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\MessageHandler;
@@ -26,7 +29,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     /**
      * @var string
      */
-    private $referenceClassName;
+    private $aggregateClassName;
     /**
      * @var string
      */
@@ -77,7 +80,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      */
     private function __construct(string $aggregateClassName, string $methodName, bool $isCommandHandler, string $handledMessageClassName)
     {
-        $this->referenceClassName = $aggregateClassName;
+        $this->aggregateClassName = $aggregateClassName;
         $this->methodName = $methodName;
         $this->isCommandHandler = $isCommandHandler;
 
@@ -93,7 +96,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      */
     private function initialize(string $aggregateClassName, string $handledMessageClassName): void
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching($this->referenceClassName, $this->methodName);
+        $interfaceToCall = InterfaceToCall::create($this->aggregateClassName, $this->methodName);
         $this->isFactoryMethod = $interfaceToCall->isStaticallyCalled();
         $this->isVoidMethod = $interfaceToCall->getReturnType()->isVoid();
 
@@ -194,6 +197,16 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     }
 
     /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    {
+        return [
+            $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->methodName)
+        ];
+    }
+
+    /**
      * @param array $aggregateRepositoryFactories
      * @return AggregateMessageHandlerBuilder
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
@@ -236,18 +249,18 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         $aggregateRepository = null;
 
         foreach ($this->aggregateRepositoryFactories as $aggregateRepositoryFactory) {
-            if ($aggregateRepositoryFactory->canHandle($referenceSearchService, $this->referenceClassName)) {
-                $aggregateRepository = $aggregateRepositoryFactory->getFor($referenceSearchService, $this->referenceClassName);
+            if ($aggregateRepositoryFactory->canHandle($referenceSearchService, $this->aggregateClassName)) {
+                $aggregateRepository = $aggregateRepositoryFactory->getFor($referenceSearchService, $this->aggregateClassName);
             }
         }
-        Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$this->referenceClassName}:{$this->methodName}");
+        Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$this->aggregateClassName}:{$this->methodName}");
 
         $chainCqrsMessageHandler
             ->chain(
                 ServiceActivatorBuilder::createWithDirectReference(
                     new LoadAggregateService(
                         $aggregateRepository,
-                        $this->referenceClassName,
+                        $this->aggregateClassName,
                         $this->methodName,
                         $this->isFactoryMethod,
                         $this->messageIdentifierMapping,
@@ -266,7 +279,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         $chainCqrsMessageHandler
             ->chain(
                 ServiceActivatorBuilder::createWithDirectReference(
-                    new CallAggregateService($channelResolver, $methodParameterConverters, $referenceSearchService),
+                    new CallAggregateService($channelResolver, $methodParameterConverters, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $this->orderedAroundInterceptors), $referenceSearchService),
                     "call"
                 )->withPassThroughMessageOnVoidInterface($this->isVoidMethod)
             );
@@ -286,8 +299,16 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             ->build($channelResolver, $referenceSearchService);
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->methodName);
+    }
+
     public function __toString()
     {
-        return sprintf("Aggregate Handler - %s:%s with name `%s` for input channel `%s`", $this->referenceClassName, $this->methodName, $this->getEndpointId(), $this->getInputMessageChannelName());
+        return sprintf("Aggregate Handler - %s:%s with name `%s` for input channel `%s`", $this->aggregateClassName, $this->methodName, $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 }

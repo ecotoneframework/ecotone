@@ -3,17 +3,6 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller\ServiceActivatorWithPollerExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Channel\DumbChannelInterceptor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Configuration\FakeModule;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbGatewayBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReferenceMessageHandlerBuilderExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
@@ -23,17 +12,29 @@ use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Config\OrderedMethodInterceptor;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Chain\ChainForwarder;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Channel\DumbChannelInterceptor;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Configuration\FakeModule;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbGatewayBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -555,36 +556,37 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_pre_method_call_interceptor()
+    public function test_registering_interceptors_using_pointcuts()
     {
         $endpointName = "endpointName";
         $inputChannelName = "inputChannel";
         $messagingSystemConfiguration =
             MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
                 ->registerMessageHandler(
-                    ChainMessageHandlerBuilder::create()
-                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
-                        ->chain(
-                            ChainMessageHandlerBuilder::create()
-                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
-                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
-                                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
-                        )
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
                         ->withInputChannelName($inputChannelName)
                         ->withEndpointId($endpointName)
                 )
-                ->registerPreCallMethodInterceptor(
-                    OrderedMethodInterceptor::create(
-                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-                            ->withEndpointId($endpointName),
-                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "some",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum"),
+                    MethodInterceptor::DEFAULT_PRECEDENCE,
+                        CalculatingService::class
                     )
                 )
-                ->registerPostCallMethodInterceptor(
-                    OrderedMethodInterceptor::create(
-                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
-                            ->withEndpointId($endpointName),
-                        OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                ->registerAroundMethodInterceptor(
+                    AroundInterceptorReference::createWithDirectObject(
+                        CalculatingServiceInterceptorExample::create(2), "sum",
+                        1, CalculatingService::class
+                    )
+                )
+                ->registerAfterMethodInterceptor(
+                    MethodInterceptor::create(
+                        "some",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
+                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        CalculatingService::class
                     )
                 )
                 ->registerConsumerFactory(new EventDrivenConsumerBuilder())
@@ -600,7 +602,91 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
 
         $this->assertEquals(
-            18,
+            15,
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_registering_interceptors_by_reference_names()
+    {
+        $endpointName = "endpointName";
+        $inputChannelName = "inputChannel";
+        $calculatorWithOne = "calculatorWithOne";
+        $calculatorWithTwo = "calculatorWithTwo";
+        $calculatorWithTwoAround = "calculatorWithTwoAround";
+
+        $messagingSystemConfiguration =
+            MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+                ->registerMessageHandler(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
+                        ->withRequiredInterceptorReferenceNames([$calculatorWithTwo, $calculatorWithTwoAround])
+                        ->withInputChannelName($inputChannelName)
+                        ->withEndpointId($endpointName)
+                )
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        $calculatorWithOne,
+                        ServiceActivatorBuilder::create($calculatorWithOne, "sum"),
+                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        ""
+                    )
+                )
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        $calculatorWithTwo,
+                        ServiceActivatorBuilder::create($calculatorWithTwo, "sum"),
+                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        ""
+                    )
+                )
+                ->registerAroundMethodInterceptor(
+                    AroundInterceptorReference::create(
+                        $calculatorWithOne, "sum",
+                        1, ""
+                    )
+                )
+                ->registerAroundMethodInterceptor(
+                    AroundInterceptorReference::create(
+                        $calculatorWithTwoAround, "sum",
+                        1, ""
+                    )
+                )
+                ->registerAfterMethodInterceptor(
+                    MethodInterceptor::create(
+                        $calculatorWithOne,
+                        ServiceActivatorBuilder::create($calculatorWithOne, "multiply"),
+                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        ""
+                    )
+                )
+                ->registerAfterMethodInterceptor(
+                    MethodInterceptor::create(
+                        $calculatorWithTwo,
+                        ServiceActivatorBuilder::create($calculatorWithTwo, "multiply"),
+                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        ""
+                    )
+                )
+                ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+                ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
+                        $calculatorWithTwo => CalculatingService::create(2),
+                        $calculatorWithTwoAround => CalculatingServiceInterceptorExample::create(2)
+                ]));
+
+        $messageChannel = $messagingSystemConfiguration->getMessageChannelByName($inputChannelName);
+        $outputChannel = QueueChannel::create();
+
+        $messageChannel->send(
+            MessageBuilder::withPayload(0)
+                ->setReplyChannel($outputChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            10,
             $outputChannel->receive()->getPayload()
         );
     }
@@ -612,14 +698,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
     {
         $this->expectException(ConfigurationException::class);
 
-        $endpointName = "endpointName";
         MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
-            ->registerPostCallMethodInterceptor(
-                OrderedMethodInterceptor::create(
+            ->registerAfterMethodInterceptor(
+                MethodInterceptor::create(
+                    "some",
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
-                        ->withEndpointId($endpointName)
                         ->withInputChannelName("some"),
-                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                    \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::DEFAULT_PRECEDENCE,
+                    CalculatingService::class
                 )
             );
     }
@@ -631,14 +717,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
     {
         $this->expectException(ConfigurationException::class);
 
-        $endpointName = "endpointName";
         MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
-            ->registerPostCallMethodInterceptor(
-                OrderedMethodInterceptor::create(
+            ->registerAfterMethodInterceptor(
+                \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                    "some",
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
-                        ->withEndpointId($endpointName)
                         ->withOutputMessageChannel("some"),
-                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
+                    MethodInterceptor::DEFAULT_PRECEDENCE,
+                    CalculatingService::class
                 )
             );
     }
@@ -646,43 +732,45 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_with_weight_orders()
+    public function test_registering_interceptors_with_precedence()
     {
-        $endpointName = "endpointName";
         $inputChannelName = "inputChannel";
         $messagingSystemConfiguration =
             MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
                         ->withInputChannelName($inputChannelName)
-                        ->withEndpointId($endpointName)
                 )
-                ->registerPreCallMethodInterceptor(
-                    OrderedMethodInterceptor::create(
-                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
-                            ->withEndpointId($endpointName),
-                        3
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "some",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
+                        3,
+                        CalculatingService::class
                     )
                 )
-                ->registerPreCallMethodInterceptor(
-                    OrderedMethodInterceptor::create(
-                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-                            ->withEndpointId($endpointName),
-                        1
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "some",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum"),
+                        1,
+                        CalculatingService::class
                     )
                 )
-                ->registerPostCallMethodInterceptor(
-                    OrderedMethodInterceptor::create(
-                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")
-                            ->withEndpointId($endpointName),
-                        3
+                ->registerAfterMethodInterceptor(
+                    \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                        "some",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
+                        3,
+                        CalculatingService::class
                     )
                 )
-                ->registerPostCallMethodInterceptor(
-                    OrderedMethodInterceptor::create(
-                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum")
-                            ->withEndpointId($endpointName),
-                        1
+                ->registerAfterMethodInterceptor(
+                    \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                        "some",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum"),
+                        1,
+                        CalculatingService::class
                     )
                 )
                 ->registerConsumerFactory(new EventDrivenConsumerBuilder())
@@ -701,38 +789,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
             18,
             $outputChannel->receive()->getPayload()
         );
-    }
-
-    /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function test_throwing_exception_if_passed_pre_call_interceptor_without_endpoint_name()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
-            ->registerPreCallMethodInterceptor(
-                OrderedMethodInterceptor::create(
-                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
-                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
-                )
-            );
-    }
-
-    /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function test_throwing_exception_if_passed_post_call_interceptor_without_endpoint_name()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
-            ->registerPostCallMethodInterceptor(
-                OrderedMethodInterceptor::create(
-                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
-                    OrderedMethodInterceptor::DEFAULT_ORDER_WEIGHT
-                )
-            );
     }
 
     /**

@@ -9,18 +9,8 @@ namespace SimplyCodedSoftware\Messaging\Annotation\Interceptor;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class ServiceActivatorInterceptor extends MethodInterceptorAnnotation
+class ServiceActivatorInterceptor
 {
-    /**
-     * @var string
-     * @Required()
-     */
-    public $referenceName;
-    /**
-     * @var string
-     * @Required()
-     */
-    public $methodName;
     /**
      * @var array
      */

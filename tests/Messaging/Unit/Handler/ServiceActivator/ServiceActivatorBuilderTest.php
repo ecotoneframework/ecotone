@@ -2,19 +2,20 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\ServiceActivator;
-use SimplyCodedSoftware\Messaging\Handler\OrderedAroundInterceptorReference;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\CalculatingServiceInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\StubCallSavingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
+use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
+use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
+use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorCollectionRegistry;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceReturningMessage;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\StaticallyCalledService;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -192,19 +193,17 @@ class ServiceActivatorBuilderTest extends MessagingTest
     {
         $objectToInvoke = CalculatingServiceInterceptorExample::create(0);
 
-        $firstInterceptor = OrderedAroundInterceptorReference::create("calculator", "sum");
-        $secondInterceptor = OrderedAroundInterceptorReference::create("calculator", "multiply");
-        $thirdInterceptor = OrderedAroundInterceptorReference::create("calculator", "sum");
+        $firstInterceptor = AroundInterceptorReference::create("calculator", "sum", 1, "");
+        $secondInterceptor = AroundInterceptorReference::create("calculator", "multiply", 2, "");
+        $thirdInterceptor = AroundInterceptorReference::create("calculator", "sum", 3, "");
         $replyChannel = QueueChannel::create();
 
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, "result")
                             ->withInputChannelName("someName")
                             ->withEndpointId("someEndpoint")
-                            ->withOrderedAroundInterceptors([
-                                $secondInterceptor,
-                                $thirdInterceptor,
-                                $firstInterceptor
-                            ])
+                            ->addAroundInterceptor($secondInterceptor)
+                            ->addAroundInterceptor($thirdInterceptor)
+                            ->addAroundInterceptor($firstInterceptor)
                             ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
                                 "calculator" => CalculatingServiceInterceptorExample::create(2)
                             ]));
@@ -212,8 +211,40 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $serviceActivator->handle(MessageBuilder::withPayload(1)->setReplyChannel($replyChannel)->build());
 
         $this->assertEquals(
-            6,
+            8,
             $replyChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_resolving_correct_interface_from_direct_object()
+    {
+        $objectToInvoke = CalculatingServiceInterceptorExample::create(0);
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, "result");
+
+        $this->assertEquals(
+            [InterfaceToCall::create($objectToInvoke, "result")],
+            $serviceActivator->resolveRelatedReference(
+                InterfaceToCallRegistry::createWith(InMemoryReferenceTypeFromNameResolver::createEmpty())
+            )
+        );
+    }
+
+    public function test_resolving_correct_interface_from_reference_object()
+    {
+        $objectToInvokeOnReference = "service-a";
+        $objectToInvoke = CalculatingServiceInterceptorExample::create(0);
+
+        $serviceActivator = ServiceActivatorBuilder::create($objectToInvokeOnReference, 'result');
+
+        $this->assertEquals(
+            [InterfaceToCall::create($objectToInvoke, "result")],
+            $serviceActivator->resolveRelatedReference(
+                InterfaceToCallRegistry::createWith(
+                    InMemoryReferenceTypeFromNameResolver::createFromAssociativeArray([
+                        $objectToInvokeOnReference => $objectToInvoke
+                    ])
+                )
+            )
         );
     }
 }

@@ -2,17 +2,11 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Annotation\Splitter;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\SplitterModule;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Config\NullObserver;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Splitter\SplitterBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
 
 /**
  * Class AnnotationTransformerConfigurationTest
@@ -38,7 +32,7 @@ class SplitterModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration->prepare($configuration, []);
 
         $messageHandlerBuilder = SplitterBuilder::create(
-            SplitterExample::class,  "split"
+            SplitterExample::class, "split"
         )
             ->withEndpointId("testId")
             ->withInputChannelName("inputChannel")

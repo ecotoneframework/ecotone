@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler;
 
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+
 /**
  * Class InputOutputMessageHandlerBuilder
  * @package SimplyCodedSoftware\Messaging\Handler
@@ -23,6 +25,14 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      * @var string
      */
     private $name = "";
+    /**
+     * @var string[]
+     */
+    private $requiredInterceptorReferenceNames = [];
+    /**
+     * @var AroundInterceptorReference[]
+     */
+    protected $orderedAroundInterceptors = [];
 
     /**
      * @inheritDoc
@@ -58,6 +68,36 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     public function getInputMessageChannelName(): string
     {
         return $this->inputMessageChannelName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    {
+        $this->orderedAroundInterceptors[] = $aroundInterceptorReference;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredInterceptorReferenceNames(): iterable
+    {
+        return $this->requiredInterceptorReferenceNames;
+    }
+
+    /**
+     * @param string[] $referenceNames
+     *
+     * @return static
+     */
+    public function withRequiredInterceptorReferenceNames(iterable $referenceNames)
+    {
+        $this->requiredInterceptorReferenceNames = $referenceNames;
+
+        return $this;
     }
 
     /**

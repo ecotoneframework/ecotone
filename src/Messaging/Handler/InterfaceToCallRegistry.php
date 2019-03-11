@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Handler;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 
 /**
  * Class InterfaceToCallBuilder
@@ -19,17 +21,17 @@ class InterfaceToCallRegistry
      */
     private $interfacesToCall = [];
     /**
-     * @var AnnotationParser
+     * @var ReferenceTypeFromNameResolver
      */
-    private $annotationParser;
+    private $referenceTypeFromNameResolver;
 
     /**
      * InterfaceToCallRegistry constructor.
-     * @param AnnotationParser $annotationParser
+     * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
      */
-    private function __construct(AnnotationParser $annotationParser)
+    private function __construct(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver)
     {
-        $this->annotationParser = $annotationParser;
+        $this->referenceTypeFromNameResolver = $referenceTypeFromNameResolver;
     }
 
     /**
@@ -37,22 +39,38 @@ class InterfaceToCallRegistry
      */
     public static function createEmpty() : self
     {
-        return new self(InMemoryAnnotationRegistrationService::createEmpty());
+        return new self(InMemoryReferenceTypeFromNameResolver::createEmpty());
     }
 
     /**
-     * @param AnnotationParser $annotationParser
+     * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
      * @return InterfaceToCallRegistry
      */
-    public static function createWith(AnnotationParser $annotationParser) : self
+    public static function createWith(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver) : self
     {
-        return new self($annotationParser);
+        return new self($referenceTypeFromNameResolver);
+    }
+
+    /**
+     * @param iterable $interfacesToCall
+     * @return InterfaceToCallRegistry
+     */
+    public static function createWithInterfaces(iterable $interfacesToCall) : self
+    {
+        $self = new self(InMemoryReferenceTypeFromNameResolver::createEmpty());
+        $self->interfacesToCall = $interfacesToCall;
+
+        return $self;
     }
 
     /**
      * @param string|object $interfaceName
      * @param string $methodName
      * @return InterfaceToCall
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
      */
     public function getFor($interfaceName, string $methodName) : InterfaceToCall
     {
@@ -60,10 +78,47 @@ class InterfaceToCallRegistry
             return $this->interfacesToCall[$this->getName($interfaceName, $methodName)];
         }
 
-        $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName, $this->annotationParser);
+        $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName);
         $this->interfacesToCall[$this->getName($interfaceName, $methodName)] = $interfaceToCall;
 
         return $interfaceToCall;
+    }
+
+    /**
+     * @param string|object $interfaceName
+     * @return InterfaceToCall[]
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     */
+    public function getForAllPublicMethodOf($interfaceName) : iterable
+    {
+        $interfaces = [];
+        foreach ((new \ReflectionClass($interfaceName))->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+            if (!$method->isConstructor()) {
+                $interfaces[] = $this->getFor($interfaceName, $method->getName());
+            }
+        }
+
+        return $interfaces;
+    }
+
+    /**
+     * @param string $referenceName
+     * @param string $methodName
+     * @return InterfaceToCall
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     */
+    public function getForReferenceName(string $referenceName, string $methodName) : InterfaceToCall
+    {
+        $objectClassType = $this->referenceTypeFromNameResolver->resolve($referenceName);
+
+        return $this->getFor($objectClassType->toString(), $methodName);
     }
 
     /**

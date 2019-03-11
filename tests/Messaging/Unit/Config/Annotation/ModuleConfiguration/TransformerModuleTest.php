@@ -3,17 +3,11 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Annotation\Transformer;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Config\NullObserver;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
 
 /**
  * Class AnnotationTransformerConfigurationTest

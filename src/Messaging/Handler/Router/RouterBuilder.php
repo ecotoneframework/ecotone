@@ -2,7 +2,10 @@
 
 namespace SimplyCodedSoftware\Messaging\Handler\Router;
 
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
@@ -30,7 +33,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @var object
      */
-    private $objectToInvoke;
+    private $directObjectToInvoke;
     /**
      * @var string
      */
@@ -96,6 +99,16 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         $routerBuilder->setObjectToInvoke(PayloadTypeRouter::create($typeToChannelMapping));
 
         return $routerBuilder;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    {
+        return [$this->directObjectToInvoke
+                ? $interfaceToCallRegistry->getFor($this->directObjectToInvoke, $this->methodName)
+                : $interfaceToCallRegistry->getForReferenceName($this->objectToInvokeReference, $this->methodName)];
     }
 
     /**
@@ -221,7 +234,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
     {
-        $objectToInvoke = $this->objectToInvoke ? $this->objectToInvoke : $referenceSearchService->get($this->objectToInvokeReference);
+        $objectToInvoke = $this->directObjectToInvoke ? $this->directObjectToInvoke : $referenceSearchService->get($this->objectToInvokeReference);
 
         return Router::create(
             $channelResolver,
@@ -289,7 +302,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     {
         Assert::isObject($objectToInvoke, "Object to invoke in router must be object");
 
-        $this->objectToInvoke = $objectToInvoke;
+        $this->directObjectToInvoke = $objectToInvoke;
     }
 
     /**

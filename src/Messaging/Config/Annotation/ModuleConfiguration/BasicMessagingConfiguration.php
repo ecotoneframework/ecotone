@@ -8,7 +8,6 @@ use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\RequiredReference;
 use SimplyCodedSoftware\Messaging\Conversion\ArrayToJson\ArrayToJsonConverterBuilder;
@@ -19,7 +18,6 @@ use SimplyCodedSoftware\Messaging\Conversion\StringToUuid\StringToUuidConverterB
 use SimplyCodedSoftware\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;

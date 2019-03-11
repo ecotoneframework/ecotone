@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Annotation\Aspect;
+namespace SimplyCodedSoftware\Messaging\Annotation\Interceptor;
 
 /**
- * Class Around
- * @package SimplyCodedSoftware\Messaging\Annotation\Aspect
+ * Class Before
+ * @package SimplyCodedSoftware\Messaging\Annotation\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class Around
+class Before
 {
     /**
      * The aspect returning the lower value from precedence (or the annotation value) has the higher precedence.
@@ -19,5 +19,12 @@ class Around
      *
      * @var int
      */
-    public $precedence;
+    public $precedence = \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::DEFAULT_PRECEDENCE;
+
+    /**
+     * Advice is associated with a pointcut expression and runs at any join point matched by the pointcut (for example, the execution of a method with a certain name)
+     *
+     * @var string
+     */
+    public $pointcut = "";
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler;
 
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 
 /**
@@ -18,6 +19,14 @@ interface MessageHandlerBuilder
      * @return MessageHandler
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler;
+
+    /**
+     * It returns, internal reference objects that will be called during handling method
+     *
+     * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     * @return InterfaceToCall[]
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable;
 
     /**
      * @param string $inputChannelName

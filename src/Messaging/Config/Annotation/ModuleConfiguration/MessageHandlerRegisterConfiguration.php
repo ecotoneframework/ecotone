@@ -7,7 +7,6 @@ use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
@@ -47,7 +46,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
             $annotation = $annotationRegistration->getAnnotationForMethod();
             $messageHandlerBuilders[] = static::createMessageHandlerFrom($annotationRegistration)
                 ->withMethodParameterConverters(
-                    $parameterConverterFactory->createParameterConverters(InterfaceToCall::createWithoutCaching($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()), $annotation->parameterConverters)
+                    $parameterConverterFactory->createParameterConverters(InterfaceToCall::create($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()), $annotation->parameterConverters)
                 );
         }
 

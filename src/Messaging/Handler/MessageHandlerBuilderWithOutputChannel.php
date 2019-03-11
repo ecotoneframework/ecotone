@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler;
 
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+
 /**
  * Interface MessageHandlerBuilderWithOutputChannel
  * @package SimplyCodedSoftware\Messaging\Handler
@@ -21,4 +23,21 @@ interface MessageHandlerBuilderWithOutputChannel extends MessageHandlerBuilder
      * @return string
      */
     public function getOutputMessageChannelName() : string;
+
+    /**
+     * @param AroundInterceptorReference $aroundInterceptorReference
+     * @return self
+     */
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference);
+
+    /**
+     * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     * @return InterfaceToCall
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry) : InterfaceToCall;
+
+    /**
+     * @return string[]
+     */
+    public function getRequiredInterceptorReferenceNames() : iterable;
 }

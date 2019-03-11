@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor;
+namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor;
 
+use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 /**
@@ -10,7 +11,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocati
  * @package Test\SimplyCodedSoftware\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class CalculatingServiceInterceptorExample
+class SummingInterceptorExample
 {
     /**
      * @var int
@@ -29,30 +30,15 @@ class CalculatingServiceInterceptorExample
         return $calculatingService;
     }
 
-    public function result(int $amount) : int
-    {
-        return $amount;
-    }
-
+    /**
+     * @param MethodInvocation $methodInvocation
+     * @param int $amount
+     * @return int
+     * @Around(precedence=4)
+     */
     public function sum(MethodInvocation $methodInvocation, int $amount) : int
     {
         $result = $amount + $this->secondValueForMathOperations;
-
-        $methodInvocation->replaceArgument("amount", $result);
-        return $methodInvocation->proceed();
-    }
-
-    public function subtract(MethodInvocation $methodInvocation, int $amount) : int
-    {
-        $result = $amount - $this->secondValueForMathOperations;
-
-        $methodInvocation->replaceArgument("amount", $result);
-        return $methodInvocation->proceed();
-    }
-
-    public function multiply(MethodInvocation $methodInvocation, int $amount) : int
-    {
-        $result = $amount * $this->secondValueForMathOperations;
 
         $methodInvocation->replaceArgument("amount", $result);
         return $methodInvocation->proceed();

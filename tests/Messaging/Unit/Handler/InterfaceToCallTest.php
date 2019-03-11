@@ -34,7 +34,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "changeName"
         );
 
@@ -50,7 +50,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint_from_doc_block_guessing_namespace()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "changePassword"
         );
 
@@ -66,7 +66,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint_from_global_namespace()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "changeDetails"
         );
 
@@ -82,7 +82,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint_from_different_namespace_than_class_it_self()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "changeFavourites"
         );
 
@@ -98,7 +98,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint_from_different_namespace_using_use_statements()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "changeSingleFavourite"
         );
 
@@ -114,7 +114,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint_with_collection_transformation()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "removeFavourites"
         );
 
@@ -130,7 +130,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint_with_collection_class_name_from_use_statements()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "disableFavourites"
         );
 
@@ -146,7 +146,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint_with_use_statement_alias()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "addAdminPermission"
         );
 
@@ -162,7 +162,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint_with_collection_of_scalar_type()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "addRatings"
         );
 
@@ -178,7 +178,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_retrieving_parameter_type_hint_with_primitive_type()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "removeRating"
         );
 
@@ -194,7 +194,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_guessing_parameter_type_hint_from_scalar_and_compound_type()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "randomRating"
         );
 
@@ -210,7 +210,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_guessing_parameter_first_type_hint_from_method_annotation()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "addPhones"
         );
 
@@ -226,7 +226,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_guessing_parameter_type_hint_from_scalar_and_class_name()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "addEmail"
         );
 
@@ -243,7 +243,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_guessing_parameter_from_interface_inherit_doc()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             OnlineShop::class, "buy"
         );
 
@@ -260,7 +260,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_guessing_parameter_from_abstract_class_inherit_doc()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             OnlineShop::class, "findGames"
         );
 
@@ -276,7 +276,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_guessing_return_type_based_on_inherit_doc_annotation()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             OnlineShop::class, "findGames"
         );
 
@@ -290,7 +290,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_guessing_unknown_if_no_type_hint_information_available()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "changeSurname"
         );
 
@@ -307,7 +307,7 @@ class InterfaceToCallTest extends TestCase
      */
     public function test_choosing_unknown_type_if_mixed_type_hint_in_doc_block()
     {
-        $interfaceToCall = InterfaceToCall::createWithoutCaching(
+        $interfaceToCall = InterfaceToCall::create(
             User::class, "changeAddress"
         );
 
@@ -325,17 +325,17 @@ class InterfaceToCallTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::create("\\" . User::class),
-            (InterfaceToCall::createWithoutCaching(User::class, "getSelf"))->getReturnType()
+            (InterfaceToCall::create(User::class, "getSelf"))->getReturnType()
         );
 
         $this->assertEquals(
             TypeDescriptor::create("\\" . User::class),
-            (InterfaceToCall::createWithoutCaching(User::class, "getStatic"))->getReturnType()
+            (InterfaceToCall::create(User::class, "getStatic"))->getReturnType()
         );
 
         $this->assertEquals(
             TypeDescriptor::create("\\" . User::class),
-            (InterfaceToCall::createWithoutCaching(User::class, "getSelfWithoutDocBlock"))->getReturnType()
+            (InterfaceToCall::create(User::class, "getSelfWithoutDocBlock"))->getReturnType()
         );
     }
 
@@ -347,7 +347,7 @@ class InterfaceToCallTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::create("\\" . User::class),
-            (InterfaceToCall::createWithoutCaching(User::class, "returnFullUser"))->getReturnType()
+            (InterfaceToCall::create(User::class, "returnFullUser"))->getReturnType()
         );
     }
 
@@ -359,7 +359,7 @@ class InterfaceToCallTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::create("\\" . \stdClass::class),
-            (InterfaceToCall::createWithoutCaching(User::class, "returnFromGlobalNamespace"))->getReturnType()
+            (InterfaceToCall::create(User::class, "returnFromGlobalNamespace"))->getReturnType()
         );
     }
 
@@ -371,7 +371,7 @@ class InterfaceToCallTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::create("\\" . SuperAdmin::class),
-            (InterfaceToCall::createWithoutCaching(SuperAdmin::class, "getSuperAdmin"))->getReturnType()
+            (InterfaceToCall::create(SuperAdmin::class, "getSuperAdmin"))->getReturnType()
         );
     }
 
@@ -383,7 +383,7 @@ class InterfaceToCallTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::create("\\" . Admin::class),
-            (InterfaceToCall::createWithoutCaching(SuperAdmin::class, "getAdmin"))->getReturnType()
+            (InterfaceToCall::create(SuperAdmin::class, "getAdmin"))->getReturnType()
         );
     }
 
@@ -395,13 +395,13 @@ class InterfaceToCallTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::create("\\" . AbstractSuperAdmin::class),
-            (InterfaceToCall::createWithoutCaching(SuperAdmin::class, "getInformation"))->getReturnType()
+            (InterfaceToCall::create(SuperAdmin::class, "getInformation"))->getReturnType()
         );
     }
 
     public function test_retrieving_annotations()
     {
-        $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, "convert", InMemoryAnnotationRegistrationService::createFrom([ExampleConverterService::class]));
+        $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, "convert");
 
         $this->assertEquals(
             [new Converter()],
@@ -415,39 +415,39 @@ class InterfaceToCallTest extends TestCase
 
     public function test_retrieving_specific_annotation()
     {
-        $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, "convert", InMemoryAnnotationRegistrationService::createFrom([ExampleConverterService::class]));
+        $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, "convert");
 
-        $this->assertTrue($interfaceToCall->hasMethodAnnotation(Converter::class));
-        $this->assertFalse($interfaceToCall->hasMethodAnnotation(MessageEndpoint::class));
+        $this->assertTrue($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(Converter::class)));
+        $this->assertFalse($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(MessageEndpoint::class)));
 
-        $this->assertTrue($interfaceToCall->hasClassAnnotation(MessageEndpoint::class));
-        $this->assertFalse($interfaceToCall->hasClassAnnotation(Converter::class));
+        $this->assertTrue($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(MessageEndpoint::class)));
+        $this->assertFalse($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(Converter::class)));
 
         $this->assertEquals(
             new MessageEndpoint(),
-            $interfaceToCall->getClassAnnotation(MessageEndpoint::class)
+            $interfaceToCall->getClassAnnotation(TypeDescriptor::create(MessageEndpoint::class))
         );
         $this->assertEquals(
             new Converter(),
-            $interfaceToCall->getMethodAnnotation(Converter::class)
+            $interfaceToCall->getMethodAnnotation(TypeDescriptor::create(Converter::class))
         );
     }
 
     public function test_throwing_exception_when_retrieving_not_existing_method_annotation()
     {
-        $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, "convert", InMemoryAnnotationRegistrationService::createFrom([ExampleConverterService::class]));
+        $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, "convert");
 
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall->getMethodAnnotation(MessageEndpoint::class);
+        $interfaceToCall->getMethodAnnotation(TypeDescriptor::create(MessageEndpoint::class));
     }
 
     public function test_throwing_exception_when_retrieving_not_existing_class_annotation()
     {
-        $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, "convert", InMemoryAnnotationRegistrationService::createFrom([ExampleConverterService::class]));
+        $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, "convert");
 
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall->getClassAnnotation(Converter::class);
+        $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Converter::class));
     }
 }

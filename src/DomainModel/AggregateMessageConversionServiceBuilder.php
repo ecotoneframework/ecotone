@@ -2,9 +2,12 @@
 
 namespace SimplyCodedSoftware\DomainModel;
 
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -54,6 +57,22 @@ class AggregateMessageConversionServiceBuilder extends InputOutputMessageHandler
         return ServiceActivatorBuilder::createWithDirectReference(new AggregateMessageConversionService($conversionService, $this->messageClassNameToConvertTo), "convert")
                     ->withOutputMessageChannel($this->getOutputMessageChannelName())
                     ->build($channelResolver, $referenceSearchService);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    {
+        // TODO: Implement resolveRelatedReference() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        // TODO: Implement getInterceptedInterface() method.
     }
 
     /**

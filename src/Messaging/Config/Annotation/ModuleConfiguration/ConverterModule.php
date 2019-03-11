@@ -7,7 +7,6 @@ use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Conversion\ConverterBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\ReferenceServiceConverterBuilder;
@@ -48,7 +47,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
         $converterBuilders = [];
 
         foreach ($registrations as $registration) {
-            $interfaceToCall = InterfaceToCall::createWithoutCaching($registration->getClassName(), $registration->getMethodName());
+            $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
             $converterBuilders[] = ReferenceServiceConverterBuilder::create(
                   $registration->getReferenceName(),
                   $registration->getMethodName(),

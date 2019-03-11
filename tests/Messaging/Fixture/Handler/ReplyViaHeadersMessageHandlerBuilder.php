@@ -2,8 +2,11 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageHandler;
@@ -60,6 +63,23 @@ class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuil
         $this->canAdd = $canAdd;
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $interfaceToCallRegistry->getFor(ReplyViaHeadersMessageHandler::class, "handle");
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    {
+        return [];
     }
 
     /**

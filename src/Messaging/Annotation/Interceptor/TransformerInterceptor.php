@@ -1,18 +1,17 @@
 <?php
-declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Annotation\Interceptor;
 
 /**
- * Class ClassInterceptor
+ * Class TransformerInterceptor
  * @package SimplyCodedSoftware\Messaging\Annotation\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class ClassInterceptors
+class TransformerInterceptor
 {
     /**
      * @var array
      */
-    public $classMethodsInterceptors = [];
+    public $parameterConverters = [];
 }

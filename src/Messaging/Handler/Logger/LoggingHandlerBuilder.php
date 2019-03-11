@@ -2,9 +2,12 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Logger;
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\MessageHandler;
@@ -38,6 +41,22 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder
                 ->withPassThroughMessageOnVoidInterface(true)
                 ->withOutputMessageChannel($this->outputMessageChannelName)
                 ->build($channelResolver, $referenceSearchService);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    {
+        return [$interfaceToCallRegistry->getFor(LoggingHandler::class, "handle")];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $interfaceToCallRegistry->getFor(LoggingHandler::class, "handle");
     }
 
     /**

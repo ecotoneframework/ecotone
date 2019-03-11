@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Splitter;
 
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
@@ -68,6 +69,18 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     public static function create(string $referenceName, string $methodName): self
     {
         return new self($referenceName, $methodName);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    {
+        return [
+            $this->directObject
+                ? $interfaceToCallRegistry->getFor($this->directObject, $this->methodName)
+                : $interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName)
+        ];
     }
 
     /**
@@ -138,6 +151,14 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * @inheritDoc
      */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $this->referenceName ? $interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName) : $interfaceToCallRegistry->getFor($this->directObject, $this->methodName);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         $objectToInvokeOn = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
@@ -150,11 +171,12 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
         return new Splitter(
             RequestReplyProducer::createRequestAndSplit(
                 $this->outputMessageChannelName,
-                MethodInvoker::createWith(
+                MethodInvoker::createWithInterceptors(
                     $objectToInvokeOn,
                     $this->methodName,
                     $this->methodParameterConverterBuilders,
-                    $referenceSearchService
+                    $referenceSearchService,
+                    $this->orderedAroundInterceptors
                 )
                 ,
                 $channelResolver

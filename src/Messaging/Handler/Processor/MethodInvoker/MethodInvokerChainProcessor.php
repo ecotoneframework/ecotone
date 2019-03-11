@@ -109,4 +109,12 @@ class MethodInvokerChainProcessor implements MethodInvocation
     {
         return $this->interceptedInterfaceToCall->getMethodName();
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getInterceptedInterface() : InterfaceToCall
+    {
+        return $this->interceptedInterfaceToCall;
+    }
 }

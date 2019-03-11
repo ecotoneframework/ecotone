@@ -2,6 +2,8 @@
 
 namespace SimplyCodedSoftware\DomainModel;
 
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+
 /**
  * Interface CQRS
  * @package SimplyCodedSoftware\DomainModel
@@ -17,7 +19,7 @@ interface AggregateMessage
     const EXPECTED_VERSION = "domain.aggregate.expected_version";
     const CALLING_MESSAGE = "domain.aggregate.calling_message";
 
-    const BEFORE_CONVERTER_INTERCEPTOR = -1;
+    const BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE = MethodInterceptor::DEFAULT_PRECEDENCE + 10;
     const AGGREGATE_SEND_MESSAGE_CHANNEL = "domain.aggregate.send_message";
     const AGGREGATE_MESSAGE_CHANNEL_NAME_TO_SEND = "domain.aggregate.send_message.channel_name";
 }

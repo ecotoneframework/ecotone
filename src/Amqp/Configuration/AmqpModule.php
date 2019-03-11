@@ -5,9 +5,7 @@ namespace SimplyCodedSoftware\Amqp\Configuration;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\RequiredReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**

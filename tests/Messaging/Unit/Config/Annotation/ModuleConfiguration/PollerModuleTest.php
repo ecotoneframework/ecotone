@@ -5,8 +5,6 @@ namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfig
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller\ServiceActivatorWithPollerExample;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Config\NullObserver;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 
 /**

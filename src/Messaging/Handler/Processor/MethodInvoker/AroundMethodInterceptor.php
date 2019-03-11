@@ -8,6 +8,7 @@ use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Interface MethodInterceptor
@@ -23,7 +24,7 @@ class AroundMethodInterceptor
     /**
      * @var InterfaceToCall
      */
-    private $interfaceToCall;
+    private $interceptorInterfaceToCall;
 
     /**
      * MethodInterceptor constructor.
@@ -34,8 +35,13 @@ class AroundMethodInterceptor
     private function __construct($referenceToCall, InterfaceToCall $interfaceToCall)
     {
         Assert::isObject($referenceToCall, "Method Interceptor should point to instance not class name");
+
+        if ($interfaceToCall->hasReturnValue() && !$this->hasMethodInvocationParameter($interfaceToCall)) {
+            throw InvalidArgumentException::create("Trying to register {$interfaceToCall} as Around Advice which can return value, but doesn't control invocation using " . MethodInvocation::class . ". Have you wanted to register Before/After Advice or forgot to type hint MethodInvocation?");
+        }
+
         $this->referenceToCall = $referenceToCall;
-        $this->interfaceToCall = $interfaceToCall;
+        $this->interceptorInterfaceToCall = $interfaceToCall;
     }
 
     /**
@@ -49,6 +55,17 @@ class AroundMethodInterceptor
     {
         $interfaceToCall = $interfaceToCallRegistry->getFor($referenceToCall, $methodName);
 
+        return new self($referenceToCall, $interfaceToCall);
+    }
+
+    /**
+     * @param $referenceToCall
+     * @param InterfaceToCall $interfaceToCall
+     * @return AroundMethodInterceptor
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createWithInterface($referenceToCall, InterfaceToCall $interfaceToCall) : self
+    {
         return new self($referenceToCall, $interfaceToCall);
     }
 
@@ -70,38 +87,46 @@ class AroundMethodInterceptor
         $interceptedInstanceType = TypeDescriptor::createFromVariable($methodInvocation->getInterceptedInstance());
         $messageType = TypeDescriptor::create(Message::class);
 
-        foreach ($this->interfaceToCall->getInterfaceParameters() as $parameter) {
+        foreach ($this->interceptorInterfaceToCall->getInterfaceParameters() as $parameter) {
             $resolvedArgument = null;
-            if ($parameter->hasType($methodInvocationType)) {
+
+            foreach ($methodCall->getMethodArguments() as $methodArgument) {
+                if ($methodArgument->hasSameTypeAs($parameter)) {
+                    $resolvedArgument = $methodArgument->value();
+                }
+            }
+
+            if (!$resolvedArgument && $parameter->hasType($methodInvocationType)) {
                 $hasMethodInvocation = true;
                 $resolvedArgument = $methodInvocation;
             }
 
+            if (!$resolvedArgument && $parameter->hasType($interceptedInstanceType)) {
+                $resolvedArgument = $methodInvocation->getInterceptedInstance();
+            }
+
+            if (!$resolvedArgument && $parameter->hasType($messageType)) {
+                $resolvedArgument = $requestMessage;
+            }
+
             if (!$resolvedArgument) {
-                foreach ($methodCall->getMethodArguments() as $methodArgument) {
-                    if ($methodArgument->hasSameTypeAs($parameter)) {
-                        $resolvedArgument = $methodArgument->value();
-                    }
+                if ($methodInvocation->getInterceptedInterface()->hasMethodAnnotation($parameter->getTypeDescriptor())) {
+                    $resolvedArgument = $methodInvocation->getInterceptedInterface()->getMethodAnnotation($parameter->getTypeDescriptor());
                 }
-
-                if (!$resolvedArgument && $parameter->hasType($interceptedInstanceType)) {
-                    $resolvedArgument = $methodInvocation->getInterceptedInstance();
-                }
-
-                if (!$resolvedArgument && $parameter->hasType($messageType)) {
-                    $resolvedArgument = $requestMessage;
+                if ($methodInvocation->getInterceptedInterface()->hasClassAnnotation($parameter->getTypeDescriptor())) {
+                    $resolvedArgument = $methodInvocation->getInterceptedInterface()->getClassAnnotation($parameter->getTypeDescriptor());
                 }
             }
 
             if (!$resolvedArgument && !$parameter->doesAllowNulls()) {
-                throw MethodInvocationException::create("{$this->interfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`");
+                throw MethodInvocationException::create("{$this->interceptorInterfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`. Maybe your docblock type hint is not correct?");
             }
 
             $argumentsToCallInterceptor[] = $resolvedArgument;
         }
 
         $returnValue = call_user_func_array(
-            [$this->referenceToCall, $this->interfaceToCall->getMethodName()],
+            [$this->referenceToCall, $this->interceptorInterfaceToCall->getMethodName()],
             $argumentsToCallInterceptor
         );
 
@@ -110,5 +135,23 @@ class AroundMethodInterceptor
         }
 
         return $returnValue;
+    }
+
+    /**
+     * @param InterfaceToCall $interfaceToCall
+     * @return bool
+     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function hasMethodInvocationParameter(InterfaceToCall $interfaceToCall): bool
+    {
+        $methodInvocation = TypeDescriptor::create(MethodInvocation::class);
+        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+            if ($interfaceParameter->hasType($methodInvocation)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

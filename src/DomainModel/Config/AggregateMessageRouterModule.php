@@ -1,17 +1,14 @@
 <?php
 
 namespace SimplyCodedSoftware\DomainModel\Config;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\OrderedMethodInterceptor;
-use SimplyCodedSoftware\Messaging\Config\RequiredReference;
+
 use SimplyCodedSoftware\DomainModel\AggregateMessage;
-use SimplyCodedSoftware\DomainModel\AggregateMessageConversionServiceBuilder;
 use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
 use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
 use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
+use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
+use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
 

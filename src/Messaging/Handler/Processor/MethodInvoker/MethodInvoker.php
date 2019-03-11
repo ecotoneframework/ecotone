@@ -152,6 +152,8 @@ final class MethodInvoker implements MessageProcessor
      * @param ReferenceSearchService $referenceSearchService
      * @return MethodInvoker
      * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
@@ -162,7 +164,7 @@ final class MethodInvoker implements MessageProcessor
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService);
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, []);
     }
 
     /**
@@ -170,20 +172,22 @@ final class MethodInvoker implements MessageProcessor
      * @param string $objectMethodName
      * @param ParameterConverterBuilder[] $methodParameters
      * @param ReferenceSearchService $referenceSearchService
-     * @param AroundMethodInterceptor[] $aroundMethodInterceptors
+     * @param AroundInterceptorReference[] $orderedAroundMethodInterceptorReferences
      * @return MethodInvoker
      * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWithInterceptors($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $aroundMethodInterceptors): self
+    public static function createWithInterceptors($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $orderedAroundMethodInterceptorReferences): self
     {
         $messageConverters = [];
         foreach ($methodParameters as $methodParameter) {
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, $aroundMethodInterceptors);
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $orderedAroundMethodInterceptorReferences));
     }
 
 
@@ -192,20 +196,22 @@ final class MethodInvoker implements MessageProcessor
      * @param string $objectMethodName
      * @param ParameterConverter[] $methodParameters
      * @param ReferenceSearchService $referenceSearchService
-     * @param AroundMethodInterceptor[] $aroundMethodInterceptors
+     * @param AroundMethodInterceptor[] $interceptorsReferences
      * @return MethodInvoker
      * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWithBuiltParameterConverters($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $aroundMethodInterceptors = []): self
+    public static function createWithBuiltParameterConverters($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $interceptorsReferences = []): self
     {
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
         $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
         /** @var ConversionService $conversionService */
         $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
 
-        return new self($objectToInvokeOn, $objectMethodName, $methodParameters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService, $aroundMethodInterceptors);
+        return new self($objectToInvokeOn, $objectMethodName, $methodParameters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService, $interceptorsReferences);
     }
 
     /**

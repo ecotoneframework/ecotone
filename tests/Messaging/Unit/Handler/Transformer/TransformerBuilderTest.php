@@ -3,28 +3,28 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\Handler\OrderedAroundInterceptorReference;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\CalculatingServiceInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithReturnValue;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithReturnValue;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -364,28 +364,21 @@ class TransformerBuilderTest extends MessagingTest
     public function test_creating_with_interceptors()
     {
         $objectToInvoke = CalculatingServiceInterceptorExample::create(0);
-
-        $firstInterceptor = OrderedAroundInterceptorReference::create("calculator", "sum");
-        $secondInterceptor = OrderedAroundInterceptorReference::create("calculator", "multiply");
-        $thirdInterceptor = OrderedAroundInterceptorReference::create("calculator", "sum");
         $replyChannel = QueueChannel::create();
 
         $serviceActivator = TransformerBuilder::createWithReferenceObject($objectToInvoke, "result")
             ->withInputChannelName("someName")
             ->withEndpointId("someEndpoint")
-            ->withOrderedAroundInterceptors([
-                $secondInterceptor,
-                $thirdInterceptor,
-                $firstInterceptor
-            ])
+            ->addAroundInterceptor(AroundInterceptorReference::create(CalculatingServiceInterceptorExample::class, "sum", 2, ""))
+            ->addAroundInterceptor(AroundInterceptorReference::create(CalculatingServiceInterceptorExample::class, "multiply", 1, ""))
             ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
-                "calculator" => CalculatingServiceInterceptorExample::create(2)
+                CalculatingServiceInterceptorExample::class => CalculatingServiceInterceptorExample::create(4)
             ]));
 
-        $serviceActivator->handle(MessageBuilder::withPayload(1)->setReplyChannel($replyChannel)->build());
+        $serviceActivator->handle(MessageBuilder::withPayload(2)->setReplyChannel($replyChannel)->build());
 
         $this->assertEquals(
-            6,
+            12,
             $replyChannel->receive()->getPayload()
         );
     }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 

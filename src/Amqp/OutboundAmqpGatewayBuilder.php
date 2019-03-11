@@ -5,7 +5,10 @@ namespace SimplyCodedSoftware\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
 use Ramsey\Uuid\Uuid;
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageConverter\DefaultHeaderMapper;
@@ -131,6 +134,14 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
             $this->defaultPersistentDelivery,
             AmqpMessageConverter::createWithMapper($amqpConnectionFactory, $this->headerMapper, AmqpAcknowledgementCallback::NONE)
         );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    {
+        return [$interfaceToCallRegistry->getFor(OutboundAmqpGateway::class, "handle")];
     }
 
     /**

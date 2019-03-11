@@ -3,17 +3,16 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Config;
 
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\ConverterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 
@@ -49,16 +48,22 @@ interface Configuration
     public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder) : Configuration;
 
     /**
-     * @param OrderedMethodInterceptor $methodInterceptor
+     * @param MethodInterceptor $methodInterceptor
      * @return Configuration
      */
-    public function registerPreCallMethodInterceptor(OrderedMethodInterceptor $methodInterceptor): Configuration;
+    public function registerBeforeMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
 
     /**
-     * @param OrderedMethodInterceptor $methodInterceptor
+     * @param \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference $aroundInterceptorReference
      * @return Configuration
      */
-    public function registerPostCallMethodInterceptor(OrderedMethodInterceptor $methodInterceptor): Configuration;
+    public function registerAroundMethodInterceptor(AroundInterceptorReference $aroundInterceptorReference) : Configuration;
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return Configuration
+     */
+    public function registerAfterMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
 
     /**
      * @param ChannelAdapterConsumerBuilder $consumerBuilder

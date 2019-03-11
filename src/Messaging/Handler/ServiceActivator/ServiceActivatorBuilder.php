@@ -3,15 +3,14 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
 
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterceptableHandler;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\OrderedAroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
@@ -55,10 +54,6 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      * @var bool
      */
     private $shouldPassThroughMessage = false;
-    /**
-     * @var OrderedAroundInterceptorReference[]
-     */
-    private $orderedAroundInterceptorReferences = [];
 
     /**
      * ServiceActivatorBuilder constructor.
@@ -155,21 +150,25 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     }
 
     /**
-     * @param OrderedAroundInterceptorReference[] $orderedAroundInterceptorReferences
-     * @return ServiceActivatorBuilder
+     * @inheritDoc
      */
-    public function withOrderedAroundInterceptors(iterable $orderedAroundInterceptorReferences) : self
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        usort($orderedAroundInterceptorReferences, function(OrderedAroundInterceptorReference $element, OrderedAroundInterceptorReference $elementToCompare) {
-            if ($element->getPrecedence() == $elementToCompare->getPrecedence()) {
-                return 0;
-            }
+        return $this->objectToInvokeReferenceName
+            ?   $interfaceToCallRegistry->getForReferenceName($this->objectToInvokeReferenceName, $this->methodName)
+            :   $interfaceToCallRegistry->getFor($this->directObjectReference, $this->methodName);
+    }
 
-            return $element->getPrecedence() > $elementToCompare->getPrecedence() ? 1 : -1;
-        });
-        $this->orderedAroundInterceptorReferences = $orderedAroundInterceptorReferences;
-
-        return $this;
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    {
+        return [
+            $this->directObjectReference
+                ? $interfaceToCallRegistry->getFor($this->directObjectReference, $this->methodName)
+                : $interfaceToCallRegistry->getForReferenceName($this->objectToInvokeReferenceName, $this->methodName)
+        ];
     }
 
     /**
@@ -191,11 +190,6 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         }
         $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($objectToInvoke, $this->methodName);
 
-        $interceptors = [];
-        foreach ($this->orderedAroundInterceptorReferences as $orderedAroundInterceptorReference) {
-            $interceptors[] = $orderedAroundInterceptorReference->buildAroundInterceptor($referenceSearchService);
-        }
-
         $methodToInvoke = WrapWithMessageBuildProcessor::createWith(
             $objectToInvoke,
             $this->methodName,
@@ -204,7 +198,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
                 $this->methodName,
                 $this->methodParameterConverterBuilders,
                 $referenceSearchService,
-                $interceptors
+                $this->orderedAroundInterceptors
             ),
             $referenceSearchService
         );

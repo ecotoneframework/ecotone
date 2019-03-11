@@ -2,8 +2,11 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
 
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
@@ -85,6 +88,14 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
     /**
      * @inheritDoc
      */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getRequiredReferenceNames(): array
     {
         return $this->requiredReferenceNames;
@@ -98,6 +109,14 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
         $this->requiredReferenceNames[] = $referenceName;
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $interfaceToCallRegistry->getFor(MessageHandler::class, "handle");
     }
 
     /**

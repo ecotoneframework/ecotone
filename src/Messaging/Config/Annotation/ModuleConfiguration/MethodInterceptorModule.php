@@ -3,32 +3,37 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\InputOutputEndpointAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\ClassInterceptors;
+use SimplyCodedSoftware\Messaging\Annotation\Interceptor\After;
+use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
+use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Before;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\EnricherInterceptor;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\EnrichHeader;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\EnrichPayload;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\GatewayInterceptor;
+use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptorAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\Messaging\Annotation\Interceptor\TransformerInterceptor;
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
+use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ConfigurableReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\OrderedMethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichPayloadWithValueBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\EnricherBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayInterceptorBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 
 /**
@@ -41,23 +46,29 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
 {
     public const MODULE_NAME = "methodInterceptorModule";
     /**
-     * @var array|OrderedMethodInterceptor[]
+     * @var array|MethodInterceptor[]
      */
     private $postCallInterceptors;
     /**
-     * @var array|OrderedMethodInterceptor[]
+     * @var array|MethodInterceptor[]
      */
     private $preCallInterceptors;
+    /**
+     * @var array|AroundInterceptorReference[]
+     */
+    private $aroundInterceptors;
 
     /**
      * MethodInterceptorModule constructor.
-     * @param OrderedMethodInterceptor[] $preCallInterceptors
-     * @param OrderedMethodInterceptor[] $postCallInterceptors
+     * @param MethodInterceptor[] $preCallInterceptors
+     * @param AroundInterceptorReference[] $aroundInterceptors
+     * @param MethodInterceptor[] $postCallInterceptors
      */
-    private function __construct(array $preCallInterceptors, array $postCallInterceptors)
+    private function __construct(array $preCallInterceptors, array $aroundInterceptors, array $postCallInterceptors)
     {
         $this->preCallInterceptors = $preCallInterceptors;
         $this->postCallInterceptors = $postCallInterceptors;
+        $this->aroundInterceptors = $aroundInterceptors;
     }
 
     /**
@@ -66,133 +77,95 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     public static function create(AnnotationRegistrationService $annotationRegistrationService): MethodInterceptorModule
     {
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
-        $multipleClassInterceptors = $annotationRegistrationService->getAllClassesWithAnnotation(ClassInterceptors::class);
-        $multipleMethodsInterceptors = $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, MethodInterceptors::class);
-        $endpoints = $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, InputOutputEndpointAnnotation::class);
+        /** @var AnnotationRegistration[] $methodsInterceptors */
+        $methodsInterceptors = array_merge(
+            $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, Before::class),
+            $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, Around::class),
+            $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, After::class)
+        );
+
+        $beforeAnnotation = TypeDescriptor::create(Before::class);
+        $aroundAnnotation = TypeDescriptor::create(Around::class);
+        $afterAnnotation = TypeDescriptor::create(After::class);
 
         $preCallInterceptors = [];
+        $aroundInterceptors = [];
         $postCallInterceptors = [];
-        foreach ($endpoints as $endpoint) {
-            if (in_array($endpoint->getClassName(), $multipleClassInterceptors)) {
-                /** @var EndpointAnnotation $endpointAnnotation */
-                $endpointAnnotation = $endpoint->getAnnotationForMethod();
-                /** @var ClassInterceptors $classInterceptors */
-                $classInterceptors = $annotationRegistrationService->getAnnotationForClass($endpoint->getClassName(), ClassInterceptors::class);
+        foreach ($methodsInterceptors as $methodInterceptor) {
+            $interfaceToCall = InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName());
 
-                /** @var MethodInterceptors $methodInterceptors */
-                foreach ($classInterceptors->classMethodsInterceptors as $methodInterceptors) {
-                    if (in_array($endpoint->getMethodName(), $methodInterceptors->excludedMethods)) {
-                        continue;
-                    }
+            if ($interfaceToCall->hasMethodAnnotation($aroundAnnotation)) {
+                /** @var Around $aroundInterceptor */
+                $aroundInterceptor = $interfaceToCall->getMethodAnnotation($aroundAnnotation);
+                $aroundInterceptors[] = AroundInterceptorReference::create(
+                    $methodInterceptor->getReferenceName(),
+                    $methodInterceptor->getMethodName(),
+                    $aroundInterceptor->precedence,
+                    $aroundInterceptor->pointcut
+                );
+            }
 
-                    $preCallInterceptors = array_merge($preCallInterceptors, self::createInterceptorList($endpointAnnotation->endpointId, true, $methodInterceptors, $parameterConverterFactory));
-                    $postCallInterceptors = array_merge($postCallInterceptors, self::createInterceptorList($endpointAnnotation->endpointId, false, $methodInterceptors, $parameterConverterFactory));
-                }
+            if ($interfaceToCall->hasMethodAnnotation($beforeAnnotation)) {
+                /** @var Before $beforeInterceptor */
+                $beforeInterceptor = $interfaceToCall->getMethodAnnotation($beforeAnnotation);
+                $preCallInterceptors[] = \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                    $methodInterceptor->getReferenceName(),
+                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
+                    $beforeInterceptor->precedence,
+                    $beforeInterceptor->pointcut
+                );
+            }
+            if ($interfaceToCall->hasMethodAnnotation($afterAnnotation)) {
+                /** @var After $afterInterceptor */
+                $afterInterceptor = $interfaceToCall->getMethodAnnotation($afterAnnotation);
+                $postCallInterceptors[] = \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                    $methodInterceptor->getReferenceName(),
+                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
+                    $afterInterceptor->precedence,
+                    $afterInterceptor->pointcut
+                );
             }
         }
 
-        foreach ($multipleMethodsInterceptors as $methodInterceptorsRegistration) {
-            $relatedEndpointIds = [];
-            foreach ($endpoints as $endpoint) {
-                if ($endpoint->getClassName() === $methodInterceptorsRegistration->getClassName()) {
-                    /** @var EndpointAnnotation $endpointAnnotation */
-                    $endpointAnnotation = $endpoint->getAnnotationForMethod();
-
-                    $relatedEndpointIds[] = $endpointAnnotation->endpointId;
-                    break;
-                }
-            }
-
-            if (empty($relatedEndpointIds)) {
-                throw ConfigurationException::create("No endpointId configuration defined for {$methodInterceptorsRegistration->getClassName()}:{$methodInterceptorsRegistration->getMethodName()}. If method interceptors are used it must be defined");
-            }
-
-            foreach ($relatedEndpointIds as $relatedEndpointId) {
-                $preCallInterceptors = array_merge($preCallInterceptors, self::createInterceptorList($relatedEndpointId, true, $methodInterceptorsRegistration->getAnnotationForMethod(), $parameterConverterFactory));
-                $postCallInterceptors = array_merge($postCallInterceptors, self::createInterceptorList($relatedEndpointId, false, $methodInterceptorsRegistration->getAnnotationForMethod(), $parameterConverterFactory));
-            }
-        }
-
-        return new self($preCallInterceptors, $postCallInterceptors);
+        return new self($preCallInterceptors, $aroundInterceptors, $postCallInterceptors);
     }
 
     /**
-     * @param string $endpointId
-     * @param bool $forPreCall
-     * @param MethodInterceptors $methodInterceptors
+     * @param AnnotationRegistration $methodInterceptor
      * @param ParameterConverterAnnotationFactory $parameterConverterFactory
-     * @return array|MessageHandlerBuilderWithOutputChannel[]
+     * @param InterfaceToCall $interfaceToCall
+     * @return MessageHandlerBuilderWithOutputChannel
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
      */
-    private static function createInterceptorList(string $endpointId, bool $forPreCall, MethodInterceptors $methodInterceptors, ParameterConverterAnnotationFactory $parameterConverterFactory): array
+    private static function createMessageHandler(AnnotationRegistration $methodInterceptor, ParameterConverterAnnotationFactory $parameterConverterFactory, InterfaceToCall $interfaceToCall): MessageHandlerBuilderWithOutputChannel
     {
-        Assert::isTrue($methodInterceptors instanceof MethodInterceptors, "Annotation must be MethodInterceptor");
+        $serviceActivatorInterceptorAnnotation = TypeDescriptor::create(ServiceActivatorInterceptor::class);
+        $transformerInterceptorAnnotation = TypeDescriptor::create(TransformerInterceptor::class);
 
-        $interceptors = [];
-        $interceptorsToConvert = $forPreCall ? $methodInterceptors->preCallInterceptors : $methodInterceptors->postCallInterceptors;
-        /** @var MethodInterceptorAnnotation $interceptor */
-        foreach ($interceptorsToConvert as $interceptor) {
-            if ($interceptor instanceof ServiceActivatorInterceptor) {
-                $interceptors[] =
-                    OrderedMethodInterceptor::create(
-                        ServiceActivatorBuilder::create($interceptor->referenceName, $interceptor->methodName)
-                            ->withEndpointId($endpointId)
-                            ->withMethodParameterConverters(
-                                $parameterConverterFactory->createParameterConverters(
-                                    null, $interceptor->parameterConverters
-                                )
-                            ),
-                        $interceptor->weightOrder
-                    );
-            } else if ($interceptor instanceof EnricherInterceptor) {
-                $propertyEditors = [];
-                foreach ($interceptor->editors as $editor) {
-                    if ($editor instanceof EnrichHeader) {
-                        if ($editor->expression) {
-                            $propertyEditors[] = EnrichHeaderWithExpressionBuilder::createWith($editor->propertyPath, $editor->expression)
-                                ->withNullResultExpression($editor->nullResultExpression);
-                        } else {
-                            $propertyEditors[] = EnrichHeaderWithValueBuilder::create($editor->propertyPath, $editor->value);
-                        }
-                    } else if ($editor instanceof EnrichPayload) {
-                        if ($editor->expression) {
-                            if ($editor->mappingExpression) {
-                                $propertyEditors[] = EnrichPayloadWithExpressionBuilder::createWithMapping($editor->propertyPath, $editor->expression, $editor->mappingExpression)
-                                    ->withNullResultExpression($editor->nullResultExpression);
-                            } else if ($editor->expression) {
-                                $propertyEditors[] = EnrichPayloadWithExpressionBuilder::createWith($editor->propertyPath, $editor->expression)
-                                    ->withNullResultExpression($editor->nullResultExpression);
-                            }
-                        } else if ($editor->value) {
-                            $propertyEditors[] = EnrichPayloadWithValueBuilder::createWith($editor->propertyPath, $editor->value);
-                        }
-                    } else {
-                        $className = get_class($editor);
-                        throw ConfigurationException::create("Registered not known property editor {$className} for EnricherInterceptor");
-                    }
-                }
+        if ($interfaceToCall->hasMethodAnnotation($serviceActivatorInterceptorAnnotation)) {
+            /** @var ServiceActivatorInterceptor $interceptorAnnotation */
+            $interceptorAnnotation = $interfaceToCall->getMethodAnnotation($serviceActivatorInterceptorAnnotation);
+            $messageHandler = ServiceActivatorBuilder::create($methodInterceptor->getReferenceName(), $methodInterceptor->getMethodName())
+                ->withMethodParameterConverters($parameterConverterFactory->createParameterConverters(
+                    $interfaceToCall, $interceptorAnnotation->parameterConverters
+                ));
 
-                $interceptors[] =
-                    OrderedMethodInterceptor::create(
-                        EnricherBuilder::create($propertyEditors)
-                            ->withEndpointId($endpointId)
-                            ->withRequestHeaders($interceptor->requestHeaders)
-                            ->withRequestPayloadExpression($interceptor->requestPayloadExpression)
-                            ->withRequestMessageChannel($interceptor->requestMessageChannel),
-                        $interceptor->weightOrder
-                    );
-            } else if ($interceptor instanceof GatewayInterceptor) {
-                $interceptors[] =
-                    OrderedMethodInterceptor::create(
-                        GatewayInterceptorBuilder::create($interceptor->requestChannelName)
-                            ->withEndpointId($endpointId),
-                        $interceptor->weightOrder
-                    );
-            }
+            return $messageHandler;
         }
 
-        return $interceptors;
+        if ($interfaceToCall->hasMethodAnnotation($transformerInterceptorAnnotation)) {
+            /** @var TransformerInterceptor $interceptorAnnotation */
+            $interceptorAnnotation = $interfaceToCall->getMethodAnnotation($transformerInterceptorAnnotation);
+            $messageHandler = TransformerBuilder::create($methodInterceptor->getReferenceName(), $methodInterceptor->getMethodName())
+                ->withMethodParameterConverters($parameterConverterFactory->createParameterConverters(
+                    $interfaceToCall, $interceptorAnnotation->parameterConverters
+                ));
+
+            return $messageHandler;
+        }
+
+        throw ConfigurationException::create("Missing Interceptor Handler Annotation for {$interfaceToCall}");
     }
 
     /**
@@ -201,10 +174,13 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         foreach ($this->preCallInterceptors as $preCallInterceptor) {
-            $configuration->registerPreCallMethodInterceptor($preCallInterceptor);
+            $configuration->registerBeforeMethodInterceptor($preCallInterceptor);
+        }
+        foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
+            $configuration->registerAroundMethodInterceptor($aroundInterceptorReference);
         }
         foreach ($this->postCallInterceptors as $postCallInterceptor) {
-            $configuration->registerPostCallMethodInterceptor($postCallInterceptor);
+            $configuration->registerAfterMethodInterceptor($postCallInterceptor);
         }
     }
 

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Filter;
 
+use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
@@ -80,6 +81,22 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
         $this->requiredReferences[] = $referenceName;
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    {
+        return [$interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName)];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $this->referenceName ? $interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName) : $interfaceToCallRegistry->getFor($this->directObject, $this->methodName);
     }
 
     /**

@@ -14,14 +14,14 @@ use SimplyCodedSoftware\Messaging\Annotation\RequiredReferenceNameList;
 class Transactional
 {
     /**
-     * @var array
+     * @var string[]
      * @RequiredReferenceNameList()
      */
     private $factoryReferenceNameList;
 
     /**
      * Transactional constructor.
-     * @param array $values
+     * @param string[] $values
      */
     public function __construct(array $values)
     {
@@ -29,7 +29,7 @@ class Transactional
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getFactoryReferenceNameList(): array
     {

@@ -14,6 +14,7 @@ use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
 class InMemoryAnnotationRegistrationService implements AnnotationRegistrationService, AnnotationParser
 {
     private const CLASS_ANNOTATIONS = "classAnnotations";
+    private const CLASS_PROPERTIES = "classProperties";
 
     /**
      * @var array
@@ -64,6 +65,11 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
         foreach ($annotationReader->getClassAnnotations($reflectionClass) as $classAnnotation) {
             $this->addAnnotationToClass($className, $classAnnotation);
         }
+        foreach ($reflectionClass->getProperties() as $property) {
+            foreach ($annotationReader->getPropertyAnnotations($property) as $annotation) {
+                $this->addAnnotationToProperty($className, $property->getName(), $annotation);
+            }
+        }
 
         foreach (get_class_methods($className) as $method) {
             $methodReflection = new \ReflectionMethod($className, $method);
@@ -97,6 +103,18 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
         }
 
         return array_values($this->annotationsForClass[self::CLASS_ANNOTATIONS][$classNameToFind]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAnnotationsForProperty(string $className, string $propertyName): iterable
+    {
+        if (!isset($this->annotationsForClass[self::CLASS_ANNOTATIONS][$className][self::CLASS_PROPERTIES][$propertyName])) {
+            return [];
+        }
+
+        return $this->annotationsForClass[self::CLASS_ANNOTATIONS][$className][self::CLASS_PROPERTIES][$propertyName];
     }
 
     /**
@@ -165,6 +183,19 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
     public function addAnnotationToClass(string $className, $classAnnotationObject): self
     {
         $this->annotationsForClass[self::CLASS_ANNOTATIONS][$className][get_class($classAnnotationObject)] = $classAnnotationObject;
+
+        return $this;
+    }
+
+    /**
+     * @param string $className
+     * @param string $property
+     * @param $propertyAnnotationObject
+     * @return InMemoryAnnotationRegistrationService
+     */
+    public function addAnnotationToProperty(string $className, string $property, $propertyAnnotationObject) : self
+    {
+        $this->annotationsForClass[self::CLASS_ANNOTATIONS][$className][self::CLASS_PROPERTIES][$property][] = $propertyAnnotationObject;
 
         return $this;
     }

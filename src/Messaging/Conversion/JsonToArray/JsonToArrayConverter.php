@@ -27,9 +27,9 @@ class JsonToArrayConverter implements Converter
     public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
     {
         return
-            $sourceType->equals(TypeDescriptor::createString())
+            $sourceType->equals(TypeDescriptor::createStringType())
             && $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_JSON)
-            && $targetType->equals(TypeDescriptor::createArray())
+            && $targetType->equals(TypeDescriptor::createArrayType())
             && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP_OBJECT);
     }
 }

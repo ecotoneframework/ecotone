@@ -41,7 +41,7 @@ class SimpleMessageConverterTest extends TestCase
             $payload,
             $simpleMessageConverter->fromMessage(
                 MessageBuilder::withPayload($payload)->build(),
-                TypeDescriptor::createString()
+                TypeDescriptor::createStringType()
             )
         );
     }

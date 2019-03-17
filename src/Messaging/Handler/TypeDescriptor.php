@@ -229,7 +229,7 @@ final class TypeDescriptor
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createUnknown() : self
+    public static function createUnknownType() : self
     {
         return new self(self::UNKNOWN, "");
     }
@@ -239,7 +239,27 @@ final class TypeDescriptor
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createArray() : self
+    public static function createBooleanType() : self
+    {
+        return new self(self::BOOL, "");
+    }
+
+    /**
+     * @return TypeDescriptor
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createIntegerType() : self
+    {
+        return new self(self::INTEGER, "");
+    }
+
+    /**
+     * @return TypeDescriptor
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createArrayType() : self
     {
         return new self(self::ARRAY, "");
     }
@@ -249,7 +269,7 @@ final class TypeDescriptor
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createString() : self
+    public static function createStringType() : self
     {
         return new self(self::STRING, "");
     }
@@ -424,6 +444,13 @@ final class TypeDescriptor
         if ($typeHint === self::VOID) {
             $this->type = self::VOID;
             return;
+        }
+
+        if ($typeHint === "integer") {
+            $typeHint = self::INTEGER;
+        }
+        if ($typeHint === "boolean") {
+            $typeHint = self::BOOL;
         }
 
         if (

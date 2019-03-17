@@ -353,4 +353,20 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals("array<\stdClass>", TypeDescriptor::createCollection(\stdClass::class)->toString());
     }
+
+    public function test_creating_for_boolean_with_full_name()
+    {
+        $this->assertEquals(
+            TypeDescriptor::createBooleanType(),
+            TypeDescriptor::create("boolean")
+        );
+    }
+
+    public function test_creating_for_integer_with_full_name()
+    {
+        $this->assertEquals(
+            TypeDescriptor::createIntegerType(),
+            TypeDescriptor::create("integer")
+        );
+    }
 }

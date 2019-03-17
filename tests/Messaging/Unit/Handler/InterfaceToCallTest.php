@@ -15,11 +15,13 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Permission;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\OnlineShop;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Password;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\SuperAdmin;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\TwoStepPassword;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\User;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\OrderPropertyExample;
 
 /**
  * Class InterfaceToCallTest
@@ -336,6 +338,14 @@ class InterfaceToCallTest extends TestCase
         $this->assertEquals(
             TypeDescriptor::create("\\" . User::class),
             (InterfaceToCall::create(User::class, "getSelfWithoutDocBlock"))->getReturnType()
+        );
+    }
+
+    public function test_taking_use_statements_from_declaring_class()
+    {
+        $this->assertEquals(
+            TypeDescriptor::create("\\" . TwoStepPassword::class),
+            (InterfaceToCall::create(SuperAdmin::class, "getPassword"))->getReturnType()
         );
     }
 

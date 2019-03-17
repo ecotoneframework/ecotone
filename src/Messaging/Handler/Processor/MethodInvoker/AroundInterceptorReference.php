@@ -153,13 +153,10 @@ class AroundInterceptorReference
      */
     public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService) : AroundMethodInterceptor
     {
-        /** @var InterfaceToCallRegistry $interfaceRegistry */
-        $interfaceRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
-
         return AroundMethodInterceptor::createWith(
             $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName),
             $this->methodName,
-            $interfaceRegistry
+            $referenceSearchService
         );
     }
 }

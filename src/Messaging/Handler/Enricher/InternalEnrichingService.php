@@ -144,7 +144,7 @@ class InternalEnrichingService
                 if ($this->conversionService->canConvert(
                     $mediaType->hasTypeParameter() ? TypeDescriptor::create($mediaType->getTypeParameter()) : TypeDescriptor::createFromVariable($message->getPayload()),
                     $mediaType,
-                    TypeDescriptor::createArray(),
+                    TypeDescriptor::createArrayType(),
                     MediaType::createApplicationXPHPObject()
                 )) {
                     $enrichedMessage = $enrichedMessage
@@ -154,7 +154,7 @@ class InternalEnrichingService
                                 $message->getPayload(),
                                 TypeDescriptor::createFromVariable($message->getPayload()),
                                 $mediaType,
-                                TypeDescriptor::createArray(),
+                                TypeDescriptor::createArrayType(),
                                 MediaType::createApplicationXPHPObject()
                             )
                         );

@@ -22,4 +22,11 @@ interface AnnotationParser
      * @return object[]
      */
     public function getAnnotationsForClass(string $className) : iterable;
+
+    /**
+     * @param string $className
+     * @param string $propertyName
+     * @return object[]
+     */
+    public function getAnnotationsForProperty(string $className, string $propertyName) : iterable;
 }

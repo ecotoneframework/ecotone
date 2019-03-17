@@ -158,10 +158,6 @@ class GatewayInternalHandler
         } catch (\Throwable $e) {
             $this->rollbackTransactions($requestMessage, $transactions);
 
-            if ($e instanceof MessagingException && $e->getCause()) {
-                throw $e->getCause();
-            }
-
             throw $e;
         }
     }

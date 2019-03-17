@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Support\Assert;
@@ -25,14 +26,20 @@ class AroundMethodInterceptor
      * @var InterfaceToCall
      */
     private $interceptorInterfaceToCall;
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
 
     /**
      * MethodInterceptor constructor.
      * @param object $referenceToCall
      * @param InterfaceToCall $interfaceToCall
+     * @param ReferenceSearchService $referenceSearchService
+     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function __construct($referenceToCall, InterfaceToCall $interfaceToCall)
+    private function __construct($referenceToCall, InterfaceToCall $interfaceToCall, ReferenceSearchService $referenceSearchService)
     {
         Assert::isObject($referenceToCall, "Method Interceptor should point to instance not class name");
 
@@ -42,31 +49,28 @@ class AroundMethodInterceptor
 
         $this->referenceToCall = $referenceToCall;
         $this->interceptorInterfaceToCall = $interfaceToCall;
+        $this->referenceSearchService = $referenceSearchService;
     }
 
     /**
      * @param object $referenceToCall
      * @param string $methodName
-     * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     * @param ReferenceSearchService $referenceSearchService
      * @return AroundMethodInterceptor
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWith($referenceToCall, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry) : self
+    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService) : self
     {
-        $interfaceToCall = $interfaceToCallRegistry->getFor($referenceToCall, $methodName);
+        /** @var InterfaceToCallRegistry $interfaceRegistry */
+        $interfaceRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
 
-        return new self($referenceToCall, $interfaceToCall);
-    }
+        $interfaceToCall = $interfaceRegistry->getFor($referenceToCall, $methodName);
 
-    /**
-     * @param $referenceToCall
-     * @param InterfaceToCall $interfaceToCall
-     * @return AroundMethodInterceptor
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public static function createWithInterface($referenceToCall, InterfaceToCall $interfaceToCall) : self
-    {
-        return new self($referenceToCall, $interfaceToCall);
+        return new self($referenceToCall, $interfaceToCall, $referenceSearchService);
     }
 
     /**

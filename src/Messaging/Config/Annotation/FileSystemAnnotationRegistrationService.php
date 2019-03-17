@@ -143,6 +143,16 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     /**
      * @inheritDoc
      */
+    public function getAnnotationsForProperty(string $className, string $propertyName): iterable
+    {
+        $reflectionProperty = new \ReflectionProperty($className, $propertyName);
+
+        return $this->annotationReader->getPropertyAnnotations($reflectionProperty);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getAllClassesWithAnnotation(string $annotationClassName): array
     {
         if ($annotationClassName == "*") {

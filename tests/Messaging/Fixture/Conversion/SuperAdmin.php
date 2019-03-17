@@ -2,6 +2,8 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
 
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Password as AdminPassword;
+
 /**
  * Class SuperAdmin
  * @package Test\SimplyCodedSoftware\Messaging\Fixture\Conversion
@@ -23,5 +25,13 @@ class SuperAdmin extends AbstractSuperAdmin implements Admin
     public function getAdmin()
     {
         // TODO: Implement getAdmin() method.
+    }
+
+    /**
+     * @return AdminPassword
+     */
+    public function getAdminPassword() : AdminPassword
+    {
+
     }
 }

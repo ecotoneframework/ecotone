@@ -160,140 +160,31 @@ class Gateway
             $replyChannelComingFromPreviousGateway,
             $errorChannelComingFromPreviousGateway
         );
-        $chainHandler = ChainMessageHandlerBuilder::create()
-                            ->chain(ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle"))
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle")
                             ->withOutputMessageChannel($internalReplyBridgeName)
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([$internalReplyBridgeName => $internalReplyBridge]),
                                 InMemoryReferenceSearchService::createEmpty()
                             );
-//        $gatewayInternalHandler->handle($requestMessage);
-
-        $transactions = [];
-        foreach ($this->transactionFactories as $transactionFactory) {
-            $transactions[] = $transactionFactory->begin();
-        }
 
         try {
-            try{
-                $this->requestChannel->send($requestMessage);
-            }catch (\Throwable $e) {
-                if (!$this->errorChannel) {
-                    throw MessageHandlingException::fromOtherException($e, $requestMessage);
-                }
+            $serviceActivator->handle($requestMessage);
+            $reply = $internalReplyBridge->receive();
 
-                $this->errorChannel->send(ErrorMessage::createWithFailedMessage($e, $requestMessage));
+            if ($this->interfaceToCall->getReturnType()->isClassOfType(Message::class)) {
+                return $reply;
+            }
+            if ($reply) {
+                return $reply->getPayload();
             }
 
-            $replyMessage = null;
-            if ($this->interfaceToCall->hasReturnValue()) {
-                $replyCallable = $this->getReply($requestMessage, $replyChannel);
-
-                if ($this->interfaceToCall->doesItReturnFuture()) {
-                    $this->commitTransactions($requestMessage, $transactions);
-                    return FutureReplyReceiver::create($replyCallable);
-                }
-
-                $replyMessage = $replyCallable();
-            }
-
-            if ($this->interfaceToCall->doesItReturnMessage() && $replyMessage) {
-                $replyMessageBuilder = MessageBuilder::fromMessage($replyMessage);
-                if ($replyChannelComingFromPreviousGateway) {
-                    $replyMessageBuilder->setHeader(MessageHeaders::REPLY_CHANNEL, $replyChannelComingFromPreviousGateway);
-                }
-                if ($errorChannelComingFromPreviousGateway) {
-                    $replyMessageBuilder->setHeader(MessageHeaders::ERROR_CHANNEL, $errorChannelComingFromPreviousGateway);
-                }
-
-                return $replyMessageBuilder->build();
-            }
-
-            $reply = null;
-            if ($replyMessage) {
-                foreach ($this->messageConverters as $messageConverter) {
-                    $reply = $messageConverter->fromMessage(
-                        $replyMessage,
-                        $this->interfaceToCall->getReturnType()
-                    );
-
-                    if ($reply) {
-                        break;
-                    }
-                }
-
-                if (!$reply) {
-                   $reply = $replyMessage ? $replyMessage->getPayload() : null;
-                }
-            }
-
-            $this->commitTransactions($requestMessage, $transactions);
-            return $reply;
-        } catch (\Throwable $e) {
-            $this->rollbackTransactions($requestMessage, $transactions);
-
-            if ($e instanceof MessagingException && $e->getCause()) {
+            return null;
+        } catch (MessagingException $e) {
+            if ($e->getCause()) {
                 throw $e->getCause();
             }
 
             throw $e;
         }
-    }
-
-    /**
-     * @param Message $requestMessage
-     * @param Transaction[] $transactions
-     */
-    private function commitTransactions(Message $requestMessage, array $transactions): void
-    {
-        foreach ($transactions as $transaction) {
-            $transaction->commit($requestMessage);
-        }
-    }
-
-    /**
-     * @param Message $requestMessage
-     * @param Transaction[] $transactions
-     */
-    private function rollbackTransactions(Message $requestMessage, array $transactions): void
-    {
-        foreach ($transactions as $transaction) {
-            $transaction->rollback($requestMessage);
-        }
-    }
-
-    /**
-     * @param Message $requestMessage
-     * @param PollableChannel $replyChannel
-     * @return callable
-     */
-    private function getReply(Message $requestMessage, PollableChannel $replyChannel) : callable
-    {
-        return function () use ($requestMessage, $replyChannel) {
-            $replyMessage = null;
-            try {
-                $replyMessage = $this->replyMilliSecondsTimeout > 0 ? $replyChannel->receiveWithTimeout($this->replyMilliSecondsTimeout) : $replyChannel->receive();
-            }catch (\Throwable $exception) {
-                if (!$this->errorChannel) {
-                    throw $exception;
-                }
-
-                $this->errorChannel->send(ErrorMessage::createWithOriginalMessage($exception, $requestMessage));
-            }
-
-            if (is_null($replyMessage) && !$this->interfaceToCall->canItReturnNull()) {
-                throw InvalidArgumentException::create("{$this->interfaceToCall} expects value, but null was returned. If you defined errorChannel it's advised to change interface to nullable.");
-            }
-            if ($replyMessage instanceof ErrorMessage) {
-                if (!$this->errorChannel) {
-                    throw MessageHandlingException::fromErrorMessage($replyMessage);
-                }
-
-                $this->errorChannel->send($replyMessage->extendWithOriginalMessage($requestMessage));
-                return null;
-            }
-
-            return $replyMessage;
-        };
     }
 }

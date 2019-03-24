@@ -222,7 +222,7 @@ class TypeResolver
         }
 
         if (preg_match(self::COLLECTION_TYPE_REGEX, $className, $matches)) {
-            return TypeDescriptor::isItTypeOfScalar($matches[1]) || TypeDescriptor::isItTypeOfExistingClassOrInterface($matches[1]);
+            return TypeDescriptor::isItTypeOfPrimitive($matches[1]) || TypeDescriptor::isItTypeOfExistingClassOrInterface($matches[1]);
         }
 
         return count(explode("\\", $className)) == 2;
@@ -350,34 +350,38 @@ class TypeResolver
         $properties = array_unique($properties);
 
         foreach ($properties as $property) {
-            $type = $this->getPropertyDocblockTypeHint($reflectionClass, $property);
-            $type = $type ? $type : TypeDescriptor::createUnknownType();
-            $annotations = $annotationParser->getAnnotationsForProperty($className, $property->getName());
+            try {
+                $type = $this->getPropertyDocblockTypeHint($reflectionClass, $property);
+                $type = $type ? $type : TypeDescriptor::createUnknownType();
+                $annotations = $annotationParser->getAnnotationsForProperty($className, $property->getName());
 
-            if ($property->isPrivate()) {
-                $classProperties[] = ClassPropertyDefinition::createPrivate(
-                    $property->getName(),
-                    $type,
-                    true,
-                    $property->isStatic(),
-                    $annotations
-                );
-            } else if ($property->isProtected()) {
-                $classProperties[] = ClassPropertyDefinition::createProtected(
-                    $property->getName(),
-                    $type,
-                    true,
-                    $property->isStatic(),
-                    $annotations
-                );
-            } else {
-                $classProperties[] = ClassPropertyDefinition::createPublic(
-                    $property->getName(),
-                    $type,
-                    true,
-                    $property->isStatic(),
-                    $annotations
-                );
+                if ($property->isPrivate()) {
+                    $classProperties[] = ClassPropertyDefinition::createPrivate(
+                        $property->getName(),
+                        $type,
+                        true,
+                        $property->isStatic(),
+                        $annotations
+                    );
+                } else if ($property->isProtected()) {
+                    $classProperties[] = ClassPropertyDefinition::createProtected(
+                        $property->getName(),
+                        $type,
+                        true,
+                        $property->isStatic(),
+                        $annotations
+                    );
+                } else {
+                    $classProperties[] = ClassPropertyDefinition::createPublic(
+                        $property->getName(),
+                        $type,
+                        true,
+                        $property->isStatic(),
+                        $annotations
+                    );
+                }
+            }catch (TypeDefinitionException $typeDefinitionException) {
+                throw TypeDefinitionException::create("There is problem with type of property {$property->getName()} in class {$className}: {$typeDefinitionException}");
             }
         }
 

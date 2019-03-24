@@ -431,24 +431,24 @@ class InterfaceToCall
      */
     private function initialize(string $interfaceName, string $methodName): void
     {
-        $typeResolver = TypeResolver::create();
-        $this->interfaceType = TypeDescriptor::create($interfaceName);
-        $this->interfaceName = $this->interfaceType->toString();
-        $this->methodName = $methodName;
-        $reflectionClass = new \ReflectionClass($interfaceName);
-        if (!$reflectionClass->hasMethod($methodName)) {
-            throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
-        }
-        $reflectionMethod = new \ReflectionMethod($interfaceName, $methodName);
-
         try {
+            $typeResolver = TypeResolver::create();
+            $this->interfaceType = TypeDescriptor::create($interfaceName);
+            $this->interfaceName = $this->interfaceType->toString();
+            $this->methodName = $methodName;
+            $reflectionClass = new \ReflectionClass($interfaceName);
+            if (!$reflectionClass->hasMethod($methodName)) {
+                throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
+            }
+            $reflectionMethod = new \ReflectionMethod($interfaceName, $methodName);
+
             $this->parameters = $typeResolver->getMethodParameters($interfaceName, $methodName);
             $this->returnType = $typeResolver->getReturnType($interfaceName, $methodName);
 
             $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
             $this->isStaticallyCalled = $reflectionMethod->isStatic();
         } catch (TypeDefinitionException $definitionException) {
-            throw InvalidArgumentException::create("Interface {$this} has problem with type definition. {$definitionException->getMessage()}");
+            throw InvalidArgumentException::create("Interface {$this} has problem with type declaration. {$definitionException->getMessage()}");
         }
     }
 }

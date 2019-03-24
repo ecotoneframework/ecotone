@@ -285,6 +285,10 @@ final class MessagingSystemConfiguration implements Configuration
                 $requiredReferenceName = $requiredReferenceName->getReferenceName();
             }
 
+            if (in_array($requiredReferenceName, [InterfaceToCallRegistry::REFERENCE_NAME, ConversionService::REFERENCE_NAME])) {
+                continue;
+            }
+
             if ($requiredReferenceName) {
                 $this->requiredReferences[] = $requiredReferenceName;
             }
@@ -425,11 +429,12 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
+
+        $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall);
         $converters = [];
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->build($referenceSearchService);
         }
-        $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall);
         $referenceSearchServiceWithExtras = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
             ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
             InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry

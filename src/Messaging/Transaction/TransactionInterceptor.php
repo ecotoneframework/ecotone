@@ -12,12 +12,10 @@ use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
  * Class TransactionInterceptor
  * @package SimplyCodedSoftware\Messaging\Transaction
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MethodInterceptor()
  */
 class TransactionInterceptor
 {
     /**
-     * @Around()
      * @param MethodInvocation $methodInvocation
      * @param ReferenceSearchService $referenceSearchService
      * @param Transactional $transactional

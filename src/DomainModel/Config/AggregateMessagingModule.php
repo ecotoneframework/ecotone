@@ -105,14 +105,6 @@ class AggregateMessagingModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function afterConfigure(ReferenceSearchService $referenceSearchService): void
-    {
-        return;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {

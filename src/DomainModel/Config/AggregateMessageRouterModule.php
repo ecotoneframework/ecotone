@@ -6,6 +6,7 @@ use SimplyCodedSoftware\DomainModel\AggregateMessage;
 use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
 use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
 use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
+use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
@@ -16,6 +17,7 @@ use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
  * Class AggregateMessageRouterModule
  * @package SimplyCodedSoftware\DomainModel\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @ModuleAnnotation()
  */
 class AggregateMessageRouterModule implements AnnotationModule
 {

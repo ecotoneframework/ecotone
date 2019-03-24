@@ -37,7 +37,7 @@ class AggregateMessageToChannelRouter
      */
     public function route(Message $message) : string
     {
-        $routingKey =$message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_MESSAGE_CHANNEL_NAME_TO_SEND)
+        $routingKey = $message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_MESSAGE_CHANNEL_NAME_TO_SEND)
             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_MESSAGE_CHANNEL_NAME_TO_SEND)
             : TypeDescriptor::createFromVariable($message->getPayload())->toString();
 

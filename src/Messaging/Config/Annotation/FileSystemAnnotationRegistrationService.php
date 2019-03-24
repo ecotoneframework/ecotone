@@ -27,11 +27,6 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      * @var string[]
      */
     private $registeredClasses;
-
-    /**
-     * @var array|AnnotationRegistration[]
-     */
-    private $initializedRegistrations = [];
     /**
      * @var array
      */
@@ -95,13 +90,6 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
 
                 $methodAnnotations = $this->getMethodAnnotations($className, $method, $methodAnnotationClassName);
                 foreach ($methodAnnotations as $methodAnnotation) {
-                    $annotationReference = $className . get_class($methodAnnotation);
-                    if (array_key_exists($annotationReference, $this->initializedRegistrations)) {
-                        $registrations[] = $this->initializedRegistrations[$annotationReference];
-
-                        continue;
-                    }
-
                     if (get_class($methodAnnotation) === $methodAnnotationClassName || $methodAnnotation instanceof $methodAnnotationClassName) {
                         $annotationRegistration = AnnotationRegistration::create(
                             $this->getAnnotationForClass($className, $classAnnotationName),
@@ -111,7 +99,6 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
                         );
 
                         $registrations[] = $annotationRegistration;
-                        $this->initializedRegistrations[$annotationReference] = $annotationRegistration;
                     }
                 }
             }

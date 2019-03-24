@@ -146,9 +146,6 @@ final class MessagingSystemConfiguration implements Configuration
             $relatedInterfaces = $messageHandlerBuilder->resolveRelatedReferences($interfaceToCallRegistry);
 
             foreach ($relatedInterfaces as $relatedInterface) {
-                if (is_array($relatedInterface)) {
-                    var_dump($relatedInterfaces);die();
-                }
                 foreach ($relatedInterface->getMethodAnnotations() as $methodAnnotation) {
                     if ($methodAnnotation instanceof WithRequiredReferenceNameList) {
                         $this->requireReferences($methodAnnotation->getRequiredReferenceNameList());
@@ -284,6 +281,10 @@ final class MessagingSystemConfiguration implements Configuration
     private function requireReferences(array $referenceNames): void
     {
         foreach ($referenceNames as $requiredReferenceName) {
+            if ($requiredReferenceName instanceof RequiredReference) {
+                $requiredReferenceName = $requiredReferenceName->getReferenceName();
+            }
+
             if ($requiredReferenceName) {
                 $this->requiredReferences[] = $requiredReferenceName;
             }

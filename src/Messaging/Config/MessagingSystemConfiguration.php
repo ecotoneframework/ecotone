@@ -140,8 +140,8 @@ final class MessagingSystemConfiguration implements Configuration
                 $moduleExtensions[$module->getName()]
             );
         }
-        $this->configureInterceptors();
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
+        $this->configureInterceptors($interfaceToCallRegistry);
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $relatedInterfaces = $messageHandlerBuilder->resolveRelatedReferences($interfaceToCallRegistry);
 
@@ -429,9 +429,10 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->build($referenceSearchService);
         }
+        $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall);
         $referenceSearchServiceWithExtras = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
             ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
-            InterfaceToCallRegistry::REFERENCE_NAME => InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall)
+            InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry
         ]);
 
         $channelResolver = $this->createChannelResolver($referenceSearchServiceWithExtras);
@@ -441,7 +442,7 @@ final class MessagingSystemConfiguration implements Configuration
             $gateways[] = $gatewayReference;
         }
 
-        $this->configureInterceptors();
+        $this->configureInterceptors($interfaceToCallRegistry);
 
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchServiceWithExtras, $this->consumerFactories, $this->messageHandlerPollingMetadata);
         $consumers = [];
@@ -557,15 +558,15 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
+     * @param InterfaceToCallRegistry $interfaceRegistry
      * @return void
      * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function configureInterceptors(): void
+    private function configureInterceptors(InterfaceToCallRegistry $interfaceRegistry): void
     {
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
-                $interfaceRegistry = InterfaceToCallRegistry::createEmpty();
                 $preCallInterceptors = $this->findPreCallInterceptorsFor($interfaceRegistry, $messageHandlerBuilder);
                 $aroundInterceptors = $this->findAroundInterceptorsFor($interfaceRegistry, $messageHandlerBuilder);
                 $postCallInterceptors = $this->findPostCallInterceptorsFor($interfaceRegistry, $messageHandlerBuilder);

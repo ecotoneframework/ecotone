@@ -46,27 +46,27 @@ class InterfaceToCall
     /**
      * @var iterable|object[]
      */
-    private $classAnnotations;
-    /**
-     * @var iterable|object[]
-     */
     private $methodAnnotations;
+    /**
+     * @var ClassDefinition
+     */
+    private $classDefinition;
 
     /**
      * InterfaceToCall constructor.
      * @param string $interfaceName
      * @param string $methodName
-     * @param object[] $classAnnotations
+     * @param ClassDefinition $classDefinition
      * @param object[] $methodAnnotations
      * @throws InvalidArgumentException
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function __construct(string $interfaceName, string $methodName, iterable $classAnnotations = [], iterable $methodAnnotations = [])
+    private function __construct(string $interfaceName, string $methodName, ClassDefinition $classDefinition, iterable $methodAnnotations = [])
     {
         $this->initialize($interfaceName, $methodName);
-        $this->classAnnotations = $classAnnotations;
         $this->methodAnnotations = $methodAnnotations;
+        $this->classDefinition = $classDefinition;
     }
 
     /**
@@ -95,7 +95,7 @@ class InterfaceToCall
 
         $annotationParser = InMemoryAnnotationRegistrationService::createFrom([$interface]);
 
-        return new self($interface, $methodName, $annotationParser->getAnnotationsForClass($interface), $annotationParser->getAnnotationsForMethod($interface, $methodName));
+        return new self($interface, $methodName, ClassDefinition::createUsingAnnotationParser(TypeDescriptor::create($interface), $annotationParser), $annotationParser->getAnnotationsForMethod($interface, $methodName));
     }
 
     /**
@@ -111,7 +111,15 @@ class InterfaceToCall
      */
     public function getClassAnnotations(): iterable
     {
-        return $this->classAnnotations;
+        return $this->getClassDefinition()->getClassAnnotations();
+    }
+
+    /**
+     * @return ClassDefinition
+     */
+    public function getClassDefinition() : ClassDefinition
+    {
+        return $this->classDefinition;
     }
 
     /**
@@ -139,7 +147,7 @@ class InterfaceToCall
      */
     public function hasClassAnnotation(TypeDescriptor $className): bool
     {
-        foreach ($this->classAnnotations as $classAnnotation) {
+        foreach ($this->getClassAnnotations() as $classAnnotation) {
             if (TypeDescriptor::createFromVariable($classAnnotation)->equals($className)) {
                 return true;
             }
@@ -155,7 +163,7 @@ class InterfaceToCall
      */
     public function getClassAnnotation(TypeDescriptor $className)
     {
-        foreach ($this->classAnnotations as $classAnnotation) {
+        foreach ($this->getClassAnnotations() as $classAnnotation) {
             if (TypeDescriptor::createFromVariable($classAnnotation)->equals($className)) {
                 return $classAnnotation;
             }

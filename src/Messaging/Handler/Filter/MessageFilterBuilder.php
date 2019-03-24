@@ -86,7 +86,7 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [$interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName)];
     }
@@ -166,11 +166,13 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::createWithDirectReference(
             new MessageFilter(
-                MethodInvoker::createWith(
+                MethodInvoker::createWithInterceptors(
                     $messageSelector,
                     $this->methodName,
                     $this->parameterConverters,
-                    $referenceSearchService
+                    $referenceSearchService,
+                    $this->orderedAroundInterceptors,
+                    $this->getEndpointAnnotations()
                 ),
                 $discardChannel,
                 $this->throwExceptionOnDiscard

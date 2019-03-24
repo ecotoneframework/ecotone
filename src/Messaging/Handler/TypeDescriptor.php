@@ -497,15 +497,15 @@ final class TypeDescriptor
         }
 
         if (preg_match(self::COLLECTION_TYPE_REGEX, $type, $match)) {
-            $collectionType = $this->addSlashPrefix($match[1]);
+            $collectionType = $this->removeSlashPrefix($match[1]);
             if (!$this->isResolvableType($collectionType)) {
                 throw TypeDefinitionException::create("Unknown type for {$typeHint}. Passed type hint is not resolvable: {$collectionType}.");
             }
 
-            $type = str_replace($match[1], $collectionType, $type);
+            $type = str_replace($match[1], $collectionType, $match[0]);
         }
 
-        return $this->addSlashPrefix($type);
+        return $this->removeSlashPrefix($type);
     }
 
     /**
@@ -577,10 +577,10 @@ final class TypeDescriptor
      * @param string $type
      * @return string
      */
-    private function addSlashPrefix(string $type): string
+    private function removeSlashPrefix(string $type): string
     {
         if ($this->isClassOrInterface($type)) {
-            $type = substr($type, 0, 1) !== "\\" ? ("\\" . $type) : $type;
+            $type = ltrim($type, "\\");
         }
 
         return trim($type);

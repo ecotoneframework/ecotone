@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Transaction;
 
+use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Transaction\Transaction;
 use SimplyCodedSoftware\Messaging\Transaction\TransactionFactory;
 
@@ -48,7 +49,7 @@ class FakeTransactionFactory implements TransactionFactory
     /**
      * @inheritDoc
      */
-    public function begin(): Transaction
+    public function begin(Message $message): Transaction
     {
         $this->transactionToReturn = $this->transactionToReturn ? $this->transactionToReturn : FakeTransaction::begin();
 

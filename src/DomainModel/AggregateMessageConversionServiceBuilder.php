@@ -62,9 +62,9 @@ class AggregateMessageConversionServiceBuilder extends InputOutputMessageHandler
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        // TODO: Implement resolveRelatedReference() method.
+        return [$interfaceToCallRegistry->getFor(AggregateMessageConversionService::class, "convert")];
     }
 
     /**
@@ -72,7 +72,7 @@ class AggregateMessageConversionServiceBuilder extends InputOutputMessageHandler
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        // TODO: Implement getInterceptedInterface() method.
+        return $interfaceToCallRegistry->getFor(AggregateMessageConversionService::class, "convert");
     }
 
     /**

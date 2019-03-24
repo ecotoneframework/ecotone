@@ -77,7 +77,7 @@ class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuil
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [];
     }

@@ -48,7 +48,7 @@ class ReferenceBuilderTest extends TestCase
         $value = new \stdClass();
         $converter = ReferenceBuilder::createWithDynamicResolve("param")
             ->build(InMemoryReferenceSearchService::createWith([
-                "\\" . \stdClass::class => $value
+                \stdClass::class => $value
             ]));
 
         $this->assertEquals(

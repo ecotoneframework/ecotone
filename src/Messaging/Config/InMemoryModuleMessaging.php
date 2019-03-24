@@ -43,8 +43,8 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
     }
 
     /**
-     * @param array $moduleConfigurations
-     * @param array $moduleExtensions
+     * @param Module[] $moduleConfigurations
+     * @param object[] $moduleExtensions
      * @return InMemoryModuleMessaging
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */

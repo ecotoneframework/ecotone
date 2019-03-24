@@ -90,8 +90,8 @@ class AggregateMessagingModuleTest extends TestCase
      */
     public function test_registering_aggregate_command_handler()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerExample::class, "doAction", "\\" . DoStuffCommand::class)
-                            ->withInputChannelName("\\" . DoStuffCommand::class)
+        $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerExample::class, "doAction",  DoStuffCommand::class)
+                            ->withInputChannelName(DoStuffCommand::class)
                             ->withEndpointId('command-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
@@ -99,7 +99,7 @@ class AggregateMessagingModuleTest extends TestCase
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
-                    AggregateMessageConversionServiceBuilder::createWith("\\" . DoStuffCommand::class),
+                    AggregateMessageConversionServiceBuilder::createWith( DoStuffCommand::class),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                     AggregateCommandHandlerExample::class
                 )
@@ -111,7 +111,7 @@ class AggregateMessagingModuleTest extends TestCase
             ],
             $expectedConfiguration,
             [
-                "\\" . DoStuffCommand::class => "\\" . DoStuffCommand::class
+                DoStuffCommand::class => DoStuffCommand::class
             ]
         );
     }
@@ -126,15 +126,15 @@ class AggregateMessagingModuleTest extends TestCase
      */
     public function test_registering_aggregate_query_handler()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerExample::class, "doStuff", "\\" . SomeQuery::class)
-                            ->withInputChannelName("\\" . SomeQuery::class)
+        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerExample::class, "doStuff",  SomeQuery::class)
+                            ->withInputChannelName( SomeQuery::class)
                             ->withEndpointId('some-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
             ->registerBeforeMethodInterceptor(MethodInterceptor::create(
                 "",
-                AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class),
+                AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                 AggregateQueryHandlerExample::class
             ));
@@ -145,7 +145,7 @@ class AggregateMessagingModuleTest extends TestCase
             ],
             $expectedConfiguration,
             [
-                "\\" . SomeQuery::class => "\\" . SomeQuery::class
+                 SomeQuery::class =>  SomeQuery::class
             ]
         );
     }
@@ -160,8 +160,8 @@ class AggregateMessagingModuleTest extends TestCase
      */
     public function test_registering_aggregate_query_handler_with_output_channel()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", "\\" . SomeQuery::class)
-            ->withInputChannelName("\\" . SomeQuery::class)
+        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
+            ->withInputChannelName( SomeQuery::class)
             ->withEndpointId("some-id")
             ->withOutputMessageChannel("outputChannel");
 
@@ -169,7 +169,7 @@ class AggregateMessagingModuleTest extends TestCase
             ->registerMessageHandler($commandHandler)
             ->registerBeforeMethodInterceptor(MethodInterceptor::create(
                 "",
-                AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class),
+                AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                 AggregateQueryHandlerWithOutputChannelExample::class
             ));
@@ -180,7 +180,7 @@ class AggregateMessagingModuleTest extends TestCase
             ],
             $expectedConfiguration,
             [
-                "\\" . SomeQuery::class => "\\" . SomeQuery::class
+                 SomeQuery::class =>  SomeQuery::class
             ]
         );
     }
@@ -195,7 +195,7 @@ class AggregateMessagingModuleTest extends TestCase
      */
     public function test_registering_aggregate_with_custom_input_channel()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", "\\" . SomeQuery::class)
+        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
             ->withInputChannelName("inputChannel")
             ->withEndpointId("some-id");
 
@@ -212,12 +212,12 @@ class AggregateMessagingModuleTest extends TestCase
                 ->registerMessageHandler($commandHandler)
                 ->registerBeforeMethodInterceptor(\SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     "",
-                    AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class),
+                    AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                     AggregateQueryHandlerWithOutputChannelExample::class
                 )),
             [
-                "\\" . SomeQuery::class => "inputChannel"
+                 SomeQuery::class => "inputChannel"
             ]
         );
     }
@@ -232,7 +232,7 @@ class AggregateMessagingModuleTest extends TestCase
      */
     public function test_registering_aggregate_without_query_class_with_only_input_channel()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", "\\" . SomeQuery::class)
+        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
             ->withInputChannelName("inputChannel")
             ->withEndpointId("some-id");
 
@@ -249,12 +249,12 @@ class AggregateMessagingModuleTest extends TestCase
                 ->registerMessageHandler($commandHandler)
                 ->registerBeforeMethodInterceptor(MethodInterceptor::create(
                     "",
-                    AggregateMessageConversionServiceBuilder::createWith("\\" . SomeQuery::class),
+                    AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                     AggregateQueryHandlerWithOutputChannelExample::class
                 )),
             [
-                "\\" . SomeQuery::class => "inputChannel"
+                 SomeQuery::class => "inputChannel"
             ]
         );
     }

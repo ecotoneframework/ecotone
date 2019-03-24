@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfigurat
 
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
@@ -18,6 +19,10 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\Messaging\Confi
      * @var array
      */
     private $extensionObjects;
+    /**
+     * @var MessageHandlerBuilder[]
+     */
+    private $messageHandlers = [];
 
     private function __construct(array $extensionObjects)
     {
@@ -36,6 +41,14 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\Messaging\Confi
     public static function createWithExtensions(array $extensionObjects): self
     {
         return new self($extensionObjects);
+    }
+
+    public static function createWithHandlers(iterable $messageHandlerBuilders) : self
+    {
+        $self = self::createEmpty();
+        $self->messageHandlers = $messageHandlerBuilders;
+
+        return $self;
     }
 
     /**
@@ -60,6 +73,10 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\Messaging\Confi
     public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         $this->extensionObjects = $extensionObjects;
+
+        foreach ($this->messageHandlers as $messageHandlerBuilder) {
+            $configuration->registerMessageHandler($messageHandlerBuilder);
+        }
 
         return;
     }

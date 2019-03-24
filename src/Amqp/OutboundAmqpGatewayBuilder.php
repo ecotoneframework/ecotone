@@ -139,7 +139,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [$interfaceToCallRegistry->getFor(OutboundAmqpGateway::class, "handle")];
     }

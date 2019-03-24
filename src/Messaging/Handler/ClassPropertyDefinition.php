@@ -106,6 +106,30 @@ final class ClassPropertyDefinition
     }
 
     /**
+     * @return object[]
+     */
+    public function getAnnotations() : iterable
+    {
+        return $this->annotations;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNullable() : bool
+    {
+        return $this->isNullable;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatic() : bool
+    {
+        return $this->isStatic;
+    }
+
+    /**
      * @return bool
      */
     public function isPrivate() : bool

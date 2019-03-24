@@ -54,7 +54,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     {
         $aggregateId = $this->getAggregateId($identifiers);
         if (!$aggregateId || !array_key_exists($aggregateId, $this->aggregates)) {
-            throw AggregateNotFoundException::create("Aggregate with id {$aggregateId} was not found");
+            return null;
         }
 
         return $this->aggregates[$aggregateId];

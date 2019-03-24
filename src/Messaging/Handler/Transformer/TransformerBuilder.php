@@ -68,7 +68,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [
             $this->directObject
@@ -213,7 +213,8 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
                         $this->methodName,
                         $this->methodParameterConverterBuilders,
                         $referenceSearchService,
-                        $this->orderedAroundInterceptors
+                        $this->orderedAroundInterceptors,
+                        $this->getEndpointAnnotations()
                     )
                 ),
                 $channelResolver,

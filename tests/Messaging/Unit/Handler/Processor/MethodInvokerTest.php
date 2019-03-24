@@ -35,8 +35,10 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\Cal
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithPassThroughInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithProceedingAndReturningInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithProceedingInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithReferenceSearchServiceExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithReplacingArgumentsInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithRequestMessageInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithStdClassInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithUnorderedClassInvocationInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\StubCallSavingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
@@ -231,7 +233,7 @@ class MethodInvokerTest extends MessagingTest
 
         $this->assertMessages(
               MessageBuilder::withPayload(OrderConfirmation::fromOrder(Order::create('1', "correct")))
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("\\" . OrderConfirmation::class))
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(OrderConfirmation::class))
                 ->build(),
               $replyMessage
         );
@@ -575,6 +577,21 @@ class MethodInvokerTest extends MessagingTest
         $this->assertNull($methodInvocation->processMessage($requestMessage));
     }
 
+    public function test_calling_interceptor_with_reference_search_service()
+    {
+        $interceptingService1 = CallWithReferenceSearchServiceExample::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("some") ;
+        $methodInvocation = MethodInvoker::createWithInterceptors(
+            $interceptedService, 'methodWithAnnotation', [], InMemoryReferenceSearchService::createWith([
+            CallWithReferenceSearchServiceExample::class => $interceptingService1
+        ]),
+            [AroundInterceptorReference::createWithNoPointcut(CallWithReferenceSearchServiceExample::class, "call")]
+        );
+
+        $requestMessage = MessageBuilder::withPayload("test")->build();
+        $this->assertNull($methodInvocation->processMessage($requestMessage));
+    }
+
     public function test_throwing_exception_if_registering_around_method_interceptor_with_return_value_but_without_method_invocation()
     {
         $interceptingService1 = CalculatingService::create(0);
@@ -588,5 +605,21 @@ class MethodInvokerTest extends MessagingTest
         ]),
             [AroundInterceptorReference::createWithNoPointcut(CalculatingService::class, "sum")]
         );
+    }
+
+    public function test_passing_endpoint_annotation()
+    {
+        $interceptingService1 = CallWithStdClassInterceptorExample::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("some") ;
+        $methodInvocation = MethodInvoker::createWithInterceptors(
+            $interceptedService, 'methodWithAnnotation', [], InMemoryReferenceSearchService::createWith([
+            CallWithStdClassInterceptorExample::class => $interceptingService1
+        ]),
+            [AroundInterceptorReference::createWithNoPointcut(CallWithStdClassInterceptorExample::class, "callWithStdClass")],
+            [new \stdClass()]
+        );
+
+        $requestMessage = MessageBuilder::withPayload("test")->build();
+        $this->assertNull($methodInvocation->processMessage($requestMessage));
     }
 }

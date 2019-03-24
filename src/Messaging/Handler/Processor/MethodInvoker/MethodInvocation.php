@@ -40,6 +40,11 @@ interface MethodInvocation
     public function getInterceptedInterface() : InterfaceToCall;
 
     /**
+     * @return object[]
+     */
+    public function getEndpointAnnotations() : iterable;
+
+    /**
      * @param string $parameterName
      * @param mixed $value
      * @return void

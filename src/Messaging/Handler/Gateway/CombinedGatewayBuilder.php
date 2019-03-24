@@ -7,6 +7,7 @@ use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MultipleMethodGatewayBuilder
@@ -37,6 +38,8 @@ class CombinedGatewayBuilder implements GatewayBuilder
      * @param string $referenceName
      * @param string $interfaceName
      * @param CombinedGatewayDefinition[] $combinedGatewayDefinitions
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function __construct(string $referenceName, string $interfaceName, array $combinedGatewayDefinitions)
     {
@@ -45,7 +48,9 @@ class CombinedGatewayBuilder implements GatewayBuilder
         $this->gatewayDefinitions = $combinedGatewayDefinitions;
 
         foreach ($combinedGatewayDefinitions as $gatewayBuilder) {
-            InterfaceToCall::create($interfaceName, $gatewayBuilder->getRelatedMethod());
+            if (!(new \ReflectionClass($interfaceName))->hasMethod($gatewayBuilder->getRelatedMethod())) {
+                throw InvalidArgumentException::create("Combined gateway has no method {$gatewayBuilder->getRelatedMethod()}");
+            }
 
             $this->requiredReferences = array_merge($this->requiredReferences, $gatewayBuilder->getGatewayBuilder()->getRequiredReferences());
         }

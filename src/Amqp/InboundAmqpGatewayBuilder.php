@@ -19,8 +19,6 @@ use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageConverter\DefaultHeaderMapper;
 use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
-use SimplyCodedSoftware\Messaging\Transaction\AcknowledgementCallbackTransaction;
-use SimplyCodedSoftware\Messaging\Transaction\AcknowledgementCallbackTransactionFactory;
 
 /**
  * Class InboundEnqueueGatewayBuilder
@@ -157,7 +155,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
         /** @var InboundAmqpGateway $gateway */
         $referenceSearchService1 = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
             $customConverterReferenceName => AmqpMessageConverter::createWithMapper($amqpConnectionFactory, $this->headerMapper, $this->acknowledgeMode),
-            $customTransactionReferenceName => AcknowledgementCallbackTransactionFactory::createWith(AmqpHeader::HEADER_ACKNOWLEDGE)
+            $customTransactionReferenceName => new AcknowledgementCallbackTransactionFactory()
         ]);
 
         $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), InboundAmqpGateway::class, "execute", $this->requestChannelName)

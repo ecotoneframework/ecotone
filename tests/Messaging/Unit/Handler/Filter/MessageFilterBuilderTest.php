@@ -2,6 +2,9 @@
 
 namespace SimplyCodedSoftware\Messaging\Handler\Filter;
 
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainNoReturningInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
@@ -168,5 +171,37 @@ class MessageFilterBuilderTest extends MessagingTest
                 ->withEndpointId($endpointName),
             sprintf("Message filter - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
         );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_intercepting_message_with_discard()
+    {
+        $outputChannelName = "outputChannel";
+        $outputChannel = QueueChannel::create();
+
+        $messageFilter = MessageFilterBuilder::createWithReferenceName( MessageSelectorExample::class, "accept")
+            ->withOutputMessageChannel($outputChannelName)
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject(
+                CallWithEndingChainAndReturningInterceptorExample::createWithReturnType(false), "callWithEndingChainAndReturning",
+                1, ""
+            ))
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $outputChannelName => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    MessageSelectorExample::class => MessageSelectorExample::create()
+                ])
+            );
+
+        $message = MessageBuilder::withPayload("some")->build();
+
+        $messageFilter->handle($message);
+
+        $this->assertNull($outputChannel->receive());
     }
 }

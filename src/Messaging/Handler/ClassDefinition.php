@@ -23,7 +23,7 @@ class ClassDefinition
     /**
      * @var object[]
      */
-    private $annotations;
+    private $classAnnotations;
 
     /**
      * ClassDefinition constructor.
@@ -35,7 +35,7 @@ class ClassDefinition
     {
         $this->classDescriptor = $classDescriptor;
         $this->properties = $properties;
-        $this->annotations = $annotations;
+        $this->classAnnotations = $annotations;
     }
 
     /**
@@ -50,6 +50,26 @@ class ClassDefinition
     {
         $annotationParser = InMemoryAnnotationRegistrationService::createFrom([$classType->toString()]);
         $typeResolver = TypeResolver::create();
+
+        return new self(
+            $classType,
+            $typeResolver->getClassProperties($classType->toString()),
+            $annotationParser->getAnnotationsForClass($classType->toString())
+        );
+    }
+
+    /**
+     * @param TypeDescriptor $classType
+     * @param AnnotationParser $annotationParser
+     * @return ClassDefinition
+     * @throws TypeDefinitionException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationParser $annotationParser)
+    {
+        $typeResolver = TypeResolver::createWithAnnotationParser($annotationParser);
 
         return new self(
             $classType,
@@ -80,10 +100,31 @@ class ClassDefinition
     }
 
     /**
+     * @param TypeDescriptor $annotationClass
+     * @return array
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function getPropertiesWithAnnotation(TypeDescriptor $annotationClass)
+    {
+        $propertiesWithAnnotation = [];
+        foreach ($this->properties as $property) {
+            foreach ($property->getAnnotations() as $annotation) {
+                if (TypeDescriptor::createFromVariable($annotation)->equals($annotationClass)) {
+                    $propertiesWithAnnotation[] = $property;
+                    break;
+                }
+            }
+        }
+
+        return $propertiesWithAnnotation;
+    }
+
+    /**
      * @return object[]
      */
-    public function getAnnotations(): array
+    public function getClassAnnotations(): array
     {
-        return $this->annotations;
+        return $this->classAnnotations;
     }
 }

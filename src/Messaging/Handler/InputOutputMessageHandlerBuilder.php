@@ -33,6 +33,10 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      * @var AroundInterceptorReference[]
      */
     protected $orderedAroundInterceptors = [];
+    /**
+     * @var object[]
+     */
+    private $endpointAnnotations = [];
 
     /**
      * @inheritDoc
@@ -68,6 +72,25 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     public function getInputMessageChannelName(): string
     {
         return $this->inputMessageChannelName;
+    }
+
+    /**
+     * @param iterable $endpointAnnotations
+     * @return static
+     */
+    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    {
+        $this->endpointAnnotations = $endpointAnnotations;
+
+        return $this;
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getEndpointAnnotations(): array
+    {
+        return $this->endpointAnnotations;
     }
 
     /**

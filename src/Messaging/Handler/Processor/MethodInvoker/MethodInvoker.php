@@ -54,6 +54,10 @@ final class MethodInvoker implements MessageProcessor
      * @var AroundMethodInterceptor[]
      */
     private $aroundMethodInterceptors = [];
+    /**
+     * @var object[]
+     */
+    private $endpointAnnotations;
 
     /**
      * MethodInvocation constructor.
@@ -63,10 +67,11 @@ final class MethodInvoker implements MessageProcessor
      * @param InterfaceToCall $interfaceToCall
      * @param ConversionService $conversionService
      * @param AroundMethodInterceptor[] $aroundMethodInterceptors
+     * @param object[] $endpointAnnotations
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall, ConversionService $conversionService, array $aroundMethodInterceptors)
+    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall, ConversionService $conversionService, array $aroundMethodInterceptors, array $endpointAnnotations)
     {
         Assert::allInstanceOfType($methodParameterConverters, ParameterConverter::class);
 
@@ -76,6 +81,7 @@ final class MethodInvoker implements MessageProcessor
         $this->objectMethodName = $objectMethodName;
         $this->interfaceToCall = $interfaceToCall;
         $this->aroundMethodInterceptors = $aroundMethodInterceptors;
+        $this->endpointAnnotations = $endpointAnnotations;
     }
 
     /**
@@ -91,7 +97,8 @@ final class MethodInvoker implements MessageProcessor
             $this->aroundMethodInterceptors,
             $this->objectToInvokeOn,
             $this->interfaceToCall,
-            $message
+            $message,
+            $this->endpointAnnotations
         );
 
         return $methodInvokerProcessor->proceed();
@@ -173,6 +180,7 @@ final class MethodInvoker implements MessageProcessor
      * @param ParameterConverterBuilder[] $methodParameters
      * @param ReferenceSearchService $referenceSearchService
      * @param AroundInterceptorReference[] $orderedAroundMethodInterceptorReferences
+     * @param object[] $endpointAnnotations
      * @return MethodInvoker
      * @throws InvalidArgumentException
      * @throws \Doctrine\Common\Annotations\AnnotationException
@@ -180,14 +188,14 @@ final class MethodInvoker implements MessageProcessor
      * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWithInterceptors($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $orderedAroundMethodInterceptorReferences): self
+    public static function createWithInterceptors($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $orderedAroundMethodInterceptorReferences, array $endpointAnnotations = []): self
     {
         $messageConverters = [];
         foreach ($methodParameters as $methodParameter) {
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $orderedAroundMethodInterceptorReferences));
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $orderedAroundMethodInterceptorReferences), $endpointAnnotations);
     }
 
 
@@ -197,6 +205,7 @@ final class MethodInvoker implements MessageProcessor
      * @param ParameterConverter[] $methodParameters
      * @param ReferenceSearchService $referenceSearchService
      * @param AroundMethodInterceptor[] $interceptorsReferences
+     * @param object[] $endpointAnnotations
      * @return MethodInvoker
      * @throws InvalidArgumentException
      * @throws \Doctrine\Common\Annotations\AnnotationException
@@ -204,14 +213,14 @@ final class MethodInvoker implements MessageProcessor
      * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWithBuiltParameterConverters($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $interceptorsReferences = []): self
+    public static function createWithBuiltParameterConverters($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $interceptorsReferences = [], array $endpointAnnotations = []): self
     {
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
         $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
         /** @var ConversionService $conversionService */
         $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
 
-        return new self($objectToInvokeOn, $objectMethodName, $methodParameters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService, $interceptorsReferences);
+        return new self($objectToInvokeOn, $objectMethodName, $methodParameters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService, $interceptorsReferences, $endpointAnnotations);
     }
 
     /**

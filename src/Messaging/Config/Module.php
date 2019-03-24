@@ -39,13 +39,4 @@ interface Module
      * @return RequiredReference[]
      */
     public function getRequiredReferences(): array;
-
-    /**
-     * Runs during configuration phase, when all handlers must be already defined
-     *
-     * @param ReferenceSearchService $referenceSearchService
-     *
-     * @return void
-     */
-    public function afterConfigure(ReferenceSearchService $referenceSearchService): void;
 }

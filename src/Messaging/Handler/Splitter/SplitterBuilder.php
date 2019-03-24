@@ -74,7 +74,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [
             $this->directObject
@@ -176,9 +176,9 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
                     $this->methodName,
                     $this->methodParameterConverterBuilders,
                     $referenceSearchService,
-                    $this->orderedAroundInterceptors
-                )
-                ,
+                    $this->orderedAroundInterceptors,
+                    $this->getEndpointAnnotations()
+                ),
                 $channelResolver
             )
         );

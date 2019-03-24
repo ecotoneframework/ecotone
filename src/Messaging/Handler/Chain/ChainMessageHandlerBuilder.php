@@ -166,15 +166,17 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         $relatedReferences = [];
         if ($this->outputMessageHandler) {
-            $relatedReferences[] = $this->outputMessageHandler->resolveRelatedReference($interfaceToCallRegistry);
+            $relatedReferences[] = $this->outputMessageHandler->resolveRelatedReferences($interfaceToCallRegistry);
         }
 
         foreach ($this->chainedMessageHandlerBuilders as $chainedMessageHandlerBuilder) {
-            $relatedReferences[] = array_merge($relatedReferences, $chainedMessageHandlerBuilder->resolveRelatedReference($interfaceToCallRegistry));
+            foreach ($chainedMessageHandlerBuilder->resolveRelatedReferences($interfaceToCallRegistry) as $resolveRelatedReference) {
+                $relatedReferences[] = $resolveRelatedReference;
+            }
         }
 
         return $relatedReferences;

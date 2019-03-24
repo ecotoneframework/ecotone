@@ -25,7 +25,7 @@ class QueryHandler extends EndpointAnnotation
      */
     public $messageClassName;
     /**
-     * Optional output channel for extra transformations of query handler result
+     * Optional output channel for extra transformations
      *
      * @var string
      */

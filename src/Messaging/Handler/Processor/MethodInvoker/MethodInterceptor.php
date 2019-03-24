@@ -35,30 +35,31 @@ class MethodInterceptor
 
     /**
      * Interceptor constructor.
-     * @param string $referenceName
+     * @param string $interceptorName
      * @param MessageHandlerBuilderWithOutputChannel $messageHandler
      * @param int $precedence
      * @param Pointcut $pointcut
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function __construct(string $referenceName, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, Pointcut $pointcut)
+    private function __construct(string $interceptorName, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, Pointcut $pointcut)
     {
         $this->messageHandler = $messageHandler;
         $this->precedence = $precedence;
         $this->pointcut = $pointcut;
-        $this->referenceName = $referenceName;
+        $this->referenceName = $interceptorName;
     }
 
     /**
-     * @param string $referenceName
+     * @param string $interceptorName
      * @param MessageHandlerBuilderWithOutputChannel $messageHandler
      * @param int $precedence
      * @param string $pointcut
      * @return MethodInterceptor
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function create(string $referenceName, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, string $pointcut)
+    public static function create(string $interceptorName, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, string $pointcut)
     {
-        return new self($referenceName, $messageHandler, $precedence, Pointcut::createWith($pointcut));
+        return new self($interceptorName, $messageHandler, $precedence, Pointcut::createWith($pointcut));
     }
 
     /**
@@ -78,7 +79,7 @@ class MethodInterceptor
      */
     public function doesItCutWith(InterfaceToCallRegistry $interfaceToCallRegistry, MessageHandlerBuilderWithOutputChannel $messageHandler) : bool
     {
-        return $this->pointcut->doesItCut($messageHandler->getInterceptedInterface($interfaceToCallRegistry));
+        return $this->pointcut->doesItCut($messageHandler->getInterceptedInterface($interfaceToCallRegistry), $messageHandler->getEndpointAnnotations());
     }
 
     /**

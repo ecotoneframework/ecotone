@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Config;
 
 use Ramsey\Uuid\Uuid;
+use SimplyCodedSoftware\Messaging\Annotation\WithRequiredReferenceNameList;
 use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
@@ -142,7 +143,25 @@ final class MessagingSystemConfiguration implements Configuration
         $this->configureInterceptors();
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            $this->interfacesToCall = array_merge($this->interfacesToCall, $messageHandlerBuilder->resolveRelatedReference($interfaceToCallRegistry));
+            $relatedInterfaces = $messageHandlerBuilder->resolveRelatedReferences($interfaceToCallRegistry);
+
+            foreach ($relatedInterfaces as $relatedInterface) {
+                if (is_array($relatedInterface)) {
+                    var_dump($relatedInterfaces);die();
+                }
+                foreach ($relatedInterface->getMethodAnnotations() as $methodAnnotation) {
+                    if ($methodAnnotation instanceof WithRequiredReferenceNameList) {
+                        $this->requireReferences($methodAnnotation->getRequiredReferenceNameList());
+                    }
+                }
+                foreach ($relatedInterface->getClassAnnotations() as $classAnnotation) {
+                    if ($classAnnotation instanceof WithRequiredReferenceNameList) {
+                        $this->requireReferences($classAnnotation->getRequiredReferenceNameList());
+                    }
+                }
+            }
+
+            $this->interfacesToCall = array_merge($this->interfacesToCall, $relatedInterfaces);
         }
 
         $this->interfacesToCall = array_unique($this->interfacesToCall);
@@ -222,7 +241,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerAroundMethodInterceptor(AroundInterceptorReference $aroundInterceptorReference) : Configuration
     {
         $this->aroundMethodInterceptors[] = $aroundInterceptorReference;
-        $this->requireReferences([$aroundInterceptorReference->getReferenceName()]);
+        $this->requireReferences([$aroundInterceptorReference->getInterceptorName()]);
 
         return $this;
     }
@@ -296,6 +315,13 @@ final class MessagingSystemConfiguration implements Configuration
         if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithParameterConverters) {
             foreach ($messageHandlerBuilder->getParameterConverters() as $parameterConverter) {
                 $this->requireReferences($parameterConverter->getRequiredReferences());
+            }
+        }
+        if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
+            foreach ($messageHandlerBuilder->getEndpointAnnotations() as $endpointAnnotation) {
+                if ($endpointAnnotation instanceof WithRequiredReferenceNameList) {
+                    $this->requireReferences($endpointAnnotation->getRequiredReferenceNameList());
+                }
             }
         }
 
@@ -481,7 +507,7 @@ final class MessagingSystemConfiguration implements Configuration
         $aroundCallInterceptors = [];
 
         foreach ($this->aroundMethodInterceptors as $aroundMethodInterceptor) {
-            if (in_array($aroundMethodInterceptor->getReferenceName(), $interceptedMessageHandlerBuilder->getRequiredInterceptorReferenceNames()) || $aroundMethodInterceptor->doesItCutWith($interfaceToCallRegistry, $interceptedMessageHandlerBuilder)) {
+            if (in_array($aroundMethodInterceptor->getInterceptorName(), $interceptedMessageHandlerBuilder->getRequiredInterceptorReferenceNames()) || $aroundMethodInterceptor->doesItCutWith($interfaceToCallRegistry, $interceptedMessageHandlerBuilder)) {
                 $aroundCallInterceptors[] = $aroundMethodInterceptor;
             }
         }

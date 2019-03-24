@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Config\Annotation;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
+use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class InMemoryAnnotationRegistrationService
@@ -110,11 +111,11 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
      */
     public function getAnnotationsForProperty(string $className, string $propertyName): iterable
     {
-        if (!isset($this->annotationsForClass[self::CLASS_ANNOTATIONS][$className][self::CLASS_PROPERTIES][$propertyName])) {
+        if (!isset($this->annotationsForClass[self::CLASS_PROPERTIES][$className][$propertyName])) {
             return [];
         }
 
-        return $this->annotationsForClass[self::CLASS_ANNOTATIONS][$className][self::CLASS_PROPERTIES][$propertyName];
+        return $this->annotationsForClass[self::CLASS_PROPERTIES][$className][$propertyName];
     }
 
     /**
@@ -156,6 +157,9 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
 
         foreach ($this->annotationsForClass[self::CLASS_ANNOTATIONS] as $className => $annotations) {
             foreach ($annotations as $annotation) {
+                if (!is_object($annotation)) {
+                    var_dump($annotation);die();
+                }
                 if (get_class($annotation) == $annotationClassName) {
                     $classes[] = $className;
                 }
@@ -195,7 +199,7 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
      */
     public function addAnnotationToProperty(string $className, string $property, $propertyAnnotationObject) : self
     {
-        $this->annotationsForClass[self::CLASS_ANNOTATIONS][$className][self::CLASS_PROPERTIES][$property][] = $propertyAnnotationObject;
+        $this->annotationsForClass[self::CLASS_PROPERTIES][$className][$property][] = $propertyAnnotationObject;
 
         return $this;
     }

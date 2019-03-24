@@ -37,6 +37,10 @@ class MethodInvokerChainProcessor implements MethodInvocation
      * @var Message
      */
     private $requestMessage;
+    /**
+     * @var object[]
+     */
+    private $endpointAnnotations;
 
     /**
      * MethodInvokerProcessor constructor.
@@ -46,8 +50,9 @@ class MethodInvokerChainProcessor implements MethodInvocation
      * @param object $interceptedInstance
      * @param InterfaceToCall $interceptedInterfaceToCall
      * @param Message $requestMessage
+     * @param object[] $endpointAnnotations
      */
-    public function __construct(MethodCall $methodCall, MethodInvoker $methodInvoker, array $aroundMethodInterceptors, $interceptedInstance, InterfaceToCall $interceptedInterfaceToCall, Message $requestMessage)
+    public function __construct(MethodCall $methodCall, MethodInvoker $methodInvoker, array $aroundMethodInterceptors, $interceptedInstance, InterfaceToCall $interceptedInterfaceToCall, Message $requestMessage, iterable $endpointAnnotations)
     {
         $this->methodCall = $methodCall;
         $this->methodInvoker = $methodInvoker;
@@ -55,6 +60,7 @@ class MethodInvokerChainProcessor implements MethodInvocation
         $this->interceptedInstance = $interceptedInstance;
         $this->interceptedInterfaceToCall = $interceptedInterfaceToCall;
         $this->requestMessage = $requestMessage;
+        $this->endpointAnnotations = $endpointAnnotations;
     }
 
 
@@ -116,5 +122,13 @@ class MethodInvokerChainProcessor implements MethodInvocation
     public function getInterceptedInterface() : InterfaceToCall
     {
         return $this->interceptedInterfaceToCall;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEndpointAnnotations(): iterable
+    {
+        return $this->endpointAnnotations;
     }
 }

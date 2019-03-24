@@ -118,6 +118,10 @@ class InterfaceToCallRegistry
     {
         $objectClassType = $this->referenceTypeFromNameResolver->resolve($referenceName);
 
+        if (!$objectClassType->isObject()) {
+            throw new \InvalidArgumentException("Reference {$referenceName} is not an object");
+        }
+
         return $this->getFor($objectClassType->toString(), $methodName);
     }
 

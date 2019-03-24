@@ -46,7 +46,7 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [$interfaceToCallRegistry->getFor(LoggingHandler::class, "handle")];
     }

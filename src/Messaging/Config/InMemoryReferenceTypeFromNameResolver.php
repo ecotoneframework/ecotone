@@ -13,13 +13,13 @@ use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameResolver
 {
     /**
-     * @var object[]
+     * @var string[]
      */
     private $references;
 
     /**
      * InMemoryReferenceTypeFromNameResolver constructor.
-     * @param object[] $references
+     * @param string[] $references
      */
     private function __construct(array $references)
     {
@@ -27,7 +27,7 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
     }
 
     /**
-     * @param object[] $references
+     * @param string[] $references
      * @return InMemoryReferenceTypeFromNameResolver
      */
     public static function createFromAssociativeArray(array $references) : self
@@ -52,6 +52,6 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
             throw ConfigurationException::create("Reference not found `{$referenceName}`.");
         }
 
-        return TypeDescriptor::createFromVariable($this->references[$referenceName]);
+        return TypeDescriptor::create($this->references[$referenceName]);
     }
 }

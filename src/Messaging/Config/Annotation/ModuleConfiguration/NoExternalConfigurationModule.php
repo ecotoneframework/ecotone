@@ -17,22 +17,6 @@ abstract class NoExternalConfigurationModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function getConfigurationVariables(): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function afterConfigure(ReferenceSearchService $referenceSearchService): void
-    {
-        return;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getRequiredReferences(): array
     {
         return [];

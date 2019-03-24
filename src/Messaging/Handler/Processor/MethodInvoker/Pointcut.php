@@ -46,11 +46,12 @@ class Pointcut
 
     /**
      * @param InterfaceToCall $interfaceToCall
+     * @param object[] $endpointAnnotations
      * @return bool
      * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function doesItCut(InterfaceToCall $interfaceToCall) : bool
+    public function doesItCut(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations) : bool
     {
         if (is_null($this->expression)) {
             return false;
@@ -70,16 +71,21 @@ class Pointcut
             }
         }
 
-        if (strpos($this->expression, "@method(") !== false) {
-            $methodAnnotation = str_replace(["@method(", ")"], "", $this->expression);
+        if (strpos($this->expression, "@(") !== false) {
+            $annotationToCheck = str_replace(["@(", ")"], "", $this->expression);
+            $annotationToCheck = TypeDescriptor::create($annotationToCheck);
 
-            return $interfaceToCall->hasMethodAnnotation(TypeDescriptor::create($methodAnnotation));
-        }
+            foreach ($endpointAnnotations as $endpointAnnotation) {
+                $endpointType = TypeDescriptor::createFromVariable($endpointAnnotation);
 
-        if (strpos($this->expression, "@class(") !== false) {
-            $classAnnotation = str_replace(["@class(", ")"], "", $this->expression);
+                if ($endpointType->equals($annotationToCheck)) {
+                    return true;
+                }
+            }
 
-            return $interfaceToCall->hasClassAnnotation(TypeDescriptor::create($classAnnotation));
+            return
+                $interfaceToCall->hasMethodAnnotation($annotationToCheck)
+                || $interfaceToCall->hasClassAnnotation($annotationToCheck);
         }
 
         return false;

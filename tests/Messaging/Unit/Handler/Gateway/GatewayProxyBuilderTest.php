@@ -2,6 +2,8 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway;
 
+use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransaction;
+use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway\DumbSendAndReceiveService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
@@ -661,21 +663,19 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannelName = "request-channel";
         $requestChannel     = DirectChannel::create();
         $requestChannel->subscribe($messageHandler);
-        $transactionFactoryReferenceNames = ["trans1", "trans2"];
+        $transactionFactoryReferenceNames = ["trans1"];
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName)
-                                ->withTransactionFactories($transactionFactoryReferenceNames);
+                                    ->withTransactionFactories($transactionFactoryReferenceNames);
 
         $this->assertEquals($transactionFactoryReferenceNames, $gatewayProxyBuilder->getRequiredReferences());
 
 
-        /** @var ServiceInterfaceSendOnly $gatewayProxy */
-        $transactionFactoryOne = FakeTransactionFactory::create();
-        $transactionFactoryTwo = FakeTransactionFactory::create();
+        $transactionOne = NullTransaction::start();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
         $gatewayProxy = $gatewayProxyBuilder->build(
             InMemoryReferenceSearchService::createWith([
-                "trans1" => $transactionFactoryOne,
-                "trans2" => $transactionFactoryTwo
+                "trans1" => $transactionFactoryOne
             ]),
             InMemoryChannelResolver::create(
                 [
@@ -684,13 +684,9 @@ class GatewayProxyBuilderTest extends MessagingTest
             )
         );
 
-        $this->assertNull($transactionFactoryOne->getCurrentTransaction());
-        $this->assertNull($transactionFactoryTwo->getCurrentTransaction());
-
         $gatewayProxy->sendMail('test');
 
-        $this->assertTrue($transactionFactoryOne->getCurrentTransaction()->isCommitted());
-        $this->assertTrue($transactionFactoryTwo->getCurrentTransaction()->isCommitted());
+        $this->assertTrue($transactionOne->isCommitted());
     }
 
     public function test_calling_gateway_with_failure_transactions()

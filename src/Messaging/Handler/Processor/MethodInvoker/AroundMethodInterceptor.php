@@ -89,6 +89,7 @@ class AroundMethodInterceptor
         $hasMethodInvocation = false;
         $argumentsToCallInterceptor = [];
         $interceptedInstanceType = TypeDescriptor::createFromVariable($methodInvocation->getInterceptedInstance());
+        $referenceSearchServiceTypeDescriptor = TypeDescriptor::create(ReferenceSearchService::class);
         $messageType = TypeDescriptor::create(Message::class);
 
         foreach ($this->interceptorInterfaceToCall->getInterfaceParameters() as $parameter) {
@@ -119,6 +120,21 @@ class AroundMethodInterceptor
                 }
                 if ($methodInvocation->getInterceptedInterface()->hasClassAnnotation($parameter->getTypeDescriptor())) {
                     $resolvedArgument = $methodInvocation->getInterceptedInterface()->getClassAnnotation($parameter->getTypeDescriptor());
+                }
+            }
+
+            if (!$resolvedArgument) {
+                foreach ($methodInvocation->getEndpointAnnotations() as $endpointAnnotation) {
+                    if (TypeDescriptor::createFromVariable($endpointAnnotation)->equals($parameter->getTypeDescriptor())) {
+                        $resolvedArgument = $endpointAnnotation;
+                        break;
+                    }
+                }
+            }
+
+            if (!$resolvedArgument) {
+                if ($parameter->hasType($referenceSearchServiceTypeDescriptor)) {
+                    $resolvedArgument = $this->referenceSearchService;
                 }
             }
 

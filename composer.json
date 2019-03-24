@@ -30,7 +30,13 @@
         "doctrine/annotations": "^1.6.0",
         "symfony/expression-language": "^3.0|^4.0",
         "dragonmantank/cron-expression": "^2.2",
-        "psr/http-message": "^1.0.1"
+        "psr/http-message": "^1.0.1",
+
+        "guzzlehttp/psr7": "^1.4",
+
+        "enqueue/amqp-lib": "^0.9",
+        "enqueue/dsn": "^0.9",
+        "enqueue/enqueue": "^0.9"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.0.0",

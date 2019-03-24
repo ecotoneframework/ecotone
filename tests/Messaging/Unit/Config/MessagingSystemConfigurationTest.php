@@ -11,6 +11,7 @@ use SimplyCodedSoftware\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
+use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
@@ -25,6 +26,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuild
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Channel\DumbChannelInterceptor;
@@ -33,6 +35,7 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbGatewayBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
@@ -171,7 +174,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws \Exception
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_informing_exposing_required_references()
+    public function test_registering_required_reference_names()
     {
         $messagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -185,6 +188,83 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $this->assertEquals(
             ["ref-a", "ref-b"],
+            $messagingSystem->getRequiredReferences()
+        );
+    }
+
+    public function test_registering_reference_names_from_interceptors()
+    {
+        $messagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+
+        $messagingSystem
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "some",
+                    ServiceActivatorBuilder::create("reference1", "sum"),
+                    MethodInterceptor::DEFAULT_PRECEDENCE,
+                    CalculatingService::class
+                )
+            )
+            ->registerAroundMethodInterceptor(
+                AroundInterceptorReference::createWithNoPointcut(
+                    "reference2", "multiply"
+                )
+            )
+            ->registerAfterMethodInterceptor(
+                MethodInterceptor::create(
+                    "some",
+                    ServiceActivatorBuilder::create("reference3", "multiply"),
+                    MethodInterceptor::DEFAULT_PRECEDENCE,
+                    CalculatingService::class
+                )
+            )
+        ;
+
+        $this->assertEquals(
+            ["reference1", "reference2", "reference3"],
+            $messagingSystem->getRequiredReferences()
+        );
+    }
+
+    public function test_registering_reference_from_endpoint_annotation()
+    {
+        $messagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+
+        $messagingSystem
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::create("reference1", "sum")
+                    ->withInputChannelName("some")
+                    ->withEndpointAnnotations([
+                        Transactional::createWith(["reference2"])
+                    ])
+            )
+        ;
+
+        $this->assertEquals(
+            ["reference1", "reference2"],
+            $messagingSystem->getRequiredReferences()
+        );
+    }
+
+    public function test_registering_reference_from_interface_to_call_on_prepare_method()
+    {
+        $messagingSystem = MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
+            InMemoryModuleMessaging::createWith(
+                [
+                    ExampleModuleConfiguration::createWithHandlers([
+                        ServiceActivatorBuilder::create("reference0", "doAction")
+                            ->withInputChannelName("some")
+                    ])
+                ],
+                []
+            ),
+            InMemoryReferenceTypeFromNameResolver::createFromAssociativeArray([
+                "reference0" => TransactionalInterceptorExample::class
+            ])
+        );
+
+        $this->assertEquals(
+            ["reference0", "reference2", "reference1"],
             $messagingSystem->getRequiredReferences()
         );
     }

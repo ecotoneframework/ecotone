@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
 
+use SimplyCodedSoftware\DomainModel\Annotation\InitializeAggregateOnNotFound;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;

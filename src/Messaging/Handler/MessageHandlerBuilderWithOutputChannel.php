@@ -37,6 +37,17 @@ interface MessageHandlerBuilderWithOutputChannel extends MessageHandlerBuilder
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry) : InterfaceToCall;
 
     /**
+     * @param iterable $endpointAnnotations
+     * @return static
+     */
+    public function withEndpointAnnotations(iterable $endpointAnnotations);
+
+    /**
+     * @return object[]
+     */
+    public function getEndpointAnnotations(): array;
+
+    /**
      * @return string[]
      */
     public function getRequiredInterceptorReferenceNames() : iterable;

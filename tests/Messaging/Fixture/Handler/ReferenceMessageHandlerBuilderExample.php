@@ -75,7 +75,7 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [];
     }

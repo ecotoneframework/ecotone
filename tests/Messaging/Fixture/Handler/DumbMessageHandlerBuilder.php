@@ -88,7 +88,7 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [];
     }

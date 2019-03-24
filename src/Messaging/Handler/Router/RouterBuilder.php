@@ -104,7 +104,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [$this->directObjectToInvoke
                 ? $interfaceToCallRegistry->getFor($this->directObjectToInvoke, $this->methodName)

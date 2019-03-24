@@ -162,7 +162,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [
             $this->directObjectReference
@@ -198,7 +198,8 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
                 $this->methodName,
                 $this->methodParameterConverterBuilders,
                 $referenceSearchService,
-                $this->orderedAroundInterceptors
+                $this->orderedAroundInterceptors,
+                $this->getEndpointAnnotations()
             ),
             $referenceSearchService
         );

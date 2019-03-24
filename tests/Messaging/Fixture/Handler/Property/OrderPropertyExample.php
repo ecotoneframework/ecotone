@@ -2,8 +2,8 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property;
 
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
-use SimplyCodedSoftware\Messaging\Annotation\RequiredReferenceName;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
+use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 use stdClass as SomeClass;
 
 /**
@@ -24,7 +24,7 @@ class OrderPropertyExample
 
     /**
      * @var string
-     * @RequiredReferenceName()
+     * @PropertyAnnotationExample()
      */
     protected static $reference;
     /**

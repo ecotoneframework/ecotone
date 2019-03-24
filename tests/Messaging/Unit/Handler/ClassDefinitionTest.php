@@ -4,12 +4,14 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler;
 
 use PHPUnit\Framework\TestCase;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\Messaging\Annotation\RequiredReferenceName;
 use SimplyCodedSoftware\Messaging\Handler\ClassDefinition;
 use SimplyCodedSoftware\Messaging\Handler\ClassPropertyDefinition;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\OrderPropertyExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\PropertyAnnotationExample;
 
 /**
  * Class ClassDefinitionTest
@@ -34,9 +36,23 @@ class ClassDefinitionTest extends TestCase
 
         $this->assertEquals(
             ClassPropertyDefinition::createProtected("reference", TypeDescriptor::createStringType(), true, true, [
-                new RequiredReferenceName()
+                new PropertyAnnotationExample()
             ]),
             $classDefinition->getProperty("reference")
+        );
+    }
+
+    public function test_retrieving_property_with_annotation()
+    {
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
+
+        $this->assertEquals(
+            [
+                ClassPropertyDefinition::createProtected("reference", TypeDescriptor::createStringType(), true, true, [
+                    new PropertyAnnotationExample()
+                ])
+            ],
+            $classDefinition->getPropertiesWithAnnotation(TypeDescriptor::create(PropertyAnnotationExample::class))
         );
     }
 

@@ -97,7 +97,7 @@ class GatewayInternalHandler
     {
         $transactions = [];
         foreach ($this->transactionFactories as $transactionFactory) {
-            $transactions[] = $transactionFactory->begin();
+            $transactions[] = $transactionFactory->begin($requestMessage);
         }
 
         try {

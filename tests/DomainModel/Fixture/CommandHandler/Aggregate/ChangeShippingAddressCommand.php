@@ -9,7 +9,7 @@ use SimplyCodedSoftware\DomainModel\Annotation\TargetAggregateIdentifier;
  * @package Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ChangeShippingAddressCommand
+class ChangeShippingAddressCommand implements RegisterWithShipping
 {
     /**
      * @var string

@@ -8,7 +8,9 @@ use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Pointcut;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\AspectWithoutMethodInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample;
 
 /**
  * Class PointcutTest
@@ -19,7 +21,7 @@ class PointcutTest extends TestCase
 {
     public function test_if_empty_point_cut_it_should_no_cut()
     {
-        $this->assertFalse(Pointcut::createEmpty()->doesItCut(InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")));
+        $this->assertFalse(Pointcut::createEmpty()->doesItCut(InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation"), []));
     }
 
     public function test_pointing_to_exact_class()
@@ -46,31 +48,41 @@ class PointcutTest extends TestCase
         );
     }
 
-    public function test_pointing_based_on_method_annotation()
+    public function test_targeting_on_method_annotation()
     {
         $this->itShouldCut(
-            "@method(" . Around::class . ")",
-            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+            "@(" . Around::class . ")",
+            InterfaceToCall::create(AspectWithoutMethodInterceptorExample::class, "doSomething")
         );
 
         $this->itShouldNotCut(
-            "@method(" . MethodInterceptor::class . ")",
-            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+            "@(" . MethodInterceptor::class . ")",
+            InterfaceToCall::create(AspectWithoutMethodInterceptorExample::class, "doSomething")
         );
     }
 
-    public function test_pointing_based_on_class_annotation()
+    public function test_targeting_on_class_annotation()
     {
         $this->itShouldNotCut(
-            "@class(" . Around::class . ")",
-            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+            "@(" . Around::class . ")",
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
 
         $this->itShouldCut(
-            "@class(" . MethodInterceptor::class . ")",
-            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+            "@(" . MethodInterceptor::class . ")",
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
     }
+
+    public function test_targeting_on_endpoint_annotations()
+    {
+        $this->assertTrue(Pointcut::createWith("@(" . \stdClass::class . ")")->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
+                [new \stdClass()]
+            )
+        );
+    }
+
 
     /**
      * @param string $expression
@@ -80,7 +92,7 @@ class PointcutTest extends TestCase
      */
     private function itShouldCut(string $expression, InterfaceToCall $doesItCut): void
     {
-        $this->assertTrue(Pointcut::createWith($expression)->doesItCut($doesItCut));
+        $this->assertTrue(Pointcut::createWith($expression)->doesItCut($doesItCut, []));
     }
 
     /**
@@ -91,6 +103,6 @@ class PointcutTest extends TestCase
      */
     private function itShouldNotCut(string $expression, InterfaceToCall $doesItCut): void
     {
-        $this->assertFalse(Pointcut::createWith($expression)->doesItCut($doesItCut));
+        $this->assertFalse(Pointcut::createWith($expression)->doesItCut($doesItCut, []));
     }
 }

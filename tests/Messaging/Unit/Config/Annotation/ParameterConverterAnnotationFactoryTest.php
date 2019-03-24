@@ -38,7 +38,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
             [
                 ReferenceBuilder::create(
                     $parameterConverterAnnotation->parameterName,
-                    "\\" . \stdClass::class
+                    \stdClass::class
                 )
             ],
             $parameterConverterAnnotationFactory->createParameterConverters(

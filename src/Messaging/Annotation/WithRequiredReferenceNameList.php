@@ -4,12 +4,14 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Annotation;
 
 /**
- * Class ReferenceNameList
+ * Interface WithRequiredReferenceNameList
  * @package SimplyCodedSoftware\Messaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
  */
-class RequiredReferenceNameList
+interface WithRequiredReferenceNameList
 {
-
+    /**
+     * @return string[]
+     */
+    public function getRequiredReferenceNameList() : iterable;
 }

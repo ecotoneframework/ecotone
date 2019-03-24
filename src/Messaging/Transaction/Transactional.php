@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Transaction;
 
-use SimplyCodedSoftware\Messaging\Annotation\RequiredReferenceNameList;
+use SimplyCodedSoftware\Messaging\Annotation\WithRequiredReferenceNameList;
 
 /**
  * Class Transactional
@@ -11,11 +11,11 @@ use SimplyCodedSoftware\Messaging\Annotation\RequiredReferenceNameList;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class Transactional
+class Transactional implements WithRequiredReferenceNameList
 {
+    private const FACTORY_REFERENCE_NAME_LIST = 'factoryReferenceNameList';
     /**
-     * @var string[]
-     * @RequiredReferenceNameList()
+     * @var array|string[]
      */
     private $factoryReferenceNameList;
 
@@ -25,7 +25,19 @@ class Transactional
      */
     public function __construct(array $values)
     {
-        $this->factoryReferenceNameList = $values['factoryReferenceNameList'];
+        $this->factoryReferenceNameList =
+            isset($values[self::FACTORY_REFERENCE_NAME_LIST])
+                ? $values[self::FACTORY_REFERENCE_NAME_LIST]
+                : (isset($values['value']) ? $values['value'] : []);
+    }
+
+    /**
+     * @param string[] $factoryReferenceNameList
+     * @return Transactional
+     */
+    public static function createWith(array $factoryReferenceNameList) : self
+    {
+        return new self([self::FACTORY_REFERENCE_NAME_LIST => $factoryReferenceNameList]);
     }
 
     /**
@@ -34,5 +46,13 @@ class Transactional
     public function getFactoryReferenceNameList(): array
     {
         return $this->factoryReferenceNameList;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredReferenceNameList(): iterable
+    {
+        return $this->getFactoryReferenceNameList();
     }
 }

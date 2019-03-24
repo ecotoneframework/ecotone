@@ -35,6 +35,10 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      */
     private $methodName;
     /**
+     * @var InterfaceToCall
+     */
+    private $interfaceToCall;
+    /**
      * @var array|ParameterConverterBuilder[]
      */
     private $methodParameterConverterBuilders = [];
@@ -148,6 +152,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
 
         $this->messageIdentifierMapping = $aggregateDefaultIdentifiers;
         $this->expectedVersionPropertyName = $expectedVersionPropertyName;
+        $this->interfaceToCall = $interfaceToCall;
     }
 
     /**
@@ -194,16 +199,6 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     public function getRequiredReferenceNames(): array
     {
         return $this->requiredReferences;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [
-            $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->methodName)
-        ];
     }
 
     /**
@@ -297,6 +292,19 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         return $chainCqrsMessageHandler
             ->withOutputMessageChannel($this->outputMessageChannelName)
             ->build($channelResolver, $referenceSearchService);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    {
+        return [
+            $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->methodName),
+            $interfaceToCallRegistry->getFor(LoadAggregateService::class, "load"),
+            $interfaceToCallRegistry->getFor(CallAggregateService::class, "call"),
+            $interfaceToCallRegistry->getFor(SaveAggregateService::class, "save")
+        ];
     }
 
     /**

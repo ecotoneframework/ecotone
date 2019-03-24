@@ -223,7 +223,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
 
         $this->assertEquals(
             [InterfaceToCall::create($objectToInvoke, "result")],
-            $serviceActivator->resolveRelatedReference(
+            $serviceActivator->resolveRelatedReferences(
                 InterfaceToCallRegistry::createWith(InMemoryReferenceTypeFromNameResolver::createEmpty())
             )
         );
@@ -238,10 +238,10 @@ class ServiceActivatorBuilderTest extends MessagingTest
 
         $this->assertEquals(
             [InterfaceToCall::create($objectToInvoke, "result")],
-            $serviceActivator->resolveRelatedReference(
+            $serviceActivator->resolveRelatedReferences(
                 InterfaceToCallRegistry::createWith(
                     InMemoryReferenceTypeFromNameResolver::createFromAssociativeArray([
-                        $objectToInvokeOnReference => $objectToInvoke
+                        $objectToInvokeOnReference => CalculatingServiceInterceptorExample::class
                     ])
                 )
             )

@@ -23,7 +23,7 @@ class AroundInterceptorReference
     /**
      * @var string
      */
-    private $referenceName;
+    private $interceptorName;
     /**
      * @var string
      */
@@ -40,38 +40,38 @@ class AroundInterceptorReference
     /**
      * InterceptorReference constructor.
      * @param int $precedence
-     * @param string $referenceName
+     * @param string $interceptorName
      * @param string $methodName
      * @param Pointcut $pointcut
      */
-    private function __construct(int $precedence, string $referenceName, string $methodName, Pointcut $pointcut)
+    private function __construct(int $precedence, string $interceptorName, string $methodName, Pointcut $pointcut)
     {
-        $this->referenceName = $referenceName;
+        $this->interceptorName = $interceptorName;
         $this->methodName = $methodName;
         $this->precedence = $precedence;
         $this->pointcut = $pointcut;
     }
 
     /**
-     * @param string $referenceName
+     * @param string $interceptorName
      * @param string $methodName
      * @return AroundInterceptorReference
      */
-    public static function createWithNoPointcut(string $referenceName, string $methodName) : self
+    public static function createWithNoPointcut(string $interceptorName, string $methodName) : self
     {
-        return new self(MethodInterceptor::DEFAULT_PRECEDENCE, $referenceName, $methodName, Pointcut::createEmpty());
+        return new self(MethodInterceptor::DEFAULT_PRECEDENCE, $interceptorName, $methodName, Pointcut::createEmpty());
     }
 
     /**
-     * @param string $referenceName
+     * @param string $interceptorName
      * @param string $methodName
      * @param int $precedence
      * @param string $pointcut
      * @return AroundInterceptorReference
      */
-    public static function create(string $referenceName, string $methodName, int $precedence, string $pointcut) : self
+    public static function create(string $interceptorName, string $methodName, int $precedence, string $pointcut) : self
     {
-        return new self($precedence, $referenceName, $methodName, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty());
+        return new self($precedence, $interceptorName, $methodName, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty());
     }
 
     /**
@@ -93,8 +93,13 @@ class AroundInterceptorReference
 
     /**
      * @param ReferenceSearchService $referenceSearchService
-     * @param array $interceptorsReferences
+     * @param AroundInterceptorReference[] $interceptorsReferences
      * @return MethodInterceptor[]
+     * @throws ReferenceNotFoundException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
      */
     public static function createAroundInterceptors(ReferenceSearchService $referenceSearchService, array $interceptorsReferences): array
     {
@@ -126,11 +131,13 @@ class AroundInterceptorReference
     }
 
     /**
+     * For Around interceptor, name is also a reference name
+     *
      * @return string
      */
-    public function getReferenceName() : string
+    public function getInterceptorName() : string
     {
-        return $this->referenceName;
+        return $this->interceptorName;
     }
 
     /**
@@ -142,19 +149,22 @@ class AroundInterceptorReference
      */
     public function doesItCutWith(InterfaceToCallRegistry $interfaceToCallRegistry, MessageHandlerBuilderWithOutputChannel $messageHandler) : bool
     {
-        return $this->pointcut->doesItCut($messageHandler->getInterceptedInterface($interfaceToCallRegistry));
+        return $this->pointcut->doesItCut($messageHandler->getInterceptedInterface($interfaceToCallRegistry), $messageHandler->getEndpointAnnotations());
     }
 
     /**
      * @param ReferenceSearchService $referenceSearchService
      * @return AroundMethodInterceptor
      * @throws ReferenceNotFoundException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
      */
     public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService) : AroundMethodInterceptor
     {
         return AroundMethodInterceptor::createWith(
-            $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName),
+            $this->directObject ? $this->directObject : $referenceSearchService->get($this->interceptorName),
             $this->methodName,
             $referenceSearchService
         );

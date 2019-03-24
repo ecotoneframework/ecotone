@@ -3,7 +3,6 @@
 namespace SimplyCodedSoftware\Messaging\Handler;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class TypeResolver
@@ -24,13 +23,32 @@ class TypeResolver
     private const STATIC_TYPE_HINT = "static";
     private const THIS_TYPE_HINT = '$this';
 
-    private function __construct()
+    /**
+     * @var AnnotationParser|null
+     */
+    private $annotationParser;
+
+    /**
+     * TypeResolver constructor.
+     * @param AnnotationParser|null $annotationParser
+     */
+    private function __construct(?AnnotationParser $annotationParser)
     {
+        $this->annotationParser = $annotationParser;
     }
 
     public static function create(): self
     {
-        return new self();
+        return new self(null);
+    }
+
+    /**
+     * @param AnnotationParser $annotationParser
+     * @return TypeResolver
+     */
+    public static function createWithAnnotationParser(AnnotationParser $annotationParser): self
+    {
+        return new self($annotationParser);
     }
 
     /**
@@ -63,125 +81,6 @@ class TypeResolver
     }
 
     /**
-     * @param string $className
-     * @return ClassPropertyDefinition[]
-     * @throws TypeDefinitionException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function getClassProperties(string $className): iterable
-    {
-        $reflectionClass = new \ReflectionClass($className);
-        $annotationParser = InMemoryAnnotationRegistrationService::createFrom([$className]);
-
-        $classProperties = [];
-        $properties = $reflectionClass->getProperties();
-        $parent = $reflectionClass;
-        while ($parent = $parent->getParentClass()) {
-            $properties = array_merge($properties, $parent->getProperties());
-        }
-        $properties = array_unique($properties);
-
-        foreach ($properties as $property) {
-            $type = $this->getPropertyDocblockTypeHint($reflectionClass, $property);
-            $type = $type ? $type : TypeDescriptor::createUnknownType();
-            $annotations = $annotationParser->getAnnotationsForProperty($className, $property->getName());
-
-            if ($property->isPrivate()) {
-                $classProperties[] = ClassPropertyDefinition::createPrivate(
-                    $property->getName(),
-                    $type,
-                    true,
-                    $property->isStatic(),
-                    $annotations
-                );
-            }else if ($property->isProtected()) {
-                $classProperties[] = ClassPropertyDefinition::createProtected(
-                    $property->getName(),
-                    $type,
-                    true,
-                    $property->isStatic(),
-                    $annotations
-                );
-            }else {
-                $classProperties[] = ClassPropertyDefinition::createPublic(
-                    $property->getName(),
-                    $type,
-                    true,
-                    $property->isStatic(),
-                    $annotations
-                );
-            }
-        }
-
-        return $classProperties;
-    }
-
-    /**
-     * @param \ReflectionClass $analyzedClass
-     * @param \ReflectionProperty $reflectionProperty
-     * @return TypeDescriptor|null
-     * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    private function getPropertyDocblockTypeHint(\ReflectionClass $analyzedClass, \ReflectionProperty $reflectionProperty): ?TypeDescriptor
-    {
-        $docComment = $reflectionProperty->getDocComment();
-        preg_match_all(self::CLASS_PROPERTY_TYPE_HINT_REGEX, $docComment, $matchedDocBlockParameterTypes);
-
-        if (!isset($matchedDocBlockParameterTypes[1][0])) {
-            return null;
-        }
-
-        return TypeDescriptor::create(
-            $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][0], $analyzedClass, $reflectionProperty->getDeclaringClass())
-        );
-    }
-
-    /**
-     * @param \ReflectionClass $interfaceReflection
-     * @return array
-     */
-    private function getClassUseStatements(\ReflectionClass $interfaceReflection): array
-    {
-        $code = file_get_contents($interfaceReflection->getFileName());
-        preg_match_all(self::CODE_USE_STATEMENTS_REGEX, $code, $foundUseStatements);
-
-        $useStatements = [];
-        $matchAmount = count($foundUseStatements[0]);
-        for ($matchIndex = 0; $matchIndex < $matchAmount; $matchIndex++) {
-            $className = $foundUseStatements[1][$matchIndex];
-            $classNameAlias = null;
-            if (($alias = explode(" as ", $className)) && $this->hasUseStatementAlias($alias)) {
-                $className = $alias[0];
-                $classNameAlias = $alias[1];
-            }
-
-            $splittedClassName = explode("\\", $className);
-            if ($className[0] !== "\\") {
-                $className = "\\" . $className;
-            }
-            if (!$classNameAlias) {
-                $classNameAlias = end($splittedClassName);
-            }
-
-            $useStatements[$classNameAlias] = $className;
-        }
-
-        return $useStatements;
-    }
-
-    /**
-     * @param $alias
-     * @return bool
-     */
-    private function hasUseStatementAlias($alias): bool
-    {
-        return count($alias) === 2;
-    }
-
-    /**
      * @param \ReflectionClass $reflectionClass
      * @param \ReflectionMethod $methodReflection
      * @param string[] $statements
@@ -200,28 +99,6 @@ class TypeResolver
         }
 
         return $docBlockParameterTypeHints;
-    }
-
-    /**
-     * @param \ReflectionClass $analyzedClass
-     * @param string $methodName
-     * @return \ReflectionClass
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    private function getMethodDeclaringClass(\ReflectionClass $analyzedClass, string $methodName) : \ReflectionClass
-    {
-        foreach ($analyzedClass->getInterfaceNames() as $interfaceName) {
-            if (method_exists($interfaceName, $methodName)) {
-                return new \ReflectionClass($interfaceName);
-            }
-        }
-        $parentClass = $analyzedClass->getParentClass();
-        if ($parentClass && $parentClass->hasMethod($methodName)) {
-            return $parentClass;
-        }
-
-        return $analyzedClass;
     }
 
     /**
@@ -286,6 +163,48 @@ class TypeResolver
         }
 
         return implode("|", $fullNames);
+    }
+
+    /**
+     * @param \ReflectionClass $interfaceReflection
+     * @return array
+     */
+    private function getClassUseStatements(\ReflectionClass $interfaceReflection): array
+    {
+        $code = file_get_contents($interfaceReflection->getFileName());
+        preg_match_all(self::CODE_USE_STATEMENTS_REGEX, $code, $foundUseStatements);
+
+        $useStatements = [];
+        $matchAmount = count($foundUseStatements[0]);
+        for ($matchIndex = 0; $matchIndex < $matchAmount; $matchIndex++) {
+            $className = $foundUseStatements[1][$matchIndex];
+            $classNameAlias = null;
+            if (($alias = explode(" as ", $className)) && $this->hasUseStatementAlias($alias)) {
+                $className = $alias[0];
+                $classNameAlias = $alias[1];
+            }
+
+            $splittedClassName = explode("\\", $className);
+            if ($className[0] !== "\\") {
+                $className = "\\" . $className;
+            }
+            if (!$classNameAlias) {
+                $classNameAlias = end($splittedClassName);
+            }
+
+            $useStatements[$classNameAlias] = $className;
+        }
+
+        return $useStatements;
+    }
+
+    /**
+     * @param $alias
+     * @return bool
+     */
+    private function hasUseStatementAlias($alias): bool
+    {
+        return count($alias) === 2;
     }
 
     /**
@@ -385,6 +304,116 @@ class TypeResolver
         }
 
         return str_replace($relatedClassName, $typeHint, $parameterTypeHint);
+    }
+
+    /**
+     * @param \ReflectionClass $analyzedClass
+     * @param string $methodName
+     * @return \ReflectionClass
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function getMethodDeclaringClass(\ReflectionClass $analyzedClass, string $methodName): \ReflectionClass
+    {
+        foreach ($analyzedClass->getInterfaceNames() as $interfaceName) {
+            if (method_exists($interfaceName, $methodName)) {
+                return new \ReflectionClass($interfaceName);
+            }
+        }
+        $parentClass = $analyzedClass->getParentClass();
+        if ($parentClass && $parentClass->hasMethod($methodName)) {
+            return $parentClass;
+        }
+
+        return $analyzedClass;
+    }
+
+    /**
+     * @param string $className
+     * @return ClassPropertyDefinition[]
+     * @throws TypeDefinitionException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function getClassProperties(string $className): iterable
+    {
+        $reflectionClass = new \ReflectionClass($className);
+        $annotationParser = $this->getAnnotationParser($className);
+
+        $classProperties = [];
+        $properties = $reflectionClass->getProperties();
+        $parent = $reflectionClass;
+        while ($parent = $parent->getParentClass()) {
+            $properties = array_merge($properties, $parent->getProperties());
+        }
+        $properties = array_unique($properties);
+
+        foreach ($properties as $property) {
+            $type = $this->getPropertyDocblockTypeHint($reflectionClass, $property);
+            $type = $type ? $type : TypeDescriptor::createUnknownType();
+            $annotations = $annotationParser->getAnnotationsForProperty($className, $property->getName());
+
+            if ($property->isPrivate()) {
+                $classProperties[] = ClassPropertyDefinition::createPrivate(
+                    $property->getName(),
+                    $type,
+                    true,
+                    $property->isStatic(),
+                    $annotations
+                );
+            } else if ($property->isProtected()) {
+                $classProperties[] = ClassPropertyDefinition::createProtected(
+                    $property->getName(),
+                    $type,
+                    true,
+                    $property->isStatic(),
+                    $annotations
+                );
+            } else {
+                $classProperties[] = ClassPropertyDefinition::createPublic(
+                    $property->getName(),
+                    $type,
+                    true,
+                    $property->isStatic(),
+                    $annotations
+                );
+            }
+        }
+
+        return $classProperties;
+    }
+
+    /**
+     * @param string $className
+     * @return AnnotationParser
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     */
+    private function getAnnotationParser(string $className): AnnotationParser
+    {
+        return $this->annotationParser ? $this->annotationParser : InMemoryAnnotationRegistrationService::createFrom([$className]);
+    }
+
+    /**
+     * @param \ReflectionClass $analyzedClass
+     * @param \ReflectionProperty $reflectionProperty
+     * @return TypeDescriptor|null
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function getPropertyDocblockTypeHint(\ReflectionClass $analyzedClass, \ReflectionProperty $reflectionProperty): ?TypeDescriptor
+    {
+        $docComment = $reflectionProperty->getDocComment();
+        preg_match_all(self::CLASS_PROPERTY_TYPE_HINT_REGEX, $docComment, $matchedDocBlockParameterTypes);
+
+        if (!isset($matchedDocBlockParameterTypes[1][0])) {
+            return null;
+        }
+
+        return TypeDescriptor::create(
+            $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][0], $analyzedClass, $reflectionProperty->getDeclaringClass())
+        );
     }
 
     /**

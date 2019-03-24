@@ -130,7 +130,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReference(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [$interfaceToCallRegistry->getFor(InternalEnrichingService::class, "enrich")];
     }
@@ -177,11 +177,13 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
         return new Enricher(
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
-                MethodInvoker::createWith(
+                MethodInvoker::createWithInterceptors(
                     $internalEnrichingService,
                     "enrich",
                     [],
-                    $referenceSearchService
+                    $referenceSearchService,
+                    $this->orderedAroundInterceptors,
+                    $this->getEndpointAnnotations()
                 ),
                 $channelResolver,
                 false

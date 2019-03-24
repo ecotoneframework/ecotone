@@ -73,6 +73,7 @@ class CallAggregateService
         $aggregate = $message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_OBJECT)
                             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
                             : null;
+
         $methodInvoker = MethodInvoker::createWithBuiltParameterConverters(
             $aggregate ? $aggregate : $message->getHeaders()->get(AggregateMessage::CLASS_NAME),
             $message->getHeaders()->get(AggregateMessage::METHOD_NAME),

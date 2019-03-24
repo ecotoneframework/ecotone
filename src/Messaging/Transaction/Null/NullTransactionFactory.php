@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Transaction\Null;
 
+use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\Transaction\Transaction;
 use SimplyCodedSoftware\Messaging\Transaction\TransactionFactory;
 
@@ -47,7 +48,7 @@ class NullTransactionFactory implements TransactionFactory
     /**
      * @inheritDoc
      */
-    public function begin(): Transaction
+    public function begin(Message $message): Transaction
     {
         return NullTransaction::start();
     }

@@ -26,4 +26,9 @@ interface AggregateRepositoryFactory
      * @return AggregateRepository
      */
     public function getFor(ReferenceSearchService $referenceSearchService, string $aggregateClassName) : AggregateRepository;
+
+    /**
+     * @return string[]
+     */
+    public function getRequiredReferences() : array;
 }

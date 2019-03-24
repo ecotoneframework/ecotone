@@ -66,6 +66,12 @@ interface Configuration
     public function registerAfterMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
 
     /**
+     * @param string[] $referenceNames
+     * @return Configuration
+     */
+    public function requireReferences(array $referenceNames): Configuration;
+
+    /**
      * @param ChannelAdapterConsumerBuilder $consumerBuilder
      *
      * @return Configuration

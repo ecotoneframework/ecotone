@@ -277,8 +277,9 @@ final class MessagingSystemConfiguration implements Configuration
 
     /**
      * @param string[] $referenceNames
+     * @return Configuration
      */
-    private function requireReferences(array $referenceNames): void
+    public function requireReferences(array $referenceNames): Configuration
     {
         foreach ($referenceNames as $requiredReferenceName) {
             if ($requiredReferenceName instanceof RequiredReference) {
@@ -295,6 +296,8 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $this->requiredReferences = array_unique($this->requiredReferences);
+
+        return $this;
     }
 
     /**

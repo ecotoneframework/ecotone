@@ -46,6 +46,14 @@ class InMemoryOrderRepositoryFactory implements AggregateRepositoryFactory
     /**
      * @inheritDoc
      */
+    public function getRequiredReferences(): array
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function canHandle(ReferenceSearchService $referenceSearchService, string $aggregateClassName): bool
     {
         return $aggregateClassName === Order::class;

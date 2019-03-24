@@ -107,6 +107,11 @@ class AggregateMessagingModule implements AnnotationModule
      */
     public function prepare(Configuration $configuration, array $moduleExtensions): void
     {
+        /** @var AggregateRepositoryFactory $moduleExtension */
+        foreach ($moduleExtensions as $moduleExtension) {
+            $configuration->requireReferences($moduleExtension->getRequiredReferences());
+        }
+
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
             /** @var CommandHandler $annotation */
             $annotation = $registration->getAnnotationForMethod();

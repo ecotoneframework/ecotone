@@ -96,6 +96,14 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     /**
      * @inheritDoc
      */
+    public function getGatewayList(): iterable
+    {
+        return $this->gatewayReferences;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getMessageChannelByName(string $channelName): MessageChannel
     {
         return $this->channelResolver->resolve($channelName);

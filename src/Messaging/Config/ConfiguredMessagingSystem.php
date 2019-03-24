@@ -19,6 +19,11 @@ interface ConfiguredMessagingSystem
     public function getGatewayByName(string $gatewayReferenceName);
 
     /**
+     * @return GatewayReference[]
+     */
+    public function getGatewayList() : iterable;
+
+    /**
      * @param string $channelName
      * @return MessageChannel
      * @throws ConfigurationException if trying to find not existing channel

@@ -3,6 +3,8 @@
 namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Blog;
 use SimplyCodedSoftware\DomainModel\AggregateNotFoundException;
 use SimplyCodedSoftware\DomainModel\AggregateRepository;
+use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class InMemoryArticleRepository
@@ -23,7 +25,7 @@ class InMemoryArticleRepository implements AggregateRepository
     private function __construct(array $articles)
     {
         foreach ($articles as $article) {
-            $this->save($article);
+            $this->save(MessageBuilder::withPayload("some")->build(), $article);
         }
     }
 
@@ -75,9 +77,10 @@ class InMemoryArticleRepository implements AggregateRepository
     }
 
     /**
+     * @param Message $requestMessage
      * @param Article $aggregate
      */
-    public function save($aggregate): void
+    public function save(Message $requestMessage, $aggregate): void
     {
         $this->articles[$this->getIdentifier($aggregate)] = $aggregate;
     }

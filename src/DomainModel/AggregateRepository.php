@@ -2,6 +2,8 @@
 
 namespace SimplyCodedSoftware\DomainModel;
 
+use SimplyCodedSoftware\Messaging\Message;
+
 /**
  * Interface AggregateRepository
  * @package SimplyCodedSoftware\DomainModel
@@ -25,7 +27,8 @@ interface AggregateRepository
     public function findWithLockingBy(array $identifiers, int $expectedVersion);
 
     /**
+     * @param Message $requestMessage
      * @param object $aggregate
      */
-    public function save($aggregate): void;
+    public function save(Message $requestMessage, $aggregate): void;
 }

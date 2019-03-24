@@ -48,7 +48,7 @@ class SaveAggregateService
     {
         $aggregate = $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
 
-        $this->aggregateRepository->save($aggregate);
+        $this->aggregateRepository->save($message->getHeaders()->get(AggregateMessage::CALLING_MESSAGE), $aggregate);
 
         if ($message->getHeaders()->get(AggregateMessage::IS_FACTORY_METHOD)) {
             $aggregate = $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);

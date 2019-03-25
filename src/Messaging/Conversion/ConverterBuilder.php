@@ -17,4 +17,9 @@ interface ConverterBuilder
      * @return Converter
      */
     public function build(ReferenceSearchService $referenceSearchService) : Converter;
+
+    /**
+     * @return string[]
+     */
+    public function getRequiredReferences() : array;
 }

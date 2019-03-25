@@ -41,4 +41,12 @@ class ConverterReferenceBuilder implements ConverterBuilder
     {
         return $referenceSearchService->get($this->referenceName);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredReferences(): array
+    {
+        return [$this->referenceName];
+    }
 }

@@ -8,6 +8,7 @@ use SimplyCodedSoftware\DomainModel\AggregateMessageConversionServiceBuilder;
 use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
 use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
 use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
+use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
@@ -15,11 +16,13 @@ use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\DoStuffCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoCommandInformationConfiguration;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithReturnValue;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\EventHandler\ExampleEventEventHandler;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\AggregateQueryHandlerExample;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\AggregateQueryHandlerWithOutputChannelExample;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\QueryHandlerWithNoReturnValue;
@@ -256,6 +259,29 @@ class AggregateMessagingModuleTest extends TestCase
             [
                  SomeQuery::class => "inputChannel"
             ]
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Exception
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_registering_service_event_handler()
+    {
+        $handler = ServiceActivatorBuilder::create(ExampleEventEventHandler::class, "doSomething")
+            ->withInputChannelName("someInput")
+            ->withEndpointId("some-id");
+
+        $this->createModuleWithCustomConfigAndAssertConfiguration(
+            InMemoryAnnotationRegistrationService::createFrom([ExampleEventEventHandler::class]),
+            $this->createMessagingSystemConfiguration()
+                ->registerMessageHandler($handler)
+                ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("someInput")),
+            []
         );
     }
 

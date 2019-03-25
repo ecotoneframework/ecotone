@@ -20,4 +20,12 @@ class StringToUuidConverterBuilder implements ConverterBuilder
     {
         return new StringToUuidConverter();
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredReferences(): array
+    {
+        return [];
+    }
 }

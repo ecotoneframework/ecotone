@@ -6,6 +6,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Unit\Config;
 use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
+use SimplyCodedSoftware\Messaging\Channel\PublishSubscribeChannel;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
@@ -577,6 +578,28 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->send(MessageBuilder::withPayload("some")->build());
 
         $this->assertTrue($messageHandler->wasCalled());
+    }
+
+    /**
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_creating_default_channel_configuration_if_not_exists()
+    {
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+
+        $inputMessageChannelName = "inputChannelName";
+        $messageHandler = NoReturnMessageHandler::create();
+        $messagingSystem = $messagingSystemConfiguration
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputMessageChannelName))
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName))
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
+            ->send(MessageBuilder::withPayload("some")->build());
+
+        $this->assertInstanceOf(PublishSubscribeChannel::class, $messagingSystem->getMessageChannelByName($inputMessageChannelName));
     }
 
     /**

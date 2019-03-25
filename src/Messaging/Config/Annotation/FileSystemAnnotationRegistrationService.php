@@ -28,6 +28,10 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      */
     private $registeredClasses;
     /**
+     * @var array|AnnotationRegistration[]
+     */
+    private $initializedRegistrations = [];
+    /**
      * @var array
      */
     private $bannedEnvironmentClassMethods = [];

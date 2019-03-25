@@ -20,4 +20,12 @@ class ArrayToJsonConverterBuilder implements ConverterBuilder
     {
         return new ArrayToJsonConverter();
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredReferences(): array
+    {
+        return [];
+    }
 }

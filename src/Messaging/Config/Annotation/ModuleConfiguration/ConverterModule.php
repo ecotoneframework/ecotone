@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
 use SimplyCodedSoftware\Messaging\Annotation\Converter;
+use SimplyCodedSoftware\Messaging\Annotation\MediaTypeConverter;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Conversion\ConverterBuilder;
+use SimplyCodedSoftware\Messaging\Conversion\ConverterReferenceBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 
@@ -54,6 +56,15 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
                   $interfaceToCall->getFirstParameter()->getTypeDescriptor(),
                   $interfaceToCall->getReturnType()
             );
+        }
+
+        $registrations = $annotationRegistrationService->getAllClassesWithAnnotation(MediaTypeConverter::class);
+
+        foreach ($registrations as $registration) {
+            /** @var MediaTypeConverter $mediaTypeConverter */
+            $mediaTypeConverter = $annotationRegistrationService->getAnnotationForClass($registration, MediaTypeConverter::class);
+
+            $converterBuilders[] = ConverterReferenceBuilder::create($mediaTypeConverter->referenceName ? $mediaTypeConverter->referenceName : $registration);
         }
 
         return new self($converterBuilders);

@@ -20,4 +20,12 @@ class DeserializingConverterBuilder implements ConverterBuilder
     {
         return new DeserializingConverter();
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredReferences(): array
+    {
+        return [];
+    }
 }

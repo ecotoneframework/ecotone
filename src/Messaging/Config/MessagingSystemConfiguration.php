@@ -44,6 +44,10 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private $channelBuilders = [];
     /**
+     * @var MessageChannelBuilder[]
+     */
+    private $defaultChannelBuilders = [];
+    /**
      * @var ChannelInterceptorBuilder[]
      */
     private $channelInterceptorBuilders = [];
@@ -359,6 +363,17 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
+    public function registerDefaultChannelFor(MessageChannelBuilder $messageChannelBuilder): Configuration
+    {
+        $this->defaultChannelBuilders[$messageChannelBuilder->getMessageChannelName()] = $messageChannelBuilder;
+        $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder): Configuration
     {
         $this->channelAdapters[] = $consumerBuilder;
@@ -412,6 +427,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerConverter(ConverterBuilder $converterBuilder): Configuration
     {
         $this->converterBuilders[] = $converterBuilder;
+        $this->requireReferences($converterBuilder->getRequiredReferences());
 
         return $this;
     }
@@ -428,7 +444,11 @@ final class MessagingSystemConfiguration implements Configuration
     {
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelBuilders)) {
-                $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
+                if (array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->defaultChannelBuilders)) {
+                    $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = $this->defaultChannelBuilders[$messageHandlerBuilder->getInputMessageChannelName()];
+                }else {
+                    $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
+                }
             }
         }
 
@@ -553,9 +573,9 @@ final class MessagingSystemConfiguration implements Configuration
                 }
             }
 
-            if ($messageChannel instanceof PollableChannel) {
+            if ($messageChannel instanceof PollableChannel && $interceptorsForChannel) {
                 $messageChannel = new PollableChannelInterceptorAdapter($messageChannel, $interceptorsForChannel);
-            } else {
+            } else if ($interceptorsForChannel) {
                 $messageChannel = new EventDrivenChannelInterceptorAdapter($messageChannel, $interceptorsForChannel);
             }
 

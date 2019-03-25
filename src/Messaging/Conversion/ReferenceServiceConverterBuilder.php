@@ -80,4 +80,12 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
             $this->targetType
         );
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredReferences(): array
+    {
+        return [$this->referenceName];
+    }
 }

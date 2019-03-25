@@ -30,6 +30,13 @@ interface Configuration
     public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): Configuration;
 
     /**
+     * @param MessageChannelBuilder $messageChannelBuilder
+     *
+     * @return Configuration
+     */
+    public function registerDefaultChannelFor(MessageChannelBuilder $messageChannelBuilder) : Configuration;
+
+    /**
      * @param MessageHandlerBuilder $messageHandlerBuilder
      * @return Configuration
      */

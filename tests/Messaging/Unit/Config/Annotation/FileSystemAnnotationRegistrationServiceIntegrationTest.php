@@ -131,8 +131,8 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment", "dev");
         $this->assertEquals(
             [
-                $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodEnvironmentExample::class, "configSingleEnvironment"),
-                $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodMultipleEnvironmentsExample::class, "configMultipleEnvironments")
+                $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodMultipleEnvironmentsExample::class, "configMultipleEnvironments"),
+                $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodEnvironmentExample::class, "configSingleEnvironment")
             ],
             $fileSystemAnnotationRegistrationService->findRegistrationsFor(ApplicationContext::class, Extension::class)
         );
@@ -227,8 +227,8 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $annotationForMethodRetrievedAsInputOutput = $annotationRegistrations[0]->getAnnotationForMethod();
 
         $this->assertEquals(
-            $annotationForMethodRetrievedAsEndpoint->endpointId,
-            $annotationForMethodRetrievedAsInputOutput->endpointId
+            $annotationForMethodRetrievedAsEndpoint,
+            $annotationForMethodRetrievedAsInputOutput
         );
     }
 

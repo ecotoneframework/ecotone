@@ -20,4 +20,12 @@ class UuidToStringConverterBuilder implements ConverterBuilder
     {
         return new UuidToStringConverter();
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredReferences(): array
+    {
+        return [];
+    }
 }

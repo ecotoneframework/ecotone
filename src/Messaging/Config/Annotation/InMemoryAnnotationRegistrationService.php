@@ -157,9 +157,6 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
 
         foreach ($this->annotationsForClass[self::CLASS_ANNOTATIONS] as $className => $annotations) {
             foreach ($annotations as $annotation) {
-                if (!is_object($annotation)) {
-                    var_dump($annotation);die();
-                }
                 if (get_class($annotation) == $annotationClassName) {
                     $classes[] = $className;
                 }

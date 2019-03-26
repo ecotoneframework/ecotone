@@ -15,14 +15,20 @@ use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithReferencesExample;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\DoStuffCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoCommandInformationConfiguration;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithReturnValue;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service\SomeCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\EventHandler\ExampleEventEventHandler;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\EventHandler\ExampleEventHandlerWithServices;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\AggregateQueryHandlerExample;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\AggregateQueryHandlerWithOutputChannelExample;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\QueryHandlerWithNoReturnValue;
@@ -51,21 +57,6 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
-    /**
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function test_throwing_exception_if_command_handler_has_return_value()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $this->prepareConfiguration(
-            InMemoryAnnotationRegistrationService::createFrom([
-                CommandHandlerWithReturnValue::class
-            ])
-        );
-    }
 
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException
@@ -104,7 +95,7 @@ class AggregateMessagingModuleTest extends TestCase
                     "",
                     AggregateMessageConversionServiceBuilder::createWith( DoStuffCommand::class),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                    AggregateCommandHandlerExample::class
+                    AggregateCommandHandlerExample::class . "::doAction"
                 )
             );
 
@@ -115,6 +106,106 @@ class AggregateMessagingModuleTest extends TestCase
             $expectedConfiguration,
             [
                 DoStuffCommand::class => DoStuffCommand::class
+            ]
+        );
+    }
+
+    public function test_registering_service_command_handler_with_return_value()
+    {
+        $commandHandler = ServiceActivatorBuilder::create( CommandHandlerWithReturnValue::class, "execute")
+            ->withMethodParameterConverters([
+                PayloadBuilder::create("command"),
+                ReferenceBuilder::create("service1", \stdClass::class)
+            ])
+            ->withInputChannelName("input")
+            ->withEndpointId('command-id');
+
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler($commandHandler);
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                CommandHandlerWithReturnValue::class
+            ],
+            $expectedConfiguration,
+            [
+                SomeCommand::class => "input"
+            ]
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Exception
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_registering_service_command_handler()
+    {
+        $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerExample::class, "doAction",  DoStuffCommand::class)
+            ->withInputChannelName(DoStuffCommand::class)
+            ->withEndpointId('command-id');
+
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler($commandHandler)
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "",
+                    AggregateMessageConversionServiceBuilder::createWith( DoStuffCommand::class),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    AggregateCommandHandlerExample::class . "::doAction"
+                )
+            );
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                AggregateCommandHandlerExample::class
+            ],
+            $expectedConfiguration,
+            [
+                DoStuffCommand::class => DoStuffCommand::class
+            ]
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Exception
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_registering_aggregate_command_handler_with_extra_services()
+    {
+        $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerWithReferencesExample::class, "doAction",  DoStuffCommand::class)
+            ->withInputChannelName("input")
+            ->withMethodParameterConverters([
+                PayloadBuilder::create("command"),
+                ReferenceBuilder::create("injectedService", \stdClass::class)
+            ])
+            ->withEndpointId('command-id');
+
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler($commandHandler)
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "",
+                    AggregateMessageConversionServiceBuilder::createWith( DoStuffCommand::class),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    AggregateCommandHandlerWithReferencesExample::class . "::doAction"
+                )
+            );
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                AggregateCommandHandlerWithReferencesExample::class
+            ],
+            $expectedConfiguration,
+            [
+                DoStuffCommand::class => "input"
             ]
         );
     }
@@ -139,7 +230,7 @@ class AggregateMessagingModuleTest extends TestCase
                 "",
                 AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                AggregateQueryHandlerExample::class
+                AggregateQueryHandlerExample::class . "::doStuff"
             ));
 
         $this->createModuleAndAssertConfiguration(
@@ -174,7 +265,7 @@ class AggregateMessagingModuleTest extends TestCase
                 "",
                 AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                AggregateQueryHandlerWithOutputChannelExample::class
+                AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
             ));
 
         $this->createModuleAndAssertConfiguration(
@@ -217,7 +308,7 @@ class AggregateMessagingModuleTest extends TestCase
                     "",
                     AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                    AggregateQueryHandlerWithOutputChannelExample::class
+                    AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
                 )),
             [
                  SomeQuery::class => "inputChannel"
@@ -254,7 +345,7 @@ class AggregateMessagingModuleTest extends TestCase
                     "",
                     AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                    AggregateQueryHandlerWithOutputChannelExample::class
+                    AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
                 )),
             [
                  SomeQuery::class => "inputChannel"
@@ -272,16 +363,54 @@ class AggregateMessagingModuleTest extends TestCase
      */
     public function test_registering_service_event_handler()
     {
-        $handler = ServiceActivatorBuilder::create(ExampleEventEventHandler::class, "doSomething")
+        $commandHandler = ServiceActivatorBuilder::create( ExampleEventEventHandler::class, "doSomething")
             ->withInputChannelName("someInput")
-            ->withEndpointId("some-id");
+            ->withEndpointId('some-id');
 
-        $this->createModuleWithCustomConfigAndAssertConfiguration(
-            InMemoryAnnotationRegistrationService::createFrom([ExampleEventEventHandler::class]),
-            $this->createMessagingSystemConfiguration()
-                ->registerMessageHandler($handler)
-                ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("someInput")),
-            []
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler($commandHandler)
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("someInput"));
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                ExampleEventEventHandler::class
+            ],
+            $expectedConfiguration,
+            [
+                DoStuffCommand::class => "someInput"
+            ]
+        );
+    }
+
+    /**
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_registering_service_event_handler_with_extra_services()
+    {
+        $commandHandler = ServiceActivatorBuilder::create( ExampleEventHandlerWithServices::class, "doSomething")
+            ->withInputChannelName("someInput")
+            ->withMethodParameterConverters([
+                PayloadBuilder::create("command"),
+                ReferenceBuilder::create("service1", \stdClass::class),
+                ReferenceBuilder::create("service2", \stdClass::class)
+            ])
+            ->withEndpointId('some-id');
+
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler($commandHandler)
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("someInput"));
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                ExampleEventHandlerWithServices::class
+            ],
+            $expectedConfiguration,
+            [
+                DoStuffCommand::class => "someInput"
+            ]
         );
     }
 

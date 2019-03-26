@@ -3,7 +3,7 @@
 namespace SimplyCodedSoftware\DomainModel\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
+use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
 
 /**
  * Class EventHandler
@@ -12,7 +12,10 @@ use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
  * @Annotation
  * @Target({"METHOD"})
  */
-class EventHandler extends ServiceActivator
+class EventHandler extends EndpointAnnotation
 {
-
+    /**
+     * @var array
+     */
+    public $parameterConverters = [];
 }

@@ -10,7 +10,7 @@ use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
  * Class CommandHandlerWithReturnValue
  * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
+ * @MessageEndpoint()
  */
 class CommandHandlerWithReturnValue
 {
@@ -18,9 +18,9 @@ class CommandHandlerWithReturnValue
      * @param SomeCommand $command
      *
      * @return int
-     * @CommandHandler()
+     * @CommandHandler(inputChannelName="input", endpointId="command-id")
      */
-    public function execute(SomeCommand $command) : int
+    public function execute(SomeCommand $command, \stdClass $service1) : int
     {
         return 1;
     }

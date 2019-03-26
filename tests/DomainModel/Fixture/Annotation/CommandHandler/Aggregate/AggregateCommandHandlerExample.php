@@ -29,4 +29,9 @@ class AggregateCommandHandlerExample
     {
 
     }
+
+    public function doAnotherAction(DoStuffCommand $command) : void
+    {
+
+    }
 }

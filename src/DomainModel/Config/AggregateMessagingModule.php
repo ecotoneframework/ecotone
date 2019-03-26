@@ -10,6 +10,7 @@ use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
 use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
 use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
 use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
+use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
@@ -22,6 +23,7 @@ use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationServic
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
@@ -144,6 +146,8 @@ class AggregateMessagingModule implements AnnotationModule
             $configuration->requireReferences($moduleExtension->getRequiredReferences());
         }
 
+        $inputChannelNames = [];
+
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
             /** @var CommandHandler $annotation */
             $annotation = $registration->getAnnotationForMethod();
@@ -171,6 +175,8 @@ class AggregateMessagingModule implements AnnotationModule
                     $registration->getClassName() . "::" . $registration->getMethodName()
                 )
             );
+
+            $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames);
         }
 
         foreach ($this->aggregateQueryHandlerRegistrations as $registration) {
@@ -202,18 +208,24 @@ class AggregateMessagingModule implements AnnotationModule
                     $registration->getClassName() . "::" . $registration->getMethodName()
                 )
             );
+
+            $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames);
         }
 
         foreach ($this->serviceCommandHandlersRegistrations as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
+            $inputChannelNames = $this->addUniqueChannelName($registration->getAnnotationForMethod(), $inputChannelNames);
         }
         foreach ($this->serviceQueryHandlerRegistrations as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
+            $inputChannelNames = $this->addUniqueChannelName($registration->getAnnotationForMethod(), $inputChannelNames);
         }
         foreach ($this->serviceEventHandlers as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
             $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($registration->getAnnotationForMethod()->inputChannelName));
         }
+
+
     }
 
     /***
@@ -311,5 +323,22 @@ class AggregateMessagingModule implements AnnotationModule
             ->withMethodParameterConverters($parameterConverters);
 
         return $messageHandlerBuilder;
+}
+
+    /**
+     * @param string $channelName
+     * @param array  $inputChannelNames
+     *
+     * @return array
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function addUniqueChannelName(string $channelName, array $inputChannelNames): array
+    {
+        if (in_array($channelName, $inputChannelNames)) {
+            throw ConfigurationException::create("Trying to register Command Handler twice for input {$channelName}");
+        }
+        $inputChannelNames[] = $channelName;
+
+        return $inputChannelNames;
 }
 }

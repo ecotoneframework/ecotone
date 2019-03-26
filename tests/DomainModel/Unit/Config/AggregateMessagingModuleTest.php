@@ -6,12 +6,14 @@ use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\DomainModel\AggregateMessage;
 use SimplyCodedSoftware\DomainModel\AggregateMessageConversionServiceBuilder;
 use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
+use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
 use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
 use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
@@ -46,7 +48,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_throwing_configuration_exception_if_command_handler_has_no_information_about_command()
+    public function __test_throwing_configuration_exception_if_command_handler_has_no_information_about_command()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -63,7 +65,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_throwing_exception_if_query_handler_has_no_return_value()
+    public function __test_throwing_exception_if_query_handler_has_no_return_value()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -71,6 +73,34 @@ class AggregateMessagingModuleTest extends TestCase
             InMemoryAnnotationRegistrationService::createFrom([
                 QueryHandlerWithNoReturnValue::class
             ])
+        );
+    }
+
+    public function test_resulting_in_exception_when_registering_commands_handlers_for_same_input_channel()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $commandHandlerAnnotation = new CommandHandler();
+
+        $this->prepareConfiguration(
+            InMemoryAnnotationRegistrationService::createFrom([
+                AggregateCommandHandlerExample::class
+            ])
+                ->addAnnotationToClassMethod(AggregateCommandHandlerExample::class, "doAnotherAction", $commandHandlerAnnotation)
+        );
+    }
+
+    public function test_resulting_in_exception_when_registering_query_handlers_for_same_input_channel()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $queryHandlerAnnotation = new QueryHandler();
+
+        $this->prepareConfiguration(
+            InMemoryAnnotationRegistrationService::createFrom([
+                AggregateQueryHandlerExample::class
+            ])
+                ->addAnnotationToClassMethod(AggregateQueryHandlerExample::class, "doAnotherAction", $queryHandlerAnnotation)
         );
     }
 
@@ -82,7 +112,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_aggregate_command_handler()
+    public function __test_registering_aggregate_command_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerExample::class, "doAction",  DoStuffCommand::class)
                             ->withInputChannelName(DoStuffCommand::class)
@@ -110,7 +140,7 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
-    public function test_registering_service_command_handler_with_return_value()
+    public function __test_registering_service_command_handler_with_return_value()
     {
         $commandHandler = ServiceActivatorBuilder::create( CommandHandlerWithReturnValue::class, "execute")
             ->withMethodParameterConverters([
@@ -142,7 +172,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_service_command_handler()
+    public function __test_registering_service_command_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerExample::class, "doAction",  DoStuffCommand::class)
             ->withInputChannelName(DoStuffCommand::class)
@@ -178,7 +208,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_aggregate_command_handler_with_extra_services()
+    public function __test_registering_aggregate_command_handler_with_extra_services()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerWithReferencesExample::class, "doAction",  DoStuffCommand::class)
             ->withInputChannelName("input")
@@ -186,7 +216,7 @@ class AggregateMessagingModuleTest extends TestCase
                 PayloadBuilder::create("command"),
                 ReferenceBuilder::create("injectedService", \stdClass::class)
             ])
-            ->withEndpointId('command-id');
+            ->withEndpointId('command-id-with-references');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
@@ -218,7 +248,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_aggregate_query_handler()
+    public function __test_registering_aggregate_query_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerExample::class, "doStuff",  SomeQuery::class)
                             ->withInputChannelName( SomeQuery::class)
@@ -252,7 +282,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_aggregate_query_handler_with_output_channel()
+    public function __test_registering_aggregate_query_handler_with_output_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
             ->withInputChannelName( SomeQuery::class)
@@ -287,7 +317,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_aggregate_with_custom_input_channel()
+    public function __test_registering_aggregate_with_custom_input_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
             ->withInputChannelName("inputChannel")
@@ -324,7 +354,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_aggregate_without_query_class_with_only_input_channel()
+    public function __test_registering_aggregate_without_query_class_with_only_input_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
             ->withInputChannelName("inputChannel")
@@ -361,7 +391,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_service_event_handler()
+    public function __test_registering_service_event_handler()
     {
         $commandHandler = ServiceActivatorBuilder::create( ExampleEventEventHandler::class, "doSomething")
             ->withInputChannelName("someInput")
@@ -388,7 +418,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_registering_service_event_handler_with_extra_services()
+    public function __test_registering_service_event_handler_with_extra_services()
     {
         $commandHandler = ServiceActivatorBuilder::create( ExampleEventHandlerWithServices::class, "doSomething")
             ->withInputChannelName("someInput")

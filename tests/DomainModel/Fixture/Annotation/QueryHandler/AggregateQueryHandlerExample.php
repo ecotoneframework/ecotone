@@ -36,4 +36,9 @@ class AggregateQueryHandlerExample
     {
         return new SomeResult();
     }
+
+    public function doAnotherAction(SomeQuery $query) : SomeResult
+    {
+
+    }
 }

@@ -150,7 +150,7 @@ class AggregateMessagingModule implements AnnotationModule
                     "",
                     AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                    $registration->getClassName()
+                    $registration->getClassName() . "::" . $registration->getMethodName()
                 )
             );
         }
@@ -182,7 +182,7 @@ class AggregateMessagingModule implements AnnotationModule
                     "",
                     AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                    $registration->getClassName()
+                    $registration->getClassName() . "::" . $registration->getMethodName()
                 )
             );
         }

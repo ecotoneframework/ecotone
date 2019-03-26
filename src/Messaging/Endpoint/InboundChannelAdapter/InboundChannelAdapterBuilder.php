@@ -175,7 +175,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
                             ->withErrorChannel($this->errorChannel)
                             ->build(
                                 $referenceSearchService,
-                                InMemoryChannelResolver::createWithChanneResolver($channelResolver, [
+                                InMemoryChannelResolver::createWithChannelResolver($channelResolver, [
                                     "forwardChannel" => $forwardChannel
                                 ])
                             );

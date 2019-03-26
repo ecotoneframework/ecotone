@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\
 
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeader;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderArray;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderValue;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
@@ -20,7 +21,9 @@ interface BookStoreGatewayExample
     /**
      * @param string $bookNumber
      * @param string $rentTill
-     * @param int $cost
+     * @param int    $cost
+     * @param array  $data
+     *
      * @return bool
      *
      * @Gateway(
@@ -30,11 +33,12 @@ interface BookStoreGatewayExample
      *          @GatewayPayload(parameterName="bookNumber", expression="upper(value)"),
      *          @GatewayHeader(parameterName="rentTill", headerName="rentDate"),
      *          @GatewayHeader(parameterName="cost", headerName="cost", expression="value * 5"),
-     *          @GatewayHeaderValue(headerName="owner", headerValue="Johny")
+     *          @GatewayHeaderValue(headerName="owner", headerValue="Johny"),
+     *          @GatewayHeaderArray(parameterName="data")
      *      },
      *      transactionFactories={"dbalTransaction"},
      *      replyTimeoutInMilliseconds=100
      * )
      */
-    public function rent(string $bookNumber, string $rentTill, int $cost): bool;
+    public function rent(string $bookNumber, string $rentTill, int $cost, array $data): bool;
 }

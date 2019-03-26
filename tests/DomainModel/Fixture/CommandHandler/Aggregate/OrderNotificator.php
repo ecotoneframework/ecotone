@@ -1,0 +1,35 @@
+<?php
+
+namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
+
+use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
+use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+
+/**
+ * Class OrderNotificator
+ * @package Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @MessageEndpoint()
+ */
+class OrderNotificator
+{
+    /** @var Notification[] */
+    private $notifications = [];
+
+    /**
+     * @param Notification $notification
+     * @EventHandler()
+     */
+    public function notify(Notification $notification) : void
+    {
+        $this->notifications[] = $notification;
+    }
+
+    /**
+     * @return array
+     */
+    public function getNotifications() : array
+    {
+        return $this->notifications;
+    }
+}

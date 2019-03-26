@@ -3,6 +3,7 @@
 namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
 
 use SimplyCodedSoftware\DomainModel\Annotation\InitializeAggregateOnNotFound;
+use SimplyCodedSoftware\DomainModel\EventBus;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
@@ -57,13 +58,17 @@ class Order implements VersionAggregate
 
     /**
      * @param CreateOrderCommand $command
+     * @param EventBus           $eventBus
      *
      * @return Order
      * @CommandHandler()
      */
-    public static function createWith(CreateOrderCommand $command) : self
+    public static function createWith(CreateOrderCommand $command, EventBus $eventBus) : self
     {
-        return new self($command);
+        $order = new self($command);
+
+        $eventBus->send(new Notification());
+        return $order;
     }
 
     public function increaseAmount() : void

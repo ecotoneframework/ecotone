@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeader;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderArray;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderValue;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
@@ -16,6 +17,7 @@ use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderArrayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
@@ -75,9 +77,11 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     }
                 } else if ($parameterToMessage instanceof GatewayHeaderValue) {
                     $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
-                }else {
+                } else if ($parameterToMessage instanceof GatewayHeaderArray) {
+                    $parameterConverters[] = GatewayHeaderArrayBuilder::create($parameterToMessage->parameterName);
+                } else {
                     $converterClass = get_class($parameterToMessage);
-                    throw new \InvalidArgumentException("Not known converters for gateway {$converterClass}");
+                    throw new \InvalidArgumentException("Not known converters for gateway {$converterClass} for {$annotationRegistration->getClassName()}::{$annotationRegistration->getMethodName()}");
                 }
             }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Config;
 
 use Ramsey\Uuid\Uuid;
+use SimplyCodedSoftware\DomainModel\EventBus;
 use SimplyCodedSoftware\Messaging\Annotation\WithRequiredReferenceNameList;
 use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptorBuilder;
 use SimplyCodedSoftware\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
@@ -319,7 +320,7 @@ final class MessagingSystemConfiguration implements Configuration
             $messageHandlerBuilder->withEndpointId(Uuid::uuid4()->toString());
         }
         if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->messageHandlerBuilders)) {
-            throw ConfigurationException::create("Trying to register endpoints with same id. {$messageHandlerBuilder} and {$this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()]}");
+            throw ConfigurationException::create("Trying to register endpoints with same id {$messageHandlerBuilder->getEndpointId()}. {$messageHandlerBuilder} and {$this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()]}");
         }
 
         $this->requireReferences($messageHandlerBuilder->getRequiredReferenceNames());
@@ -478,6 +479,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder);
         }
+
         foreach ($this->channelAdapters as $channelAdapter) {
             $consumers[] = $channelAdapter->build($channelResolver, $referenceSearchServiceWithExtras);
         }

@@ -20,6 +20,4 @@ interface AggregateMessage
     const CALLING_MESSAGE = "domain.aggregate.calling_message";
 
     const BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE = MethodInterceptor::DEFAULT_PRECEDENCE + 10;
-    const AGGREGATE_SEND_MESSAGE_CHANNEL = "domain.aggregate.send_message";
-    const AGGREGATE_MESSAGE_CHANNEL_NAME_TO_SEND = "domain.aggregate.send_message.channel_name";
 }

@@ -68,7 +68,7 @@ class InMemoryChannelResolver implements ChannelResolver
      * @return InMemoryChannelResolver
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWithChanneResolver(ChannelResolver $channelResolver, array $associativeAdditionalChannels) : self
+    public static function createWithChannelResolver(ChannelResolver $channelResolver, array $associativeAdditionalChannels) : self
     {
         $self = self::createFromAssociativeArray($associativeAdditionalChannels);
         $self->withExternalChannelResolver($channelResolver);
@@ -105,6 +105,24 @@ class InMemoryChannelResolver implements ChannelResolver
         }
 
         throw DestinationResolutionException::create("Channel with name {$channelName} can't be resolved");
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasChannelWithName(string $channelName): bool
+    {
+        foreach ($this->resolvableChannels as $resolvableChannel) {
+            if ($resolvableChannel->hasName($channelName)) {
+                return true;
+            }
+        }
+
+        if ($this->externalChannelResolver) {
+            return $this->externalChannelResolver->hasChannelWithName($channelName);
+        }
+
+        return false;
     }
 
     /**

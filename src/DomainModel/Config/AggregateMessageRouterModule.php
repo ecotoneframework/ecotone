@@ -5,7 +5,9 @@ namespace SimplyCodedSoftware\DomainModel\Config;
 use SimplyCodedSoftware\DomainModel\AggregateMessage;
 use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
 use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
+use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
 use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
+use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
@@ -24,17 +26,48 @@ class AggregateMessageRouterModule implements AnnotationModule
     const AGGREGATE_ROUTER_MODULE = "aggregateRouterModule";
 
     /**
-     * @var RouterBuilder
+     * @var BusRouterBuilder
      */
-    private $router;
+    private $commandBusByObject;
+    /**
+     * @var BusRouterBuilder
+     */
+    private $queryBusByObject;
+    /**
+     * @var BusRouterBuilder
+     */
+    private $eventBusByObject;
+    /**
+     * @var BusRouterBuilder
+     */
+    private $commandBusByName;
+    /**
+     * @var BusRouterBuilder
+     */
+    private $queryBusByName;
+    /**
+     * @var BusRouterBuilder
+     */
+    private $eventBusByName;
 
     /**
      * AggregateMessageRouterModule constructor.
-     * @param RouterBuilder $router
+     *
+     * @param BusRouterBuilder $commandBusByObject
+     * @param BusRouterBuilder $commandBusByName
+     * @param BusRouterBuilder $queryBusByObject
+     * @param BusRouterBuilder $queryBusByName
+     * @param BusRouterBuilder $eventBusByObject
+     * @param BusRouterBuilder $eventBusByName
      */
-    private function __construct(RouterBuilder $router)
+    public function __construct(BusRouterBuilder $commandBusByObject, BusRouterBuilder $commandBusByName, BusRouterBuilder $queryBusByObject, BusRouterBuilder $queryBusByName, BusRouterBuilder $eventBusByObject, BusRouterBuilder $eventBusByName)
     {
-        $this->router = $router;
+        $this->commandBusByObject = $commandBusByObject;
+        $this->queryBusByObject   = $queryBusByObject;
+        $this->eventBusByObject   = $eventBusByObject;
+        $this->commandBusByName = $commandBusByName;
+        $this->queryBusByName = $queryBusByName;
+        $this->eventBusByName = $eventBusByName;
     }
 
     /**
@@ -42,29 +75,33 @@ class AggregateMessageRouterModule implements AnnotationModule
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService)
     {
-        $commandHandlers = $annotationRegistrationService->findRegistrationsFor(Aggregate::class, CommandHandler::class);
-        $queryHandlers = $annotationRegistrationService->findRegistrationsFor(Aggregate::class, QueryHandler::class);
-
-        $messageClassNameToChannelNameMapping = [];
-        foreach ($commandHandlers as $registration) {
-            $messageClassName = AggregateMessagingModule::getMessageClassFor($registration);
-            $inputChannel = AggregateMessagingModule::getMessageChannelFor($registration);
-
-            $messageClassNameToChannelNameMapping[$messageClassName] = $inputChannel;
-            $messageClassNameToChannelNameMapping[$inputChannel] = $inputChannel;
+        $commandHandlers = [];
+        foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, CommandHandler::class) as $registration) {
+            $commandHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+        }
+        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, CommandHandler::class) as $registration) {
+            $commandHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+        }
+        $queryHandlers = [];
+        foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, QueryHandler::class) as $registration) {
+            $queryHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+        }
+        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, QueryHandler::class) as $registration) {
+            $queryHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+        }
+        $eventHandlers = [];
+        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
+            $eventHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
 
-        foreach ($queryHandlers as $registration) {
-            $messageClassName = AggregateMessagingModule::getMessageClassFor($registration);
-            $inputChannel = AggregateMessagingModule::getMessageChannelFor($registration);
-
-            $messageClassNameToChannelNameMapping[$messageClassName] = $inputChannel;
-            $messageClassNameToChannelNameMapping[$inputChannel] = $inputChannel;
-        }
 
         return new self(
-            RouterBuilder::createRouterFromObject(new AggregateMessageToChannelRouter($messageClassNameToChannelNameMapping), "route")
-                ->withInputChannelName(AggregateMessage::AGGREGATE_SEND_MESSAGE_CHANNEL)
+            BusRouterBuilder::createCommandBusByObject($commandHandlers),
+            BusRouterBuilder::createCommandBusByName($commandHandlers),
+            BusRouterBuilder::createQueryBusByObject($queryHandlers),
+            BusRouterBuilder::createQueryBusByName($queryHandlers),
+            BusRouterBuilder::createEventBusByObject($eventHandlers),
+            BusRouterBuilder::createEventBusByName($eventHandlers)
         );
     }
 
@@ -82,7 +119,12 @@ class AggregateMessageRouterModule implements AnnotationModule
     public function prepare(Configuration $configuration, array $extensionObjects): void
     {
         $configuration
-            ->registerMessageHandler($this->router);
+            ->registerMessageHandler($this->commandBusByObject)
+            ->registerMessageHandler($this->queryBusByObject)
+            ->registerMessageHandler($this->eventBusByObject)
+            ->registerMessageHandler($this->commandBusByName)
+            ->registerMessageHandler($this->queryBusByName)
+            ->registerMessageHandler($this->eventBusByName);
     }
 
     /**
@@ -99,13 +141,5 @@ class AggregateMessageRouterModule implements AnnotationModule
     public function getRequiredReferences(): array
     {
         return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function afterConfigure(ReferenceSearchService $referenceSearchService): void
-    {
-        return;
     }
 }

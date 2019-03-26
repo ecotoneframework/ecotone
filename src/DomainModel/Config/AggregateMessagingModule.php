@@ -90,9 +90,9 @@ class AggregateMessagingModule implements AnnotationModule
         $this->parameterConverterAnnotationFactory = $parameterConverterAnnotationFactory;
         $this->aggregateCommandHandlerRegistrations = $aggregateCommandHandlerRegistrations;
         $this->aggregateQueryHandlerRegistrations = $aggregateQueryHandlerRegistrations;
-        $this->serviceEventHandlers = $serviceEventHandlers;
         $this->serviceCommandHandlersRegistrations = $serviceCommandHandlersRegistrations;
         $this->serviceQueryHandlerRegistrations = $serviceQueryHandlerRegistrations;
+        $this->serviceEventHandlers = $serviceEventHandlers;
     }
 
     /**
@@ -222,7 +222,7 @@ class AggregateMessagingModule implements AnnotationModule
         }
         foreach ($this->serviceEventHandlers as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
-            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($registration->getAnnotationForMethod()->inputChannelName));
+            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(self::getMessageChannelFor($registration)));
         }
 
 
@@ -301,7 +301,7 @@ class AggregateMessagingModule implements AnnotationModule
 }
 
     /**
-     * @param AnnotationRegistration $eventHandlerRegistration
+     * @param AnnotationRegistration $registration
      *
      * @return ServiceActivatorBuilder
      * @throws InvalidArgumentException
@@ -309,16 +309,17 @@ class AggregateMessagingModule implements AnnotationModule
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function createServiceActivator(AnnotationRegistration $eventHandlerRegistration): ServiceActivatorBuilder
+    private function createServiceActivator(AnnotationRegistration $registration): ServiceActivatorBuilder
     {
-        $annotation = $eventHandlerRegistration->getAnnotationForMethod();
+        $inputChannelName = self::getMessageChannelFor($registration);
+        $annotation = $registration->getAnnotationForMethod();
 
-        $relatedClassInterface         = InterfaceToCall::create($eventHandlerRegistration->getClassName(), $eventHandlerRegistration->getMethodName());
+        $relatedClassInterface         = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
         $parameterConverterAnnotations = $annotation->parameterConverters;
         $parameterConverters           = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations);
 
-        $messageHandlerBuilder = ServiceActivatorBuilder::create($eventHandlerRegistration->getReferenceName(), $eventHandlerRegistration->getMethodName())
-            ->withInputChannelName($annotation->inputChannelName)
+        $messageHandlerBuilder = ServiceActivatorBuilder::create($registration->getReferenceName(), $registration->getMethodName())
+            ->withInputChannelName($inputChannelName)
             ->withEndpointId($annotation->endpointId)
             ->withMethodParameterConverters($parameterConverters);
 

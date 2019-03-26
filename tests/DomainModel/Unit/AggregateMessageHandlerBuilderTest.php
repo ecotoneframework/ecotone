@@ -5,10 +5,13 @@ namespace Test\SimplyCodedSoftware\DomainModel\Unit;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
 use SimplyCodedSoftware\DomainModel\AggregateNotFoundException;
+use SimplyCodedSoftware\DomainModel\EventBus;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\NullableMessageChannel;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
@@ -27,7 +30,9 @@ use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemo
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryOrderRepositoryFactory;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\MultiplyAmountCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\Order;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\OrderNotificator;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\LazyEventBus;
 
 /**
  * Class ServiceCallToAggregateAdapterTest
@@ -43,7 +48,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_calling_existing_aggregate_method_with_only_command_as_parameter()
     {
-        $order = Order::createWith(CreateOrderCommand::create(1, 1, "Poland"));
+        $order = Order::createWith(CreateOrderCommand::create(1, 1, "Poland"), new LazyEventBus());
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
             "changeShippingAddress",
@@ -90,7 +95,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_calling_aggregate_for_query_handler_with_return_value()
     {
         $orderAmount = 5;
-        $order = Order::createWith(CreateOrderCommand::create(1, $orderAmount, "Poland"));
+        $order = Order::createWith(CreateOrderCommand::create(1, $orderAmount, "Poland"), new LazyEventBus());
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getAmountWithQuery",
@@ -125,7 +130,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $outputChannelName = "output";
         $orderAmount = 5;
-        $order = Order::createWith(CreateOrderCommand::create(1, $orderAmount, "Poland"));
+        $order = Order::createWith(CreateOrderCommand::create(1, $orderAmount, "Poland"), new LazyEventBus());
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getAmountWithQuery",
@@ -164,7 +169,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_calling_aggregate_for_query_without_parameters()
     {
         $orderAmount = 5;
-        $order = Order::createWith(CreateOrderCommand::create(1, $orderAmount, "Poland"));
+        $order = Order::createWith(CreateOrderCommand::create(1, $orderAmount, "Poland"), new LazyEventBus());
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getAmount",
@@ -203,12 +208,18 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "createWith",
             CreateOrderCommand::class
         )
+            ->withMethodParameterConverters([
+                PayloadBuilder::create("command"),
+                ReferenceBuilder::create("eventBus", EventBus::class)
+            ])
             ->withAggregateRepositoryFactories([InMemoryOrderRepositoryFactory::createEmpty()])
             ->withInputChannelName("inputChannel");
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                EventBus::class => new LazyEventBus()
+            ])
         );
 
         $replyChannel = QueueChannel::create();
@@ -317,7 +328,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_calling_aggregate_with_version_locking()
     {
-        $order = Order::createWith(CreateOrderCommand::create(1, 1, "Poland"));
+        $order = Order::createWith(CreateOrderCommand::create(1, 1, "Poland"), new LazyEventBus());
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
             "multiplyOrder",
@@ -346,7 +357,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_throwing_exception_when_trying_to_handle_command_without_aggregate_id()
     {
-        $order = Order::createWith(CreateOrderCommand::create(1, 1, "Poland"));
+        $order = Order::createWith(CreateOrderCommand::create(1, 1, "Poland"), new LazyEventBus());
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
             "finish",
@@ -408,7 +419,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_throwing_exception_if_version_locking_defined_and_no_version_provided()
     {
-        $order = Order::createWith(CreateOrderCommand::create(1, 1, "Poland"));
+        $order = Order::createWith(CreateOrderCommand::create(1, 1, "Poland"), new LazyEventBus());
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
             "multiplyOrder",

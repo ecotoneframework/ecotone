@@ -32,6 +32,24 @@ interface QueryBus
     public function send($query);
 
     /**
+     * Entrypoint for queries, when you access to instance of the command
+     *
+     * @param object $query instance of command
+     * @param array  $metadata
+     *
+     * @return mixed
+     *
+     * @Gateway(
+     *     requestChannel=QueryBus::CHANNEL_NAME_BY_OBJECT,
+     *     parameterConverters={
+     *          @GatewayPayload(parameterName="query"),
+     *          @GatewayHeaderArray(parameterName="metadata")
+     *     }
+     * )
+     */
+    public function sendWithMetadata($query, array $metadata);
+
+    /**
      * @param string $name
      * @param string $dataMediaType
      * @param mixed  $commandData

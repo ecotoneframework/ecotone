@@ -33,6 +33,24 @@ interface CommandBus
     public function send($command);
 
     /**
+     * Entrypoint for commands, when you access to instance of the command
+     *
+     * @param object $command instance of command
+     * @param array  $metadata
+     *
+     * @return mixed
+     *
+     * @Gateway(
+     *     requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT,
+     *     parameterConverters={
+     *          @GatewayPayload(parameterName="command"),
+     *          @GatewayHeaderArray(parameterName="metadata")
+     *     }
+     * )
+     */
+    public function sendWithMetadata($command, array $metadata);
+
+    /**
      * @param string $name
      * @param string $dataMediaType
      * @param mixed  $commandData

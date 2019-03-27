@@ -48,8 +48,19 @@ class LazyEventBus implements EventBus
         }
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function sendWithMetadata($event, array $metadata)
+    {
+        if ($this->eventBus) {
+            $this->eventBus->sendWithMetadata($event, $metadata);
+        }
+    }
+
     public function setEventBus(EventBus $eventBus) : void
     {
         $this->eventBus = $eventBus;
     }
+
 }

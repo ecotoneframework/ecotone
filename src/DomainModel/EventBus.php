@@ -3,6 +3,8 @@
 namespace SimplyCodedSoftware\DomainModel;
 
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderArray;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 
 /**
@@ -26,4 +28,22 @@ interface EventBus
      * @Gateway(requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT)
      */
     public function send($event);
+
+    /**
+     * Entrypoint for queries, when you access to instance of the command
+     *
+     * @param object $event instance of command
+     * @param array  $metadata
+     *
+     * @return mixed
+     *
+     * @Gateway(
+     *     requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT,
+     *     parameterConverters={
+     *         @GatewayPayload(parameterName="event"),
+     *         @GatewayHeaderArray(parameterName="metadata")
+     *     }
+     * )
+     */
+    public function sendWithMetadata($event, array $metadata);
 }

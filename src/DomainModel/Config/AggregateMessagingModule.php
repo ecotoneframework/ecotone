@@ -214,11 +214,11 @@ class AggregateMessagingModule implements AnnotationModule
 
         foreach ($this->serviceCommandHandlersRegistrations as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
-            $inputChannelNames = $this->addUniqueChannelName($registration->getAnnotationForMethod(), $inputChannelNames);
+            $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames);
         }
         foreach ($this->serviceQueryHandlerRegistrations as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
-            $inputChannelNames = $this->addUniqueChannelName($registration->getAnnotationForMethod(), $inputChannelNames);
+            $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames);
         }
         foreach ($this->serviceEventHandlers as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));

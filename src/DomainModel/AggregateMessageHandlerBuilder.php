@@ -134,7 +134,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         }
 
         foreach ($aggregateDefaultIdentifiers as $aggregateIdentifierName => $aggregateIdentifierMappingKey) {
-            if (is_null($aggregateIdentifierMappingKey)) {
+            if (is_null($aggregateIdentifierMappingKey) && !$this->isFactoryMethod) {
                 $mappingKey = null;
                 foreach ($messageReflection->getProperties() as $property) {
                     if ($aggregateIdentifierName === $property->getName()) {
@@ -143,7 +143,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                 }
 
                 if (is_null($mappingKey)) {
-                    throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` for {$handledMessageClassName}. How you forgot to mark @TargetIdentifier?");
+                    throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` for {$handledMessageClassName}. How you forgot to mark @TargetAggregateIdentifier?");
                 } else {
                     $aggregateDefaultIdentifiers[$aggregateIdentifierName] = $mappingKey;
                 }

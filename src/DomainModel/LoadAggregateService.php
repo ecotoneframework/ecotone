@@ -82,12 +82,14 @@ class LoadAggregateService
     {
         $aggregateIdentifiers = [];
         $expectedVersion = null;
+
         foreach ($this->aggregateIdentifierMapping as $aggregateIdentifierName => $aggregateIdentifierMappingName) {
-            $aggregateIdentifiers[$aggregateIdentifierName] = $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload());
+            $aggregateIdentifiers[$aggregateIdentifierName] = $this->isFactoryMethod ? null : $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload());
         }
 
         $aggregate = null;
         if (!$this->isFactoryMethod) {
+
             foreach ($aggregateIdentifiers as $identifierName => $aggregateIdentifier) {
                 if (is_null($aggregateIdentifier)) {
                     throw AggregateNotFoundException::create("Aggregate identifier {$identifierName} definition found, but is null. Can't load aggregate {$this->aggregateClassName} to call {$this->aggregateMethod}.");

@@ -317,6 +317,7 @@ class GatewayProxyBuilderTest extends MessagingTest
               $requestChannel->receive()->getPayload(),
               'some'
         );
+        $this->assertNull($requestChannel->receive());
     }
 
     public function test_resolving_response_in_future()
@@ -538,6 +539,7 @@ class GatewayProxyBuilderTest extends MessagingTest
             ErrorMessage::class,
             $errorChannel->receive()
         );
+        $this->assertNull($errorChannel->receive());
     }
 
     public function test_propagating_error_to_error_channel_when_exception_happen_during_receiving_reply()

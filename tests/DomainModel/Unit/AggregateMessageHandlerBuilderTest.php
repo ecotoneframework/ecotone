@@ -21,6 +21,7 @@ use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\ChangeArticleContentComman
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\CloseArticleCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\InMemoryArticleRepositoryFactory;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\PublishArticleCommand;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\PublishArticleWithTitleOnlyCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\RepublishArticleCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CommandWithoutAggregateIdentifier;
@@ -393,6 +394,21 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "changeContent",
             RepublishArticleCommand::class
         );
+    }
+
+    /**
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_not_throwing_exception_if_no_aggregate_identifier_definition_found_for_factory_method()
+    {
+        AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            Article::class,
+            "createWithoutContent",
+            PublishArticleWithTitleOnlyCommand::class
+        );
+
+        $this->assertTrue(true, "Created without identifiers");
     }
 
     /**

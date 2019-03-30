@@ -53,6 +53,17 @@ class Article
     }
 
     /**
+     * @param PublishArticleWithTitleOnlyCommand $command
+     *
+     * @return Article
+     * @CommandHandler()
+     */
+    public static function createWithoutContent(PublishArticleWithTitleOnlyCommand $command) : self
+    {
+        return new self($command->getAuthor(), $command->getTitle(), "");
+    }
+
+    /**
      * @param ChangeArticleContentCommand $command
      * @return bool
      * @CommandHandler()

@@ -483,6 +483,10 @@ final class TypeDescriptor
      */
     private function resolveType(string $typeHint) : string
     {
+        if ($typeHint == "") {
+            return self::UNKNOWN;
+        }
+
         $type = explode("|", $typeHint)[0];
 
         if (strpos($type, "[]") !== false) {

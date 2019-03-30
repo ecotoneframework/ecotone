@@ -45,6 +45,14 @@ class TypeDescriptorTest extends TestCase
         );
     }
 
+    public function test_guessing_unknown_type_if_only_empty_strings_passed()
+    {
+        $this->assertEquals(
+            TypeDescriptor::UNKNOWN,
+            ($typeDescription = TypeDescriptor::createWithDocBlock("    ", "    "))->getTypeHint()
+        );
+    }
+
     /**
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException

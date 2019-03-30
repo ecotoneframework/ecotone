@@ -31,6 +31,15 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      * @var array
      */
     private $bannedEnvironmentClassMethods = [];
+    /**
+     * @var string[]
+     */
+    private $cachedMethodAnnotations = [];
+
+    /**
+     * @var object[][]
+     */
+    private $cachedClassAnnotations = [];
 
     /**
      * FileSystemAnnotationRegistrationService constructor.
@@ -64,7 +73,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
 
         foreach ($this->registeredClasses as $className) {
             foreach (get_class_methods($className) as $method) {
-                $methodAnnotations = $this->getMethodAnnotations($className, $method, Environment::class);
+                $methodAnnotations = $this->getCachedMethodAnnotations($className, $method);
                 foreach ($methodAnnotations as $methodAnnotation) {
                     if ($methodAnnotation instanceof Environment) {
                         if (!in_array($environmentName, $methodAnnotation->names)) {
@@ -88,7 +97,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
                     continue;
                 }
 
-                $methodAnnotations = $this->getMethodAnnotations($className, $method, $methodAnnotationClassName);
+                $methodAnnotations = $this->getCachedMethodAnnotations($className, $method);
                 foreach ($methodAnnotations as $methodAnnotation) {
                     if (get_class($methodAnnotation) === $methodAnnotationClassName || $methodAnnotation instanceof $methodAnnotationClassName) {
                         $annotationRegistration = AnnotationRegistration::create(
@@ -104,6 +113,14 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
             }
         }
 
+        usort($registrations, function (AnnotationRegistration $annotationRegistration, AnnotationRegistration $annotationRegistrationToCheck){
+            if ($annotationRegistration->getClassName() == $annotationRegistrationToCheck->getClassName()) {
+                return 0;
+            }
+
+            return $annotationRegistration->getClassName() > $annotationRegistrationToCheck->getClassName();
+        });
+
         return $registrations;
     }
 
@@ -112,19 +129,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      */
     public function getAnnotationsForMethod(string $className, string $methodName): iterable
     {
-        $reflectionMethod = new \ReflectionMethod($className, $methodName);
-
-        return $this->annotationReader->getMethodAnnotations($reflectionMethod);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAnnotationsForClass(string $className): iterable
-    {
-        $reflectionClass = new \ReflectionClass($className);
-
-        return $this->annotationReader->getClassAnnotations($reflectionClass);
+        return $this->getCachedMethodAnnotations($className, $methodName);
     }
 
     /**
@@ -148,9 +153,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
 
         $classesWithAnnotations = [];
         foreach ($this->registeredClasses as $class) {
-            $classReflection = new \ReflectionClass($class);
-
-            $classAnnotation = $this->annotationReader->getClassAnnotation($classReflection, $annotationClassName);
+            $classAnnotation = $this->getAnnotationForClass($class, $annotationClassName);
 
             if ($classAnnotation) {
                 $classesWithAnnotations[] = $class;
@@ -163,9 +166,68 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     /**
      * @inheritDoc
      */
-    public function getAnnotationForClass(string $className, string $annotationClassName)
+    public function getAnnotationForClass(string $className, string $annotationClassNameToFind)
     {
-        return $this->annotationReader->getClassAnnotation(new \ReflectionClass($className), $annotationClassName);
+        $annotationsForClass = $this->getAnnotationsForClass($className);
+
+        foreach ($annotationsForClass as $annotationForClass) {
+            if (get_class($annotationForClass) == $annotationClassNameToFind) {
+                return $annotationForClass;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAnnotationsForClass(string $className): iterable
+    {
+        return $this->getCachedAnnotationsForClass($className);
+    }
+
+    /**
+     * @param string $className
+     * @param string $methodName
+     * @return object[]
+     * @throws ConfigurationException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function getCachedMethodAnnotations(string $className, string $methodName) : array
+    {
+        if (isset($this->cachedMethodAnnotations[$className . $methodName])) {
+            return $this->cachedMethodAnnotations[$className . $methodName];
+        }
+
+        try {
+            $reflectionMethod = new \ReflectionMethod($className, $methodName);
+
+            $annotations =  $this->annotationReader->getMethodAnnotations($reflectionMethod);
+        }catch (\ReflectionException $e) {
+            throw ConfigurationException::create("Class {$className} with method {$methodName} does not exists or got annotation configured wrong: " . $e->getMessage());
+        }
+
+        $this->cachedMethodAnnotations[$className . $methodName] = $annotations;
+
+        return $annotations;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private function getCachedAnnotationsForClass(string $className): iterable
+    {
+        if (isset($this->cachedClassAnnotations[$className])) {
+            return $this->cachedClassAnnotations[$className];
+        }
+
+
+        $reflectionClass = new \ReflectionClass($className);
+        $classAnnotations = $this->annotationReader->getClassAnnotations($reflectionClass);
+
+        $this->cachedClassAnnotations[$className] = $classAnnotations;
+        return $classAnnotations;
     }
 
     /**
@@ -235,25 +297,6 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
         }
 
         $this->registeredClasses = array_unique($classes);
-    }
-
-    /**
-     * @param string $className
-     * @param string $methodName
-     * @param string $annotationName
-     * @return object[]
-     * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    private function getMethodAnnotations(string $className, string $methodName, string $annotationName) : array
-    {
-        try {
-            $reflectionMethod = new \ReflectionMethod($className, $methodName);
-
-            return $this->annotationReader->getMethodAnnotations($reflectionMethod);
-        }catch (\ReflectionException $e) {
-            throw ConfigurationException::create("Class {$className} with method {$methodName} and annotation {$annotationName} does not exists or got annotation configured wrong: " . $e->getMessage());
-        }
     }
 
     /**

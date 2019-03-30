@@ -18,21 +18,29 @@ class EventBusRouter
     /**
      * @var array
      */
-    private $channelNamesRouting;
+    private $classNameToChannelNameMapping;
+    /**
+     * @var array
+     */
+    private $channelNameToClassNameMapping;
     /**
      * @var ChannelResolver
      */
     private $channelResolver;
 
+
     /**
      * CommandBusRouter constructor.
      *
-     * @param array           $channelNamesRouting
+     * @param array           $classNameToChannelNameMapping
      * @param ChannelResolver $channelResolver
      */
-    public function __construct(array $channelNamesRouting, ChannelResolver $channelResolver)
+    public function __construct(array $classNameToChannelNameMapping, ChannelResolver $channelResolver)
     {
-        $this->channelNamesRouting = $channelNamesRouting;
+        $this->classNameToChannelNameMapping = $classNameToChannelNameMapping;
+        foreach ($classNameToChannelNameMapping as $className => $channelNames) {
+            $this->channelNameToClassNameMapping[$channelNames[0]] = $className;
+        }
         $this->channelResolver = $channelResolver;
     }
 
@@ -47,11 +55,11 @@ class EventBusRouter
         Assert::isObject($object, "Passed non object value to Event Bus: " . TypeDescriptor::createFromVariable($object)->toString() . ". Did you wanted to use convertAndSend?");
 
         $className = get_class($object);
-        if (!array_key_exists($className, $this->channelNamesRouting)) {
+        if (!array_key_exists($className, $this->classNameToChannelNameMapping)) {
             return [];
         }
 
-        return $this->channelNamesRouting[$className];
+        return $this->classNameToChannelNameMapping[$className];
     }
 
     /**
@@ -66,7 +74,7 @@ class EventBusRouter
             throw ConfigurationException::create("Can't send via name using EventBus without " . EventBus::CHANNEL_NAME_BY_NAME . " header defined");
         }
 
-        if (!$this->channelResolver->hasChannelWithName($name)) {
+        if (!array_key_exists($name, $this->channelNameToClassNameMapping)) {
             return null;
         }
 

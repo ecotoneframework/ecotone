@@ -110,7 +110,7 @@ class DomainContext extends TestCase implements Context
      */
     public function thereShouldBeProductsForOrderWithIdRetrievedFrom(int $productsAmount, int $orderId, string $channelName)
     {
-        $executeWithContentType = $this->commandBus->convertAndSend($channelName, MediaType::APPLICATION_X_PHP_SERIALIZED_OBJECT,serialize(GetOrderAmountQuery::createWith($orderId)));
+        $executeWithContentType = $this->queryBus->convertAndSend($channelName, MediaType::APPLICATION_X_PHP_SERIALIZED_OBJECT,serialize(GetOrderAmountQuery::createWith($orderId)));
         $this->assertEquals(
             $productsAmount,
             $executeWithContentType

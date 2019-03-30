@@ -19,7 +19,11 @@ class QueryBusRouter
     /**
      * @var array
      */
-    private $channelNamesRouting;
+    private $classNameToChannelNameMapping;
+    /**
+     * @var array
+     */
+    private $channelNameToClassNameMapping;
     /**
      * @var ChannelResolver
      */
@@ -28,12 +32,15 @@ class QueryBusRouter
     /**
      * CommandBusRouter constructor.
      *
-     * @param array           $channelNamesRouting
+     * @param array           $classNameToChannelNameMapping
      * @param ChannelResolver $channelResolver
      */
-    public function __construct(array $channelNamesRouting, ChannelResolver $channelResolver)
+    public function __construct(array $classNameToChannelNameMapping, ChannelResolver $channelResolver)
     {
-        $this->channelNamesRouting = $channelNamesRouting;
+        $this->classNameToChannelNameMapping = $classNameToChannelNameMapping;
+        foreach ($classNameToChannelNameMapping as $className => $channelNames) {
+            $this->channelNameToClassNameMapping[$channelNames[0]] = $className;
+        }
         $this->channelResolver = $channelResolver;
     }
 
@@ -49,11 +56,11 @@ class QueryBusRouter
         Assert::isObject($object, "Passed non object value to Query Bus: " . TypeDescriptor::createFromVariable($object)->toString() . ". Did you wanted to use convertAndSend?");
 
         $className = get_class($object);
-        if (!array_key_exists($className, $this->channelNamesRouting)) {
-            throw DestinationResolutionException::create("There is no Query Handler defined for {$className}. Have you forgot to add @QueryHandler annotation?");
+        if (!array_key_exists($className, $this->classNameToChannelNameMapping)) {
+            throw DestinationResolutionException::create("Can't send query to {$className}. No Query Handler defined for it. Have you forgot to add @QueryHandler to method or @MessageEndpoint to class?");
         }
 
-        return $this->channelNamesRouting[$className];
+        return $this->classNameToChannelNameMapping[$className];
     }
 
     /**
@@ -68,8 +75,8 @@ class QueryBusRouter
             throw ConfigurationException::create("Can't send via name using QueryBus without " . QueryBus::CHANNEL_NAME_BY_NAME . " header defined");
         }
 
-        if (!$this->channelResolver->hasChannelWithName($name)) {
-            throw ConfigurationException::create("Can't send command to {$name}. No Query Handler defined with this name. Have you forgot to add @QueryHandler annotation?");
+        if (!array_key_exists($name, $this->channelNameToClassNameMapping)) {
+            throw ConfigurationException::create("Can't send query to {$name}. No Query Handler defined for it. Have you forgot to add @QueryHandler to method or @MessageEndpoint to class?");
         }
 
         return $name;

@@ -90,6 +90,9 @@ class AggregateMessageRouterModule implements AnnotationModule
             $queryHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
         $eventHandlers = [];
+        foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
+            $eventHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+        }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
             $eventHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }

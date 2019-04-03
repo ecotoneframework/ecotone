@@ -290,6 +290,42 @@ class InterfaceToCallTest extends TestCase
         );
     }
 
+    public function test_resolving_return_type_type_hint_from_trait_in_different_namespace()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            SuperAdmin::class, "getLessFavourite"
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create(Favourite::class),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
+    public function test_resolving_return_type_type_hint_located_in_docblock_from_trait_in_different_namespace()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            SuperAdmin::class, "getYourVeryBestFavourite"
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create(Favourite::class),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
+    public function test_overriding_trait_method_return_type()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            SuperAdmin::class, "getUser"
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create(SuperAdmin::class),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
     /**
      * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException

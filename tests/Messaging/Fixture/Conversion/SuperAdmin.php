@@ -2,6 +2,8 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
 
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\GetFavouriteTrait;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\GetUserTrait;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Password as AdminPassword;
 
 /**
@@ -11,12 +13,23 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Password as AdminPassw
  */
 class SuperAdmin extends AbstractSuperAdmin implements Admin
 {
+    use GetFavouriteTrait;
+    use GetUserTrait;
+
     /**
      * @inheritDoc
      */
     public function getSuperAdmin()
     {
         // TODO: Implement getUser() method.
+    }
+
+    /**
+     * @return $this
+     */
+    public function getUser()
+    {
+
     }
 
     /**

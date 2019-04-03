@@ -17,7 +17,7 @@ class TypeResolver
     private const CODE_USE_STATEMENTS_REGEX = '/use[\s]*([^;]*)[\s]*;/';
 
     private const METHOD_DOC_BLOCK_TYPE_HINT_REGEX = '~@param[\s]*([^\n\$\s]*)[\s]*\$([a-zA-Z0-9]*)~';
-    private const METHOD_RETURN_TYPE_HINT_REGEX = '~@return[\s]*([^\n\$\s]*)~';
+    private const METHOD_RETURN_TYPE_HINT_REGEX = '~@return[\s]*([^\n\s]*)~';
     private const CLASS_PROPERTY_TYPE_HINT_REGEX = "#@var[\s]*([^\n\$\s]*)#";
 
     private const SELF_TYPE_HINT = "self";
@@ -499,6 +499,11 @@ class TypeResolver
                 }
             }
         }
+        foreach ($analyzedClass->getTraits() as $trait) {
+            if ($trait->hasMethod($methodReflection->getName()) && !$this->wasTraitOverwritten($methodReflection, $trait)) {
+                return $this->getReturnTypeDocBlockParameterTypeHint($thisClass, $trait, $trait->getMethod($methodReflection->getName()));
+            }
+        }
 
         $docComment = $this->getDocComment($analyzedClass, $methodReflection);
 
@@ -509,5 +514,51 @@ class TypeResolver
         }
 
         return null;
+    }
+
+    /**
+     * @param \ReflectionClass $analyzedClass
+     * @param string $methodName
+     * @return \ReflectionClass
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function getClassToAnalyzeMethod(\ReflectionClass $analyzedClass, string $methodName) : \ReflectionClass
+    {
+        $methodReflection = $analyzedClass->getMethod($methodName);
+        $declaringClass = $this->getMethodDeclaringClass($analyzedClass, $methodName);
+        if ($analyzedClass->getName() !== $declaringClass->getName()) {
+            return $this->getClassToAnalyzeMethod($declaringClass, $methodName);
+        }
+
+        if ($this->isInheritDocComment($methodReflection->getDocComment())) {
+            if ($analyzedClass->getParentClass() && $analyzedClass->getParentClass()->hasMethod($methodReflection->getName())) {
+                return $this->getClassToAnalyzeMethod($analyzedClass->getParentClass(), $methodName);
+            }
+            foreach ($analyzedClass->getInterfaceNames() as $interfaceName) {
+                if (method_exists($interfaceName, $methodReflection->getName())) {
+                    $reflectionClass = new \ReflectionClass($interfaceName);
+                    return $this->getClassToAnalyzeMethod($reflectionClass, $methodName);
+                }
+            }
+        }
+        foreach ($analyzedClass->getTraits() as $trait) {
+            if ($trait->hasMethod($methodReflection->getName()) && !$this->wasTraitOverwritten($methodReflection, $trait)) {
+                return $this->getClassToAnalyzeMethod($trait, $methodName);
+            }
+        }
+
+        return $analyzedClass;
+    }
+
+    /**
+     * @param \ReflectionMethod $methodReflection
+     * @param \ReflectionClass $trait
+     * @return bool
+     * @throws \ReflectionException
+     */
+    private function wasTraitOverwritten(\ReflectionMethod $methodReflection, \ReflectionClass $trait): bool
+    {
+        return $methodReflection->getFileName() !== $trait->getMethod($methodReflection->getName())->getFileName();
     }
 }

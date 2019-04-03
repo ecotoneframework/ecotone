@@ -22,7 +22,6 @@ use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\OrderPropertyExample;
 
 /**
  * Class InterfaceToCallTest

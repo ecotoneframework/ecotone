@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Annotation\RequiredReferenceName;
 use SimplyCodedSoftware\Messaging\Handler\ClassDefinition;
 use SimplyCodedSoftware\Messaging\Handler\ClassPropertyDefinition;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\OrderPropertyExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\OrderWithTraits;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\PropertyAnnotationExample;
 
 /**
@@ -73,6 +73,16 @@ class ClassDefinitionTest extends TestCase
         $this->assertEquals(
             ClassPropertyDefinition::createPrivate("someClass", TypeDescriptor::create(\stdClass::class), true, false, []),
             $classDefinition->getProperty("someClass")
+        );
+    }
+
+    public function test_retrieving_private_from_trait()
+    {
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderWithTraits::class));
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("property", TypeDescriptor::create(ExtraObject::class), true, false, []),
+            $classDefinition->getProperty("property")
         );
     }
 }

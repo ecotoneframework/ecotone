@@ -378,50 +378,17 @@ class TypeResolver
         $annotationParser = $this->getAnnotationParser($className);
 
         $classProperties = [];
-        $properties = $reflectionClass->getProperties();
         $parent = $reflectionClass;
-        while ($parent = $parent->getParentClass()) {
-            $properties = array_merge($properties, $parent->getProperties());
+        foreach ($reflectionClass->getProperties() as $property) {
+            $classProperties[] = $this->createClassPropertyUsingTraitsIfExists($className, $reflectionClass, $property, $annotationParser);
         }
-        $properties = array_unique($properties);
-
-        foreach ($properties as $property) {
-            try {
-                $type = $this->getPropertyDocblockTypeHint($reflectionClass, $property);
-                $type = $type ? $type : TypeDescriptor::createUnknownType();
-                $annotations = $annotationParser->getAnnotationsForProperty($className, $property->getName());
-
-                if ($property->isPrivate()) {
-                    $classProperties[] = ClassPropertyDefinition::createPrivate(
-                        $property->getName(),
-                        $type,
-                        true,
-                        $property->isStatic(),
-                        $annotations
-                    );
-                } else if ($property->isProtected()) {
-                    $classProperties[] = ClassPropertyDefinition::createProtected(
-                        $property->getName(),
-                        $type,
-                        true,
-                        $property->isStatic(),
-                        $annotations
-                    );
-                } else {
-                    $classProperties[] = ClassPropertyDefinition::createPublic(
-                        $property->getName(),
-                        $type,
-                        true,
-                        $property->isStatic(),
-                        $annotations
-                    );
-                }
-            }catch (TypeDefinitionException $typeDefinitionException) {
-                throw TypeDefinitionException::create("There is problem with type of property {$property->getName()} in class {$className}: {$typeDefinitionException}");
+        while ($parent = $parent->getParentClass()) {
+            foreach ($parent->getProperties() as $property) {
+                $classProperties[] = $this->createClassPropertyUsingTraitsIfExists($parent, $reflectionClass, $property, $annotationParser);
             }
         }
 
-        return $classProperties;
+        return array_unique($classProperties);
     }
 
     /**
@@ -436,13 +403,15 @@ class TypeResolver
     }
 
     /**
+     * @param \ReflectionClass $thisClass
      * @param \ReflectionClass $analyzedClass
+     * @param \ReflectionClass $declaringClass
      * @param \ReflectionProperty $reflectionProperty
      * @return TypeDescriptor|null
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function getPropertyDocblockTypeHint(\ReflectionClass $analyzedClass, \ReflectionProperty $reflectionProperty): ?TypeDescriptor
+    private function getPropertyDocblockTypeHint(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionClass $declaringClass, \ReflectionProperty $reflectionProperty): ?TypeDescriptor
     {
         $docComment = $reflectionProperty->getDocComment();
         preg_match_all(self::CLASS_PROPERTY_TYPE_HINT_REGEX, $docComment, $matchedDocBlockParameterTypes);
@@ -451,9 +420,15 @@ class TypeResolver
             return null;
         }
 
-        return TypeDescriptor::create(
-            $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][0], $analyzedClass, $analyzedClass, $reflectionProperty->getDeclaringClass())
-        );
+        try {
+            $typeDescriptor = TypeDescriptor::create(
+                $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][0], $thisClass, $analyzedClass, $declaringClass)
+            );
+        }catch (TypeDefinitionException $typeDefinitionException) {
+            throw TypeDefinitionException::create("There is problem with type of property {$reflectionProperty->getName()} in class {$analyzedClass->getName()}: {$typeDefinitionException}");
+        }
+
+        return $typeDescriptor;
     }
 
     /**
@@ -530,5 +505,79 @@ class TypeResolver
     private function wasTraitOverwritten(\ReflectionMethod $methodReflection, \ReflectionClass $trait): bool
     {
         return $methodReflection->getFileName() !== $trait->getMethod($methodReflection->getName())->getFileName();
+    }
+
+    /**
+     * @param string $className
+     * @param AnnotationParser $annotationParser
+     * @param $property
+     * @param TypeDescriptor|null $type
+     * @return ClassPropertyDefinition|null
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function createClassProperty(string $className, AnnotationParser $annotationParser, $property, ?TypeDescriptor $type)
+    {
+        $classProperty = null;
+        $type = $type ? $type : TypeDescriptor::createUnknownType();
+        $annotations = $annotationParser->getAnnotationsForProperty($className, $property->getName());
+        if ($property->isPrivate()) {
+            $classProperty = ClassPropertyDefinition::createPrivate(
+                $property->getName(),
+                $type,
+                true,
+                $property->isStatic(),
+                $annotations
+            );
+        } else if ($property->isProtected()) {
+            $classProperty = ClassPropertyDefinition::createProtected(
+                $property->getName(),
+                $type,
+                true,
+                $property->isStatic(),
+                $annotations
+            );
+        } else {
+            $classProperty = ClassPropertyDefinition::createPublic(
+                $property->getName(),
+                $type,
+                true,
+                $property->isStatic(),
+                $annotations
+            );
+        }
+        return $classProperty;
+    }
+
+    /**
+     * @param string $className
+     * @param \ReflectionClass $reflectionClass
+     * @param \ReflectionProperty $property
+     * @param AnnotationParser $annotationParser
+     * @return ClassPropertyDefinition|null
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function createClassPropertyUsingTraitsIfExists(string $className, \ReflectionClass $reflectionClass, \ReflectionProperty $property, AnnotationParser $annotationParser)
+    {
+        foreach ($reflectionClass->getTraits() as $trait) {
+            foreach ($trait->getProperties() as $traitProperty) {
+                if ($traitProperty->getName() === $property->getName()) {
+                    return $this->createClassProperty(
+                        $className,
+                        $annotationParser,
+                        $traitProperty,
+                        $this->getPropertyDocblockTypeHint($reflectionClass, $trait, $property->getDeclaringClass(), $traitProperty)
+                    );
+                }
+            }
+        }
+
+        return $this->createClassProperty(
+                $className,
+                $annotationParser,
+                $property,
+                $this->getPropertyDocblockTypeHint($reflectionClass, $property->getDeclaringClass(), $property->getDeclaringClass(), $property)
+        );
     }
 }

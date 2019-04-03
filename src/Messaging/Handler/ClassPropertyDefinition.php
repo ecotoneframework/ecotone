@@ -152,4 +152,9 @@ final class ClassPropertyDefinition
     {
         return $this->visibility === self::PROTECTED_VISIBILITY;
     }
+
+    public function __toString()
+    {
+        return $this->visibility . $this->name . $this->type->toString();
+    }
 }

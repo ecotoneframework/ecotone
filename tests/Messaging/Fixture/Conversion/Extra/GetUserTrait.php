@@ -12,9 +12,11 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\User;
 trait GetUserTrait
 {
     /**
+     *
+     * @param User $user
      * @return User
      */
-    public function getUser()
+    public function getUser($user)
     {
 
     }

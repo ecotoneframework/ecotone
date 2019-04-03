@@ -25,9 +25,10 @@ class SuperAdmin extends AbstractSuperAdmin implements Admin
     }
 
     /**
+     * @param self $user
      * @return $this
      */
-    public function getUser()
+    public function getUser($user)
     {
 
     }

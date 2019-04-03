@@ -11,14 +11,15 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra;
 trait GetFavouriteTrait
 {
     /**
+     * @param Favourite $favourite
      * @return Favourite
      */
-    public function getYourVeryBestFavourite()
+    public function getYourVeryBestFavourite($favourite)
     {
 
     }
 
-    public function getLessFavourite() : Favourite
+    public function getLessFavourite(Favourite $favourite) : Favourite
     {
 
     }

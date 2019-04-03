@@ -297,6 +297,10 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
+            InterfaceParameter::createNotNullable("favourite", TypeDescriptor::create(Favourite::class)),
+            $interfaceToCall->getParameterWithName("favourite")
+        );
+        $this->assertEquals(
             TypeDescriptor::create(Favourite::class),
             $interfaceToCall->getReturnType()
         );
@@ -309,6 +313,10 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
+            InterfaceParameter::createNullable("favourite", TypeDescriptor::create(Favourite::class)),
+            $interfaceToCall->getParameterWithName("favourite")
+        );
+        $this->assertEquals(
             TypeDescriptor::create(Favourite::class),
             $interfaceToCall->getReturnType()
         );
@@ -320,6 +328,10 @@ class InterfaceToCallTest extends TestCase
             SuperAdmin::class, "getUser"
         );
 
+        $this->assertEquals(
+            InterfaceParameter::createNullable("user", TypeDescriptor::create(SuperAdmin::class)),
+            $interfaceToCall->getParameterWithName("user")
+        );
         $this->assertEquals(
             TypeDescriptor::create(SuperAdmin::class),
             $interfaceToCall->getReturnType()

@@ -1,17 +1,16 @@
 <?php
-declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
 
-/***
- * Interface Shop
+/**
+ * Interface BlackListedUser
  * @package Test\SimplyCodedSoftware\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface Shop
+interface BlackListedUser
 {
     /**
-     * @param \stdClass|object $product
+     * @return Admin
      */
-    public function buy($product) : void;
+    public function bannedBy() : Admin;
 }

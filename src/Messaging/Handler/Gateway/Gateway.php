@@ -11,6 +11,8 @@ use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\MessageChannel;
@@ -65,6 +67,14 @@ class Gateway
      * @var MessageChannel
      */
     private $requestChannel;
+    /**
+     * @var ReferenceSearchService
+     */
+    private $referenceSearchService;
+    /**
+     * @var iterable|AroundInterceptorReference[]
+     */
+    private $aroundInterceptors;
 
     /**
      * GatewayProxy constructor.
@@ -76,9 +86,16 @@ class Gateway
      * @param PollableChannel|null $replyChannel
      * @param MessageChannel|null $errorChannel
      * @param int $replyMilliSecondsTimeout
+     * @param ReferenceSearchService $referenceSearchService
+     * @param AroundInterceptorReference[] $aroundInterceptors
      * @throws MessagingException
      */
-    public function __construct(InterfaceToCall $interfaceToCall, MethodCallToMessageConverter $methodCallToMessageConverter, array $messageConverters, array $transactionFactories, MessageChannel $requestChannel, ?PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $replyMilliSecondsTimeout)
+    public function __construct(
+        InterfaceToCall $interfaceToCall, MethodCallToMessageConverter $methodCallToMessageConverter,
+        array $messageConverters, array $transactionFactories, MessageChannel $requestChannel,
+        ?PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $replyMilliSecondsTimeout,
+        ReferenceSearchService $referenceSearchService, iterable $aroundInterceptors
+    )
     {
         Assert::allInstanceOfType($transactionFactories, TransactionFactory::class);
 
@@ -90,6 +107,8 @@ class Gateway
         $this->errorChannel = $errorChannel;
         $this->replyMilliSecondsTimeout = $replyMilliSecondsTimeout;
         $this->requestChannel = $requestChannel;
+        $this->referenceSearchService = $referenceSearchService;
+        $this->aroundInterceptors = $aroundInterceptors;
     }
 
     /**
@@ -161,10 +180,14 @@ class Gateway
             $errorChannelComingFromPreviousGateway
         );
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle")
-                            ->withOutputMessageChannel($internalReplyBridgeName)
+            ->withOutputMessageChannel($internalReplyBridgeName);
+        foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
+            $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
+        }
+        $serviceActivator = $serviceActivator
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([$internalReplyBridgeName => $internalReplyBridge]),
-                                InMemoryReferenceSearchService::createEmpty()
+                                $this->referenceSearchService
                             );
 
         try {

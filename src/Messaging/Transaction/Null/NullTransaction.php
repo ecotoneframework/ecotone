@@ -54,7 +54,7 @@ class NullTransaction implements Transaction
      */
     public function isCommitted() : bool
     {
-        return $this->status = self::COMMITTED;
+        return $this->status == self::COMMITTED;
     }
 
     /**
@@ -62,7 +62,7 @@ class NullTransaction implements Transaction
      */
     public function isRollback() : bool
     {
-        return $this->status = self::ROLLED_BACK;
+        return $this->status == self::ROLLED_BACK;
     }
 
     /**

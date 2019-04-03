@@ -3,6 +3,8 @@
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
 
 
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\TwoStepPassword as AdminPassword;
+
 interface Admin
 {
     /**
@@ -14,4 +16,10 @@ interface Admin
      * @return self
      */
     public function getAdmin();
+
+    /**
+     * @param mixed $password
+     * @return mixed
+     */
+    public function getPassword(AdminPassword $password) : AdminPassword;
 }

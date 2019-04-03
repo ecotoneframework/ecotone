@@ -9,7 +9,7 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\TwoStepPassword as Adm
  * @package Test\SimplyCodedSoftware\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-abstract class AbstractSuperAdmin
+abstract class AbstractSuperAdmin implements Admin
 {
     /**
      * @return self
@@ -20,9 +20,10 @@ abstract class AbstractSuperAdmin
     }
 
     /**
+     * @param AdminPassword $password
      * @return AdminPassword
      */
-    public function getPassword() : AdminPassword
+    public function getPassword(AdminPassword $password) : AdminPassword
     {
 
     }

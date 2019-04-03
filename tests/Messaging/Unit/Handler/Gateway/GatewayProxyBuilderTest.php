@@ -2,8 +2,10 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway;
 
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransaction;
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
+use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway\DumbSendAndReceiveService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
@@ -678,6 +680,43 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxy = $gatewayProxyBuilder->build(
             InMemoryReferenceSearchService::createWith([
                 "trans1" => $transactionFactoryOne
+            ]),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                ]
+            )
+        );
+
+        $gatewayProxy->sendMail('test');
+
+        $this->assertTrue($transactionOne->isCommitted());
+    }
+
+    public function test_calling_interface_with_around_interceptor()
+    {
+        $messageHandler     = NoReturnMessageHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $transactionOne = NullTransaction::start();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName)
+            ->withEndpointAnnotations([
+                Transactional::createWith(["transactionFactory"])
+            ])
+            ->addAroundInterceptor(
+                AroundInterceptorReference::create("transactionInterceptor", "begin", 1, "")
+            );
+
+        $this->assertEquals(["transactionInterceptor"], $gatewayProxyBuilder->getRequiredReferences());
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createWith([
+                "transactionFactory" => $transactionFactoryOne,
+                "transactionInterceptor" => $transactionFactoryOne
             ]),
             InMemoryChannelResolver::create(
                 [

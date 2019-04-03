@@ -8,6 +8,7 @@ use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\SubscribableChannel;
@@ -67,6 +68,14 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @var string[]
      */
     private $messageConverterReferenceNames = [];
+    /**
+     * @var AroundInterceptorReference[]
+     */
+    private $aroundInterceptors = [];
+    /**
+     * @var object[]
+     */
+    private $endpointAnnotations;
 
     /**
      * GatewayProxyBuilder constructor.
@@ -192,6 +201,37 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @param AroundInterceptorReference $aroundInterceptorReference
+     * @return $this
+     */
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    {
+        $this->aroundInterceptors[] = $aroundInterceptorReference;
+        $this->requiredReferenceNames[] = $aroundInterceptorReference->getInterceptorName();
+
+        return $this;
+    }
+
+    /**
+     * @param object[] $endpointAnnotations
+     * @return static
+     */
+    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    {
+        $this->endpointAnnotations = $endpointAnnotations;
+
+        return $this;
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getEndpointAnnotations() : iterable
+    {
+        return $this->endpointAnnotations;
+    }
+
+    /**
      * @inheritdoc
      */
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
@@ -243,7 +283,9 @@ class GatewayProxyBuilder implements GatewayBuilder
             $requestChannel,
             $replyChannel,
             $errorChannel,
-            $this->replyMilliSecondsTimeout
+            $this->replyMilliSecondsTimeout,
+            $referenceSearchService,
+            $this->aroundInterceptors
         );
 
         $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gateway) implements AdapterInterface {

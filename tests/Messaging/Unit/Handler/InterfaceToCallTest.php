@@ -11,6 +11,7 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\AbstractSuperAdmin;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Admin;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Email;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\LazyUser;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Permission;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\OnlineShop;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Password;
@@ -57,7 +58,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("password", TypeDescriptor::create("\\" . Password::class)),
+            InterfaceParameter::createNotNullable("password", TypeDescriptor::create(Password::class)),
             $interfaceToCall->getParameterWithName("password")
         );
     }
@@ -233,7 +234,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("email", TypeDescriptor::create("\\" . Email::class)),
+            InterfaceParameter::createNullable("email", TypeDescriptor::create(Email::class)),
             $interfaceToCall->getParameterWithName("email")
         );
     }
@@ -243,15 +244,32 @@ class InterfaceToCallTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
      */
-    public function test_guessing_parameter_from_interface_inherit_doc()
+    public function test_guessing_parameter_from_interface_inherit_doc_with_different_parameter_name()
     {
         $interfaceToCall = InterfaceToCall::create(
             OnlineShop::class, "buy"
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("productId", TypeDescriptor::create("\\" . \stdClass::class)),
+            InterfaceParameter::createNullable("productId", TypeDescriptor::create(\stdClass::class)),
             $interfaceToCall->getParameterWithName("productId")
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     */
+    public function test_guessing_parameter_from_inherit_doc_with_return_type_from_super_class_namespace()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            LazyUser::class, "bannedBy"
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create(Admin::class),
+            $interfaceToCall->getReturnType()
         );
     }
 
@@ -326,25 +344,29 @@ class InterfaceToCallTest extends TestCase
     public function test_choosing_declaring_class_if_use_this_or_self_or_static()
     {
         $this->assertEquals(
-            TypeDescriptor::create("\\" . User::class),
+            TypeDescriptor::create(User::class),
             (InterfaceToCall::create(User::class, "getSelf"))->getReturnType()
         );
 
         $this->assertEquals(
-            TypeDescriptor::create("\\" . User::class),
+            TypeDescriptor::create(User::class),
             (InterfaceToCall::create(User::class, "getStatic"))->getReturnType()
         );
 
         $this->assertEquals(
-            TypeDescriptor::create("\\" . User::class),
+            TypeDescriptor::create(User::class),
             (InterfaceToCall::create(User::class, "getSelfWithoutDocBlock"))->getReturnType()
         );
     }
 
-    public function test_taking_use_statements_from_declaring_class()
+    public function test_different_different_class_under_same_alias_than_in_declaring_one()
     {
         $this->assertEquals(
-            TypeDescriptor::create("\\" . TwoStepPassword::class),
+            TypeDescriptor::create(TwoStepPassword::class),
+            (InterfaceToCall::create(SuperAdmin::class, "getPassword"))->getParameterWithName("password")->getTypeDescriptor()
+        );
+        $this->assertEquals(
+            TypeDescriptor::create(TwoStepPassword::class),
             (InterfaceToCall::create(SuperAdmin::class, "getPassword"))->getReturnType()
         );
     }
@@ -356,7 +378,7 @@ class InterfaceToCallTest extends TestCase
     public function test_guessing_type_hint_with_full_qualified_name()
     {
         $this->assertEquals(
-            TypeDescriptor::create("\\" . User::class),
+            TypeDescriptor::create(User::class),
             (InterfaceToCall::create(User::class, "returnFullUser"))->getReturnType()
         );
     }
@@ -368,7 +390,7 @@ class InterfaceToCallTest extends TestCase
     public function test_guessing_type_hint_from_global_namespace()
     {
         $this->assertEquals(
-            TypeDescriptor::create("\\" . \stdClass::class),
+            TypeDescriptor::create(\stdClass::class),
             (InterfaceToCall::create(User::class, "returnFromGlobalNamespace"))->getReturnType()
         );
     }
@@ -377,10 +399,10 @@ class InterfaceToCallTest extends TestCase
      * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_resolving_sub_class_for_static_type_hint()
+    public function test_resolving_sub_class_for_static_type_hint_return_type()
     {
         $this->assertEquals(
-            TypeDescriptor::create("\\" . SuperAdmin::class),
+            TypeDescriptor::create(SuperAdmin::class),
             (InterfaceToCall::create(SuperAdmin::class, "getSuperAdmin"))->getReturnType()
         );
     }
@@ -392,7 +414,7 @@ class InterfaceToCallTest extends TestCase
     public function test_resolving_declaring_class_for_self_type_hint_declared_in_interface()
     {
         $this->assertEquals(
-            TypeDescriptor::create("\\" . Admin::class),
+            TypeDescriptor::create(Admin::class),
             (InterfaceToCall::create(SuperAdmin::class, "getAdmin"))->getReturnType()
         );
     }
@@ -404,7 +426,7 @@ class InterfaceToCallTest extends TestCase
     public function test_resolving_declaring_class_for_self_type_hint_declared_in_abstract_class()
     {
         $this->assertEquals(
-            TypeDescriptor::create("\\" . AbstractSuperAdmin::class),
+            TypeDescriptor::create(AbstractSuperAdmin::class),
             (InterfaceToCall::create(SuperAdmin::class, "getInformation"))->getReturnType()
         );
     }

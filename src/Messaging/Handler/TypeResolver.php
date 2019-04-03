@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Handler;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Admin;
 
 /**
  * Class TypeResolver
@@ -61,16 +62,16 @@ class TypeResolver
      */
     public function getMethodParameters(string $interfaceName, string $methodName): iterable
     {
-        $reflectionClass = new \ReflectionClass($interfaceName);
+        $analyzedClass = new \ReflectionClass($interfaceName);
 
         $parameters = [];
-        $reflectionMethod = $reflectionClass->getMethod($methodName);
-        $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($reflectionClass, $reflectionMethod);
+        $reflectionMethod = $analyzedClass->getMethod($methodName);
+        $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($analyzedClass, $analyzedClass, $reflectionMethod);
         foreach ($reflectionMethod->getParameters() as $parameter) {
             $parameters[] = InterfaceParameter::create(
                 $parameter->getName(),
                 TypeDescriptor::createWithDocBlock(
-                    $parameter->getType() ? $this->expandParameterTypeHint($parameter->getType()->getName(), $reflectionClass, $this->getMethodDeclaringClass($reflectionClass, $methodName)) : null,
+                    $parameter->getType() ? $this->expandParameterTypeHint($parameter->getType()->getName(), $analyzedClass, $analyzedClass, $this->getMethodDeclaringClass($analyzedClass, $methodName)) : null,
                     array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
                 ),
                 $parameter->getType() ? $parameter->getType()->allowsNull() : true
@@ -81,21 +82,50 @@ class TypeResolver
     }
 
     /**
-     * @param \ReflectionClass $reflectionClass
+     * @param \ReflectionClass $thisClass
+     * @param \ReflectionClass $analyzedClass
      * @param \ReflectionMethod $methodReflection
-     * @param string[] $statements
      * @return array
      * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function getMethodDocBlockParameterTypeHints(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection): array
+    private function getMethodDocBlockParameterTypeHints(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionMethod $methodReflection): array
     {
-        $docComment = $this->getDocComment($reflectionClass, $methodReflection);
+        $declaringClass = $this->getMethodDeclaringClass($analyzedClass, $methodReflection->getName());
+        if ($analyzedClass->getName() !== $declaringClass->getName()) {
+            return $this->getMethodDocBlockParameterTypeHints($thisClass, $declaringClass, $declaringClass->getMethod($methodReflection->getName()));
+        }
+        if ($this->isInheritDocComment($methodReflection->getDocComment())) {
+            if ($analyzedClass->getParentClass() && $analyzedClass->getParentClass()->hasMethod($methodReflection->getName())) {
+                return $this->getMethodDocBlockParameterTypeHints($thisClass, $analyzedClass->getParentClass(), $analyzedClass->getParentClass()->getMethod($methodReflection->getName()));
+            }
+            foreach ($analyzedClass->getInterfaceNames() as $interfaceName) {
+                if (method_exists($interfaceName, $methodReflection->getName())) {
+                    $reflectionClass = new \ReflectionClass($interfaceName);
+                    return $this->getMethodDocBlockParameterTypeHints($thisClass, $reflectionClass, $reflectionClass->getMethod($methodReflection->getName()));
+                }
+            }
+        }
+
+        $docComment = $this->getDocComment($analyzedClass, $methodReflection);
         preg_match_all(self::METHOD_DOC_BLOCK_TYPE_HINT_REGEX, $docComment, $matchedDocBlockParameterTypes);
 
         $docBlockParameterTypeHints = [];
         $matchAmount = count($matchedDocBlockParameterTypes[0]);
         for ($matchIndex = 0; $matchIndex < $matchAmount; $matchIndex++) {
-            $docBlockParameterTypeHints[$matchedDocBlockParameterTypes[2][$matchIndex]] = $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][$matchIndex], $reflectionClass, $this->getMethodDeclaringClass($reflectionClass, $methodReflection->getName()));
+            $docBlockParameterTypeHints[$matchedDocBlockParameterTypes[2][$matchIndex]] = $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][$matchIndex], $thisClass, $analyzedClass, $declaringClass);
+        }
+
+        if ($thisClass !== $analyzedClass) {
+            $mappedParameterNames = [];
+            $thisReflectionMethodParameters = $thisClass->getMethod($methodReflection->getName())->getParameters();
+            $reflectionParameters = $methodReflection->getParameters();
+            for ($parameterIndex = 0; $parameterIndex < count($reflectionParameters); $parameterIndex++) {
+                if (array_key_exists($reflectionParameters[$parameterIndex]->getName(), $docBlockParameterTypeHints)) {
+                    $mappedParameterNames[$thisReflectionMethodParameters[$parameterIndex]->getName()] = $docBlockParameterTypeHints[$reflectionParameters[$parameterIndex]->getName()];
+                }
+            }
+            $docBlockParameterTypeHints = $mappedParameterNames;
         }
 
         return $docBlockParameterTypeHints;
@@ -115,13 +145,13 @@ class TypeResolver
         }
 
         if (preg_match("/@inheritDoc/", $docComment)) {
+            if ($reflectionClass->getParentClass() && $reflectionClass->getParentClass()->hasMethod($methodReflection->getName())) {
+                $docComment = $reflectionClass->getParentClass()->getMethod($methodReflection->getName())->getDocComment();
+            }
             foreach ($reflectionClass->getInterfaceNames() as $interfaceName) {
                 if (method_exists($interfaceName, $methodReflection->getName())) {
                     $docComment = (new \ReflectionMethod($interfaceName, $methodReflection->getName()))->getDocComment();
                 }
-            }
-            if ($reflectionClass->getParentClass() && $reflectionClass->getParentClass()->hasMethod($methodReflection->getName())) {
-                $docComment = $reflectionClass->getParentClass()->getMethod($methodReflection->getName())->getDocComment();
             }
         }
 
@@ -129,16 +159,26 @@ class TypeResolver
     }
 
     /**
+     * @param string $docBlock
+     * @return bool
+     */
+    private function isInheritDocComment(string $docBlock) : bool
+    {
+        return preg_match("/@inheritDoc/", $docBlock);
+    }
+
+    /**
      * @param string $parameterTypeHint
+     * @param \ReflectionClass $thisClass
      * @param \ReflectionClass $analyzedClass
      * @param \ReflectionClass $declaringClass
      * @return string
      */
-    private function expandParameterTypeHint(string $parameterTypeHint, \ReflectionClass $analyzedClass, \ReflectionClass $declaringClass): string
+    private function expandParameterTypeHint(string $parameterTypeHint, \ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionClass $declaringClass): string
     {
         $multipleTypeHints = explode("|", $parameterTypeHint);
         $multipleTypeHints = is_array($multipleTypeHints) ? $multipleTypeHints : [$multipleTypeHints];
-        $statements = $this->getClassUseStatements($declaringClass);
+        $statements = $this->getClassUseStatements($analyzedClass);
 
         if (!$parameterTypeHint) {
             return TypeDescriptor::UNKNOWN;
@@ -159,7 +199,7 @@ class TypeResolver
                 ? $typeHint
                 : ($this->isFromDifferentNamespace($typeHint, $statements)
                     ? $this->getTypeHintFromUseNamespace($typeHint, $statements)
-                    : $this->getWithClassNamespace($analyzedClass, $declaringClass, $typeHint));
+                    : $this->getWithClassNamespace($thisClass, $analyzedClass, $declaringClass, $typeHint));
         }
 
         return implode("|", $fullNames);
@@ -281,19 +321,20 @@ class TypeResolver
     }
 
     /**
+     * @param \ReflectionClass $thisClass
      * @param \ReflectionClass $analyzedClass
      * @param \ReflectionClass $declaringClass
      * @param string $parameterTypeHint
      * @return string
      */
-    private function getWithClassNamespace(\ReflectionClass $analyzedClass, \ReflectionClass $declaringClass, string $parameterTypeHint): string
+    private function getWithClassNamespace(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionClass $declaringClass, string $parameterTypeHint): string
     {
         if ($parameterTypeHint === self::SELF_TYPE_HINT) {
             return $declaringClass->getName();
         }
 
         if (in_array($parameterTypeHint, [self::STATIC_TYPE_HINT, self::THIS_TYPE_HINT])) {
-            return $analyzedClass->getName();
+            return $thisClass->getName();
         }
 
         $relatedClassName = $this->getRelatedClassNameFromTypeHint($parameterTypeHint);
@@ -315,17 +356,7 @@ class TypeResolver
      */
     private function getMethodDeclaringClass(\ReflectionClass $analyzedClass, string $methodName): \ReflectionClass
     {
-        foreach ($analyzedClass->getInterfaceNames() as $interfaceName) {
-            if (method_exists($interfaceName, $methodName)) {
-                return new \ReflectionClass($interfaceName);
-            }
-        }
-        $parentClass = $analyzedClass->getParentClass();
-        if ($parentClass && $parentClass->hasMethod($methodName)) {
-            return $parentClass;
-        }
-
-        return $analyzedClass;
+        return $analyzedClass->getMethod($methodName)->getDeclaringClass();
     }
 
     /**
@@ -416,7 +447,7 @@ class TypeResolver
         }
 
         return TypeDescriptor::create(
-            $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][0], $analyzedClass, $reflectionProperty->getDeclaringClass())
+            $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][0], $analyzedClass, $analyzedClass, $reflectionProperty->getDeclaringClass())
         );
     }
 
@@ -430,34 +461,51 @@ class TypeResolver
      */
     public function getReturnType(string $interfaceName, string $methodName): TypeDescriptor
     {
-        $reflectionClass = new \ReflectionClass($interfaceName);
-        $reflectionMethod = $reflectionClass->getMethod($methodName);
+        $analyzedClass = new \ReflectionClass($interfaceName);
+        $reflectionMethod = $analyzedClass->getMethod($methodName);
 
-        $returnType = $this->getReturnTypeDocBlockParameterTypeHint($reflectionClass, $reflectionMethod);
+        $returnType = $this->getReturnTypeDocBlockParameterTypeHint($analyzedClass, $analyzedClass, $reflectionMethod);
 
         return TypeDescriptor::create(
             $returnType
                 ? $returnType
-                : $this->expandParameterTypeHint((string)$reflectionMethod->getReturnType(), $reflectionClass, $this->getMethodDeclaringClass($reflectionClass, $methodName))
+                : $this->expandParameterTypeHint((string)$reflectionMethod->getReturnType(), $analyzedClass, $analyzedClass, $this->getMethodDeclaringClass($analyzedClass, $methodName))
         );
     }
 
     /**
-     * @param \ReflectionClass $reflectionClass
+     * @param \ReflectionClass $thisClass
+     * @param \ReflectionClass $analyzedClass
      * @param \ReflectionMethod $methodReflection
-     * @param string[] $statements
      * @return string
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function getReturnTypeDocBlockParameterTypeHint(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection): ?string
+    private function getReturnTypeDocBlockParameterTypeHint(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionMethod $methodReflection): ?string
     {
-        $docComment = $this->getDocComment($reflectionClass, $methodReflection);
+        $declaringClass = $this->getMethodDeclaringClass($analyzedClass, $methodReflection->getName());
+        if ($analyzedClass->getName() !== $declaringClass->getName()) {
+            return $this->getReturnTypeDocBlockParameterTypeHint($thisClass, $declaringClass, $declaringClass->getMethod($methodReflection->getName()));
+        }
+
+        if ($this->isInheritDocComment($methodReflection->getDocComment())) {
+            if ($analyzedClass->getParentClass() && $analyzedClass->getParentClass()->hasMethod($methodReflection->getName())) {
+                return $this->getReturnTypeDocBlockParameterTypeHint($thisClass, $analyzedClass->getParentClass(), $analyzedClass->getParentClass()->getMethod($methodReflection->getName()));
+            }
+            foreach ($analyzedClass->getInterfaceNames() as $interfaceName) {
+                if (method_exists($interfaceName, $methodReflection->getName())) {
+                    $reflectionClass = new \ReflectionClass($interfaceName);
+                    return $this->getReturnTypeDocBlockParameterTypeHint($thisClass, $reflectionClass, $reflectionClass->getMethod($methodReflection->getName()));
+                }
+            }
+        }
+
+        $docComment = $this->getDocComment($analyzedClass, $methodReflection);
 
         preg_match(self::METHOD_RETURN_TYPE_HINT_REGEX, $docComment, $matchedDocBlockReturnType);
 
         if (isset($matchedDocBlockReturnType[1])) {
-            return $this->expandParameterTypeHint($matchedDocBlockReturnType[1], $reflectionClass, $this->getMethodDeclaringClass($reflectionClass, $methodReflection->getName()));
+            return $this->expandParameterTypeHint($matchedDocBlockReturnType[1], $thisClass, $analyzedClass, $declaringClass);
         }
 
         return null;

@@ -66,6 +66,10 @@ class AggregateMessagingModule implements AnnotationModule
     /**
      * @var array|AnnotationRegistration[]
      */
+    private $aggregateEventHandlers;
+    /**
+     * @var array|AnnotationRegistration[]
+     */
     private $serviceEventHandlers;
 
     /**
@@ -76,6 +80,7 @@ class AggregateMessagingModule implements AnnotationModule
      * @param AnnotationRegistration[]            $serviceCommandHandlersRegistrations
      * @param AnnotationRegistration[]            $aggregateQueryHandlerRegistrations
      * @param AnnotationRegistration[]            $serviceQueryHandlerRegistrations
+     * @param AnnotationRegistration[]            $aggregateEventHandlers
      * @param AnnotationRegistration[]            $serviceEventHandlers
      */
     private function __construct(
@@ -84,6 +89,7 @@ class AggregateMessagingModule implements AnnotationModule
         array $serviceCommandHandlersRegistrations,
         array $aggregateQueryHandlerRegistrations,
         array $serviceQueryHandlerRegistrations,
+        array $aggregateEventHandlers,
         array $serviceEventHandlers
     )
     {
@@ -92,6 +98,7 @@ class AggregateMessagingModule implements AnnotationModule
         $this->aggregateQueryHandlerRegistrations = $aggregateQueryHandlerRegistrations;
         $this->serviceCommandHandlersRegistrations = $serviceCommandHandlersRegistrations;
         $this->serviceQueryHandlerRegistrations = $serviceQueryHandlerRegistrations;
+        $this->aggregateEventHandlers = $aggregateEventHandlers;
         $this->serviceEventHandlers = $serviceEventHandlers;
     }
 
@@ -108,6 +115,7 @@ class AggregateMessagingModule implements AnnotationModule
             $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, CommandHandler::class),
             $annotationRegistrationService->findRegistrationsFor(Aggregate::class, QueryHandler::class),
             $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, QueryHandler::class),
+            $annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class),
             $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class)
         );
     }
@@ -149,34 +157,17 @@ class AggregateMessagingModule implements AnnotationModule
         $inputChannelNames = [];
 
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
-            /** @var CommandHandler $annotation */
-            $annotation = $registration->getAnnotationForMethod();
-
-            $relatedClassInterface         = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
-            $parameterConverterAnnotations = $annotation->parameterConverters;
-            $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations);
-
-            $endpointId = $registration->getAnnotationForMethod()->endpointId;
             $inputChannelName = self::getMessageChannelFor($registration);
-            $handledMessageClassName = self::getMessageClassFor($registration);
-            $configuration->registerMessageHandler(
-                AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith($registration->getClassName(), $registration->getMethodName(), $handledMessageClassName)
-                    ->withInputChannelName($inputChannelName)
-                    ->withEndpointId($endpointId)
-                    ->withAggregateRepositoryFactories($moduleExtensions)
-                    ->withMethodParameterConverters($parameterConverters)
-            );
-
-            $configuration->registerBeforeMethodInterceptor(
-                \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
-                    "",
-                    AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                    $registration->getClassName() . "::" . $registration->getMethodName()
-                )
-            );
+            $this->registerAggregateCommandHandler($configuration, $moduleExtensions, $registration, $inputChannelName);
 
             $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames);
+        }
+
+        foreach ($this->aggregateEventHandlers as $registration) {
+            $inputChannelName = self::getMessageChannelFor($registration);
+            $this->registerAggregateCommandHandler($configuration, $moduleExtensions, $registration, $inputChannelName);
+
+            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
         }
 
         foreach ($this->aggregateQueryHandlerRegistrations as $registration) {
@@ -224,8 +215,6 @@ class AggregateMessagingModule implements AnnotationModule
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
             $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(self::getMessageChannelFor($registration)));
         }
-
-
     }
 
     /***
@@ -342,4 +331,46 @@ class AggregateMessagingModule implements AnnotationModule
 
         return $inputChannelNames;
 }
+
+    /**
+     * @param Configuration          $configuration
+     * @param array                  $moduleExtensions
+     * @param AnnotationRegistration $registration
+     * @param string                 $inputChannelName
+     *
+     * @return array
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function registerAggregateCommandHandler(Configuration $configuration, array $moduleExtensions, AnnotationRegistration $registration, string $inputChannelName): void
+    {
+        /** @var CommandHandler $annotation */
+        $annotation = $registration->getAnnotationForMethod();
+
+        $relatedClassInterface         = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
+        $parameterConverterAnnotations = $annotation->parameterConverters;
+        $parameterConverters           = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations);
+
+        $endpointId              = $registration->getAnnotationForMethod()->endpointId;
+        $handledMessageClassName = self::getMessageClassFor($registration);
+        $configuration->registerMessageHandler(
+            AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith($registration->getClassName(), $registration->getMethodName(), $handledMessageClassName)
+                ->withInputChannelName($inputChannelName)
+                ->withEndpointId($endpointId)
+                ->withAggregateRepositoryFactories($moduleExtensions)
+                ->withMethodParameterConverters($parameterConverters)
+        );
+
+        $configuration->registerBeforeMethodInterceptor(
+            \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                "",
+                AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
+                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                $registration->getClassName() . "::" . $registration->getMethodName()
+            )
+        );
+    }
 }

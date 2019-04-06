@@ -111,4 +111,11 @@ class Assert
             throw InvalidArgumentException::create($exceptionMessage);
         }
     }
+
+    public static function isIterable($valueToCheck, string $exceptionMessage) : void
+    {
+        if (!is_iterable($valueToCheck)) {
+            throw InvalidArgumentException::create($exceptionMessage);
+        }
+    }
 }

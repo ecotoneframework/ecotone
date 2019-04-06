@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
+use ProxyManager\Factory\RemoteObjectFactory;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
@@ -119,7 +119,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param string $errorChannelName
      * @return GatewayProxyBuilder
      */
-    public function withErrorChannel(string $errorChannelName) : self
+    public function withErrorChannel(string $errorChannelName): self
     {
         $this->errorChannelName = $errorChannelName;
 
@@ -179,7 +179,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param string[] $messageConverterReferenceNames
      * @return GatewayProxyBuilder
      */
-    public function withMessageConverters(array $messageConverterReferenceNames) : self
+    public function withMessageConverters(array $messageConverterReferenceNames): self
     {
         $this->messageConverterReferenceNames = $messageConverterReferenceNames;
 
@@ -190,7 +190,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param string[] $transactionFactoryReferenceNames
      * @return GatewayProxyBuilder
      */
-    public function withTransactionFactories(array $transactionFactoryReferenceNames) : self
+    public function withTransactionFactories(array $transactionFactoryReferenceNames): self
     {
         $this->transactionFactoryReferenceNames = $transactionFactoryReferenceNames;
         foreach ($transactionFactoryReferenceNames as $transactionFactoryReferenceName) {
@@ -226,7 +226,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @return object[]
      */
-    public function getEndpointAnnotations() : iterable
+    public function getEndpointAnnotations(): iterable
     {
         return $this->endpointAnnotations;
     }
@@ -247,6 +247,10 @@ class GatewayProxyBuilder implements GatewayBuilder
         if (!($interfaceToCall->canItReturnNull() || $interfaceToCall->hasReturnTypeVoid())) {
             /** @var DirectChannel $requestChannel */
             Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel should not be pollable if expected return type is not nullable");
+        }
+
+        if (!$interfaceToCall->canItReturnNull() && $this->errorChannelName && !$interfaceToCall->hasReturnTypeVoid()) {
+            throw InvalidArgumentException::create("Gateway {$interfaceToCall} with error channel must allow nullable return type");
         }
 
         if ($replyChannel) {
@@ -289,7 +293,8 @@ class GatewayProxyBuilder implements GatewayBuilder
             $this->endpointAnnotations
         );
 
-        $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gateway) implements AdapterInterface {
+        $factory = new RemoteObjectFactory(new class ($gateway) implements AdapterInterface
+        {
             /**
              * @var Gateway
              */

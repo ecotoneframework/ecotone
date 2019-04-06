@@ -60,7 +60,7 @@ class NullTransaction implements Transaction
     /**
      * @return bool
      */
-    public function isRollback() : bool
+    public function isRolledBack() : bool
     {
         return $this->status == self::ROLLED_BACK;
     }

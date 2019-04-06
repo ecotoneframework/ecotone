@@ -200,22 +200,31 @@ class Gateway
 
         try {
             $serviceActivator->handle($requestMessage);
-            $reply = $internalReplyBridge->receive();
+        }catch (\Throwable $exception) {
+            if (!$this->errorChannel) {
+                if ($exception instanceof MessagingException && $exception->getCause()) {
+                    throw $exception->getCause();
+                }
 
-            if ($this->interfaceToCall->getReturnType()->isClassOfType(Message::class)) {
-                return $reply;
-            }
-            if ($reply) {
-                return $reply->getPayload();
-            }
-
-            return null;
-        } catch (MessagingException $e) {
-            if ($e->getCause()) {
-                throw $e->getCause();
+                throw $exception;
             }
 
-            throw $e;
+            if (!($exception instanceof MessagingException)) {
+                $exception = MessageHandlingException::fromOtherException($exception, $requestMessage);
+            }
+
+            $this->errorChannel->send(ErrorMessage::create($exception));
         }
+
+        $reply = $internalReplyBridge->receive();
+
+        if ($this->interfaceToCall->getReturnType()->isClassOfType(Message::class)) {
+            return $reply;
+        }
+        if ($reply) {
+            return $reply->getPayload();
+        }
+
+        return null;
     }
 }

@@ -3,7 +3,6 @@
 namespace SimplyCodedSoftware\Messaging\Handler;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Admin;
 
 /**
  * Class TypeResolver
@@ -71,7 +70,7 @@ class TypeResolver
             $parameters[] = InterfaceParameter::create(
                 $parameter->getName(),
                 TypeDescriptor::createWithDocBlock(
-                    $parameter->getType() ? $this->expandParameterTypeHint($parameter->getType()->getName(), $analyzedClass, $analyzedClass, $this->getMethodDeclaringClass($analyzedClass, $methodName)) : null,
+                    $parameter->getType() ? $this->expandParameterTypeHint($parameter->getType()->getName(), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName)) : null,
                     array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
                 ),
                 $parameter->getType() ? $parameter->getType()->allowsNull() : true
@@ -91,9 +90,9 @@ class TypeResolver
      */
     private function getMethodDocBlockParameterTypeHints(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, string $methodName): array
     {
-        $analyzedClass = $this->getOwnerClass($thisClass, $analyzedClass, $methodName);
+        $analyzedClass = $this->getMethodOwnerClass($analyzedClass, $methodName);
         $methodReflection = $analyzedClass->getMethod($methodName);
-        $declaringClass = $this->getMethodDeclaringClass($analyzedClass, $methodReflection->getName());
+        $declaringClass = self::getMethodDeclaringClass($analyzedClass, $methodReflection->getName());
 
         $docComment = $this->getDocComment($analyzedClass, $methodReflection);
         preg_match_all(self::METHOD_DOC_BLOCK_TYPE_HINT_REGEX, $docComment, $matchedDocBlockParameterTypes);
@@ -127,27 +126,27 @@ class TypeResolver
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function getOwnerClass(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, string $methodName)
+    public static function getMethodOwnerClass(\ReflectionClass $analyzedClass, string $methodName)
     {
         $methodReflection = $analyzedClass->getMethod($methodName);
-        $declaringClass = $this->getMethodDeclaringClass($analyzedClass, $methodReflection->getName());
+        $declaringClass = self::getMethodDeclaringClass($analyzedClass, $methodReflection->getName());
         if ($analyzedClass->getName() !== $declaringClass->getName()) {
-            return $this->getOwnerClass($thisClass, $declaringClass, $methodName);
+            return self::getMethodOwnerClass($declaringClass, $methodName);
         }
-        if ($this->isInheritDocComment($methodReflection->getDocComment())) {
+        if (self::isInheritDocComment($methodReflection->getDocComment())) {
             if ($analyzedClass->getParentClass() && $analyzedClass->getParentClass()->hasMethod($methodReflection->getName())) {
-                return $this->getOwnerClass($thisClass, $analyzedClass->getParentClass(), $methodName);
+                return self::getMethodOwnerClass($analyzedClass->getParentClass(), $methodName);
             }
             foreach ($analyzedClass->getInterfaceNames() as $interfaceName) {
                 if (method_exists($interfaceName, $methodReflection->getName())) {
                     $reflectionClass = new \ReflectionClass($interfaceName);
-                    return $this->getOwnerClass($thisClass, $reflectionClass, $methodName);
+                    return self::getMethodOwnerClass($reflectionClass, $methodName);
                 }
             }
         }
         foreach ($analyzedClass->getTraits() as $trait) {
-            if ($trait->hasMethod($methodReflection->getName()) && !$this->wasTraitOverwritten($methodReflection, $trait)) {
-                return $this->getOwnerClass($thisClass, $trait, $methodName);
+            if ($trait->hasMethod($methodReflection->getName()) && !self::wasTraitOverwritten($methodReflection, $trait)) {
+                return self::getMethodOwnerClass($trait, $methodName);
             }
         }
 
@@ -185,7 +184,7 @@ class TypeResolver
      * @param string $docBlock
      * @return bool
      */
-    private function isInheritDocComment(string $docBlock) : bool
+    private static function isInheritDocComment(string $docBlock) : bool
     {
         return preg_match("/@inheritDoc/", $docBlock);
     }
@@ -377,7 +376,7 @@ class TypeResolver
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function getMethodDeclaringClass(\ReflectionClass $analyzedClass, string $methodName): \ReflectionClass
+    private static function getMethodDeclaringClass(\ReflectionClass $analyzedClass, string $methodName): \ReflectionClass
     {
         return $analyzedClass->getMethod($methodName)->getDeclaringClass();
     }
@@ -467,7 +466,7 @@ class TypeResolver
         return TypeDescriptor::create(
             $returnType
                 ? $returnType
-                : $this->expandParameterTypeHint((string)$reflectionMethod->getReturnType(), $analyzedClass, $analyzedClass, $this->getMethodDeclaringClass($analyzedClass, $methodName))
+                : $this->expandParameterTypeHint((string)$reflectionMethod->getReturnType(), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName))
         );
     }
 
@@ -481,9 +480,9 @@ class TypeResolver
      */
     private function getReturnTypeDocBlockParameterTypeHint(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, string $methodName): ?string
     {
-        $analyzedClass = $this->getOwnerClass($thisClass, $analyzedClass, $methodName);
+        $analyzedClass = $this->getMethodOwnerClass($analyzedClass, $methodName);
         $methodReflection = $analyzedClass->getMethod($methodName);
-        $declaringClass = $this->getMethodDeclaringClass($analyzedClass, $methodReflection->getName());
+        $declaringClass = self::getMethodDeclaringClass($analyzedClass, $methodReflection->getName());
 
         $docComment = $this->getDocComment($analyzedClass, $methodReflection);
         preg_match(self::METHOD_RETURN_TYPE_HINT_REGEX, $docComment, $matchedDocBlockReturnType);
@@ -501,7 +500,7 @@ class TypeResolver
      * @return bool
      * @throws \ReflectionException
      */
-    private function wasTraitOverwritten(\ReflectionMethod $methodReflection, \ReflectionClass $trait): bool
+    private static function wasTraitOverwritten(\ReflectionMethod $methodReflection, \ReflectionClass $trait): bool
     {
         return $methodReflection->getFileName() !== $trait->getMethod($methodReflection->getName())->getFileName();
     }

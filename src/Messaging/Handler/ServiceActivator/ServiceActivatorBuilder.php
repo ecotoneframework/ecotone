@@ -189,7 +189,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
             $objectToInvoke = $this->directObjectReference ? $this->directObjectReference : $referenceSearchService->get($this->objectToInvokeReferenceName);
         }
         $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($objectToInvoke, $this->methodName);
-
+        
         $methodToInvoke = WrapWithMessageBuildProcessor::createWith(
             $objectToInvoke,
             $this->methodName,

@@ -75,6 +75,10 @@ class Gateway
      * @var iterable|AroundInterceptorReference[]
      */
     private $aroundInterceptors;
+    /**
+     * @var iterable|object[]
+     */
+    private $endpointAnnotations;
 
     /**
      * GatewayProxy constructor.
@@ -88,13 +92,15 @@ class Gateway
      * @param int $replyMilliSecondsTimeout
      * @param ReferenceSearchService $referenceSearchService
      * @param AroundInterceptorReference[] $aroundInterceptors
+     * @param object[] $endpointAnnotations
      * @throws MessagingException
      */
     public function __construct(
         InterfaceToCall $interfaceToCall, MethodCallToMessageConverter $methodCallToMessageConverter,
         array $messageConverters, array $transactionFactories, MessageChannel $requestChannel,
         ?PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $replyMilliSecondsTimeout,
-        ReferenceSearchService $referenceSearchService, iterable $aroundInterceptors
+        ReferenceSearchService $referenceSearchService, iterable $aroundInterceptors,
+        iterable $endpointAnnotations
     )
     {
         Assert::allInstanceOfType($transactionFactories, TransactionFactory::class);
@@ -109,6 +115,7 @@ class Gateway
         $this->requestChannel = $requestChannel;
         $this->referenceSearchService = $referenceSearchService;
         $this->aroundInterceptors = $aroundInterceptors;
+        $this->endpointAnnotations = $endpointAnnotations;
     }
 
     /**
@@ -180,6 +187,7 @@ class Gateway
             $errorChannelComingFromPreviousGateway
         );
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle")
+            ->withEndpointAnnotations($this->endpointAnnotations)
             ->withOutputMessageChannel($internalReplyBridgeName);
         foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
             $serviceActivator->addAroundInterceptor($aroundInterceptorReference);

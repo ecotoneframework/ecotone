@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler;
+
 use SimplyCodedSoftware\Messaging\Annotation\Converter;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
@@ -10,6 +11,7 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Converter\ExampleConve
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\AbstractSuperAdmin;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Admin;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Email;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\ExampleTestAnnotation;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\LazyUser;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Permission;
@@ -252,6 +254,18 @@ class InterfaceToCallTest extends TestCase
         $this->assertEquals(
             InterfaceParameter::createNullable("productId", TypeDescriptor::create(\stdClass::class)),
             $interfaceToCall->getParameterWithName("productId")
+        );
+    }
+
+    public function test_retrieving_annotations_from_inherit_doc()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            OnlineShop::class, "buy"
+        );
+
+        $this->assertEquals(
+            [new ExampleTestAnnotation()],
+            $interfaceToCall->getMethodAnnotations()
         );
     }
 

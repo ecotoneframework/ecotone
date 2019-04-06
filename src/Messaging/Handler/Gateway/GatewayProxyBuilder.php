@@ -75,7 +75,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @var object[]
      */
-    private $endpointAnnotations;
+    private $endpointAnnotations = [];
 
     /**
      * GatewayProxyBuilder constructor.
@@ -285,7 +285,8 @@ class GatewayProxyBuilder implements GatewayBuilder
             $errorChannel,
             $this->replyMilliSecondsTimeout,
             $referenceSearchService,
-            $this->aroundInterceptors
+            $this->aroundInterceptors,
+            $this->endpointAnnotations
         );
 
         $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gateway) implements AdapterInterface {

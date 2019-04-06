@@ -50,6 +50,6 @@ class NullTransactionFactory implements TransactionFactory
      */
     public function begin(Message $message): Transaction
     {
-        return NullTransaction::start();
+        return $this->predefinedTransaction ?? NullTransaction::start();
     }
 }

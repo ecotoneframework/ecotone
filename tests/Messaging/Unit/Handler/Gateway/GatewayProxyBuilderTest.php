@@ -6,6 +6,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundIntercep
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransaction;
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
 use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use SimplyCodedSoftware\Messaging\Transaction\TransactionInterceptor;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway\DumbSendAndReceiveService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
@@ -52,7 +53,7 @@ use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
  */
 class GatewayProxyBuilderTest extends MessagingTest
 {
-    public function test_creating_gateway_for_send_only_interface()
+    public function __test_creating_gateway_for_send_only_interface()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = "request-channel";
@@ -75,7 +76,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertTrue($messageHandler->wasCalled());
     }
 
-    public function test_throwing_exception_if_reply_channel_passed_for_send_only_interface()
+    public function __test_throwing_exception_if_reply_channel_passed_for_send_only_interface()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = "req-channel";
@@ -99,7 +100,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_creating_gateway_for_receive_only()
+    public function __test_creating_gateway_for_receive_only()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = "request-channel";
@@ -131,7 +132,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_calling_reply_queue_with_time_out()
+    public function __test_calling_reply_queue_with_time_out()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = 'request-channel';
@@ -167,7 +168,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_executing_with_method_argument_converters()
+    public function __test_executing_with_method_argument_converters()
     {
         $messageHandler     = StatefulHandler::create();
         $requestChannelName = 'request-channel';
@@ -204,7 +205,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_executing_with_multiple_converters_for_single_parameter_interface()
+    public function __test_executing_with_multiple_converters_for_single_parameter_interface()
     {
         $messageHandler     = StatefulHandler::create();
         $requestChannelName = "request-channel";
@@ -240,7 +241,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals($content, $message->getPayload());
     }
 
-    public function test_executing_with_multiple_message_converters_for_same_parameter()
+    public function __test_executing_with_multiple_message_converters_for_same_parameter()
     {
         $messageHandler     = StatefulHandler::create();
         $requestChannelName = "request-channel";
@@ -276,7 +277,7 @@ class GatewayProxyBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function test_throwing_exception_if_gateway_expect_reply_and_request_channel_is_queue()
+    public function __test_throwing_exception_if_gateway_expect_reply_and_request_channel_is_queue()
     {
         $requestChannelName = "requestChannel";
         $requestChannel = QueueChannel::create();
@@ -298,7 +299,7 @@ class GatewayProxyBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function test_creating_with_queue_channel_when_gateway_does_not_expect_reply()
+    public function __test_creating_with_queue_channel_when_gateway_does_not_expect_reply()
     {
         $requestChannelName = "requestChannel";
         $requestChannel = QueueChannel::create();
@@ -322,7 +323,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertNull($requestChannel->receive());
     }
 
-    public function test_resolving_response_in_future()
+    public function __test_resolving_response_in_future()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = "request-channel";
@@ -354,7 +355,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_throwing_exception_when_received_error_message()
+    public function __test_throwing_exception_when_received_error_message()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = 'request-channel';
@@ -384,7 +385,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxy->getById(1);
     }
 
-    public function test_throwing_exception_when_received_error_message_for_future_reply_sender()
+    public function __test_throwing_exception_when_received_error_message_for_future_reply_sender()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = 'request-channel';
@@ -414,7 +415,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxy->someLongRunningWork()->resolve();
     }
 
-    public function test_returning_null_when_no_reply_received_for_nullable_interface()
+    public function __test_returning_null_when_no_reply_received_for_nullable_interface()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = 'request-channel';
@@ -443,7 +444,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_throwing_exception_when_reply_is_null_but_interface_expect_value()
+    public function __test_throwing_exception_when_reply_is_null_but_interface_expect_value()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = 'request-channel';
@@ -476,7 +477,7 @@ class GatewayProxyBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function test_gateway_in_gateway_messaging()
+    public function __test_gateway_in_gateway_messaging()
     {
         $methodName = 'execute';
         $interfaceName = ServiceReceivingMessageAndReturningMessage::class;
@@ -513,7 +514,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals($errorChannel, $message->getHeaders()->getErrorChannel());
     }
 
-    public function test_propagating_error_to_error_channel()
+    public function __test_propagating_error_to_error_channel()
     {
         $requestChannelName = "request-channel";
         $requestChannel     = DirectChannel::create();
@@ -544,7 +545,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertNull($errorChannel->receive());
     }
 
-    public function test_propagating_error_to_error_channel_when_exception_happen_during_receiving_reply()
+    public function __test_propagating_error_to_error_channel_when_exception_happen_during_receiving_reply()
     {
         $replyChannelName = "replyChannel";
         $replyChannel        = $this->createMock(PollableChannel::class);
@@ -584,7 +585,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals(123, $receivedMessage->getOriginalMessage()->getPayload());
     }
 
-    public function test_propagating_error_to_error_channel_when_error_message_received_from_reply_channel()
+    public function __test_propagating_error_to_error_channel_when_error_message_received_from_reply_channel()
     {
         $replyChannelName = "replyChannel";
         $exception = new \RuntimeException();
@@ -623,7 +624,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals(123, $receivedMessage->getOriginalMessage()->getPayload());
     }
 
-    public function test_requesting_with_original_message_and_returning_new_message()
+    public function __test_requesting_with_original_message_and_returning_new_message()
     {
         $requestChannelName = "request-channel";
         $requestChannel     = DirectChannel::create();
@@ -661,7 +662,7 @@ class GatewayProxyBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_calling_gateway_with_success_transactions()
+    public function __test_calling_gateway_with_success_transactions()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = "request-channel";
@@ -701,6 +702,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel->subscribe($messageHandler);
 
         $transactionOne = NullTransaction::start();
+        $transactionInterceptor = new TransactionInterceptor();
         $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName)
@@ -708,7 +710,7 @@ class GatewayProxyBuilderTest extends MessagingTest
                 Transactional::createWith(["transactionFactory"])
             ])
             ->addAroundInterceptor(
-                AroundInterceptorReference::create("transactionInterceptor", "begin", 1, "")
+                AroundInterceptorReference::create("transactionInterceptor", "transactional", 1, "")
             );
 
         $this->assertEquals(["transactionInterceptor"], $gatewayProxyBuilder->getRequiredReferences());
@@ -716,7 +718,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxy = $gatewayProxyBuilder->build(
             InMemoryReferenceSearchService::createWith([
                 "transactionFactory" => $transactionFactoryOne,
-                "transactionInterceptor" => $transactionFactoryOne
+                "transactionInterceptor" => $transactionInterceptor
             ]),
             InMemoryChannelResolver::create(
                 [
@@ -730,7 +732,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertTrue($transactionOne->isCommitted());
     }
 
-    public function test_calling_gateway_with_failure_transactions()
+    public function __test_calling_gateway_with_failure_transactions()
     {
         $messageHandler     = ExceptionMessageHandler::create();
         $requestChannelName = "request-channel";
@@ -768,7 +770,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertTrue(false, "Transaction was not rolled back");
     }
 
-    public function test_converting_to_string()
+    public function __test_converting_to_string()
     {
         $requestChannelName = 'inputChannel';
         $referenceName = 'ref-name';
@@ -783,7 +785,7 @@ class GatewayProxyBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function test_using_message_converter_for_transformation_according_to_interface()
+    public function __test_using_message_converter_for_transformation_according_to_interface()
     {
         $requestChannelName = "request-channel";
         $requestChannel     = DirectChannel::create();

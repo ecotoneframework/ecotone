@@ -260,10 +260,10 @@ final class MessagingSystemConfiguration implements Configuration
             }
 
             if ($methodInterceptor->getPrecedence() > $toCompare->getPrecedence()) {
-                return -1;
+                return 1;
             }
 
-            return 1;
+            return -1;
         });
 
         return $methodInterceptors;

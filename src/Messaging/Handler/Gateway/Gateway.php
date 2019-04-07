@@ -8,6 +8,7 @@ use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
@@ -44,10 +45,6 @@ class Gateway
      */
     private $messageConverters;
     /**
-     * @var TransactionFactory[]
-     */
-    private $transactionFactories;
-    /**
      * @var InterfaceToCall
      */
     private $interfaceToCall;
@@ -66,7 +63,7 @@ class Gateway
     /**
      * @var MessageChannel
      */
-    private $requestChannel;
+    private $gatewayRequestChannel;
     /**
      * @var ReferenceSearchService
      */
@@ -75,6 +72,14 @@ class Gateway
      * @var iterable|AroundInterceptorReference[]
      */
     private $aroundInterceptors;
+    /**
+     * @var InputOutputMessageHandlerBuilder[]
+     */
+    private $sortedBeforeInterceptors = [];
+    /**
+     * @var InputOutputMessageHandlerBuilder[]
+     */
+    private $sortedAfterInterceptors = [];
     /**
      * @var iterable|object[]
      */
@@ -85,37 +90,37 @@ class Gateway
      * @param InterfaceToCall $interfaceToCall
      * @param MethodCallToMessageConverter $methodCallToMessageConverter
      * @param MessageConverter[] $messageConverters
-     * @param array $transactionFactories
      * @param MessageChannel $requestChannel
      * @param PollableChannel|null $replyChannel
      * @param MessageChannel|null $errorChannel
      * @param int $replyMilliSecondsTimeout
      * @param ReferenceSearchService $referenceSearchService
      * @param AroundInterceptorReference[] $aroundInterceptors
+     * @param InputOutputMessageHandlerBuilder[] $sortedBeforeInterceptors
+     * @param InputOutputMessageHandlerBuilder[] $sortedAfterInterceptors
      * @param object[] $endpointAnnotations
      * @throws MessagingException
      */
     public function __construct(
         InterfaceToCall $interfaceToCall, MethodCallToMessageConverter $methodCallToMessageConverter,
-        array $messageConverters, array $transactionFactories, MessageChannel $requestChannel,
+        array $messageConverters, MessageChannel $requestChannel,
         ?PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $replyMilliSecondsTimeout,
         ReferenceSearchService $referenceSearchService, iterable $aroundInterceptors,
-        iterable $endpointAnnotations
+        iterable $sortedBeforeInterceptors, iterable $sortedAfterInterceptors, iterable $endpointAnnotations
     )
     {
-        Assert::allInstanceOfType($transactionFactories, TransactionFactory::class);
-
         $this->methodCallToMessageConverter = $methodCallToMessageConverter;
-        $this->transactionFactories = $transactionFactories;
         $this->messageConverters = $messageConverters;
         $this->interfaceToCall = $interfaceToCall;
         $this->replyChannel = $replyChannel;
         $this->errorChannel = $errorChannel;
         $this->replyMilliSecondsTimeout = $replyMilliSecondsTimeout;
-        $this->requestChannel = $requestChannel;
+        $this->gatewayRequestChannel = $requestChannel;
         $this->referenceSearchService = $referenceSearchService;
         $this->aroundInterceptors = $aroundInterceptors;
         $this->endpointAnnotations = $endpointAnnotations;
+        $this->sortedBeforeInterceptors = $sortedBeforeInterceptors;
+        $this->sortedAfterInterceptors = $sortedAfterInterceptors;
     }
 
     /**
@@ -139,8 +144,6 @@ class Gateway
         if ($this->interfaceToCall->hasSingleArgument() && $this->interfaceToCall->hasFirstParameterMessageTypeHint()) {
             /** @var Message $requestMessage */
             $requestMessage = $methodArguments[0]->value();
-            $replyChannelComingFromPreviousGateway = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
-            $errorChannelComingFromPreviousGateway = $requestMessage->getHeaders()->containsKey(MessageHeaders::ERROR_CHANNEL) ? $requestMessage->getHeaders()->getErrorChannel() : null;
 
             $requestMessage = MessageBuilder::fromMessage($requestMessage);
         } else {
@@ -160,46 +163,15 @@ class Gateway
             }
         }
 
-        $replyChannel = $this->replyChannel;
-        if ($this->interfaceToCall->hasReturnValue()) {
-            if (!$replyChannel) {
-                $replyChannel = QueueChannel::create();
-                $requestMessage = $requestMessage
-                    ->setReplyChannel($replyChannel);
-            }
-            $requestMessage = $requestMessage
-                ->setErrorChannel($this->errorChannel ? $this->errorChannel : $replyChannel);
-        }
-
-        $requestMessage = $requestMessage->build();
-
-        $internalReplyBridgeName = Uuid::uuid4()->toString();
         $internalReplyBridge = QueueChannel::create();
-        $gatewayInternalHandler = new GatewayInternalHandler(
-            $this->interfaceToCall,
-            $this->requestChannel,
-            $this->errorChannel,
-            $replyChannel,
-            $this->messageConverters,
-            $this->transactionFactories,
-            $this->replyMilliSecondsTimeout,
-            $replyChannelComingFromPreviousGateway,
-            $errorChannelComingFromPreviousGateway
-        );
-        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle")
-            ->withEndpointAnnotations($this->endpointAnnotations)
-            ->withOutputMessageChannel($internalReplyBridgeName);
-        foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
-            $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
-        }
-        $serviceActivator = $serviceActivator
-                            ->build(
-                                InMemoryChannelResolver::createFromAssociativeArray([$internalReplyBridgeName => $internalReplyBridge]),
-                                $this->referenceSearchService
-                            );
+        $requestMessage = $requestMessage
+                            ->setReplyChannel($internalReplyBridge)
+                            ->build();
+
+        $messageHandler = $this->buildHandler($replyChannelComingFromPreviousGateway, $errorChannelComingFromPreviousGateway, $internalReplyBridge);
 
         try {
-            $serviceActivator->handle($requestMessage);
+            $messageHandler->handle($requestMessage);
         }catch (\Throwable $exception) {
             if (!$this->errorChannel) {
                 if ($exception instanceof MessagingException && $exception->getCause()) {
@@ -226,5 +198,50 @@ class Gateway
         }
 
         return null;
+    }
+
+    /**
+     * @param $replyChannelComingFromPreviousGateway
+     * @param $errorChannelComingFromPreviousGateway
+     * @param QueueChannel $internalReplyBridge
+     * @return ServiceActivatorBuilder|\SimplyCodedSoftware\Messaging\MessageHandler
+     * @throws MessagingException
+     */
+    private function buildHandler($replyChannelComingFromPreviousGateway, $errorChannelComingFromPreviousGateway, QueueChannel $internalReplyBridge)
+    {
+        $gatewayInternalHandler = new GatewayInternalHandler(
+            $this->interfaceToCall,
+            $this->gatewayRequestChannel,
+            $this->errorChannel,
+            $this->replyChannel,
+            $this->messageConverters,
+            $this->replyMilliSecondsTimeout,
+            $replyChannelComingFromPreviousGateway,
+            $errorChannelComingFromPreviousGateway
+        );
+
+        $gatewayInternalHandler = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle")
+            ->withEndpointAnnotations($this->endpointAnnotations);
+        foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
+            $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference);
+        }
+
+
+        $chainHandler = ChainMessageHandlerBuilder::create();
+        foreach ($this->sortedBeforeInterceptors as $beforeInterceptor) {
+            $chainHandler = $chainHandler->chain($beforeInterceptor);
+        }
+        $chainHandler = $chainHandler->chain($gatewayInternalHandler);
+        foreach ($this->sortedAfterInterceptors as $afterInterceptor) {
+            $chainHandler = $chainHandler->chain($afterInterceptor);
+        }
+
+        $internalReplyBridgeName = Uuid::uuid4()->toString();
+        return $chainHandler
+            ->withOutputMessageChannel($internalReplyBridgeName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([$internalReplyBridgeName => $internalReplyBridge]),
+                $this->referenceSearchService
+            );
     }
 }

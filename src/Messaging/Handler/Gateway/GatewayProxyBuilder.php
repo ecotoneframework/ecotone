@@ -7,8 +7,10 @@ use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use ProxyManager\Factory\RemoteObjectFactory;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\SubscribableChannel;
@@ -72,6 +74,14 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @var AroundInterceptorReference[]
      */
     private $aroundInterceptors = [];
+    /**
+     * @var MethodInterceptor[]
+     */
+    private $beforeInterceptors = [];
+    /**
+     * @var MethodInterceptor[]
+     */
+    private $afterInterceptors = [];
     /**
      * @var object[]
      */
@@ -213,6 +223,28 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return $this
+     */
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor)
+    {
+        $this->beforeInterceptors[] = $methodInterceptor;
+
+        return $this;
+    }
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return $this
+     */
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor)
+    {
+        $this->afterInterceptors[] = $methodInterceptor;
+
+        return $this;
+    }
+
+    /**
      * @param object[] $endpointAnnotations
      * @return static
      */
@@ -268,10 +300,6 @@ class GatewayProxyBuilder implements GatewayBuilder
             $methodArgumentConverters[] = $messageConverterBuilder->build($referenceSearchService);
         }
 
-        $transactionFactories = [];
-        foreach ($this->transactionFactoryReferenceNames as $referenceName) {
-            $transactionFactories[] = $referenceSearchService->get($referenceName);
-        }
         $messageConverters = [];
         foreach ($this->messageConverterReferenceNames as $messageConverterReferenceName) {
             $messageConverters[] = $referenceSearchService->get($messageConverterReferenceName);
@@ -283,13 +311,14 @@ class GatewayProxyBuilder implements GatewayBuilder
                 $interfaceToCall, $methodArgumentConverters
             ),
             $messageConverters,
-            $transactionFactories,
             $requestChannel,
             $replyChannel,
             $errorChannel,
             $this->replyMilliSecondsTimeout,
             $referenceSearchService,
             $this->aroundInterceptors,
+            $this->getSortedInterceptors($this->beforeInterceptors),
+            $this->getSortedInterceptors($this->afterInterceptors),
             $this->endpointAnnotations
         );
 
@@ -320,6 +349,25 @@ class GatewayProxyBuilder implements GatewayBuilder
         });
 
         return $factory->createProxy($this->interfaceName);
+    }
+
+    /**
+     * @param MethodInterceptor[] $methodInterceptors
+     * @return InputOutputMessageHandlerBuilder[]
+     */
+    private function getSortedInterceptors(iterable $methodInterceptors) : iterable
+    {
+        usort($methodInterceptors, function(MethodInterceptor $methodInterceptor, MethodInterceptor $toCompare){
+            if ($methodInterceptor->getPrecedence() === $toCompare->getPrecedence()) {
+                return 0;
+            }
+
+            return $methodInterceptor->getPrecedence() > $toCompare->getPrecedence() ? 1 : -1;
+        });
+
+        return array_map(function(MethodInterceptor $methodInterceptor){
+            return $methodInterceptor->getMessageHandler();
+        },$methodInterceptors);
     }
 
     public function __toString()

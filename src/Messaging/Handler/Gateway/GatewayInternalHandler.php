@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use foo\bar;
+use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\Message;
@@ -33,10 +34,6 @@ class GatewayInternalHandler
      * @var MessageChannel|string
      */
     private $errorChannelComingFromPreviousGateway;
-    /**
-     * @var array
-     */
-    private $transactionFactories;
     /**
      * @var MessageChannel
      */
@@ -69,17 +66,15 @@ class GatewayInternalHandler
      * @param MessageChannel|null $errorChannel
      * @param PollableChannel|null $replyChannel
      * @param MessageConverter[] $messageConverters
-     * @param TransactionFactory[] $transactionFactories
      * @param int $replyMilliSecondsTimeout
      * @param string|MessageChannel $replyChannelComingFromPreviousGateway
      * @param string|MessageChannel $errorChannelComingFromPreviousGateway
      */
-    public function __construct(InterfaceToCall $interfaceToCall, MessageChannel $requestChannel, ?MessageChannel $errorChannel, ?PollableChannel $replyChannel, array $messageConverters, array $transactionFactories, int $replyMilliSecondsTimeout, $replyChannelComingFromPreviousGateway, $errorChannelComingFromPreviousGateway)
+    public function __construct(InterfaceToCall $interfaceToCall, MessageChannel $requestChannel, ?MessageChannel $errorChannel, ?PollableChannel $replyChannel, array $messageConverters, int $replyMilliSecondsTimeout, $replyChannelComingFromPreviousGateway, $errorChannelComingFromPreviousGateway)
     {
         $this->interfaceToCall = $interfaceToCall;
         $this->replyChannelComingFromPreviousGateway = $replyChannelComingFromPreviousGateway;
         $this->errorChannelComingFromPreviousGateway = $errorChannelComingFromPreviousGateway;
-        $this->transactionFactories = $transactionFactories;
         $this->requestChannel = $requestChannel;
         $this->errorChannel = $errorChannel;
         $this->replyChannel = $replyChannel;
@@ -95,29 +90,33 @@ class GatewayInternalHandler
      */
     public function handle(Message $requestMessage)
     {
+        $replyChannelComingFromPreviousGateway = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
+        $errorChannelComingFromPreviousGateway = $requestMessage->getHeaders()->containsKey(MessageHeaders::ERROR_CHANNEL) ? $requestMessage->getHeaders()->getErrorChannel() : null;
+
+        $requestMessage = MessageBuilder::fromMessage($requestMessage);
+        $replyChannel = $this->replyChannel ? $this->replyChannel : QueueChannel::create();
+        if ($this->interfaceToCall->hasReturnValue()) {
+            $requestMessage = $requestMessage
+                ->setReplyChannel($replyChannel);
+            if ($this->errorChannel) {
+                $requestMessage = $requestMessage
+                    ->setErrorChannel($this->errorChannel ? $this->errorChannel : $this->replyChannel);
+            }
+        }
+        $requestMessage = $requestMessage->build();
+
+
         $this->requestChannel->send($requestMessage);
 
         $replyMessage = null;
         if ($this->interfaceToCall->hasReturnValue()) {
-            $replyCallable = $this->getReply($requestMessage, $this->replyChannel);
+            $replyCallable = $this->getReply($requestMessage, $replyChannel);
 
             if ($this->interfaceToCall->doesItReturnFuture()) {
                 return FutureReplyReceiver::create($replyCallable);
             }
 
             $replyMessage = $replyCallable();
-        }
-
-        if ($this->interfaceToCall->doesItReturnMessage() && $replyMessage) {
-            $replyMessageBuilder = MessageBuilder::fromMessage($replyMessage);
-            if ($this->replyChannelComingFromPreviousGateway) {
-                $replyMessageBuilder->setHeader(MessageHeaders::REPLY_CHANNEL, $this->replyChannelComingFromPreviousGateway);
-            }
-            if ($this->errorChannelComingFromPreviousGateway) {
-                $replyMessageBuilder->setHeader(MessageHeaders::ERROR_CHANNEL, $this->errorChannelComingFromPreviousGateway);
-            }
-
-            return $replyMessageBuilder->build();
         }
 
         $reply = null;
@@ -138,7 +137,20 @@ class GatewayInternalHandler
             }
         }
 
-        return $reply;
+        if ($reply) {
+            $replyMessageBuilder = MessageBuilder::fromMessage($replyMessage)
+                ->setPayload($reply);
+            if ($replyChannelComingFromPreviousGateway) {
+                $replyMessageBuilder->setHeader(MessageHeaders::REPLY_CHANNEL, $replyChannelComingFromPreviousGateway);
+            }
+            if ($errorChannelComingFromPreviousGateway) {
+                $replyMessageBuilder->setHeader(MessageHeaders::ERROR_CHANNEL, $errorChannelComingFromPreviousGateway);
+            }
+
+            return $replyMessageBuilder->build();
+        }
+
+        return null;
     }
 
     /**
@@ -153,7 +165,7 @@ class GatewayInternalHandler
             $replyMessage = $this->replyMilliSecondsTimeout > 0 ? $replyChannel->receiveWithTimeout($this->replyMilliSecondsTimeout) : $replyChannel->receive();
 
             if (is_null($replyMessage) && !$this->interfaceToCall->canItReturnNull()) {
-                throw InvalidArgumentException::create("{$this->interfaceToCall} expects value, but null was returned. If you defined errorChannel it's advised to change interface to nullable.");
+                throw InvalidArgumentException::create("{$this->interfaceToCall} expects value, but null was returned. Have you consider changing return value to nullable?");
             }
             if ($replyMessage instanceof ErrorMessage) {
                 throw $replyMessage->getPayload();

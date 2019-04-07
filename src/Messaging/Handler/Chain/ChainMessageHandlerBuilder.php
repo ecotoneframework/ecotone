@@ -106,7 +106,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         for ($key = 1; $key < count($messageHandlersToChain); $key++) {
             $bridgeChannels[$baseKey . $key] = DirectChannel::create();
         }
-        $requestChannelName = $baseKey;
         $requestChannel = DirectChannel::create();
         $bridgeChannels[$baseKey] = $requestChannel;
 
@@ -133,11 +132,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             }
         }
 
-        /** @var ChainGateway $gateway */
-        $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), ChainGateway::class, "execute", $requestChannelName)
-            ->build($referenceSearchService, $customChannelResolver);
-
-        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwarder($gateway), "forward")
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel), "forward")
             ->withOutputMessageChannel($this->outputMessageChannelName);
 
         foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
@@ -172,7 +167,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(ChainForwarder::class, "forward");
+        return $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, "forward");
     }
 
     /**

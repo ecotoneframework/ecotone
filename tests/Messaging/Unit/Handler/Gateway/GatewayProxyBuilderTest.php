@@ -3,6 +3,8 @@
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway;
 
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransaction;
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
 use SimplyCodedSoftware\Messaging\Transaction\Transactional;
@@ -14,8 +16,10 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHan
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\StatefulHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter\FakeMessageConverter;
 use Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter\FakeMessageConverterGatewayExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\MessageServiceExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingNoArguments;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceive;
@@ -196,12 +200,12 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
         $gatewayProxy->sendMail($personId, $content);
 
-        $this->assertMessages(
-            MessageBuilder::withPayload($content)
-                ->setHeader('personId', $personId)
-                ->setHeader("errorChannel", "errorChannel")
-                ->build(),
-            $messageHandler->message()
+        $this->assertEquals(
+            $personId,
+            $messageHandler->message()->getHeaders()->get('personId')
+        );
+        $this->assertEquals(
+            $content, $messageHandler->message()->getPayload()
         );
     }
 
@@ -681,9 +685,9 @@ class GatewayProxyBuilderTest extends MessagingTest
             $messageHandler->getReceivedMessage()->getHeaders()->get("token")
         );
 
-        $this->assertMessages(
-            $replyData,
-            $replyMessage
+        $this->assertEquals(
+            $replyData->getPayload(),
+            $replyMessage->getPayload()
         );
     }
 
@@ -724,6 +728,61 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $this->assertTrue($transactionOne->isCommitted());
     }
+
+    public function test_calling_interface_with_before_and_after_interceptors()
+    {
+        $messageHandler     = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
+                                    ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
+            ->addBeforeInterceptor(
+                MethodInterceptor::create(
+                    "interceptor0",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
+                    0,
+                    ""
+                )
+            )
+            ->addBeforeInterceptor(
+                MethodInterceptor::create(
+                    "interceptor1",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum"),
+                    1,
+                    ""
+                )
+            )
+            ->addAfterInterceptor(
+                MethodInterceptor::create(
+                    "interceptor2",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result"),
+                    1,
+                    ""
+                )
+            )
+            ->addAfterInterceptor(
+                MethodInterceptor::create(
+                    "interceptor3",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
+                    0,
+                    ""
+                )
+            );
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    $requestChannelName => $requestChannel
+                ]
+            )
+        );
+
+        $this->assertEquals(20, $gatewayProxy->calculate(2));
+    }
+
 
     public function test_calling_around_interceptors_before_sending_to_error_channel()
     {

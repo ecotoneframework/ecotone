@@ -137,7 +137,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function getRequiredReferences(): array
     {
-        return [$this->amqpConnectionReferenceName];
+        return [$this->amqpConnectionReferenceName, AmqpAdmin::REFERENCE_NAME];
     }
 
     /**

@@ -16,6 +16,7 @@ use SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConve
 use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
@@ -63,6 +64,8 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
                 $configuration->registerMessageChannel($extensionObject);
             } else if ($extensionObject instanceof GatewayBuilder) {
                 $configuration->registerGatewayBuilder($extensionObject);
+            } else if ($extensionObject instanceof ChannelAdapterConsumerBuilder) {
+                $configuration->registerConsumer($extensionObject);
             }
         }
 
@@ -90,7 +93,9 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             ||
             $extensionObject instanceof MessageChannelBuilder
             ||
-            $extensionObject instanceof GatewayBuilder;
+            $extensionObject instanceof GatewayBuilder
+            ||
+            $extensionObject instanceof ChannelAdapterConsumerBuilder;
     }
 
     /**

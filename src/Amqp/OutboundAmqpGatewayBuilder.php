@@ -164,7 +164,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
 
         return new OutboundAmqpGateway(
             $amqpConnectionFactory,
-            $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME),
+            $this->autoDeclare ? $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME) : AmqpAdmin::createEmpty(),
             $this->exchangeName,
             $this->routingKey,
             $this->routingKeyFromHeader,
@@ -223,6 +223,11 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
      */
     public function getRequiredReferenceNames(): array
     {
-        return [];
+        return [$this->amqpConnectionFactoryReferenceName];
+    }
+
+    public function __toString()
+    {
+        return "Outbound Amqp Adapter for channel " . $this->inputChannelName;
     }
 }

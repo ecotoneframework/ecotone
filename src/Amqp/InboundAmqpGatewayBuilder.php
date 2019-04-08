@@ -137,7 +137,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function getRequiredReferences(): array
     {
-        return [];
+        return [$this->amqpConnectionReferenceName];
     }
 
     /**
@@ -181,5 +181,10 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
                     $this->acknowledgeMode
                 )
             );
+    }
+
+    public function __toString()
+    {
+        return "Inbound Amqp Adapter with id " . $this->endpointId;
     }
 }

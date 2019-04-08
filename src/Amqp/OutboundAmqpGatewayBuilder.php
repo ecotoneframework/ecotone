@@ -41,6 +41,10 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     /**
      * @var string
      */
+    private $routingKeyFromHeader;
+    /**
+     * @var string
+     */
     private $exchangeName;
     /**
      * @var bool
@@ -50,7 +54,9 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
      * @var HeaderMapper
      */
     private $headerMapper;
-
+    /**
+     * @var bool
+     */
     private $autoDeclare = self::DEFAULT_AUTO_DECLARE;
 
     /**
@@ -92,9 +98,21 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
      *
      * @return OutboundAmqpGatewayBuilder
      */
-    public function withRoutingKey(string $routingKey): self
+    public function withDefaultRoutingKey(string $routingKey): self
     {
         $this->routingKey = $routingKey;
+
+        return $this;
+    }
+
+    /**
+     * @param string $headerName
+     *
+     * @return OutboundAmqpGatewayBuilder
+     */
+    public function withRoutingKeyFromHeader(string $headerName) : self
+    {
+        $this->routingKeyFromHeader = $headerName;
 
         return $this;
     }
@@ -149,6 +167,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
             $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME),
             $this->exchangeName,
             $this->routingKey,
+            $this->routingKeyFromHeader,
             $this->defaultPersistentDelivery,
             $this->autoDeclare,
             AmqpMessageConverter::createWithMapper($amqpConnectionFactory, $this->headerMapper, AmqpAcknowledgementCallback::NONE)

@@ -49,6 +49,10 @@ class OutboundAmqpGateway implements MessageHandler
      * @var bool
      */
     private $autoDeclare;
+    /**
+     * @var string|null
+     */
+    private $routingKeyHeaderName;
 
     /**
      * OutboundAmqpGateway constructor.
@@ -57,11 +61,12 @@ class OutboundAmqpGateway implements MessageHandler
      * @param AmqpAdmin             $amqpAdmin
      * @param string                $exchangeName
      * @param string|null           $routingKey
+     * @param string|null           $routingKeyHeaderName
      * @param bool                  $defaultPersistentDelivery
      * @param bool                  $autoDeclare
      * @param MessageConverter      $messageConverter
      */
-    public function __construct(AmqpConnectionFactory $amqpConnectionFactory, AmqpAdmin $amqpAdmin, string $exchangeName, ?string $routingKey, bool $defaultPersistentDelivery, bool $autoDeclare, MessageConverter $messageConverter)
+    public function __construct(AmqpConnectionFactory $amqpConnectionFactory, AmqpAdmin $amqpAdmin, string $exchangeName, ?string $routingKey, ?string $routingKeyHeaderName, bool $defaultPersistentDelivery, bool $autoDeclare, MessageConverter $messageConverter)
     {
         $this->amqpConnectionFactory = $amqpConnectionFactory;
         $this->routingKey = $routingKey;
@@ -70,6 +75,7 @@ class OutboundAmqpGateway implements MessageHandler
         $this->defaultPersistentDelivery = $defaultPersistentDelivery;
         $this->messageConverter = $messageConverter;
         $this->autoDeclare = $autoDeclare;
+        $this->routingKeyHeaderName = $routingKeyHeaderName;
     }
 
     /**
@@ -85,9 +91,16 @@ class OutboundAmqpGateway implements MessageHandler
         }
 
         /** @var AmqpMessage $messageToSend */
-        $messageToSend = $this->messageConverter->fromMessage($message, TypeDescriptor::create(AmqpMessage::class));;
-        if (!is_null($this->routingKey) && $this->routingKey !== "") {
-            $messageToSend->setRoutingKey($this->routingKey);
+        $messageToSend = $this->messageConverter->fromMessage($message, TypeDescriptor::create(AmqpMessage::class));
+
+        if ($this->routingKeyHeaderName) {
+            $routingKey = $message->getHeaders()->containsKey($this->routingKeyHeaderName) ? $message->getHeaders()->get($this->routingKeyHeaderName) : $this->routingKey;
+        }else {
+            $routingKey = $this->routingKey;
+        }
+
+        if (!is_null($routingKey) && $routingKey !== "") {
+            $messageToSend->setRoutingKey($routingKey);
         }
         $messageToSend->setDeliveryMode($this->defaultPersistentDelivery ? AmqpMessage::DELIVERY_MODE_PERSISTENT : AmqpMessage::DELIVERY_MODE_NON_PERSISTENT);
 

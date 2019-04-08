@@ -188,6 +188,8 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     public function withInputChannelName(string $inputChannelName)
     {
         $this->inputChannelName = $inputChannelName;
+
+        return $this;
     }
 
     /**

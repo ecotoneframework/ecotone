@@ -118,7 +118,9 @@ class AmqpGatewayBuilderTest extends AmqpMessagingTest
      */
     private function send(OutboundAmqpGatewayBuilder $outboundAmqpGatewayBuilder, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, \SimplyCodedSoftware\Messaging\Message $messageToSend)
     {
-        $outboundAmqpGatewayBuilder->build($channelResolver, $referenceSearchService)->handle($messageToSend);
+        $outboundAmqpGatewayBuilder
+            ->withAutoDeclareOnSend(true)
+            ->build($channelResolver, $referenceSearchService)->handle($messageToSend);
     }
 
     /**

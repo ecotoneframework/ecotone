@@ -45,17 +45,23 @@ class OutboundAmqpGateway implements MessageHandler
      * @var MessageConverter
      */
     private $messageConverter;
+    /**
+     * @var bool
+     */
+    private $autoDeclare;
 
     /**
      * OutboundAmqpGateway constructor.
+     *
      * @param AmqpConnectionFactory $amqpConnectionFactory
-     * @param AmqpAdmin $amqpAdmin
-     * @param string $exchangeName
-     * @param string|null $routingKey
-     * @param bool $defaultPersistentDelivery
-     * @param MessageConverter $messageConverter
+     * @param AmqpAdmin             $amqpAdmin
+     * @param string                $exchangeName
+     * @param string|null           $routingKey
+     * @param bool                  $defaultPersistentDelivery
+     * @param bool                  $autoDeclare
+     * @param MessageConverter      $messageConverter
      */
-    public function __construct(AmqpConnectionFactory $amqpConnectionFactory, AmqpAdmin $amqpAdmin, string $exchangeName, ?string $routingKey, bool $defaultPersistentDelivery, MessageConverter $messageConverter)
+    public function __construct(AmqpConnectionFactory $amqpConnectionFactory, AmqpAdmin $amqpAdmin, string $exchangeName, ?string $routingKey, bool $defaultPersistentDelivery, bool $autoDeclare, MessageConverter $messageConverter)
     {
         $this->amqpConnectionFactory = $amqpConnectionFactory;
         $this->routingKey = $routingKey;
@@ -63,6 +69,7 @@ class OutboundAmqpGateway implements MessageHandler
         $this->amqpAdmin = $amqpAdmin;
         $this->defaultPersistentDelivery = $defaultPersistentDelivery;
         $this->messageConverter = $messageConverter;
+        $this->autoDeclare = $autoDeclare;
     }
 
     /**
@@ -73,7 +80,9 @@ class OutboundAmqpGateway implements MessageHandler
         /** @var AmqpContext $context */
         $context = $this->amqpConnectionFactory->createContext();
 
-        $this->amqpAdmin->declareExchangeWithQueuesAndBindings($this->exchangeName, $context);
+        if ($this->autoDeclare) {
+            $this->amqpAdmin->declareExchangeWithQueuesAndBindings($this->exchangeName, $context);
+        }
 
         /** @var AmqpMessage $messageToSend */
         $messageToSend = $this->messageConverter->fromMessage($message, TypeDescriptor::create(AmqpMessage::class));;

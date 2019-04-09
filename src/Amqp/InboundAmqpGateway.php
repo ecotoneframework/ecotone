@@ -16,7 +16,7 @@ interface InboundAmqpGateway
     /**
      * @param AmqpMessage $amqpMessage
      * @param Consumer $consumer
-     * @return mixed
+     * @return void
      */
-    public function execute(AmqpMessage $amqpMessage, Consumer $consumer);
+    public function execute(AmqpMessage $amqpMessage, Consumer $consumer) : void;
 }

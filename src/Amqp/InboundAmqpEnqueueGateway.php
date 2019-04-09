@@ -95,7 +95,7 @@ class InboundAmqpEnqueueGateway implements MessageDrivenChannelAdapter
         $subscriptionConsumer = $context->createSubscriptionConsumer();
         $subscriptionConsumer->subscribe($consumer, function(AmqpMessage $message, \Interop\Queue\Consumer $consumer) {
             $this->inboundAmqpGateway->execute($message, $consumer);
-            $consumer->acknowledge($message);
+//            $consumer->acknowledge($message);
         });
 
         $subscriptionConsumer->consume($this->receiveTimeoutInMilliseconds);

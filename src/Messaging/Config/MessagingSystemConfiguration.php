@@ -207,9 +207,18 @@ final class MessagingSystemConfiguration implements Configuration
     {
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
-                $preCallInterceptors = $this->getRelatedInterceptors($this->preCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
-                $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
-                $postCallInterceptors = $this->getRelatedInterceptors($this->postCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
+                $aroundInterceptors = [];
+                $preCallInterceptors = [];
+                $postCallInterceptors = [];
+                if ($this->preCallMethodInterceptors) {
+                    $preCallInterceptors = $this->getRelatedInterceptors($this->preCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
+                }
+                if ($this->aroundMethodInterceptors) {
+                    $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
+                }
+                if ($this->postCallMethodInterceptors) {
+                    $postCallInterceptors = $this->getRelatedInterceptors($this->postCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
+                }
 
                 foreach ($aroundInterceptors as $aroundInterceptorReference) {
                     $messageHandlerBuilder->addAroundInterceptor($aroundInterceptorReference);

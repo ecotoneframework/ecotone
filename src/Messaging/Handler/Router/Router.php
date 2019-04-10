@@ -83,6 +83,9 @@ final class Router implements MessageHandler
     {
         $resolutionChannels = $this->methodInvoker->processMessage($message);
 
+        if (is_null($resolutionChannels)) {
+            $resolutionChannels = [];
+        }
         if (!is_array($resolutionChannels)) {
             $resolutionChannels = [$resolutionChannels];
         }

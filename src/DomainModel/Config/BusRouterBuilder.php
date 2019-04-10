@@ -165,13 +165,15 @@ class BusRouterBuilder implements MessageHandlerBuilder
                 return RouterBuilder::createRouterFromObject(
                     new EventBusRouter($this->channelNamesRouting, $channelResolver),
                     "routeByObject"
-                )->build($channelResolver, $referenceSearchService);
+                )   ->setResolutionRequired(false)
+                    ->build($channelResolver, $referenceSearchService);
             }
             case "eventByName": {
                 return RouterBuilder::createRouterFromObject(
                     new EventBusRouter($this->channelNamesRouting, $channelResolver),
                     "routeByName"
                 )
+                    ->setResolutionRequired(false)
                     ->withMethodParameterConverters([
                         HeaderBuilder::createOptional("name", EventBus::CHANNEL_NAME_BY_NAME)
                     ])

@@ -26,6 +26,8 @@ use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
  */
 class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
+    const DEFAULT_FILTER_OUT_ON_NOT_FOUND = false;
+
     /**
      * @var string
      */
@@ -70,14 +72,20 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      * @var ?string
      */
     private $expectedVersionPropertyName;
+    /**
+     * @var bool
+     */
+    private $filterOutOnNotFound = self::DEFAULT_FILTER_OUT_ON_NOT_FOUND;
 
     /**
      * AggregateCallingCommandHandlerBuilder constructor.
      *
      * @param string $aggregateClassName
      * @param string $methodName
-     * @param bool $isCommandHandler
+     * @param bool   $isCommandHandler
      * @param string $handledMessageClassName
+     * @param bool   $filterOutOnNotFound
+     *
      * @throws InvalidArgumentException
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
@@ -160,6 +168,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      * @param string $methodName
      *
      * @param string $handledMessageClassName
+     *
      * @return AggregateMessageHandlerBuilder
      * @throws InvalidArgumentException
      * @throws \ReflectionException
@@ -215,6 +224,18 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     }
 
     /**
+     * @param bool $filterOutOnNotFound
+     *
+     * @return AggregateMessageHandlerBuilder
+     */
+    public function withFilterOutOnNotFound(bool $filterOutOnNotFound) : self
+    {
+        $this->filterOutOnNotFound = $filterOutOnNotFound;
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function registerRequiredReference(string $referenceName): void
@@ -260,7 +281,8 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                         $this->isFactoryMethod,
                         $this->messageIdentifierMapping,
                         $this->expectedVersionPropertyName,
-                        $propertyReader
+                        $propertyReader,
+                        $this->filterOutOnNotFound
                     ),
                     "load"
                 )

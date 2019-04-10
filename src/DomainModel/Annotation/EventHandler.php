@@ -24,4 +24,8 @@ class EventHandler extends EndpointAnnotation
      * @var string
      */
     public $messageClassName;
+    /**
+     * @var bool
+     */
+    public $filterOutOnNotFound = false;
 }

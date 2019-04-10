@@ -47,19 +47,24 @@ class LoadAggregateService
      * @var null|string
      */
     private $expectedVersionName;
+    /**
+     * @var bool
+     */
+    private $filterOutOnNotFound;
 
     /**
      * ServiceCallToAggregateAdapter constructor.
      *
-     * @param AggregateRepository $aggregateRepository
-     * @param string $aggregateClassName
-     * @param string $aggregateMethod
-     * @param bool $isFactoryMethod
-     * @param array $aggregateIdentifierMapping
-     * @param null|string $expectedVersionName
+     * @param AggregateRepository    $aggregateRepository
+     * @param string                 $aggregateClassName
+     * @param string                 $aggregateMethod
+     * @param bool                   $isFactoryMethod
+     * @param array                  $aggregateIdentifierMapping
+     * @param null|string            $expectedVersionName
      * @param PropertyReaderAccessor $propertyReaderAccessor
+     * @param bool                   $filterOutOnNotFound
      */
-    public function __construct(AggregateRepository $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?string $expectedVersionName, PropertyReaderAccessor $propertyReaderAccessor)
+    public function __construct(AggregateRepository $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?string $expectedVersionName, PropertyReaderAccessor $propertyReaderAccessor, bool $filterOutOnNotFound)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->isFactoryMethod = $isFactoryMethod;
@@ -68,6 +73,7 @@ class LoadAggregateService
         $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->expectedVersionName = $expectedVersionName;
+        $this->filterOutOnNotFound = $filterOutOnNotFound;
     }
 
     /**
@@ -78,7 +84,7 @@ class LoadAggregateService
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function load(Message $message) : Message
+    public function load(Message $message) : ?Message
     {
         $aggregateIdentifiers = [];
         $expectedVersion = null;
@@ -104,6 +110,10 @@ class LoadAggregateService
             $aggregate = is_null($this->expectedVersionName)
                 ? $this->aggregateRepository->findBy($aggregateIdentifiers)
                 : $this->aggregateRepository->findWithLockingBy($aggregateIdentifiers, $expectedVersion);
+
+            if (!$aggregate && $this->filterOutOnNotFound) {
+                return null;
+            }
         }
 
         $messageBuilder = MessageBuilder::fromMessage($message);

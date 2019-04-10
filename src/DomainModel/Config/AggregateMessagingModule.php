@@ -158,14 +158,14 @@ class AggregateMessagingModule implements AnnotationModule
 
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
             $inputChannelName = self::getMessageChannelFor($registration);
-            $this->registerAggregateCommandHandler($configuration, $moduleExtensions, $registration, $inputChannelName);
+            $this->registerAggregateCommandHandler($configuration, $moduleExtensions, $registration, $inputChannelName, false);
 
             $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames);
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {
             $inputChannelName = self::getMessageChannelFor($registration);
-            $this->registerAggregateCommandHandler($configuration, $moduleExtensions, $registration, $inputChannelName);
+            $this->registerAggregateCommandHandler($configuration, $moduleExtensions, $registration, $inputChannelName, $registration->getAnnotationForMethod()->filterOutOnNotFound);
 
             $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
         }
@@ -338,14 +338,16 @@ class AggregateMessagingModule implements AnnotationModule
      * @param AnnotationRegistration $registration
      * @param string                 $inputChannelName
      *
-     * @return array
+     * @param bool                   $filterOutOnNotFound
+     *
+     * @return void
      * @throws InvalidArgumentException
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function registerAggregateCommandHandler(Configuration $configuration, array $moduleExtensions, AnnotationRegistration $registration, string $inputChannelName): void
+    private function registerAggregateCommandHandler(Configuration $configuration, array $moduleExtensions, AnnotationRegistration $registration, string $inputChannelName, bool $filterOutOnNotFound): void
     {
         /** @var CommandHandler $annotation */
         $annotation = $registration->getAnnotationForMethod();
@@ -361,6 +363,7 @@ class AggregateMessagingModule implements AnnotationModule
                 ->withInputChannelName($inputChannelName)
                 ->withEndpointId($endpointId)
                 ->withAggregateRepositoryFactories($moduleExtensions)
+                ->withFilterOutOnNotFound($filterOutOnNotFound)
                 ->withMethodParameterConverters($parameterConverters)
         );
 

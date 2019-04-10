@@ -193,7 +193,5 @@ final class MessageBuilder
     private function initialize($payload) : void
     {
         Assert::notNull($payload, "Message payload can't be empty");
-
-        $this->headerAccessor->setHeaderIfAbsent(MessageHeaders::ERROR_CHANNEL, "errorChannel");
     }
 }

@@ -28,8 +28,4 @@ class GatewayHeader
      * @var string
      */
     public $expression;
-    /**
-     * @var mixed
-     */
-    public $value;
 }

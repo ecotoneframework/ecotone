@@ -4,10 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
-use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
@@ -18,11 +15,12 @@ use SimplyCodedSoftware\Messaging\MessageHandler;
 /**
  * Class OutboundAmqpGatewayBuilder
  * @package SimplyCodedSoftware\Amqp
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
 {
     private const DEFAULT_PERSISTENT_MODE = true;
+    const         DEFAULT_AUTO_DECLARE    = false;
 
     /**
      * @var string
@@ -43,6 +41,10 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     /**
      * @var string
      */
+    private $routingKeyFromHeader;
+    /**
+     * @var string
+     */
     private $exchangeName;
     /**
      * @var bool
@@ -52,43 +54,51 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
      * @var HeaderMapper
      */
     private $headerMapper;
+    /**
+     * @var bool
+     */
+    private $autoDeclare = self::DEFAULT_AUTO_DECLARE;
 
     /**
      * OutboundAmqpGatewayBuilder constructor.
+     *
      * @param string $exchangeName
      * @param string $amqpConnectionFactoryReferenceName
      */
     private function __construct(string $exchangeName, string $amqpConnectionFactoryReferenceName)
     {
         $this->amqpConnectionFactoryReferenceName = $amqpConnectionFactoryReferenceName;
-        $this->exchangeName = $exchangeName;
-        $this->headerMapper = DefaultHeaderMapper::createNoMapping();
+        $this->exchangeName                       = $exchangeName;
+        $this->headerMapper                       = DefaultHeaderMapper::createNoMapping();
     }
 
     /**
      * @param string $exchangeName
      * @param string $amqpConnectionFactoryReferenceName
+     *
      * @return OutboundAmqpGatewayBuilder
      */
-    public static function create(string $exchangeName, string $amqpConnectionFactoryReferenceName) : self
+    public static function create(string $exchangeName, string $amqpConnectionFactoryReferenceName): self
     {
         return new self($exchangeName, $amqpConnectionFactoryReferenceName);
     }
 
     /**
      * @param string $amqpConnectionFactoryReferenceName
+     *
      * @return OutboundAmqpGatewayBuilder
      */
-    public static function createForDefaultExchange(string $amqpConnectionFactoryReferenceName) : self
+    public static function createForDefaultExchange(string $amqpConnectionFactoryReferenceName): self
     {
         return new self("", $amqpConnectionFactoryReferenceName);
     }
 
     /**
      * @param string $routingKey
+     *
      * @return OutboundAmqpGatewayBuilder
      */
-    public function withRoutingKey(string $routingKey): self
+    public function withDefaultRoutingKey(string $routingKey): self
     {
         $this->routingKey = $routingKey;
 
@@ -96,10 +106,23 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     }
 
     /**
-     * @param bool $isPersistent
+     * @param string $headerName
+     *
      * @return OutboundAmqpGatewayBuilder
      */
-    public function withDefaultPersistentMode(bool $isPersistent) : self
+    public function withRoutingKeyFromHeader(string $headerName) : self
+    {
+        $this->routingKeyFromHeader = $headerName;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $isPersistent
+     *
+     * @return OutboundAmqpGatewayBuilder
+     */
+    public function withDefaultPersistentMode(bool $isPersistent): self
     {
         $this->defaultPersistentDelivery = $isPersistent;
 
@@ -108,12 +131,25 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
 
     /**
      * @param string $headerMapper comma separated list of headers to be mapped.
-     *  (e.g. "\*" or "thing1*, thing2" or "*thing1")
+     *                             (e.g. "\*" or "thing1*, thing2" or "*thing1")
+     *
      * @return OutboundAmqpGatewayBuilder
      */
-    public function withHeaderMapper(string $headerMapper) : self
+    public function withHeaderMapper(string $headerMapper): self
     {
         $this->headerMapper = DefaultHeaderMapper::createWith([], explode(",", $headerMapper));
+
+        return $this;
+    }
+
+    /**
+     * @param bool $toDeclare
+     *
+     * @return OutboundAmqpGatewayBuilder
+     */
+    public function withAutoDeclareOnSend(bool $toDeclare): self
+    {
+        $this->autoDeclare = $toDeclare;
 
         return $this;
     }
@@ -128,10 +164,12 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
 
         return new OutboundAmqpGateway(
             $amqpConnectionFactory,
-            $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME),
+            $this->autoDeclare ? $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME) : AmqpAdmin::createEmpty(),
             $this->exchangeName,
             $this->routingKey,
+            $this->routingKeyFromHeader,
             $this->defaultPersistentDelivery,
+            $this->autoDeclare,
             AmqpMessageConverter::createWithMapper($amqpConnectionFactory, $this->headerMapper, AmqpAcknowledgementCallback::NONE)
         );
     }
@@ -139,7 +177,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [$interfaceToCallRegistry->getFor(OutboundAmqpGateway::class, "handle")];
     }
@@ -150,6 +188,8 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     public function withInputChannelName(string $inputChannelName)
     {
         $this->inputChannelName = $inputChannelName;
+
+        return $this;
     }
 
     /**
@@ -183,6 +223,11 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
      */
     public function getRequiredReferenceNames(): array
     {
-        return [];
+        return [$this->amqpConnectionFactoryReferenceName];
+    }
+
+    public function __toString()
+    {
+        return "Outbound Amqp Adapter for channel " . $this->inputChannelName;
     }
 }

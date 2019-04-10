@@ -33,8 +33,6 @@ interface AmqpHeader
     public const TIMESTAMP = "amqp_timestamp";
     public const TYPE = "amqp_type";
     public const USER_ID = "amqp_userId";
-    public const SPRING_REPLY_CORRELATION = "amqp_springReplyCorrelation";
-    public const SPRING_REPLY_TO_STACK = "amqp_springReplyToStack";
     public const PUBLISH_CONFIRM = "amqp_publishConfirm";
     public const PUBLISH_CONFIRM_NACK_CAUSE = "amqp_publishConfirmNackCause";
     public const RETURN_REPLY_CODE = "amqp_returnReplyCode";

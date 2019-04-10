@@ -188,6 +188,23 @@ class MessageHeaders
     }
 
     /**
+     * @return bool
+     */
+    public function hasContentType() : bool
+    {
+        return $this->containsKey(self::CONTENT_TYPE);
+    }
+
+    /**
+     * @return string
+     * @throws MessagingException
+     */
+    public function getContentType() : string
+    {
+        return $this->get(self::CONTENT_TYPE);
+    }
+
+    /**
      * @param array|string[] $headers
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */

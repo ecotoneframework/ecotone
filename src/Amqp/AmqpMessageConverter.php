@@ -101,6 +101,10 @@ class AmqpMessageConverter implements MessageConverter
                                 ->setHeader(AmqpHeader::HEADER_ACKNOWLEDGE, $amqpAcknowledgeCallback);
         }
 
+        if ($source->getContentType()) {
+            $messageBuilder = $messageBuilder->setContentType(MediaType::parseMediaType($source->getContentType()));
+        }
+
         return $messageBuilder;
     }
 }

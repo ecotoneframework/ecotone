@@ -120,6 +120,10 @@ class RequestReplyProducer
         if (!is_null($replyData)) {
             $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $this->channelResolver->resolve($message->getHeaders()->getReplyChannel()) : null);
             if (!$replyChannel) {
+                if (!$this->isReplyRequired()) {
+                    return;
+                }
+
                 throw MessageDeliveryException::createWithFailedMessage("Can't process {$message}, no output channel during delivery in {$this->messageProcessor}", $message);
             }
 

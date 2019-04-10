@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\DomainModel\Unit;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
 use SimplyCodedSoftware\DomainModel\AggregateNotFoundException;
+use SimplyCodedSoftware\DomainModel\AggregateVersionMismatchException;
 use SimplyCodedSoftware\DomainModel\EventBus;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
@@ -345,7 +346,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
 
         $aggregateCommandHandler->handle(MessageBuilder::withPayload(MultiplyAmountCommand::create(1, 1, 10))->setReplyChannel(NullableMessageChannel::create())->build());
 
-        $this->expectException(MessageHandlingException::class);
+        $this->expectException(AggregateVersionMismatchException::class);
 
         $aggregateCommandHandler->handle(MessageBuilder::withPayload(MultiplyAmountCommand::create(1, 1, 10))->setReplyChannel(NullableMessageChannel::create())->build());
     }
@@ -374,11 +375,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
 
         $this->expectException(AggregateNotFoundException::class);
 
-        try {
-            $aggregateCommandHandler->handle(MessageBuilder::withPayload(CommandWithoutAggregateIdentifier::create(null))->build());
-        } catch (MessagingException $messagingException) {
-            throw $messagingException->getCause();
-        }
+        $aggregateCommandHandler->handle(MessageBuilder::withPayload(CommandWithoutAggregateIdentifier::create(null))->build());
     }
 
     /**
@@ -449,7 +446,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             InMemoryReferenceSearchService::createEmpty()
         );
 
-        $this->expectException(MessageHandlingException::class);
+        $this->expectException(InvalidArgumentException::class);
 
         $aggregateCommandHandler->handle(MessageBuilder::withPayload(MultiplyAmountCommand::create(1, null, 10))->build());
     }

@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Enricher;
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\Assert;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
@@ -85,6 +86,8 @@ class PropertyEditorAccessor
             $propertyToBeChanged = $this->cutOutCurrentAccessPropertyName($propertyNamePath, "[*]");
             $newPayload = $dataToEnrich;
             foreach ($dataToEnrich as $propertyKey => $context) {
+                Assert::isIterable($dataToEnrichWith, "Data provided to enrich {$propertyNamePath->getPath()} is not iterable. Can't perform enriching.");
+
                 $enriched = false;
                 foreach ($dataToEnrichWith as $replyElement) {
                     if ($this->canBeMapped($context, $replyElement, $requestMessage, $replyMessage)) {

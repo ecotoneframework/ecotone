@@ -3,9 +3,12 @@
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway;
 
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransaction;
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
 use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use SimplyCodedSoftware\Messaging\Transaction\TransactionInterceptor;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway\DumbSendAndReceiveService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
@@ -13,8 +16,10 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHan
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\StatefulHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter\FakeMessageConverter;
 use Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter\FakeMessageConverterGatewayExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\MessageServiceExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingNoArguments;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceive;
@@ -195,12 +200,12 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
         $gatewayProxy->sendMail($personId, $content);
 
-        $this->assertMessages(
-            MessageBuilder::withPayload($content)
-                ->setHeader('personId', $personId)
-                ->setHeader("errorChannel", "errorChannel")
-                ->build(),
-            $messageHandler->message()
+        $this->assertEquals(
+            $personId,
+            $messageHandler->message()->getHeaders()->get('personId')
+        );
+        $this->assertEquals(
+            $content, $messageHandler->message()->getPayload()
         );
     }
 
@@ -361,7 +366,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel     = DirectChannel::create();
         $requestChannel->subscribe($messageHandler);
 
-        $errorMessage     = ErrorMessage::create(new \Exception("error occurred"), MessageHeaders::createEmpty());
+        $errorMessage     = ErrorMessage::create(MessageHandlingException::create("error occurred"));
         $replyChannelName = 'replyChannel';
         $replyChannel     = QueueChannel::create();
         $replyChannel->send($errorMessage);
@@ -391,7 +396,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel     = DirectChannel::create();
         $requestChannel->subscribe($messageHandler);
 
-        $errorMessage     = ErrorMessage::create(new \Exception("error occurred"), MessageHeaders::createEmpty());
+        $errorMessage     = ErrorMessage::create(MessageHandlingException::create("error occurred"));
         $replyChannelName = 'reply-channel';
         $replyChannel     = QueueChannel::create();
         $replyChannel->send($errorMessage);
@@ -548,7 +553,7 @@ class GatewayProxyBuilderTest extends MessagingTest
     {
         $replyChannelName = "replyChannel";
         $replyChannel        = $this->createMock(PollableChannel::class);
-        $exception = new \RuntimeException();
+        $exception = new \RuntimeException("some error");
         $replyChannel
             ->method("receive")
             ->willThrowException($exception);
@@ -577,19 +582,19 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxy->getById(123);
 
-        /** @var ErrorMessage $receivedMessage */
-        $receivedMessage = $errorChannel->receive();
-        $this->assertNull($receivedMessage->getFailedMessage());
-        $this->assertEquals($exception, $receivedMessage->getException());
-        $this->assertEquals(123, $receivedMessage->getOriginalMessage()->getPayload());
+        /** @var ErrorMessage $errorMessage */
+        $errorMessage = $errorChannel->receive();
+        $this->assertNotNull($errorMessage, "Error message was not sent to error channel");
+        $this->assertEquals($exception->getMessage(), $errorMessage->getPayload()->getMessage());
     }
 
     public function test_propagating_error_to_error_channel_when_error_message_received_from_reply_channel()
     {
         $replyChannelName = "replyChannel";
-        $exception = new \RuntimeException();
+        $exception = new \RuntimeException("Error happened");
         $replyChannel = QueueChannel::create();
-        $errorMessage = ErrorMessage::createWithFailedMessage($exception, MessageBuilder::withPayload("some")->build());
+        $exception = MessageHandlingException::createWithFailedMessage($exception, MessageBuilder::withPayload("some")->build());
+        $errorMessage = ErrorMessage::create($exception);
         $replyChannel->send($errorMessage);
 
         $requestChannelName = "requestChannel";
@@ -614,13 +619,42 @@ class GatewayProxyBuilderTest extends MessagingTest
             )
         );
 
-        $this->assertNull($gatewayProxy->getById(123));
+        $gatewayProxy->getById(123);
 
-        /** @var ErrorMessage $receivedMessage */
-        $receivedMessage = $errorChannel->receive();
-        $this->assertEquals($errorMessage->getFailedMessage(), $receivedMessage->getFailedMessage());
-        $this->assertEquals($errorMessage->getException(), $receivedMessage->getException());
-        $this->assertEquals(123, $receivedMessage->getOriginalMessage()->getPayload());
+        /** @var ErrorMessage $errorMessage */
+        $errorMessage = $errorChannel->receive();
+        $this->assertNotNull($errorMessage, "Error message never arrived on error channel");
+        $this->assertEquals($exception, $errorMessage->getPayload());
+    }
+
+    public function test_throwing_root_cause_exception_when_no_error_channel_defined()
+    {
+        $replyChannelName = "replyChannel";
+        $replyChannel = QueueChannel::create();
+        $exception = MessageHandlingException::fromOtherException(new \RuntimeException("Error happened"), MessageBuilder::withPayload("some")->build());
+        $errorMessage = ErrorMessage::create($exception);
+        $replyChannel->send($errorMessage);
+
+        $requestChannelName = "requestChannel";
+        $requestChannel = QueueChannel::create();
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendAndReceive::class, 'getById', $requestChannelName)
+            ->withReplyChannel($replyChannelName);
+
+        /** @var ServiceInterfaceSendAndReceive $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    $requestChannelName => $requestChannel,
+                    $replyChannelName => $replyChannel
+                ]
+            )
+        );
+
+        $this->expectException(\RuntimeException::class);
+
+        $gatewayProxy->getById(123);
     }
 
     public function test_requesting_with_original_message_and_returning_new_message()
@@ -651,46 +685,10 @@ class GatewayProxyBuilderTest extends MessagingTest
             $messageHandler->getReceivedMessage()->getHeaders()->get("token")
         );
 
-        $this->assertMessages(
-            $replyData,
-            $replyMessage
+        $this->assertEquals(
+            $replyData->getPayload(),
+            $replyMessage->getPayload()
         );
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function test_calling_gateway_with_success_transactions()
-    {
-        $messageHandler     = NoReturnMessageHandler::create();
-        $requestChannelName = "request-channel";
-        $requestChannel     = DirectChannel::create();
-        $requestChannel->subscribe($messageHandler);
-        $transactionFactoryReferenceNames = ["trans1"];
-
-        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName)
-                                    ->withTransactionFactories($transactionFactoryReferenceNames);
-
-        $this->assertEquals($transactionFactoryReferenceNames, $gatewayProxyBuilder->getRequiredReferences());
-
-
-        $transactionOne = NullTransaction::start();
-        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
-        $gatewayProxy = $gatewayProxyBuilder->build(
-            InMemoryReferenceSearchService::createWith([
-                "trans1" => $transactionFactoryOne
-            ]),
-            InMemoryChannelResolver::create(
-                [
-                    NamedMessageChannel::create($requestChannelName, $requestChannel)
-                ]
-            )
-        );
-
-        $gatewayProxy->sendMail('test');
-
-        $this->assertTrue($transactionOne->isCommitted());
     }
 
     public function test_calling_interface_with_around_interceptor()
@@ -701,6 +699,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel->subscribe($messageHandler);
 
         $transactionOne = NullTransaction::start();
+        $transactionInterceptor = new TransactionInterceptor();
         $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName)
@@ -708,7 +707,7 @@ class GatewayProxyBuilderTest extends MessagingTest
                 Transactional::createWith(["transactionFactory"])
             ])
             ->addAroundInterceptor(
-                AroundInterceptorReference::create("transactionInterceptor", "begin", 1, "")
+                AroundInterceptorReference::create("transactionInterceptor","transactionInterceptor", "transactional", 1, "")
             );
 
         $this->assertEquals(["transactionInterceptor"], $gatewayProxyBuilder->getRequiredReferences());
@@ -716,7 +715,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxy = $gatewayProxyBuilder->build(
             InMemoryReferenceSearchService::createWith([
                 "transactionFactory" => $transactionFactoryOne,
-                "transactionInterceptor" => $transactionFactoryOne
+                "transactionInterceptor" => $transactionInterceptor
             ]),
             InMemoryChannelResolver::create(
                 [
@@ -730,42 +729,140 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertTrue($transactionOne->isCommitted());
     }
 
-    public function test_calling_gateway_with_failure_transactions()
+    public function test_calling_interface_with_before_and_after_interceptors()
+    {
+        $messageHandler     = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
+                                    ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
+            ->addBeforeInterceptor(
+                MethodInterceptor::create(
+                    "interceptor0",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
+                    0,
+                    ""
+                )
+            )
+            ->addBeforeInterceptor(
+                MethodInterceptor::create(
+                    "interceptor1",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum"),
+                    1,
+                    ""
+                )
+            )
+            ->addAfterInterceptor(
+                MethodInterceptor::create(
+                    "interceptor2",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result"),
+                    1,
+                    ""
+                )
+            )
+            ->addAfterInterceptor(
+                MethodInterceptor::create(
+                    "interceptor3",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
+                    0,
+                    ""
+                )
+            );
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    $requestChannelName => $requestChannel
+                ]
+            )
+        );
+
+        $this->assertEquals(20, $gatewayProxy->calculate(2));
+    }
+
+
+    public function test_calling_around_interceptors_before_sending_to_error_channel()
     {
         $messageHandler     = ExceptionMessageHandler::create();
         $requestChannelName = "request-channel";
         $requestChannel     = DirectChannel::create();
         $requestChannel->subscribe($messageHandler);
-        $transactionFactoryReferenceNames = ["trans1"];
+
+        $transactionOne = NullTransaction::start();
+        $transactionInterceptor = new TransactionInterceptor();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName)
-            ->withTransactionFactories($transactionFactoryReferenceNames);
+            ->withErrorChannel("some")
+            ->withEndpointAnnotations([
+                Transactional::createWith(["transactionFactory"])
+            ])
+            ->addAroundInterceptor(
+                AroundInterceptorReference::create("transactionInterceptor","transactionInterceptor", "transactional", 1, "")
+            );
 
-        $this->assertEquals($transactionFactoryReferenceNames, $gatewayProxyBuilder->getRequiredReferences());
-
-        /** @var ServiceInterfaceSendOnly $gatewayProxy */
-        $transactionFactoryOne = FakeTransactionFactory::create();
         $gatewayProxy = $gatewayProxyBuilder->build(
             InMemoryReferenceSearchService::createWith([
-                "trans1" => $transactionFactoryOne
+                "transactionFactory" => $transactionFactoryOne,
+                "transactionInterceptor" => $transactionInterceptor
             ]),
             InMemoryChannelResolver::create(
                 [
-                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                    NamedMessageChannel::create($requestChannelName, $requestChannel),
+                    NamedMessageChannel::create("some", QueueChannel::create())
                 ]
             )
         );
 
-        $this->assertNull($transactionFactoryOne->getCurrentTransaction());
+        $gatewayProxy->sendMail('test');
 
-        try {
-            $gatewayProxy->sendMail('test');
-        }catch (\InvalidArgumentException $e) {
-            $this->assertTrue($transactionFactoryOne->getCurrentTransaction()->isRolledBack());
-            return;
-        }
+        $this->assertTrue($transactionOne->isRolledBack());
+    }
 
-        $this->assertTrue(false, "Transaction was not rolled back");
+    public function test_calling_interceptors_before_sending_to_error_channel_when_receive_throws_error()
+    {
+        $requestChannelName = "request-channel";
+        $replyChannel        = $this->createMock(PollableChannel::class);
+        $exception = new \RuntimeException();
+        $replyChannel
+            ->method("receive")
+            ->willThrowException($exception);
+
+
+        $transactionOne = NullTransaction::start();
+        $transactionInterceptor = new TransactionInterceptor();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceReceiveOnlyWithNull::class, 'sendMail', $requestChannelName)
+            ->withReplyChannel("replyChannel")
+            ->withErrorChannel("some")
+            ->withEndpointAnnotations([
+                Transactional::createWith(["transactionFactory"])
+            ])
+            ->addAroundInterceptor(
+                AroundInterceptorReference::create("transactionInterceptor","transactionInterceptor", "transactional", 1, "")
+            );
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createWith([
+                "transactionFactory" => $transactionFactoryOne,
+                "transactionInterceptor" => $transactionInterceptor
+            ]),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, QueueChannel::create()),
+                    NamedMessageChannel::create("some", QueueChannel::create()),
+                    NamedMessageChannel::create("replyChannel", $replyChannel)
+                ]
+            )
+        );
+
+        $gatewayProxy->sendMail('test');
+
+        $this->assertTrue($transactionOne->isRolledBack());
     }
 
     public function test_converting_to_string()
@@ -777,6 +874,21 @@ class GatewayProxyBuilderTest extends MessagingTest
             GatewayProxyBuilder::create($referenceName, ServiceInterfaceSendOnly::class, 'sendMail', $requestChannelName),
             sprintf("Gateway - %s:%s with reference name `%s` for request channel `%s`", ServiceInterfaceSendOnly::class, "sendMail", $referenceName, $requestChannelName)
         );
+    }
+
+    public function test_throwing_exception_if_creating_gateway_with_error_channel_and_interface_can_not_return_null()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        GatewayProxyBuilder::create("some", ServiceInterfaceReceiveOnly::class, 'sendMail', "requestChannel")
+            ->withErrorChannel("errorChannel")
+            ->build(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    "requestChannel" => DirectChannel::create(),
+                    "errorChannel" => QueueChannel::create()
+                ])
+            );
     }
 
     /**

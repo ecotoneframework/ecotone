@@ -2,16 +2,11 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\Handler\Enricher\EnrichException;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\FakeConverterService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Dto\OrderExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\CollectionConverter;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\Converter;
 use SimplyCodedSoftware\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
@@ -21,14 +16,17 @@ use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichHeaderWithVal
 use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichPayloadWithValueBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\EnricherBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Enricher\EnrichException;
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\MessageHeaders;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\FakeConverterService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Dto\OrderExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -79,6 +77,34 @@ class EnricherBuilderTest extends MessagingTest
     }
 
     /**
+     * @param MessageBuilder $inputMessage
+     * @param QueueChannel $outputChannel
+     * @param array $setterBuilders
+     * @throws ConfigurationException
+     * @throws \Exception
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function createEnricherAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, array $setterBuilders): void
+    {
+        $inputMessage = $inputMessage
+            ->setReplyChannel($outputChannel)
+            ->build();
+
+        $enricher = EnricherBuilder::create($setterBuilders)
+            ->withInputChannelName("some")
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createWith(
+                    [
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                    ]
+                )
+            );
+
+        $enricher->handle($inputMessage);
+    }
+
+    /**
      * @throws ConfigurationException
      * @throws \Exception
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
@@ -113,6 +139,36 @@ class EnricherBuilderTest extends MessagingTest
                 ->addParameter("type", TypeDescriptor::ARRAY)->toString(),
             $transformedMessage->getHeaders()->get(MessageHeaders::CONTENT_TYPE)
         );
+    }
+
+    /**
+     * @param MessageBuilder $inputMessage
+     * @param QueueChannel $outputChannel
+     * @param array $setterBuilders
+     * @param Converter[] $converters
+     * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    private function createEnricherWithConvertersAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, array $setterBuilders, array $converters): void
+    {
+        $inputMessage = $inputMessage
+            ->setReplyChannel($outputChannel)
+            ->build();
+
+        $enricher = EnricherBuilder::create($setterBuilders)
+            ->withInputChannelName("some")
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createWith(
+                    [
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+                        ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters)
+                    ]
+                )
+            );
+
+        $enricher->handle($inputMessage);
     }
 
     /**
@@ -317,7 +373,7 @@ class EnricherBuilderTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
 
-        $this->expectException(MessageHandlingException::class);
+        $this->expectException(EnrichException::class);
 
         $this->createEnricherAndHandle(
             MessageBuilder::withPayload(OrderExample::createFromId(100)),
@@ -485,7 +541,7 @@ class EnricherBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
 
         $workerName = "johny";
-        $this->expectException(MessageHandlingException::class);
+        $this->expectException(EnrichException::class);
 
         $this->createEnricherAndHandle(
             MessageBuilder::withPayload(["worker" => ["names" => "Edward"]]),
@@ -741,8 +797,8 @@ class EnricherBuilderTest extends MessagingTest
             ]
         );
         $replyMessage = MessageBuilder::withPayload('{"surname": "Franco"}')
-                            ->setContentType(MediaType::createApplicationJson())
-                            ->build();
+            ->setContentType(MediaType::createApplicationJson())
+            ->build();
         $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith("surname", "payload['surname']")];
 
         $inputMessage = $inputMessage
@@ -890,63 +946,5 @@ class EnricherBuilderTest extends MessagingTest
         $enricher->handle($inputMessage);
 
         $this->assertEquals(['ids' => [1, 2, 2]], $messageHandler->getReceivedMessage()->getPayload());
-    }
-
-    /**
-     * @param MessageBuilder $inputMessage
-     * @param QueueChannel $outputChannel
-     * @param array $setterBuilders
-     * @throws ConfigurationException
-     * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    private function createEnricherAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, array $setterBuilders): void
-    {
-        $inputMessage = $inputMessage
-            ->setReplyChannel($outputChannel)
-            ->build();
-
-        $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName("some")
-            ->build(
-                InMemoryChannelResolver::createEmpty(),
-                InMemoryReferenceSearchService::createWith(
-                    [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
-                    ]
-                )
-            );
-
-        $enricher->handle($inputMessage);
-    }
-
-    /**
-     * @param MessageBuilder $inputMessage
-     * @param QueueChannel $outputChannel
-     * @param array $setterBuilders
-     * @param Converter[] $converters
-     * @throws ConfigurationException
-     * @throws MessagingException
-     * @throws \Exception
-     */
-    private function createEnricherWithConvertersAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, array $setterBuilders, array $converters): void
-    {
-        $inputMessage = $inputMessage
-            ->setReplyChannel($outputChannel)
-            ->build();
-
-        $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName("some")
-            ->build(
-                InMemoryChannelResolver::createEmpty(),
-                InMemoryReferenceSearchService::createWith(
-                    [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                        ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters)
-                    ]
-                )
-            );
-
-        $enricher->handle($inputMessage);
     }
 }

@@ -2,115 +2,70 @@
 
 namespace SimplyCodedSoftware\Messaging\Support;
 
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\MessagingException;
 
 /**
  * Class ErrorMessage where payload is thrown exception
  * @package SimplyCodedSoftware\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class ErrorMessage extends GenericMessage
+final class ErrorMessage implements Message
 {
     /**
-     * @var Message|null
+     * @var MessagingException
      */
-    private $failedMessage;
+    private $messagingException;
     /**
-     * @var Message|null
+     * @var MessageHeaders
      */
-    private $originalMessage;
+    private $messageHeaders;
 
     /**
-     * @param \Throwable $exception
-     * @param Message $failedMessage
+     * ErrorMessage constructor.
+     * @param MessagingException $messagingException
+     * @param MessageHeaders $messageHeaders
+     */
+    private function __construct(MessagingException $messagingException, MessageHeaders $messageHeaders)
+    {
+        $this->messagingException = $messagingException;
+        $this->messageHeaders = $messageHeaders;
+    }
+
+    /**
+     * @param MessagingException $messagingException
      * @return ErrorMessage
      */
-    public static function createWithFailedMessage(\Throwable $exception, Message $failedMessage) : self
+    public static function create(MessagingException $messagingException) : self
     {
-        /** @var ErrorMessage $errorMessage */
-        $errorMessage = self::create($exception, MessageHeaders::createEmpty());
-        $errorMessage->setFailedMessage($failedMessage);
-
-        return $errorMessage;
+        return new self($messagingException, MessageHeaders::createEmpty());
     }
 
     /**
-     * @param \Throwable $exception
-     * @param Message $failedMessage
-     * @param Message $originalMessage
+     * @param MessagingException $messagingException
+     * @param MessageHeaders $messageHeaders
      * @return ErrorMessage
      */
-    public static function createWithFailedAndOriginalMessage(\Throwable $exception, Message $failedMessage, Message $originalMessage) : self
+    public static function createWithHeaders(MessagingException $messagingException, MessageHeaders $messageHeaders) : self
     {
-        /** @var ErrorMessage $errorMessage */
-        $errorMessage = self::create($exception, MessageHeaders::createEmpty());
-        $errorMessage->setFailedMessage($failedMessage);
-        $errorMessage->setOriginalMessage($originalMessage);
-
-        return $errorMessage;
+        return new self($messagingException, $messageHeaders);
     }
 
     /**
-     * @param \Throwable $exception
-     * @param Message $originalMessage
-     * @return ErrorMessage
+     * @inheritDoc
      */
-    public static function createWithOriginalMessage(\Throwable $exception, Message $originalMessage) : self
+    public function getHeaders(): MessageHeaders
     {
-        /** @var ErrorMessage $errorMessage */
-        $errorMessage = self::create($exception, MessageHeaders::createEmpty());
-        $errorMessage->setOriginalMessage($originalMessage);
-
-        return $errorMessage;
+        return $this->messageHeaders;
     }
 
     /**
-     * @param Message $originalMessage
-     * @return ErrorMessage
+     * @inheritDoc
      */
-    public function extendWithOriginalMessage(Message $originalMessage) : self
+    public function getPayload()
     {
-        return self::createWithFailedAndOriginalMessage($this->getPayload(), $this->failedMessage, $originalMessage);
-    }
-
-    /**
-     * @return \Throwable
-     */
-    public function getException() : \Throwable
-    {
-        return $this->getPayload();
-    }
-
-    /**
-     * @return Message|null
-     */
-    public function getFailedMessage() : ?Message
-    {
-        return $this->failedMessage;
-    }
-
-    /**
-     * @return Message|null
-     */
-    public function getOriginalMessage(): ?Message
-    {
-        return $this->originalMessage;
-    }
-
-    /**
-     * @param Message $message
-     */
-    private function setFailedMessage(Message $message) : void
-    {
-        $this->failedMessage = $message;
-    }
-
-    /**
-     * @param Message $message
-     */
-    private function setOriginalMessage(Message $message) : void
-    {
-        $this->originalMessage = $message;
+        return $this->messagingException;
     }
 }

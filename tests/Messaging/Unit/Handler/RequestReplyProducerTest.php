@@ -128,17 +128,6 @@ class RequestReplyProducerTest extends MessagingTest
         );
     }
 
-    public function test_rethrowing_exception_as_messaging_one()
-    {
-        $this->expectException(MessagingException::class);
-
-        $this->handleReplyWithMessage(
-            MessageBuilder::withPayload('some')
-                ->build(),
-            RequestReplyProducer::createRequestAndReply("", ThrowExceptionMessageProcessor::create(new \InvalidArgumentException()), InMemoryChannelResolver::createEmpty(), false)
-        );
-    }
-
     public function test_splitting_payload_into_multiple_messages()
     {
         $replyData = [1, 2, 3, 4];

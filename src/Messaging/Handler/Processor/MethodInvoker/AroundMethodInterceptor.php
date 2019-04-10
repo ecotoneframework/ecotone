@@ -3,11 +3,16 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
+use Doctrine\Common\Annotations\AnnotationException;
+use ReflectionException;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
@@ -36,8 +41,8 @@ class AroundMethodInterceptor
      * @param object $referenceToCall
      * @param InterfaceToCall $interfaceToCall
      * @param ReferenceSearchService $referenceSearchService
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
     private function __construct($referenceToCall, InterfaceToCall $interfaceToCall, ReferenceSearchService $referenceSearchService)
     {
@@ -53,17 +58,35 @@ class AroundMethodInterceptor
     }
 
     /**
+     * @param InterfaceToCall $interfaceToCall
+     * @return bool
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     */
+    private function hasMethodInvocationParameter(InterfaceToCall $interfaceToCall): bool
+    {
+        $methodInvocation = TypeDescriptor::create(MethodInvocation::class);
+        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+            if ($interfaceParameter->hasType($methodInvocation)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @param object $referenceToCall
      * @param string $methodName
      * @param ReferenceSearchService $referenceSearchService
      * @return AroundMethodInterceptor
      * @throws InvalidArgumentException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws ReferenceNotFoundException
+     * @throws MessagingException
      */
-    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService) : self
+    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService): self
     {
         /** @var InterfaceToCallRegistry $interfaceRegistry */
         $interfaceRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
@@ -79,8 +102,8 @@ class AroundMethodInterceptor
      * @param Message $requestMessage
      *
      * @return mixed
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
     public function invoke(MethodInvocation $methodInvocation, MethodCall $methodCall, Message $requestMessage)
     {
@@ -155,23 +178,5 @@ class AroundMethodInterceptor
         }
 
         return $returnValue;
-    }
-
-    /**
-     * @param InterfaceToCall $interfaceToCall
-     * @return bool
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    private function hasMethodInvocationParameter(InterfaceToCall $interfaceToCall): bool
-    {
-        $methodInvocation = TypeDescriptor::create(MethodInvocation::class);
-        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-            if ($interfaceParameter->hasType($methodInvocation)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

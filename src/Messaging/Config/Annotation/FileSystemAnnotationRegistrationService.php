@@ -7,6 +7,7 @@ use Doctrine\Common\Annotations\Reader;
 use SimplyCodedSoftware\Messaging\Annotation\Environment;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
+use SimplyCodedSoftware\Messaging\Handler\TypeResolver;
 
 /**
  * Class FileSystemAnnotationRegistrationService
@@ -201,7 +202,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
         }
 
         try {
-            $reflectionMethod = new \ReflectionMethod($className, $methodName);
+            $reflectionMethod = TypeResolver::getMethodOwnerClass(new \ReflectionClass($className), $methodName)->getMethod($methodName);
 
             $annotations =  $this->annotationReader->getMethodAnnotations($reflectionMethod);
         }catch (\ReflectionException $e) {

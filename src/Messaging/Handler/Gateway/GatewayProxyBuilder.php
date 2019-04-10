@@ -4,12 +4,15 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
+use ProxyManager\Factory\RemoteObjectFactory;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\SubscribableChannel;
 use SimplyCodedSoftware\Messaging\Support\Assert;
@@ -73,9 +76,17 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     private $aroundInterceptors = [];
     /**
+     * @var MethodInterceptor[]
+     */
+    private $beforeInterceptors = [];
+    /**
+     * @var MethodInterceptor[]
+     */
+    private $afterInterceptors = [];
+    /**
      * @var object[]
      */
-    private $endpointAnnotations;
+    private $endpointAnnotations = [];
 
     /**
      * GatewayProxyBuilder constructor.
@@ -119,7 +130,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param string $errorChannelName
      * @return GatewayProxyBuilder
      */
-    public function withErrorChannel(string $errorChannelName) : self
+    public function withErrorChannel(string $errorChannelName): self
     {
         $this->errorChannelName = $errorChannelName;
 
@@ -164,7 +175,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @param array $methodArgumentConverters
      * @return GatewayProxyBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function withParameterConverters(array $methodArgumentConverters): self
     {
@@ -179,7 +190,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param string[] $messageConverterReferenceNames
      * @return GatewayProxyBuilder
      */
-    public function withMessageConverters(array $messageConverterReferenceNames) : self
+    public function withMessageConverters(array $messageConverterReferenceNames): self
     {
         $this->messageConverterReferenceNames = $messageConverterReferenceNames;
 
@@ -190,7 +201,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param string[] $transactionFactoryReferenceNames
      * @return GatewayProxyBuilder
      */
-    public function withTransactionFactories(array $transactionFactoryReferenceNames) : self
+    public function withTransactionFactories(array $transactionFactoryReferenceNames): self
     {
         $this->transactionFactoryReferenceNames = $transactionFactoryReferenceNames;
         foreach ($transactionFactoryReferenceNames as $transactionFactoryReferenceName) {
@@ -207,7 +218,29 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
     {
         $this->aroundInterceptors[] = $aroundInterceptorReference;
-        $this->requiredReferenceNames[] = $aroundInterceptorReference->getInterceptorName();
+        $this->requiredReferenceNames[] = $aroundInterceptorReference->getReferenceName();
+
+        return $this;
+    }
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return $this
+     */
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor)
+    {
+        $this->beforeInterceptors[] = $methodInterceptor;
+
+        return $this;
+    }
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return $this
+     */
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor)
+    {
+        $this->afterInterceptors[] = $methodInterceptor;
 
         return $this;
     }
@@ -226,7 +259,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @return object[]
      */
-    public function getEndpointAnnotations() : iterable
+    public function getEndpointAnnotations(): iterable
     {
         return $this->endpointAnnotations;
     }
@@ -249,6 +282,10 @@ class GatewayProxyBuilder implements GatewayBuilder
             Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel should not be pollable if expected return type is not nullable");
         }
 
+        if (!$interfaceToCall->canItReturnNull() && $this->errorChannelName && !$interfaceToCall->hasReturnTypeVoid()) {
+            throw InvalidArgumentException::create("Gateway {$interfaceToCall} with error channel must allow nullable return type");
+        }
+
         if ($replyChannel) {
             /** @var PollableChannel $replyChannel */
             Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");
@@ -264,10 +301,6 @@ class GatewayProxyBuilder implements GatewayBuilder
             $methodArgumentConverters[] = $messageConverterBuilder->build($referenceSearchService);
         }
 
-        $transactionFactories = [];
-        foreach ($this->transactionFactoryReferenceNames as $referenceName) {
-            $transactionFactories[] = $referenceSearchService->get($referenceName);
-        }
         $messageConverters = [];
         foreach ($this->messageConverterReferenceNames as $messageConverterReferenceName) {
             $messageConverters[] = $referenceSearchService->get($messageConverterReferenceName);
@@ -279,16 +312,19 @@ class GatewayProxyBuilder implements GatewayBuilder
                 $interfaceToCall, $methodArgumentConverters
             ),
             $messageConverters,
-            $transactionFactories,
             $requestChannel,
             $replyChannel,
             $errorChannel,
             $this->replyMilliSecondsTimeout,
             $referenceSearchService,
-            $this->aroundInterceptors
+            $this->aroundInterceptors,
+            $this->getSortedInterceptors($this->beforeInterceptors),
+            $this->getSortedInterceptors($this->afterInterceptors),
+            $this->endpointAnnotations
         );
 
-        $factory = new \ProxyManager\Factory\RemoteObjectFactory(new class ($gateway) implements AdapterInterface {
+        $factory = new RemoteObjectFactory(new class ($gateway) implements AdapterInterface
+        {
             /**
              * @var Gateway
              */
@@ -314,6 +350,25 @@ class GatewayProxyBuilder implements GatewayBuilder
         });
 
         return $factory->createProxy($this->interfaceName);
+    }
+
+    /**
+     * @param MethodInterceptor[] $methodInterceptors
+     * @return InputOutputMessageHandlerBuilder[]
+     */
+    private function getSortedInterceptors(iterable $methodInterceptors): iterable
+    {
+        usort($methodInterceptors, function (MethodInterceptor $methodInterceptor, MethodInterceptor $toCompare) {
+            if ($methodInterceptor->getPrecedence() === $toCompare->getPrecedence()) {
+                return 0;
+            }
+
+            return $methodInterceptor->getPrecedence() > $toCompare->getPrecedence() ? 1 : -1;
+        });
+
+        return array_map(function (MethodInterceptor $methodInterceptor) {
+            return $methodInterceptor->getMessageHandler();
+        }, $methodInterceptors);
     }
 
     public function __toString()

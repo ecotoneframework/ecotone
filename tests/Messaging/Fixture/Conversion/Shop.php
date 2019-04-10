@@ -12,6 +12,7 @@ interface Shop
 {
     /**
      * @param \stdClass|object $product
+     * @ExampleTestAnnotation
      */
     public function buy($product) : void;
 }

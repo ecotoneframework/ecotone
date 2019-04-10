@@ -5,25 +5,18 @@ namespace SimplyCodedSoftware\Messaging\Handler\Chain;
 
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Config\NamedMessageChannel;
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\PassThroughGateway;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class ChainMessageHandlerBuilder
@@ -55,7 +48,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     /**
      * @return ChainMessageHandlerBuilder
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -64,7 +57,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      * @param MessageHandlerBuilderWithOutputChannel $messageHandler
      * @return ChainMessageHandlerBuilder
      */
-    public function chain(MessageHandlerBuilderWithOutputChannel $messageHandler) : self
+    public function chain(MessageHandlerBuilderWithOutputChannel $messageHandler): self
     {
         $messageHandler
             ->withInputChannelName("")
@@ -85,7 +78,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      * @param MessageHandlerBuilder $outputMessageHandler
      * @return ChainMessageHandlerBuilder
      */
-    public function withOutputMessageHandler(MessageHandlerBuilder $outputMessageHandler) : self
+    public function withOutputMessageHandler(MessageHandlerBuilder $outputMessageHandler): self
     {
         $this->outputMessageHandler = $outputMessageHandler;
 
@@ -113,7 +106,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         for ($key = 1; $key < count($messageHandlersToChain); $key++) {
             $bridgeChannels[$baseKey . $key] = DirectChannel::create();
         }
-        $requestChannelName = $baseKey;
         $requestChannel = DirectChannel::create();
         $bridgeChannels[$baseKey] = $requestChannel;
 
@@ -140,11 +132,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             }
         }
 
-        /** @var ChainGateway $gateway */
-        $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), ChainGateway::class, "execute", $requestChannelName)
-                    ->build($referenceSearchService, $customChannelResolver);
-
-        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwarder($gateway), "forward")
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel), "forward")
             ->withOutputMessageChannel($this->outputMessageChannelName);
 
         foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
@@ -155,18 +143,37 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     }
 
     /**
-     * @inheritDoc
+     * @param array $messageHandlersToChain
+     * @param $nextHandlerKey
+     * @return bool
      */
-    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    private function hasNextHandler(array $messageHandlersToChain, $nextHandlerKey): bool
     {
-        return $interfaceToCallRegistry->getFor(ChainForwarder::class, "forward");
+        return isset($messageHandlersToChain[$nextHandlerKey]);
     }
 
+    /**
+     * @param array $messageHandlersToChain
+     * @param $previousHandlerKey
+     * @return bool
+     */
+    private function hasPreviousHandler(array $messageHandlersToChain, $previousHandlerKey): bool
+    {
+        return isset($messageHandlersToChain[$previousHandlerKey]);
+    }
 
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, "forward");
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         $relatedReferences = [];
         if ($this->outputMessageHandler) {
@@ -188,25 +195,5 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     public function getRequiredReferenceNames(): array
     {
         return $this->requiredReferences;
-    }
-
-    /**
-     * @param array $messageHandlersToChain
-     * @param $nextHandlerKey
-     * @return bool
-     */
-    private function hasNextHandler(array $messageHandlersToChain, $nextHandlerKey): bool
-    {
-        return isset($messageHandlersToChain[$nextHandlerKey]);
-    }
-
-    /**
-     * @param array $messageHandlersToChain
-     * @param $previousHandlerKey
-     * @return bool
-     */
-    private function hasPreviousHandler(array $messageHandlersToChain, $previousHandlerKey): bool
-    {
-        return isset($messageHandlersToChain[$previousHandlerKey]);
     }
 }

@@ -111,11 +111,7 @@ class RequestReplyProducer
      */
     public function handleWithReply(Message $message): void
     {
-        try {
-            $replyData = $this->messageProcessor->processMessage($message);
-        }catch (\Throwable $e) {
-            throw MessageHandlingException::fromOtherException($e, $message);
-        }
+        $replyData = $this->messageProcessor->processMessage($message);
 
         if ($this->isReplyRequired() && $this->isReplyDataEmpty($replyData)) {
             throw MessageDeliveryException::createWithFailedMessage("Requires response but got none. {$this->messageProcessor}", $message);

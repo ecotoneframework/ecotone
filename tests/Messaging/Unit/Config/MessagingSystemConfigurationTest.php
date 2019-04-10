@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config;
 
+use Exception;
 use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
@@ -11,33 +12,39 @@ use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
+use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Chain\ChainForwarder;
-use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use stdClass;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Channel\DumbChannelInterceptor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Configuration\FakeModule;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbGatewayBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
@@ -50,8 +57,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 {
     /**
      * @throws ConfigurationException
-     * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws Exception
+     * @throws MessagingException
      */
     public function test_run_event_driven_consumer()
     {
@@ -71,22 +78,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function test_registering_module_with_extension_objects()
-    {
-        $exampleModuleConfiguration = ExampleModuleConfiguration::createEmpty();
-        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createWith([$exampleModuleConfiguration], [new \stdClass(), ServiceWithoutReturnValue::create()]));
-
-        $this->assertEquals(
-            ExampleModuleConfiguration::createWithExtensions([new \stdClass()]),
-            $exampleModuleConfiguration
-        );
-    }
-
-    /**
      * @return MessagingSystemConfiguration
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     private function createMessagingSystemConfiguration(): MessagingSystemConfiguration
     {
@@ -94,8 +87,22 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
+     */
+    public function test_registering_module_with_extension_objects()
+    {
+        $exampleModuleConfiguration = ExampleModuleConfiguration::createEmpty();
+        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createWith([$exampleModuleConfiguration], [new stdClass(), ServiceWithoutReturnValue::create()]));
+
+        $this->assertEquals(
+            ExampleModuleConfiguration::createWithExtensions([new stdClass()]),
+            $exampleModuleConfiguration
+        );
+    }
+
+    /**
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_running_pollable_consumer()
     {
@@ -118,8 +125,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_throwing_exception_if_running_not_existing_consumer()
     {
@@ -132,8 +139,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_notifying_observer()
     {
@@ -147,13 +154,13 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create("queue", "interceptor"))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(["interceptor" => new DumbChannelInterceptor()]));
 
-        $this->assertEquals(["dumb" => \stdClass::class], $messagingSystemConfiguration->getRegisteredGateways());
+        $this->assertEquals(["dumb" => stdClass::class], $messagingSystemConfiguration->getRegisteredGateways());
         $this->assertEquals([NoReturnMessageHandler::class, "some", "interceptor"], $messagingSystemConfiguration->getRequiredReferences());
     }
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_serializing_and_deserializing()
     {
@@ -172,8 +179,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws Exception
+     * @throws MessagingException
      */
     public function test_registering_required_reference_names()
     {
@@ -208,7 +215,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             )
             ->registerAroundMethodInterceptor(
                 AroundInterceptorReference::createWithNoPointcut(
-                    "reference2", "multiply"
+                    "reference2", "reference2", "multiply"
                 )
             )
             ->registerAfterMethodInterceptor(
@@ -218,8 +225,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     MethodInterceptor::DEFAULT_PRECEDENCE,
                     CalculatingService::class
                 )
-            )
-        ;
+            );
 
         $this->assertEquals(
             ["reference1", "reference2", "reference3"],
@@ -238,8 +244,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     ->withEndpointAnnotations([
                         Transactional::createWith(["reference2"])
                     ])
-            )
-        ;
+            );
 
         $this->assertEquals(
             ["reference1", "reference2"],
@@ -272,8 +277,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_intercepting_message_flow_before_sending()
     {
@@ -311,8 +316,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_ordering_channel_interceptors_before_sending()
     {
@@ -363,8 +368,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_intercepting_by_stopping_message_flow()
     {
@@ -399,8 +404,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_intercepting_after_sending_to_inform_it_was_successful()
     {
@@ -435,8 +440,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_intercepting_after_sending_to_inform_about_failure_handling_after_exception_occurred()
     {
@@ -469,9 +474,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws ConfigurationException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_intercepting_with_multiple_channels()
     {
@@ -519,8 +524,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_registering_channel_interceptor_with_regex()
     {
@@ -558,8 +563,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_creating_implicit_direct_channel_if_not_exists()
     {
@@ -582,7 +587,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_creating_default_channel_configuration_if_not_exists()
     {
@@ -604,8 +609,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_replacing_implicit_direct_channel_with_real_channel_if_passed()
     {
@@ -627,9 +632,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws Exception
+     * @throws NoConsumerFactoryForBuilderException
+     * @throws MessagingException
      */
     public function test_registering_polling_consumer_with_metadata()
     {
@@ -657,7 +662,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_registering_interceptors_using_pointcuts()
     {
@@ -674,12 +679,13 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     MethodInterceptor::create(
                         "some",
                         ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum"),
-                    MethodInterceptor::DEFAULT_PRECEDENCE,
+                        MethodInterceptor::DEFAULT_PRECEDENCE,
                         CalculatingService::class
                     )
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::createWithDirectObject(
+                        "aroundCalculating",
                         CalculatingServiceInterceptorExample::create(2), "sum",
                         1, CalculatingService::class
                     )
@@ -711,7 +717,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_registering_interceptors_by_reference_names()
     {
@@ -747,12 +753,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::create(
+                        $calculatorWithOne,
                         $calculatorWithOne, "sum",
                         1, ""
                     )
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::create(
+                        $calculatorWithTwoAround,
                         $calculatorWithTwoAround, "sum",
                         1, ""
                     )
@@ -775,8 +783,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
                 ->registerConsumerFactory(new EventDrivenConsumerBuilder())
                 ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
-                        $calculatorWithTwo => CalculatingService::create(2),
-                        $calculatorWithTwoAround => CalculatingServiceInterceptorExample::create(2)
+                    $calculatorWithTwo => CalculatingService::create(2),
+                    $calculatorWithTwoAround => CalculatingServiceInterceptorExample::create(2)
                 ]));
 
         $messageChannel = $messagingSystemConfiguration->getMessageChannelByName($inputChannelName);
@@ -794,8 +802,26 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
+    public function test_combing_gateway_for_same_reference()
+    {
+        $buyGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "buy", "buy");
+        $sellGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "sell", "sell");
+
+        $this->assertEquals(
+            CombinedGatewayBuilder::create("combinedGateway", CombinedGatewayExample::class, [
+                CombinedGatewayDefinition::create($buyGateway,"buy"),
+                CombinedGatewayDefinition::create($sellGateway,"sell")
+            ])->build(InMemoryReferenceSearchService::createEmpty(), InMemoryChannelResolver::createEmpty()),
+            $this->createMessagingSystemConfiguration()
+                ->registerGatewayBuilder($buyGateway)
+                ->registerGatewayBuilder($sellGateway)
+                ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty())
+                ->getGatewayByName("combinedGateway")
+        );
+    }
+
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_throwing_exception_if_registering_interceptor_with_input_channel()
     {
@@ -807,14 +833,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     "some",
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
                         ->withInputChannelName("some"),
-                    \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::DEFAULT_PRECEDENCE,
+                    MethodInterceptor::DEFAULT_PRECEDENCE,
                     CalculatingService::class
                 )
             );
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_throwing_exception_if_registering_interceptor_with_output_channel()
     {
@@ -822,7 +848,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
             ->registerAfterMethodInterceptor(
-                \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                MethodInterceptor::create(
                     "some",
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
                         ->withOutputMessageChannel("some"),
@@ -833,7 +859,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_registering_interceptors_with_precedence()
     {
@@ -861,7 +887,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     )
                 )
                 ->registerAfterMethodInterceptor(
-                    \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                    MethodInterceptor::create(
                         "some",
                         ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
                         3,
@@ -869,7 +895,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     )
                 )
                 ->registerAfterMethodInterceptor(
-                    \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                    MethodInterceptor::create(
                         "some",
                         ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum"),
                         1,
@@ -889,13 +915,77 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
 
         $this->assertEquals(
-            18,
+            28,
             $outputChannel->receive()->getPayload()
         );
     }
 
+    public function test_registering_interceptors_for_gateway()
+    {
+        $requestChannelName = "inputChannel";
+        $messagingSystemConfiguration =
+            MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+                ->registerGatewayBuilder(
+                    GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
+                )
+                ->registerMessageHandler(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
+                        ->withInputChannelName($requestChannelName)
+                )
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor0",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
+                        0,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor1",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum"),
+                        1,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerAroundMethodInterceptor(
+                    AroundInterceptorReference::createWithDirectObject(
+                        "aroundCalculating",
+                        CalculatingService::create(2), "sum",
+                        1,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerAfterMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor2",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result"),
+                        1,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerAfterMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor3",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
+                        0,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+                ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        /** @var ServiceInterfaceCalculatingService $gateway */
+        $gateway = $messagingSystemConfiguration->getGatewayByName('ref-name');
+
+        $this->assertEquals(
+            28,
+            $gateway->calculate(1)
+        );
+    }
+
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_throwing_exception_if_registering_handlers_with_same_endpoint_id()
     {
@@ -908,7 +998,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_generating_random_id_if_no_endpoint_id_passed()
     {
@@ -920,7 +1010,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_throwing_exception_if_trying_to_register_two_channels_with_same_names()
     {

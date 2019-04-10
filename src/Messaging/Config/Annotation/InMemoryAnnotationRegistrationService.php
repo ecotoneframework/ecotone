@@ -6,6 +6,7 @@ namespace SimplyCodedSoftware\Messaging\Config\Annotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use SimplyCodedSoftware\Messaging\Handler\TypeResolver;
 
 /**
  * Class InMemoryAnnotationRegistrationService
@@ -57,6 +58,7 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
      * @return InMemoryAnnotationRegistrationService
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     public function registerClassWithAnnotations(string $className) : self
     {
@@ -73,7 +75,8 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
         }
 
         foreach (get_class_methods($className) as $method) {
-            $methodReflection = new \ReflectionMethod($className, $method);
+            $methodOwnerClass = TypeResolver::getMethodOwnerClass($reflectionClass, $method)->getName();
+            $methodReflection = new \ReflectionMethod($methodOwnerClass, $method);
             foreach ($annotationReader->getMethodAnnotations($methodReflection) as $methodAnnotation) {
                 $this->addAnnotationToClassMethod($className, $method, $methodAnnotation);
             }

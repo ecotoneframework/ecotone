@@ -3,23 +3,24 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
+use SimplyCodedSoftware\Messaging\MessagingException;
 
 /**
  * Class Interceptor
  * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class MethodInterceptor
+class MethodInterceptor implements InterceptorWithPointCut
 {
     const DEFAULT_PRECEDENCE = 1;
 
     /**
      * @var string
      */
-    private $referenceName;
+    private $interceptorName;
     /**
      * @var MessageHandlerBuilderWithOutputChannel
      */
@@ -39,14 +40,13 @@ class MethodInterceptor
      * @param MessageHandlerBuilderWithOutputChannel $messageHandler
      * @param int $precedence
      * @param Pointcut $pointcut
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     private function __construct(string $interceptorName, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, Pointcut $pointcut)
     {
         $this->messageHandler = $messageHandler;
         $this->precedence = $precedence;
         $this->pointcut = $pointcut;
-        $this->referenceName = $interceptorName;
+        $this->interceptorName = $interceptorName;
     }
 
     /**
@@ -55,7 +55,7 @@ class MethodInterceptor
      * @param int $precedence
      * @param string $pointcut
      * @return MethodInterceptor
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function create(string $interceptorName, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, string $pointcut)
     {
@@ -63,31 +63,39 @@ class MethodInterceptor
     }
 
     /**
-     * @return MessageHandlerBuilderWithOutputChannel
+     * @param InterfaceToCall $interfaceToCall
+     * @param object[] $endpointAnnotations
+     * @return bool
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
-    public function getMessageHandler(): MessageHandlerBuilderWithOutputChannel
+    public function doesItCutWith(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations): bool
+    {
+        return $this->pointcut->doesItCut($interfaceToCall, $endpointAnnotations);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptingObject()
     {
         return $this->messageHandler;
     }
 
     /**
-     * @param InterfaceToCallRegistry $interfaceToCallRegistry
-     * @param MessageHandlerBuilderWithOutputChannel $messageHandler
-     * @return bool
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @inheritDoc
      */
-    public function doesItCutWith(InterfaceToCallRegistry $interfaceToCallRegistry, MessageHandlerBuilderWithOutputChannel $messageHandler) : bool
+    public function hasName(string $name): bool
     {
-        return $this->pointcut->doesItCut($messageHandler->getInterceptedInterface($interfaceToCallRegistry), $messageHandler->getEndpointAnnotations());
+        return $this->interceptorName === $name;
     }
 
     /**
      * @return string
      */
-    public function getReferenceName(): string
+    public function getInterceptorName(): string
     {
-        return $this->referenceName;
+        return $this->interceptorName;
     }
 
     /**
@@ -103,6 +111,14 @@ class MethodInterceptor
      */
     public function __toString()
     {
-        return "{$this->getMessageHandler()}";
+        return "{$this->interceptorName}";
+    }
+
+    /**
+     * @return MessageHandlerBuilderWithOutputChannel
+     */
+    public function getMessageHandler(): MessageHandlerBuilderWithOutputChannel
+    {
+        return $this->messageHandler;
     }
 }

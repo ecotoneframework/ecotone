@@ -37,10 +37,13 @@ class EventBusRouter
      */
     public function __construct(array $classNameToChannelNameMapping, ChannelResolver $channelResolver)
     {
-        $this->classNameToChannelNameMapping = $classNameToChannelNameMapping;
         foreach ($classNameToChannelNameMapping as $className => $channelNames) {
             $this->channelNameToClassNameMapping[$channelNames[0]] = $className;
         }
+        $this->classNameToChannelNameMapping = array_map(function(array $channels) {
+            return array_unique($channels);
+        }, $classNameToChannelNameMapping);
+
         $this->channelResolver = $channelResolver;
     }
 

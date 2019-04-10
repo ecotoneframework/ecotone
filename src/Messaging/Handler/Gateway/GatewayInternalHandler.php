@@ -125,7 +125,7 @@ class GatewayInternalHandler
             }
         }
 
-        if ($reply) {
+        if (!is_null($reply)) {
             $replyMessageBuilder = MessageBuilder::fromMessage($replyMessage)
                 ->setPayload($reply);
             if ($replyChannelComingFromPreviousGateway) {

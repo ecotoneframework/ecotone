@@ -3,18 +3,22 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use Doctrine\Common\Annotations\AnnotationException;
+use ReflectionException;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
+use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class InterceptorReference
  * @package SimplyCodedSoftware\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class AroundInterceptorReference
+class AroundInterceptorReference implements InterceptorWithPointCut
 {
     /**
      * @var int
@@ -36,56 +40,65 @@ class AroundInterceptorReference
      * @var object
      */
     private $directObject;
+    /**
+     * @var string
+     */
+    private $referenceName;
 
     /**
      * InterceptorReference constructor.
      * @param int $precedence
      * @param string $interceptorName
+     * @param string $referenceName
      * @param string $methodName
      * @param Pointcut $pointcut
      */
-    private function __construct(int $precedence, string $interceptorName, string $methodName, Pointcut $pointcut)
+    private function __construct(int $precedence, string $interceptorName, string $referenceName, string $methodName, Pointcut $pointcut)
     {
         $this->interceptorName = $interceptorName;
         $this->methodName = $methodName;
         $this->precedence = $precedence;
         $this->pointcut = $pointcut;
+        $this->referenceName = $referenceName;
     }
 
     /**
      * @param string $interceptorName
+     * @param string $referenceName
      * @param string $methodName
      * @return AroundInterceptorReference
      */
-    public static function createWithNoPointcut(string $interceptorName, string $methodName) : self
+    public static function createWithNoPointcut(string $interceptorName, string $referenceName, string $methodName): self
     {
-        return new self(MethodInterceptor::DEFAULT_PRECEDENCE, $interceptorName, $methodName, Pointcut::createEmpty());
+        return new self(MethodInterceptor::DEFAULT_PRECEDENCE, $interceptorName, $referenceName, $methodName, Pointcut::createEmpty());
     }
 
     /**
      * @param string $interceptorName
+     * @param string $referenceName
      * @param string $methodName
      * @param int $precedence
      * @param string $pointcut
      * @return AroundInterceptorReference
      */
-    public static function create(string $interceptorName, string $methodName, int $precedence, string $pointcut) : self
+    public static function create(string $interceptorName, string $referenceName, string $methodName, int $precedence, string $pointcut): self
     {
-        return new self($precedence, $interceptorName, $methodName, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty());
+        return new self($precedence, $interceptorName, $referenceName, $methodName, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty());
     }
 
     /**
+     * @param string $interceptorName
      * @param object $referenceObject
      * @param string $methodName
      * @param int $precedence
      * @param string $pointcut
      * @return AroundInterceptorReference
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
-    public static function createWithDirectObject($referenceObject, string $methodName, int $precedence, string $pointcut) : self
+    public static function createWithDirectObject(string $interceptorName, $referenceObject, string $methodName, int $precedence, string $pointcut): self
     {
         Assert::isObject($referenceObject, "Direct object for interceptor must be instance");
-        $aroundInterceptorReference = new self($precedence, "", $methodName, Pointcut::createWith($pointcut));
+        $aroundInterceptorReference = new self($precedence, $interceptorName, "", $methodName, Pointcut::createWith($pointcut));
         $aroundInterceptorReference->directObject = $referenceObject;
 
         return $aroundInterceptorReference;
@@ -96,10 +109,10 @@ class AroundInterceptorReference
      * @param AroundInterceptorReference[] $interceptorsReferences
      * @return MethodInterceptor[]
      * @throws ReferenceNotFoundException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public static function createAroundInterceptors(ReferenceSearchService $referenceSearchService, array $interceptorsReferences): array
     {
@@ -131,42 +144,74 @@ class AroundInterceptorReference
     }
 
     /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @return AroundMethodInterceptor
+     * @throws ReferenceNotFoundException
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
+     */
+    public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
+    {
+        return AroundMethodInterceptor::createWith(
+            $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName),
+            $this->methodName,
+            $referenceSearchService
+        );
+    }
+
+    /**
      * For Around interceptor, name is also a reference name
      *
      * @return string
      */
-    public function getInterceptorName() : string
+    public function getInterceptorName(): string
     {
         return $this->interceptorName;
     }
 
     /**
-     * @param InterfaceToCallRegistry $interfaceToCallRegistry
-     * @param MessageHandlerBuilderWithOutputChannel $messageHandler
-     * @return bool
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @return string
      */
-    public function doesItCutWith(InterfaceToCallRegistry $interfaceToCallRegistry, MessageHandlerBuilderWithOutputChannel $messageHandler) : bool
+    public function getReferenceName() : string
     {
-        return $this->pointcut->doesItCut($messageHandler->getInterceptedInterface($interfaceToCallRegistry), $messageHandler->getEndpointAnnotations());
+        return $this->referenceName;
     }
 
     /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @return AroundMethodInterceptor
-     * @throws ReferenceNotFoundException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @inheritDoc
      */
-    public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService) : AroundMethodInterceptor
+    public function getInterceptingObject()
     {
-        return AroundMethodInterceptor::createWith(
-            $this->directObject ? $this->directObject : $referenceSearchService->get($this->interceptorName),
-            $this->methodName,
-            $referenceSearchService
-        );
+        return $this;
+    }
+
+    /**
+     * @param InterfaceToCall $interfaceToCall
+     * @param object[] $endpointAnnotations
+     * @return bool
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     */
+    public function doesItCutWith(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations): bool
+    {
+        return $this->pointcut->doesItCut($interfaceToCall, $endpointAnnotations);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasName(string $name): bool
+    {
+        return $this->interceptorName === $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->interceptorName;
     }
 }

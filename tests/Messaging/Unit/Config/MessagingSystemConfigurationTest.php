@@ -12,6 +12,7 @@ use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
+use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
@@ -20,7 +21,9 @@ use SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Chain\ChainForwarder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -32,15 +35,16 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 use stdClass;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Channel\DumbChannelInterceptor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Configuration\FakeModule;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbGatewayBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
@@ -211,7 +215,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             )
             ->registerAroundMethodInterceptor(
                 AroundInterceptorReference::createWithNoPointcut(
-                    "reference2", "multiply"
+                    "reference2", "reference2", "multiply"
                 )
             )
             ->registerAfterMethodInterceptor(
@@ -681,6 +685,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::createWithDirectObject(
+                        "aroundCalculating",
                         CalculatingServiceInterceptorExample::create(2), "sum",
                         1, CalculatingService::class
                     )
@@ -748,12 +753,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::create(
+                        $calculatorWithOne,
                         $calculatorWithOne, "sum",
                         1, ""
                     )
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::create(
+                        $calculatorWithTwoAround,
                         $calculatorWithTwoAround, "sum",
                         1, ""
                     )
@@ -792,6 +799,24 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertEquals(
             10,
             $outputChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_combing_gateway_for_same_reference()
+    {
+        $buyGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "buy", "buy");
+        $sellGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "sell", "sell");
+
+        $this->assertEquals(
+            CombinedGatewayBuilder::create("combinedGateway", CombinedGatewayExample::class, [
+                CombinedGatewayDefinition::create($buyGateway,"buy"),
+                CombinedGatewayDefinition::create($sellGateway,"sell")
+            ])->build(InMemoryReferenceSearchService::createEmpty(), InMemoryChannelResolver::createEmpty()),
+            $this->createMessagingSystemConfiguration()
+                ->registerGatewayBuilder($buyGateway)
+                ->registerGatewayBuilder($sellGateway)
+                ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty())
+                ->getGatewayByName("combinedGateway")
         );
     }
 
@@ -892,6 +917,70 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertEquals(
             28,
             $outputChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_registering_interceptors_for_gateway()
+    {
+        $requestChannelName = "inputChannel";
+        $messagingSystemConfiguration =
+            MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+                ->registerGatewayBuilder(
+                    GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
+                )
+                ->registerMessageHandler(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
+                        ->withInputChannelName($requestChannelName)
+                )
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor0",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
+                        0,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor1",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum"),
+                        1,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerAroundMethodInterceptor(
+                    AroundInterceptorReference::createWithDirectObject(
+                        "aroundCalculating",
+                        CalculatingService::create(2), "sum",
+                        1,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerAfterMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor2",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result"),
+                        1,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerAfterMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor3",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
+                        0,
+                        ServiceInterfaceCalculatingService::class
+                    )
+                )
+                ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+                ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        /** @var ServiceInterfaceCalculatingService $gateway */
+        $gateway = $messagingSystemConfiguration->getGatewayByName('ref-name');
+
+        $this->assertEquals(
+            28,
+            $gateway->calculate(1)
         );
     }
 

@@ -12,6 +12,7 @@ use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\SubscribableChannel;
 use SimplyCodedSoftware\Messaging\Support\Assert;
@@ -174,7 +175,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @param array $methodArgumentConverters
      * @return GatewayProxyBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function withParameterConverters(array $methodArgumentConverters): self
     {
@@ -217,7 +218,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
     {
         $this->aroundInterceptors[] = $aroundInterceptorReference;
-        $this->requiredReferenceNames[] = $aroundInterceptorReference->getInterceptorName();
+        $this->requiredReferenceNames[] = $aroundInterceptorReference->getReferenceName();
 
         return $this;
     }
@@ -355,9 +356,9 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param MethodInterceptor[] $methodInterceptors
      * @return InputOutputMessageHandlerBuilder[]
      */
-    private function getSortedInterceptors(iterable $methodInterceptors) : iterable
+    private function getSortedInterceptors(iterable $methodInterceptors): iterable
     {
-        usort($methodInterceptors, function(MethodInterceptor $methodInterceptor, MethodInterceptor $toCompare){
+        usort($methodInterceptors, function (MethodInterceptor $methodInterceptor, MethodInterceptor $toCompare) {
             if ($methodInterceptor->getPrecedence() === $toCompare->getPrecedence()) {
                 return 0;
             }
@@ -365,9 +366,9 @@ class GatewayProxyBuilder implements GatewayBuilder
             return $methodInterceptor->getPrecedence() > $toCompare->getPrecedence() ? 1 : -1;
         });
 
-        return array_map(function(MethodInterceptor $methodInterceptor){
+        return array_map(function (MethodInterceptor $methodInterceptor) {
             return $methodInterceptor->getMessageHandler();
-        },$methodInterceptors);
+        }, $methodInterceptors);
     }
 
     public function __toString()

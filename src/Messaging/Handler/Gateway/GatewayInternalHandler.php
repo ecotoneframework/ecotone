@@ -27,14 +27,6 @@ use SimplyCodedSoftware\Messaging\Transaction\TransactionFactory;
 class GatewayInternalHandler
 {
     /**
-     * @var MessageChannel|string
-     */
-    private $replyChannelComingFromPreviousGateway;
-    /**
-     * @var MessageChannel|string
-     */
-    private $errorChannelComingFromPreviousGateway;
-    /**
      * @var MessageChannel
      */
     private $requestChannel;
@@ -67,14 +59,10 @@ class GatewayInternalHandler
      * @param PollableChannel|null $replyChannel
      * @param MessageConverter[] $messageConverters
      * @param int $replyMilliSecondsTimeout
-     * @param string|MessageChannel $replyChannelComingFromPreviousGateway
-     * @param string|MessageChannel $errorChannelComingFromPreviousGateway
      */
-    public function __construct(InterfaceToCall $interfaceToCall, MessageChannel $requestChannel, ?MessageChannel $errorChannel, ?PollableChannel $replyChannel, array $messageConverters, int $replyMilliSecondsTimeout, $replyChannelComingFromPreviousGateway, $errorChannelComingFromPreviousGateway)
+    public function __construct(InterfaceToCall $interfaceToCall, MessageChannel $requestChannel, ?MessageChannel $errorChannel, ?PollableChannel $replyChannel, array $messageConverters, int $replyMilliSecondsTimeout)
     {
         $this->interfaceToCall = $interfaceToCall;
-        $this->replyChannelComingFromPreviousGateway = $replyChannelComingFromPreviousGateway;
-        $this->errorChannelComingFromPreviousGateway = $errorChannelComingFromPreviousGateway;
         $this->requestChannel = $requestChannel;
         $this->errorChannel = $errorChannel;
         $this->replyChannel = $replyChannel;

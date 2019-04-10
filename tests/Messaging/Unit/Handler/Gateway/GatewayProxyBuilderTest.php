@@ -707,7 +707,7 @@ class GatewayProxyBuilderTest extends MessagingTest
                 Transactional::createWith(["transactionFactory"])
             ])
             ->addAroundInterceptor(
-                AroundInterceptorReference::create("transactionInterceptor", "transactional", 1, "")
+                AroundInterceptorReference::create("transactionInterceptor","transactionInterceptor", "transactional", 1, "")
             );
 
         $this->assertEquals(["transactionInterceptor"], $gatewayProxyBuilder->getRequiredReferences());
@@ -801,7 +801,7 @@ class GatewayProxyBuilderTest extends MessagingTest
                 Transactional::createWith(["transactionFactory"])
             ])
             ->addAroundInterceptor(
-                AroundInterceptorReference::create("transactionInterceptor", "transactional", 1, "")
+                AroundInterceptorReference::create("transactionInterceptor","transactionInterceptor", "transactional", 1, "")
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -843,7 +843,7 @@ class GatewayProxyBuilderTest extends MessagingTest
                 Transactional::createWith(["transactionFactory"])
             ])
             ->addAroundInterceptor(
-                AroundInterceptorReference::create("transactionInterceptor", "transactional", 1, "")
+                AroundInterceptorReference::create("transactionInterceptor","transactionInterceptor", "transactional", 1, "")
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(

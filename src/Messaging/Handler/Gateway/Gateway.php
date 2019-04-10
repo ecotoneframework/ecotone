@@ -168,7 +168,7 @@ class Gateway
                             ->setReplyChannel($internalReplyBridge)
                             ->build();
 
-        $messageHandler = $this->buildHandler($replyChannelComingFromPreviousGateway, $errorChannelComingFromPreviousGateway, $internalReplyBridge);
+        $messageHandler = $this->buildHandler($internalReplyBridge);
 
         try {
             $messageHandler->handle($requestMessage);
@@ -201,13 +201,11 @@ class Gateway
     }
 
     /**
-     * @param $replyChannelComingFromPreviousGateway
-     * @param $errorChannelComingFromPreviousGateway
      * @param QueueChannel $internalReplyBridge
      * @return ServiceActivatorBuilder|\SimplyCodedSoftware\Messaging\MessageHandler
      * @throws MessagingException
      */
-    private function buildHandler($replyChannelComingFromPreviousGateway, $errorChannelComingFromPreviousGateway, QueueChannel $internalReplyBridge)
+    private function buildHandler(QueueChannel $internalReplyBridge)
     {
         $gatewayInternalHandler = new GatewayInternalHandler(
             $this->interfaceToCall,
@@ -215,9 +213,7 @@ class Gateway
             $this->errorChannel,
             $this->replyChannel,
             $this->messageConverters,
-            $this->replyMilliSecondsTimeout,
-            $replyChannelComingFromPreviousGateway,
-            $errorChannelComingFromPreviousGateway
+            $this->replyMilliSecondsTimeout
         );
 
         $gatewayInternalHandler = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle")

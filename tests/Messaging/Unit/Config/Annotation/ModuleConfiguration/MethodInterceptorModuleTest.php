@@ -33,9 +33,9 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     public function test_registering_around_method_level_interceptor()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "sum", 2, CalculatingServiceInterceptorExample::class))
-            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "subtract", MethodInterceptor::DEFAULT_PRECEDENCE, ""))
-            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "multiply", 2, CalculatingServiceInterceptorExample::class));
+            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService","calculatingService", "sum", 2, CalculatingServiceInterceptorExample::class))
+            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService","calculatingService", "subtract", MethodInterceptor::DEFAULT_PRECEDENCE, ""))
+            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService","calculatingService", "multiply", 2, CalculatingServiceInterceptorExample::class));
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
             CalculatingServiceInterceptorExample::class

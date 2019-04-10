@@ -28,7 +28,7 @@
         "ramsey/uuid": "^3.0",
         "ocramius/proxy-manager": "^2.1.1",
         "doctrine/annotations": "^1.6.0",
-        "symfony/expression-language": "^3.0|^4.0",
+        "symfony/expression-language": "^2.0|^3.0|^4.0",
         "dragonmantank/cron-expression": "^2.2",
         "psr/http-message": "^1.0.1",
 

@@ -22,7 +22,7 @@ class EventBusRouter
     /**
      * @var array
      */
-    private $channelNameToClassNameMapping;
+    private $availableChannelNames;
     /**
      * @var ChannelResolver
      */
@@ -38,7 +38,9 @@ class EventBusRouter
     public function __construct(array $classNameToChannelNameMapping, ChannelResolver $channelResolver)
     {
         foreach ($classNameToChannelNameMapping as $className => $channelNames) {
-            $this->channelNameToClassNameMapping[$channelNames[0]] = $className;
+            foreach ($channelNames as $channelName) {
+                $this->availableChannelNames[$channelName] = $className;
+            }
         }
         $this->classNameToChannelNameMapping = array_map(function(array $channels) {
             return array_unique($channels);
@@ -77,7 +79,7 @@ class EventBusRouter
             throw ConfigurationException::create("Can't send via name using EventBus without " . EventBus::CHANNEL_NAME_BY_NAME . " header defined");
         }
 
-        if (!array_key_exists($name, $this->channelNameToClassNameMapping)) {
+        if (!array_key_exists($name, $this->availableChannelNames)) {
             return null;
         }
 

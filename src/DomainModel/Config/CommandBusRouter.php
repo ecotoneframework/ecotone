@@ -24,7 +24,7 @@ class CommandBusRouter
     /**
      * @var array
      */
-    private $channelNameToClassNameMapping;
+    private $availableChannelNames;
     /**
      * @var ChannelResolver
      */
@@ -40,7 +40,9 @@ class CommandBusRouter
     {
         $this->classNameToChannelNameMapping = $classNameToChannelNameMapping;
         foreach ($classNameToChannelNameMapping as $className => $channelNames) {
-            $this->channelNameToClassNameMapping[$channelNames[0]] = $className;
+            foreach ($channelNames as $channelName) {
+                $this->availableChannelNames[$channelName] = $className;
+            }
         }
         $this->channelResolver = $channelResolver;
     }
@@ -76,7 +78,7 @@ class CommandBusRouter
             throw ConfigurationException::create("Can't send via name using CommandBus without " . CommandBus::CHANNEL_NAME_BY_NAME . " header defined");
         }
 
-        if (!array_key_exists($name, $this->channelNameToClassNameMapping)) {
+        if (!array_key_exists($name, $this->availableChannelNames)) {
             throw ConfigurationException::create("Can't send command to {$name}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method or @MessageEndpoint to class?");
         }
 

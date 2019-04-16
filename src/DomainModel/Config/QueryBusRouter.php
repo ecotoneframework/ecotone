@@ -23,7 +23,7 @@ class QueryBusRouter
     /**
      * @var array
      */
-    private $channelNameToClassNameMapping;
+    private $availableCommandChannels;
     /**
      * @var ChannelResolver
      */
@@ -38,8 +38,10 @@ class QueryBusRouter
     public function __construct(array $classNameToChannelNameMapping, ChannelResolver $channelResolver)
     {
         $this->classNameToChannelNameMapping = $classNameToChannelNameMapping;
-        foreach ($classNameToChannelNameMapping as $className => $channelNames) {
-            $this->channelNameToClassNameMapping[$channelNames[0]] = $className;
+        foreach ($classNameToChannelNameMapping as $typeName => $channelNames) {
+            foreach ($channelNames as $channelName) {
+                $this->availableCommandChannels[$channelName] = $typeName;
+            }
         }
         $this->channelResolver = $channelResolver;
     }
@@ -75,7 +77,7 @@ class QueryBusRouter
             throw ConfigurationException::create("Can't send via name using QueryBus without " . QueryBus::CHANNEL_NAME_BY_NAME . " header defined");
         }
 
-        if (!array_key_exists($name, $this->channelNameToClassNameMapping)) {
+        if (!array_key_exists($name, $this->availableCommandChannels)) {
             throw ConfigurationException::create("Can't send query to {$name}. No Query Handler defined for it. Have you forgot to add @QueryHandler to method or @MessageEndpoint to class?");
         }
 

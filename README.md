@@ -1,3 +1,11 @@
+@TODO 
+
+- transactions within consumer
+- aggregate root as a service
+- simple types for aggregate commands/queries
+- allow inject all headers
+
+
 # Integration Messaging
 
 ## What is this about

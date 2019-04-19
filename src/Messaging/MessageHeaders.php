@@ -107,9 +107,9 @@ class MessageHeaders
     /**
      * @param string $headerRegex e.g. ecotone-domain-*
      *
-     * @return iterable
+     * @return array
      */
-    final public function findByRegex(string $headerRegex) : iterable
+    final public function findByRegex(string $headerRegex) : array
     {
         $foundHeaders = [];
         $headerRegex = str_replace(".", "\.", $headerRegex);

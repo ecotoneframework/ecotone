@@ -84,4 +84,21 @@ class MessageHeadersTest extends TestCase
             new \stdClass()
         );
     }
+
+    public function test_retrieving_headers_by_regex()
+    {
+        $messageHeaders = MessageHeaders::create([
+            "ecotone.domain.aggregate" => "name",
+            "ecotone.domain.method" => "bla",
+            "ecotone.messaging"
+        ]);
+
+        $this->assertEquals(
+            [
+                "ecotone.domain.aggregate" => "name",
+                "ecotone.domain.method" => "bla"
+            ],
+            $messageHeaders->findByRegex("ecotone.domain.*")
+        );
+    }
 }

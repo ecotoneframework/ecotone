@@ -105,6 +105,27 @@ class MessageHeaders
     }
 
     /**
+     * @param string $headerRegex e.g. ecotone-domain-*
+     *
+     * @return iterable
+     */
+    final public function findByRegex(string $headerRegex) : iterable
+    {
+        $foundHeaders = [];
+        $headerRegex = str_replace(".", "\.", $headerRegex);
+        $headerRegex = str_replace("*", ".*", $headerRegex);
+        $headerRegex = "#" . $headerRegex . "#";
+
+        foreach ($this->headers as $key => $value) {
+            if (preg_match($headerRegex, $key)) {
+                $foundHeaders[$key] = $value;
+            }
+        }
+
+        return $foundHeaders;
+    }
+
+    /**
      * @param string $headerName
      * @return bool
      */

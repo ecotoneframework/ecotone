@@ -12,7 +12,7 @@ class NullConsumerFactory implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function start(): void
+    public function run(): void
     {
         return;
     }

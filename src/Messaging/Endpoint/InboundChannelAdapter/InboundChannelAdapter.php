@@ -16,10 +16,6 @@ use SimplyCodedSoftware\Messaging\Scheduling\Trigger;
 class InboundChannelAdapter implements ConsumerLifecycle
 {
     /**
-     * @var boolean
-     */
-    private $isRunning = false;
-    /**
      * @var string
      */
     private $consumerName;
@@ -54,13 +50,9 @@ class InboundChannelAdapter implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function start(): void
+    public function run(): void
     {
-        $this->isRunning = true;
-
-        while ($this->isRunning) {
-            $this->taskScheduler->schedule($this->taskExecutor, $this->trigger);
-        }
+        $this->taskScheduler->schedule($this->taskExecutor, $this->trigger);
     }
 
     /**
@@ -68,7 +60,7 @@ class InboundChannelAdapter implements ConsumerLifecycle
      */
     public function stop(): void
     {
-        $this->isRunning = false;
+        return;
     }
 
     /**

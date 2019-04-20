@@ -54,9 +54,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
-        $gatewaysToBuild = [];
-        /** @var CombinedGatewayDefinition[][] $gatewayDefinitions */
-        $gatewayDefinitions = [];
+        $gatewayBuilders = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Gateway::class) as $annotationRegistration) {
             /** @var \SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway $annotation */
             $annotation = $annotationRegistration->getAnnotationForMethod();
@@ -81,35 +79,18 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     $parameterConverters[] = GatewayHeaderArrayBuilder::create($parameterToMessage->parameterName);
                 } else {
                     $converterClass = get_class($parameterToMessage);
-                    throw new \InvalidArgumentException("Not known converters for gateway {$converterClass} for {$annotationRegistration->getClassName()}::{$annotationRegistration->getMethodName()}");
+                    throw new \InvalidArgumentException("Not known converters for gateway {$converterClass} for {$annotationRegistration->getClassName()}::{$annotationRegistration->getMethodName()}. Have you registered converter starting with name @Gateway(...) e.g. @GatewayHeader?");
                 }
             }
 
-            $gatewayDefinitions[$annotationRegistration->getReferenceName()][] =
-                CombinedGatewayDefinition::create(
-                    GatewayProxyBuilder::create($annotationRegistration->getReferenceName(), $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
-                        ->withTransactionFactories($annotation->transactionFactories)
-                        ->withErrorChannel($annotation->errorChannel)
-                        ->withParameterConverters($parameterConverters)
-                        ->withReplyMillisecondTimeout($annotation->replyTimeoutInMilliseconds),
-                    $annotationRegistration->getMethodName()
-                );
+            $gatewayBuilders[] = GatewayProxyBuilder::create($annotationRegistration->getReferenceName(), $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
+                ->withTransactionFactories($annotation->transactionFactories)
+                ->withErrorChannel($annotation->errorChannel)
+                ->withParameterConverters($parameterConverters)
+                ->withReplyMillisecondTimeout($annotation->replyTimeoutInMilliseconds);
         }
 
-        foreach ($gatewayDefinitions as $gatewayDefinitionsPerReference) {
-            $firstDefinition = $gatewayDefinitionsPerReference[0]->getGatewayBuilder();
-            if (count($gatewayDefinitionsPerReference) == 1) {
-                $gatewaysToBuild[] = $firstDefinition;
-            } else {
-                $gatewaysToBuild[] = CombinedGatewayBuilder::create(
-                    $firstDefinition->getReferenceName(),
-                    $firstDefinition->getInterfaceName(),
-                    $gatewayDefinitionsPerReference
-                );
-            }
-        }
-
-        return new self($gatewaysToBuild);
+        return new self($gatewayBuilders);
     }
 
     /**

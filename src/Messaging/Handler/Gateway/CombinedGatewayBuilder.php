@@ -5,95 +5,45 @@ namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use ProxyManager\Factory\RemoteObjectFactory;
-use ReflectionClass;
-use ReflectionException;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MultipleMethodGatewayBuilder
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class CombinedGatewayBuilder implements GatewayBuilder
+class CombinedGatewayBuilder
 {
     /**
      * @var string
      */
     private $interfaceName;
     /**
-     * @var string
+     * @var GatewayBuilder[]
      */
-    private $referenceName;
-    /**
-     * @var array|CombinedGatewayDefinition[]
-     */
-    private $gatewayDefinitions;
-    /**
-     * @var string[]
-     */
-    private $requiredReferences = [];
+    private $gatewayBuilders;
 
     /**
      * MultipleMethodGatewayBuilder constructor.
-     * @param string $referenceName
      * @param string $interfaceName
-     * @param CombinedGatewayDefinition[] $combinedGatewayDefinitions
-     * @throws ReflectionException
-     * @throws MessagingException
+     * @param GatewayBuilder[] $gatewayBuilders
      */
-    private function __construct(string $referenceName, string $interfaceName, array $combinedGatewayDefinitions)
+    private function __construct(string $interfaceName, array $gatewayBuilders)
     {
-        $this->referenceName = $referenceName;
         $this->interfaceName = $interfaceName;
-        $this->gatewayDefinitions = $combinedGatewayDefinitions;
-
-        foreach ($combinedGatewayDefinitions as $gatewayBuilder) {
-            if (!(new ReflectionClass($interfaceName))->hasMethod($gatewayBuilder->getRelatedMethod())) {
-                throw InvalidArgumentException::create("Combined gateway has no method {$gatewayBuilder->getRelatedMethod()}");
-            }
-
-            $this->requiredReferences = array_merge($this->requiredReferences, $gatewayBuilder->getGatewayBuilder()->getRequiredReferences());
-        }
+        $this->gatewayBuilders = $gatewayBuilders;
     }
 
     /**
-     * @param string $referenceName
      * @param string $interfaceName
-     * @param CombinedGatewayDefinition[] $gatewayBuilders
+     * @param GatewayBuilder[] $gatewayBuilders
      * @return CombinedGatewayBuilder
      */
-    public static function create(string $referenceName, string $interfaceName, array $gatewayBuilders): self
+    public static function create(string $interfaceName, array $gatewayBuilders): self
     {
-        return new self($referenceName, $interfaceName, $gatewayBuilders);
+        return new self($interfaceName, $gatewayBuilders);
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getReferenceName(): string
-    {
-        return $this->referenceName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferences(): array
-    {
-        return $this->requiredReferences;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getInterfaceName(): string
-    {
-        return $this->interfaceName;
-    }
-
 
     /**
      * @inheritDoc
@@ -101,8 +51,8 @@ class CombinedGatewayBuilder implements GatewayBuilder
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
         $gateways = [];
-        foreach ($this->gatewayDefinitions as $gatewayDefinition) {
-            $gateways[$gatewayDefinition->getRelatedMethod()] = $gatewayDefinition->getGatewayBuilder()->build($referenceSearchService, $channelResolver);
+        foreach ($this->gatewayBuilders as $gatewayBuilder) {
+            $gateways[$gatewayBuilder->getRelatedMethodName()] = $gatewayBuilder->build($referenceSearchService, $channelResolver);
         }
 
         $factory = new RemoteObjectFactory(new class ($gateways) implements AdapterInterface

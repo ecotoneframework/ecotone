@@ -32,12 +32,13 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         InboundChannelAdapterBuilder::create(
             "channelName", "someRef", "withReturnValue"
         )
-            ->withConsumerName("test")
+            ->withEndpointId("test")
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => ServiceExpectingOneArgument::create()
-                ])
+                ]),
+                null
             );
     }
 
@@ -52,12 +53,13 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         InboundChannelAdapterBuilder::create(
             "channelName", "someRef", "withoutReturnValue"
         )
-            ->withConsumerName("test")
+            ->withEndpointId("test")
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => ServiceExpectingNoArguments::create()
-                ])
+                ]),
+                null
             );
     }
 
@@ -75,18 +77,19 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $inputChannelName, "someRef", "execute"
         )
-            ->withConsumerName("test")
+            ->withEndpointId("test")
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $inputChannelName => $inputChannel
                 ]),
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => $inboundChannelAdapterStoppingService
-            ])
-        );
+                ]),
+                null
+            );
 
         $inboundChannelAdapterStoppingService->setConsumerLifecycle($inboundChannel);
-        $inboundChannel->start();
+        $inboundChannel->run();
 
         $this->assertEquals(
             $payload,
@@ -107,7 +110,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $inputChannelName, "someRef", "execute"
         )
-            ->withConsumerName("test")
+            ->withEndpointId("test")
             ->withTrigger(PeriodicTrigger::create(1, 0))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -115,11 +118,12 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                 ]),
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => $inboundChannelAdapterStoppingService
-                ])
+                ]),
+                null
             );
 
         $inboundChannelAdapterStoppingService->setConsumerLifecycle($inboundChannel);
-        $inboundChannel->start();
+        $inboundChannel->run();
 
         $this->assertEquals(
             $payload,
@@ -143,14 +147,15 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         InboundChannelAdapterBuilder::create(
             $inputChannelName, "someRef", "notExistingMethod"
         )
-            ->withConsumerName("test")
+            ->withEndpointId("test")
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $inputChannelName => $inputChannel
                 ]),
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => $inboundChannelAdapterStoppingService
-                ])
+                ]),
+                null
             );
     }
 }

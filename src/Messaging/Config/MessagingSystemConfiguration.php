@@ -21,7 +21,10 @@ use SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
@@ -63,7 +66,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @var PollingMetadata[]
      */
-    private $messageHandlerPollingMetadata = [];
+    private $pollingMetadata = [];
     /**
      * @var array|GatewayBuilder[]
      */
@@ -79,7 +82,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @var MethodInterceptor[]
      */
-    private $preCallMethodInterceptors = [];
+    private $beforeCallMethodInterceptors = [];
     /**
      * @var AroundInterceptorReference[]
      */
@@ -87,7 +90,7 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @var MethodInterceptor[]
      */
-    private $postCallMethodInterceptors = [];
+    private $afterCallMethodInterceptors = [];
     /**
      * @var string[]
      */
@@ -199,108 +202,6 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @param InterfaceToCallRegistry $interfaceRegistry
-     * @return void
-     * @throws MessagingException
-     */
-    private function configureInterceptors(InterfaceToCallRegistry $interfaceRegistry): void
-    {
-        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
-                $aroundInterceptors = [];
-                $preCallInterceptors = [];
-                $postCallInterceptors = [];
-                if ($this->preCallMethodInterceptors) {
-                    $preCallInterceptors = $this->getRelatedInterceptors($this->preCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
-                }
-                if ($this->aroundMethodInterceptors) {
-                    $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
-                }
-                if ($this->postCallMethodInterceptors) {
-                    $postCallInterceptors = $this->getRelatedInterceptors($this->postCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
-                }
-
-                foreach ($aroundInterceptors as $aroundInterceptorReference) {
-                    $messageHandlerBuilder->addAroundInterceptor($aroundInterceptorReference);
-                }
-                if ($preCallInterceptors || $postCallInterceptors) {
-                    $messageHandlerBuilderToUse = ChainMessageHandlerBuilder::create()
-                        ->withEndpointId($messageHandlerBuilder->getEndpointId())
-                        ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
-                        ->withOutputMessageChannel($messageHandlerBuilder->getOutputMessageChannelName());
-
-                    foreach ($preCallInterceptors as $preCallInterceptor) {
-                        $messageHandlerBuilderToUse->chain($preCallInterceptor);
-                    }
-                    $messageHandlerBuilderToUse->chain($messageHandlerBuilder);
-                    foreach ($postCallInterceptors as $postCallInterceptor) {
-                        $messageHandlerBuilderToUse->chain($postCallInterceptor);
-                    }
-
-                    $this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()] = $messageHandlerBuilderToUse;
-                }
-            }
-        }
-        foreach ($this->gatewayBuilders as $gatewayBuilder) {
-//            $gatewayBuilder->getReferenceName()
-        }
-
-        $this->preCallMethodInterceptors = [];
-        $this->aroundMethodInterceptors = [];
-        $this->postCallMethodInterceptors = [];
-    }
-
-    /**
-     * @param InterceptorWithPointCut[] $interceptors
-     * @param InterfaceToCall $interceptedInterface
-     * @param object[] $endpointAnnotations
-     * @param string[] $requiredInterceptorNames
-     * @return InterceptorWithPointCut[]|AroundInterceptorReference[]|MessageHandlerBuilderWithOutputChannel[]
-     * @throws MessagingException
-     */
-    private function getRelatedInterceptors($interceptors, InterfaceToCall $interceptedInterface, iterable $endpointAnnotations, iterable $requiredInterceptorNames) : iterable
-    {
-        $relatedInterceptors = [];
-        foreach ($requiredInterceptorNames as $requiredInterceptorName) {
-            if (!$this->hasInterceptorWithNameExists($requiredInterceptorName)) {
-                throw ConfigurationException::create("Can't find interceptor with name {$requiredInterceptorName} for {$interceptedInterface}");
-            }
-        }
-
-        foreach ($interceptors as $interceptor) {
-            foreach ($requiredInterceptorNames as $requiredInterceptorName) {
-                if ($interceptor->hasName($requiredInterceptorName)) {
-                    $relatedInterceptors[] = $interceptor->getInterceptingObject();
-                    break;
-                }
-            }
-
-            if ($interceptor->doesItCutWith($interceptedInterface, $endpointAnnotations)) {
-                $relatedInterceptors[] = $interceptor->getInterceptingObject();
-            }
-        }
-
-        return array_unique($relatedInterceptors);
-    }
-
-    /**
-     * @param string $name
-     * @return bool
-     */
-    private function hasInterceptorWithNameExists(string $name) : bool
-    {
-        /** @var InterceptorWithPointCut $interceptor */
-        foreach (array_merge($this->aroundMethodInterceptors, $this->preCallMethodInterceptors, $this->postCallMethodInterceptors) as $interceptor)
-        {
-            if ($interceptor->hasName($name)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @return Configuration
      * @throws MessagingException
@@ -328,7 +229,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerPollingMetadata(PollingMetadata $pollingMetadata): Configuration
     {
-        $this->messageHandlerPollingMetadata[$pollingMetadata->getEndpointId()] = $pollingMetadata;
+        $this->pollingMetadata[$pollingMetadata->getEndpointId()] = $pollingMetadata;
 
         return $this;
     }
@@ -343,50 +244,11 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->checkIfInterceptorIsCorrect($methodInterceptor);
 
-        $this->preCallMethodInterceptors[] = $methodInterceptor;
-        $this->preCallMethodInterceptors = $this->orderMethodInterceptors($this->preCallMethodInterceptors);
+        $this->beforeCallMethodInterceptors[] = $methodInterceptor;
+        $this->beforeCallMethodInterceptors = $this->orderMethodInterceptors($this->beforeCallMethodInterceptors);
         $this->requireReferences($methodInterceptor->getMessageHandler()->getRequiredReferenceNames());
 
         return $this;
-    }
-
-    /**
-     * @param MethodInterceptor $methodInterceptor
-     * @throws ConfigurationException
-     * @throws MessagingException
-     */
-    private function checkIfInterceptorIsCorrect(MethodInterceptor $methodInterceptor): void
-    {
-        if ($methodInterceptor->getMessageHandler()->getEndpointId()) {
-            throw ConfigurationException::create("Interceptor {$methodInterceptor} should not contain EndpointId");
-        }
-        if ($methodInterceptor->getMessageHandler()->getInputMessageChannelName()) {
-            throw ConfigurationException::create("Interceptor {$methodInterceptor} should not contain input channel. Interceptor is wired by endpoint id");
-        }
-        if ($methodInterceptor->getMessageHandler()->getOutputMessageChannelName()) {
-            throw ConfigurationException::create("Interceptor {$methodInterceptor} should not contain output channel. Interceptor is wired by endpoint id");
-        }
-    }
-
-    /**
-     * @param MessageHandlerBuilderWithOutputChannel[] $methodInterceptors
-     * @return array
-     */
-    private function orderMethodInterceptors(array $methodInterceptors): array
-    {
-        usort($methodInterceptors, function (MethodInterceptor $methodInterceptor, MethodInterceptor $toCompare) {
-            if ($methodInterceptor->getPrecedence() === $toCompare->getPrecedence()) {
-                return 0;
-            }
-
-            if ($methodInterceptor->getPrecedence() > $toCompare->getPrecedence()) {
-                return 1;
-            }
-
-            return -1;
-        });
-
-        return $methodInterceptors;
     }
 
     /**
@@ -399,8 +261,8 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->checkIfInterceptorIsCorrect($methodInterceptor);
 
-        $this->postCallMethodInterceptors[] = $methodInterceptor;
-        $this->postCallMethodInterceptors = $this->orderMethodInterceptors($this->postCallMethodInterceptors);
+        $this->afterCallMethodInterceptors[] = $methodInterceptor;
+        $this->afterCallMethodInterceptors = $this->orderMethodInterceptors($this->afterCallMethodInterceptors);
         $this->requireReferences($methodInterceptor->getMessageHandler()->getRequiredReferenceNames());
 
         return $this;
@@ -583,21 +445,22 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->build($referenceSearchService);
         }
-        $referenceSearchServiceWithExtras = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
+        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
             ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
             InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry
         ]);
 
-        $channelResolver = $this->createChannelResolver($referenceSearchServiceWithExtras);
-        $gateways = [];
-        foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $gatewayReference = GatewayReference::createWith($gatewayBuilder, $referenceSearchServiceWithExtras, $channelResolver);
-            $gateways[] = $gatewayReference;
-        }
-
+        $channelResolver = $this->createChannelResolver($referenceSearchService);
         $this->configureInterceptors($interfaceToCallRegistry);
 
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchServiceWithExtras, $this->consumerFactories, $this->messageHandlerPollingMetadata);
+        /** @var GatewayBuilder[][] $preparedGateways */
+        $preparedGateways = [];
+        foreach ($this->gatewayBuilders as $gatewayBuilder) {
+            $preparedGateways[$gatewayBuilder->getReferenceName()][] = $gatewayBuilder;
+        }
+        $gateways = $this->configureGateways($preparedGateways, $referenceSearchService, $channelResolver);
+
+        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories, $this->pollingMetadata);
         $consumers = [];
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
@@ -605,7 +468,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         foreach ($this->channelAdapters as $channelAdapter) {
-            $consumers[] = $channelAdapter->build($channelResolver, $referenceSearchServiceWithExtras);
+            $consumers[] = $channelAdapter->build($channelResolver, $referenceSearchService, array_key_exists($channelAdapter->getEndpointId(), $this->pollingMetadata) ? $this->pollingMetadata[$channelAdapter->getEndpointId()] : null);
         }
 
         return MessagingSystem::create($consumers, $gateways, $channelResolver);
@@ -659,5 +522,196 @@ final class MessagingSystemConfiguration implements Configuration
     private function __clone()
     {
 
+    }
+
+    /**
+     * @param array $preparedGateways
+     * @param InMemoryReferenceSearchService $referenceSearchServiceWithExtras
+     * @param ChannelResolver $channelResolver
+     * @return array
+     * @throws MessagingException
+     */
+    private function configureGateways(array $preparedGateways, InMemoryReferenceSearchService $referenceSearchServiceWithExtras, ChannelResolver $channelResolver): array
+    {
+        $gateways = [];
+        foreach ($preparedGateways as $referenceName => $preparedGatewaysForReference) {
+            if (count($preparedGatewaysForReference) === 1) {
+                $gateways[] = GatewayReference::createWith(
+                    $preparedGatewaysForReference[0]->getReferenceName(),
+                    $preparedGatewaysForReference[0]->build($referenceSearchServiceWithExtras, $channelResolver)
+                );
+            } else {
+                $gateways[] =
+                    GatewayReference::createWith(
+                        $referenceName,
+                        CombinedGatewayBuilder::create(
+                            $preparedGatewaysForReference[0]->getInterfaceName(), $preparedGatewaysForReference
+                        )->build($referenceSearchServiceWithExtras, $channelResolver)
+                    );
+            }
+        }
+        return $gateways;
+    }
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @throws ConfigurationException
+     * @throws MessagingException
+     */
+    private function checkIfInterceptorIsCorrect(MethodInterceptor $methodInterceptor): void
+    {
+        if ($methodInterceptor->getMessageHandler()->getEndpointId()) {
+            throw ConfigurationException::create("Interceptor {$methodInterceptor} should not contain EndpointId");
+        }
+        if ($methodInterceptor->getMessageHandler()->getInputMessageChannelName()) {
+            throw ConfigurationException::create("Interceptor {$methodInterceptor} should not contain input channel. Interceptor is wired by endpoint id");
+        }
+        if ($methodInterceptor->getMessageHandler()->getOutputMessageChannelName()) {
+            throw ConfigurationException::create("Interceptor {$methodInterceptor} should not contain output channel. Interceptor is wired by endpoint id");
+        }
+    }
+
+    /**
+     * @param InterceptorWithPointCut[] $interceptors
+     * @param InterfaceToCall $interceptedInterface
+     * @param object[] $endpointAnnotations
+     * @param string[] $requiredInterceptorNames
+     * @return InterceptorWithPointCut[]|AroundInterceptorReference[]|MessageHandlerBuilderWithOutputChannel[]
+     * @throws MessagingException
+     */
+    private function getRelatedInterceptors($interceptors, InterfaceToCall $interceptedInterface, iterable $endpointAnnotations, iterable $requiredInterceptorNames) : iterable
+    {
+        $relatedInterceptors = [];
+        foreach ($requiredInterceptorNames as $requiredInterceptorName) {
+            if (!$this->hasInterceptorWithNameExists($requiredInterceptorName)) {
+                throw ConfigurationException::create("Can't find interceptor with name {$requiredInterceptorName} for {$interceptedInterface}");
+            }
+        }
+
+        foreach ($interceptors as $interceptor) {
+            foreach ($requiredInterceptorNames as $requiredInterceptorName) {
+                if ($interceptor->hasName($requiredInterceptorName)) {
+                    $relatedInterceptors[] = $interceptor;
+                    break;
+                }
+            }
+
+            if ($interceptor->doesItCutWith($interceptedInterface, $endpointAnnotations)) {
+                $relatedInterceptors[] = $interceptor;
+            }
+        }
+
+        return array_unique($relatedInterceptors);
+    }
+
+    /**
+     * @param InterfaceToCallRegistry $interfaceRegistry
+     * @return void
+     * @throws MessagingException
+     */
+    private function configureInterceptors(InterfaceToCallRegistry $interfaceRegistry): void
+    {
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
+                $aroundInterceptors = [];
+                $beforeCallInterceptors = [];
+                $afterCallInterceptors = [];
+                if ($this->beforeCallMethodInterceptors) {
+                    $beforeCallInterceptors = $this->getRelatedInterceptors($this->beforeCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
+                }
+                if ($this->aroundMethodInterceptors) {
+                    $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
+                }
+                if ($this->afterCallMethodInterceptors) {
+                    $afterCallInterceptors = $this->getRelatedInterceptors($this->afterCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorReferenceNames());
+                }
+
+                foreach ($aroundInterceptors as $aroundInterceptorReference) {
+                    $messageHandlerBuilder->addAroundInterceptor($aroundInterceptorReference);
+                }
+                if ($beforeCallInterceptors || $afterCallInterceptors) {
+                    $messageHandlerBuilderToUse = ChainMessageHandlerBuilder::create()
+                        ->withEndpointId($messageHandlerBuilder->getEndpointId())
+                        ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
+                        ->withOutputMessageChannel($messageHandlerBuilder->getOutputMessageChannelName());
+
+                    foreach ($beforeCallInterceptors as $beforeCallInterceptor) {
+                        $messageHandlerBuilderToUse->chain($beforeCallInterceptor->getInterceptingObject());
+                    }
+                    $messageHandlerBuilderToUse->chain($messageHandlerBuilder);
+                    foreach ($afterCallInterceptors as $afterCallInterceptor) {
+                        $messageHandlerBuilderToUse->chain($afterCallInterceptor->getInterceptingObject());
+                    }
+
+                    $this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()] = $messageHandlerBuilderToUse;
+                }
+            }
+        }
+        foreach ($this->gatewayBuilders as $gatewayBuilder) {
+            $aroundInterceptors = [];
+            $beforeCallInterceptors = [];
+            $afterCallInterceptors = [];
+            if ($this->beforeCallMethodInterceptors) {
+                $beforeCallInterceptors = $this->getRelatedInterceptors($this->beforeCallMethodInterceptors, $gatewayBuilder->getInterceptedInterface($interfaceRegistry), $gatewayBuilder->getEndpointAnnotations(), $gatewayBuilder->getRequiredInterceptorReferenceNames());
+            }
+            if ($this->aroundMethodInterceptors) {
+                $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $gatewayBuilder->getInterceptedInterface($interfaceRegistry), $gatewayBuilder->getEndpointAnnotations(), $gatewayBuilder->getRequiredInterceptorReferenceNames());
+            }
+            if ($this->afterCallMethodInterceptors) {
+                $afterCallInterceptors = $this->getRelatedInterceptors($this->afterCallMethodInterceptors, $gatewayBuilder->getInterceptedInterface($interfaceRegistry), $gatewayBuilder->getEndpointAnnotations(), $gatewayBuilder->getRequiredInterceptorReferenceNames());
+            }
+
+            foreach ($aroundInterceptors as $aroundInterceptor) {
+                $gatewayBuilder->addAroundInterceptor($aroundInterceptor);
+            }
+            foreach ($beforeCallInterceptors as $beforeCallInterceptor) {
+                $gatewayBuilder->addBeforeInterceptor($beforeCallInterceptor);
+            }
+            foreach ($afterCallInterceptors as $afterCallInterceptor) {
+                $gatewayBuilder->addAfterInterceptor($afterCallInterceptor);
+            }
+        }
+
+        $this->beforeCallMethodInterceptors = [];
+        $this->aroundMethodInterceptors = [];
+        $this->afterCallMethodInterceptors = [];
+    }
+
+    /**
+     * @param MessageHandlerBuilderWithOutputChannel[] $methodInterceptors
+     * @return array
+     */
+    private function orderMethodInterceptors(array $methodInterceptors): array
+    {
+        usort($methodInterceptors, function (MethodInterceptor $methodInterceptor, MethodInterceptor $toCompare) {
+            if ($methodInterceptor->getPrecedence() === $toCompare->getPrecedence()) {
+                return 0;
+            }
+
+            if ($methodInterceptor->getPrecedence() > $toCompare->getPrecedence()) {
+                return 1;
+            }
+
+            return -1;
+        });
+
+        return $methodInterceptors;
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    private function hasInterceptorWithNameExists(string $name) : bool
+    {
+        /** @var InterceptorWithPointCut $interceptor */
+        foreach (array_merge($this->aroundMethodInterceptors, $this->beforeCallMethodInterceptors, $this->afterCallMethodInterceptors) as $interceptor)
+        {
+            if ($interceptor->hasName($name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

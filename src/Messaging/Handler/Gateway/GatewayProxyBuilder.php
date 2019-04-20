@@ -8,6 +8,7 @@ use ProxyManager\Factory\RemoteObjectFactory;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -173,6 +174,14 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getRelatedMethodName(): string
+    {
+        return $this->methodName;
+    }
+
+    /**
      * @param array $methodArgumentConverters
      * @return GatewayProxyBuilder
      * @throws MessagingException
@@ -224,6 +233,14 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName);
+    }
+
+    /**
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
@@ -257,9 +274,19 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getRequiredInterceptorReferenceNames(): iterable
+    {
+        $requiredReferences = [];
+
+        return $requiredReferences;
+    }
+
+    /**
      * @return object[]
      */
-    public function getEndpointAnnotations(): iterable
+    public function getEndpointAnnotations(): array
     {
         return $this->endpointAnnotations;
     }

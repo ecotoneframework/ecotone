@@ -3,21 +3,18 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Endpoint;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerStoppingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerThrowingExceptionService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\MessageHandlerStoppingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandlerBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Transaction\FakeTransactionFactory;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerStoppingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerThrowingExceptionService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Transaction\FakeTransactionFactory;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -29,9 +26,9 @@ class PollingConsumerBuilderTest extends MessagingTest
 {
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
-    public function test_creating_consumer_with_period_trigger()
+    public function __test_creating_consumer_with_period_trigger()
     {
         $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = "inputChannelName";
@@ -39,8 +36,8 @@ class PollingConsumerBuilderTest extends MessagingTest
 
         $directObjectReference = ConsumerStoppingService::create(null);
         $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "executeNoReturn")
-                                                    ->withEndpointId("test")
-                                                    ->withInputChannelName($inputChannelName);
+            ->withEndpointId("test")
+            ->withInputChannelName($inputChannelName);
         $pollingConsumer = $pollingConsumerBuilder->create(
             InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => $inputChannel
@@ -52,7 +49,7 @@ class PollingConsumerBuilderTest extends MessagingTest
 
         $directObjectReference->setConsumerLifecycle($pollingConsumer);
         $inputChannel->send(MessageBuilder::withPayload("somePayload")->build());
-        $pollingConsumer->start();
+        $pollingConsumer->run();
 
         $this->assertEquals(
             "somePayload",
@@ -61,9 +58,9 @@ class PollingConsumerBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
-    public function test_calling_pollable_consumer_with_transactions()
+    public function __test_calling_pollable_consumer_with_transactions()
     {
         $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = "inputChannelName";
@@ -89,14 +86,46 @@ class PollingConsumerBuilderTest extends MessagingTest
         $directObjectReference->setConsumerLifecycle($pollingConsumer);
         $inputChannel->send(MessageBuilder::withPayload("somePayload")->build());
 
-        $pollingConsumer->start();
+        $pollingConsumer->run();
         $this->assertTrue($transactionFactory->getCurrentTransaction()->isCommitted());
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
-    public function test_passing_message_to_error_channel_on_failure()
+    public function __test_calling_with_message_consumption_limit()
+    {
+        $pollingConsumerBuilder = new PollingConsumerBuilder();
+        $pollableChannelName = "pollableChannelName";
+        $pollableChannel = QueueChannel::create();
+
+        $directObjectReference = ConsumerContinuouslyWorkingService::create();
+        $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "executeReturn")
+            ->withEndpointId("test")
+            ->withInputChannelName($pollableChannelName);
+
+        $pollingConsumer = $pollingConsumerBuilder->create(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                $pollableChannelName => $pollableChannel
+            ]),
+            InMemoryReferenceSearchService::createEmpty(),
+            $replyViaHeadersMessageHandlerBuilder,
+            PollingMetadata::create("some")
+                ->setStopAfterExceedingHandledMessageLimit(3)
+        );
+
+        $pollableChannel->send(MessageBuilder::withPayload("somePayload")->build());
+        $pollableChannel->send(MessageBuilder::withPayload("somePayload")->build());
+        $pollableChannel->send(MessageBuilder::withPayload("somePayload")->build());
+
+        $pollingConsumer->run();
+        $this->assertNull($pollableChannel->receive());
+    }
+
+    /**
+     * @throws MessagingException
+     */
+    public function __test_passing_message_to_error_channel_on_failure()
     {
         $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = "inputChannelName";
@@ -122,7 +151,7 @@ class PollingConsumerBuilderTest extends MessagingTest
         $directObjectReference->setConsumerLifecycle($pollingConsumer);
         $inputChannel->send(MessageBuilder::withPayload("somePayload")->build());
 
-        $pollingConsumer->start();
+        $pollingConsumer->run();
 
         $this->assertNotNull($errorChannel->receive());
     }

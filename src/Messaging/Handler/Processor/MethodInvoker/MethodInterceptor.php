@@ -111,7 +111,7 @@ class MethodInterceptor implements InterceptorWithPointCut
      */
     public function __toString()
     {
-        return "{$this->interceptorName}";
+        return "{$this->interceptorName}.{$this->messageHandler}";
     }
 
     /**

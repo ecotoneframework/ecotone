@@ -96,15 +96,6 @@ class RequestReplyProducerTest extends MessagingTest
         );
     }
 
-    public function test_throwing_exception_if_there_is_reply_data_but_no_output_channel()
-    {
-        $requestReplyProducer = $this->createRequestReplyProducer(FakeReplyMessageProducer::create("some payload"));
-
-        $this->expectException(MessageDeliveryException::class);
-
-        $this->handleReplyWith($requestReplyProducer);
-    }
-
     public function test_propagating_message_headers()
     {
         $outputChannel = QueueChannel::create();

@@ -34,12 +34,7 @@ class CombinedGatewayBuilderTest extends TestCase
         $requestChannelGatewayTwo = QueueChannel::create();
         $gatewayProxyBuilderTwo = GatewayProxyBuilder::create('ref-name', MultipleMethodsGatewayExample::class, 'execute2', $requestChannelNameGatewayTwo);
 
-        $multipleGatewayBuilder = CombinedGatewayBuilder::create("ref-name", MultipleMethodsGatewayExample::class,
-            [
-                CombinedGatewayDefinition::create($gatewayProxyBuilderOne, "execute1"),
-                CombinedGatewayDefinition::create($gatewayProxyBuilderTwo, "execute2")
-            ]
-        );
+        $multipleGatewayBuilder = CombinedGatewayBuilder::create(MultipleMethodsGatewayExample::class, [$gatewayProxyBuilderOne, $gatewayProxyBuilderTwo]);
         /** @var MultipleMethodsGatewayExample $gateway */
         $gateway = $multipleGatewayBuilder->build(
             InMemoryReferenceSearchService::createEmpty(),
@@ -59,19 +54,5 @@ class CombinedGatewayBuilderTest extends TestCase
         $gateway->execute2('some2');
         $this->assertNull($requestChannelGatewayOne->receive());
         $this->assertEquals($requestChannelGatewayTwo->receive()->getPayload(),'some2');
-    }
-
-    public function test_throwing_exception_if_interface_has_no_combined_method()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $requestChannelNameGatewayOne = "requestChannel1";
-        $gatewayProxyBuilderOne = GatewayProxyBuilder::create('ref-name', MultipleMethodsGatewayExample::class, 'execute1', $requestChannelNameGatewayOne);
-
-        CombinedGatewayBuilder::create("ref-name", MultipleMethodsGatewayExample::class,
-            [
-                CombinedGatewayDefinition::create($gatewayProxyBuilderOne, "notExisting")
-            ]
-        );
     }
 }

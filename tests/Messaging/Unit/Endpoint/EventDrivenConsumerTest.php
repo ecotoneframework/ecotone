@@ -22,7 +22,7 @@ class EventDrivenConsumerTest extends MessagingTest
         $handler = NoReturnMessageHandler::create();
         $eventDrivenConsumer = new EventDrivenConsumer('some', $directChannel, $handler);
 
-        $eventDrivenConsumer->start();
+        $eventDrivenConsumer->run();
 
         $directChannel->send(MessageBuilder::withPayload('test')->build());
 
@@ -35,7 +35,7 @@ class EventDrivenConsumerTest extends MessagingTest
         $handler = NoReturnMessageHandler::create();
         $eventDrivenConsumer = new EventDrivenConsumer('some', $directChannel, $handler);
 
-        $eventDrivenConsumer->start();
+        $eventDrivenConsumer->run();
         $eventDrivenConsumer->stop();
 
         $this->expectException(MessageDispatchingException::class);

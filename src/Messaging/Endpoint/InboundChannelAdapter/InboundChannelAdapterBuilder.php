@@ -2,11 +2,13 @@
 declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter;
+
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
+use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
@@ -39,7 +41,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @var string
      */
-    private $inputChannelName;
+    private $requestChannelName;
     /**
      * @var string
      */
@@ -47,7 +49,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @var string
      */
-    private $consumerName;
+    private $endpointId;
     /**
      * @var Trigger
      */
@@ -69,7 +71,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
      */
     private function __construct(string $inputChannelName, string $referenceName, string $methodName)
     {
-        $this->inputChannelName = $inputChannelName;
+        $this->requestChannelName = $inputChannelName;
         $this->referenceName = $referenceName;
         $this->methodName = $methodName;
     }
@@ -122,18 +124,26 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
      */
     public function withInputChannelName(string $inputChannelName) : self
     {
-        $this->inputChannelName = $inputChannelName;
+        $this->requestChannelName = $inputChannelName;
 
         return $this;
     }
 
     /**
-     * @param string $consumerName
+     * @inheritDoc
+     */
+    public function getEndpointId(): string
+    {
+        return $this->endpointId;
+    }
+
+    /**
+     * @param string $endpointId
      * @return InboundChannelAdapterBuilder
      */
-    public function withConsumerName(string $consumerName) : self
+    public function withEndpointId(string $endpointId) : self
     {
-        $this->consumerName = $consumerName;
+        $this->endpointId = $endpointId;
 
         return $this;
     }
@@ -163,9 +173,17 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): ConsumerLifecycle
+    public function getRequestChannelName(): string
     {
-        Assert::notNullAndEmpty($this->consumerName, "Consumer name for inbound channel adapter can't be empty");
+        return $this->requestChannelName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, ?PollingMetadata $pollingMetadata): ConsumerLifecycle
+    {
+        Assert::notNullAndEmpty($this->endpointId, "Endpoint Id for inbound channel adapter can't be empty");
 
         $taskExecutor = $this->taskExecutor;
         $forwardChannel = DirectChannel::create();
@@ -192,7 +210,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
                 throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not be void");
             }
 
-            $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), InboundChannelGateway::class, "execute", $this->inputChannelName)
+            $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), InboundChannelGateway::class, "execute", $this->requestChannelName)
                 ->build($referenceSearchService, $channelResolver);
             Assert::isTrue(\assert($gateway instanceof InboundChannelGateway), "Internal error, wrong class, expected " . InboundChannelGateway::class);
 
@@ -207,7 +225,7 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
         $trigger = $this->trigger ? $this->trigger : PeriodicTrigger::create(5, 0);
 
         return new InboundChannelAdapter(
-            $this->consumerName,
+            $this->endpointId,
             SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
             $trigger,
             $forwardGateway

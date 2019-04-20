@@ -1,6 +1,8 @@
 @TODO 
 
-- transactions within consumer
+- combined gateways
+- configurable interceptors on gateway
+- consumer interceptor after send message using gateway interceptor
 - aggregate root as a service
 - simple types for aggregate commands/queries
 - allow inject all headers

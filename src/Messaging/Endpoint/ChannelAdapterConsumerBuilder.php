@@ -14,15 +14,26 @@ use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 interface ChannelAdapterConsumerBuilder
 {
     /**
+     * @return string
+     */
+    public function getRequestChannelName() : string;
+
+    /**
+     * @return string
+     */
+    public function getEndpointId() : string;
+
+    /**
      * @return string[]
      */
     public function getRequiredReferences() : array;
 
     /**
-     * @param ChannelResolver        $channelResolver
+     * @param ChannelResolver $channelResolver
      * @param ReferenceSearchService $referenceSearchService
      *
+     * @param PollingMetadata|null $pollingMetadata
      * @return ConsumerLifecycle
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : ConsumerLifecycle;
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, ?PollingMetadata $pollingMetadata) : ConsumerLifecycle;
 }

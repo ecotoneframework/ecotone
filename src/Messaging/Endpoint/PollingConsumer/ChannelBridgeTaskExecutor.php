@@ -37,6 +37,8 @@ class ChannelBridgeTaskExecutor implements TaskExecutor
     {
         $message = $this->pollableChannel->receive();
 
-        $this->entrypointGateway->execute($message);
+        if ($message) {
+            $this->entrypointGateway->execute($message);
+        }
     }
 }

@@ -47,7 +47,7 @@ class MessageDrivenConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function start(): void
+    public function run(): void
     {
         $this->messageDrivenChannelAdapter->startMessageDrivenConsumer();
     }

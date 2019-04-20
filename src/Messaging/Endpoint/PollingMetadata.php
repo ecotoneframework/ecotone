@@ -49,6 +49,10 @@ class PollingMetadata
      */
     private $initialDelayInMilliseconds = self::DEFAULT_INITIAL_DELAY;
     /**
+     * @var int
+     */
+    private $stopAfterExceedingHandledMessageLimit = 0;
+    /**
      * @var string[]
      */
     private $transactionFactoryReferenceNames = [];
@@ -156,6 +160,19 @@ class PollingMetadata
     }
 
     /**
+     * @param int $stopAfterExceedingHandledMessageLimit
+     * @return PollingMetadata
+     */
+    public function setStopAfterExceedingHandledMessageLimit(int $stopAfterExceedingHandledMessageLimit): PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->stopAfterExceedingHandledMessageLimit = $stopAfterExceedingHandledMessageLimit;
+
+        return $copy;
+    }
+
+
+    /**
      * @param string[] $transactionFactoryReferenceNames
      * @return PollingMetadata
      */
@@ -237,6 +254,14 @@ class PollingMetadata
     public function getEndpointId(): string
     {
         return $this->endpointId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStopAfterExceedingHandledMessageLimit(): int
+    {
+        return $this->stopAfterExceedingHandledMessageLimit;
     }
 
     /**

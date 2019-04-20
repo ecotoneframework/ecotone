@@ -7,8 +7,8 @@ use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
 use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\InterceptedConsumer;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenChannelAdapter;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
@@ -73,23 +73,21 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
                 InMemoryChannelResolver::createFromAssociativeArray([
                     "inputChannel" => $connectionChannel
                 ])
-        );
+            );
         Assert::isTrue(\assert($gateway instanceof EntrypointGateway), "Internal error, wrong class, expected " . EntrypointGateway::class);
 
-        return InboundChannelAdapterBuilder::createWithTaskExecutor(
-            new ChannelBridgeTaskExecutor(
-                $pollableChannel,
-                $gateway
-            )
-        )
-            ->withConsumerName($messageHandlerBuilder->getEndpointId())
-            ->withTransactionFactories($pollingMetadata->getTransactionFactoryReferenceNames())
-            ->withErrorChannel($pollingMetadata->getErrorChannelName())
-            ->withTrigger(
-                $pollingMetadata->getCron()
-                ? CronTrigger::createWith($pollingMetadata->getCron())
-                : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds())
-            )
-            ->build($channelResolver, $referenceSearchService);
+        return InterceptedConsumer::createWith(
+            InboundChannelAdapterBuilder::createWithTaskExecutor(new ChannelBridgeTaskExecutor($pollableChannel,$gateway))
+                ->withEndpointId($messageHandlerBuilder->getEndpointId())
+                ->withTransactionFactories($pollingMetadata->getTransactionFactoryReferenceNames())
+                ->withErrorChannel($pollingMetadata->getErrorChannelName())
+                ->withTrigger(
+                    $pollingMetadata->getCron()
+                        ? CronTrigger::createWith($pollingMetadata->getCron())
+                        : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds())
+                )
+                ->build($channelResolver, $referenceSearchService, $pollingMetadata),
+            $pollingMetadata
+        );
     }
 }

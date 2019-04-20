@@ -74,25 +74,15 @@ class GatewayModuleTest extends AnnotationConfigurationTest
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
                 ->registerGatewayBuilder(
-                    CombinedGatewayBuilder::create(
-                        MultipleMethodsGatewayExample::class,
-                        MultipleMethodsGatewayExample::class,
-                        [
-                            CombinedGatewayDefinition::create(
-                                GatewayProxyBuilder::create(
-                                    MultipleMethodsGatewayExample::class, MultipleMethodsGatewayExample::class,
-                                    "execute1", "channel1"
-                                ),
-                                "execute1"
-                            ),
-                            CombinedGatewayDefinition::create(
-                                GatewayProxyBuilder::create(
-                                    MultipleMethodsGatewayExample::class, MultipleMethodsGatewayExample::class,
-                                    "execute2", "channel2"
-                                ),
-                                "execute2"
-                            )
-                        ]
+                    GatewayProxyBuilder::create(
+                        MultipleMethodsGatewayExample::class, MultipleMethodsGatewayExample::class,
+                        "execute1", "channel1"
+                    )
+                )
+                ->registerGatewayBuilder(
+                    GatewayProxyBuilder::create(
+                        MultipleMethodsGatewayExample::class, MultipleMethodsGatewayExample::class,
+                        "execute2", "channel2"
                     )
                 ),
             $messagingSystemConfiguration

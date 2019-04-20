@@ -4,6 +4,10 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
@@ -53,9 +57,73 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
+    public function getRelatedMethodName(): string
+    {
+        return "";
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $interfaceToCallRegistry->getFor(self::class, "getInterceptedInterface");
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getRequiredReferences(): array
     {
         return $this->requiredReferences;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    {
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor)
+    {
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor)
+    {
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    {
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredInterceptorReferenceNames(): iterable
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEndpointAnnotations(): array
+    {
+        return [];
     }
 
     /**

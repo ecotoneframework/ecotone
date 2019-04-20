@@ -212,6 +212,6 @@ class AroundInterceptorReference implements InterceptorWithPointCut
      */
     public function __toString()
     {
-        return $this->interceptorName;
+        return $this->interceptorName . $this->referenceName . $this->methodName;
     }
 }

@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\InterceptedEndpoint;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
@@ -13,7 +16,7 @@ use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface GatewayBuilder
+interface GatewayBuilder extends InterceptedEndpoint
 {
     /**
      * Name to be registered under
@@ -32,34 +35,28 @@ interface GatewayBuilder
      */
     public function getInterfaceName() : string;
 
-//    /**
-//     * @param AroundInterceptorReference $aroundInterceptorReference
-//     * @return $this
-//     */
-//    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference);
-//
-//    /**
-//     * @param MethodInterceptor $methodInterceptor
-//     * @return $this
-//     */
-//    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor);
-//
-//    /**
-//     * @param MethodInterceptor $methodInterceptor
-//     * @return $this
-//     */
-//    public function addAfterInterceptor(MethodInterceptor $methodInterceptor);
-//
-//    /**
-//     * @param object[] $endpointAnnotations
-//     * @return static
-//     */
-//    public function withEndpointAnnotations(iterable $endpointAnnotations);
-//
-//    /**
-//     * @return object[]
-//     */
-//    public function getEndpointAnnotations(): iterable;
+    /**
+     * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     * @return InterfaceToCall
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry) : InterfaceToCall;
+
+    /**
+     * @return string
+     */
+    public function getRelatedMethodName() : string;
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return $this
+     */
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor);
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return $this
+     */
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor);
 
     /**
      * @param ReferenceSearchService $referenceSearchService

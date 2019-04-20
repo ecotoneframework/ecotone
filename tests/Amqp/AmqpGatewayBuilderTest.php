@@ -153,8 +153,8 @@ class AmqpGatewayBuilderTest extends AmqpMessagingTest
     public function receive(InboundAmqpGatewayBuilder $inboundAmqpGatewayBuilder, QueueChannel $inboundRequestChannel, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): ?Message
     {
         $inboundAmqpGateway = $inboundAmqpGatewayBuilder
-            ->build($channelResolver, $referenceSearchService);
-        $inboundAmqpGateway->start();
+            ->build($channelResolver, $referenceSearchService, null);
+        $inboundAmqpGateway->run();
 
         $message = $inboundRequestChannel->receive();
 
@@ -375,7 +375,7 @@ class AmqpGatewayBuilderTest extends AmqpMessagingTest
         $inboundRequestChannel->subscribe($exceptionalHandler);
         $inboundAmqpGateway = $inboundAmqpAdapter
             ->build($inMemoryChannelResolver, $referenceSearchService);
-        $inboundAmqpGateway->start();
+        $inboundAmqpGateway->run();
 
         $inboundRequestChannel->unsubscribe($exceptionalHandler);
         $inboundQueueChannel = QueueChannel::create();

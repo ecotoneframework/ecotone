@@ -11,6 +11,7 @@ use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenConsumer;
+use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -27,7 +28,7 @@ use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
  */
 class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
 {
-    private const NO_RECEIVE_TIMEOUT = 0;
+    private const DEFAULT_RECEIVE_TIMEOUT = 10000;
 
     /**
      * @var string
@@ -52,7 +53,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @var int
      */
-    private $receiveTimeoutInMilliseconds = self::NO_RECEIVE_TIMEOUT;
+    private $receiveTimeoutInMilliseconds = self::DEFAULT_RECEIVE_TIMEOUT;
     /**
      * @var HeaderMapper
      */
@@ -108,6 +109,22 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
     }
 
     /**
+     * @return string
+     */
+    public function getEndpointId(): string
+    {
+        return $this->endpointId;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequestChannelName(): string
+    {
+        return $this->requestChannelName;
+    }
+
+    /**
      * @param string $headerMapper
      * @return InboundAmqpGatewayBuilder
      */
@@ -143,7 +160,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): ConsumerLifecycle
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, ?PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         /** @var AmqpAdmin $amqpAdmin */
         $amqpAdmin = $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME);

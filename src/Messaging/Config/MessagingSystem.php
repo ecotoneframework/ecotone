@@ -31,7 +31,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     /**
      * Application constructor.
      * @param iterable|ConsumerLifecycle[] $consumers
-     * @param object[]|array $gateways
+     * @param GatewayReference[]|array $gateways
      * @param ChannelResolver $channelResolver
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
@@ -49,7 +49,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
 
     /**
      * @param iterable $consumers
-     * @param object[]|array $gateways
+     * @param GatewayReference[]|array $gateways
      * @param ChannelResolver $channelResolver
      * @return MessagingSystem
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
@@ -71,7 +71,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             if ($consumer->getConsumerName() === $consumerName) {
                 Assert::isTrue($consumer->isRunningInSeparateThread(), "Can't run event driven consumer with name {$consumerName} in separate thread");
 
-                $consumer->start();
+                $consumer->run();
                 return;
             }
         }
@@ -130,7 +130,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     {
         foreach ($this->consumers as $consumer) {
             if (!$consumer->isRunningInSeparateThread()) {
-                $consumer->start();
+                $consumer->run();
             }
         }
     }

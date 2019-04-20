@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Amqp;
 
@@ -7,18 +6,16 @@ use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpMessage;
 use Interop\Queue\Consumer;
-use Interop\Queue\Exception\Exception;
-use Interop\Queue\Exception\SubscriptionConsumerNotSupportedException;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenChannelAdapter;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Endpoint\ConsumerInterceptor;
+use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
 use Throwable;
 
 /**
- * Class InboundEnqueueGateway
+ * Class InboundAmqpAdapter
  * @package SimplyCodedSoftware\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InboundAmqpEnqueueGateway implements MessageDrivenChannelAdapter
+class InboundAmqpAdapter implements ConsumerLifecycle
 {
     /**
      * @var AmqpConnectionFactory
@@ -48,6 +45,18 @@ class InboundAmqpEnqueueGateway implements MessageDrivenChannelAdapter
      * @var string
      */
     private $acknowledgeMode;
+    /**
+     * @var bool
+     */
+    private $keepRunning = true;
+    /**
+     * @var string
+     */
+    private $endpointId;
+    /**
+     * @var ConsumerInterceptor[]
+     */
+    private $consumerExtensions = [];
 
     /**
      * InboundAmqpEnqueueGateway constructor.
@@ -79,12 +88,12 @@ class InboundAmqpEnqueueGateway implements MessageDrivenChannelAdapter
     }
 
     /**
-     * @throws Exception
-     * @throws SubscriptionConsumerNotSupportedException
-     * @throws InvalidArgumentException
+     * @inheritDoc
      */
-    public function startMessageDrivenConsumer(): void
+    public function run(): void
     {
+        $this->keepRunning = true;
+
         /** @var AmqpContext $context */
         $context = $this->amqpConnectionFactory->createContext();
         $this->amqpAdmin->declareQueueWithBindings($this->amqpQueueName, $context);
@@ -103,5 +112,29 @@ class InboundAmqpEnqueueGateway implements MessageDrivenChannelAdapter
         });
 
         $subscriptionConsumer->consume($this->receiveTimeoutInMilliseconds);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function stop(): void
+    {
+        $this->keepRunning = false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isRunningInSeparateThread(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getConsumerName(): string
+    {
+        return $this->endpointId;
     }
 }

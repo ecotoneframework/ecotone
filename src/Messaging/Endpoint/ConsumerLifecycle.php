@@ -13,7 +13,7 @@ interface ConsumerLifecycle
     /**
      * start component
      */
-    public function start() : void;
+    public function run() : void;
 
     /**
      * stop component from running

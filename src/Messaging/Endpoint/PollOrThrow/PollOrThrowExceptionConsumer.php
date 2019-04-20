@@ -64,7 +64,7 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
     /**
      * @inheritDoc
      */
-    public function start(): void
+    public function run(): void
     {
         $message = $this->pollableChannel->receive();
         if (is_null($message)) {

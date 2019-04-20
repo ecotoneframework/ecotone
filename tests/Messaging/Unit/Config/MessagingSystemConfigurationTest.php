@@ -16,6 +16,8 @@ use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
+use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
@@ -25,6 +27,7 @@ use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
@@ -807,14 +810,20 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $buyGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "buy", "buy");
         $sellGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "sell", "sell");
 
+        $channels = ["buy" => DirectChannel::create(), "sell" => DirectChannel::create()];
         $this->assertEquals(
-            CombinedGatewayBuilder::create("combinedGateway", CombinedGatewayExample::class, [
-                CombinedGatewayDefinition::create($buyGateway,"buy"),
-                CombinedGatewayDefinition::create($sellGateway,"sell")
-            ])->build(InMemoryReferenceSearchService::createEmpty(), InMemoryChannelResolver::createEmpty()),
+            CombinedGatewayBuilder::create(CombinedGatewayExample::class, [$buyGateway, $sellGateway])->build(
+                InMemoryReferenceSearchService::createWithReferenceService(InMemoryReferenceSearchService::createEmpty(), [
+                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createEmpty(),
+                    InterfaceToCallRegistry::REFERENCE_NAME => InterfaceToCallRegistry::createEmpty()
+                ]),
+                InMemoryChannelResolver::createFromAssociativeArray($channels)
+            ),
             $this->createMessagingSystemConfiguration()
                 ->registerGatewayBuilder($buyGateway)
                 ->registerGatewayBuilder($sellGateway)
+                ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("buy"))
+                ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("sell"))
                 ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty())
                 ->getGatewayByName("combinedGateway")
         );
@@ -861,7 +870,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_registering_interceptors_with_precedence()
+    public function test_registering_interceptors_with_precedence_for_message_handler()
     {
         $inputChannelName = "inputChannel";
         $messagingSystemConfiguration =
@@ -920,7 +929,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
-    public function test_registering_interceptors_for_gateway()
+    public function test_registering_interceptors_for_gateway_using_pointcut()
     {
         $requestChannelName = "inputChannel";
         $messagingSystemConfiguration =
@@ -929,7 +938,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
                 )
                 ->registerMessageHandler(
-                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "sum")
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result")
                         ->withInputChannelName($requestChannelName)
                 )
                 ->registerBeforeMethodInterceptor(
@@ -951,9 +960,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::createWithDirectObject(
                         "aroundCalculating",
-                        CalculatingService::create(2), "sum",
-                        1,
-                        ServiceInterfaceCalculatingService::class
+                        CalculatingServiceInterceptorExample::create(2), "sum",
+                        1, CalculatingService::class
                     )
                 )
                 ->registerAfterMethodInterceptor(
@@ -979,7 +987,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $gateway = $messagingSystemConfiguration->getGatewayByName('ref-name');
 
         $this->assertEquals(
-            28,
+            16,
             $gateway->calculate(1)
         );
     }

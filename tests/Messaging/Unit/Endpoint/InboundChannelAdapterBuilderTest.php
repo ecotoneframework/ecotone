@@ -3,16 +3,17 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Endpoint;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerStoppingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingNoArguments;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Transaction\FakeTransactionFactory;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerStoppingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingNoArguments;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -25,7 +26,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
     /**
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_throwing_exception_if_passed_reference_service_has_parameters()
+    public function __test_throwing_exception_if_passed_reference_service_has_parameters()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -46,7 +47,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_passed_reference_should_return_parameters()
+    public function __test_passed_reference_should_return_parameters()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -67,7 +68,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_running_with_default_period_trigger()
+    public function __test_running_with_default_period_trigger()
     {
         $payload = "testPayload";
         $inputChannelName = "inputChannelName";
@@ -98,9 +99,72 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
     }
 
     /**
+     * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_running_with_custom_trigger()
+    public function test_running_with_message_consumption_limit()
+    {
+        $payload = "testPayload";
+        $requestChannelName = "requestChannelName";
+        $requestChannel = QueueChannel::create();
+        $inboundChannelAdapterStoppingService = ConsumerContinuouslyWorkingService::createWithReturn($payload);
+
+        $inboundChannel = InboundChannelAdapterBuilder::create(
+            $requestChannelName, "someRef", "executeReturn"
+        )
+            ->withEndpointId("test")
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    "someRef" => $inboundChannelAdapterStoppingService
+                ]),
+                PollingMetadata::create("test")
+                    ->setHandledMessageLimit(1)
+            );
+
+        $inboundChannel->run();
+
+        $this->assertEquals($payload, $requestChannel->receive()->getPayload());
+        $this->assertNull($requestChannel->receive());
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_running_with_memory_limit()
+    {
+        $payload = "testPayload";
+        $requestChannelName = "requestChannelName";
+        $requestChannel = QueueChannel::create();
+        $inboundChannelAdapterStoppingService = ConsumerContinuouslyWorkingService::createWithReturn($payload);
+
+        $inboundChannel = InboundChannelAdapterBuilder::create(
+            $requestChannelName, "someRef", "executeReturn"
+        )
+            ->withEndpointId("test")
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    "someRef" => $inboundChannelAdapterStoppingService
+                ]),
+                PollingMetadata::create("test")
+                    ->setMemoryLimitInMegaBytes(1)
+            );
+
+        $inboundChannel->run();
+
+        $this->assertNull($requestChannel->receive());
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function __test_running_with_custom_trigger()
     {
         $payload = "testPayload";
         $inputChannelName = "inputChannelName";
@@ -135,7 +199,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function test_throwing_exception_if_reference_service_has_no_passed_method()
+    public function __test_throwing_exception_if_reference_service_has_no_passed_method()
     {
         $payload = "testPayload";
         $inputChannelName = "inputChannelName";

@@ -12,19 +12,27 @@ class ConsumerContinuouslyWorkingService
 {
     private $receivedPayload;
 
-    private function __construct()
+    private $returnData;
+
+    private function __construct($returnData)
     {
+        $this->returnData = $returnData;
     }
 
     public static function create() : self
     {
-        return new self();
+        return new self(null);
+    }
+
+    public static function createWithReturn($returnData)
+    {
+        return new self($returnData);
     }
 
 
-    public function executeReturn() : \stdClass
+    public function executeReturn()
     {
-        return new \stdClass();
+        return $this->returnData;
     }
 
     public function executeNoReturn($receivedPayload): void

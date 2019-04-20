@@ -106,19 +106,19 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function getRequiredInterceptorReferenceNames(): iterable
+    public function getRequiredInterceptorNames(): iterable
     {
         return $this->requiredInterceptorReferenceNames;
     }
 
     /**
-     * @param string[] $referenceNames
+     * @param string[] $interceptorNames
      *
      * @return static
      */
-    public function withRequiredInterceptorReferenceNames(iterable $referenceNames)
+    public function withRequiredInterceptorNames(iterable $interceptorNames)
     {
-        $this->requiredInterceptorReferenceNames = $referenceNames;
+        $this->requiredInterceptorReferenceNames = $interceptorNames;
 
         return $this;
     }

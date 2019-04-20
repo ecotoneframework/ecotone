@@ -4,6 +4,11 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterceptedEndpoint;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
@@ -11,13 +16,8 @@ use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
  * @package SimplyCodedSoftware\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface ChannelAdapterConsumerBuilder
+interface ChannelAdapterConsumerBuilder extends ConsumerLifecycleBuilder, InterceptedEndpoint
 {
-    /**
-     * @return string
-     */
-    public function getRequestChannelName() : string;
-
     /**
      * @return string
      */
@@ -27,6 +27,19 @@ interface ChannelAdapterConsumerBuilder
      * @return string[]
      */
     public function getRequiredReferences() : array;
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return $this
+     */
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor);
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return $this
+     */
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor);
+
 
     /**
      * @param ChannelResolver $channelResolver

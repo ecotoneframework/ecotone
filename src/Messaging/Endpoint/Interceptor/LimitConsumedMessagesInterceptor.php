@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Endpoint\Interceptor;
 
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerInterceptor;
-use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Class LimitConsumedMessagesExtension
@@ -76,6 +75,6 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
     {
         $this->currentSentMessages++;
 
-        $this->shouldBeStopped = $this->currentSentMessages > $this->messageLimit;
+        $this->shouldBeStopped = $this->currentSentMessages >= $this->messageLimit;
     }
 }

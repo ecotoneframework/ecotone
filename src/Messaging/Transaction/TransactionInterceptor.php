@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Transaction;
 
+use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
+use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Message;
@@ -11,6 +13,7 @@ use SimplyCodedSoftware\Messaging\Message;
  * Class TransactionInterceptor
  * @package SimplyCodedSoftware\Messaging\Transaction
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @MethodInterceptor()
  */
 class TransactionInterceptor
 {
@@ -22,6 +25,7 @@ class TransactionInterceptor
      * @return mixed
      * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      * @throws \Throwable
+     * @Around(precedence=-10, pointcut="@(Transactional::class)")
      */
     public function transactional(MethodInvocation $methodInvocation, ReferenceSearchService $referenceSearchService, Transactional $transactional, Message $message)
     {

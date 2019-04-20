@@ -36,12 +36,6 @@ interface GatewayBuilder extends InterceptedEndpoint
     public function getInterfaceName() : string;
 
     /**
-     * @param InterfaceToCallRegistry $interfaceToCallRegistry
-     * @return InterfaceToCall
-     */
-    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry) : InterfaceToCall;
-
-    /**
      * @return string
      */
     public function getRelatedMethodName() : string;

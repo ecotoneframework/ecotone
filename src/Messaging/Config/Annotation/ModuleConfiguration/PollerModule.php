@@ -53,7 +53,7 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
                     ->setCron($poller->cron)
                     ->setInitialDelayInMilliseconds($poller->initialDelayInMilliseconds)
                     ->setFixedRateInMilliseconds($poller->fixedRateInMilliseconds)
-                    ->setTransactionFactoryReferenceNames($poller->transactionFactoryReferenceNames)
+
                     ->setErrorChannelName($poller->errorChannelName)
                     ->setMaxMessagePerPoll($poller->maxMessagePerPoll)
                     ->setTriggerReferenceName($poller->triggerReferenceName)

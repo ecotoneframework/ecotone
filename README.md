@@ -1,8 +1,7 @@
 @TODO 
 
-- combined gateways
-- configurable interceptors on gateway
-- consumer interceptor after send message using gateway interceptor
+- poller module
+- add interceptors for consumer lifecycle
 - aggregate root as a service
 - simple types for aggregate commands/queries
 - allow inject all headers

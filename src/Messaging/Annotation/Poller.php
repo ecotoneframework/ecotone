@@ -41,7 +41,23 @@ class Poller
      */
     public $initialDelayInMilliseconds = PollingMetadata::DEFAULT_INITIAL_DELAY;
     /**
+     * @var object[]
+     */
+    public $endpointAnnotations = [];
+    /**
      * @var string[]
      */
-    public $transactionFactoryReferenceNames = [];
+    public $requiredInterceptorNames = [];
+    /**
+     * How much ram can poller use before stopping
+     *
+     * @var int
+     */
+    public $memoryLimitInMegabytes = PollingMetadata::DEFAULT_MEMORY_LIMIT_MEGABYTES;
+    /**
+     * How many messages should poller handle before stopping
+     *
+     * @var int
+     */
+    public $handledMessageLimit = PollingMetadata::DEFAULT_HANDLED_MESSAGE_LIMIT;
 }

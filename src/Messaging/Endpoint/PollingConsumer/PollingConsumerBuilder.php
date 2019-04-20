@@ -76,8 +76,7 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
             );
         Assert::isTrue(\assert($gateway instanceof EntrypointGateway), "Internal error, wrong class, expected " . EntrypointGateway::class);
 
-        return InterceptedConsumer::createWith(
-            InboundChannelAdapterBuilder::createWithTaskExecutor(new ChannelBridgeTaskExecutor($pollableChannel,$gateway))
+        return InboundChannelAdapterBuilder::createWithTaskExecutor(new ChannelBridgeTaskExecutor($pollableChannel,$gateway))
                 ->withEndpointId($messageHandlerBuilder->getEndpointId())
                 ->withTransactionFactories($pollingMetadata->getTransactionFactoryReferenceNames())
                 ->withErrorChannel($pollingMetadata->getErrorChannelName())
@@ -86,8 +85,6 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
                         ? CronTrigger::createWith($pollingMetadata->getCron())
                         : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds())
                 )
-                ->build($channelResolver, $referenceSearchService, $pollingMetadata),
-            $pollingMetadata
-        );
+                ->build($channelResolver, $referenceSearchService, $pollingMetadata);
     }
 }

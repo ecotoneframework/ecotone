@@ -60,7 +60,7 @@ class PollingConsumerBuilderTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function __test_calling_pollable_consumer_with_transactions()
+    public function test_calling_pollable_consumer_with_transactions()
     {
         $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = "inputChannelName";
@@ -111,7 +111,7 @@ class PollingConsumerBuilderTest extends MessagingTest
             InMemoryReferenceSearchService::createEmpty(),
             $replyViaHeadersMessageHandlerBuilder,
             PollingMetadata::create("some")
-                ->setStopAfterExceedingHandledMessageLimit(3)
+                ->setHandledMessageLimit(3)
         );
 
         $pollableChannel->send(MessageBuilder::withPayload("somePayload")->build());

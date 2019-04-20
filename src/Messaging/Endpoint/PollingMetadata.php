@@ -15,6 +15,8 @@ class PollingMetadata
     const DEFAULT_FIXED_RATE = 1000;
 
     const DEFAULT_INITIAL_DELAY = 0;
+    const DEFAULT_MEMORY_LIMIT_MEGABYTES = 0;
+    const DEFAULT_HANDLED_MESSAGE_LIMIT = 0;
 
     /**
      * @var string
@@ -29,18 +31,6 @@ class PollingMetadata
      */
     private $errorChannelName = "";
     /**
-     * @var int
-     */
-    private $maxMessagePerPoll = self::DEFAULT_MAX_MESSAGES_PER_POLL;
-    /**
-     * @var string
-     */
-    private $triggerReferenceName = "";
-    /**
-     * @var string
-     */
-    private $taskExecutorName = "";
-    /**
      * @var int in milliseconds
      */
     private $fixedRateInMilliseconds = self::DEFAULT_FIXED_RATE;
@@ -51,11 +41,39 @@ class PollingMetadata
     /**
      * @var int
      */
-    private $stopAfterExceedingHandledMessageLimit = 0;
+    private $handledMessageLimit = self::DEFAULT_HANDLED_MESSAGE_LIMIT;
     /**
      * @var string[]
      */
     private $transactionFactoryReferenceNames = [];
+    /**
+     * @var int
+     */
+    private $memoryLimitInMegabytes = self::DEFAULT_MEMORY_LIMIT_MEGABYTES;
+    /**
+     * @var int
+     */
+    private $maxMessagePerPoll = self::DEFAULT_MAX_MESSAGES_PER_POLL;
+    /**
+     * @var bool
+     */
+    private $withSignalInterceptors = false;
+    /**
+     * @var string[]
+     */
+    private $requiredInterceptorNames;
+    /**
+     * @var object[]
+     */
+    private $endpointAnnotations;
+    /**
+     * @var string
+     */
+    private $triggerReferenceName = "";
+    /**
+     * @var string
+     */
+    private $taskExecutorName = "";
 
     /**
      * PollingMetadata constructor.
@@ -64,6 +82,7 @@ class PollingMetadata
     private function __construct(string $endpointId)
     {
         $this->endpointId = $endpointId;
+        $this->withSignalInterceptors = extension_loaded('pcntl');
     }
 
     /**
@@ -160,17 +179,98 @@ class PollingMetadata
     }
 
     /**
-     * @param int $stopAfterExceedingHandledMessageLimit
+     * @param int $handledMessageLimit
      * @return PollingMetadata
      */
-    public function setStopAfterExceedingHandledMessageLimit(int $stopAfterExceedingHandledMessageLimit): PollingMetadata
+    public function setHandledMessageLimit(int $handledMessageLimit): PollingMetadata
     {
         $copy = $this->createCopy();
-        $copy->stopAfterExceedingHandledMessageLimit = $stopAfterExceedingHandledMessageLimit;
+        $copy->handledMessageLimit = $handledMessageLimit;
 
         return $copy;
     }
 
+    /**
+     * @param int $memoryLimit
+     * @return PollingMetadata
+     */
+    public function setMemoryLimitInMegaBytes(int $memoryLimit) : PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->memoryLimitInMegabytes = $memoryLimit;
+
+        return $copy;
+    }
+
+    /**
+     * @param bool $withSignalInterceptors
+     * @return PollingMetadata
+     */
+    public function setSignalInterceptors(bool $withSignalInterceptors) : PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->withSignalInterceptors = $withSignalInterceptors;
+
+        return $copy;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRequiredInterceptorNames(): array
+    {
+        return $this->requiredInterceptorNames;
+    }
+
+    /**
+     * @param string[] $requiredInterceptorNames
+     * @return PollingMetadata
+     */
+    public function setRequiredInterceptorNames(array $requiredInterceptorNames): PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->requiredInterceptorNames = $requiredInterceptorNames;
+
+        return $copy;
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getEndpointAnnotations(): array
+    {
+        return $this->endpointAnnotations;
+    }
+
+    /**
+     * @param object[] $endpointAnnotations
+     * @return PollingMetadata
+     */
+    public function setEndpointAnnotations(array $endpointAnnotations): PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->endpointAnnotations = $endpointAnnotations;
+
+        return $copy;
+    }
+
+
+
+    /**
+     * @return bool
+     */
+    public function isWithSignalInterceptors(): bool
+    {
+        return $this->withSignalInterceptors;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMemoryLimitInMegabytes(): int
+    {
+        return $this->memoryLimitInMegabytes;
+    }
 
     /**
      * @param string[] $transactionFactoryReferenceNames
@@ -259,9 +359,9 @@ class PollingMetadata
     /**
      * @return int
      */
-    public function getStopAfterExceedingHandledMessageLimit(): int
+    public function getHandledMessageLimit(): int
     {
-        return $this->stopAfterExceedingHandledMessageLimit;
+        return $this->handledMessageLimit;
     }
 
     /**

@@ -78,42 +78,6 @@ class ConsumerEndpointFactoryTest extends MessagingTest
     }
 
     /**
-     * @throws MessagingException
-     * @throws NoConsumerFactoryForBuilderException
-     */
-    public function test_creating_poll_or_throw_consumer_with_limit_messages_interceptor()
-    {
-        $inputChannel = QueueChannel::create();
-        $replyChannel = QueueChannel::create();
-        $consumerBuilders = [new PollOrThrowMessageHandlerConsumerBuilder()];
-        $firstValueForMathOperations = 0;
-        $secondValueForMathOperations = 4;
-        $messageHandler = ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create($secondValueForMathOperations), "sum");
-
-        $message = $this->buildMessageWithReplyChannel($firstValueForMathOperations, $replyChannel);
-
-        $consumerEndpointFactory = new ConsumerEndpointFactory(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                self::INPUT_CHANNEL_NAME => $inputChannel
-            ]),
-            InMemoryReferenceSearchService::createEmpty(),
-            $consumerBuilders,
-            []
-        );
-
-        $messageHandler = $messageHandler
-            ->withInputChannelName(self::INPUT_CHANNEL_NAME);
-        $consumer = $consumerEndpointFactory->createForMessageHandler($messageHandler);
-        $consumer->run();
-        $inputChannel->send($message);
-
-        $this->assertEquals(
-            4,
-            $replyChannel->receive()->getPayload()
-        );
-    }
-
-    /**
      * @param MessageChannel $inputChannel
      * @param array $consumerBuilders
      * @param array $preCallInterceptorBuilders

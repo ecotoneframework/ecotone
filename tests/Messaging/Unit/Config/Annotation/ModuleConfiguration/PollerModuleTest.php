@@ -28,7 +28,6 @@ class PollerModuleTest extends AnnotationConfigurationTest
                     ->setCron("* * * * *")
                     ->setInitialDelayInMilliseconds(2000)
                     ->setFixedRateInMilliseconds(130)
-                    ->setTransactionFactoryReferenceNames(["transaction"])
                     ->setErrorChannelName("errorChannel")
                     ->setMaxMessagePerPoll(5)
                     ->setTriggerReferenceName("trigger")

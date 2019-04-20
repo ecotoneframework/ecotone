@@ -14,7 +14,7 @@ interface InterceptedEndpoint
 {
     /**
      * @param AroundInterceptorReference $aroundInterceptorReference
-     * @return self
+     * @return static
      */
     public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference);
 
@@ -25,7 +25,7 @@ interface InterceptedEndpoint
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry) : InterfaceToCall;
 
     /**
-     * @param iterable $endpointAnnotations
+     * @param object[] $endpointAnnotations
      * @return static
      */
     public function withEndpointAnnotations(iterable $endpointAnnotations);
@@ -38,5 +38,12 @@ interface InterceptedEndpoint
     /**
      * @return string[]
      */
-    public function getRequiredInterceptorReferenceNames() : iterable;
+    public function getRequiredInterceptorNames() : iterable;
+
+    /**
+     * @param string[] $interceptorNames
+     *
+     * @return static
+     */
+    public function withRequiredInterceptorNames(iterable $interceptorNames);
 }

@@ -3,6 +3,9 @@
 namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
+use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
+use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\SignalInterceptor;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 
 /**
  * Class ContinuouslyRunningConsumer
@@ -36,21 +39,42 @@ class InterceptedConsumer implements ConsumerLifecycle
     }
 
     /**
-     * @param ConsumerLifecycle $consumerLifecycle
+     * @param ConsumerLifecycleBuilder $consumerLifecycleBuilder
      * @param PollingMetadata|null $pollingMetadata
+     * @param \Closure $buildContext
      * @return ConsumerLifecycle
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWith(ConsumerLifecycle $consumerLifecycle, ?PollingMetadata $pollingMetadata) : ConsumerLifecycle
+    public static function createWith(ConsumerLifecycleBuilder $consumerLifecycleBuilder, ?PollingMetadata $pollingMetadata, \Closure $buildContext) : ConsumerLifecycle
     {
         if (!$pollingMetadata) {
-            return new self($consumerLifecycle, []);
+            return new self($buildContext(), []);
         }
 
         $interceptors = [];
-        if($pollingMetadata->getStopAfterExceedingHandledMessageLimit() > 0) {
-            $interceptors[] = new LimitConsumedMessagesInterceptor($pollingMetadata->getStopAfterExceedingHandledMessageLimit());
+        if($pollingMetadata->getHandledMessageLimit() > 0) {
+            $interceptors[] = new LimitConsumedMessagesInterceptor($pollingMetadata->getHandledMessageLimit());
+        }
+        if ($pollingMetadata->getMemoryLimitInMegabytes() !== 0) {
+            $interceptors[] = new LimitMemoryUsageInterceptor($pollingMetadata->getMemoryLimitInMegabytes());
+        }
+        if ($pollingMetadata->isWithSignalInterceptors()) {
+            $interceptor[] = new SignalInterceptor();
         }
 
+        foreach ($interceptors as $interceptor) {
+            $consumerLifecycleBuilder->addAroundInterceptor(
+                AroundInterceptorReference::createWithDirectObject(
+                    "",
+                    $interceptor,
+                    "postSend",
+                    -10000,
+                    ""
+                )
+            );
+        }
+
+        $consumerLifecycle = $buildContext();
         return new self($consumerLifecycle, $interceptors);
     }
 

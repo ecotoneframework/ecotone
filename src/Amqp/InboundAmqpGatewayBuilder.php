@@ -17,6 +17,10 @@ use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageConverter\DefaultHeaderMapper;
 use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
@@ -117,14 +121,6 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getRequestChannelName(): string
-    {
-        return $this->requestChannelName;
-    }
-
-    /**
      * @param string $headerMapper
      * @return InboundAmqpGatewayBuilder
      */
@@ -155,6 +151,70 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
     public function getRequiredReferences(): array
     {
         return [$this->amqpConnectionReferenceName, AmqpAdmin::REFERENCE_NAME];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor)
+    {
+        // TODO: Implement addBeforeInterceptor() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor)
+    {
+        // TODO: Implement addAfterInterceptor() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    {
+        // TODO: Implement addAroundInterceptor() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        // TODO: Implement getInterceptedInterface() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    {
+        // TODO: Implement withEndpointAnnotations() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEndpointAnnotations(): array
+    {
+        // TODO: Implement getEndpointAnnotations() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredInterceptorNames(): iterable
+    {
+        // TODO: Implement getRequiredInterceptorReferenceNames() method.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withRequiredInterceptorNames(iterable $interceptorNames)
+    {
+        // TODO: Implement withRequiredInterceptorNames() method.
     }
 
     /**

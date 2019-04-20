@@ -8,12 +8,16 @@ use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
+use SimplyCodedSoftware\Messaging\Endpoint\InterceptedConsumer;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
 use SimplyCodedSoftware\Messaging\Scheduling\SyncTaskScheduler;
@@ -31,6 +35,10 @@ use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
 {
     /**
+     * @var GatewayBuilder
+     */
+    private $gateway;
+    /**
      * @var string
      */
     private $referenceName;
@@ -38,10 +46,6 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
      * @var string
      */
     private $methodName;
-    /**
-     * @var string
-     */
-    private $requestChannelName;
     /**
      * @var string
      */
@@ -62,34 +66,42 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
      * @var string[]
      */
     private $transactionFactoriesReferenceNames = [];
+    /**
+     * @var string
+     */
+    private $requestChannelName;
 
     /**
      * InboundChannelAdapterBuilder constructor.
-     * @param string $inputChannelName
+     * @param string $requestChannelName
      * @param string $referenceName
      * @param string $methodName
+     * @throws \Exception
      */
-    private function __construct(string $inputChannelName, string $referenceName, string $methodName)
+    private function __construct(string $requestChannelName, string $referenceName, string $methodName)
     {
-        $this->requestChannelName = $inputChannelName;
+        $this->gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), TaskExecutor::class, "execute", "forwardChannel");
         $this->referenceName = $referenceName;
         $this->methodName = $methodName;
+        $this->requestChannelName = $requestChannelName;
     }
 
     /**
-     * @param string $inputChannelName
+     * @param string $requestChannelName
      * @param string $referenceName
      * @param string $methodName
      * @return InboundChannelAdapterBuilder
+     * @throws \Exception
      */
-    public static function create(string $inputChannelName, string $referenceName, string $methodName) : self
+    public static function create(string $requestChannelName, string $referenceName, string $methodName) : self
     {
-        return new self($inputChannelName, $referenceName, $methodName);
+        return new self($requestChannelName, $referenceName, $methodName);
     }
 
     /**
      * @param TaskExecutor $taskExecutor
      * @return InboundChannelAdapterBuilder
+     * @throws \Exception
      */
     public static function createWithTaskExecutor(TaskExecutor $taskExecutor) : self
     {
@@ -114,17 +126,6 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
     public function withTrigger(Trigger $trigger) : self
     {
         $this->trigger = $trigger;
-
-        return $this;
-    }
-
-    /**
-     * @param string $inputChannelName
-     * @return InboundChannelAdapterBuilder
-     */
-    public function withInputChannelName(string $inputChannelName) : self
-    {
-        $this->requestChannelName = $inputChannelName;
 
         return $this;
     }
@@ -173,9 +174,75 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @inheritDoc
      */
-    public function getRequestChannelName(): string
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor)
     {
-        return $this->requestChannelName;
+        $this->gateway->addBeforeInterceptor($methodInterceptor);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor)
+    {
+        $this->gateway->addAfterInterceptor($methodInterceptor);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    {
+        $this->gateway->addAroundInterceptor($aroundInterceptorReference);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $this->gateway->getInterceptedInterface($interfaceToCallRegistry);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    {
+        $this->gateway->withEndpointAnnotations($endpointAnnotations);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEndpointAnnotations(): array
+    {
+        return $this->gateway->getEndpointAnnotations();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredInterceptorNames(): iterable
+    {
+        return $this->gateway->getRequiredInterceptorNames();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withRequiredInterceptorNames(iterable $interceptorNames)
+    {
+        $this->gateway->withRequiredInterceptorNames($interceptorNames);
+
+        return $this;
     }
 
     /**
@@ -185,50 +252,60 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
     {
         Assert::notNullAndEmpty($this->endpointId, "Endpoint Id for inbound channel adapter can't be empty");
 
-        $taskExecutor = $this->taskExecutor;
-        $forwardChannel = DirectChannel::create();
-        /** @var TaskExecutor $forwardGateway */
-        $forwardGateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), TaskExecutor::class, "execute", "forwardChannel")
-                            ->withTransactionFactories($this->transactionFactoriesReferenceNames)
-                            ->withErrorChannel($this->errorChannel)
-                            ->build(
-                                $referenceSearchService,
-                                InMemoryChannelResolver::createWithChannelResolver($channelResolver, [
-                                    "forwardChannel" => $forwardChannel
-                                ])
-                            );
+        return
+            InterceptedConsumer::createWith(
+                $this,
+                $pollingMetadata,
+                function() use ($channelResolver, $referenceSearchService, $pollingMetadata) {
+                    $taskExecutor = $this->taskExecutor;
+                    $forwardChannel = DirectChannel::create();
+                    $channelResolver = InMemoryChannelResolver::createWithChannelResolver(
+                        $channelResolver,
+                        ["forwardChannel" => $forwardChannel]
+                    );
 
-        if (!$taskExecutor) {
-            $referenceService = $referenceSearchService->get($this->referenceName);
-            $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($referenceService, $this->methodName);
+                    /** @var TaskExecutor $forwardGateway */
+                    $forwardGateway = $this->gateway
+                        ->withTransactionFactories($this->transactionFactoriesReferenceNames)
+                        ->withErrorChannel($this->errorChannel)
+                        ->build(
+                            $referenceSearchService,
+                            $channelResolver
+                        );
 
-            if (!$interfaceToCall->hasNoParameters()) {
-                throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not have any parameters");
-            }
+                    if (!$taskExecutor) {
+                        $referenceService = $referenceSearchService->get($this->referenceName);
+                        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($referenceService, $this->methodName);
 
-            if ($interfaceToCall->hasReturnTypeVoid()) {
-                throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not be void");
-            }
+                        if (!$interfaceToCall->hasNoParameters()) {
+                            throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not have any parameters");
+                        }
 
-            $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), InboundChannelGateway::class, "execute", $this->requestChannelName)
-                ->build($referenceSearchService, $channelResolver);
-            Assert::isTrue(\assert($gateway instanceof InboundChannelGateway), "Internal error, wrong class, expected " . InboundChannelGateway::class);
+                        if ($interfaceToCall->hasReturnTypeVoid()) {
+                            throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not be void");
+                        }
 
-            $taskExecutor = new InboundChannelTaskExecutor(
-                $gateway,
-                $referenceService,
-                $this->methodName
+                        $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), InboundChannelGateway::class, "execute", $this->requestChannelName)
+                            ->build($referenceSearchService, $channelResolver);
+                        Assert::isTrue(\assert($gateway instanceof InboundChannelGateway), "Internal error, wrong class, expected " . InboundChannelGateway::class);
+
+                        $taskExecutor = new InboundChannelTaskExecutor(
+                            $gateway,
+                            $referenceService,
+                            $this->methodName
+                        );
+                    }
+
+                    $forwardChannel->subscribe(new TaskExecutorBridge($taskExecutor));
+                    $trigger = $this->trigger ? $this->trigger : PeriodicTrigger::create(5, 0);
+
+                    return new InboundChannelAdapter(
+                        $this->endpointId,
+                        SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
+                        $trigger,
+                        $forwardGateway
+                    );
+                }
             );
-        }
-
-        $forwardChannel->subscribe(new TaskExecutorBridge($taskExecutor));
-        $trigger = $this->trigger ? $this->trigger : PeriodicTrigger::create(5, 0);
-
-        return new InboundChannelAdapter(
-            $this->endpointId,
-            SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
-            $trigger,
-            $forwardGateway
-        );
     }
 }

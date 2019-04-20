@@ -88,6 +88,10 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @var object[]
      */
     private $endpointAnnotations = [];
+    /**
+     * @var string[]
+     */
+    private $requiredInterceptorNames = [];
 
     /**
      * GatewayProxyBuilder constructor.
@@ -276,11 +280,21 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function getRequiredInterceptorReferenceNames(): iterable
+    public function getRequiredInterceptorNames(): iterable
     {
         $requiredReferences = [];
 
         return $requiredReferences;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withRequiredInterceptorNames(iterable $interceptorNames)
+    {
+        $this->requiredInterceptorNames = $interceptorNames;
+
+        return $this;
     }
 
     /**

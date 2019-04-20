@@ -113,7 +113,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function getRequiredInterceptorReferenceNames(): iterable
+    public function getRequiredInterceptorNames(): iterable
     {
         return [];
     }
@@ -124,6 +124,14 @@ class DumbGatewayBuilder implements GatewayBuilder
     public function getEndpointAnnotations(): array
     {
         return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withRequiredInterceptorNames(iterable $interceptorNames)
+    {
+        return;
     }
 
     /**

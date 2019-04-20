@@ -3,16 +3,10 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller;
 
-use SimplyCodedSoftware\Messaging\Annotation\EndpointId;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\MessageParameter;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Value;
 use SimplyCodedSoftware\Messaging\Annotation\Poller;
 use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 
 /**
  * Class ServiceActivatorWithAllConfigurationDefined
@@ -31,15 +25,18 @@ class ServiceActivatorWithPollerExample
      *          cron="* * * * *",
      *          initialDelayInMilliseconds=2000,
      *          fixedRateInMilliseconds=130,
-     *          transactionFactoryReferenceNames={"transaction"},
      *          errorChannelName="errorChannel",
      *          maxMessagePerPoll=5,
      *          triggerReferenceName="trigger",
-     *          taskExecutorName="taskExecutor"
+     *          taskExecutorName="taskExecutor",
+     *          memoryLimitInMegabytes=100,
+     *          requiredInterceptorNames={"some"},
+     *          handledMessageLimit=10,
+     *          endpointAnnotations={@Transactional("transactionFactory")}
      *     )
      * )
      */
-    public function sendMessage() : void
+    public function sendMessage(): void
     {
         return;
     }

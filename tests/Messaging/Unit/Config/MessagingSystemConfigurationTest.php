@@ -734,7 +734,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
-                        ->withRequiredInterceptorReferenceNames([$calculatorWithTwo, $calculatorWithTwoAround])
+                        ->withRequiredInterceptorNames([$calculatorWithTwo, $calculatorWithTwoAround])
                         ->withInputChannelName($inputChannelName)
                         ->withEndpointId($endpointName)
                 )

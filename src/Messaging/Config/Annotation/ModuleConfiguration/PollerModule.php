@@ -10,6 +10,7 @@ use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
+use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 
 /**
  * Class PollerModule
@@ -53,11 +54,12 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
                     ->setCron($poller->cron)
                     ->setInitialDelayInMilliseconds($poller->initialDelayInMilliseconds)
                     ->setFixedRateInMilliseconds($poller->fixedRateInMilliseconds)
-
                     ->setErrorChannelName($poller->errorChannelName)
                     ->setMaxMessagePerPoll($poller->maxMessagePerPoll)
-                    ->setTriggerReferenceName($poller->triggerReferenceName)
-                    ->setTaskExecutorName($poller->taskExecutorName);
+                    ->setMemoryLimitInMegaBytes($poller->memoryLimitInMegabytes)
+                    ->setRequiredInterceptorNames($poller->requiredInterceptorNames)
+                    ->setHandledMessageLimit($poller->handledMessageLimit)
+                    ->setEndpointAnnotations($poller->endpointAnnotations);
             }
         }
 

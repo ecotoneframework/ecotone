@@ -43,10 +43,6 @@ class PollingMetadata
      */
     private $handledMessageLimit = self::DEFAULT_HANDLED_MESSAGE_LIMIT;
     /**
-     * @var string[]
-     */
-    private $transactionFactoryReferenceNames = [];
-    /**
      * @var int
      */
     private $memoryLimitInMegabytes = self::DEFAULT_MEMORY_LIMIT_MEGABYTES;
@@ -270,26 +266,6 @@ class PollingMetadata
     public function getMemoryLimitInMegabytes(): int
     {
         return $this->memoryLimitInMegabytes;
-    }
-
-    /**
-     * @param string[] $transactionFactoryReferenceNames
-     * @return PollingMetadata
-     */
-    public function setTransactionFactoryReferenceNames(array $transactionFactoryReferenceNames): PollingMetadata
-    {
-        $copy = $this->createCopy();
-        $copy->transactionFactoryReferenceNames = $transactionFactoryReferenceNames;
-
-        return $copy;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getTransactionFactoryReferenceNames(): array
-    {
-        return $this->transactionFactoryReferenceNames;
     }
 
     /**

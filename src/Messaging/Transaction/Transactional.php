@@ -25,10 +25,13 @@ class Transactional implements WithRequiredReferenceNameList
      */
     public function __construct(array $values)
     {
-        $this->factoryReferenceNameList =
-            isset($values[self::FACTORY_REFERENCE_NAME_LIST])
-                ? $values[self::FACTORY_REFERENCE_NAME_LIST]
-                : (isset($values['value']) ? $values['value'] : []);
+        if (isset($values[self::FACTORY_REFERENCE_NAME_LIST])) {
+            $this->factoryReferenceNameList = $values[self::FACTORY_REFERENCE_NAME_LIST];
+        }else {
+            if (isset($values['value'])) {
+                $this->factoryReferenceNameList = is_array($values['value']) ? $values['value'] : [$values['value']];
+            }
+        }
     }
 
     /**

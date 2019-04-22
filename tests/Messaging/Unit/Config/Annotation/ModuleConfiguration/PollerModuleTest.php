@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller\ServiceActivatorWithPollerExample;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
@@ -30,8 +31,10 @@ class PollerModuleTest extends AnnotationConfigurationTest
                     ->setFixedRateInMilliseconds(130)
                     ->setErrorChannelName("errorChannel")
                     ->setMaxMessagePerPoll(5)
-                    ->setTriggerReferenceName("trigger")
-                    ->setTaskExecutorName("taskExecutor")
+                    ->setHandledMessageLimit(10)
+                    ->setMemoryLimitInMegaBytes(100)
+                    ->setRequiredInterceptorNames(["some"])
+                    ->setEndpointAnnotations([Transactional::createWith(["transactionFactory"])])
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([

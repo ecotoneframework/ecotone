@@ -78,7 +78,6 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
 
         return InboundChannelAdapterBuilder::createWithTaskExecutor(new ChannelBridgeTaskExecutor($pollableChannel,$gateway))
                 ->withEndpointId($messageHandlerBuilder->getEndpointId())
-                ->withTransactionFactories($pollingMetadata->getTransactionFactoryReferenceNames())
                 ->withErrorChannel($pollingMetadata->getErrorChannelName())
                 ->withTrigger(
                     $pollingMetadata->getCron()

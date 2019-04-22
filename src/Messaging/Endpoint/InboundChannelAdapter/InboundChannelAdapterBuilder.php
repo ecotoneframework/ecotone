@@ -266,7 +266,6 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
 
                     /** @var TaskExecutor $forwardGateway */
                     $forwardGateway = $this->gateway
-                        ->withTransactionFactories($this->transactionFactoriesReferenceNames)
                         ->withErrorChannel($this->errorChannel)
                         ->build(
                             $referenceSearchService,

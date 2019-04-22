@@ -27,8 +27,6 @@ class ServiceActivatorWithPollerExample
      *          fixedRateInMilliseconds=130,
      *          errorChannelName="errorChannel",
      *          maxMessagePerPoll=5,
-     *          triggerReferenceName="trigger",
-     *          taskExecutorName="taskExecutor",
      *          memoryLimitInMegabytes=100,
      *          requiredInterceptorNames={"some"},
      *          handledMessageLimit=10,

@@ -1,7 +1,7 @@
 @TODO 
 
-- poller module
 - add interceptors for consumer lifecycle
+- @inheritdoc + extra annotations
 - aggregate root as a service
 - simple types for aggregate commands/queries
 - allow inject all headers

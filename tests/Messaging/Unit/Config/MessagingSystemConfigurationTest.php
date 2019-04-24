@@ -932,6 +932,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
     public function test_registering_interceptors_for_gateway_using_pointcut()
     {
         $requestChannelName = "inputChannel";
+        $aroundInterceptor = NoReturnMessageHandler::create();
+
         $messagingSystemConfiguration =
             MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
                 ->registerGatewayBuilder(
@@ -959,9 +961,10 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::createWithDirectObject(
-                        "aroundCalculating",
-                        CalculatingServiceInterceptorExample::create(2), "sum",
-                        1, CalculatingService::class
+                        "around",
+                        $aroundInterceptor, "handle",
+                        1,
+                        ServiceInterfaceCalculatingService::class
                     )
                 )
                 ->registerAfterMethodInterceptor(
@@ -987,9 +990,11 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $gateway = $messagingSystemConfiguration->getGatewayByName('ref-name');
 
         $this->assertEquals(
-            16,
+            12,
             $gateway->calculate(1)
         );
+
+        $this->assertTrue($aroundInterceptor->wasCalled());
     }
 
     public function test_registering_interceptors_for_gateway_using_interceptor_name()

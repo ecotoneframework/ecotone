@@ -6,6 +6,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\Assert;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodCall
@@ -87,5 +88,20 @@ class MethodCall
         return array_map(function (MethodArgument $argument){
             return $argument->value();
         }, $this->methodArguments);
+    }
+
+    /**
+     * @param string $parameterName
+     * @return bool
+     */
+    public function hasMethodArgumentWithName(string $parameterName): bool
+    {
+        foreach ($this->methodArguments as $methodArgument) {
+            if ($methodArgument->getParameterName() === $parameterName) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

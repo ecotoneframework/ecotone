@@ -18,6 +18,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
+use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
@@ -620,6 +621,25 @@ class MethodInvokerTest extends MessagingTest
         );
 
         $requestMessage = MessageBuilder::withPayload("test")->build();
+        $this->assertNull($methodInvocation->processMessage($requestMessage));
+    }
+
+    public function test_passing_payload_if_compatible()
+    {
+        $interceptingService1 = CallWithStdClassInterceptorExample::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("some") ;
+        $methodInvocation = MethodInvoker::createWithInterceptors(
+            $interceptedService, 'callWithMessage', [],
+            InMemoryReferenceSearchService::createWith([
+                CallWithStdClassInterceptorExample::class => $interceptingService1
+            ]),
+            [AroundInterceptorReference::createWithNoPointcut("someId", CallWithStdClassInterceptorExample::class, "callWithStdClass")],
+            []
+        );
+
+        $requestMessage = MessageBuilder::withPayload(new \stdClass())
+                            ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(\stdClass::class))
+                            ->build();
         $this->assertNull($methodInvocation->processMessage($requestMessage));
     }
 }

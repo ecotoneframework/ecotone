@@ -44,10 +44,10 @@ class CalculatingServiceInterceptorExample
     /**
      * @param MethodInvocation $methodInvocation
      * @param int $amount
-     * @return int
      * @Around(precedence=2, pointcut=CalculatingServiceInterceptorExample::class)
+     * @return mixed
      */
-    public function sum(MethodInvocation $methodInvocation, int $amount) : int
+    public function sum(MethodInvocation $methodInvocation, int $amount)
     {
         $result = $amount + $this->secondValueForMathOperations;
 

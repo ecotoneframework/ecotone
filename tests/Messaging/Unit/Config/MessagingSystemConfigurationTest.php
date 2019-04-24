@@ -992,6 +992,68 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
+    public function test_registering_interceptors_for_gateway_using_interceptor_name()
+    {
+        $requestChannelName = "inputChannel";
+        $aroundInterceptor = NoReturnMessageHandler::create();
+        $messagingSystemConfiguration =
+            MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+                ->registerGatewayBuilder(
+                    GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
+                        ->withRequiredInterceptorNames(["interceptor0", "interceptor1", "around", "interceptor2", "interceptor3"])
+                )
+                ->registerMessageHandler(
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result")
+                        ->withInputChannelName($requestChannelName)
+                )
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor0",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
+                        0,""
+                    )
+                )
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor1",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum"),
+                        1,""
+                    )
+                )
+                ->registerAroundMethodInterceptor(
+                    AroundInterceptorReference::createWithDirectObject(
+                        "around",
+                        $aroundInterceptor, "handle",
+                        1,""
+                    )
+                )
+                ->registerAfterMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor2",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result"),
+                        1,""
+                    )
+                )
+                ->registerAfterMethodInterceptor(
+                    MethodInterceptor::create(
+                        "interceptor3",
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
+                        0,""
+                    )
+                )
+                ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+                ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        /** @var ServiceInterfaceCalculatingService $gateway */
+        $gateway = $messagingSystemConfiguration->getGatewayByName('ref-name');
+
+        $this->assertEquals(
+            12,
+            $gateway->calculate(1)
+        );
+        $this->assertTrue($aroundInterceptor->wasCalled());
+    }
+
     /**
      * @throws MessagingException
      */

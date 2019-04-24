@@ -57,9 +57,7 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
                     ->setErrorChannelName($poller->errorChannelName)
                     ->setMaxMessagePerPoll($poller->maxMessagePerPoll)
                     ->setMemoryLimitInMegaBytes($poller->memoryLimitInMegabytes)
-                    ->setRequiredInterceptorNames($poller->requiredInterceptorNames)
-                    ->setHandledMessageLimit($poller->handledMessageLimit)
-                    ->setEndpointAnnotations($poller->endpointAnnotations);
+                    ->setHandledMessageLimit($poller->handledMessageLimit);
             }
         }
 

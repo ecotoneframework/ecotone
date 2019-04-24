@@ -2,11 +2,14 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller\ServiceActivatorWithPollerExample;
+
+use Doctrine\Common\Annotations\AnnotationException;
+use ReflectionException;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
+use SimplyCodedSoftware\Messaging\MessagingException;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller\ServiceActivatorWithPollerExample;
 
 /**
  * Class PollerModuleTest
@@ -17,9 +20,9 @@ class PollerModuleTest extends AnnotationConfigurationTest
 {
     /**
      * @return mixed
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws MessagingException
      */
     public function test_registering_poller_for_endpoint()
     {
@@ -33,8 +36,6 @@ class PollerModuleTest extends AnnotationConfigurationTest
                     ->setMaxMessagePerPoll(5)
                     ->setHandledMessageLimit(10)
                     ->setMemoryLimitInMegaBytes(100)
-                    ->setRequiredInterceptorNames(["some"])
-                    ->setEndpointAnnotations([Transactional::createWith(["transactionFactory"])])
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([

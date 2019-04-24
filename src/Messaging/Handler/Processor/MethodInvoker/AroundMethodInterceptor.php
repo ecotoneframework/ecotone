@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use ReflectionException;
+use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
@@ -35,16 +36,26 @@ class AroundMethodInterceptor
      * @var ReferenceSearchService
      */
     private $referenceSearchService;
+    /**
+     * @var bool
+     */
+    private $allowForMethodArgumentReplacement;
+    /**
+     * @var string
+     */
+    private $methodArgumentReplacementExceptionMessage;
 
     /**
      * MethodInterceptor constructor.
      * @param object $referenceToCall
      * @param InterfaceToCall $interfaceToCall
      * @param ReferenceSearchService $referenceSearchService
-     * @throws TypeDefinitionException
+     * @param bool $allowForMethodArgumentReplacement
+     * @param string $methodArgumentReplacementExceptionMessage
      * @throws MessagingException
+     * @throws TypeDefinitionException
      */
-    private function __construct($referenceToCall, InterfaceToCall $interfaceToCall, ReferenceSearchService $referenceSearchService)
+    private function __construct($referenceToCall, InterfaceToCall $interfaceToCall, ReferenceSearchService $referenceSearchService, bool $allowForMethodArgumentReplacement, string $methodArgumentReplacementExceptionMessage)
     {
         Assert::isObject($referenceToCall, "Method Interceptor should point to instance not class name");
 
@@ -55,6 +66,8 @@ class AroundMethodInterceptor
         $this->referenceToCall = $referenceToCall;
         $this->interceptorInterfaceToCall = $interfaceToCall;
         $this->referenceSearchService = $referenceSearchService;
+        $this->allowForMethodArgumentReplacement = $allowForMethodArgumentReplacement;
+        $this->methodArgumentReplacementExceptionMessage = $methodArgumentReplacementExceptionMessage;
     }
 
     /**
@@ -79,21 +92,24 @@ class AroundMethodInterceptor
      * @param object $referenceToCall
      * @param string $methodName
      * @param ReferenceSearchService $referenceSearchService
+     * @param bool $allowForMethodArgumentReplacement
+     * @param string $methodArgumentReplacementExceptionMessage
      * @return AroundMethodInterceptor
-     * @throws InvalidArgumentException
      * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws ReferenceNotFoundException
+     * @throws InvalidArgumentException
      * @throws MessagingException
+     * @throws ReferenceNotFoundException
+     * @throws ReflectionException
+     * @throws TypeDefinitionException
      */
-    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService): self
+    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService, bool $allowForMethodArgumentReplacement, string $methodArgumentReplacementExceptionMessage): self
     {
         /** @var InterfaceToCallRegistry $interfaceRegistry */
         $interfaceRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
 
         $interfaceToCall = $interfaceRegistry->getFor($referenceToCall, $methodName);
 
-        return new self($referenceToCall, $interfaceToCall, $referenceSearchService);
+        return new self($referenceToCall, $interfaceToCall, $referenceSearchService, $allowForMethodArgumentReplacement, $methodArgumentReplacementExceptionMessage);
     }
 
     /**
@@ -114,14 +130,15 @@ class AroundMethodInterceptor
         $interceptedInstanceType = TypeDescriptor::createFromVariable($methodInvocation->getInterceptedInstance());
         $referenceSearchServiceTypeDescriptor = TypeDescriptor::create(ReferenceSearchService::class);
         $messageType = TypeDescriptor::create(Message::class);
+        $messagePayloadType = $requestMessage->getHeaders()->hasContentType() && $requestMessage->getHeaders()->getContentType()->hasTypeParameter()
+                                ? $requestMessage->getHeaders()->getContentType()->getTypeParameter()
+                                : TypeDescriptor::createUnknownType();
 
         foreach ($this->interceptorInterfaceToCall->getInterfaceParameters() as $parameter) {
             $resolvedArgument = null;
 
-            foreach ($methodCall->getMethodArguments() as $methodArgument) {
-                if ($methodArgument->hasSameTypeAs($parameter)) {
-                    $resolvedArgument = $methodArgument->value();
-                }
+            if (!$resolvedArgument && $parameter->hasType($messagePayloadType)) {
+                $resolvedArgument = $requestMessage->getPayload();
             }
 
             if (!$resolvedArgument && $parameter->hasType($methodInvocationType)) {
@@ -161,6 +178,12 @@ class AroundMethodInterceptor
                 }
             }
 
+            foreach ($methodCall->getMethodArguments() as $methodArgument) {
+                if ($methodArgument->hasSameTypeAs($parameter)) {
+                    $resolvedArgument = $methodArgument->value();
+                }
+            }
+
             if (!$resolvedArgument && !$parameter->doesAllowNulls()) {
                 throw MethodInvocationException::create("{$this->interceptorInterfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`. Maybe your docblock type hint is not correct?");
             }
@@ -178,5 +201,21 @@ class AroundMethodInterceptor
         }
 
         return $returnValue;
+    }
+
+    /**
+     * @return bool
+     */
+    public function doesAllowForMethodArgumentReplacement(): bool
+    {
+        return $this->allowForMethodArgumentReplacement;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethodArgumentReplacementExceptionMessage(): string
+    {
+        return $this->methodArgumentReplacementExceptionMessage;
     }
 }

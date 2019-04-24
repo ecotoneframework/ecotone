@@ -219,7 +219,9 @@ class Gateway
         $gatewayInternalHandler = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle")
             ->withEndpointAnnotations($this->endpointAnnotations);
         foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
-            $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference);
+            $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference->disallowMethodArgumentReplacement(
+                "Around interceptors can't replace method arguments for gateway {$this->interfaceToCall}"
+            ));
         }
 
 

@@ -6,7 +6,6 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\Poller;
 use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 
 /**
  * Class ServiceActivatorWithAllConfigurationDefined
@@ -28,9 +27,7 @@ class ServiceActivatorWithPollerExample
      *          errorChannelName="errorChannel",
      *          maxMessagePerPoll=5,
      *          memoryLimitInMegabytes=100,
-     *          requiredInterceptorNames={"some"},
-     *          handledMessageLimit=10,
-     *          endpointAnnotations={@Transactional("transactionFactory")}
+     *          handledMessageLimit=10
      *     )
      * )
      */

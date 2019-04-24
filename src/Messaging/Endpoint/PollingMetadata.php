@@ -55,14 +55,6 @@ class PollingMetadata
      */
     private $withSignalInterceptors = false;
     /**
-     * @var string[]
-     */
-    private $requiredInterceptorNames;
-    /**
-     * @var object[]
-     */
-    private $endpointAnnotations;
-    /**
      * @var string
      */
     private $triggerReferenceName = "";
@@ -209,47 +201,6 @@ class PollingMetadata
 
         return $copy;
     }
-
-    /**
-     * @return string[]
-     */
-    public function getRequiredInterceptorNames(): array
-    {
-        return $this->requiredInterceptorNames;
-    }
-
-    /**
-     * @param string[] $requiredInterceptorNames
-     * @return PollingMetadata
-     */
-    public function setRequiredInterceptorNames(array $requiredInterceptorNames): PollingMetadata
-    {
-        $copy = $this->createCopy();
-        $copy->requiredInterceptorNames = $requiredInterceptorNames;
-
-        return $copy;
-    }
-
-    /**
-     * @return object[]
-     */
-    public function getEndpointAnnotations(): array
-    {
-        return $this->endpointAnnotations;
-    }
-
-    /**
-     * @param object[] $endpointAnnotations
-     * @return PollingMetadata
-     */
-    public function setEndpointAnnotations(array $endpointAnnotations): PollingMetadata
-    {
-        $copy = $this->createCopy();
-        $copy->endpointAnnotations = $endpointAnnotations;
-
-        return $copy;
-    }
-
 
 
     /**

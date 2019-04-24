@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodInvokerProcessor
@@ -89,6 +90,16 @@ class MethodInvokerChainProcessor implements MethodInvocation
      */
     public function replaceArgument(string $parameterName, $value): void
     {
+        foreach ($this->aroundMethodInterceptors->getArrayCopy() as $aroundMethodInterceptor) {
+            if (!$aroundMethodInterceptor->doesAllowForMethodArgumentReplacement()) {
+                throw MethodArgumentReplacementException::create("Can't replace argument with name `{$parameterName}`. " . $aroundMethodInterceptor->getMethodArgumentReplacementExceptionMessage());
+            }
+        }
+
+        if (!$this->methodCall->hasMethodArgumentWithName($parameterName)) {
+            throw InvalidArgumentException::create("Can't replace argument with parameter name {$parameterName}. This parameter does not exists for {$this->getInterceptedInterface()}");
+        }
+
         $this->methodCall->replaceArgument($parameterName, $value);
     }
 

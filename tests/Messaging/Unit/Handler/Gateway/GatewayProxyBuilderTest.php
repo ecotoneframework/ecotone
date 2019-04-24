@@ -2,13 +2,19 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway;
 
+use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
+use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodArgumentReplacementException;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\InvalidMessageHeaderException;
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransaction;
 use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
 use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 use SimplyCodedSoftware\Messaging\Transaction\TransactionInterceptor;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway\DumbSendAndReceiveService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
@@ -925,6 +931,36 @@ class GatewayProxyBuilderTest extends MessagingTest
             new \stdClass(),
             $gateway->execute([], 100)
         );
+    }
+
+    public function test_throwing_exception_if_trying_to_replace_argument_using_around_interceptor_on_gateway()
+    {
+        $messageHandler     = NoReturnMessageHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
+            ->addAroundInterceptor(
+                AroundInterceptorReference::createWithDirectObject(
+                    "aroundCalculating",
+                    CalculatingServiceInterceptorExample::create(2), "sum",
+                    1,""
+                )
+            );
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                ]
+            )
+        );
+
+        $this->expectException(MethodArgumentReplacementException::class);
+
+        $gatewayProxy->calculate(5);
     }
 
     /**

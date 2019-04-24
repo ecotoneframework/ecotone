@@ -142,7 +142,7 @@ class InternalEnrichingService
             $mediaType = MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE));
             if (!$mediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP_OBJECT)) {
                 if ($this->conversionService->canConvert(
-                    $mediaType->hasTypeParameter() ? TypeDescriptor::create($mediaType->getTypeParameter()) : TypeDescriptor::createFromVariable($message->getPayload()),
+                    $mediaType->hasTypeParameter() ? $mediaType->getTypeParameter() : TypeDescriptor::createFromVariable($message->getPayload()),
                     $mediaType,
                     TypeDescriptor::createArrayType(),
                     MediaType::createApplicationXPHPObject()

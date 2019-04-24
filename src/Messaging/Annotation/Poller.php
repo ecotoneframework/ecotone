@@ -41,14 +41,6 @@ class Poller
      */
     public $initialDelayInMilliseconds = PollingMetadata::DEFAULT_INITIAL_DELAY;
     /**
-     * @var object[]
-     */
-    public $endpointAnnotations = [];
-    /**
-     * @var string[]
-     */
-    public $requiredInterceptorNames = [];
-    /**
      * How much ram can poller use before stopping
      *
      * @var int

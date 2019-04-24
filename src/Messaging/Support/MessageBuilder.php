@@ -63,6 +63,17 @@ final class MessageBuilder
     }
 
     /**
+     * @param MediaType $mediaType
+     * @return MessageBuilder
+     */
+    public function setContentTypeIfAbsent(MediaType $mediaType) : self
+    {
+        $this->setHeaderIfAbsent(MessageHeaders::CONTENT_TYPE, $mediaType->toString());
+
+        return $this;
+    }
+
+    /**
      * @param array|string[] $headers
      * @return MessageBuilder
      */

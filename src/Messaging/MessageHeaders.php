@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\Messaging;
 
 use Ramsey\Uuid\Uuid;
+use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 
 /**
  * Class MessageHeaders
@@ -217,12 +218,13 @@ class MessageHeaders
     }
 
     /**
-     * @return string
+     * @return MediaType
      * @throws MessagingException
+     * @throws Support\InvalidArgumentException
      */
-    public function getContentType() : string
+    public function getContentType() : MediaType
     {
-        return $this->get(self::CONTENT_TYPE);
+        return MediaType::parseMediaType($this->get(self::CONTENT_TYPE));
     }
 
     /**

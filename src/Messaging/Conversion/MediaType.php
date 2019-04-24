@@ -275,13 +275,13 @@ final class MediaType
     }
 
     /**
-     * @return string
+     * @return TypeDescriptor
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function getTypeParameter() : string
+    public function getTypeParameter() : TypeDescriptor
     {
-        return $this->getParameter(self::TYPE_PARAMETER);
+        return TypeDescriptor::create($this->getParameter(self::TYPE_PARAMETER));
     }
 
     /**

@@ -100,7 +100,7 @@ class OutboundAmqpGateway implements MessageHandler
         }
 
         if ($message->getHeaders()->hasContentType()) {
-            $messageToSend->setContentType($message->getHeaders()->getContentType());
+            $messageToSend->setContentType($message->getHeaders()->getContentType()->toString());
         }
 
         if (!is_null($routingKey) && $routingKey !== "") {

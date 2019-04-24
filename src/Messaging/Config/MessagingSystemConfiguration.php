@@ -583,7 +583,7 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $relatedInterceptors = [];
         foreach ($requiredInterceptorNames as $requiredInterceptorName) {
-            if (!$this->hasInterceptorWithNameExists($requiredInterceptorName)) {
+            if (!$this->doesInterceptorWithNameExists($requiredInterceptorName)) {
                 throw ConfigurationException::create("Can't find interceptor with name {$requiredInterceptorName} for {$interceptedInterface}");
             }
         }
@@ -702,7 +702,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @param string $name
      * @return bool
      */
-    private function hasInterceptorWithNameExists(string $name) : bool
+    private function doesInterceptorWithNameExists(string $name) : bool
     {
         /** @var InterceptorWithPointCut $interceptor */
         foreach (array_merge($this->aroundMethodInterceptors, $this->beforeCallMethodInterceptors, $this->afterCallMethodInterceptors) as $interceptor)

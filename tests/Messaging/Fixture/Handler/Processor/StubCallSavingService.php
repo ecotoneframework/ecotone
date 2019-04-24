@@ -141,6 +141,17 @@ class StubCallSavingService
 
     }
 
+    public function callWithMessage(Message $message) : void
+    {
+
+    }
+
+
+    public function callWithMessageReturnType(Message $message) : Message
+    {
+        return $message;
+    }
+
     /**
      * @return bool
      */

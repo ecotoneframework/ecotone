@@ -44,6 +44,14 @@ class AroundInterceptorReference implements InterceptorWithPointCut
      * @var string
      */
     private $referenceName;
+    /**
+     * @var bool
+     */
+    private $allowForMethodArgumentReplacement = true;
+    /**
+     * @var string
+     */
+    private $argumentReplacementExceptionMessage = "";
 
     /**
      * InterceptorReference constructor.
@@ -157,8 +165,23 @@ class AroundInterceptorReference implements InterceptorWithPointCut
         return AroundMethodInterceptor::createWith(
             $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName),
             $this->methodName,
-            $referenceSearchService
+            $referenceSearchService,
+            $this->allowForMethodArgumentReplacement,
+            $this->argumentReplacementExceptionMessage
         );
+    }
+
+    /**
+     * @param string $errorMessage
+     * @return AroundInterceptorReference
+     */
+    public function disallowMethodArgumentReplacement(string $errorMessage) : self
+    {
+        $copy = clone $this;
+        $copy->allowForMethodArgumentReplacement = false;
+        $copy->argumentReplacementExceptionMessage = $errorMessage;
+
+        return $copy;
     }
 
     /**

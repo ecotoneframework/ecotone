@@ -24,7 +24,6 @@ use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilde
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
@@ -1015,35 +1014,35 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     MethodInterceptor::create(
                         "interceptor0",
                         ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
-                        0,""
+                        0, ""
                     )
                 )
                 ->registerBeforeMethodInterceptor(
                     MethodInterceptor::create(
                         "interceptor1",
                         ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum"),
-                        1,""
+                        1, ""
                     )
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::createWithDirectObject(
                         "around",
                         $aroundInterceptor, "handle",
-                        1,""
+                        1, ""
                     )
                 )
                 ->registerAfterMethodInterceptor(
                     MethodInterceptor::create(
                         "interceptor2",
                         ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result"),
-                        1,""
+                        1, ""
                     )
                 )
                 ->registerAfterMethodInterceptor(
                     MethodInterceptor::create(
                         "interceptor3",
                         ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
-                        0,""
+                        0, ""
                     )
                 )
                 ->registerConsumerFactory(new EventDrivenConsumerBuilder())

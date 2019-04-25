@@ -32,7 +32,7 @@ use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
  */
 class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
 {
-    private const DEFAULT_RECEIVE_TIMEOUT = 10000;
+    private const DEFAULT_RECEIVE_TIMEOUT = 0;
 
     /**
      * @var string

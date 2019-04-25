@@ -13,7 +13,6 @@ use SimplyCodedSoftware\Messaging\Message;
  * Class TransactionInterceptor
  * @package SimplyCodedSoftware\Messaging\Transaction
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MethodInterceptor()
  */
 class TransactionInterceptor
 {
@@ -25,7 +24,7 @@ class TransactionInterceptor
      * @return mixed
      * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
      * @throws \Throwable
-     * @Around(precedence=-10, pointcut="@(Transactional::class)")
+     * @Around(precedence=-10, pointcut="@(SimplyCodedSoftware\Messaging\Transaction\Transactional)")
      */
     public function transactional(MethodInvocation $methodInvocation, ReferenceSearchService $referenceSearchService, Transactional $transactional, Message $message)
     {

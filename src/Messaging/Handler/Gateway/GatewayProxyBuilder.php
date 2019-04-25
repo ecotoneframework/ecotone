@@ -282,9 +282,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     public function getRequiredInterceptorNames(): iterable
     {
-        $requiredReferences = [];
-
-        return $requiredReferences;
+        return $this->requiredInterceptorNames;
     }
 
     /**

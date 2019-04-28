@@ -84,7 +84,6 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
             }
 
             $gatewayBuilders[] = GatewayProxyBuilder::create($annotationRegistration->getReferenceName(), $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
-                ->withTransactionFactories($annotation->transactionFactories)
                 ->withErrorChannel($annotation->errorChannel)
                 ->withParameterConverters($parameterConverters)
                 ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)

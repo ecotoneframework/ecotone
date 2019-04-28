@@ -30,10 +30,6 @@ class Gateway
      */
     public $parameterConverters = [];
     /**
-     * @var array
-     */
-    public $transactionFactories = [];
-    /**
      * @var int
      */
     public $replyTimeoutInMilliseconds = GatewayProxyBuilder::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;

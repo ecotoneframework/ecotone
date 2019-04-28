@@ -36,7 +36,7 @@ interface BookStoreGatewayExample
      *          @GatewayHeaderValue(headerName="owner", headerValue="Johny"),
      *          @GatewayHeaderArray(parameterName="data")
      *      },
-     *      transactionFactories={"dbalTransaction"},
+     *      requiredInterceptorNames={"dbalTransaction"},
      *      replyTimeoutInMilliseconds=100
      * )
      */

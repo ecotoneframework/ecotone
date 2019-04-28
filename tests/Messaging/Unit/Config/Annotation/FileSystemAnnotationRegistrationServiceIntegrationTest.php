@@ -76,7 +76,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $messageToPayloadParameter = new GatewayPayload();
         $messageToPayloadParameter->parameterName = "orderId";
         $gatewayAnnotation->parameterConverters = [$messageToPayloadParameter];
-        $gatewayAnnotation->transactionFactories = ["dbalTransaction"];
+        $gatewayAnnotation->requiredInterceptorNames = ["dbalTransaction"];
 
         $this->assertEquals(
             [
@@ -98,7 +98,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $messageToPayloadParameter = new GatewayPayload();
         $messageToPayloadParameter->parameterName = "orderId";
         $gatewayAnnotation->parameterConverters = [$messageToPayloadParameter];
-        $gatewayAnnotation->transactionFactories = ["dbalTransaction"];
+        $gatewayAnnotation->requiredInterceptorNames = ["dbalTransaction"];
 
         $this->assertEquals(
             [

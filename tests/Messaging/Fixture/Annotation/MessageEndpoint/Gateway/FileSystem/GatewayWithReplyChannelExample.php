@@ -25,7 +25,7 @@ interface GatewayWithReplyChannelExample
      *      parameterConverters={
      *          @GatewayPayload(parameterName="orderId")
      *      },
-     *      transactionFactories={"dbalTransaction"}
+     *      requiredInterceptorNames={"dbalTransaction"}
      * )
      */
     public function buy(string $orderId): bool;

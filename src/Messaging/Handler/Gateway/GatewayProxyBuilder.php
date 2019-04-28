@@ -211,20 +211,6 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
-     * @param string[] $transactionFactoryReferenceNames
-     * @return GatewayProxyBuilder
-     */
-    public function withTransactionFactories(array $transactionFactoryReferenceNames): self
-    {
-        $this->transactionFactoryReferenceNames = $transactionFactoryReferenceNames;
-        foreach ($transactionFactoryReferenceNames as $transactionFactoryReferenceName) {
-            $this->requiredReferenceNames[] = $transactionFactoryReferenceName;
-        }
-
-        return $this;
-    }
-
-    /**
      * @param AroundInterceptorReference $aroundInterceptorReference
      * @return $this
      */

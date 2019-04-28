@@ -66,10 +66,6 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      * @var string
      */
     private $acknowledgeMode = AmqpAcknowledgementCallback::AUTO_ACK;
-    /**
-     * @var string[]
-     */
-    private $transactionReferenceNames = [];
 
     /**
      * InboundAmqpEnqueueGatewayBuilder constructor.
@@ -241,7 +237,6 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
                             GatewayHeaderBuilder::create("consumer", AmqpHeader::HEADER_CONSUMER),
                             GatewayHeaderBuilder::create("amqpMessage", AmqpHeader::HEADER_AMQP_MESSAGE)
                         ])
-                        ->withTransactionFactories(array_merge($this->transactionReferenceNames, [$customTransactionReferenceName]))
                         ->withMessageConverters([$customConverterReferenceName])
                         ->build($referenceSearchService1, $channelResolver);
 

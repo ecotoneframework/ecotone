@@ -57,35 +57,40 @@ class Pointcut
             return false;
         }
 
-        if ($this->isRelatedClass($this->expression, $interfaceToCall)) {
-            return true;
-        }
-        if (strpos($this->expression, "::") !== false) {
-            list($class, $method) = explode("::", $this->expression);
+        $multipleExpression = explode("||", $this->expression);
 
-            if ($this->isRelatedClass($class, $interfaceToCall)) {
-                $method = str_replace("()", "", $method);
-                if ($interfaceToCall->hasMethodName($method)) {
-                    return true;
-                }
+        foreach ($multipleExpression as $expression) {
+            if ($this->isRelatedClass($expression, $interfaceToCall)) {
+                return true;
             }
-        }
+            if (strpos($expression, "::") !== false) {
+                list($class, $method) = explode("::", $expression);
 
-        if (strpos($this->expression, "@(") !== false) {
-            $annotationToCheck = str_replace(["@(", ")"], "", $this->expression);
-            $annotationToCheck = TypeDescriptor::create($annotationToCheck);
-
-            foreach ($endpointAnnotations as $endpointAnnotation) {
-                $endpointType = TypeDescriptor::createFromVariable($endpointAnnotation);
-
-                if ($endpointType->equals($annotationToCheck)) {
-                    return true;
+                if ($this->isRelatedClass($class, $interfaceToCall)) {
+                    $method = str_replace("()", "", $method);
+                    if ($interfaceToCall->hasMethodName($method)) {
+                        return true;
+                    }
                 }
             }
 
-            return
-                $interfaceToCall->hasMethodAnnotation($annotationToCheck)
-                || $interfaceToCall->hasClassAnnotation($annotationToCheck);
+            if (strpos($expression, "@(") !== false) {
+                $annotationToCheck = str_replace(["@(", ")"], "", $expression);
+                $annotationToCheck = TypeDescriptor::create($annotationToCheck);
+
+                foreach ($endpointAnnotations as $endpointAnnotation) {
+                    $endpointType = TypeDescriptor::createFromVariable($endpointAnnotation);
+
+                    if ($endpointType->equals($annotationToCheck)) {
+                        return true;
+                    }
+                }
+
+                if ($interfaceToCall->hasMethodAnnotation($annotationToCheck)
+                    || $interfaceToCall->hasClassAnnotation($annotationToCheck)) {
+                    return true;
+                }
+            }
         }
 
         return false;

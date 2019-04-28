@@ -32,6 +32,14 @@ class PointcutTest extends TestCase
         );
     }
 
+    public function test_pointing_to_class_with_or()
+    {
+        $this->itShouldCut(
+            \stdClass::class . "||" . CallMultipleUnorderedArgumentsInvocationInterceptorExample::class,
+            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+        );
+    }
+
     public function test_pointing_to_exact_method_in_class()
     {
         $this->itShouldCut(

@@ -37,4 +37,8 @@ class Gateway
      * @var int
      */
     public $replyTimeoutInMilliseconds = GatewayProxyBuilder::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
+    /**
+     * @var array
+     */
+    public $requiredInterceptorNames = [];
 }

@@ -87,6 +87,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                 ->withTransactionFactories($annotation->transactionFactories)
                 ->withErrorChannel($annotation->errorChannel)
                 ->withParameterConverters($parameterConverters)
+                ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
                 ->withReplyMillisecondTimeout($annotation->replyTimeoutInMilliseconds);
         }
 

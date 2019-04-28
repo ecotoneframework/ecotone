@@ -220,7 +220,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, ?PollingMetadata $pollingMetadata): ConsumerLifecycle
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         /** @var AmqpAdmin $amqpAdmin */
         $amqpAdmin = $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME);

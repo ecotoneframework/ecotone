@@ -19,6 +19,10 @@ class CalculatingServiceInterceptorExample
      * @var int
      */
     private $secondValueForMathOperations;
+    /**
+     * @var bool
+     */
+    private $wasCalled = false;
 
     /**
      * @param int $secondValueForMathOperations
@@ -33,10 +37,11 @@ class CalculatingServiceInterceptorExample
     }
 
     /**
+     * @param MethodInvocation $methodInvocation
      * @param int $amount
      * @return int
      */
-    public function result(int $amount) : int
+    public function result(MethodInvocation $methodInvocation, int $amount) : int
     {
         return $amount;
     }
@@ -81,5 +86,13 @@ class CalculatingServiceInterceptorExample
 
         $methodInvocation->replaceArgument("amount", $result);
         return $methodInvocation->proceed();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isWasCalled(): bool
+    {
+        return $this->wasCalled;
     }
 }

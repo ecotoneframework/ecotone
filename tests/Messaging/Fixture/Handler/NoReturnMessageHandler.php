@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
 
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 
@@ -15,6 +16,8 @@ class NoReturnMessageHandler implements MessageHandler
     /** @var  bool */
     private $wasCalled = false;
 
+    private $callCount = 0;
+
     public static function create() : self
     {
         return new self();
@@ -26,6 +29,13 @@ class NoReturnMessageHandler implements MessageHandler
     public function handle(Message $message): void
     {
         $this->wasCalled = true;
+        $this->callCount++;
+    }
+
+    public function handleWithMethodInvocation(MethodInvocation $methodInvocation, Message $message) : void
+    {
+        $this->wasCalled = true;
+        $this->callCount++;
     }
 
     public function wasCalled() : bool
@@ -33,6 +43,13 @@ class NoReturnMessageHandler implements MessageHandler
         return $this->wasCalled;
     }
 
+    /**
+     * @return int
+     */
+    public function getCallCount(): int
+    {
+        return $this->callCount;
+    }
 
 
     public function __toString()

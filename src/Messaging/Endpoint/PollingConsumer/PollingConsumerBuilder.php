@@ -7,8 +7,8 @@ use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\InterceptedConsumer;
+use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
+use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenChannelAdapter;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
@@ -18,8 +18,9 @@ use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Scheduling\CronTrigger;
+use SimplyCodedSoftware\Messaging\Scheduling\EpochBasedClock;
 use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
+use SimplyCodedSoftware\Messaging\Scheduling\SyncTaskScheduler;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 
 /**
@@ -46,7 +47,7 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
     /**
      * @inheritDoc
      */
-    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, ?PollingMetadata $pollingMetadata): ConsumerLifecycle
+    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         Assert::notNullAndEmpty($messageHandlerBuilder->getEndpointId(), "Message Endpoint name can't be empty for {$messageHandlerBuilder}");
         Assert::notNull($pollingMetadata, "No polling meta data defined for polling endpoint {$messageHandlerBuilder}");
@@ -64,26 +65,24 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
             "execute",
             "inputChannel"
         )
+            ->withErrorChannel($pollingMetadata->getErrorChannelName())
             ->build(
                 InMemoryReferenceSearchService::createWithReferenceService(
                     $referenceSearchService, [
                         "handler" => $messageHandler
                     ]
                 ),
-                InMemoryChannelResolver::createFromAssociativeArray([
+                InMemoryChannelResolver::createWithChannelResolver($channelResolver, [
                     "inputChannel" => $connectionChannel
                 ])
             );
         Assert::isTrue(\assert($gateway instanceof EntrypointGateway), "Internal error, wrong class, expected " . EntrypointGateway::class);
 
-        return InboundChannelAdapterBuilder::createWithTaskExecutor(new ChannelBridgeTaskExecutor($pollableChannel,$gateway))
-                ->withEndpointId($messageHandlerBuilder->getEndpointId())
-                ->withErrorChannel($pollingMetadata->getErrorChannelName())
-                ->withTrigger(
-                    $pollingMetadata->getCron()
-                        ? CronTrigger::createWith($pollingMetadata->getCron())
-                        : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds())
-                )
-                ->build($channelResolver, $referenceSearchService, $pollingMetadata);
+        return new InboundChannelAdapter(
+            $messageHandlerBuilder->getEndpointId(),
+            SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
+            PeriodicTrigger::create(1, 0),
+            new ChannelBridgeTaskExecutor($pollableChannel, $gateway)
+        );
     }
 }

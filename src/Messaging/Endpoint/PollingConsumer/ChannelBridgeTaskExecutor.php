@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer;
 
+use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
 

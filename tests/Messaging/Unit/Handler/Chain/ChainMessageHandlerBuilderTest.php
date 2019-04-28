@@ -122,8 +122,8 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $this->createChainHandlerAndHandle(
             [
-                TransformerBuilder::createWithReferenceObject(new StdClassTransformer(), "transform"),
-                TransformerBuilder::createWithReferenceObject( new StringTransformer(), "transform"),
+                TransformerBuilder::createWithDirectObject(new StdClassTransformer(), "transform"),
+                TransformerBuilder::createWithDirectObject( new StringTransformer(), "transform"),
             ],
             $requestPayload,
             $replyChannel
@@ -146,10 +146,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $this->createChainHandlerAndHandle(
             [
-                TransformerBuilder::createWithReferenceObject(new StdClassTransformer(), "transform"),
-                TransformerBuilder::createWithReferenceObject( new StringTransformer(), "transform"),
+                TransformerBuilder::createWithDirectObject(new StdClassTransformer(), "transform"),
+                TransformerBuilder::createWithDirectObject( new StringTransformer(), "transform"),
                 ChainMessageHandlerBuilder::create()
-                    ->chain(TransformerBuilder::createWithReferenceObject(new StdClassTransformer(), "transform"))
+                    ->chain(TransformerBuilder::createWithDirectObject(new StdClassTransformer(), "transform"))
             ],
             $requestPayload,
             $replyChannel
@@ -176,7 +176,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
                    EnrichHeaderWithValueBuilder::create("awesome", "yes")
                 ]),
                 ChainMessageHandlerBuilder::create()
-                    ->chain(TransformerBuilder::createWithReferenceObject( new StdClassTransformer(), "transform"))
+                    ->chain(TransformerBuilder::createWithDirectObject( new StdClassTransformer(), "transform"))
                     ->chain(TransformerBuilder::createHeaderEnricher(["superAwesome" => "no"])),
                 TransformerBuilder::createHeaderEnricher(["superAwesome" => "yes"])
             ],

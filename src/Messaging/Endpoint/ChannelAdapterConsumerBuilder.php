@@ -45,8 +45,8 @@ interface ChannelAdapterConsumerBuilder extends ConsumerLifecycleBuilder, Interc
      * @param ChannelResolver $channelResolver
      * @param ReferenceSearchService $referenceSearchService
      *
-     * @param PollingMetadata|null $pollingMetadata
+     * @param PollingMetadata $pollingMetadata
      * @return ConsumerLifecycle
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, ?PollingMetadata $pollingMetadata) : ConsumerLifecycle;
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata) : ConsumerLifecycle;
 }

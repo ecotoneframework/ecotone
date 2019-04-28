@@ -20,6 +20,8 @@ use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
@@ -302,7 +304,7 @@ class TransformerBuilderTest extends MessagingTest
     {
         $referenceObject = ServiceWithReturnValue::create();
 
-        $transformer = TransformerBuilder::createWithReferenceObject($referenceObject, "getName")
+        $transformer = TransformerBuilder::createWithDirectObject($referenceObject, "getName")
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createEmpty()
@@ -363,10 +365,10 @@ class TransformerBuilderTest extends MessagingTest
      */
     public function test_creating_with_interceptors()
     {
-        $objectToInvoke = CalculatingServiceInterceptorExample::create(0);
+        $objectToInvoke = CalculatingService::create(0);
         $replyChannel = QueueChannel::create();
 
-        $serviceActivator = TransformerBuilder::createWithReferenceObject($objectToInvoke, "result")
+        $serviceActivator = TransformerBuilder::createWithDirectObject($objectToInvoke, "result")
             ->withInputChannelName("someName")
             ->withEndpointId("someEndpoint")
             ->addAroundInterceptor(AroundInterceptorReference::create("calculator1",CalculatingServiceInterceptorExample::class, "sum", 2, ""))

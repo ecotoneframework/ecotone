@@ -19,6 +19,7 @@ use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
@@ -40,14 +41,17 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\Calculatin
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Channel\DumbChannelInterceptor;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbGatewayBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithReturnValue;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -664,9 +668,132 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
+     * @throws ConfigurationException
+     * @throws Exception
+     * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_registering_interceptors_using_pointcuts()
+    public function test_intercepting_channel_adapter()
+    {
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+        $requestChannelName = "requestChannelName";
+        $endpointName = "pollableName";
+        $requestChannel  = DirectChannel::create();
+        $messageHandler = ReplyViaHeadersMessageHandler::createReplyWithRequestMessage();
+        $requestChannel->subscribe($messageHandler);
+
+        $endChain = ReplyViaHeadersMessageHandler::createReplyWithRequestMessage();
+
+        $messagingSystem = $messagingSystemConfiguration
+            ->registerConsumer(
+                InboundChannelAdapterBuilder::createWithDirectObject(
+                    $requestChannelName,
+                    ConsumerContinuouslyWorkingService::createWithReturn(5),
+                    "executeReturn"
+                )->withEndpointId($endpointName)
+            )
+            ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference($messageHandler, "handle")->withInputChannelName($requestChannelName))
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerPollingMetadata(
+                PollingMetadata::create($endpointName)
+                    ->setHandledMessageLimit(1)
+            )
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "1",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
+                    1,
+                    ConsumerContinuouslyWorkingService::class
+                )
+            )
+            ->registerAroundMethodInterceptor(
+                AroundInterceptorReference::createWithDirectObject(
+                    "around",
+                    CalculatingServiceInterceptorExample::create(0), "result",
+                    1,
+                    ConsumerContinuouslyWorkingService::class
+                )
+            )
+            ->registerAfterMethodInterceptor(
+                MethodInterceptor::create(
+                    "1",
+                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
+                    1,
+                    ConsumerContinuouslyWorkingService::class
+                )
+            )
+            ->registerAfterMethodInterceptor(
+                MethodInterceptor::create(
+                    "1",
+                    ServiceActivatorBuilder::createWithDirectReference($endChain, "handle"),
+                    1,
+                    ConsumerContinuouslyWorkingService::class
+                )
+            )
+
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $messagingSystem->runSeparatelyRunningConsumerBy($endpointName);
+
+        $this->assertEquals(20, $endChain->getReceivedMessage()->getPayload());
+    }
+
+    public function test_intercepting_channel_adapter_with_void_services_by_passing_through_message()
+    {
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+        $requestChannelName = "requestChannelName";
+        $endpointName = "pollableName";
+        $interceptingHandler = NoReturnMessageHandler::create();
+
+        $messagingSystem = $messagingSystemConfiguration
+            ->registerConsumer(
+                InboundChannelAdapterBuilder::createWithDirectObject(
+                    $requestChannelName,
+                    ConsumerContinuouslyWorkingService::createWithReturn(5),
+                    "executeReturn"
+                )->withEndpointId($endpointName)
+            )
+            ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(ServiceWithReturnValue::create(), "getName")->withInputChannelName($requestChannelName))
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerPollingMetadata(
+                PollingMetadata::create($endpointName)
+                    ->setHandledMessageLimit(1)
+            )
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "1",
+                    ServiceActivatorBuilder::createWithDirectReference($interceptingHandler, "handle"),
+                    1,
+                    ConsumerContinuouslyWorkingService::class
+                )
+            )
+            ->registerAroundMethodInterceptor(
+                AroundInterceptorReference::createWithDirectObject(
+                    "around",
+                    $interceptingHandler, "handle",
+                    1,
+                    ConsumerContinuouslyWorkingService::class
+                )
+            )
+            ->registerAfterMethodInterceptor(
+                MethodInterceptor::create(
+                    "1",
+                    ServiceActivatorBuilder::createWithDirectReference($interceptingHandler, "handle"),
+                    1,
+                    ConsumerContinuouslyWorkingService::class
+                )
+            )
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $messagingSystem->runSeparatelyRunningConsumerBy($endpointName);
+
+        $this->assertEquals(3, $interceptingHandler->getCallCount());
+    }
+
+    /**
+     * @throws MessagingException
+     */
+    public function test_registering_interceptors_using_pointcuts_for_message_handler()
     {
         $endpointName = "endpointName";
         $inputChannelName = "inputChannel";

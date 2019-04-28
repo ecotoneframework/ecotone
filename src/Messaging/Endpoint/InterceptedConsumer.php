@@ -68,7 +68,7 @@ class InterceptedConsumer implements ConsumerLifecycle
                     "",
                     $interceptor,
                     "postSend",
-                    -10000,
+                    -100000,
                     ""
                 )
             );

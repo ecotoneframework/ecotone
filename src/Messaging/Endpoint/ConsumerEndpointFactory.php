@@ -76,7 +76,7 @@ class ConsumerEndpointFactory
                     $messageHandlerBuilder,
                     array_key_exists($messageHandlerBuilder->getEndpointId(), $this->pollingMetadataMessageHandlers)
                         ? $this->pollingMetadataMessageHandlers[$messageHandlerBuilder->getEndpointId()]
-                        : null
+                        : PollingMetadata::create($messageHandlerBuilder->getEndpointId())
                 );
             }
         }

@@ -26,7 +26,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
     /**
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_throwing_exception_if_passed_reference_service_has_parameters()
+    public function test_throwing_exception_if_passed_reference_service_has_parameters()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -39,7 +39,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => ServiceExpectingOneArgument::create()
                 ]),
-                null
+                PollingMetadata::create("test")
             );
     }
 
@@ -47,7 +47,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_passed_reference_should_return_parameters()
+    public function test_passed_reference_should_return_parameters()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -60,7 +60,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => ServiceExpectingNoArguments::create()
                 ]),
-                null
+                PollingMetadata::create("test")
             );
     }
 
@@ -68,7 +68,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_running_with_default_period_trigger()
+    public function test_running_with_default_period_trigger()
     {
         $payload = "testPayload";
         $inputChannelName = "inputChannelName";
@@ -86,7 +86,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => $inboundChannelAdapterStoppingService
                 ]),
-                null
+                PollingMetadata::create("test")
             );
 
         $inboundChannelAdapterStoppingService->setConsumerLifecycle($inboundChannel);
@@ -164,7 +164,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
     /**
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_running_with_custom_trigger()
+    public function test_running_with_custom_trigger()
     {
         $payload = "testPayload";
         $inputChannelName = "inputChannelName";
@@ -175,7 +175,6 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             $inputChannelName, "someRef", "execute"
         )
             ->withEndpointId("test")
-            ->withTrigger(PeriodicTrigger::create(1, 0))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $inputChannelName => $inputChannel
@@ -183,7 +182,9 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => $inboundChannelAdapterStoppingService
                 ]),
-                null
+                PollingMetadata::create("test")
+                    ->setFixedRateInMilliseconds(1)
+                    ->setInitialDelayInMilliseconds(0)
             );
 
         $inboundChannelAdapterStoppingService->setConsumerLifecycle($inboundChannel);
@@ -199,7 +200,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
      * @throws InvalidArgumentException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_throwing_exception_if_reference_service_has_no_passed_method()
+    public function test_throwing_exception_if_reference_service_has_no_passed_method()
     {
         $payload = "testPayload";
         $inputChannelName = "inputChannelName";
@@ -219,7 +220,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                 InMemoryReferenceSearchService::createWith([
                     "someRef" => $inboundChannelAdapterStoppingService
                 ]),
-                null
+                PollingMetadata::create("test")
             );
     }
 }

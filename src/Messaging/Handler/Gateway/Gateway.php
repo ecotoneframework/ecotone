@@ -141,7 +141,7 @@ class Gateway
 
         $replyChannelComingFromPreviousGateway = null;
         $errorChannelComingFromPreviousGateway = null;
-        if ($this->interfaceToCall->hasSingleArgument() && $this->interfaceToCall->hasFirstParameterMessageTypeHint()) {
+        if (($this->interfaceToCall->hasSingleArgument() && ($this->interfaceToCall->hasFirstParameterMessageTypeHint() || $methodArguments[0]->value() instanceof Message))) {
             /** @var Message $requestMessage */
             $requestMessage = $methodArguments[0]->value();
 

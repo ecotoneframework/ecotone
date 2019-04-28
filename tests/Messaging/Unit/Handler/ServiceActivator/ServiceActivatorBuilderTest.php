@@ -13,6 +13,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundIntercep
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceReturningMessage;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\StaticallyCalledService;
@@ -191,7 +192,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
      */
     public function test_creating_with_interceptors()
     {
-        $objectToInvoke = CalculatingServiceInterceptorExample::create(0);
+        $objectToInvoke = CalculatingService::create(0);
 
         $firstInterceptor = AroundInterceptorReference::create("calculator1","calculator", "sum", 1, "");
         $secondInterceptor = AroundInterceptorReference::create("calculator2","calculator", "multiply", 2, "");

@@ -30,6 +30,10 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
     private $shouldAdd;
 
     private $callback;
+    /**
+     * @var bool
+     */
+    private $replyWithRequestMessage = false;
 
     /**
      * StubHttpResponseMessageHandler constructor.
@@ -47,6 +51,14 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
     public static function create($replyData) : self
     {
         return new self($replyData, false, null);
+    }
+
+    public static function createReplyWithRequestMessage() : self
+    {
+        $replyViaHeadersMessageHandler = new self(null, false, null);
+        $replyViaHeadersMessageHandler->replyWithRequestMessage = true;
+
+        return $replyViaHeadersMessageHandler;
     }
 
     /**
@@ -77,6 +89,11 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
         if ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
             /** @var MessageChannel $replyChannel */
             $replyChannel = $message->getHeaders()->getReplyChannel();
+
+            if ($this->replyWithRequestMessage) {
+                $replyChannel->send($message);
+                return;
+            }
 
             if ($this->replyData || $this->callback) {
                 $replyData = $this->replyData ? $this->replyData  : call_user_func($this->callback, $message);

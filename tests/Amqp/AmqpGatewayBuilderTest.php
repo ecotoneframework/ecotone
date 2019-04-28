@@ -15,6 +15,7 @@ use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
+use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
@@ -153,7 +154,7 @@ class AmqpGatewayBuilderTest extends AmqpMessagingTest
     public function receive(InboundAmqpGatewayBuilder $inboundAmqpGatewayBuilder, QueueChannel $inboundRequestChannel, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): ?Message
     {
         $inboundAmqpGateway = $inboundAmqpGatewayBuilder
-            ->build($channelResolver, $referenceSearchService, null);
+            ->build($channelResolver, $referenceSearchService, PollingMetadata::create("some"));
         $inboundAmqpGateway->run();
 
         $message = $inboundRequestChannel->receive();

@@ -4,6 +4,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Intercept
 
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
+use SimplyCodedSoftware\Messaging\Message;
 
 /**
  * Class CallWithPassThroughInterceptorExample
@@ -15,8 +16,9 @@ class CallWithPassThroughInterceptorExample extends BaseInterceptorExample
 {
     /**
      * @Around()
+     * @param Message $message
      */
-    public function callWithPassThrough() : void
+    public function callWithPassThrough(Message $message) : void
     {
 
     }

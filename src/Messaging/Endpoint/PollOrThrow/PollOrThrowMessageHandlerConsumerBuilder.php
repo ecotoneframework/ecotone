@@ -37,7 +37,7 @@ class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumer
     /**
      * @inheritDoc
      */
-    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, ?PollingMetadata $pollingMetadata): ConsumerLifecycle
+    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         /** @var PollableChannel $pollableChannel */
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());

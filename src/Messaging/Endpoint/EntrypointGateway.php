@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer;
-
-use SimplyCodedSoftware\Messaging\Message;
+namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 /**
  * Interface PollingConsumerGatewayEntrypoint
@@ -13,7 +11,8 @@ use SimplyCodedSoftware\Messaging\Message;
 interface EntrypointGateway
 {
     /**
-     * @param Message $message
+     * @param mixed $data
+     * @return mixed
      */
-    public function execute(Message $message) : void;
+    public function execute($data);
 }

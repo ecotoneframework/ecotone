@@ -83,6 +83,15 @@ class PollingMetadata
     }
 
     /**
+     * @param PollingMetadata $pollingMetadata
+     * @return PollingMetadata
+     */
+    public static function createFrom(PollingMetadata $pollingMetadata) : self
+    {
+        return clone $pollingMetadata;
+    }
+
+    /**
      * @param string $cron
      * @return PollingMetadata
      */

@@ -106,7 +106,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      * @return TransformerBuilder
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWithReferenceObject($referenceObject, string $methodName) : self
+    public static function createWithDirectObject($referenceObject, string $methodName) : self
     {
         Assert::isObject($referenceObject, "Reference object for transformer must be object");
 

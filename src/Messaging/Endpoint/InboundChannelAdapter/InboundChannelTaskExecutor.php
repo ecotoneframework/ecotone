@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter;
 
+use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
 use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
 
 /**
@@ -22,17 +23,17 @@ class InboundChannelTaskExecutor implements TaskExecutor
      */
     private $method;
     /**
-     * @var InboundChannelGateway
+     * @var EntrypointGateway
      */
     private $inboundChannelGateway;
 
     /**
      * InboundChannelGatewayExecutor constructor.
-     * @param InboundChannelGateway $inboundChannelGateway
+     * @param EntrypointGateway $inboundChannelGateway
      * @param $serviceToCall
      * @param string $method
      */
-    public function __construct(InboundChannelGateway $inboundChannelGateway, $serviceToCall, string $method)
+    public function __construct(EntrypointGateway $inboundChannelGateway, $serviceToCall, string $method)
     {
         $this->serviceToCall = $serviceToCall;
         $this->method = $method;
@@ -46,7 +47,7 @@ class InboundChannelTaskExecutor implements TaskExecutor
     {
         $result = call_user_func_array([$this->serviceToCall, $this->method], []);
 
-        if ($result) {
+        if (!is_null($result)) {
             $this->inboundChannelGateway->execute($result);
         }
     }

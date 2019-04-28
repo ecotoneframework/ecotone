@@ -16,7 +16,6 @@ use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerStoppingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerThrowingExceptionService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Transaction\FakeTransactionFactory;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -30,7 +29,7 @@ class PollingConsumerBuilderTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function __test_creating_consumer_with_period_trigger()
+    public function test_creating_consumer_with_default_period_trigger()
     {
         $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = "inputChannelName";
@@ -57,40 +56,6 @@ class PollingConsumerBuilderTest extends MessagingTest
             "somePayload",
             $directObjectReference->getReceivedPayload()
         );
-    }
-
-    /**
-     * @throws MessagingException
-     */
-    public function __test_calling_pollable_consumer_with_transactions()
-    {
-        $pollingConsumerBuilder = new PollingConsumerBuilder();
-        $inputChannelName = "inputChannelName";
-        $inputChannel = QueueChannel::create();
-        $transaction = NullTransaction::start();
-        $transactionFactory = NullTransactionFactory::createWithPredefinedTransaction($transaction);
-
-        $directObjectReference = ConsumerStoppingService::create(null);
-        $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "executeNoReturn")
-            ->withEndpointId("test")
-            ->withInputChannelName($inputChannelName);
-        $pollingConsumer = $pollingConsumerBuilder->create(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                $inputChannelName => $inputChannel
-            ]),
-            InMemoryReferenceSearchService::createWith([
-                "tx" => $transactionFactory
-            ]),
-            $replyViaHeadersMessageHandlerBuilder,
-            PollingMetadata::create("some")
-                ->set
-        );
-
-        $directObjectReference->setConsumerLifecycle($pollingConsumer);
-        $inputChannel->send(MessageBuilder::withPayload("somePayload")->build());
-
-        $pollingConsumer->run();
-        $this->assertTrue($transaction->isCommitted());
     }
 
     /**
@@ -128,7 +93,7 @@ class PollingConsumerBuilderTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function __test_passing_message_to_error_channel_on_failure()
+    public function test_passing_message_to_error_channel_on_failure()
     {
         $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = "inputChannelName";
@@ -140,6 +105,7 @@ class PollingConsumerBuilderTest extends MessagingTest
         $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "execute")
             ->withEndpointId("test")
             ->withInputChannelName($inputChannelName);
+
         $pollingConsumer = $pollingConsumerBuilder->create(
             InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => $inputChannel,

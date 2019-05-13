@@ -14,6 +14,25 @@ use SimplyCodedSoftware\Messaging\MessageChannel;
  */
 class AmqpChannelBuilder implements MessageChannelBuilder
 {
+    /**
+     * @var string
+     */
+    private $channelName;
+    /**
+     * @var string
+     */
+    private $amqpConnectionReferenceName;
+
+    /**
+     * AmqpChannelBuilder constructor.
+     * @param string $channelName
+     * @param string $amqpConnectionReferenceName
+     */
+    private function __construct(string $channelName, string $amqpConnectionReferenceName)
+    {
+        $this->channelName = $channelName;
+        $this->amqpConnectionReferenceName = $amqpConnectionReferenceName;
+    }
 
 
     /**
@@ -21,7 +40,7 @@ class AmqpChannelBuilder implements MessageChannelBuilder
      */
     public function getMessageChannelName(): string
     {
-        // TODO: Implement getMessageChannelName() method.
+        return $this->channelName;
     }
 
     /**

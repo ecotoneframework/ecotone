@@ -9,8 +9,8 @@ use Enqueue\Consumption\QueueConsumer;
 use Interop\Queue\Message;
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Amqp\AmqpAdmin;
-use SimplyCodedSoftware\Amqp\InboundAmqpGatewayBuilder;
-use SimplyCodedSoftware\Amqp\OutboundAmqpGatewayBuilder;
+use SimplyCodedSoftware\Amqp\AmqpInboundChannelAdapterBuilder;
+use SimplyCodedSoftware\Amqp\AmqpOutboundChannelAdapterBuilder;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
@@ -69,14 +69,14 @@ $referenceSearchService      =         $referenceSearchService = InMemoryReferen
     ]
 );
 
-$outboundAmqpGatewayBuilder = OutboundAmqpGatewayBuilder::createForDefaultExchange($amqpConnectionReferenceName)
+$outboundAmqpGatewayBuilder = AmqpOutboundChannelAdapterBuilder::createForDefaultExchange($amqpConnectionReferenceName)
     ->withDefaultRoutingKey($queueName);
 $outboundAmqpGatewayBuilder
     ->withAutoDeclareOnSend(true)
     ->build($channelResolver, $referenceSearchService)
     ->handle($messageToSend);
 
-$inboundAmqpAdapter = InboundAmqpGatewayBuilder::createWith(
+$inboundAmqpAdapter = AmqpInboundChannelAdapterBuilder::createWith(
     Uuid::uuid4()->toString(),
     $queueName,
     $requestChannelName,

@@ -4,13 +4,9 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Amqp;
 
 use Interop\Amqp\AmqpMessage;
-use Interop\Queue\ConnectionFactory;
-use Interop\Queue\Message as EnqueueMessage;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageConverter\DefaultHeaderMapper;
 use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
 use SimplyCodedSoftware\Messaging\MessageConverter\MessageConverter;
 use SimplyCodedSoftware\Messaging\MessageConverter\MessageConvertingException;
@@ -24,10 +20,6 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 class AmqpMessageConverter implements MessageConverter
 {
     /**
-     * @var ConnectionFactory
-     */
-    private $connectionFactory;
-    /**
      * @var HeaderMapper
      */
     private $headerMapper;
@@ -38,26 +30,23 @@ class AmqpMessageConverter implements MessageConverter
 
     /**
      * EnqueueMessageConverter constructor.
-     * @param ConnectionFactory $connectionFactory
      * @param HeaderMapper $headerMapper
      * @param string $acknowledgeMode
      */
-    private function __construct(ConnectionFactory $connectionFactory, HeaderMapper $headerMapper, string $acknowledgeMode)
+    private function __construct(HeaderMapper $headerMapper, string $acknowledgeMode)
     {
-        $this->connectionFactory = $connectionFactory;
         $this->headerMapper = $headerMapper;
         $this->acknowledgeMode = $acknowledgeMode;
     }
 
     /**
-     * @param ConnectionFactory $connectionFactory
      * @param HeaderMapper $headerMapper
      * @param string $acknowledgeMode
      * @return AmqpMessageConverter
      */
-    public static function createWithMapper(ConnectionFactory $connectionFactory, HeaderMapper $headerMapper, string $acknowledgeMode) : self
+    public static function createWithMapper(HeaderMapper $headerMapper, string $acknowledgeMode): self
     {
-        return new self($connectionFactory, $headerMapper, $acknowledgeMode);
+        return new self($headerMapper, $acknowledgeMode);
     }
 
     /**
@@ -72,7 +61,7 @@ class AmqpMessageConverter implements MessageConverter
         $enqueueMessagePayload = $message->getPayload();
 
         $applicationHeaders = $this->headerMapper->mapFromMessageHeaders($message->getHeaders()->headers());
-        $message = $this->connectionFactory->createContext()->createMessage($enqueueMessagePayload, $applicationHeaders, []);
+        $message = new \Interop\Amqp\Impl\AmqpMessage($enqueueMessagePayload, $applicationHeaders, []);
 
         return $message;
     }
@@ -93,12 +82,12 @@ class AmqpMessageConverter implements MessageConverter
         if (in_array($this->acknowledgeMode, [AmqpAcknowledgementCallback::AUTO_ACK, AmqpAcknowledgementCallback::MANUAL_ACK])) {
             if ($this->acknowledgeMode == AmqpAcknowledgementCallback::AUTO_ACK) {
                 $amqpAcknowledgeCallback = AmqpAcknowledgementCallback::createWithAutoAck($messageBuilder->getHeaderWithName(AmqpHeader::HEADER_CONSUMER), $messageBuilder->getHeaderWithName(AmqpHeader::HEADER_AMQP_MESSAGE));
-            }else {
-                throw new \InvalidArgumentException("not yet");
+            } else {
+                $amqpAcknowledgeCallback = AmqpAcknowledgementCallback::createWithManualAck($messageBuilder->getHeaderWithName(AmqpHeader::HEADER_CONSUMER), $messageBuilder->getHeaderWithName(AmqpHeader::HEADER_AMQP_MESSAGE));
             }
 
             $messageBuilder = $messageBuilder
-                                ->setHeader(AmqpHeader::HEADER_ACKNOWLEDGE, $amqpAcknowledgeCallback);
+                ->setHeader(AmqpHeader::HEADER_ACKNOWLEDGE, $amqpAcknowledgeCallback);
         }
 
         if ($source->getContentType()) {

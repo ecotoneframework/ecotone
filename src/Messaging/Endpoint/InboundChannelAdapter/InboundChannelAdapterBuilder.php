@@ -9,6 +9,7 @@ use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
+use SimplyCodedSoftware\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\InterceptedConsumer;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
@@ -34,7 +35,7 @@ use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
  * @package SimplyCodedSoftware\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
+class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 {
     /**
      * @var GatewayBuilder
@@ -209,44 +210,37 @@ class InboundChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle
+    protected function buildAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         Assert::notNullAndEmpty($this->endpointId, "Endpoint Id for inbound channel adapter can't be empty");
 
-        return
-            InterceptedConsumer::createWith(
-                $this,
-                $pollingMetadata,
-                function() use ($channelResolver, $referenceSearchService, $pollingMetadata) {
-                    $referenceService = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
-                    $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($referenceService, $this->methodName);
+        $referenceService = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
+        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($referenceService, $this->methodName);
 
-                    if (!$interfaceToCall->hasNoParameters()) {
-                        throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not have any parameters");
-                    }
+        if (!$interfaceToCall->hasNoParameters()) {
+            throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not have any parameters");
+        }
 
-                    if ($interfaceToCall->hasReturnTypeVoid()) {
-                        throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not be void");
-                    }
+        if ($interfaceToCall->hasReturnTypeVoid()) {
+            throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not be void");
+        }
 
-                    $gateway = $this->gatewayExecutor
-                        ->build($referenceSearchService, $channelResolver);
+        $gateway = $this->gatewayExecutor
+            ->build($referenceSearchService, $channelResolver);
 
-                    $taskExecutor = new InboundChannelTaskExecutor(
-                        $gateway,
-                        $referenceService,
-                        $this->methodName
-                    );
+        $taskExecutor = new InboundChannelTaskExecutor(
+            $gateway,
+            $referenceService,
+            $this->methodName
+        );
 
-                    return new InboundChannelAdapter(
-                        $this->endpointId,
-                        SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
-                        $pollingMetadata->getCron()
-                            ? CronTrigger::createWith($pollingMetadata->getCron())
-                            : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds()),
-                        $taskExecutor
-                    );
-                }
-            );
+        return new InboundChannelAdapter(
+            $this->endpointId,
+            SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
+            $pollingMetadata->getCron()
+                ? CronTrigger::createWith($pollingMetadata->getCron())
+                : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds()),
+            $taskExecutor
+        );
     }
 }

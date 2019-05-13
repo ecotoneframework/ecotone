@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter;
+namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 /**
  * Allows to ack message

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Endpoint;
+namespace Test\SimplyCodedSoftware\Messaging\Unit\Endpoint\Poller;
 
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
@@ -39,7 +39,7 @@ class PollingConsumerBuilderTest extends MessagingTest
         $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "executeNoReturn")
             ->withEndpointId("test")
             ->withInputChannelName($inputChannelName);
-        $pollingConsumer = $pollingConsumerBuilder->create(
+        $pollingConsumer = $pollingConsumerBuilder->build(
             InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => $inputChannel
             ]),
@@ -72,7 +72,7 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->withEndpointId("test")
             ->withInputChannelName($pollableChannelName);
 
-        $pollingConsumer = $pollingConsumerBuilder->create(
+        $pollingConsumer = $pollingConsumerBuilder->build(
             InMemoryChannelResolver::createFromAssociativeArray([
                 $pollableChannelName => $pollableChannel
             ]),
@@ -106,7 +106,7 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->withEndpointId("test")
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $pollingConsumerBuilder->create(
+        $pollingConsumer = $pollingConsumerBuilder->build(
             InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => $inputChannel,
                 $errorChannelName => $errorChannel

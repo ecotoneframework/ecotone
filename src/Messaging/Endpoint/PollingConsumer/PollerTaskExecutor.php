@@ -4,15 +4,19 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer;
 
 use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
+use SimplyCodedSoftware\Messaging\Endpoint\NullAcknowledgementCallback;
+use SimplyCodedSoftware\Messaging\Endpoint\StoppableConsumer;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
+use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 
 /**
  * Class PollingConsumerTaskExecutor
  * @package SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ChannelBridgeTaskExecutor implements TaskExecutor
+class PollerTaskExecutor implements TaskExecutor
 {
     /**
      * @var PollableChannel
@@ -39,7 +43,22 @@ class ChannelBridgeTaskExecutor implements TaskExecutor
         $message = $this->pollableChannel->receive();
 
         if ($message) {
-            $this->entrypointGateway->execute($message);
+            $acknowledgementCallback = NullAcknowledgementCallback::create();
+            if ($message->getHeaders()->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
+                $acknowledgementCallback = $message->getHeaders()->get(
+                    $message->getHeaders()->get(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)
+                );
+            }
+
+            try {
+                $this->entrypointGateway->execute($message);
+
+                if ($acknowledgementCallback->isAutoAck()) {
+                    $acknowledgementCallback->accept();
+                }
+            }catch (\Throwable $e) {
+                $acknowledgementCallback->requeue();
+            }
         }
     }
 }

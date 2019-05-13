@@ -3,13 +3,10 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Amqp;
 
+use Enqueue\AmqpLib\AmqpConsumer;
 use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Amqp\AmqpContext;
-use Interop\Amqp\AmqpMessage;
-use Interop\Queue\Consumer;
-use Interop\Queue\Exception\Exception;
-use Interop\Queue\Exception\SubscriptionConsumerNotSupportedException;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenChannelAdapter;
+use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use Throwable;
 
@@ -18,14 +15,14 @@ use Throwable;
  * @package SimplyCodedSoftware\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InboundAmqpEnqueueGateway implements MessageDrivenChannelAdapter
+class AmqpInboundChannelAdapter implements TaskExecutor
 {
     /**
      * @var AmqpConnectionFactory
      */
     private $amqpConnectionFactory;
     /**
-     * @var InboundAmqpGateway
+     * @var AmqpInboundChannelAdapterEntrypoint
      */
     private $inboundAmqpGateway;
     /**
@@ -52,7 +49,7 @@ class InboundAmqpEnqueueGateway implements MessageDrivenChannelAdapter
     /**
      * InboundAmqpEnqueueGateway constructor.
      * @param AmqpConnectionFactory $amqpConnectionFactory
-     * @param InboundAmqpGateway $inboundAmqpGateway
+     * @param AmqpInboundChannelAdapterEntrypoint $inboundAmqpGateway
      * @param AmqpAdmin $amqpAdmin
      * @param bool $declareOnStartup
      * @param string $amqpQueueName
@@ -61,7 +58,7 @@ class InboundAmqpEnqueueGateway implements MessageDrivenChannelAdapter
      */
     public function __construct(
         AmqpConnectionFactory $amqpConnectionFactory,
-        InboundAmqpGateway $inboundAmqpGateway,
+        AmqpInboundChannelAdapterEntrypoint $inboundAmqpGateway,
         AmqpAdmin $amqpAdmin,
         bool $declareOnStartup,
         string $amqpQueueName,
@@ -79,29 +76,58 @@ class InboundAmqpEnqueueGateway implements MessageDrivenChannelAdapter
     }
 
     /**
-     * @throws Exception
-     * @throws SubscriptionConsumerNotSupportedException
-     * @throws InvalidArgumentException
+     * @var bool
      */
-    public function startMessageDrivenConsumer(): void
+    private $initialized = false;
+    /**
+     * @var AmqpConsumer
+     */
+    private $initializedConsumer;
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws Throwable
+     */
+    public function execute(): void
     {
+        if (!$this->initialized) {
+            $context = $this->amqpConnectionFactory->createContext();
+            $this->amqpAdmin->declareQueueWithBindings($this->amqpQueueName, $context);
+            $this->initialized = true;
+        }
+
+
+        $consumer = $this->getConsumer();
+        $amqpMessage = $consumer->receive($this->receiveTimeoutInMilliseconds);
+
+        if (!$amqpMessage) {
+            return;
+        }
+
+        try {
+            $this->inboundAmqpGateway->execute($amqpMessage, $consumer);
+            $consumer->acknowledge($amqpMessage);
+        } catch (Throwable $e) {
+            $consumer->reject($amqpMessage, true);
+            throw $e;
+        }
+    }
+
+    /**
+     * @return \Interop\Amqp\AmqpConsumer
+     */
+    private function getConsumer() : \Interop\Amqp\AmqpConsumer
+    {
+        if ($this->initializedConsumer) {
+            return $this->initializedConsumer;
+        }
+
         /** @var AmqpContext $context */
         $context = $this->amqpConnectionFactory->createContext();
-        $this->amqpAdmin->declareQueueWithBindings($this->amqpQueueName, $context);
 
         $consumer = $context->createConsumer(new \Interop\Amqp\Impl\AmqpQueue($this->amqpQueueName));
+        $this->initializedConsumer = $consumer;
 
-        $subscriptionConsumer = $context->createSubscriptionConsumer();
-        $subscriptionConsumer->subscribe($consumer, function (AmqpMessage $message, Consumer $consumer) {
-            try {
-                $this->inboundAmqpGateway->execute($message, $consumer);
-                $consumer->acknowledge($message);
-            } catch (Throwable $e) {
-                $consumer->reject($message, true);
-                throw $e;
-            }
-        });
-
-        $subscriptionConsumer->consume($this->receiveTimeoutInMilliseconds);
+        return $consumer;
     }
 }

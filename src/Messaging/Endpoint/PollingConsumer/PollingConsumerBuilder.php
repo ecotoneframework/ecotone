@@ -9,7 +9,7 @@ use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
 use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenChannelAdapter;
+use SimplyCodedSoftware\Messaging\Endpoint\InterceptedMessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
@@ -41,13 +41,13 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
             return $messageChannel->getInternalMessageChannel() instanceof PollableChannel && !($messageChannel->getInternalMessageChannel() instanceof MessageDrivenChannelAdapter);
         }
 
-        return $messageChannel instanceof PollableChannel && !($messageChannel instanceof MessageDrivenChannelAdapter);
+        return $messageChannel instanceof PollableChannel;
     }
 
     /**
      * @inheritDoc
      */
-    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         Assert::notNullAndEmpty($messageHandlerBuilder->getEndpointId(), "Message Endpoint name can't be empty for {$messageHandlerBuilder}");
         Assert::notNull($pollingMetadata, "No polling meta data defined for polling endpoint {$messageHandlerBuilder}");
@@ -59,12 +59,14 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
         Assert::isTrue($pollableChannel instanceof PollableChannel, "Channel passed to Polling Consumer must be pollable");
 
-        $gateway = GatewayProxyBuilder::create(
+        $gatewayProxyBuilder = GatewayProxyBuilder::create(
             "handler",
             EntrypointGateway::class,
             "execute",
             "inputChannel"
-        )
+        );
+
+        $gateway = $gatewayProxyBuilder
             ->withErrorChannel($pollingMetadata->getErrorChannelName())
             ->build(
                 InMemoryReferenceSearchService::createWithReferenceService(
@@ -76,13 +78,15 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
                     "inputChannel" => $connectionChannel
                 ])
             );
-        Assert::isTrue(\assert($gateway instanceof EntrypointGateway), "Internal error, wrong class, expected " . EntrypointGateway::class);
 
-        return new InboundChannelAdapter(
+
+        $inboundChannelAdapter = new InboundChannelAdapter(
             $messageHandlerBuilder->getEndpointId(),
             SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
             PeriodicTrigger::create(1, 0),
-            new ChannelBridgeTaskExecutor($pollableChannel, $gateway)
+            new PollerTaskExecutor($pollableChannel, $gateway)
         );
+
+        return $inboundChannelAdapter;
     }
 }

@@ -10,8 +10,11 @@ use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
+use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenConsumer;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
+use SimplyCodedSoftware\Messaging\Endpoint\TaskExecutorChannelAdapter\TaskExecutorChannelAdapter;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -30,9 +33,9 @@ use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
  * @package SimplyCodedSoftware\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
+class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 {
-    private const DEFAULT_RECEIVE_TIMEOUT = 0;
+    private const DEFAULT_RECEIVE_TIMEOUT = 10000;
 
     /**
      * @var string
@@ -49,10 +52,6 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @var string
      */
-    private $requestChannelName;
-    /**
-     * @var string
-     */
     private $endpointId;
     /**
      * @var int
@@ -66,6 +65,10 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      * @var string
      */
     private $acknowledgeMode = AmqpAcknowledgementCallback::AUTO_ACK;
+    /**
+     * @var AmqpInboundChannelAdapterEntrypoint
+     */
+    private $inboundEntrypoint;
 
     /**
      * InboundAmqpEnqueueGatewayBuilder constructor.
@@ -73,14 +76,15 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      * @param string $queueName
      * @param string $requestChannelName
      * @param string $amqpConnectionReferenceName
+     * @throws \Exception
      */
     private function __construct(string $endpointId, string $queueName, string $requestChannelName, string $amqpConnectionReferenceName)
     {
         $this->endpointId = $endpointId;
         $this->amqpConnectionReferenceName = $amqpConnectionReferenceName;
         $this->queueName = $queueName;
-        $this->requestChannelName = $requestChannelName;
         $this->headerMapper = DefaultHeaderMapper::createNoMapping();
+        $this->inboundEntrypoint = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), AmqpInboundChannelAdapterEntrypoint::class, "execute", $requestChannelName);
     }
 
     /**
@@ -88,7 +92,8 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      * @param string $queueName
      * @param string $requestChannelName
      * @param string $amqpConnectionReferenceName
-     * @return InboundAmqpGatewayBuilder
+     * @return AmqpInboundChannelAdapterBuilder
+     * @throws \Exception
      */
     public static function createWith(string $endpointId, string $queueName, string $requestChannelName, string $amqpConnectionReferenceName) : self
     {
@@ -98,7 +103,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
     /**
      * @param string $exchangeName
      * @param string $routingKey
-     * @return InboundAmqpGatewayBuilder
+     * @return AmqpInboundChannelAdapterBuilder
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     public function withBinding(string $exchangeName, string $routingKey) : self
@@ -118,7 +123,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
 
     /**
      * @param string $headerMapper
-     * @return InboundAmqpGatewayBuilder
+     * @return AmqpInboundChannelAdapterBuilder
      */
     public function withHeaderMapper(string $headerMapper) : self
     {
@@ -128,11 +133,10 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
     }
 
     /**
-     * How long it should try to receive message before ending consumer life cycle
-     * Can be used in testing scenarios, when synchronous call is needed
+     * How long it should try to receive message
      *
      * @param int $timeoutInMilliseconds
-     * @return InboundAmqpGatewayBuilder
+     * @return AmqpInboundChannelAdapterBuilder
      */
     public function withReceiveTimeout(int $timeoutInMilliseconds) : self
     {
@@ -154,7 +158,9 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function addBeforeInterceptor(MethodInterceptor $methodInterceptor)
     {
-        // TODO: Implement addBeforeInterceptor() method.
+        $this->inboundEntrypoint->addBeforeInterceptor($methodInterceptor);
+
+        return $this;
     }
 
     /**
@@ -162,7 +168,9 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function addAfterInterceptor(MethodInterceptor $methodInterceptor)
     {
-        // TODO: Implement addAfterInterceptor() method.
+        $this->inboundEntrypoint->addAfterInterceptor($methodInterceptor);
+
+        return $this;
     }
 
     /**
@@ -170,7 +178,9 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
     {
-        // TODO: Implement addAroundInterceptor() method.
+        $this->inboundEntrypoint->addAroundInterceptor($aroundInterceptorReference);
+
+        return $this;
     }
 
     /**
@@ -178,7 +188,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        // TODO: Implement getInterceptedInterface() method.
+        return $this->inboundEntrypoint->getInterceptedInterface($interfaceToCallRegistry);
     }
 
     /**
@@ -186,7 +196,9 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function withEndpointAnnotations(iterable $endpointAnnotations)
     {
-        // TODO: Implement withEndpointAnnotations() method.
+        $this->inboundEntrypoint->withEndpointAnnotations($endpointAnnotations);
+
+        return $this;
     }
 
     /**
@@ -194,7 +206,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function getEndpointAnnotations(): array
     {
-        // TODO: Implement getEndpointAnnotations() method.
+        return $this->inboundEntrypoint->getEndpointAnnotations();
     }
 
     /**
@@ -202,7 +214,7 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function getRequiredInterceptorNames(): iterable
     {
-        // TODO: Implement getRequiredInterceptorReferenceNames() method.
+        return $this->inboundEntrypoint->getRequiredInterceptorNames();
     }
 
     /**
@@ -210,13 +222,15 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
      */
     public function withRequiredInterceptorNames(iterable $interceptorNames)
     {
-        // TODO: Implement withRequiredInterceptorNames() method.
+        $this->inboundEntrypoint->withRequiredInterceptorNames($interceptorNames);
+
+        return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle
+    protected function buildAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         /** @var AmqpAdmin $amqpAdmin */
         $amqpAdmin = $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME);
@@ -224,35 +238,34 @@ class InboundAmqpGatewayBuilder implements ChannelAdapterConsumerBuilder
         $amqpConnectionFactory = $referenceSearchService->get($this->amqpConnectionReferenceName);
 
         $customConverterReferenceName = Uuid::uuid4()->toString();
-        $customTransactionReferenceName = Uuid::uuid4()->toString();
-        /** @var InboundAmqpGateway $gateway */
+        /** @var AmqpInboundChannelAdapterEntrypoint $gateway */
         $referenceSearchService1 = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
-            $customConverterReferenceName => AmqpMessageConverter::createWithMapper($amqpConnectionFactory, $this->headerMapper, $this->acknowledgeMode),
-            $customTransactionReferenceName => new AcknowledgementCallbackTransactionFactory()
+            $customConverterReferenceName => AmqpMessageConverter::createWithMapper($this->headerMapper, $this->acknowledgeMode)
         ]);
 
-        $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), InboundAmqpGateway::class, "execute", $this->requestChannelName)
-                        ->withParameterConverters([
-                            GatewayPayloadBuilder::create("amqpMessage"),
-                            GatewayHeaderBuilder::create("consumer", AmqpHeader::HEADER_CONSUMER),
-                            GatewayHeaderBuilder::create("amqpMessage", AmqpHeader::HEADER_AMQP_MESSAGE)
-                        ])
-                        ->withMessageConverters([$customConverterReferenceName])
-                        ->build($referenceSearchService1, $channelResolver);
+        $gateway = $this->inboundEntrypoint
+            ->withParameterConverters([
+                GatewayPayloadBuilder::create("amqpMessage"),
+                GatewayHeaderBuilder::create("consumer", AmqpHeader::HEADER_CONSUMER),
+                GatewayHeaderBuilder::create("amqpMessage", AmqpHeader::HEADER_AMQP_MESSAGE)
+            ])
+            ->withMessageConverters([$customConverterReferenceName])
+            ->withErrorChannel($pollingMetadata->getErrorChannelName())
+            ->build($referenceSearchService1, $channelResolver);
 
-        return
-            MessageDrivenConsumer::create(
-                $this->endpointId,
-                new InboundAmqpEnqueueGateway(
-                    $amqpConnectionFactory,
-                    $gateway,
-                    $amqpAdmin,
-                    true,
-                    $this->queueName,
-                    $this->receiveTimeoutInMilliseconds,
-                    $this->acknowledgeMode
-                )
-            );
+        return TaskExecutorChannelAdapter::createFrom(
+            $this->endpointId,
+            $pollingMetadata->setFixedRateInMilliseconds(1),
+            new AmqpInboundChannelAdapter(
+                $amqpConnectionFactory,
+                $gateway,
+                $amqpAdmin,
+                true,
+                $this->queueName,
+                $this->receiveTimeoutInMilliseconds,
+                $this->acknowledgeMode
+            )
+        );
     }
 
     public function __toString()

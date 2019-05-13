@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
+use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -14,6 +15,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundIntercep
  */
 class InterceptedConsumer implements ConsumerLifecycle
 {
+    const CONSUMER_PRECEDENCE_INTERCEPTOR = -100000;
     /**
      * @var ConsumerLifecycle
      */
@@ -32,50 +34,10 @@ class InterceptedConsumer implements ConsumerLifecycle
      * @param ConsumerLifecycle $consumerLifecycle
      * @param ConsumerInterceptor[] $consumerInterceptors
      */
-    private function __construct(ConsumerLifecycle $consumerLifecycle, iterable $consumerInterceptors)
+    public function __construct(ConsumerLifecycle $consumerLifecycle, iterable $consumerInterceptors)
     {
         $this->interceptedConsumer = $consumerLifecycle;
         $this->consumerInterceptors = $consumerInterceptors;
-    }
-
-    /**
-     * @param ConsumerLifecycleBuilder $consumerLifecycleBuilder
-     * @param PollingMetadata|null $pollingMetadata
-     * @param \Closure $buildContext
-     * @return ConsumerLifecycle
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public static function createWith(ConsumerLifecycleBuilder $consumerLifecycleBuilder, ?PollingMetadata $pollingMetadata, \Closure $buildContext) : ConsumerLifecycle
-    {
-        if (!$pollingMetadata) {
-            return new self($buildContext(), []);
-        }
-
-        $interceptors = [];
-        if($pollingMetadata->getHandledMessageLimit() > 0) {
-            $interceptors[] = new LimitConsumedMessagesInterceptor($pollingMetadata->getHandledMessageLimit());
-        }
-        if ($pollingMetadata->getMemoryLimitInMegabytes() !== 0) {
-            $interceptors[] = new LimitMemoryUsageInterceptor($pollingMetadata->getMemoryLimitInMegabytes());
-        }
-        if ($pollingMetadata->isWithSignalInterceptors()) {
-            $interceptor[] = new SignalInterceptor();
-        }
-
-        foreach ($interceptors as $interceptor) {
-            $consumerLifecycleBuilder->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObject(
-                    "",
-                    $interceptor,
-                    "postSend",
-                    -100000,
-                    ""
-                )
-            );
-        }
-
-        $consumerLifecycle = $buildContext();
-        return new self($consumerLifecycle, $interceptors);
     }
 
     /**
@@ -104,6 +66,31 @@ class InterceptedConsumer implements ConsumerLifecycle
     public function stop(): void
     {
         $this->shouldBeRunning = false;
+    }
+
+    /**
+     * @param PollingMetadata $pollingMetadata
+     * @param array $interceptor
+     * @return array
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata): array
+    {
+        $interceptors = [];
+        if ($pollingMetadata->getHandledMessageLimit() > 0) {
+            $interceptors[] = new LimitConsumedMessagesInterceptor($pollingMetadata->getHandledMessageLimit());
+        }
+        if ($pollingMetadata->getMemoryLimitInMegabytes() !== 0) {
+            $interceptors[] = new LimitMemoryUsageInterceptor($pollingMetadata->getMemoryLimitInMegabytes());
+        }
+        if ($pollingMetadata->isWithSignalInterceptors()) {
+            $interceptors[] = new SignalInterceptor();
+        }
+        if ($pollingMetadata->getExecutionAmountLimit() > 0) {
+            $interceptors[] = new LimitExecutionAmountInterceptor($pollingMetadata->getExecutionAmountLimit());
+        }
+
+        return $interceptors;
     }
 
     /**

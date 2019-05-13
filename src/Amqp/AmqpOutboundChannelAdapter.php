@@ -19,7 +19,7 @@ use SimplyCodedSoftware\Messaging\MessageHandler;
  * @package SimplyCodedSoftware\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class OutboundAmqpGateway implements MessageHandler
+class AmqpOutboundChannelAdapter implements MessageHandler
 {
     /**
      * @var AmqpConnectionFactory

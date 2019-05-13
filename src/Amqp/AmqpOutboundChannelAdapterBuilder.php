@@ -17,7 +17,7 @@ use SimplyCodedSoftware\Messaging\MessageHandler;
  * @package SimplyCodedSoftware\Amqp
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
+class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
 {
     private const DEFAULT_PERSISTENT_MODE = true;
     const         DEFAULT_AUTO_DECLARE    = false;
@@ -76,7 +76,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
      * @param string $exchangeName
      * @param string $amqpConnectionFactoryReferenceName
      *
-     * @return OutboundAmqpGatewayBuilder
+     * @return AmqpOutboundChannelAdapterBuilder
      */
     public static function create(string $exchangeName, string $amqpConnectionFactoryReferenceName): self
     {
@@ -86,7 +86,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     /**
      * @param string $amqpConnectionFactoryReferenceName
      *
-     * @return OutboundAmqpGatewayBuilder
+     * @return AmqpOutboundChannelAdapterBuilder
      */
     public static function createForDefaultExchange(string $amqpConnectionFactoryReferenceName): self
     {
@@ -96,7 +96,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     /**
      * @param string $routingKey
      *
-     * @return OutboundAmqpGatewayBuilder
+     * @return AmqpOutboundChannelAdapterBuilder
      */
     public function withDefaultRoutingKey(string $routingKey): self
     {
@@ -108,7 +108,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     /**
      * @param string $headerName
      *
-     * @return OutboundAmqpGatewayBuilder
+     * @return AmqpOutboundChannelAdapterBuilder
      */
     public function withRoutingKeyFromHeader(string $headerName) : self
     {
@@ -120,7 +120,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     /**
      * @param bool $isPersistent
      *
-     * @return OutboundAmqpGatewayBuilder
+     * @return AmqpOutboundChannelAdapterBuilder
      */
     public function withDefaultPersistentMode(bool $isPersistent): self
     {
@@ -133,7 +133,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
      * @param string $headerMapper comma separated list of headers to be mapped.
      *                             (e.g. "\*" or "thing1*, thing2" or "*thing1")
      *
-     * @return OutboundAmqpGatewayBuilder
+     * @return AmqpOutboundChannelAdapterBuilder
      */
     public function withHeaderMapper(string $headerMapper): self
     {
@@ -145,7 +145,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
     /**
      * @param bool $toDeclare
      *
-     * @return OutboundAmqpGatewayBuilder
+     * @return AmqpOutboundChannelAdapterBuilder
      */
     public function withAutoDeclareOnSend(bool $toDeclare): self
     {
@@ -162,7 +162,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
         /** @var AmqpConnectionFactory $amqpConnectionFactory */
         $amqpConnectionFactory = $referenceSearchService->get($this->amqpConnectionFactoryReferenceName);
 
-        return new OutboundAmqpGateway(
+        return new AmqpOutboundChannelAdapter(
             $amqpConnectionFactory,
             $this->autoDeclare ? $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME) : AmqpAdmin::createEmpty(),
             $this->exchangeName,
@@ -170,7 +170,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
             $this->routingKeyFromHeader,
             $this->defaultPersistentDelivery,
             $this->autoDeclare,
-            AmqpMessageConverter::createWithMapper($amqpConnectionFactory, $this->headerMapper, AmqpAcknowledgementCallback::NONE)
+            AmqpMessageConverter::createWithMapper($this->headerMapper, AmqpAcknowledgementCallback::NONE)
         );
     }
 
@@ -179,7 +179,7 @@ class OutboundAmqpGatewayBuilder implements MessageHandlerBuilder
      */
     public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [$interfaceToCallRegistry->getFor(OutboundAmqpGateway::class, "handle")];
+        return [$interfaceToCallRegistry->getFor(AmqpOutboundChannelAdapter::class, "handle")];
     }
 
     /**

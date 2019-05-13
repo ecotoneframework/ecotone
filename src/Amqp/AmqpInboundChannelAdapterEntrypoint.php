@@ -11,7 +11,7 @@ use Interop\Queue\Consumer;
  * @package SimplyCodedSoftware\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface InboundAmqpGateway
+interface AmqpInboundChannelAdapterEntrypoint
 {
     /**
      * @param AmqpMessage $amqpMessage

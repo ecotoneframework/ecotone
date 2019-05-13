@@ -10,6 +10,7 @@ use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 
@@ -20,6 +21,14 @@ use SimplyCodedSoftware\Messaging\PollableChannel;
  */
 class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumerBuilder
 {
+    /**
+     * @inheritDoc
+     */
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    {
+        return;
+    }
+
     /**
      * @inheritDoc
      */
@@ -37,7 +46,7 @@ class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumer
     /**
      * @inheritDoc
      */
-    public function create(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         /** @var PollableChannel $pollableChannel */
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());

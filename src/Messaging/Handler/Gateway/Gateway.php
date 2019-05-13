@@ -133,42 +133,46 @@ class Gateway
     {
         $methodArguments = [];
 
-        $parameters = $this->interfaceToCall->getInterfaceParameters();
-        $countArguments = count($methodArgumentValues);
-        for ($index = 0; $index < $countArguments; $index++) {
-            $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
-        }
+        try {
+            $parameters = $this->interfaceToCall->getInterfaceParameters();
+            $countArguments = count($methodArgumentValues);
+            for ($index = 0; $index < $countArguments; $index++) {
+                $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
+            }
 
-        $replyChannelComingFromPreviousGateway = null;
-        $errorChannelComingFromPreviousGateway = null;
-        if (($this->interfaceToCall->hasSingleArgument() && ($this->interfaceToCall->hasFirstParameterMessageTypeHint() || $methodArguments[0]->value() instanceof Message))) {
-            /** @var Message $requestMessage */
-            $requestMessage = $methodArguments[0]->value();
+            $replyChannelComingFromPreviousGateway = null;
+            $errorChannelComingFromPreviousGateway = null;
+            if (($this->interfaceToCall->hasSingleArgument() && ($this->interfaceToCall->hasFirstParameterMessageTypeHint() || $methodArguments[0]->value() instanceof Message))) {
+                /** @var Message $requestMessage */
+                $requestMessage = $methodArguments[0]->value();
 
-            $requestMessage = MessageBuilder::fromMessage($requestMessage);
-        } else {
-            $payloadValue = $this->methodCallToMessageConverter->getPayloadArgument($methodArguments);
-            $requestMessage = MessageBuilder::withPayload($payloadValue);
-            $requestMessage = $this->methodCallToMessageConverter->convertFor($requestMessage, $methodArguments);
+                $requestMessage = MessageBuilder::fromMessage($requestMessage);
+            } else {
+                $payloadValue = $this->methodCallToMessageConverter->getPayloadArgument($methodArguments);
+                $requestMessage = MessageBuilder::withPayload($payloadValue);
+                $requestMessage = $this->methodCallToMessageConverter->convertFor($requestMessage, $methodArguments);
 
-            foreach ($this->messageConverters as $messageConverter) {
-                $convertedMessageBuilder = $messageConverter->toMessage(
-                    $payloadValue,
-                    $requestMessage->getCurrentHeaders()
-                );
+                foreach ($this->messageConverters as $messageConverter) {
+                    $convertedMessageBuilder = $messageConverter->toMessage(
+                        $payloadValue,
+                        $requestMessage->getCurrentHeaders()
+                    );
 
-                if ($convertedMessageBuilder) {
-                    $requestMessage = $convertedMessageBuilder;
+                    if ($convertedMessageBuilder) {
+                        $requestMessage = $convertedMessageBuilder;
+                    }
                 }
             }
+
+            $internalReplyBridge = QueueChannel::create();
+            $requestMessage = $requestMessage
+                ->setReplyChannel($internalReplyBridge)
+                ->build();
+
+            $messageHandler = $this->buildHandler($internalReplyBridge);
+        }catch (\Throwable $exception) {
+            throw GatewayMessageConversionException::createFromPreviousException("Can't convert parameters to message in gateway. \n" . $exception->getMessage(), $exception);
         }
-
-        $internalReplyBridge = QueueChannel::create();
-        $requestMessage = $requestMessage
-                            ->setReplyChannel($internalReplyBridge)
-                            ->build();
-
-        $messageHandler = $this->buildHandler($internalReplyBridge);
 
         try {
             $messageHandler->handle($requestMessage);

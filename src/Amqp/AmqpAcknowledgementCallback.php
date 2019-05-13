@@ -5,7 +5,7 @@ namespace SimplyCodedSoftware\Amqp;
 
 use Interop\Queue\Consumer as EnqueueConsumer;
 use Interop\Queue\Message as EnqueueMessage;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\AcknowledgementCallback;
+use SimplyCodedSoftware\Messaging\Endpoint\AcknowledgementCallback;
 
 /**
  * Class EnqueueAcknowledgementCallback
@@ -52,6 +52,16 @@ class AmqpAcknowledgementCallback implements AcknowledgementCallback
     public static function createWithAutoAck(EnqueueConsumer $enqueueConsumer, EnqueueMessage $enqueueMessage) : self
     {
         return new self(true, $enqueueConsumer, $enqueueMessage);
+    }
+
+    /**
+     * @param EnqueueConsumer $enqueueConsumer
+     * @param EnqueueMessage $enqueueMessage
+     * @return AmqpAcknowledgementCallback
+     */
+    public static function createWithManualAck(EnqueueConsumer $enqueueConsumer, EnqueueMessage $enqueueMessage) : self
+    {
+        return new self(false, $enqueueConsumer, $enqueueMessage);
     }
 
     /**

@@ -64,6 +64,14 @@ class MessageHeaders
      * True if a message was detected as a duplicate by an idempotent receiver interceptor
      */
     const DUPLICATE_MESSAGE = 'duplicateMessage';
+    /**
+     * Informs under which key acknowledge callback is stored for this consumer message
+     */
+    const CONSUMER_ACK_HEADER_LOCATION = "consumerAcknowledgeCallbackHeader";
+    /**
+     * Consumer which started flow
+     */
+    const CONSUMER = "consumer";
 
     /**
      * @var array

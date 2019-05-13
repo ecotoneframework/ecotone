@@ -70,7 +70,7 @@ class ConsumerEndpointFactory
         foreach ($this->consumerFactories as $consumerFactory) {
             if ($consumerFactory->isSupporting($this->channelResolver, $messageHandlerBuilder)) {
 
-                return $consumerFactory->create(
+                return $consumerFactory->build(
                     $this->channelResolver,
                     $this->referenceSearchService,
                     $messageHandlerBuilder,

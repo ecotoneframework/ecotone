@@ -22,7 +22,7 @@ class InboundAmqpAdapter implements ConsumerLifecycle
      */
     private $amqpConnectionFactory;
     /**
-     * @var InboundAmqpGateway
+     * @var AmqpInboundChannelAdapterEntrypoint
      */
     private $inboundAmqpGateway;
     /**
@@ -61,7 +61,7 @@ class InboundAmqpAdapter implements ConsumerLifecycle
     /**
      * InboundAmqpEnqueueGateway constructor.
      * @param AmqpConnectionFactory $amqpConnectionFactory
-     * @param InboundAmqpGateway $inboundAmqpGateway
+     * @param AmqpInboundChannelAdapterEntrypoint $inboundAmqpGateway
      * @param AmqpAdmin $amqpAdmin
      * @param bool $declareOnStartup
      * @param string $amqpQueueName
@@ -70,7 +70,7 @@ class InboundAmqpAdapter implements ConsumerLifecycle
      */
     public function __construct(
         AmqpConnectionFactory $amqpConnectionFactory,
-        InboundAmqpGateway $inboundAmqpGateway,
+        AmqpInboundChannelAdapterEntrypoint $inboundAmqpGateway,
         AmqpAdmin $amqpAdmin,
         bool $declareOnStartup,
         string $amqpQueueName,

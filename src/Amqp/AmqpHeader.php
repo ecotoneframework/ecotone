@@ -46,4 +46,5 @@ interface AmqpHeader
     public const HEADER_CONSUMER = "amqp_originalConsumer";
     public const HEADER_AMQP_MESSAGE = "amqp_originalMessage";
     public const HEADER_ACKNOWLEDGE = "amqp_acknowledge";
+    public const HEADER_RELATED_AMQP_LIB_CHANNEL = "amqp_libChannel";
 }

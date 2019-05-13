@@ -58,6 +58,16 @@ abstract class MessagingException extends \Exception
     }
 
     /**
+     * @param string $messsage
+     * @param \Throwable $throwable
+     * @return MessagingException
+     */
+    public static function createFromPreviousException(string $messsage, \Throwable $throwable) : self
+    {
+        return new static($messsage, static::errorCode(), $throwable);
+    }
+
+    /**
      * @inheritDoc
      */
     public function hasErrorCode(int $errorCode): bool

@@ -1,11 +1,22 @@
 @TODO 
 
-- add interceptors for consumer lifecycle
+- fix issue with reading annotations from src
+- change namespace to configuration instead of parameter
+- registering aggregate repository as single annotation
+- register transaction interceptor as direct object
+- amqp admin not as a service, but configuration
+- inbound adapter as annotation
+- verify transformer and service activator as interceptors
 - @inheritdoc + extra annotations
 - aggregate root as a service
-- simple types for aggregate commands/queries
+- allow simple types for aggregate commands/queries
 - allow inject all headers
-
+- write tests for bus routers
+- check possible to debug with endpoint and channel names
+- allow to intercept part of namespace
+- add amqp queue
+- verify amqp acks
+- amqp interceptors
 
 # Integration Messaging
 

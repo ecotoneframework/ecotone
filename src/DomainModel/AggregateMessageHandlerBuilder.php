@@ -53,9 +53,9 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      */
     private $isCommandHandler;
     /**
-     * @var AggregateRepositoryFactory[]
+     * @var string[]
      */
-    private $aggregateRepositoryFactories = [];
+    private $aggregateRepositoryReferenceNames = [];
     /**
      * @var bool
      */
@@ -211,14 +211,12 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     }
 
     /**
-     * @param array $aggregateRepositoryFactories
+     * @param string[] $aggregateRepositoryReferenceNames
      * @return AggregateMessageHandlerBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function withAggregateRepositoryFactories(array $aggregateRepositoryFactories): self
+    public function withAggregateRepositoryFactories(array $aggregateRepositoryReferenceNames): self
     {
-        Assert::allInstanceOfType($aggregateRepositoryFactories, AggregateRepositoryFactory::class);
-        $this->aggregateRepositoryFactories = $aggregateRepositoryFactories;
+        $this->aggregateRepositoryReferenceNames = $aggregateRepositoryReferenceNames;
 
         return $this;
     }
@@ -264,9 +262,12 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         $chainCqrsMessageHandler = ChainMessageHandlerBuilder::create();
         $aggregateRepository = null;
 
-        foreach ($this->aggregateRepositoryFactories as $aggregateRepositoryFactory) {
-            if ($aggregateRepositoryFactory->canHandle($referenceSearchService, $this->aggregateClassName)) {
-                $aggregateRepository = $aggregateRepositoryFactory->getFor($referenceSearchService, $this->aggregateClassName);
+        foreach ($this->aggregateRepositoryReferenceNames as $aggregateRepositoryName) {
+            /** @var AggregateRepository $aggregateRepository */
+            $aggregateRepositoryToCheck = $referenceSearchService->get($aggregateRepositoryName);
+            if ($aggregateRepositoryToCheck->canHandle($this->aggregateClassName)) {
+                $aggregateRepository = $aggregateRepositoryToCheck;
+                break;
             }
         }
         Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$this->aggregateClassName}:{$this->methodName}");

@@ -20,6 +20,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\Article;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\ChangeArticleContentCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\CloseArticleCommand;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\InMemoryArticleRepository;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\InMemoryArticleRepositoryFactory;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\PublishArticleCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\PublishArticleWithTitleOnlyCommand;
@@ -28,6 +29,7 @@ use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\Change
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CommandWithoutAggregateIdentifier;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryOrderAggregateRepositoryConstructor;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryOrderRepositoryFactory;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\MultiplyAmountCommand;
@@ -56,11 +58,13 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "changeShippingAddress",
             ChangeShippingAddressCommand::class
         )
-            ->withAggregateRepositoryFactories([InMemoryOrderRepositoryFactory::createWith([$order])]);
+            ->withAggregateRepositoryFactories(["orderRepository"]);
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+            ])
         );
 
         $newShippingAddress = "Germany";
@@ -103,11 +107,13 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "getAmountWithQuery",
             GetOrderAmountQuery::class
         )
-            ->withAggregateRepositoryFactories([InMemoryOrderRepositoryFactory::createWith([$order])]);
+            ->withAggregateRepositoryFactories(["orderRepository"]);
 
         $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+            ])
         );
 
         $replyChannel = QueueChannel::create();
@@ -138,7 +144,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "getAmountWithQuery",
             GetOrderAmountQuery::class
         )
-            ->withAggregateRepositoryFactories([InMemoryOrderRepositoryFactory::createWith([$order])])
+            ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel")
             ->withOutputMessageChannel($outputChannelName);
 
@@ -149,7 +155,9 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                     $outputChannelName => $outputChannel
                 ]
             ),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+            ])
         );
 
         $aggregateQueryHandler->handle(
@@ -177,12 +185,14 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "getAmount",
             GetOrderAmountQuery::class
         )
-            ->withAggregateRepositoryFactories([InMemoryOrderRepositoryFactory::createWith([$order])])
+            ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel");
 
         $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+            ])
         );
 
         $replyChannel = QueueChannel::create();
@@ -214,13 +224,14 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 PayloadBuilder::create("command"),
                 ReferenceBuilder::create("eventBus", EventBus::class)
             ])
-            ->withAggregateRepositoryFactories([InMemoryOrderRepositoryFactory::createEmpty()])
+            ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel");
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                EventBus::class => new LazyEventBus()
+                EventBus::class => new LazyEventBus(),
+                "orderRepository" => InMemoryAggregateRepository::createEmpty()
             ])
         );
 
@@ -247,12 +258,14 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "createWith",
             PublishArticleCommand::class
         )
-            ->withAggregateRepositoryFactories([InMemoryArticleRepositoryFactory::createEmpty()])
+            ->withAggregateRepositoryFactories(["articleRepository"])
             ->withInputChannelName("inputChannel");
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "articleRepository" => InMemoryArticleRepository::createEmpty()
+            ])
         );
 
         $replyChannel = QueueChannel::create();
@@ -277,14 +290,16 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "changeContent",
             ChangeArticleContentCommand::class
         )
-            ->withAggregateRepositoryFactories([InMemoryArticleRepositoryFactory::createWith([
-                Article::createWith(PublishArticleCommand::createWith("johny", "Tolkien", "some bla bla"))
-            ])])
+            ->withAggregateRepositoryFactories(["articleRepository"])
             ->withInputChannelName("inputChannel");
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "articleRepository" => InMemoryArticleRepository::createWith([
+                    Article::createWith(PublishArticleCommand::createWith("johny", "Tolkien", "some bla bla"))
+                ])
+            ])
         );
 
         $replyChannel = QueueChannel::create();
@@ -305,14 +320,16 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "close",
             CloseArticleCommand::class
         )
-            ->withAggregateRepositoryFactories([InMemoryArticleRepositoryFactory::createWith([
-                Article::createWith(PublishArticleCommand::createWith("johny", "Tolkien", "some bla bla"))
-            ])])
+            ->withAggregateRepositoryFactories(["articleRepository"])
             ->withInputChannelName("inputChannel");
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "articleRepository" => InMemoryArticleRepository::createWith([
+                    Article::createWith(PublishArticleCommand::createWith("johny", "Tolkien", "some bla bla"))
+                ])
+            ])
         );
 
         $replyChannel = QueueChannel::create();
@@ -336,12 +353,14 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "multiplyOrder",
             MultiplyAmountCommand::class
         )
-            ->withAggregateRepositoryFactories([InMemoryOrderRepositoryFactory::createWith([$order])])
+            ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel");
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+            ])
         );
 
         $aggregateCommandHandler->handle(MessageBuilder::withPayload(MultiplyAmountCommand::create(1, 1, 10))->setReplyChannel(NullableMessageChannel::create())->build());
@@ -365,12 +384,14 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "finish",
             CommandWithoutAggregateIdentifier::class
         )
-            ->withAggregateRepositoryFactories([InMemoryOrderRepositoryFactory::createWith([$order])])
+            ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel");
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+            ])
         );
 
         $this->expectException(AggregateNotFoundException::class);
@@ -438,12 +459,14 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "multiplyOrder",
             MultiplyAmountCommand::class
         )
-            ->withAggregateRepositoryFactories([InMemoryOrderRepositoryFactory::createWith([$order])])
+            ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel");
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+            ])
         );
 
         $this->expectException(InvalidArgumentException::class);

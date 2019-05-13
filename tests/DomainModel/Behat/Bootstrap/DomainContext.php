@@ -27,6 +27,7 @@ use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\Change
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryOrderRepositoryFactory;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\Notification;
 use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\Order;
@@ -138,7 +139,7 @@ class DomainContext extends TestCase implements Context
      */
     private function prepareConfiguration(array $classesWithAnnotationToRegister): void
     {
-        $classesWithAnnotationToRegister = array_merge($classesWithAnnotationToRegister, [CommandBus::class, QueryBus::class, EventBus::class]);
+        $classesWithAnnotationToRegister = array_merge($classesWithAnnotationToRegister, [CommandBus::class, QueryBus::class, EventBus::class, InMemoryAggregateRepository::class]);
         $aggregateMessagingModule        = AggregateMessagingModule::create(InMemoryAnnotationRegistrationService::createFrom($classesWithAnnotationToRegister));
         $annotationRegistrationService   = InMemoryAnnotationRegistrationService::createFrom($classesWithAnnotationToRegister);
         $gatewayModule                   = GatewayModule::create($annotationRegistrationService);
@@ -149,13 +150,14 @@ class DomainContext extends TestCase implements Context
         $referenceSearchService    = InMemoryReferenceSearchService::createWith(
             [
                 OrderNotificator::class => $this->orderNotificator,
-                EventBus::class => $lazyEventBus
+                EventBus::class => $lazyEventBus,
+                "aggregateRepository" => InMemoryAggregateRepository::createEmpty()
             ]
         );
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
             InMemoryModuleMessaging::createWith(
                 [$aggregateMessagingModule, $gatewayModule, $aggregateRouterModule],
-                [InMemoryOrderRepositoryFactory::createEmpty()]
+                []
             ),
             InMemoryReferenceTypeFromNameResolver::createFromAssociativeArray([
                 Order::class => Order::class,

@@ -12,6 +12,13 @@ use SimplyCodedSoftware\Messaging\Message;
 interface AggregateRepository
 {
     /**
+     * @param string $aggregateClassName
+     *
+     * @return bool
+     */
+    public function canHandle(string $aggregateClassName): bool;
+
+    /**
      * @param array $identifiers
      *
      * @return object|null

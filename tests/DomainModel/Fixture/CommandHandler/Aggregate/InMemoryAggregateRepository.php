@@ -12,6 +12,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * Class InMemoryAggregateRepository
  * @package SimplyCodedSoftware\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @\SimplyCodedSoftware\DomainModel\Annotation\AggregateRepository(referenceName="aggregateRepository")
  */
 class InMemoryAggregateRepository implements AggregateRepository
 {
@@ -19,6 +20,14 @@ class InMemoryAggregateRepository implements AggregateRepository
      * @var array
      */
     private $aggregates = [];
+
+    /**
+     * @inheritDoc
+     */
+    public function canHandle(string $aggregateClassName): bool
+    {
+        return true;
+    }
 
     /**
      * InMemoryAggregateRepository constructor.

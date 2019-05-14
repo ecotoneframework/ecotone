@@ -14,4 +14,10 @@ class InputOutputEndpointAnnotation extends EndpointAnnotation
      * @var string
      */
     public $outputChannelName = '';
+    /**
+     * Required interceptor reference names
+     *
+     * @var array
+     */
+    public $requiredInterceptorNames = [];
 }

@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\DomainModel\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\InputOutputEndpointAnnotation;
 
 /**
  * Class QueryHandler
@@ -12,7 +13,7 @@ use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
  * @Annotation
  * @Target({"METHOD"})
  */
-class QueryHandler extends EndpointAnnotation
+class QueryHandler extends InputOutputEndpointAnnotation
 {
     /**
      * @var array
@@ -24,10 +25,4 @@ class QueryHandler extends EndpointAnnotation
      * @var string
      */
     public $messageClassName;
-    /**
-     * Optional output channel for extra transformations
-     *
-     * @var string
-     */
-    public $outputChannelName = "";
 }

@@ -19,11 +19,10 @@ use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 class TransformerInterceptorExample
 {
     /**
-     * @TransformerInterceptor(parameterConverters={
+     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, parameterConverters={
      *      @Payload(parameterName="name"),
      *      @Header(parameterName="surname", headerName="surname")
-     * })
-     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class)
+     * }, changeHeaders=true)
      * @param string $name
      * @param string $surname
      */
@@ -33,11 +32,10 @@ class TransformerInterceptorExample
     }
 
     /**
-     * @TransformerInterceptor(parameterConverters={
+     * @After(parameterConverters={
      *      @Payload(parameterName="name"),
      *      @Header(parameterName="surname", headerName="surname")
-     * })
-     * @After()
+     * }, changeHeaders=true)
      * @param string $name
      * @param string $surname
      */

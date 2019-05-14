@@ -41,7 +41,8 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
         )
             ->withEndpointId($annotation->endpointId)
             ->withInputChannelName($annotation->inputChannelName)
-            ->withOutputMessageChannel($annotation->outputChannelName);
+            ->withOutputMessageChannel($annotation->outputChannelName)
+            ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
     }
 
     /**

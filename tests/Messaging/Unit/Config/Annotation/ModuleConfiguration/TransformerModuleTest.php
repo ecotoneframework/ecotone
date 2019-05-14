@@ -34,7 +34,8 @@ class TransformerModuleTest extends AnnotationConfigurationTest
         )
             ->withEndpointId("some-id")
             ->withInputChannelName("inputChannel")
-            ->withOutputMessageChannel("outputChannel");
+            ->withOutputMessageChannel("outputChannel")
+            ->withRequiredInterceptorNames(["someReference"]);
         $messageHandlerBuilder->withMethodParameterConverters([
             PayloadBuilder::create("message")
         ]);

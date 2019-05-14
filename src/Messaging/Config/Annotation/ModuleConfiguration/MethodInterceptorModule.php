@@ -141,32 +141,27 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
      */
     private static function createMessageHandler(AnnotationRegistration $methodInterceptor, ParameterConverterAnnotationFactory $parameterConverterFactory, InterfaceToCall $interfaceToCall): MessageHandlerBuilderWithOutputChannel
     {
-        $serviceActivatorInterceptorAnnotation = TypeDescriptor::create(ServiceActivatorInterceptor::class);
-        $transformerInterceptorAnnotation = TypeDescriptor::create(TransformerInterceptor::class);
+        /** @var After|Before $annotationForMethod */
+        $annotationForMethod = $methodInterceptor->getAnnotationForMethod();
+        $isTransformer = $annotationForMethod->changeHeaders;
+        $parameterConverters = $annotationForMethod->parameterConverters;
 
-        if ($interfaceToCall->hasMethodAnnotation($serviceActivatorInterceptorAnnotation)) {
-            /** @var ServiceActivatorInterceptor $interceptorAnnotation */
-            $interceptorAnnotation = $interfaceToCall->getMethodAnnotation($serviceActivatorInterceptorAnnotation);
-            $messageHandler = ServiceActivatorBuilder::create($methodInterceptor->getReferenceName(), $methodInterceptor->getMethodName())
-                ->withMethodParameterConverters($parameterConverterFactory->createParameterConverters(
-                    $interfaceToCall, $interceptorAnnotation->parameterConverters
-                ));
-
-            return $messageHandler;
-        }
-
-        if ($interfaceToCall->hasMethodAnnotation($transformerInterceptorAnnotation)) {
-            /** @var TransformerInterceptor $interceptorAnnotation */
-            $interceptorAnnotation = $interfaceToCall->getMethodAnnotation($transformerInterceptorAnnotation);
+        if ($isTransformer) {
             $messageHandler = TransformerBuilder::create($methodInterceptor->getReferenceName(), $methodInterceptor->getMethodName())
                 ->withMethodParameterConverters($parameterConverterFactory->createParameterConverters(
-                    $interfaceToCall, $interceptorAnnotation->parameterConverters
+                    $interfaceToCall, $parameterConverters
                 ));
 
             return $messageHandler;
         }
 
-        throw ConfigurationException::create("Missing Interceptor Handler Annotation for {$interfaceToCall}");
+        $messageHandler = ServiceActivatorBuilder::create($methodInterceptor->getReferenceName(), $methodInterceptor->getMethodName())
+            ->withPassThroughMessageOnVoidInterface(true)
+            ->withMethodParameterConverters($parameterConverterFactory->createParameterConverters(
+                $interfaceToCall, $parameterConverters
+            ));
+
+        return $messageHandler;
     }
 
     /**

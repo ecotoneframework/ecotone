@@ -36,7 +36,8 @@ class SplitterModuleTest extends AnnotationConfigurationTest
         )
             ->withEndpointId("testId")
             ->withInputChannelName("inputChannel")
-            ->withOutputMessageChannel("outputChannel");
+            ->withOutputMessageChannel("outputChannel")
+            ->withRequiredInterceptorNames(["someReference"]);
         $messageHandlerBuilder->withMethodParameterConverters([
             PayloadBuilder::create("payload")
         ]);

@@ -55,13 +55,14 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     }
 
 
-    public function test_registering_service_activator_interceptor()
+    public function test_registering_before_and_after_with_payload_modification()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "someMethodInterceptor",
                     ServiceActivatorBuilder::create("someMethodInterceptor", "doSomethingBefore")
+                        ->withPassThroughMessageOnVoidInterface(true)
                         ->withMethodParameterConverters([
                             PayloadBuilder::create("name"),
                             HeaderBuilder::create("surname", "surname")
@@ -75,6 +76,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
                 MethodInterceptor::create(
                     "someMethodInterceptor",
                     ServiceActivatorBuilder::create("someMethodInterceptor", "doSomethingAfter")
+                        ->withPassThroughMessageOnVoidInterface(true)
                         ->withMethodParameterConverters([
                             PayloadBuilder::create("name"),
                             HeaderBuilder::create("surname", "surname")

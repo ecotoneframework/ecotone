@@ -205,6 +205,7 @@ class AggregateMessagingModule implements AnnotationModule
                     ->withEndpointId($endpointId)
                     ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
                     ->withMethodParameterConverters($parameterConverters)
+                    ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
             );
 
             $configuration->registerBeforeMethodInterceptor(
@@ -305,6 +306,7 @@ class AggregateMessagingModule implements AnnotationModule
                 ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
                 ->withFilterOutOnNotFound($filterOutOnNotFound)
                 ->withMethodParameterConverters($parameterConverters)
+                ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
         );
 
         $configuration->registerBeforeMethodInterceptor(
@@ -388,7 +390,8 @@ class AggregateMessagingModule implements AnnotationModule
         $messageHandlerBuilder = ServiceActivatorBuilder::create($registration->getReferenceName(), $registration->getMethodName())
             ->withInputChannelName($inputChannelName)
             ->withEndpointId($annotation->endpointId)
-            ->withMethodParameterConverters($parameterConverters);
+            ->withMethodParameterConverters($parameterConverters)
+            ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
 
         return $messageHandlerBuilder;
     }

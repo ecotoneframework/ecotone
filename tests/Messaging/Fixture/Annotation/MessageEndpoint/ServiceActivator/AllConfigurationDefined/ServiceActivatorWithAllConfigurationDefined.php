@@ -34,7 +34,7 @@ class ServiceActivatorWithAllConfigurationDefined
      *     @MessageParameter(parameterName="message"),
      *     @Reference(parameterName="object", referenceName="reference"),
      *     @Value(parameterName="name", value="some")
-     * })
+     * }, requiredInterceptorNames={"someReference"})
      */
     public function sendMessage(string $to, string $content, Message $message, \stdClass $object, string $name) : void
     {

@@ -27,4 +27,14 @@ class Before
      * @var string
      */
     public $pointcut = "";
+    /**
+     * Should the return value change headers. If false, then it replaces message's payload
+     *
+     * @var bool
+     */
+    public $changeHeaders = false;
+    /**
+     * @var array
+     */
+    public $parameterConverters = [];
 }

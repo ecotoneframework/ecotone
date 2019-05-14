@@ -3,7 +3,7 @@
 namespace SimplyCodedSoftware\DomainModel\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
-use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\InputOutputEndpointAnnotation;
 
 /**
  * Class EventHandler
@@ -12,7 +12,7 @@ use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
  * @Annotation
  * @Target({"METHOD"})
  */
-class EventHandler extends EndpointAnnotation
+class EventHandler extends InputOutputEndpointAnnotation
 {
     /**
      * @var array

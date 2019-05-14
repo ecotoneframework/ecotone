@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\DomainModel\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\InputOutputEndpointAnnotation;
 
 /**
  * Class CommandHandler
@@ -12,7 +13,7 @@ use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
  * @Annotation
  * @Target({"METHOD"})
  */
-class CommandHandler extends EndpointAnnotation
+class CommandHandler extends InputOutputEndpointAnnotation
 {
     /**
      * @var array

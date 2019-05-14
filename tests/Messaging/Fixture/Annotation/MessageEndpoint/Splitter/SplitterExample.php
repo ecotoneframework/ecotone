@@ -19,7 +19,7 @@ class SplitterExample
      * @return array
      * @Splitter(endpointId="testId", inputChannelName="inputChannel", outputChannelName="outputChannel", parameterConverters={
      *      @Payload(parameterName="payload")
-     * })
+     * }, requiredInterceptorNames={"someReference"})
      */
     public function split(string $payload) : array
     {

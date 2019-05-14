@@ -206,6 +206,9 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function withMessageConverters(array $messageConverterReferenceNames): self
     {
         $this->messageConverterReferenceNames = $messageConverterReferenceNames;
+        foreach ($messageConverterReferenceNames as $messageConverterReferenceName) {
+            $this->requiredReferenceNames[] = $messageConverterReferenceName;
+        }
 
         return $this;
     }
@@ -276,7 +279,9 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     public function withRequiredInterceptorNames(iterable $interceptorNames)
     {
-        $this->requiredInterceptorNames = $interceptorNames;
+        foreach ($interceptorNames as $interceptorName) {
+            $this->requiredInterceptorNames[] = $interceptorName;
+        }
 
         return $this;
     }

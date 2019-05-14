@@ -20,7 +20,7 @@ class TransformerWithMethodParameterExample
      *
      * @Transformer(endpointId="some-id", inputChannelName="inputChannel", outputChannelName="outputChannel", parameterConverters={
      *     @Payload(parameterName="message")
-     * })
+     * }, requiredInterceptorNames={"someReference"})
      * @return string
      */
     public function send(string $message) : string

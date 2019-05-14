@@ -182,13 +182,14 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      */
     public function test_retrieving_subclass_annotation()
     {
-        $annotation = new Splitter();
-        $annotation->endpointId = "testId";
-        $annotation->inputChannelName = "inputChannel";
-        $annotation->outputChannelName = "outputChannel";
-        $messageToPayloadParameter = new Payload();
+        $annotation                               = new Splitter();
+        $annotation->endpointId                   = "testId";
+        $annotation->inputChannelName             = "inputChannel";
+        $annotation->outputChannelName            = "outputChannel";
+        $annotation->requiredInterceptorNames     = ["someReference"];
+        $messageToPayloadParameter                = new Payload();
         $messageToPayloadParameter->parameterName = "payload";
-        $annotation->parameterConverters = [$messageToPayloadParameter];
+        $annotation->parameterConverters          = [$messageToPayloadParameter];
 
         $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Splitter", "prod");
 

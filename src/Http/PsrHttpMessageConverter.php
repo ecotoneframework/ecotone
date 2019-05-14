@@ -6,6 +6,7 @@ namespace SimplyCodedSoftware\Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use SimplyCodedSoftware\Http\KeepAsTemporaryMover\KeepAsTemporaryFileMover;
 use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyPath;
@@ -73,7 +74,7 @@ class PsrHttpMessageConverter implements MessageConverter
             return null;
         }
 
-        $headerMapper = $headerMapper ? $headerMapper : DefaultHeaderMapper::createWith(HttpHeaders::HTTP_REQUEST_HEADER_NAMES, []);
+        $headerMapper = DefaultHeaderMapper::createWith(HttpHeaders::HTTP_REQUEST_HEADER_NAMES, []);
         $data = (string)$source->getBody();
         $contentType = $source->hasHeader(HttpHeaders::CONTENT_TYPE) ? $source->getHeaderLine(HttpHeaders::CONTENT_TYPE) : MediaType::APPLICATION_OCTET_STREAM;
 

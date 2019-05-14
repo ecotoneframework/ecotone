@@ -18,11 +18,10 @@ use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 class ServiceActivatorInterceptorExample
 {
     /**
-     * @ServiceActivatorInterceptor(parameterConverters={
+     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, parameterConverters={
      *      @Payload(parameterName="name"),
      *      @Header(parameterName="surname", headerName="surname")
      * })
-     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class)
      * @param string $name
      * @param string $surname
      */
@@ -32,11 +31,10 @@ class ServiceActivatorInterceptorExample
     }
 
     /**
-     * @ServiceActivatorInterceptor(parameterConverters={
+     * @After(parameterConverters={
      *      @Payload(parameterName="name"),
      *      @Header(parameterName="surname", headerName="surname")
      * })
-     * @After()
      * @param string $name
      * @param string $surname
      */

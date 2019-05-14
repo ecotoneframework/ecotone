@@ -97,6 +97,7 @@ final class Router implements MessageHandler
             throw DestinationResolutionException::create("Can't resolve destination, because there are no channels to send message to.");
         }
 
+        $resolutionChannels = array_unique($resolutionChannels);
         $sequenceSize = count($resolutionChannels);
         $sequenceNumber = 1;
         foreach ($resolutionChannels as $resolutionChannel) {

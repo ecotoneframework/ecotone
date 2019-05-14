@@ -23,19 +23,13 @@ class EventBusRouter
      * @var array
      */
     private $availableChannelNames;
-    /**
-     * @var ChannelResolver
-     */
-    private $channelResolver;
-
 
     /**
      * CommandBusRouter constructor.
      *
      * @param array           $classNameToChannelNameMapping
-     * @param ChannelResolver $channelResolver
      */
-    public function __construct(array $classNameToChannelNameMapping, ChannelResolver $channelResolver)
+    public function __construct(array $classNameToChannelNameMapping)
     {
         foreach ($classNameToChannelNameMapping as $className => $channelNames) {
             foreach ($channelNames as $channelName) {
@@ -45,26 +39,49 @@ class EventBusRouter
         $this->classNameToChannelNameMapping = array_map(function(array $channels) {
             return array_unique($channels);
         }, $classNameToChannelNameMapping);
-
-        $this->channelResolver = $channelResolver;
     }
 
     /**
      * @param object $object
      *
-     * @return string|null
+     * @return array
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     public function routeByObject($object) : array
     {
         Assert::isObject($object, "Passed non object value to Event Bus: " . TypeDescriptor::createFromVariable($object)->toString() . ". Did you wanted to use convertAndSend?");
 
-        $className = get_class($object);
-        if (!array_key_exists($className, $this->classNameToChannelNameMapping)) {
-            return [];
+        $resolvedChannels = [];
+        $reflectionClass = new \ReflectionClass($object);
+        $parent = $reflectionClass;
+        while ($parent = $parent->getParentClass()) {
+            $resolvedChannels = array_merge($resolvedChannels, $this->getChannelsForClassName($parent));
         }
 
-        return $this->classNameToChannelNameMapping[$className];
+        return array_values(array_unique(array_merge($resolvedChannels, $this->getChannelsForClassName($reflectionClass))));
+    }
+
+    /**
+     * @param \ReflectionClass $class
+     *
+     * @return array
+     * @throws \ReflectionException
+     */
+    private function getChannelsForClassName(\ReflectionClass $class) : array
+    {
+        $channelNames = [];
+        foreach ($class->getInterfaceNames() as $interfaceName) {
+            $channelNames = array_merge($channelNames, $this->getChannelsForClassName(new \ReflectionClass($interfaceName)));
+        }
+
+        $className = $class->getName();
+        if (array_key_exists($className, $this->classNameToChannelNameMapping)) {
+            $channelNames =  array_merge($channelNames, $this->classNameToChannelNameMapping[$className]);
+        }
+
+        return $channelNames;
     }
 
     /**

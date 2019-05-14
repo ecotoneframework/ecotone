@@ -9,7 +9,7 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\TwoStepPassword as Adm
  * @package Test\SimplyCodedSoftware\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-abstract class AbstractSuperAdmin implements Admin
+abstract class AbstractSuperAdmin implements Admin, Email
 {
     /**
      * @return self

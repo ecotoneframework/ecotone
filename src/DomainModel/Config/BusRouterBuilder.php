@@ -163,14 +163,14 @@ class BusRouterBuilder implements MessageHandlerBuilder
         switch ($this->type) {
             case "eventByObject": {
                 return RouterBuilder::createRouterFromObject(
-                    new EventBusRouter($this->channelNamesRouting, $channelResolver),
+                    new EventBusRouter($this->channelNamesRouting),
                     "routeByObject"
                 )   ->setResolutionRequired(false)
                     ->build($channelResolver, $referenceSearchService);
             }
             case "eventByName": {
                 return RouterBuilder::createRouterFromObject(
-                    new EventBusRouter($this->channelNamesRouting, $channelResolver),
+                    new EventBusRouter($this->channelNamesRouting),
                     "routeByName"
                 )
                     ->setResolutionRequired(false)

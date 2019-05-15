@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
 
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\AllHeaders;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Expression;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\MessageParameter;
@@ -11,6 +12,7 @@ use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Value;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AllHeadersBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderBuilder;
@@ -75,6 +77,8 @@ class ParameterConverterAnnotationFactory
                 );
             } else if ($parameterConverterAnnotation instanceof Value) {
                 $parameterConverters[] = ValueBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->value);
+            } else if ($parameterConverterAnnotation instanceof AllHeaders) {
+                $parameterConverters[] = AllHeadersBuilder::createWith($parameterConverterAnnotation->parameterName);
             }
         }
 

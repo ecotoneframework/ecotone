@@ -15,6 +15,7 @@ use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
 use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\AllHeaders;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
@@ -334,17 +335,23 @@ class AggregateMessagingModule implements AnnotationModule
             $interfaceParameters = $relatedClassInterface->getInterfaceParameters();
 
             for ($index = 0; $index < count($interfaceParameters); $index++) {
+                $interfaceParameter = $interfaceParameters[$index];
                 if ($index == 0) {
                     $payload = new Payload();
-                    $payload->parameterName = $interfaceParameters[$index]->getName();
+                    $payload->parameterName = $interfaceParameter->getName();
                     $parameterConverterAnnotations[] = $payload;
                     continue;
                 }
 
-                $reference = new Reference();
-                $reference->parameterName = $interfaceParameters[$index]->getName();
-                $reference->referenceName = $interfaceParameters[$index]->getTypeHint();
-                $parameterConverterAnnotations[] = $reference;
+                if ($interfaceParameter->getTypeDescriptor()->isNonCollectionArray()) {
+                    $allHeaders = new AllHeaders();
+                    $allHeaders->parameterName = $interfaceParameter->getName();
+                }else {
+                    $reference = new Reference();
+                    $reference->parameterName = $interfaceParameter->getName();
+                    $reference->referenceName = $interfaceParameter->getTypeHint();
+                    $parameterConverterAnnotations[] = $reference;
+                }
             }
         }
 

@@ -324,6 +324,14 @@ final class TypeDescriptor
     /**
      * @return bool
      */
+    public function isNonCollectionArray() : bool
+    {
+        return $this->type === self::ARRAY;
+    }
+
+    /**
+     * @return bool
+     */
     public function isBoolean() : bool
     {
         return $this->type === self::BOOL;

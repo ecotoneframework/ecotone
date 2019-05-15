@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation;
 
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\AllHeaders;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AllHeadersBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Expression;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
@@ -28,8 +30,10 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
     public function test_creating_with_class_name_as_reference_name_if_no_reference_passed()
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
-        $parameterConverterAnnotation = new Reference();
-        $parameterConverterAnnotation->parameterName = "object";
+        $referenceAnnotation = new Reference();
+        $referenceAnnotation->parameterName = "object";
+        $allHeadersAnnotation = new AllHeaders();
+        $allHeadersAnnotation->parameterName = "some";
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
         $methodName = "sendMessage";
@@ -37,13 +41,14 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
         $this->assertEquals(
             [
                 ReferenceBuilder::create(
-                    $parameterConverterAnnotation->parameterName,
+                    $referenceAnnotation->parameterName,
                     \stdClass::class
-                )
+                ),
+                AllHeadersBuilder::createWith("some")
             ],
             $parameterConverterAnnotationFactory->createParameterConverters(
                 InterfaceToCall::create($relatedClassName, $methodName),
-                [$parameterConverterAnnotation]
+                [$referenceAnnotation, $allHeadersAnnotation]
             )
         );
     }

@@ -27,6 +27,11 @@ class ServiceExpectingTwoArguments
         $this->wasCalled = true;
     }
 
+    public function payloadAndHeaders($payload, array $headers)
+    {
+        return $payload;
+    }
+
     /**
      * @inheritDoc
      */

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\AllHeaders;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
@@ -105,13 +106,21 @@ final class MethodInvoker implements MessageProcessor
     }
 
     /**
-     * @param $requiredArgumentsCount
-     * @param $passedArgumentsCount
+     * @param InterfaceToCall $interfaceToCall
+     * @param int             $passedArgumentsCount
+     * @param int             $requiredArgumentsCount
+     *
      * @return bool
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function canBeInvokedWithDefaultArgument(int $passedArgumentsCount, int $requiredArgumentsCount): bool
+    private function canBeInvokedWithDefaultArgument(InterfaceToCall $interfaceToCall, int $passedArgumentsCount, int $requiredArgumentsCount): bool
     {
-        return $requiredArgumentsCount === 1 && $passedArgumentsCount === 0;
+        return (
+            $requiredArgumentsCount === 1
+            ||
+            $requiredArgumentsCount === 2 && $interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()
+        ) && $passedArgumentsCount === 0;
     }
 
     /**
@@ -245,15 +254,19 @@ final class MethodInvoker implements MessageProcessor
         $passedArgumentsCount = count($methodParameterConverters);
         $requiredArgumentsCount = count($interfaceToCall->getInterfaceParameters());
 
-        if ($this->canBeInvokedWithDefaultArgument($passedArgumentsCount, $requiredArgumentsCount)) {
-            $firstParameter = $interfaceToCall->getFirstParameter();
-            if ($interfaceToCall->hasFirstParameterMessageTypeHint()) {
-                $methodParameterConverters = [MessageConverter::create($firstParameter->getName())];
-            } else {
-                $methodParameterConverters = [PayloadConverter::create($firstParameter->getName())];
-            }
+        if ($this->canBeInvokedWithDefaultArgument($interfaceToCall, $passedArgumentsCount, $requiredArgumentsCount)) {
+            if ($interfaceToCall->hasMoreThanOneParameter()) {
+                $methodParameterConverters = [
+                    $this->createPayloadOrMessageParameter($interfaceToCall, $interfaceToCall->getFirstParameter()),
+                    $this->createPayloadOrMessageParameter($interfaceToCall, $interfaceToCall->getSecondParameter())
+                ];
 
-            $passedArgumentsCount = 1;
+                $passedArgumentsCount = 2;
+            }else {
+                $methodParameterConverters = [$this->createPayloadOrMessageParameter($interfaceToCall, $interfaceToCall->getFirstParameter())];
+
+                $passedArgumentsCount = 1;
+            }
         }
 
         if (!$this->hasEnoughArguments($passedArgumentsCount, $requiredArgumentsCount)) {
@@ -294,13 +307,14 @@ final class MethodInvoker implements MessageProcessor
                 ? TypeDescriptor::create($sourceMediaType->getParameter("type"))
                 : TypeDescriptor::createFromVariable($data);
 
+            $currentParameterMediaType = $isPayloadConverter ? $sourceMediaType : MediaType::createApplicationXPHPObject();
             if ($this->canConvertParameter(
                 $index,
                 $sourceTypeDescriptor,
-                $isPayloadConverter ? $sourceMediaType : MediaType::createApplicationXPHPObject(),
+                $currentParameterMediaType,
                 $replyMediaType
             )) {
-                $data = $this->doConversion($data, $index, $sourceTypeDescriptor, $sourceMediaType, $replyMediaType);
+                $data = $this->doConversion($data, $index, $sourceTypeDescriptor, $currentParameterMediaType, $replyMediaType);
             }
 
             $methodArguments[] = MethodArgument::createWith($interfaceParameter, $data);
@@ -366,4 +380,21 @@ final class MethodInvoker implements MessageProcessor
     {
         return (string)$this->interfaceToCall;
     }
+
+    /**
+     * @param InterfaceToCall    $interfaceToCall
+     * @param InterfaceParameter $parameter
+     *
+     * @return ParameterConverter
+     */
+    private function createPayloadOrMessageParameter(InterfaceToCall $interfaceToCall, InterfaceParameter $parameter)
+    {
+        if ($parameter->isMessage()) {
+            return MessageConverter::create($parameter->getName());
+        } else if ($parameter->getTypeDescriptor()->isNonCollectionArray() && $interfaceToCall->hasMoreThanOneParameter()) {
+            return new AllHeadersConverter($parameter->getName());
+        } else {
+            return PayloadConverter::create($parameter->getName());
+        }
+}
 }

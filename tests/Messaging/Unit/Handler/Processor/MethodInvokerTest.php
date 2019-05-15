@@ -169,6 +169,28 @@ class MethodInvokerTest extends MessagingTest
      * @throws \ReflectionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
+    public function test_if_method_requires_two_argument_and_there_was_not_passed_any_then_use_payload_and_headers_if_possible_as_default()
+    {
+        $serviceExpectingOneArgument = ServiceExpectingTwoArguments::create();
+
+        $methodInvocation = MethodInvoker::createWith($serviceExpectingOneArgument, 'payloadAndHeaders', [], InMemoryReferenceSearchService::createEmpty());
+
+        $payload = 'some';
+
+        $this->assertEquals(
+            $payload,
+            $methodInvocation->processMessage(
+                MessageBuilder::withPayload($payload)
+                    ->build()
+            )
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
     public function test_throwing_exception_if_passed_wrong_argument_names()
     {
         $serviceExpectingOneArgument = ServiceExpectingOneArgument::create();

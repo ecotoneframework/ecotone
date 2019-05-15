@@ -3,9 +3,14 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Handler;
 
+use Doctrine\Common\Annotations\AnnotationException;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Future;
 use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
@@ -59,8 +64,8 @@ class InterfaceToCall
      * @param ClassDefinition $classDefinition
      * @param object[] $methodAnnotations
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws ReflectionException
+     * @throws MessagingException
      */
     private function __construct(string $interfaceName, string $methodName, ClassDefinition $classDefinition, iterable $methodAnnotations = [])
     {
@@ -82,9 +87,9 @@ class InterfaceToCall
      * @param string $methodName
      * @return InterfaceToCall
      * @throws InvalidArgumentException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws MessagingException
      */
     public static function create($interfaceOrObjectName, string $methodName): self
     {
@@ -126,7 +131,7 @@ class InterfaceToCall
      * @param TypeDescriptor $className
      * @return bool
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function hasMethodAnnotation(TypeDescriptor $className): bool
     {
@@ -143,7 +148,7 @@ class InterfaceToCall
      * @param TypeDescriptor $className
      * @return bool
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function hasClassAnnotation(TypeDescriptor $className): bool
     {
@@ -159,7 +164,7 @@ class InterfaceToCall
     /**
      * @param TypeDescriptor $className
      * @return object
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function getClassAnnotation(TypeDescriptor $className)
     {
@@ -175,7 +180,7 @@ class InterfaceToCall
     /**
      * @param TypeDescriptor $className
      * @return object
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function getMethodAnnotation(TypeDescriptor $className)
     {
@@ -239,7 +244,7 @@ class InterfaceToCall
     /**
      * @return string
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function getFirstParameterName(): string
     {
@@ -249,7 +254,7 @@ class InterfaceToCall
     /**
      * @return InterfaceParameter
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function getFirstParameter(): InterfaceParameter
     {
@@ -258,6 +263,20 @@ class InterfaceToCall
         }
 
         return $this->getInterfaceParameters()[0];
+    }
+
+    /**
+     * @return InterfaceParameter
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    public function getSecondParameter(): InterfaceParameter
+    {
+        if ($this->parameterAmount() < 2) {
+            throw InvalidArgumentException::create("Expecting {$this} to have at least one parameter, but got none");
+        }
+
+        return $this->getInterfaceParameters()[1];
     }
 
     /**
@@ -280,7 +299,7 @@ class InterfaceToCall
      * @param int $index
      * @return InterfaceParameter
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function getParameterAtIndex(int $index): InterfaceParameter
     {
@@ -294,7 +313,7 @@ class InterfaceToCall
     /**
      * @return bool
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function hasFirstParameterMessageTypeHint(): bool
     {
@@ -361,7 +380,7 @@ class InterfaceToCall
     /**
      * @return string
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function getFirstParameterTypeHint(): string
     {
@@ -377,7 +396,7 @@ class InterfaceToCall
      *
      * @return InterfaceParameter
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function getParameterWithName(string $parameterName): InterfaceParameter
     {
@@ -426,8 +445,8 @@ class InterfaceToCall
      * @param string $interfaceName
      * @param string $methodName
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws ReflectionException
+     * @throws MessagingException
      */
     private function initialize(string $interfaceName, string $methodName): void
     {
@@ -436,11 +455,11 @@ class InterfaceToCall
             $this->interfaceType = TypeDescriptor::create($interfaceName);
             $this->interfaceName = $this->interfaceType->toString();
             $this->methodName = $methodName;
-            $reflectionClass = new \ReflectionClass($interfaceName);
+            $reflectionClass = new ReflectionClass($interfaceName);
             if (!$reflectionClass->hasMethod($methodName)) {
                 throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
             }
-            $reflectionMethod = new \ReflectionMethod($interfaceName, $methodName);
+            $reflectionMethod = new ReflectionMethod($interfaceName, $methodName);
 
             $this->parameters = $typeResolver->getMethodParameters($interfaceName, $methodName);
             $this->returnType = $typeResolver->getReturnType($interfaceName, $methodName);

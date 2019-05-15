@@ -78,10 +78,10 @@ interface CommandBus
      * @Gateway(
      *     requestChannel=CommandBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
+     *          @GatewayHeaderArray(parameterName="metadata"),
      *          @GatewayHeader(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
      *          @GatewayHeader(parameterName="dataMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @GatewayPayload(parameterName="commandData"),
-     *          @GatewayHeaderArray(parameterName="metadata")
+     *          @GatewayPayload(parameterName="commandData")
      *     }
      * )
      */

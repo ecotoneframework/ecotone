@@ -15,8 +15,11 @@ final class TypeDescriptor
 
     //    scalar types
     const INTEGER = "int";
+    private const INTEGER_LONG_NAME = "integer";
     const FLOAT = "float";
+    private const DOUBLE = "double";
     const BOOL = "bool";
+    private const BOOL_LONG_NAME = "boolean";
     const STRING = "string";
 
 //    compound types
@@ -54,7 +57,7 @@ final class TypeDescriptor
      */
     public static function isItTypeOfScalar(string $type) : bool
     {
-        return in_array($type, [self::INTEGER, self::FLOAT, self::BOOL, self::STRING]);
+        return in_array($type, [self::INTEGER, self::FLOAT, self::BOOL, self::STRING, self::INTEGER_LONG_NAME, self::DOUBLE, self::BOOL_LONG_NAME]);
     }
 
     /**
@@ -151,10 +154,12 @@ final class TypeDescriptor
     {
         $type = gettype($variable);
 
-        if ($type === "double") {
+        if ($type === self::DOUBLE) {
             $type = self::FLOAT;
-        }else if ($type === "integer") {
+        }else if ($type === self::INTEGER_LONG_NAME) {
             $type = self::INTEGER;
+        }else if ($type === self::BOOL_LONG_NAME) {
+            $type = self::BOOL;
         }else if ($type === self::ARRAY) {
             $type = self::ITERABLE;
         }else if (is_callable($variable)){
@@ -446,10 +451,13 @@ final class TypeDescriptor
             return;
         }
 
-        if ($typeHint === "integer") {
+        if ($typeHint === self::INTEGER_LONG_NAME) {
             $typeHint = self::INTEGER;
         }
-        if ($typeHint === "boolean") {
+        if ($typeHint === self::DOUBLE) {
+            $typeHint = self::FLOAT;
+        }
+        if ($typeHint === self::BOOL_LONG_NAME) {
             $typeHint = self::BOOL;
         }
 
@@ -469,7 +477,7 @@ final class TypeDescriptor
         $docBlockType = $docBlockTypeDescription ? $this->resolveType($docBlockTypeDescription) : self::UNKNOWN;
 
         if (self::isItTypeOfCollection($docBlockType) && (!($this->isUnknownType($type) || $this->isCompoundArray($type)))) {
-            throw TypeDefinitionException::create("Passed type hint {$typeHint} is not compatible with doc block type {$type}");
+            throw TypeDefinitionException::create("Passed type hint `{$typeHint}` is not compatible with doc block type {$type}");
         }
 
         $this->type = $docBlockType !== self::UNKNOWN ? $docBlockType : $type;
@@ -497,7 +505,7 @@ final class TypeDescriptor
             return self::UNKNOWN;
         }
         if (!$this->isResolvableType($type)) {
-            throw TypeDefinitionException::create("Passed type hint is not resolvable: {$type}");
+            throw TypeDefinitionException::create("Passed type hint `{$type}` is not resolvable");
         }
 
         if (preg_match(self::COLLECTION_TYPE_REGEX, $type, $match)) {

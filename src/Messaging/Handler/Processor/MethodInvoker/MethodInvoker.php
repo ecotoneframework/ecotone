@@ -258,7 +258,7 @@ final class MethodInvoker implements MessageProcessor
             if ($interfaceToCall->hasMoreThanOneParameter()) {
                 $methodParameterConverters = [
                     $this->createPayloadOrMessageParameter($interfaceToCall, $interfaceToCall->getFirstParameter()),
-                    $this->createPayloadOrMessageParameter($interfaceToCall, $interfaceToCall->getSecondParameter())
+                    new AllHeadersConverter($interfaceToCall->getSecondParameter()->getName())
                 ];
 
                 $passedArgumentsCount = 2;
@@ -391,8 +391,6 @@ final class MethodInvoker implements MessageProcessor
     {
         if ($parameter->isMessage()) {
             return MessageConverter::create($parameter->getName());
-        } else if ($parameter->getTypeDescriptor()->isNonCollectionArray() && $interfaceToCall->hasMoreThanOneParameter()) {
-            return new AllHeadersConverter($parameter->getName());
         } else {
             return PayloadConverter::create($parameter->getName());
         }

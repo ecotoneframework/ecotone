@@ -137,6 +137,7 @@ final class MessageBuilder
      */
     public function setPayload($payload) : self
     {
+        Assert::notNull($payload, "Trying to configure message with null payload");
         $this->payload = $payload;
 
         return $this;

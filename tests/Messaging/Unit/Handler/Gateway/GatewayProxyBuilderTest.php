@@ -2,9 +2,12 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway;
 
+use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeader;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderArray;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderArrayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodArgumentReplacementException;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -249,6 +252,37 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals($personId, $message->getHeaders()->get("personId"));
         $this->assertEquals($personName, $message->getHeaders()->get("personName"));
         $this->assertEquals($content, $message->getPayload());
+    }
+
+    public function test_converters_execution_according_to_order_in_list()
+    {
+        $messageHandler     = StatefulHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create("ref-name", ServiceInterfaceSendOnly::class, 'sendMailWithMetadata', $requestChannelName);
+        $gatewayProxyBuilder->withParameterConverters(
+            [
+                GatewayHeaderValueBuilder::create('personId', 1),
+                GatewayHeaderArrayBuilder::create('metadata'),
+                GatewayHeaderBuilder::create('content', 'personId')
+            ]
+        );
+
+        /** @var ServiceInterfaceSendOnly $gatewayProxy */
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    $requestChannelName => $requestChannel
+                ]
+            )
+        );
+        $gatewayProxy->sendMailWithMetadata(3, ["personId" => 2]);
+
+        $message = $messageHandler->message();
+        $this->assertEquals(3, $message->getHeaders()->get("personId"));
     }
 
     public function test_executing_with_multiple_message_converters_for_same_parameter()

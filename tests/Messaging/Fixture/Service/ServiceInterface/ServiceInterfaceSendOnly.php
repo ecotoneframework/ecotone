@@ -10,4 +10,10 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface;
 interface ServiceInterfaceSendOnly
 {
     public function sendMail(string $content) : void;
+
+    /**
+     * @param string $content
+     * @param array  $metadata
+     */
+    public function sendMailWithMetadata(string $content, array $metadata) : void;
 }

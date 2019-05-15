@@ -346,6 +346,8 @@ class AggregateMessagingModule implements AnnotationModule
                 if ($interfaceParameter->getTypeDescriptor()->isNonCollectionArray()) {
                     $allHeaders = new AllHeaders();
                     $allHeaders->parameterName = $interfaceParameter->getName();
+
+                    $parameterConverterAnnotations[] = $allHeaders;
                 }else {
                     $reference = new Reference();
                     $reference->parameterName = $interfaceParameter->getName();

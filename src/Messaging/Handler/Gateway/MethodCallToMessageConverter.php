@@ -47,33 +47,16 @@ class MethodCallToMessageConverter
     {
         Assert::allInstanceOfType($methodArguments, MethodArgument::class);
 
-        foreach ($methodArguments as $methodArgument) {
-            foreach ($this->methodArgumentConverters as $methodParameterConverter) {
+        foreach ($this->methodArgumentConverters as $methodParameterConverter) {
+            foreach ($methodArguments as $methodArgument) {
                 if ($methodParameterConverter->isSupporting($methodArgument)) {
                     $messageBuilder = $methodParameterConverter->convertToMessage($methodArgument, $messageBuilder);
+                    break;
                 }
             }
         }
 
         return $messageBuilder;
-    }
-
-    /**
-     * @param MethodArgument[] $methodArguments
-     * @return array
-     */
-    public function getHeaders(array $methodArguments) : array
-    {
-        $messageBuilder = MessageBuilder::withPayload("");
-        foreach ($methodArguments as $methodArgument) {
-            foreach ($this->methodArgumentConverters as $methodParameterConverter) {
-                if ($methodParameterConverter->isSupporting($methodArgument) && !($methodParameterConverter instanceof GatewayPayloadConverter)) {
-                    $messageBuilder = $methodParameterConverter->convertToMessage($methodArgument, $messageBuilder);
-                }
-            }
-        }
-
-        return $messageBuilder->getCurrentHeaders();
     }
 
     /**

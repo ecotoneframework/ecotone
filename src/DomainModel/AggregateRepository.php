@@ -19,19 +19,21 @@ interface AggregateRepository
     public function canHandle(string $aggregateClassName): bool;
 
     /**
-     * @param array $identifiers
+     * @param string $aggregateClassName
+     * @param array  $identifiers
      *
      * @return object|null
      */
-    public function findBy(array $identifiers);
+    public function findBy(string $aggregateClassName, array $identifiers);
 
     /**
-     * @param array $identifiers
-     * @param int $expectedVersion
+     * @param string $aggregateClassName
+     * @param array  $identifiers
+     * @param int    $expectedVersion
      *
      * @return object|null
      */
-    public function findWithLockingBy(array $identifiers, int $expectedVersion);
+    public function findWithLockingBy(string $aggregateClassName, array $identifiers, int $expectedVersion);
 
     /**
      * @param Message $requestMessage

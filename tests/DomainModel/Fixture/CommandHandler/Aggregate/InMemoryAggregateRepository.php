@@ -61,7 +61,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findBy(array $identifiers)
+    public function findBy(string $aggregateClassName, array $identifiers)
     {
         $aggregateId = $this->getAggregateId($identifiers);
         if (!$aggregateId || !array_key_exists($aggregateId, $this->aggregates)) {
@@ -74,10 +74,10 @@ class InMemoryAggregateRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findWithLockingBy(array $identifiers, int $expectedVersion)
+    public function findWithLockingBy(string $aggregateClassName, array $identifiers, int $expectedVersion)
     {
         /** @var VersionAggregate $aggregate */
-        $aggregate =  $this->findBy($identifiers);
+        $aggregate =  $this->findBy($aggregateClassName, $identifiers);
 
         if ($expectedVersion != $aggregate->getVersion()) {
             throw AggregateVersionMismatchException::create("Expected aggregate version {$expectedVersion} got {$aggregate->getVersion()}");

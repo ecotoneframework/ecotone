@@ -108,8 +108,8 @@ class LoadAggregateService
             }
 
             $aggregate = is_null($this->expectedVersionName)
-                ? $this->aggregateRepository->findBy($aggregateIdentifiers)
-                : $this->aggregateRepository->findWithLockingBy($aggregateIdentifiers, $expectedVersion);
+                ? $this->aggregateRepository->findBy($this->aggregateClassName, $aggregateIdentifiers)
+                : $this->aggregateRepository->findWithLockingBy($this->aggregateClassName, $aggregateIdentifiers, $expectedVersion);
 
             if (!$aggregate && $this->filterOutOnNotFound) {
                 return null;

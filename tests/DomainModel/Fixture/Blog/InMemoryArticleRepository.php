@@ -49,7 +49,7 @@ class InMemoryArticleRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findBy(array $identifiers)
+    public function findBy(string $aggregateClassName, array $identifiers)
     {
         $identifier = $identifiers['author'] . $identifiers['title'];
 
@@ -63,7 +63,7 @@ class InMemoryArticleRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findWithLockingBy(array $identifiers, int $expectedVersion)
+    public function findWithLockingBy(string $aggregateClassName, array $identifiers, int $expectedVersion)
     {
         return $this->findBy($identifiers);
     }

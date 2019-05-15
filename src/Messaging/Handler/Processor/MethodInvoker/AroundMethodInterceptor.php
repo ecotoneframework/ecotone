@@ -184,6 +184,10 @@ class AroundMethodInterceptor
                 }
             }
 
+            if (!$resolvedArgument && $parameter->getTypeDescriptor()->isNonCollectionArray()) {
+                $resolvedArgument = $requestMessage->getHeaders()->headers();
+            }
+
             if (!$resolvedArgument && !$parameter->doesAllowNulls()) {
                 throw MethodInvocationException::create("{$this->interceptorInterfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`. Maybe your docblock type hint is not correct?");
             }

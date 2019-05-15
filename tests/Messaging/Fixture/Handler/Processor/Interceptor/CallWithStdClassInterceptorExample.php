@@ -14,6 +14,8 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocati
  */
 class CallWithStdClassInterceptorExample extends BaseInterceptorExample
 {
+    private $calledHeaders;
+
     /**
      * @param \stdClass|null $stdClass
      * @Around()
@@ -21,5 +23,25 @@ class CallWithStdClassInterceptorExample extends BaseInterceptorExample
     public function callWithStdClass(\stdClass $stdClass) : void
     {
 
+    }
+
+    /**
+     * @param \stdClass|null $stdClass
+     * @param array          $headers
+     * @Around()
+     *
+     * @return void
+     */
+    public function callWithStdClassAndHeaders(\stdClass $stdClass, array $headers) : void
+    {
+        $this->calledHeaders = $headers;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCalledHeaders()
+    {
+        return $this->calledHeaders;
     }
 }

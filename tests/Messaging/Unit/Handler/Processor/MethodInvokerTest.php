@@ -19,6 +19,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundIntercep
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
@@ -663,5 +664,37 @@ class MethodInvokerTest extends MessagingTest
                             ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(\stdClass::class))
                             ->build();
         $this->assertNull($methodInvocation->processMessage($requestMessage));
+    }
+
+    public function test_passing_headers_if_compatible()
+    {
+        $interceptingService1 = CallWithStdClassInterceptorExample::create();
+        $interceptedService = StubCallSavingService::createWithReturnType("some") ;
+        $methodInvocation = MethodInvoker::createWithInterceptors(
+            $interceptedService, 'callWithMessage', [],
+            InMemoryReferenceSearchService::createWith([
+                CallWithStdClassInterceptorExample::class => $interceptingService1
+            ]),
+            [AroundInterceptorReference::createWithNoPointcut("someId", CallWithStdClassInterceptorExample::class, "callWithStdClassAndHeaders")],
+            []
+        );
+
+        $mediaType      = MediaType::createApplicationXPHPObjectWithTypeParameter(\stdClass::class);
+        $requestMessage = MessageBuilder::withPayload(new \stdClass())
+            ->setContentType($mediaType)
+            ->setHeader("token", "123")
+            ->build();
+
+        $methodInvocation->processMessage($requestMessage);
+        $headers = $interceptingService1->getCalledHeaders();
+        unset($headers[MessageHeaders::MESSAGE_ID], $headers[MessageHeaders::TIMESTAMP]);
+
+        $this->assertEquals(
+            [
+                "token" => "123",
+                MessageHeaders::CONTENT_TYPE => $mediaType->toString()
+            ],
+            $headers
+        );
     }
 }

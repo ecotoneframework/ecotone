@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Config;
 
+use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -17,7 +18,7 @@ interface ReferenceTypeFromNameResolver
     /**
      * @param string $referenceName
      * @return TypeDescriptor
-     * @throws ConfigurationException if not found used reference
+     * @throws ReferenceNotFoundException if not found used reference
      */
     public function resolve(string $referenceName) : TypeDescriptor;
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Handler;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
 
@@ -116,7 +117,11 @@ class InterfaceToCallRegistry
      */
     public function getForReferenceName(string $referenceName, string $methodName) : InterfaceToCall
     {
-        $objectClassType = $this->referenceTypeFromNameResolver->resolve($referenceName);
+        try {
+            $objectClassType = $this->referenceTypeFromNameResolver->resolve($referenceName);
+        }catch (ReferenceNotFoundException $exception) {
+            throw ConfigurationException::create("Cannot find reference with name `$referenceName` for method {$methodName}. " . $exception->getMessage());
+        }
 
         if (!$objectClassType->isObject()) {
             throw new \InvalidArgumentException("Reference {$referenceName} is not an object");

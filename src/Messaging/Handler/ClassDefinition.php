@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Handler;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class ClassDefinition
@@ -88,7 +89,9 @@ class ClassDefinition
 
     /**
      * @param string $name
+     *
      * @return ClassPropertyDefinition
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     public function getProperty(string $name) : ClassPropertyDefinition
     {
@@ -97,6 +100,8 @@ class ClassDefinition
                 return $property;
             }
         }
+
+        throw InvalidArgumentException::create("There is no property with name {$name} in {$this->classDescriptor->toString()}");
     }
 
     /**

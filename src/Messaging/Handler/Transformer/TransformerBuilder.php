@@ -70,6 +70,11 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
+        if ($this->expression) {
+            $interfaceToCallRegistry->getFor(ExpressionTransformer::class, "transform");
+            return [];
+        }
+
         return [
             $this->directObject
                 ? $interfaceToCallRegistry->getFor($this->directObject, $this->methodName)
@@ -156,6 +161,10 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
+        if ($this->expression) {
+            return $interfaceToCallRegistry->getFor(ExpressionTransformer::class, "transform");
+        }
+
         return $this->objectToInvokeReferenceName ? $interfaceToCallRegistry->getForReferenceName($this->objectToInvokeReferenceName, $this->methodName) : $interfaceToCallRegistry->getFor($this->directObject, $this->methodName);
     }
 

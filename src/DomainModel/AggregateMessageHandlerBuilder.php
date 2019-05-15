@@ -151,7 +151,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                 }
 
                 if (is_null($mappingKey)) {
-                    throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` for {$handledMessageClassName}. How you forgot to mark @TargetAggregateIdentifier?");
+                    throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` in {$handledMessageClassName} for {$aggregateClassName}. How you forgot to mark @TargetAggregateIdentifier?");
                 } else {
                     $aggregateDefaultIdentifiers[$aggregateIdentifierName] = $mappingKey;
                 }

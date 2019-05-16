@@ -25,4 +25,8 @@ class CommandHandler extends InputOutputEndpointAnnotation
      * @var string
      */
     public $messageClassName;
+    /**
+     * @var bool
+     */
+    public $filterOutOnNotFound = false;
 }

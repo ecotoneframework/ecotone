@@ -175,7 +175,7 @@ class AggregateMessagingModule implements AnnotationModule
 
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
             $inputChannelName = self::getMessageChannelFor($registration);
-            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, false);
+            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->filterOutOnNotFound);
 
             $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames);
         }

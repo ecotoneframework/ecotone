@@ -114,6 +114,10 @@ class LoadAggregateService
             if (!$aggregate && $this->filterOutOnNotFound) {
                 return null;
             }
+
+            if (!$aggregate) {
+                throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName} was not found for indentifiers " . \json_encode($aggregateIdentifiers));
+            }
         }
 
         $messageBuilder = MessageBuilder::fromMessage($message);

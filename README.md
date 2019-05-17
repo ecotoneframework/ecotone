@@ -1,3 +1,5 @@
+throw exception when has return value in docblock and void im method declaration
+
 @TODO 
 
 - fix issue with reading annotations from src

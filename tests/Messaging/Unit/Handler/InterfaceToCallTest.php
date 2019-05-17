@@ -15,6 +15,7 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\ExampleTestAnnotation;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\LazyUser;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Permission;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\InCorrectInterfaceExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\OnlineShop;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Password;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\SuperAdmin;
@@ -542,5 +543,12 @@ class InterfaceToCallTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Converter::class));
+    }
+
+    public function test_throwing_when_doc_block_has_return_value_and_declaration_has_void()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $interfaceToCall = InterfaceToCall::create(InCorrectInterfaceExample::class, "voidWithReturnValue");
     }
 }

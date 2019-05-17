@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\Messaging\Handler;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class TypeResolver
@@ -463,11 +464,17 @@ class TypeResolver
 
         $returnType = $this->getReturnTypeDocBlockParameterTypeHint($analyzedClass, $analyzedClass, $methodName);
 
-        return TypeDescriptor::create(
+        $finalType = TypeDescriptor::create(
             $returnType
                 ? $returnType
                 : $this->expandParameterTypeHint((string)$reflectionMethod->getReturnType(), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName))
         );
+
+        if ($reflectionMethod->getReturnType() && $reflectionMethod->getReturnType()->getName() === TypeDescriptor::VOID && !$finalType->isVoid()) {
+            throw InvalidArgumentException::create("Interface {$interfaceName} with method {$methodName} has return type definition in docblock, but declared is void");
+        }
+
+        return $finalType;
     }
 
     /**

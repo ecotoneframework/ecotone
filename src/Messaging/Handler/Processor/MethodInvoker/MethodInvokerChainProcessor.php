@@ -106,6 +106,14 @@ class MethodInvokerChainProcessor implements MethodInvocation
     /**
      * @inheritDoc
      */
+    public function getArguments(): array
+    {
+        return $this->methodCall->getMethodArgumentValues();
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getInterceptedInstance()
     {
         return $this->interceptedInstance;

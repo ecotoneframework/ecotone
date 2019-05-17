@@ -45,6 +45,11 @@ interface MethodInvocation
     public function getEndpointAnnotations() : iterable;
 
     /**
+     * @return array
+     */
+    public function getArguments() : array;
+
+    /**
      * @param string $parameterName
      * @param mixed $value
      * @return void

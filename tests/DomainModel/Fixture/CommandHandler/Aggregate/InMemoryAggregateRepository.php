@@ -36,7 +36,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     private function __construct(array $aggregates)
     {
         foreach ($aggregates as $aggregate) {
-            $this->save(MessageBuilder::withPayload("some")->build(),$aggregate);
+            $this->save(MessageBuilder::withPayload("some")->build(), [], $aggregate);
         }
     }
 
@@ -89,7 +89,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function save(Message $requestMessage, $aggregate): void
+    public function save(Message $requestMessage, array $identifiers, $aggregate): void
     {
         $this->aggregates[$aggregate->getId()] = $aggregate;
     }

@@ -18,6 +18,7 @@ throw exception when has return value in docblock and void im method declaration
 - verify amqp acks
 - amqp interceptors
 - presend interceptor. So it can be called before sending to channel
+- add to factory command handler possibility to redirect to method on found
 
 # Integration Messaging
 

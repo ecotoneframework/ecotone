@@ -37,7 +37,8 @@ interface AggregateRepository
 
     /**
      * @param Message $requestMessage
-     * @param object $aggregate
+     * @param array   $identifiers
+     * @param object  $aggregate
      */
-    public function save(Message $requestMessage, $aggregate): void;
+    public function save(Message $requestMessage, array $identifiers, $aggregate): void;
 }

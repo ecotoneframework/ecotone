@@ -59,7 +59,7 @@ class SaveAggregateService
 
             $payload = count($aggregateIds) === 1 ? array_shift($aggregateIds) : $aggregateIds;
 
-            return
+            $message =
                 MessageBuilder::fromMessage($message)
                     ->setPayload($payload)
                     ->build();

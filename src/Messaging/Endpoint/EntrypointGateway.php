@@ -14,5 +14,5 @@ interface EntrypointGateway
      * @param mixed $data
      * @return mixed
      */
-    public function execute($data);
+    public function executeEntrypoint($data);
 }

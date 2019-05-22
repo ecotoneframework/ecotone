@@ -51,7 +51,7 @@ class PollerTaskExecutor implements TaskExecutor
             }
 
             try {
-                $this->entrypointGateway->execute($message);
+                $this->entrypointGateway->executeEntrypoint($message);
 
                 if ($acknowledgementCallback->isAutoAck()) {
                     $acknowledgementCallback->accept();

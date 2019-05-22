@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
+use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
+use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
@@ -58,18 +60,26 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
      * @var bool
      */
     private $autoDeclare = self::DEFAULT_AUTO_DECLARE;
+    /**
+     * @var MediaType
+     */
+    private $defaultConversionMediaType;
 
     /**
      * OutboundAmqpGatewayBuilder constructor.
      *
      * @param string $exchangeName
      * @param string $amqpConnectionFactoryReferenceName
+     *
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
      */
     private function __construct(string $exchangeName, string $amqpConnectionFactoryReferenceName)
     {
         $this->amqpConnectionFactoryReferenceName = $amqpConnectionFactoryReferenceName;
         $this->exchangeName                       = $exchangeName;
         $this->headerMapper                       = DefaultHeaderMapper::createNoMapping();
+        $this->defaultConversionMediaType = MediaType::createApplicationXPHPSerializedObject();
     }
 
     /**
@@ -77,6 +87,8 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
      * @param string $amqpConnectionFactoryReferenceName
      *
      * @return AmqpOutboundChannelAdapterBuilder
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
      */
     public static function create(string $exchangeName, string $amqpConnectionFactoryReferenceName): self
     {
@@ -87,6 +99,8 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
      * @param string $amqpConnectionFactoryReferenceName
      *
      * @return AmqpOutboundChannelAdapterBuilder
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
      */
     public static function createForDefaultExchange(string $amqpConnectionFactoryReferenceName): self
     {
@@ -101,6 +115,20 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
     public function withDefaultRoutingKey(string $routingKey): self
     {
         $this->routingKey = $routingKey;
+
+        return $this;
+    }
+
+    /**
+     * @param string $mediaType
+     *
+     * @return AmqpOutboundChannelAdapterBuilder
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     */
+    public function withDefaultConversionMediaType(string $mediaType) : self
+    {
+        $this->defaultConversionMediaType = MediaType::parseMediaType($mediaType);
 
         return $this;
     }
@@ -161,6 +189,8 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
     {
         /** @var AmqpConnectionFactory $amqpConnectionFactory */
         $amqpConnectionFactory = $referenceSearchService->get($this->amqpConnectionFactoryReferenceName);
+        /** @var ConversionService $conversionService */
+        $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
 
         return new AmqpOutboundChannelAdapter(
             $amqpConnectionFactory,
@@ -170,7 +200,9 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
             $this->routingKeyFromHeader,
             $this->defaultPersistentDelivery,
             $this->autoDeclare,
-            AmqpMessageConverter::createWithMapper($this->headerMapper, AmqpAcknowledgementCallback::NONE)
+            $this->headerMapper,
+            $conversionService,
+            $this->defaultConversionMediaType
         );
     }
 

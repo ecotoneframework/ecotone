@@ -38,7 +38,7 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
         $messageChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
         if ($messageChannel instanceof MessageChannelInterceptorAdapter) {
-            return $messageChannel->getInternalMessageChannel() instanceof PollableChannel && !($messageChannel->getInternalMessageChannel() instanceof MessageDrivenChannelAdapter);
+            return $messageChannel->getInternalMessageChannel() instanceof PollableChannel;
         }
 
         return $messageChannel instanceof PollableChannel;
@@ -62,7 +62,7 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
         $gatewayProxyBuilder = GatewayProxyBuilder::create(
             "handler",
             EntrypointGateway::class,
-            "execute",
+            "executeEntrypoint",
             "inputChannel"
         );
 

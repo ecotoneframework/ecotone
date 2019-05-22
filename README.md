@@ -19,6 +19,7 @@ throw exception when has return value in docblock and void im method declaration
 - amqp interceptors
 - presend interceptor. So it can be called before sending to channel
 - add to factory command handler possibility to redirect to method on found (https://github.com/AxonFramework/AxonFramework/issues/667)
+- amqp add possibility to define point to point or publish subscribe amqp backend channel
 
 # Integration Messaging
 

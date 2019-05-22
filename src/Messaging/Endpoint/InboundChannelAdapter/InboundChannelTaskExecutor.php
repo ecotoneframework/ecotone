@@ -48,7 +48,7 @@ class InboundChannelTaskExecutor implements TaskExecutor
         $result = call_user_func_array([$this->serviceToCall, $this->method], []);
 
         if (!is_null($result)) {
-            $this->inboundChannelGateway->execute($result);
+            $this->inboundChannelGateway->executeEntrypoint($result);
         }
     }
 }

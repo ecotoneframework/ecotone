@@ -10,6 +10,7 @@ use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
+use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
 use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenConsumer;
@@ -35,7 +36,7 @@ use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
  */
 class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 {
-    private const DEFAULT_RECEIVE_TIMEOUT = 10000;
+    const DEFAULT_RECEIVE_TIMEOUT = 10000;
 
     /**
      * @var string
@@ -66,7 +67,7 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      */
     private $acknowledgeMode = AmqpAcknowledgementCallback::AUTO_ACK;
     /**
-     * @var AmqpInboundChannelAdapterEntrypoint
+     * @var EntrypointGateway
      */
     private $inboundEntrypoint;
 
@@ -84,7 +85,7 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         $this->amqpConnectionReferenceName = $amqpConnectionReferenceName;
         $this->queueName = $queueName;
         $this->headerMapper = DefaultHeaderMapper::createNoMapping();
-        $this->inboundEntrypoint = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), AmqpInboundChannelAdapterEntrypoint::class, "execute", $requestChannelName);
+        $this->inboundEntrypoint = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EntrypointGateway::class, "executeEntrypoint", $requestChannelName);
     }
 
     /**
@@ -150,7 +151,7 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      */
     public function getRequiredReferences(): array
     {
-        return [$this->amqpConnectionReferenceName, AmqpAdmin::REFERENCE_NAME];
+        return array_merge([$this->amqpConnectionReferenceName, AmqpAdmin::REFERENCE_NAME], $this->inboundEntrypoint->getRequiredReferences());
     }
 
     /**
@@ -236,22 +237,10 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         $amqpAdmin = $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME);
         /** @var AmqpConnectionFactory $amqpConnectionFactory */
         $amqpConnectionFactory = $referenceSearchService->get($this->amqpConnectionReferenceName);
-
-        $customConverterReferenceName = Uuid::uuid4()->toString();
-        /** @var AmqpInboundChannelAdapterEntrypoint $gateway */
-        $referenceSearchService1 = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
-            $customConverterReferenceName => AmqpMessageConverter::createWithMapper($this->headerMapper, $this->acknowledgeMode)
-        ]);
-
+        /** @var EntrypointGateway $gateway */
         $gateway = $this->inboundEntrypoint
-            ->withParameterConverters([
-                GatewayPayloadBuilder::create("amqpMessage"),
-                GatewayHeaderBuilder::create("consumer", AmqpHeader::HEADER_CONSUMER),
-                GatewayHeaderBuilder::create("amqpMessage", AmqpHeader::HEADER_AMQP_MESSAGE)
-            ])
-            ->withMessageConverters([$customConverterReferenceName])
             ->withErrorChannel($pollingMetadata->getErrorChannelName())
-            ->build($referenceSearchService1, $channelResolver);
+            ->build($referenceSearchService, $channelResolver);
 
         return TaskExecutorChannelAdapter::createFrom(
             $this->endpointId,
@@ -263,7 +252,8 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
                 true,
                 $this->queueName,
                 $this->receiveTimeoutInMilliseconds,
-                $this->acknowledgeMode
+                $this->acknowledgeMode,
+                $this->headerMapper
             )
         );
     }

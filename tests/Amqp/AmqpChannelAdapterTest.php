@@ -15,12 +15,17 @@ use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
+use SimplyCodedSoftware\Messaging\Conversion\MediaType;
+use SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
+use SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
+use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverter;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ForwardMessageHandler;
@@ -64,6 +69,93 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
         $this->assertEquals(
             $message->getPayload(),
             "some"
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_throwing_exception_if_sending_non_string_payload_without_media_type_information()
+    {
+        $queueName                   = Uuid::uuid4()->toString();
+        $amqpQueues                  = [AmqpQueue::createWith($queueName)->withExclusivity()];
+        $amqpExchanges               = [];
+        $amqpBindings                = [];
+        $requestChannelName          = "requestChannel";
+        $inboundRequestChannel       = QueueChannel::create();
+        $amqpConnectionReferenceName = "connection";
+        $messageToSend               = MessageBuilder::withPayload(new \stdClass())->build();
+        $converters                  = [];
+        $inMemoryChannelResolver     = $this->createChannelResolver($requestChannelName, $inboundRequestChannel);
+        $referenceSearchService      = $this->createReferenceSearchService($amqpConnectionReferenceName, $amqpExchanges, $amqpQueues, $amqpBindings, $converters);
+
+        $outboundAmqpGatewayBuilder = AmqpOutboundChannelAdapterBuilder::createForDefaultExchange($amqpConnectionReferenceName);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->send($outboundAmqpGatewayBuilder, $inMemoryChannelResolver, $referenceSearchService, $messageToSend);
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_throwing_exception_if_sending_non_string_payload_with_media_type_but_no_converter_available()
+    {
+        $queueName                   = Uuid::uuid4()->toString();
+        $amqpQueues                  = [AmqpQueue::createWith($queueName)->withExclusivity()];
+        $amqpExchanges               = [];
+        $amqpBindings                = [];
+        $requestChannelName          = "requestChannel";
+        $inboundRequestChannel       = QueueChannel::create();
+        $amqpConnectionReferenceName = "connection";
+        $messageToSend               = MessageBuilder::withPayload(new \stdClass())
+                                            ->setContentType(MediaType::createApplicationXPHPObject())
+                                            ->build();
+        $converters                  = [];
+        $inMemoryChannelResolver     = $this->createChannelResolver($requestChannelName, $inboundRequestChannel);
+        $referenceSearchService      = $this->createReferenceSearchService($amqpConnectionReferenceName, $amqpExchanges, $amqpQueues, $amqpBindings, $converters);
+
+        $outboundAmqpGatewayBuilder = AmqpOutboundChannelAdapterBuilder::createForDefaultExchange($amqpConnectionReferenceName);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->send($outboundAmqpGatewayBuilder, $inMemoryChannelResolver, $referenceSearchService, $messageToSend);
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_converting_payload_to_string_if_converter_exists_and_media_type_passed()
+    {
+        $queueName                   = Uuid::uuid4()->toString();
+        $amqpQueues                  = [AmqpQueue::createWith($queueName)->withExclusivity()];
+        $amqpExchanges               = [];
+        $amqpBindings                = [];
+        $requestChannelName          = "requestChannel";
+        $inboundRequestChannel       = QueueChannel::create();
+        $amqpConnectionReferenceName = "connection";
+        $payload                     = new \stdClass();
+        $payload->name = "someName";
+        $messageToSend               = MessageBuilder::withPayload($payload)
+                                        ->setContentType(MediaType::createApplicationXPHPObject())
+                                        ->build();
+        $converters                  = [new SerializingConverter()];
+        $inMemoryChannelResolver     = $this->createChannelResolver($requestChannelName, $inboundRequestChannel);
+        $referenceSearchService      = $this->createReferenceSearchService($amqpConnectionReferenceName, $amqpExchanges, $amqpQueues, $amqpBindings, $converters);
+
+        $outboundAmqpGatewayBuilder = AmqpOutboundChannelAdapterBuilder::createForDefaultExchange($amqpConnectionReferenceName)
+            ->withDefaultRoutingKey($queueName);
+
+        $this->send($outboundAmqpGatewayBuilder, $inMemoryChannelResolver, $referenceSearchService, $messageToSend);
+
+
+        $inboundAmqpAdapter = $this->createAmqpInboundAdapter($queueName, $requestChannelName, $amqpConnectionReferenceName);
+        $message            = $this->receiveOnce($inboundAmqpAdapter, $inboundRequestChannel, $inMemoryChannelResolver, $referenceSearchService);
+
+        $this->assertNotNull($message, "Message was not received from rabbit");
+        $this->assertEquals(
+            $message->getPayload(),
+            serialize($payload)
         );
     }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\InterceptedEndpoint;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -30,7 +31,7 @@ abstract class InterceptedMessageHandlerConsumerBuilder implements MessageHandle
                     "",
                     $interceptor,
                     "postSend",
-                    InterceptedConsumer::CONSUMER_PRECEDENCE_INTERCEPTOR,
+                    ErrorChannelInterceptor::PRECEDENCE - 100,
                     ""
                 )
             );

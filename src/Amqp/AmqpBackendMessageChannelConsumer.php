@@ -10,6 +10,7 @@ use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
@@ -43,15 +44,7 @@ class AmqpBackendMessageChannelConsumer implements MessageHandlerConsumerBuilder
     {
         $pollingConsumerBuilder = new PollingConsumerBuilder();
 
-        $precedence = InterceptedConsumer::CONSUMER_PRECEDENCE_INTERCEPTOR + 1;
-        $aroundInterceptor = AroundInterceptorReference::createWithDirectObject(
-            "",
-            new AmqpAcknowledgeConfirmationInterceptor(),
-            "ack",
-            $precedence,
-            ""
-        );
-        $pollingConsumerBuilder->addAroundInterceptor($aroundInterceptor);
+        $pollingConsumerBuilder->addAroundInterceptor(AmqpAcknowledgeConfirmationInterceptor::createAroundInterceptor());
 
         return $pollingConsumerBuilder->build($channelResolver, $referenceSearchService, $messageHandlerBuilder, $pollingMetadata);
     }

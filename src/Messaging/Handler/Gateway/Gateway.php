@@ -174,24 +174,7 @@ class Gateway
             throw GatewayMessageConversionException::createFromPreviousException("Can't convert parameters to message in gateway. \n" . $exception->getMessage(), $exception);
         }
 
-        try {
-            $messageHandler->handle($requestMessage);
-        }catch (\Throwable $exception) {
-            if (!$this->errorChannel) {
-                if ($exception instanceof MessagingException && $exception->getCause()) {
-                    throw $exception->getCause();
-                }
-
-                throw $exception;
-            }
-
-            if (!($exception instanceof MessagingException)) {
-                $exception = MessageHandlingException::fromOtherException($exception, $requestMessage);
-            }
-
-            $this->errorChannel->send(ErrorMessage::create($exception));
-        }
-
+        $messageHandler->handle($requestMessage);
         $reply = $internalReplyBridge->receive();
 
         if ($this->interfaceToCall->getReturnType()->isClassOfType(Message::class)) {

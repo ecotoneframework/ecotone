@@ -7,6 +7,7 @@ namespace SimplyCodedSoftware\Amqp;
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Endpoint\AcknowledgementCallback;
 use SimplyCodedSoftware\Messaging\Endpoint\InterceptedConsumer;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use SimplyCodedSoftware\Messaging\Message;
@@ -20,9 +21,11 @@ use Throwable;
  */
 class AmqpAcknowledgeConfirmationInterceptor
 {
+    const PRECEDENCE = ErrorChannelInterceptor::PRECEDENCE - 1;
+
     public static function createAroundInterceptor() : AroundInterceptorReference
     {
-        return AroundInterceptorReference::createWithDirectObject(Uuid::uuid4()->toString(), new self(), "ack", InterceptedConsumer::CONSUMER_PRECEDENCE_INTERCEPTOR + 1, "");
+        return AroundInterceptorReference::createWithDirectObject(Uuid::uuid4()->toString(), new self(), "ack", self::PRECEDENCE, "");
     }
 
     /**

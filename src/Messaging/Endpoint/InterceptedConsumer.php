@@ -6,6 +6,7 @@ use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInte
 use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\SignalInterceptor;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 
 /**
@@ -15,7 +16,6 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundIntercep
  */
 class InterceptedConsumer implements ConsumerLifecycle
 {
-    const CONSUMER_PRECEDENCE_INTERCEPTOR = -100000;
     /**
      * @var ConsumerLifecycle
      */

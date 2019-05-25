@@ -937,14 +937,16 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $sellGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "sell", "sell");
 
         $channels = ["buy" => DirectChannel::create(), "sell" => DirectChannel::create()];
+
         $this->assertEquals(
-            CombinedGatewayBuilder::create(CombinedGatewayExample::class, [$buyGateway, $sellGateway])->build(
-                InMemoryReferenceSearchService::createWithReferenceService(InMemoryReferenceSearchService::createEmpty(), [
-                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createEmpty(),
-                    InterfaceToCallRegistry::REFERENCE_NAME => InterfaceToCallRegistry::createEmpty()
-                ]),
-                InMemoryChannelResolver::createFromAssociativeArray($channels)
-            ),
+            CombinedGatewayBuilder::create(CombinedGatewayExample::class, [$buyGateway, $sellGateway])
+                ->build(
+                    InMemoryReferenceSearchService::createWithReferenceService(InMemoryReferenceSearchService::createEmpty(), [
+                        ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createEmpty(),
+                        InterfaceToCallRegistry::REFERENCE_NAME => InterfaceToCallRegistry::createEmpty()
+                    ]),
+                    InMemoryChannelResolver::createFromAssociativeArray($channels)
+                ),
             $this->createMessagingSystemConfiguration()
                 ->registerGatewayBuilder($buyGateway)
                 ->registerGatewayBuilder($sellGateway)

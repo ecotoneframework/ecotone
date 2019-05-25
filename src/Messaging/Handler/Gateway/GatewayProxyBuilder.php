@@ -299,59 +299,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
-        Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName}");
-
-        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
-        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
-        $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
-        $requestChannel = $channelResolver->resolve($this->requestChannelName);
-        $interfaceToCall = $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName);
-
-        if (!($interfaceToCall->canItReturnNull() || $interfaceToCall->hasReturnTypeVoid())) {
-            /** @var DirectChannel $requestChannel */
-            Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel should not be pollable if expected return type is not nullable");
-        }
-
-        if (!$interfaceToCall->canItReturnNull() && $this->errorChannelName && !$interfaceToCall->hasReturnTypeVoid()) {
-            throw InvalidArgumentException::create("Gateway {$interfaceToCall} with error channel must allow nullable return type");
-        }
-
-        if ($replyChannel) {
-            /** @var PollableChannel $replyChannel */
-            Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");
-        }
-        $errorChannel = $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null;
-
-        if (!$interfaceToCall->hasReturnValue() && $this->replyChannelName) {
-            throw InvalidArgumentException::create("Can't set reply channel for {$interfaceToCall}");
-        }
-
-        $methodArgumentConverters = [];
-        foreach ($this->methodArgumentConverters as $messageConverterBuilder) {
-            $methodArgumentConverters[] = $messageConverterBuilder->build($referenceSearchService);
-        }
-
-        $messageConverters = [];
-        foreach ($this->messageConverterReferenceNames as $messageConverterReferenceName) {
-            $messageConverters[] = $referenceSearchService->get($messageConverterReferenceName);
-        }
-
-        $gateway = new Gateway(
-            $interfaceToCall,
-            new MethodCallToMessageConverter(
-                $interfaceToCall, $methodArgumentConverters
-            ),
-            $messageConverters,
-            $requestChannel,
-            $replyChannel,
-            $errorChannel,
-            $this->replyMilliSecondsTimeout,
-            $referenceSearchService,
-            $this->aroundInterceptors,
-            $this->getSortedInterceptors($this->beforeInterceptors),
-            $this->getSortedInterceptors($this->afterInterceptors),
-            $this->endpointAnnotations
-        );
+        $gateway = $this->buildWithoutProxyObject($referenceSearchService, $channelResolver);
 
         $factory = new RemoteObjectFactory(new class ($gateway) implements AdapterInterface
         {
@@ -380,6 +328,71 @@ class GatewayProxyBuilder implements GatewayBuilder
         });
 
         return $factory->createProxy($this->interfaceName);
+    }
+
+    public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
+    {
+        Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName}");
+
+        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
+        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
+        $replyChannel = $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null;
+        $requestChannel = $channelResolver->resolve($this->requestChannelName);
+        $interfaceToCall = $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName);
+
+        if (!($interfaceToCall->canItReturnNull() || $interfaceToCall->hasReturnTypeVoid())) {
+            /** @var DirectChannel $requestChannel */
+            Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel should not be pollable if expected return type is not nullable");
+        }
+
+        if (!$interfaceToCall->canItReturnNull() && $this->errorChannelName && !$interfaceToCall->hasReturnTypeVoid()) {
+            throw InvalidArgumentException::create("Gateway {$interfaceToCall} with error channel must allow nullable return type");
+        }
+
+        if ($replyChannel) {
+            /** @var PollableChannel $replyChannel */
+            Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");
+        }
+        $errorChannel = $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null;
+        $aroundInterceptors = $this->aroundInterceptors;
+        $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
+            "",
+            new ErrorChannelInterceptor($errorChannel),
+            "handle",
+            ErrorChannelInterceptor::PRECEDENCE,
+            ""
+        );
+
+        if (!$interfaceToCall->hasReturnValue() && $this->replyChannelName) {
+            throw InvalidArgumentException::create("Can't set reply channel for {$interfaceToCall}");
+        }
+
+        $methodArgumentConverters = [];
+        foreach ($this->methodArgumentConverters as $messageConverterBuilder) {
+            $methodArgumentConverters[] = $messageConverterBuilder->build($referenceSearchService);
+        }
+
+        $messageConverters = [];
+        foreach ($this->messageConverterReferenceNames as $messageConverterReferenceName) {
+            $messageConverters[] = $referenceSearchService->get($messageConverterReferenceName);
+        }
+
+        return new Gateway(
+            $interfaceToCall,
+            new MethodCallToMessageConverter(
+                $interfaceToCall, $methodArgumentConverters
+            ),
+            $messageConverters,
+            $requestChannel,
+            $replyChannel,
+            $errorChannel,
+            $this->replyMilliSecondsTimeout,
+            $referenceSearchService,
+            $aroundInterceptors,
+            $this->getSortedInterceptors($this->beforeInterceptors),
+            $this->getSortedInterceptors($this->afterInterceptors),
+            $this->endpointAnnotations
+        );
     }
 
     /**

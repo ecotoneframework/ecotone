@@ -20,14 +20,14 @@ class CombinedGatewayBuilder
      */
     private $interfaceName;
     /**
-     * @var GatewayBuilder[]
+     * @var GatewayProxyBuilder[]
      */
     private $gatewayBuilders;
 
     /**
      * MultipleMethodGatewayBuilder constructor.
      * @param string $interfaceName
-     * @param GatewayBuilder[] $gatewayBuilders
+     * @param GatewayProxyBuilder[] $gatewayBuilders
      */
     private function __construct(string $interfaceName, array $gatewayBuilders)
     {
@@ -37,7 +37,7 @@ class CombinedGatewayBuilder
 
     /**
      * @param string $interfaceName
-     * @param GatewayBuilder[] $gatewayBuilders
+     * @param GatewayProxyBuilder[] $gatewayBuilders
      * @return CombinedGatewayBuilder
      */
     public static function create(string $interfaceName, array $gatewayBuilders): self
@@ -52,7 +52,7 @@ class CombinedGatewayBuilder
     {
         $gateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $gateways[$gatewayBuilder->getRelatedMethodName()] = $gatewayBuilder->build($referenceSearchService, $channelResolver);
+            $gateways[$gatewayBuilder->getRelatedMethodName()] = $gatewayBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver);
         }
 
         $factory = new RemoteObjectFactory(new class ($gateways) implements AdapterInterface
@@ -77,7 +77,7 @@ class CombinedGatewayBuilder
              */
             public function call(string $wrappedClass, string $method, array $params = [])
             {
-                return call_user_func_array([$this->gateways[$method], $method], $params);
+                return call_user_func_array([$this->gateways[$method], "execute"], [$params]);
             }
         });
 

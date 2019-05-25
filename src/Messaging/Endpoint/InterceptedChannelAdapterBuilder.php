@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Endpoint;
 
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
@@ -27,7 +28,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
                     "",
                     $interceptor,
                     "postSend",
-                    InterceptedConsumer::CONSUMER_PRECEDENCE_INTERCEPTOR,
+                    ErrorChannelInterceptor::PRECEDENCE - 100,
                     ""
                 )
             );

@@ -86,6 +86,7 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         $this->queueName = $queueName;
         $this->headerMapper = DefaultHeaderMapper::createNoMapping();
         $this->inboundEntrypoint = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EntrypointGateway::class, "executeEntrypoint", $requestChannelName);
+        $this->addAroundInterceptor(AmqpAcknowledgeConfirmationInterceptor::createAroundInterceptor());
     }
 
     /**
@@ -237,6 +238,7 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         $amqpAdmin = $referenceSearchService->get(AmqpAdmin::REFERENCE_NAME);
         /** @var AmqpConnectionFactory $amqpConnectionFactory */
         $amqpConnectionFactory = $referenceSearchService->get($this->amqpConnectionReferenceName);
+
         /** @var EntrypointGateway $gateway */
         $gateway = $this->inboundEntrypoint
             ->withErrorChannel($pollingMetadata->getErrorChannelName())

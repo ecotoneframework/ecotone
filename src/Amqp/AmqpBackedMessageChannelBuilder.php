@@ -51,6 +51,16 @@ class AmqpBackedMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
+     * @param string $channelName
+     * @param string $amqpConnectionReferenceName
+     * @return AmqpBackedMessageChannelBuilder
+     */
+    public static function create(string $channelName, string $amqpConnectionReferenceName)
+    {
+        return new self($channelName, $amqpConnectionReferenceName);
+    }
+
+    /**
      * How long it should try to receive message
      *
      * @param int $timeoutInMilliseconds
@@ -105,9 +115,10 @@ class AmqpBackedMessageChannelBuilder implements MessageChannelBuilder
         if ($this->defaultConversionMediaType) {
             /** @var AmqpOutboundChannelAdapter $amqpOutboundChannelAdapter */
             $amqpOutboundChannelAdapter = $amqpOutboundChannelAdapter
-                                            ->withDefaultConversionMediaType($this->defaultConversionMediaType)
-                                            ->build(InMemoryChannelResolver::createEmpty(), $referenceSearchService);
+                                            ->withDefaultConversionMediaType($this->defaultConversionMediaType);
         }
+        $amqpOutboundChannelAdapter = $amqpOutboundChannelAdapter
+            ->build(InMemoryChannelResolver::createEmpty(), $referenceSearchService);
 
         $inboundChannelAdapter = new AmqpInboundChannelAdapter(
             $amqpConnectionFactory,
@@ -115,7 +126,7 @@ class AmqpBackedMessageChannelBuilder implements MessageChannelBuilder
             $amqpAdmin,
             true,
             $this->channelName,
-            AmqpInboundChannelAdapterBuilder::DEFAULT_RECEIVE_TIMEOUT,
+            $this->receiveTimeoutInMilliseconds,
             AmqpAcknowledgementCallback::AUTO_ACK,
             DefaultHeaderMapper::createAllHeadersMapping()
         );

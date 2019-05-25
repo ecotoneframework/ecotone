@@ -124,20 +124,7 @@ class AmqpInboundChannelAdapter implements TaskExecutor, EntrypointGateway
     {
         Assert::isSubclassOf($message, Message::class, "Passed object to amqp inbound channel adapter is not a Message");
 
-        /** @var AcknowledgementCallback $amqpAcknowledgementCallback */
-        $amqpAcknowledgementCallback = $message->getHeaders()->get(AmqpHeader::HEADER_ACKNOWLEDGE);
-        try {
-            $this->inboundAmqpGateway->executeEntrypoint($message);
-
-            if ($amqpAcknowledgementCallback->isAutoAck()) {
-                $amqpAcknowledgementCallback->accept();
-            }
-        } catch (Throwable $e) {
-            if ($amqpAcknowledgementCallback->isAutoAck()) {
-                $amqpAcknowledgementCallback->requeue();
-            }
-            throw $e;
-        }
+        $this->inboundAmqpGateway->executeEntrypoint($message);
     }
 
     /**

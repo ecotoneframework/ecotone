@@ -4,9 +4,13 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\Amqp;
 
 use Ramsey\Uuid\Uuid;
+use SimplyCodedSoftware\Amqp\AmqpAcknowledgeConfirmationInterceptor;
 use SimplyCodedSoftware\Amqp\AmqpAdmin;
+use SimplyCodedSoftware\Amqp\AmqpBackedMessageChannelBuilder;
+use SimplyCodedSoftware\Amqp\AmqpBackendMessageChannel;
 use SimplyCodedSoftware\Amqp\AmqpBinding;
 use SimplyCodedSoftware\Amqp\AmqpExchange;
+use SimplyCodedSoftware\Amqp\AmqpHeader;
 use SimplyCodedSoftware\Amqp\AmqpQueue;
 use SimplyCodedSoftware\Amqp\AmqpInboundChannelAdapterBuilder;
 use SimplyCodedSoftware\Amqp\AmqpOutboundChannelAdapterBuilder;
@@ -19,6 +23,7 @@ use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
 use SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverter;
+use SimplyCodedSoftware\Messaging\Endpoint\AcknowledgementCallback;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
@@ -349,7 +354,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     /**
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function ____test_sending_message_with_auto_acking()
+    public function test_sending_message_with_auto_acking()
     {
         $queueName                   = Uuid::uuid4()->toString();
         $amqpQueues                  = [AmqpQueue::createWith($queueName)->withExclusivity()];
@@ -369,18 +374,76 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
 
         $inboundAmqpAdapter = $this->createAmqpInboundAdapter($queueName, $requestChannelName, $amqpConnectionReferenceName);
 
-        $exceptionalHandler = ExceptionMessageHandler::create();
-        $inboundRequestChannel->subscribe($exceptionalHandler);
+        $inboundQueueChannel = QueueChannel::create();
+        $inboundRequestChannel->subscribe(ForwardMessageHandler::create($inboundQueueChannel));
+
         $inboundAmqpGateway = $inboundAmqpAdapter
             ->build($inMemoryChannelResolver, $referenceSearchService, PollingMetadata::create("")->setHandledMessageLimit(1));
         $inboundAmqpGateway->run();
 
-        $inboundRequestChannel->unsubscribe($exceptionalHandler);
-        $inboundQueueChannel = QueueChannel::create();
-        $inboundRequestChannel->subscribe(ForwardMessageHandler::create($inboundQueueChannel));
-        $this->assertNotNull($this->receiveTillMessageFound($inboundAmqpAdapter, $inboundQueueChannel, $inMemoryChannelResolver, $referenceSearchService), "Message was not requeued correctly");
+        $this->assertNotNull($this->receiveOnce($inboundAmqpAdapter, $inboundQueueChannel, $inMemoryChannelResolver, $referenceSearchService), "Message was not requeued correctly");
 
-        $this->assertNull($this->receiveTillMessageFound($inboundAmqpAdapter, $inboundQueueChannel, $inMemoryChannelResolver, $referenceSearchService), "Message was not acked correctly");
+        $this->assertNull($this->receiveOnce($inboundAmqpAdapter, $inboundQueueChannel, $inMemoryChannelResolver, $referenceSearchService), "Message was not acked correctly");
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_receiving_message_second_time_when_requeued()
+    {
+        $queueName                   = Uuid::uuid4()->toString();
+
+        $amqpBackedMessageChannel = $this->createAmqpBackendMessageChannel($queueName);
+        $amqpBackedMessageChannel->send(MessageBuilder::withPayload("some")->build());
+
+        /** @var Message $message */
+        $message = $amqpBackedMessageChannel->receive();
+
+        /** @var AcknowledgementCallback $acknowledgeCallback */
+        $acknowledgeCallback = $message->getHeaders()->get(AmqpHeader::HEADER_ACKNOWLEDGE);
+        $acknowledgeCallback->requeue();
+
+        $this->assertNotNull($amqpBackedMessageChannel->receive());
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_not_receiving_message_second_time_when_acked()
+    {
+        $queueName                   = Uuid::uuid4()->toString();
+
+        $amqpBackedMessageChannel = $this->createAmqpBackendMessageChannel($queueName);
+        $amqpBackedMessageChannel->send(MessageBuilder::withPayload("some")->build());
+
+        /** @var Message $message */
+        $message = $amqpBackedMessageChannel->receive();
+
+        /** @var AcknowledgementCallback $acknowledgeCallback */
+        $acknowledgeCallback = $message->getHeaders()->get(AmqpHeader::HEADER_ACKNOWLEDGE);
+        $acknowledgeCallback->accept();
+
+        $this->assertNull($amqpBackedMessageChannel->receive());
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_not_receiving_message_second_time_when_rejected()
+    {
+        $queueName                   = Uuid::uuid4()->toString();
+
+        $amqpBackedMessageChannel = $this->createAmqpBackendMessageChannel($queueName);
+        $amqpBackedMessageChannel->send(MessageBuilder::withPayload("some")->build());
+
+        /** @var Message $message */
+        $message = $amqpBackedMessageChannel->receive();
+
+        /** @var AcknowledgementCallback $acknowledgeCallback */
+        $acknowledgeCallback = $message->getHeaders()->get(AmqpHeader::HEADER_ACKNOWLEDGE);
+        $acknowledgeCallback->reject();
+
+        $this->assertNull($amqpBackedMessageChannel->receive());
     }
 
     /**
@@ -448,19 +511,6 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
      *
      * @return Message|null
      */
-    private function receiveTillMessageFound(AmqpInboundChannelAdapterBuilder $inboundAmqpGatewayBuilder, QueueChannel $inboundRequestChannel, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): ?Message
-    {
-        return $this->receiveWithPollingMetadata($inboundAmqpGatewayBuilder, $inboundRequestChannel, $channelResolver, $referenceSearchService, PollingMetadata::create("someId")->setHandledMessageLimit(1));
-    }
-
-    /**
-     * @param AmqpInboundChannelAdapterBuilder $inboundAmqpGatewayBuilder
-     * @param QueueChannel              $inboundRequestChannel
-     * @param ChannelResolver           $channelResolver
-     * @param ReferenceSearchService    $referenceSearchService
-     *
-     * @return Message|null
-     */
     private function receiveOnce(AmqpInboundChannelAdapterBuilder $inboundAmqpGatewayBuilder, QueueChannel $inboundRequestChannel, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): ?Message
     {
         return $this->receiveWithPollingMetadata($inboundAmqpGatewayBuilder, $inboundRequestChannel, $channelResolver, $referenceSearchService, PollingMetadata::create("someId")->setExecutionAmountLimit(1));
@@ -503,5 +553,26 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
             $amqpConnectionReferenceName
         )
             ->withReceiveTimeout(1);
+    }
+
+    /**
+     * @param string $queueName
+     * @return AmqpBackendMessageChannel
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function createAmqpBackendMessageChannel(string $queueName) : AmqpBackendMessageChannel
+    {
+        $amqpConnectionReferenceName = "amqpConnectionName";
+        $referenceSearchService = $this->createReferenceSearchService(
+            $amqpConnectionReferenceName,
+            [],
+            [AmqpQueue::createWith($queueName)],
+            [],
+            []
+        );
+
+        return AmqpBackedMessageChannelBuilder::create($queueName, $amqpConnectionReferenceName)
+                ->withReceiveTimeout(1)
+                ->build($referenceSearchService);
     }
 }

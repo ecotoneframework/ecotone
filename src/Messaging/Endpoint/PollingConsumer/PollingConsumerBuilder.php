@@ -15,7 +15,10 @@ use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\Scheduling\EpochBasedClock;
@@ -28,26 +31,81 @@ use SimplyCodedSoftware\Messaging\Support\Assert;
  * @package SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
+class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder implements MessageHandlerConsumerBuilder
 {
     /**
-     * @inheritDoc
+     * @var GatewayProxyBuilder
      */
-    public function isSupporting(ChannelResolver $channelResolver, MessageHandlerBuilder $messageHandlerBuilder): bool
+    private $entrypointGateway;
+
+    public function __construct()
     {
-        $messageChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
-
-        if ($messageChannel instanceof MessageChannelInterceptorAdapter) {
-            return $messageChannel->getInternalMessageChannel() instanceof PollableChannel;
-        }
-
-        return $messageChannel instanceof PollableChannel;
+        $this->entrypointGateway = GatewayProxyBuilder::create(
+            "handler",
+            EntrypointGateway::class,
+            "executeEntrypoint",
+            "inputChannel"
+        );
     }
 
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    {
+        $this->entrypointGateway->addAroundInterceptor($aroundInterceptorReference);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    {
+        return $this->entrypointGateway->getInterceptedInterface($interfaceToCallRegistry);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    {
+        $this->entrypointGateway->withEndpointAnnotations($endpointAnnotations);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getEndpointAnnotations(): array
+    {
+        return $this->entrypointGateway->getEndpointAnnotations();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRequiredInterceptorNames(): iterable
+    {
+        return $this->entrypointGateway->getRequiredInterceptorNames();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function withRequiredInterceptorNames(iterable $interceptorNames)
+    {
+        $this->entrypointGateway->withRequiredInterceptorNames($interceptorNames);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function buildAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         Assert::notNullAndEmpty($messageHandlerBuilder->getEndpointId(), "Message Endpoint name can't be empty for {$messageHandlerBuilder}");
         Assert::notNull($pollingMetadata, "No polling meta data defined for polling endpoint {$messageHandlerBuilder}");
@@ -59,14 +117,7 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
         Assert::isTrue($pollableChannel instanceof PollableChannel, "Channel passed to Polling Consumer must be pollable");
 
-        $gatewayProxyBuilder = GatewayProxyBuilder::create(
-            "handler",
-            EntrypointGateway::class,
-            "executeEntrypoint",
-            "inputChannel"
-        );
-
-        $gateway = $gatewayProxyBuilder
+        $gateway = $this->entrypointGateway
             ->withErrorChannel($pollingMetadata->getErrorChannelName())
             ->build(
                 InMemoryReferenceSearchService::createWithReferenceService(
@@ -88,5 +139,13 @@ class PollingConsumerBuilder implements MessageHandlerConsumerBuilder
         );
 
         return $inboundChannelAdapter;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isSupporting(ChannelResolver $channelResolver, MessageHandlerBuilder $messageHandlerBuilder): bool
+    {
+        return false;
     }
 }

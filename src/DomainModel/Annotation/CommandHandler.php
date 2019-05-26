@@ -29,4 +29,10 @@ class CommandHandler extends InputOutputEndpointAnnotation
      * @var bool
      */
     public $filterOutOnNotFound = false;
+    /**
+     * Redirect to channel when factory method found already existing aggregate
+     *
+     * @var string
+     */
+    public $redirectToOnAlreadyExists = "";
 }

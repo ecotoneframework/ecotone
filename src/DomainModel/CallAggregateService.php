@@ -37,6 +37,14 @@ class CallAggregateService
      * @var array|AroundMethodInterceptor[]
      */
     private $aroundMethodInterceptors;
+    /**
+     * @var bool
+     */
+    private $withFactoryRedirectOnFoundMethodName;
+    /**
+     * @var array|ParameterConverterBuilder[]
+     */
+    private $withFactoryRedirectOnFoundParameterConverters;
 
     /**
      * ServiceCallToAggregateAdapter constructor.
@@ -45,9 +53,13 @@ class CallAggregateService
      * @param array|ParameterConverterBuilder[] $messageToParameterConverters
      * @param AroundMethodInterceptor[] $aroundMethodInterceptors
      * @param ReferenceSearchService $referenceSearchService
+     * @param string $withFactoryRedirectOnFoundMethodName
+     * @param ParameterConverterBuilder[] $withFactoryRedirectOnFoundParameterConverters
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __construct(ChannelResolver $channelResolver, array $messageToParameterConverters, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService)
+    public function __construct(ChannelResolver $channelResolver, array $messageToParameterConverters, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService,
+                                string $withFactoryRedirectOnFoundMethodName, array $withFactoryRedirectOnFoundParameterConverters
+    )
     {
         Assert::allInstanceOfType($messageToParameterConverters, ParameterConverter::class);
 
@@ -55,6 +67,8 @@ class CallAggregateService
         $this->channelResolver = $channelResolver;
         $this->referenceSearchService = $referenceSearchService;
         $this->aroundMethodInterceptors = $aroundMethodInterceptors;
+        $this->withFactoryRedirectOnFoundMethodName = $withFactoryRedirectOnFoundMethodName;
+        $this->withFactoryRedirectOnFoundParameterConverters = $withFactoryRedirectOnFoundParameterConverters;
     }
 
     /**
@@ -74,13 +88,23 @@ class CallAggregateService
                             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
                             : null;
 
-        $methodInvoker = MethodInvoker::createWithBuiltParameterConverters(
-            $aggregate ? $aggregate : $message->getHeaders()->get(AggregateMessage::CLASS_NAME),
-            $message->getHeaders()->get(AggregateMessage::METHOD_NAME),
-            $this->messageToParameterConverters,
-            $this->referenceSearchService,
-            $this->aroundMethodInterceptors
-        );
+        if ($aggregate && $this->withFactoryRedirectOnFoundMethodName) {
+            $methodInvoker = MethodInvoker::createWithBuiltParameterConverters(
+                $aggregate,
+                $this->withFactoryRedirectOnFoundMethodName,
+                $this->withFactoryRedirectOnFoundParameterConverters,
+                $this->referenceSearchService,
+                $this->aroundMethodInterceptors
+            );
+        }else {
+            $methodInvoker = MethodInvoker::createWithBuiltParameterConverters(
+                $aggregate ? $aggregate : $message->getHeaders()->get(AggregateMessage::CLASS_NAME),
+                $message->getHeaders()->get(AggregateMessage::METHOD_NAME),
+                $this->messageToParameterConverters,
+                $this->referenceSearchService,
+                $this->aroundMethodInterceptors
+            );
+        }
 
         $resultMessage = MessageBuilder::fromMessage($message);
         try {

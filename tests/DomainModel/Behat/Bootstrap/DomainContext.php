@@ -65,7 +65,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iHaveOrderWithIdForProductsRegisteredToShippingAddress(int $orderId, int $productAmount, string $shippAddress)
     {
-        $this->commandBus->send(CreateOrderCommand::create($orderId, $productAmount, $shippAddress));
+        $this->commandBus->send(CreateOrderCommand::createWith($orderId, $productAmount, $shippAddress));
     }
 
     /**

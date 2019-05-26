@@ -300,6 +300,12 @@ class AggregateMessagingModule implements AnnotationModule
 
         $endpointId = $registration->getAnnotationForMethod()->endpointId;
         $handledMessageClassName = self::getMessageClassFor($registration);
+
+        $redirectMethodConverters = [];
+        if ($annotation->redirectToOnAlreadyExists) {
+            $redirectMethodConverters = $this->getParameterConverters(InterfaceToCall::create($registration->getClassName(), $annotation->redirectToOnAlreadyExists), []);
+        }
+
         $configuration->registerMessageHandler(
             AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith($registration->getClassName(), $registration->getMethodName(), $handledMessageClassName)
                 ->withInputChannelName($inputChannelName)
@@ -307,6 +313,7 @@ class AggregateMessagingModule implements AnnotationModule
                 ->withEndpointId($endpointId)
                 ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
                 ->withFilterOutOnNotFound($filterOutOnNotFound)
+                ->withRedirectToOnAlreadyExists($annotation->redirectToOnAlreadyExists, $redirectMethodConverters)
                 ->withMethodParameterConverters($parameterConverters)
                 ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
         );

@@ -2,7 +2,9 @@
 
 namespace SimplyCodedSoftware\DomainModel;
 
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
+use Doctrine\Common\Annotations\AnnotationException;
+use ReflectionClass;
+use ReflectionException;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
@@ -13,9 +15,11 @@ use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\MessageHandler;
+use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
@@ -76,19 +80,27 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      * @var bool
      */
     private $filterOutOnNotFound = self::DEFAULT_FILTER_OUT_ON_NOT_FOUND;
+    /**
+     * @var string
+     */
+    private $withFactoryRedirectOnFoundMethodName = "";
+    /**
+     * @var ParameterConverterBuilder[]
+     */
+    private $withFactoryRedirectOnFoundParameterConverters = [];
 
     /**
      * AggregateCallingCommandHandlerBuilder constructor.
      *
      * @param string $aggregateClassName
      * @param string $methodName
-     * @param bool   $isCommandHandler
+     * @param bool $isCommandHandler
      * @param string $handledMessageClassName
-     * @param bool   $filterOutOnNotFound
+     * @param bool $filterOutOnNotFound
      *
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws ReflectionException
+     * @throws MessagingException
      */
     private function __construct(string $aggregateClassName, string $methodName, bool $isCommandHandler, string $handledMessageClassName)
     {
@@ -103,8 +115,9 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      * @param string $aggregateClassName
      * @param string $handledMessageClassName
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
+     * @throws ReflectionException
+     * @throws AnnotationException
      */
     private function initialize(string $aggregateClassName, string $handledMessageClassName): void
     {
@@ -112,7 +125,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         $this->isFactoryMethod = $interfaceToCall->isStaticallyCalled();
         $this->isVoidMethod = $interfaceToCall->getReturnType()->isVoid();
 
-        $reflectionClass = new \ReflectionClass($aggregateClassName);
+        $reflectionClass = new ReflectionClass($aggregateClassName);
         $aggregateDefaultIdentifiers = [];
         foreach ($reflectionClass->getProperties() as $property) {
             if (preg_match("*AggregateIdentifier*", $property->getDocComment())) {
@@ -124,7 +137,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             throw InvalidArgumentException::create("Aggregate {$aggregateClassName} has no identifiers defined. How you forgot to mark @AggregateIdentifier?");
         }
 
-        $messageReflection = new \ReflectionClass($handledMessageClassName);
+        $messageReflection = new ReflectionClass($handledMessageClassName);
         $expectedVersionPropertyName = null;
         foreach ($messageReflection->getProperties() as $property) {
             if (preg_match("*TargetAggregateIdentifier*", $property->getDocComment())) {
@@ -142,7 +155,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         }
 
         foreach ($aggregateDefaultIdentifiers as $aggregateIdentifierName => $aggregateIdentifierMappingKey) {
-            if (is_null($aggregateIdentifierMappingKey) && !$this->isFactoryMethod) {
+            if (is_null($aggregateIdentifierMappingKey)) {
                 $mappingKey = null;
                 foreach ($messageReflection->getProperties() as $property) {
                     if ($aggregateIdentifierName === $property->getName()) {
@@ -150,7 +163,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                     }
                 }
 
-                if (is_null($mappingKey)) {
+                if (is_null($mappingKey) && !$this->isFactoryMethod) {
                     throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` in {$handledMessageClassName} for {$aggregateClassName}. How you forgot to mark @TargetAggregateIdentifier?");
                 } else {
                     $aggregateDefaultIdentifiers[$aggregateIdentifierName] = $mappingKey;
@@ -171,8 +184,8 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      *
      * @return AggregateMessageHandlerBuilder
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws ReflectionException
+     * @throws MessagingException
      */
     public static function createAggregateCommandHandlerWith(string $aggregateClassName, string $methodName, string $handledMessageClassName): self
     {
@@ -186,8 +199,8 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      * @param string $handledMessageClassName
      * @return AggregateMessageHandlerBuilder
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws ReflectionException
+     * @throws MessagingException
      */
     public static function createAggregateQueryHandlerWith(string $aggregateClassName, string $methodName, string $handledMessageClassName): self
     {
@@ -226,7 +239,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      *
      * @return AggregateMessageHandlerBuilder
      */
-    public function withFilterOutOnNotFound(bool $filterOutOnNotFound) : self
+    public function withFilterOutOnNotFound(bool $filterOutOnNotFound): self
     {
         $this->filterOutOnNotFound = $filterOutOnNotFound;
 
@@ -254,37 +267,30 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     }
 
     /**
+     * @param string $redirectOnFoundMethod
+     * @param ParameterConverterBuilder[] $methodConverters
+     * @return AggregateMessageHandlerBuilder
+     */
+    public function withRedirectToOnAlreadyExists(string $redirectOnFoundMethod, array $methodConverters): self
+    {
+        $this->withFactoryRedirectOnFoundMethodName = $redirectOnFoundMethod;
+        $this->withFactoryRedirectOnFoundParameterConverters = $methodConverters;
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $propertyReader = new PropertyReaderAccessor();
         $chainCqrsMessageHandler = ChainMessageHandlerBuilder::create();
         $aggregateRepository = null;
-
-        foreach ($this->aggregateRepositoryReferenceNames as $aggregateRepositoryName) {
-            /** @var AggregateRepository $aggregateRepository */
-            $aggregateRepositoryToCheck = $referenceSearchService->get($aggregateRepositoryName);
-            if ($aggregateRepositoryToCheck->canHandle($this->aggregateClassName)) {
-                $aggregateRepository = $aggregateRepositoryToCheck;
-                break;
-            }
-        }
-        Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$this->aggregateClassName}:{$this->methodName}");
 
         $chainCqrsMessageHandler
             ->chain(
                 ServiceActivatorBuilder::createWithDirectReference(
-                    new LoadAggregateService(
-                        $aggregateRepository,
-                        $this->aggregateClassName,
-                        $this->methodName,
-                        $this->isFactoryMethod,
-                        $this->messageIdentifierMapping,
-                        $this->expectedVersionPropertyName,
-                        $propertyReader,
-                        $this->filterOutOnNotFound
-                    ),
+                    $this->createLoadAggregateService($referenceSearchService),
                     "load"
                 )
             );
@@ -294,10 +300,15 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             $methodParameterConverters[] = $parameterConverterBuilder->build($referenceSearchService);
         }
 
+        $withFactoryRedirectOnFoundParameterConverters = [];
+        foreach ($this->withFactoryRedirectOnFoundParameterConverters as $redirectOnFoundParameterConverter) {
+            $withFactoryRedirectOnFoundParameterConverters[] = $redirectOnFoundParameterConverter->build($referenceSearchService);
+        }
+
         $chainCqrsMessageHandler
             ->chain(
                 ServiceActivatorBuilder::createWithDirectReference(
-                    new CallAggregateService($channelResolver, $methodParameterConverters, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $this->orderedAroundInterceptors), $referenceSearchService),
+                    new CallAggregateService($channelResolver, $methodParameterConverters, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $this->orderedAroundInterceptors), $referenceSearchService, $this->withFactoryRedirectOnFoundMethodName, $withFactoryRedirectOnFoundParameterConverters),
                     "call"
                 )->withPassThroughMessageOnVoidInterface($this->isVoidMethod)
             );
@@ -306,7 +317,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             $chainCqrsMessageHandler
                 ->chain(
                     ServiceActivatorBuilder::createWithDirectReference(
-                        new SaveAggregateService($aggregateRepository, $propertyReader),
+                        new SaveAggregateService($this->getAggregateRepository($referenceSearchService), $this->getPropertyReaderAccessor()),
                         "save"
                     )
                 );
@@ -315,6 +326,58 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         return $chainCqrsMessageHandler
             ->withOutputMessageChannel($this->outputMessageChannelName)
             ->build($channelResolver, $referenceSearchService);
+    }
+
+    /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @return LoadAggregateService
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws ReferenceNotFoundException
+     */
+    public function createLoadAggregateService(ReferenceSearchService $referenceSearchService): LoadAggregateService
+    {
+        return new LoadAggregateService(
+            $this->getAggregateRepository($referenceSearchService),
+            $this->aggregateClassName,
+            $this->methodName,
+            $this->isFactoryMethod,
+            $this->messageIdentifierMapping,
+            $this->expectedVersionPropertyName,
+            $this->getPropertyReaderAccessor(),
+            $this->filterOutOnNotFound,
+            (bool)$this->withFactoryRedirectOnFoundMethodName
+        );
+    }
+
+    /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @return object|AggregateRepository
+     * @throws InvalidArgumentException
+     * @throws ReferenceNotFoundException
+     * @throws MessagingException
+     */
+    private function getAggregateRepository(ReferenceSearchService $referenceSearchService): AggregateRepository
+    {
+        foreach ($this->aggregateRepositoryReferenceNames as $aggregateRepositoryName) {
+            /** @var AggregateRepository $aggregateRepository */
+            $aggregateRepositoryToCheck = $referenceSearchService->get($aggregateRepositoryName);
+            if ($aggregateRepositoryToCheck->canHandle($this->aggregateClassName)) {
+                $aggregateRepository = $aggregateRepositoryToCheck;
+                break;
+            }
+        }
+        Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$this->aggregateClassName}:{$this->methodName}");
+        return $aggregateRepository;
+    }
+
+    /**
+     * @return PropertyReaderAccessor
+     */
+    private function getPropertyReaderAccessor(): PropertyReaderAccessor
+    {
+        $propertyReader = new PropertyReaderAccessor();
+        return $propertyReader;
     }
 
     /**

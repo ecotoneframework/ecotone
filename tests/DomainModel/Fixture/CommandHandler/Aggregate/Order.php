@@ -61,7 +61,9 @@ class Order implements VersionAggregate
      * @param EventBus           $eventBus
      *
      * @return Order
-     * @CommandHandler()
+     * @CommandHandler(
+     *     redirectToOnAlreadyExists="increaseAmount"
+     * )
      */
     public static function createWith(CreateOrderCommand $command, EventBus $eventBus) : self
     {
@@ -71,9 +73,13 @@ class Order implements VersionAggregate
         return $order;
     }
 
-    public function increaseAmount() : void
+    /**
+     * @param IncreaseAmountCommand $command
+     * @param EventBus $eventBus
+     */
+    public function increaseAmount(IncreaseAmountCommand $command, EventBus $eventBus) : void
     {
-        $this->amount += 1;
+        $this->amount += $command->getAmount();
         $this->increaseAggregateVersion();
     }
 

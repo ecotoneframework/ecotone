@@ -5,11 +5,13 @@ namespace SimplyCodedSoftware\DomainModel;
 use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\MessageHeaders;
 use SimplyCodedSoftware\Messaging\NullableMessageChannel;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 
 /**
  * Class LoadAggregateService
@@ -51,20 +53,25 @@ class LoadAggregateService
      * @var bool
      */
     private $filterOutOnNotFound;
+    /**
+     * @var bool
+     */
+    private $loadForFactoryMethod;
 
     /**
      * ServiceCallToAggregateAdapter constructor.
      *
-     * @param AggregateRepository    $aggregateRepository
-     * @param string                 $aggregateClassName
-     * @param string                 $aggregateMethod
-     * @param bool                   $isFactoryMethod
-     * @param array                  $aggregateIdentifierMapping
-     * @param null|string            $expectedVersionName
+     * @param AggregateRepository $aggregateRepository
+     * @param string $aggregateClassName
+     * @param string $aggregateMethod
+     * @param bool $isFactoryMethod
+     * @param array $aggregateIdentifierMapping
+     * @param null|string $expectedVersionName
      * @param PropertyReaderAccessor $propertyReaderAccessor
-     * @param bool                   $filterOutOnNotFound
+     * @param bool $filterOutOnNotFound
+     * @param bool $loadForFactoryMethod
      */
-    public function __construct(AggregateRepository $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?string $expectedVersionName, PropertyReaderAccessor $propertyReaderAccessor, bool $filterOutOnNotFound)
+    public function __construct(AggregateRepository $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?string $expectedVersionName, PropertyReaderAccessor $propertyReaderAccessor, bool $filterOutOnNotFound, bool $loadForFactoryMethod)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->isFactoryMethod = $isFactoryMethod;
@@ -74,6 +81,7 @@ class LoadAggregateService
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->expectedVersionName = $expectedVersionName;
         $this->filterOutOnNotFound = $filterOutOnNotFound;
+        $this->loadForFactoryMethod = $loadForFactoryMethod;
     }
 
     /**
@@ -90,15 +98,16 @@ class LoadAggregateService
         $expectedVersion = null;
 
         foreach ($this->aggregateIdentifierMapping as $aggregateIdentifierName => $aggregateIdentifierMappingName) {
-            $aggregateIdentifiers[$aggregateIdentifierName] = $this->isFactoryMethod ? null : $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload());
+            $aggregateIdentifiers[$aggregateIdentifierName] = ($this->isFactoryMethod && !$this->loadForFactoryMethod) ? null : $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload());
         }
 
         $aggregate = null;
-        if (!$this->isFactoryMethod) {
+        if (!$this->isFactoryMethod || $this->loadForFactoryMethod) {
 
             foreach ($aggregateIdentifiers as $identifierName => $aggregateIdentifier) {
                 if (is_null($aggregateIdentifier)) {
-                    throw AggregateNotFoundException::create("Aggregate identifier {$identifierName} definition found, but is null. Can't load aggregate {$this->aggregateClassName} to call {$this->aggregateMethod}.");
+                    $messageType = TypeDescriptor::createFromVariable($message->getPayload());
+                    throw AggregateNotFoundException::create("Aggregate identifier {$identifierName} definition found in {$messageType->toString()}, but is null. Can't load aggregate {$this->aggregateClassName} to call {$this->aggregateMethod}.");
                 }
             }
 
@@ -115,7 +124,7 @@ class LoadAggregateService
                 return null;
             }
 
-            if (!$aggregate) {
+            if (!$aggregate && !$this->loadForFactoryMethod) {
                 throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName} was not found for indentifiers " . \json_encode($aggregateIdentifiers));
             }
         }

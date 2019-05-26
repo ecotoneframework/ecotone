@@ -7,7 +7,7 @@ namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
  * @package Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class CreateOrderCommand
+class CreateOrderCommand implements IncreaseAmountCommand
 {
     /**
      * @var string
@@ -41,7 +41,7 @@ class CreateOrderCommand
      * @param string $shippingAddress
      * @return CreateOrderCommand
      */
-    public static function create(string $aggregateId, int $amount, string $shippingAddress) : self
+    public static function createWith(string $aggregateId, int $amount, string $shippingAddress) : self
     {
         return new self($aggregateId, $amount, $shippingAddress);
     }

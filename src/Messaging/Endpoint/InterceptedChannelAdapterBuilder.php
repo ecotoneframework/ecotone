@@ -28,7 +28,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
                     "",
                     $interceptor,
                     "postSend",
-                    ErrorChannelInterceptor::PRECEDENCE - 100,
+                    InterceptedConsumer::CONSUMER_INTERCEPTOR_PRECEDENCE,
                     ""
                 )
             );

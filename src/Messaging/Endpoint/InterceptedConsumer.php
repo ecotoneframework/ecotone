@@ -16,6 +16,8 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundIntercep
  */
 class InterceptedConsumer implements ConsumerLifecycle
 {
+    const CONSUMER_INTERCEPTOR_PRECEDENCE = ErrorChannelInterceptor::PRECEDENCE - 100;
+
     /**
      * @var ConsumerLifecycle
      */

@@ -32,6 +32,7 @@ use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\InterceptorConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\InterceptorWithPointCut;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
@@ -40,6 +41,7 @@ use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\Support\Assert;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\StubCallSavingService;
 
 /**
  * Class Configuration
@@ -245,8 +247,9 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->checkIfInterceptorIsCorrect($methodInterceptor);
 
-        if ($methodInterceptor->getInterceptingObject() instanceof ServiceActivatorBuilder) {
-            $methodInterceptor->getInterceptingObject()->withPassThroughMessageOnVoidInterface(true);
+        $interceptingObject = $methodInterceptor->getInterceptingObject();
+        if ($interceptingObject instanceof ServiceActivatorBuilder) {
+            $interceptingObject->withPassThroughMessageOnVoidInterface(true);
         }
 
         $this->beforeCallMethodInterceptors[] = $methodInterceptor;
@@ -606,7 +609,7 @@ final class MessagingSystemConfiguration implements Configuration
             }
 
             if ($interceptor->doesItCutWith($interceptedInterface, $endpointAnnotations)) {
-                $relatedInterceptors[] = $interceptor;
+                $relatedInterceptors[] = $interceptor->addInterceptedInterfaceToCall($interceptedInterface, $endpointAnnotations);
             }
         }
 

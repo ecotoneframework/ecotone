@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
 
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use Test\SimplyCodedSoftware\Messaging\Builder\Handler\InterfaceParameterTestCaseBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
@@ -15,6 +16,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ValueBuilder;
 use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CallableService;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -37,8 +39,10 @@ class PayloadBuilderTest extends MessagingTest
         $this->assertEquals(
               $payload,
               $converter->getArgumentFrom(
+                  InterfaceToCall::create(CallableService::class, "wasCalled"),
                   InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock("string", "")),
-                  MessageBuilder::withPayload($payload)->build()
+                  MessageBuilder::withPayload($payload)->build(),
+                  []
               )
         );
     }

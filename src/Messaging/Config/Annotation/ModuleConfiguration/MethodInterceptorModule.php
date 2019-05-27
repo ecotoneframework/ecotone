@@ -111,6 +111,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 $beforeInterceptor = $interfaceToCall->getMethodAnnotation($beforeAnnotation);
                 $preCallInterceptors[] = \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     $methodInterceptor->getReferenceName(),
+                    InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
                     self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
                     $beforeInterceptor->precedence,
                     $beforeInterceptor->pointcut
@@ -121,6 +122,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 $afterInterceptor = $interfaceToCall->getMethodAnnotation($afterAnnotation);
                 $postCallInterceptors[] = \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     $methodInterceptor->getReferenceName(),
+                    InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
                     self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
                     $afterInterceptor->precedence,
                     $afterInterceptor->pointcut

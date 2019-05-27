@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\DomainModel\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use ReflectionException;
 use SimplyCodedSoftware\DomainModel\AggregateMessage;
+use SimplyCodedSoftware\DomainModel\AggregateMessageConversionService;
 use SimplyCodedSoftware\DomainModel\AggregateMessageConversionServiceBuilder;
 use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
 use SimplyCodedSoftware\DomainModel\AggregateRepositoryFactory;
@@ -212,6 +213,7 @@ class AggregateMessagingModule implements AnnotationModule
             $configuration->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
+                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                     $registration->getClassName() . "::" . $registration->getMethodName()
@@ -324,6 +326,7 @@ class AggregateMessagingModule implements AnnotationModule
         $configuration->registerBeforeMethodInterceptor(
             MethodInterceptor::create(
                 "",
+                InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                 AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                 $registration->getClassName() . "::" . $registration->getMethodName()

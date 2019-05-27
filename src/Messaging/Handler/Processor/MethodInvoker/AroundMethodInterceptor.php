@@ -161,6 +161,10 @@ class AroundMethodInterceptor
                 if ($methodInvocation->getInterceptedInterface()->hasClassAnnotation($parameter->getTypeDescriptor())) {
                     $resolvedArgument = $methodInvocation->getInterceptedInterface()->getClassAnnotation($parameter->getTypeDescriptor());
                 }
+//                require test
+//                foreach ($methodInvocation->getEndpointAnnotations() as $endpointAnnotation) {
+//                    if ($endpointAnnotation ==)
+//                }
             }
 
             if (!$resolvedArgument) {

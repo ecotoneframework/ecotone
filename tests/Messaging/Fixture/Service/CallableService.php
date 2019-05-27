@@ -2,6 +2,8 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Service;
 
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+
 /**
  * Interface CallableService
  * @package Test\SimplyCodedSoftware\Messaging\Fixture\Service

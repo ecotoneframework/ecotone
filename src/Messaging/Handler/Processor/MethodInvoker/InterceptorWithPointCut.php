@@ -29,4 +29,11 @@ interface InterceptorWithPointCut
      * @return bool
      */
     public function doesItCutWith(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations): bool;
+
+    /**
+     * @param InterfaceToCall $interceptedInterface
+     * @param array $endpointAnnotations
+     * @return static
+     */
+    public function addInterceptedInterfaceToCall(InterfaceToCall $interceptedInterface, array $endpointAnnotations);
 }

@@ -385,7 +385,7 @@ class InterfaceToCall
     public function getFirstParameterTypeHint(): string
     {
         if ($this->parameterAmount() < 1) {
-            throw InvalidArgumentException::create("Trying to get first parameter, but has none");
+            throw InvalidArgumentException::create("Trying to get first parameter, but has none for {$this}");
         }
 
         return $this->getFirstParameter()->getTypeHint();

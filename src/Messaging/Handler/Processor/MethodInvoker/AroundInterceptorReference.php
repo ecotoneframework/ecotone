@@ -225,6 +225,14 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     /**
      * @inheritDoc
      */
+    public function addInterceptedInterfaceToCall(InterfaceToCall $interceptedInterface, array $endpointAnnotations)
+    {
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function hasName(string $name): bool
     {
         return $this->interceptorName === $name;

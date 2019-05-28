@@ -14,11 +14,13 @@ use SimplyCodedSoftware\Messaging\Message;
 interface ParameterConverter
 {
     /**
+     * @param InterfaceToCall $interfaceToCall
      * @param InterfaceParameter $relatedParameter
      * @param Message $message
+     * @param object[] $endpointAnnotations
      * @return mixed
      */
-    public function getArgumentFrom(InterfaceParameter $relatedParameter, Message $message);
+    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations);
 
     /**
      * @param InterfaceParameter $parameter

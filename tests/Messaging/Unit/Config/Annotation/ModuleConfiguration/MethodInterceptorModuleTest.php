@@ -6,6 +6,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfig
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptorModule;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -61,6 +62,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "someMethodInterceptor",
+                    InterfaceToCall::create(ServiceActivatorInterceptorExample::class, "doSomethingBefore"),
                     ServiceActivatorBuilder::create("someMethodInterceptor", "doSomethingBefore")
                         ->withPassThroughMessageOnVoidInterface(true)
                         ->withMethodParameterConverters([
@@ -75,6 +77,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
             ->registerAfterMethodInterceptor(
                 MethodInterceptor::create(
                     "someMethodInterceptor",
+                    InterfaceToCall::create(ServiceActivatorInterceptorExample::class, "doSomethingAfter"),
                     ServiceActivatorBuilder::create("someMethodInterceptor", "doSomethingAfter")
                         ->withPassThroughMessageOnVoidInterface(true)
                         ->withMethodParameterConverters([
@@ -110,6 +113,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "someMethodInterceptor",
+                    InterfaceToCall::create(TransformerInterceptorExample::class, "doSomethingBefore"),
                     TransformerBuilder::create("someMethodInterceptor", "doSomethingBefore")
                         ->withMethodParameterConverters([
                             PayloadBuilder::create("name"),
@@ -123,6 +127,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
             ->registerAfterMethodInterceptor(
                 MethodInterceptor::create(
                     "someMethodInterceptor",
+                    InterfaceToCall::create(TransformerInterceptorExample::class, "doSomethingAfter"),
                     TransformerBuilder::create("someMethodInterceptor", "doSomethingAfter")
                         ->withMethodParameterConverters([
                             PayloadBuilder::create("name"),

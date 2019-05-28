@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Message;
@@ -60,7 +61,7 @@ class ExpressionConverter implements ParameterConverter
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(InterfaceParameter $relatedParameter, Message $message)
+    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
     {
         return $this->expressionEvaluationService->evaluate(
             $this->expression,

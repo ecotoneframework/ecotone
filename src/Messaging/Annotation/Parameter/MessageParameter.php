@@ -10,7 +10,6 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @package SimplyCodedSoftware\Messaging\Annotation\MessageToParameter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
- * @Target({"ANNOTATION"})
  */
 class MessageParameter
 {

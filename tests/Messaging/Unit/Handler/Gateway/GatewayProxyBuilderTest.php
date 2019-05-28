@@ -8,6 +8,7 @@ use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderArrayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodArgumentReplacementException;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -781,6 +782,7 @@ class GatewayProxyBuilderTest extends MessagingTest
             ->addBeforeInterceptor(
                 MethodInterceptor::create(
                     "interceptor0",
+                    InterfaceToCall::create(CalculatingService::class, "multiply"),
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
                     0,
                     ""
@@ -789,6 +791,7 @@ class GatewayProxyBuilderTest extends MessagingTest
             ->addBeforeInterceptor(
                 MethodInterceptor::create(
                     "interceptor1",
+                    InterfaceToCall::create(CalculatingService::class, "sum"),
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "sum"),
                     1,
                     ""
@@ -797,6 +800,7 @@ class GatewayProxyBuilderTest extends MessagingTest
             ->addAfterInterceptor(
                 MethodInterceptor::create(
                     "interceptor2",
+                    InterfaceToCall::create(CalculatingService::class, "result"),
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result"),
                     1,
                     ""
@@ -805,6 +809,7 @@ class GatewayProxyBuilderTest extends MessagingTest
             ->addAfterInterceptor(
                 MethodInterceptor::create(
                     "interceptor3",
+                    InterfaceToCall::create(CalculatingService::class, "multiply"),
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
                     0,
                     ""

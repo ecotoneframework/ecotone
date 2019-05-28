@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
 
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use Test\SimplyCodedSoftware\Messaging\Builder\Handler\InterfaceParameterTestCaseBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use PHPUnit\Framework\TestCase;
@@ -13,6 +14,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ExpressionBuil
 use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CallableService;
 
 /**
  * Class ExpressionBuilderTest
@@ -36,8 +38,10 @@ class ExpressionBuilderTest extends TestCase
         $this->assertEquals(
             $payload . "1",
             $converter->getArgumentFrom(
+                InterfaceToCall::create(CallableService::class, "wasCalled"),
                 InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock("string",  "")),
-                MessageBuilder::withPayload($payload)->build()
+                MessageBuilder::withPayload($payload)->build(),
+                []
             )
         );
     }
@@ -58,8 +62,10 @@ class ExpressionBuilderTest extends TestCase
         $this->assertEquals(
             2,
             $converter->getArgumentFrom(
+                InterfaceToCall::create(CallableService::class, "wasCalled"),
                 InterfaceParameter::createNullable("x", TypeDescriptor::create("string")),
-                MessageBuilder::withPayload(1)->build()
+                MessageBuilder::withPayload(1)->build(),
+                []
             )
         );
     }

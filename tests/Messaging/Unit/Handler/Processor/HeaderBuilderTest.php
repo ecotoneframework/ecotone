@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
+use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use Test\SimplyCodedSoftware\Messaging\Builder\Handler\InterfaceParameterTestCaseBuilder;
 use PHPUnit\Framework\TestCase;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
@@ -9,6 +10,7 @@ use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderBuilder;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CallableService;
 
 /**
  * Class HeaderBuilderTest
@@ -28,8 +30,10 @@ class HeaderBuilderTest extends TestCase
         $this->assertEquals(
             123,
             $converter->getArgumentFrom(
+                InterfaceToCall::create(CallableService::class, "wasCalled"),
                 InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock("string",  "")),
-                MessageBuilder::withPayload("a")->setHeader("token", 123)->build()
+                MessageBuilder::withPayload("a")->setHeader("token", 123)->build(),
+                []
             )
         );
     }
@@ -45,8 +49,10 @@ class HeaderBuilderTest extends TestCase
         $this->assertEquals(
             null,
             $converter->getArgumentFrom(
+                InterfaceToCall::create(CallableService::class, "wasCalled"),
                 InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock("string",  "")),
-                MessageBuilder::withPayload("a")->build()
+                MessageBuilder::withPayload("a")->build(),
+                []
             )
         );
     }

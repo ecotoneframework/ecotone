@@ -141,6 +141,16 @@ class StubCallSavingService
 
     }
 
+    /**
+     * @ServiceActivator(inputChannelName="some")
+     * @param Message $message
+     * @return Message
+     */
+    public function methodWithAnnotationWithReturnType(Message $message) : Message
+    {
+        return $message;
+    }
+
     public function callWithMessage(Message $message) : void
     {
 

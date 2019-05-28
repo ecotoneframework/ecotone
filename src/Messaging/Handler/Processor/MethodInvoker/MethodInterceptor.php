@@ -5,8 +5,10 @@ namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
 
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
 use SimplyCodedSoftware\Messaging\MessagingException;
+use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class Interceptor
@@ -33,33 +35,39 @@ class MethodInterceptor implements InterceptorWithPointCut
      * @var Pointcut
      */
     private $pointcut;
+    /**
+     * @var InterfaceToCall
+     */
+    private $interceptorInterfaceToCall;
 
     /**
      * Interceptor constructor.
      * @param string $interceptorName
+     * @param InterfaceToCall $interceptorInterfaceToCall
      * @param MessageHandlerBuilderWithOutputChannel $messageHandler
      * @param int $precedence
      * @param Pointcut $pointcut
      */
-    private function __construct(string $interceptorName, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, Pointcut $pointcut)
+    private function __construct(string $interceptorName, InterfaceToCall $interceptorInterfaceToCall, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, Pointcut $pointcut)
     {
         $this->messageHandler = $messageHandler;
         $this->precedence = $precedence;
         $this->pointcut = $pointcut;
         $this->interceptorName = $interceptorName;
+        $this->interceptorInterfaceToCall = $interceptorInterfaceToCall;
     }
 
     /**
      * @param string $interceptorName
+     * @param InterfaceToCall $interceptorInterfaceToCall
      * @param MessageHandlerBuilderWithOutputChannel $messageHandler
      * @param int $precedence
      * @param string $pointcut
      * @return MethodInterceptor
-     * @throws MessagingException
      */
-    public static function create(string $interceptorName, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, string $pointcut)
+    public static function create(string $interceptorName, InterfaceToCall $interceptorInterfaceToCall, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, string $pointcut)
     {
-        return new self($interceptorName, $messageHandler, $precedence, Pointcut::createWith($pointcut));
+        return new self($interceptorName, $interceptorInterfaceToCall, $messageHandler, $precedence, Pointcut::createWith($pointcut));
     }
 
     /**
@@ -80,6 +88,29 @@ class MethodInterceptor implements InterceptorWithPointCut
     public function getInterceptingObject()
     {
         return $this->messageHandler;
+    }
+
+    /**
+     * @param InterfaceToCall $interceptedInterface
+     * @param array $endpointAnnotations
+     * @return static
+     * @throws MessagingException
+     * @throws InvalidArgumentException
+     */
+    public function addInterceptedInterfaceToCall(InterfaceToCall $interceptedInterface, array $endpointAnnotations): self
+    {
+        $clone = clone $this;
+        $interceptedMessageHandler = clone $clone->messageHandler;
+
+        if ($interceptedMessageHandler instanceof MessageHandlerBuilderWithParameterConverters) {
+            $interceptedMessageHandler->withMethodParameterConverters(array_merge(
+                [InterceptorConverterBuilder::create($interceptedInterface, $endpointAnnotations)],
+                MethodInvoker::createDefaultMethodParameters($this->interceptorInterfaceToCall, $interceptedMessageHandler->getParameterConverters(), false)
+            ));
+        }
+        $clone->messageHandler = $interceptedMessageHandler;
+
+        return $clone;
     }
 
     /**

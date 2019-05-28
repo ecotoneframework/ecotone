@@ -359,6 +359,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      */
     private function getAggregateRepository(ReferenceSearchService $referenceSearchService): AggregateRepository
     {
+        $aggregateRepository = null;
         foreach ($this->aggregateRepositoryReferenceNames as $aggregateRepositoryName) {
             /** @var AggregateRepository $aggregateRepository */
             $aggregateRepositoryToCheck = $referenceSearchService->get($aggregateRepositoryName);

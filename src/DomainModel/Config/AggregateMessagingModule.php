@@ -305,7 +305,7 @@ class AggregateMessagingModule implements AnnotationModule
 
         $redirectMethodConverters = [];
         $redirectOnFoundMethod = false;
-        if (property_exists($annotation, 'redirectToOnAlreadyExists') && $annotation->redirectToOnAlreadyExists) {
+        if ($annotation->redirectToOnAlreadyExists) {
             $redirectMethodConverters = $this->getParameterConverters(InterfaceToCall::create($registration->getClassName(), $annotation->redirectToOnAlreadyExists), []);
             $redirectOnFoundMethod = $annotation->redirectToOnAlreadyExists;
         }

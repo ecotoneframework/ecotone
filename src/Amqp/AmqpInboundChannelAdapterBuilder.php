@@ -152,7 +152,7 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      */
     public function getRequiredReferences(): array
     {
-        return array_merge([$this->amqpConnectionReferenceName, AmqpAdmin::REFERENCE_NAME], $this->inboundEntrypoint->getRequiredReferences());
+        return array_merge([$this->amqpConnectionReferenceName], $this->inboundEntrypoint->getRequiredReferences());
     }
 
     /**

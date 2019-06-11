@@ -112,10 +112,14 @@ class AmqpOutboundChannelAdapter implements MessageHandler
                 throw new InvalidArgumentException("Can't send message to amqp channel. Payload has incorrect type, that can't be converted: " . TypeDescriptor::createFromVariable($enqueueMessagePayload)->toString());
             }
 
+            $sourceType = $message->getHeaders()->getContentType()->hasTypeParameter() ? $message->getHeaders()->getContentType()->getTypeParameter() : TypeDescriptor::createFromVariable($enqueueMessagePayload);
+            $sourceMediaType = $message->getHeaders()->getContentType();
+            $targetType = TypeDescriptor::createStringType();
+
             if ($this->conversionService->canConvert(
-                $message->getHeaders()->getContentType()->hasTypeParameter() ? $message->getHeaders()->getContentType()->getTypeParameter() : TypeDescriptor::createFromVariable($enqueueMessagePayload),
-                $message->getHeaders()->getContentType(),
-                TypeDescriptor::createStringType(),
+                $sourceType,
+                $sourceMediaType,
+                $targetType,
                 $this->defaultConversionMediaType
             )) {
                 $mediaType = $this->defaultConversionMediaType;
@@ -127,7 +131,8 @@ class AmqpOutboundChannelAdapter implements MessageHandler
                     $this->defaultConversionMediaType
                 );
             }else {
-                throw new InvalidArgumentException("Can't send message to amqp channel. Payload has incorrect type, that can't be converted: " . TypeDescriptor::createFromVariable($enqueueMessagePayload)->toString());
+                throw new InvalidArgumentException("Can't send message to amqp channel. Payload has incorrect non-convertable type or converter is missing. 
+                 From {$sourceMediaType}:{$sourceType} to {$this->defaultConversionMediaType}:{$targetType} converted: " . TypeDescriptor::createFromVariable($enqueueMessagePayload)->toString());
             }
         }
 

@@ -9,6 +9,7 @@ use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Conversion\ConverterBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\ConverterReferenceBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\ReferenceServiceConverterBuilder;
@@ -81,7 +82,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         foreach ($this->converterBuilders as $converterBuilder) {
             $configuration->registerConverter($converterBuilder);

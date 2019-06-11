@@ -110,6 +110,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var InterfaceToCall[]
      */
     private $interfacesToCall = [];
+    /**
+     * @var ModuleReferenceSearchService
+     */
+    private $moduleReferenceSearchService;
 
     /**
      * Only one instance at time
@@ -135,6 +139,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver): void
     {
+        $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
         $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
         $moduleExtensions = [];
 
@@ -152,7 +157,8 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($modules as $module) {
             $module->prepare(
                 $this,
-                $moduleExtensions[$module->getName()]
+                $moduleExtensions[$module->getName()],
+                $moduleReferenceSearchService
             );
         }
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
@@ -177,6 +183,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $this->interfacesToCall = array_unique($this->interfacesToCall);
+        $this->moduleReferenceSearchService = $moduleReferenceSearchService;
     }
 
     /**
@@ -457,10 +464,15 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->build($referenceSearchService);
         }
-        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
-            ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
-            InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry
-        ]);
+        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService,
+            array_merge(
+                $this->moduleReferenceSearchService->getAllRegisteredReferences(),
+                [
+                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
+                    InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry
+                ]
+            )
+        );
 
         $channelResolver = $this->createChannelResolver($referenceSearchService);
         $this->configureInterceptors($interfaceToCallRegistry);

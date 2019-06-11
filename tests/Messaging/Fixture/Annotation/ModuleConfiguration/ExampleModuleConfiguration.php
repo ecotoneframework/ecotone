@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfigurat
 
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
@@ -70,7 +71,7 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\Messaging\Confi
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         $this->extensionObjects = $extensionObjects;
 

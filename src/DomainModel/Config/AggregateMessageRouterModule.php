@@ -12,6 +12,7 @@ use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
 
@@ -119,7 +120,7 @@ class AggregateMessageRouterModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         $configuration
             ->registerMessageHandler($this->commandBusByObject)

@@ -7,6 +7,7 @@ use Doctrine\Common\Annotations\AnnotationException;
 use ReflectionException;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller\ServiceActivatorWithPollerExample;
@@ -43,7 +44,7 @@ class PollerModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = PollerModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,

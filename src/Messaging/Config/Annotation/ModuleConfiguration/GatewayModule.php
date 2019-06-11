@@ -13,6 +13,7 @@ use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
@@ -112,7 +113,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
             $configuration->registerGatewayBuilder($gatewayBuilder);

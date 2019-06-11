@@ -9,6 +9,7 @@ use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 
@@ -67,7 +68,7 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         foreach ($this->multiplePollingMetadata as $pollingMetadata) {
             $configuration->registerPollingMetadata($pollingMetadata);

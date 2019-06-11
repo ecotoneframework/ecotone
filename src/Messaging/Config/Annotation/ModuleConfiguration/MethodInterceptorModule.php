@@ -21,6 +21,7 @@ use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
@@ -169,7 +170,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         foreach ($this->preCallInterceptors as $preCallInterceptor) {
             $configuration->registerBeforeMethodInterceptor($preCallInterceptor);

@@ -16,6 +16,7 @@ use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -495,7 +496,8 @@ class AggregateMessagingModuleTest extends TestCase
         $extendedConfiguration = $this->createMessagingSystemConfiguration();
         $cqrsMessagingModule->prepare(
             $extendedConfiguration,
-            []
+            [],
+            ModuleReferenceSearchService::createEmpty()
         );
 
         return $extendedConfiguration;

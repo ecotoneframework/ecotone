@@ -2,6 +2,7 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Router\RouterWithNoResolutionRequiredExample;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\RouterModule;
@@ -28,7 +29,7 @@ class RouterModuleTest extends AnnotationConfigurationTest
             InMemoryAnnotationRegistrationService::createFrom([RouterWithNoResolutionRequiredExample::class])
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
 
 
         $router = RouterBuilder::create(RouterWithNoResolutionRequiredExample::class, "route")

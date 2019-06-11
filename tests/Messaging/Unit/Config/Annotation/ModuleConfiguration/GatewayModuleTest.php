@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfig
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -35,7 +36,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
         );
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, []);
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [],ModuleReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
@@ -69,7 +70,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
         $annotationGatewayConfiguration = GatewayModule::create(InMemoryAnnotationRegistrationService::createFrom([MultipleMethodsGatewayExample::class]));
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, []);
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], ModuleReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

@@ -9,6 +9,7 @@ use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Config\RequiredReference;
 use SimplyCodedSoftware\Messaging\Conversion\ArrayToJson\ArrayToJsonConverterBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\JsonToArray\JsonToArrayConverterBuilder;
@@ -53,7 +54,7 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ChannelInterceptorBuilder) {

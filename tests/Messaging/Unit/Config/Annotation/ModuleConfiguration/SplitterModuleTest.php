@@ -4,6 +4,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfig
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\SplitterModule;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Splitter\SplitterBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
@@ -29,7 +30,7 @@ class SplitterModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
 
         $messageHandlerBuilder = SplitterBuilder::create(
             SplitterExample::class, "split"

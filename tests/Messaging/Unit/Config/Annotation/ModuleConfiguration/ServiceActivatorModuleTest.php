@@ -3,6 +3,7 @@
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ValueBuilder;
 use Test\SimplyCodedSoftware\Messaging\Builder\Annotation\HeaderAnnotationTestCaseBuilder;
 use Test\SimplyCodedSoftware\Messaging\Builder\Annotation\MessageParameterAnnotationTestCaseBuilder;
@@ -37,7 +38,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $configuration,

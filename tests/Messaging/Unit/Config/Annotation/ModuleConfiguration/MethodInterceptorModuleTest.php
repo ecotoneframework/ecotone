@@ -6,6 +6,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfig
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptorModule;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderBuilder;
@@ -43,7 +44,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -95,7 +96,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -144,7 +145,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,

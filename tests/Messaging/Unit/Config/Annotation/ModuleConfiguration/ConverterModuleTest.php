@@ -5,6 +5,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfig
 use SimplyCodedSoftware\Messaging\Annotation\MediaTypeConverter;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Conversion\ConverterReferenceBuilder;
 use SimplyCodedSoftware\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
@@ -31,7 +32,7 @@ class ConverterModuleTest extends AnnotationConfigurationTest
                 ->registerClassWithAnnotations(ExampleConverterService::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
@@ -59,7 +60,7 @@ class ConverterModuleTest extends AnnotationConfigurationTest
                 ->registerClassWithAnnotations(ExampleMediaTypeConverter::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, []);
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

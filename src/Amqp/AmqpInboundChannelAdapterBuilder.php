@@ -102,18 +102,18 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         return new self($endpointId, $queueName, $requestChannelName, $amqpConnectionReferenceName);
     }
 
-    /**
-     * @param string $exchangeName
-     * @param string $routingKey
-     * @return AmqpInboundChannelAdapterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function withBinding(string $exchangeName, string $routingKey) : self
-    {
-        $this->bindings[] = AmqpBinding::createFromNames($exchangeName, $this->queueName, $routingKey);
-
-        return $this;
-    }
+//    /**
+//     * @param string $exchangeName
+//     * @param string $routingKey
+//     * @return AmqpInboundChannelAdapterBuilder
+//     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+//     */
+//    public function withBinding(string $exchangeName, string $routingKey) : self
+//    {
+//        $this->bindings[] = AmqpBinding::createFromNames($exchangeName, $this->queueName, $routingKey);
+//
+//        return $this;
+//    }
 
     /**
      * @return string

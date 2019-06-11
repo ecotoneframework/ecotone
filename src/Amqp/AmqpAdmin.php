@@ -104,15 +104,17 @@ class AmqpAdmin
      */
     public function declareQueueWithBindings(string $queueName, AmqpContext $amqpContext) : void
     {
-        if ($this->hasQueueWithName($queueName)) {
-            $queue = $this->getQueueByName($queueName);
-            $amqpContext->declareQueue($queue);
+        if (!$this->hasQueueWithName($queueName)) {
+            throw new \InvalidArgumentException("Can't declare {$queueName} no information about it");
+        }
 
-            foreach ($this->amqpBindings as $amqpBinding) {
-                if ($amqpBinding->isRelatedToQueueName($queueName) && !$amqpBinding->isBindToDefaultExchange()) {
-                    $this->declareExchange($amqpBinding->getExchangeName(), $amqpContext);
-                    $amqpContext->bind($amqpBinding->toEnqueueBinding());
-                }
+        $queue = $this->getQueueByName($queueName);
+        $amqpContext->declareQueue($queue);
+
+        foreach ($this->amqpBindings as $amqpBinding) {
+            if ($amqpBinding->isRelatedToQueueName($queueName) && !$amqpBinding->isBindToDefaultExchange()) {
+                $this->declareExchange($amqpBinding->getExchangeName(), $amqpContext);
+                $amqpContext->bind($amqpBinding->toEnqueueBinding());
             }
         }
     }

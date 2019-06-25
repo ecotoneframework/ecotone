@@ -6,6 +6,7 @@ namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
 
 
 use SimplyCodedSoftware\Messaging\Annotation\InboundChannelAdapter;
+use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
@@ -14,6 +15,7 @@ use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelA
  * Class InboundChannelAdapterModule
  * @package SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @ModuleAnnotation()
  */
 class InboundChannelAdapterModule extends ConsumerRegisterConfiguration
 {

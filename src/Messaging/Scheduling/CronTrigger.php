@@ -55,7 +55,7 @@ class CronTrigger implements Trigger
         }
 
         $dateTime = new \DateTime("now", new \DateTimeZone("UTC"));
-        $dateTime->setTimestamp($clock->unixTimeInMilliseconds() / 1000);
+        $dateTime->setTimestamp((int)($clock->unixTimeInMilliseconds() / 1000));
 
         $nextExecutionTime = $cron->getNextRunDate($dateTime, 0, true, "UTC")->getTimestamp();
         if ($nextExecutionTime < $dateTime->getTimestamp()) {

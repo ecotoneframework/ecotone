@@ -8,7 +8,6 @@
 - @inheritdoc + extra annotations
 - aggregate root as a service
 - allow simple types for aggregate commands/queries
-- allow inject all headers
 - write tests for bus routers
 - check possible to debug with endpoint and channel names
 - allow to intercept part of namespace

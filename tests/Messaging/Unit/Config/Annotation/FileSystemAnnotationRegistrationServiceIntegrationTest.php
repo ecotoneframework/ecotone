@@ -213,7 +213,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      */
     public function test_retrieving_with_random_endpoint_id_if_not_defined()
     {
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\NoEndpointIdSplitter", "prod");
 
         /** @var AnnotationRegistration[] $annotationRegistrations */
         $annotationRegistrations = $fileSystemAnnotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EndpointAnnotation::class);

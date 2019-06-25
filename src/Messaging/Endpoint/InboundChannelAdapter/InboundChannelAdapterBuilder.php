@@ -71,7 +71,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      */
     private function __construct(string $requestChannelName, string $referenceName, string $methodName)
     {
-        $this->gatewayExecutor = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EntrypointGateway::class, "executeEntrypoint", $requestChannelName);
+        $this->gatewayExecutor = GatewayProxyBuilder::create($referenceName, EntrypointGateway::class, "executeEntrypoint", $requestChannelName);
         $this->referenceName = $referenceName;
         $this->methodName = $methodName;
         $this->requestChannelName = $requestChannelName;

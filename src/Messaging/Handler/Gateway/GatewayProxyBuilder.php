@@ -63,10 +63,6 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @var string[]
      */
-    private $transactionFactoryReferenceNames = [];
-    /**
-     * @var string[]
-     */
     private $requiredReferenceNames = [];
     /**
      * @var string[]

@@ -42,7 +42,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function setUp()
+    public function setUp() : void
     {
         if (!self::$annotationRegistrationService) {
             self::$annotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture", "prod");

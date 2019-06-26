@@ -135,7 +135,7 @@ class Gateway
 
         try {
             $parameters = $this->interfaceToCall->getInterfaceParameters();
-            $countArguments = count($methodArgumentValues);
+            $countArguments = count($parameters);
             for ($index = 0; $index < $countArguments; $index++) {
                 $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
             }

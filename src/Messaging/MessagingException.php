@@ -58,13 +58,13 @@ abstract class MessagingException extends \Exception
     }
 
     /**
-     * @param string $messsage
+     * @param string $message
      * @param \Throwable $throwable
      * @return MessagingException
      */
-    public static function createFromPreviousException(string $messsage, \Throwable $throwable) : self
+    public static function createFromPreviousException(string $message, \Throwable $throwable) : self
     {
-        return new static($messsage, static::errorCode(), $throwable);
+        return new static($message, static::errorCode(), $throwable);
     }
 
     /**

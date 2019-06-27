@@ -243,7 +243,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         );
 
 
-        $this->assertEquals(1, $replyChannel->receive()->getPayload());
+        $this->assertEquals(["orderId" => 1], $replyChannel->receive()->getPayload());
     }
 
     /**
@@ -330,7 +330,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         );
 
 
-        $this->assertEquals(1, $replyChannel->receive()->getPayload());
+        $this->assertEquals(["orderId" => 1], $replyChannel->receive()->getPayload());
     }
 
     /**

@@ -57,11 +57,9 @@ class SaveAggregateService
                 $aggregateIds[$aggregateIdName] = $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate);
             }
 
-            $payload = count($aggregateIds) === 1 ? array_shift($aggregateIds) : $aggregateIds;
-
             $message =
                 MessageBuilder::fromMessage($message)
-                    ->setPayload($payload)
+                    ->setPayload($aggregateIds)
                     ->build();
         }
 

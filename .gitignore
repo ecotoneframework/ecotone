@@ -4,3 +4,4 @@ bin/
 tests/coverage
 !tests/coverage/.gitkeep
 file
+.phpunit.result.cache

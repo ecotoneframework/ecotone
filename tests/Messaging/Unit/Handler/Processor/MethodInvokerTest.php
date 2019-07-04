@@ -27,6 +27,7 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\Order;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderProcessor;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\AroundInterceptorObjectBuilderExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromClassInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
@@ -330,6 +331,23 @@ class MethodInvokerTest extends MessagingTest
             ]),
             [
                 AroundInterceptorReference::createWithNoPointcut("someId", CallWithProceedingInterceptorExample::class, "callWithProceeding")
+            ]
+        );
+
+        $methodInvocation->processMessage(MessageBuilder::withPayload("some")->build());
+        $this->assertTrue($interceptedService->wasCalled());
+        $this->assertTrue($interceptingService1->wasCalled());
+    }
+
+    public function test_calling_with_around_interceptor_from_object_builder()
+    {
+        $interceptingService1 = StubCallSavingService::create();
+        $interceptedService = StubCallSavingService::create();
+        $methodInvocation = MethodInvoker::createWithInterceptors(
+            $interceptedService, 'callNoArgumentsAndReturnType', [],
+            InMemoryReferenceSearchService::createEmpty(),
+            [
+                AroundInterceptorReference::createWithObjectBuilder("someId", AroundInterceptorObjectBuilderExample::create($interceptingService1), "callWithProceed",0, "")
             ]
         );
 

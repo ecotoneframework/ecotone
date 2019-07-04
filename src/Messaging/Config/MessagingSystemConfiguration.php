@@ -294,7 +294,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerAroundMethodInterceptor(AroundInterceptorReference $aroundInterceptorReference): Configuration
     {
         $this->aroundMethodInterceptors[] = $aroundInterceptorReference;
-        $this->requireReferences([$aroundInterceptorReference->getReferenceName()]);
+        $this->requireReferences($aroundInterceptorReference->getRequiredReferenceNames());
 
         return $this;
     }

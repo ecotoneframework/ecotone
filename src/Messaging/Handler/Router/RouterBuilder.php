@@ -74,7 +74,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         $this->methodName = $methodName;
 
         if ($objectToInvokeReference) {
-            $this->registerRequiredReference($objectToInvokeReference);
+            $this->requiredReferenceNames[] = $objectToInvokeReference;
         }
     }
 
@@ -176,16 +176,6 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         $requiredReferenceNames[] = $this->objectToInvokeReference;
 
         return $requiredReferenceNames;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function registerRequiredReference(string $referenceName)
-    {
-        $this->requiredReferenceNames[] = $referenceName;
-
-        return $this;
     }
 
     /**

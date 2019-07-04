@@ -14,3 +14,4 @@
 - presend interceptor. So it can be called before sending to channel
 - amqp add possibility to define point to point or publish subscribe amqp backend channel
 - possibility to order event handler
+- gateway and endpoint same parameter converters? Check how it's handled in java

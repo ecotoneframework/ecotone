@@ -104,16 +104,6 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
     /**
      * @inheritDoc
      */
-    public function registerRequiredReference(string $referenceName)
-    {
-        $this->requiredReferenceNames[] = $referenceName;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
         return $interfaceToCallRegistry->getFor(MessageHandler::class, "handle");

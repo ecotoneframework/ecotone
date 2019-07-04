@@ -90,7 +90,7 @@ class GenericMessage implements Message
     {
         return \json_encode([
             "payload" => $this->payload,
-            "headers" => $this->getHeaders()->headers()
+            "headers" => \json_decode((string)$this->getHeaders(), true)
         ]);
     }
 }

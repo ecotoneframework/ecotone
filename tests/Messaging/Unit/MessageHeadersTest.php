@@ -101,4 +101,27 @@ class MessageHeadersTest extends TestCase
             $messageHeaders->findByRegex("ecotone.domain.*")
         );
     }
+
+    public function test_converting_to_string()
+    {
+        $messageHeaders = MessageHeaders::create([
+            "token" => "123",
+            "notConvertableObject" => new \stdClass(),
+            "metadata" => [
+                "x" => 1
+            ]
+        ]);
+
+        $this->assertEquals(
+            \json_encode([
+                "token" => "123",
+                "metadata" => [
+                    "x" => 1
+                ],
+                "id" => $messageHeaders->get(MessageHeaders::MESSAGE_ID),
+                "timestamp" => $messageHeaders->get(MessageHeaders::TIMESTAMP)
+            ]),
+            (string)$messageHeaders
+        );
+    }
 }

@@ -270,6 +270,18 @@ final class TypeDescriptor
     }
 
     /**
+     * Should be used instead of array, if array is not composed of scalar types or composition of types is unknown
+     *
+     * @return TypeDescriptor
+     * @throws TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public static function createIterable() : self
+    {
+        return new self(self::ITERABLE, "");
+    }
+
+    /**
      * @return TypeDescriptor
      * @throws TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
@@ -359,6 +371,14 @@ final class TypeDescriptor
     public function isObject() : bool
     {
         return $this->type === self::OBJECT || $this->isClassOrInterface($this->type);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrimitive() : bool
+    {
+        return self::isItTypeOfPrimitive($this->type);
     }
 
     /**

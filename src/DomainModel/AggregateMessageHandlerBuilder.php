@@ -249,14 +249,6 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     /**
      * @inheritDoc
      */
-    public function registerRequiredReference(string $referenceName): void
-    {
-        $this->requiredReferences[] = $referenceName;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders): self
     {
         Assert::allInstanceOfType($methodParameterConverterBuilders, ParameterConverterBuilder::class);

@@ -67,7 +67,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         $this->methodName = $methodName;
 
         if ($objectToInvokeOnReferenceName) {
-            $this->registerRequiredReference($objectToInvokeOnReferenceName);
+            $this->requiredReferenceNames[] = $objectToInvokeOnReferenceName;
         }
     }
 
@@ -137,16 +137,6 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     public function getRequiredReferenceNames(): array
     {
         return $this->requiredReferenceNames;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function registerRequiredReference(string $referenceName)
-    {
-        $this->requiredReferenceNames[] = $referenceName;
-
-        return $this;
     }
 
     /**

@@ -123,6 +123,12 @@ class StubCallSavingService
         return $methodInvocation->proceed();
     }
 
+    public function callWithProceed(MethodInvocation $methodInvocation)
+    {
+        $this->wasCalled = true;
+        return $methodInvocation->proceed();
+    }
+
     public function sum(MethodInvocation $methodInvocation, int $amount) : int
     {
 

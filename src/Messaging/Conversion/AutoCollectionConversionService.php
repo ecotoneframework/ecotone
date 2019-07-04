@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Conversion;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use SimplyCodedSoftware\Messaging\Support\Assert;
 
 /**
  * Class ConversionService
@@ -45,10 +46,11 @@ class AutoCollectionConversionService implements ConversionService
     /**
      * @param mixed $source
      * @param TypeDescriptor $sourceType
-     * @param TypeDescriptor $targetType
      * @param MediaType $sourceMediaType
+     * @param TypeDescriptor $targetType
      * @param MediaType $targetMediaType
      * @return mixed
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
     {
@@ -57,6 +59,7 @@ class AutoCollectionConversionService implements ConversionService
         }
 
         $converter = $this->getConverter($sourceType, $sourceMediaType, $targetType, $targetMediaType);
+        Assert::isObject($converter, "Converter was not found for {$sourceMediaType}:{$sourceType} to {$targetMediaType}:{$targetType};");
 
         return $converter->convert($source, $sourceType, $sourceMediaType, $targetType, $targetMediaType);
     }

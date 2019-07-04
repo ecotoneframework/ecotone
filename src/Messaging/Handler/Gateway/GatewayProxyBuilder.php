@@ -216,7 +216,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
     {
         $this->aroundInterceptors[] = $aroundInterceptorReference;
-        $this->requiredReferenceNames[] = $aroundInterceptorReference->getReferenceName();
+        $this->requiredReferenceNames = array_merge($this->requiredReferenceNames, $aroundInterceptorReference->getRequiredReferenceNames());
 
         return $this;
     }

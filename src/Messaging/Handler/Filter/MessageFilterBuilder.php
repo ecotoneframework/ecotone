@@ -76,16 +76,6 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     /**
      * @inheritDoc
      */
-    public function registerRequiredReference(string $referenceName)
-    {
-        $this->requiredReferences[] = $referenceName;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [$interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName)];
@@ -189,7 +179,7 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     private function initialize() : void
     {
         if ($this->referenceName) {
-            $this->registerRequiredReference($this->referenceName);
+            $this->requiredReferences[] = $this->referenceName;
         }
     }
 

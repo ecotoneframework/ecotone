@@ -61,7 +61,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         $this->methodName = $methodName;
 
         if ($objectToInvokeReference) {
-            $this->registerRequiredReference($objectToInvokeReference);
+            $this->requiredReferenceNames[] = $objectToInvokeReference;
         }
     }
 
@@ -144,16 +144,6 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         $requiredReferenceNames[] = $this->objectToInvokeReferenceName;
 
         return $requiredReferenceNames;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function registerRequiredReference(string $referenceName)
-    {
-        $this->requiredReferenceNames[] = $referenceName;
-
-        return $this;
     }
 
     /**

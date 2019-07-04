@@ -11,12 +11,6 @@ namespace SimplyCodedSoftware\Messaging\Handler;
 interface MessageHandlerBuilderWithParameterConverters extends MessageHandlerBuilder
 {
     /**
-     * @param string $referenceName
-     * @return static
-     */
-    public function registerRequiredReference(string $referenceName);
-
-    /**
      * @param array|ParameterConverterBuilder[] $methodParameterConverterBuilders
      * @return static
      */

@@ -4,6 +4,7 @@ namespace SimplyCodedSoftware\Messaging;
 
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Conversion\MediaType;
+use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class MessageHeaders
@@ -226,6 +227,24 @@ class MessageHeaders
     }
 
     /**
+     * @return string
+     * @throws MessagingException
+     */
+    public function getMessageId() : string
+    {
+        return $this->get(MessageHeaders::MESSAGE_ID);
+    }
+
+    /**
+     * @return int
+     * @throws MessagingException
+     */
+    public function getTimestamp() : int
+    {
+        return $this->get(MessageHeaders::TIMESTAMP);
+    }
+
+    /**
      * @return MediaType
      * @throws MessagingException
      * @throws Support\InvalidArgumentException
@@ -260,5 +279,41 @@ class MessageHeaders
             self::MESSAGE_ID => Uuid::uuid4()->toString(),
             self::TIMESTAMP => (int)round(microtime(true))
         ]));
+    }
+
+    /**
+     * @return false|string
+     * @throws Handler\TypeDefinitionException
+     * @throws MessagingException
+     */
+    public function __toString()
+    {
+        return \json_encode($this->convertToScalarsIfPossible($this->headers));
+    }
+
+    /**
+     * @param iterable $dataToConvert
+     * @return array
+     * @throws Handler\TypeDefinitionException
+     * @throws MessagingException
+     */
+    private function convertToScalarsIfPossible(iterable $dataToConvert) : array
+    {
+        $data = [];
+
+        foreach ($dataToConvert as $headerName => $header) {
+            if (TypeDescriptor::createFromVariable($header)->isScalar()) {
+                $data[$headerName] = $header;
+                continue;
+            }
+
+            if (is_iterable($header)) {
+                $data[$headerName] = $this->convertToScalarsIfPossible($header);
+            }else if (is_object($header) && method_exists($header, "__toString")) {
+                $data[$headerName] = (string)$header;
+            }
+        }
+
+        return $data;
     }
 }

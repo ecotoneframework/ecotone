@@ -43,7 +43,7 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     /**
      * @var string
      */
-    private $referenceName;
+    private $referenceName = "";
     /**
      * @var bool
      */
@@ -103,13 +103,26 @@ class AroundInterceptorReference implements InterceptorWithPointCut
      * @return AroundInterceptorReference
      * @throws MessagingException
      */
-    public static function createWithDirectObject(string $interceptorName, $referenceObject, string $methodName, int $precedence, string $pointcut): self
+    public static function createWithDirectObject(string $interceptorName, object $referenceObject, string $methodName, int $precedence, string $pointcut): self
     {
-        Assert::isObject($referenceObject, "Direct object for interceptor must be instance");
         $aroundInterceptorReference = new self($precedence, $interceptorName, "", $methodName, Pointcut::createWith($pointcut));
         $aroundInterceptorReference->directObject = $referenceObject;
 
         return $aroundInterceptorReference;
+    }
+
+    /**
+     * @param string $interceptorName
+     * @param AroundInterceptorObjectBuilder $aroundInterceptorObjectBuilder
+     * @param string $methodName
+     * @param int $precedence
+     * @param string $pointcut
+     * @return AroundInterceptorReference
+     * @throws MessagingException
+     */
+    public static function createWithObjectBuilder(string $interceptorName, AroundInterceptorObjectBuilder $aroundInterceptorObjectBuilder, string $methodName, int $precedence, string $pointcut) : self
+    {
+        return self::createWithDirectObject($interceptorName, $aroundInterceptorObjectBuilder, $methodName, $precedence, $pointcut);
     }
 
     /**
@@ -162,8 +175,14 @@ class AroundInterceptorReference implements InterceptorWithPointCut
      */
     public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
     {
+        $referenceToCall = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
+
+        if ($referenceToCall instanceof AroundInterceptorObjectBuilder) {
+            $referenceToCall = $referenceToCall->build($referenceSearchService);
+        }
+
         return AroundMethodInterceptor::createWith(
-            $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName),
+            $referenceToCall,
             $this->methodName,
             $referenceSearchService,
             $this->allowForMethodArgumentReplacement,
@@ -195,11 +214,11 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getReferenceName() : string
+    public function getRequiredReferenceNames() : array
     {
-        return $this->referenceName;
+        return $this->directObject instanceof AroundInterceptorObjectBuilder ? $this->directObject->getRequiredReferenceNames() : [$this->referenceName];
     }
 
     /**

@@ -57,7 +57,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
         $this->methodName = $methodName;
 
         if ($referenceName) {
-            $this->registerRequiredReference($referenceName);
+            $this->requiredReferenceNames[] = $referenceName;
         }
     }
 
@@ -134,16 +134,6 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
         Assert::allInstanceOfType($methodParameterConverterBuilders, ParameterConverterBuilder::class);
 
         $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function registerRequiredReference(string $referenceName)
-    {
-        $this->requiredReferenceNames[] = $referenceName;
 
         return $this;
     }

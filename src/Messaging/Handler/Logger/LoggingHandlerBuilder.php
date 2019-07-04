@@ -51,6 +51,7 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
     private function __construct(bool $isBefore)
     {
         $this->isBefore = $isBefore;
+        $this->methodParameterConverters[] = MessageConverterBuilder::create("message");
     }
 
     /**

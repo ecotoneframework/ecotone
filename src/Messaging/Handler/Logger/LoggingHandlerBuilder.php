@@ -119,7 +119,7 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
                         $referenceSearchService->get(self::LOGGER_REFERENCE)
                     )
                 ),
-            $this->isBefore ? "logBefore" : "logAfter"
+                $this->getMethodName()
             )
                 ->withMethodParameterConverters($this->getParameterConverters())
                 ->withPassThroughMessageOnVoidInterface(true)
@@ -132,7 +132,7 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
      */
     public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
-        return [$interfaceToCallRegistry->getFor(LoggingInterceptor::class, "log")];
+        return [$interfaceToCallRegistry->getFor(LoggingInterceptor::class, $this->getMethodName())];
     }
 
     /**
@@ -140,7 +140,7 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(LoggingInterceptor::class, "log");
+        return $interfaceToCallRegistry->getFor(LoggingInterceptor::class, $this->getMethodName());
     }
 
     /**
@@ -149,5 +149,13 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
     public function getRequiredReferenceNames(): array
     {
         return [self::LOGGER_REFERENCE];
+    }
+
+    /**
+     * @return string
+     */
+    private function getMethodName(): string
+    {
+        return $this->isBefore ? "logBefore" : "logAfter";
     }
 }

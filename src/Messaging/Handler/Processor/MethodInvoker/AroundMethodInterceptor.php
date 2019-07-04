@@ -155,23 +155,15 @@ class AroundMethodInterceptor
             }
 
             if (!$resolvedArgument) {
-                if ($methodInvocation->getInterceptedInterface()->hasMethodAnnotation($parameter->getTypeDescriptor())) {
-                    $resolvedArgument = $methodInvocation->getInterceptedInterface()->getMethodAnnotation($parameter->getTypeDescriptor());
-                }
                 if ($methodInvocation->getInterceptedInterface()->hasClassAnnotation($parameter->getTypeDescriptor())) {
                     $resolvedArgument = $methodInvocation->getInterceptedInterface()->getClassAnnotation($parameter->getTypeDescriptor());
                 }
-//                require test
-//                foreach ($methodInvocation->getEndpointAnnotations() as $endpointAnnotation) {
-//                    if ($endpointAnnotation ==)
-//                }
-            }
-
-            if (!$resolvedArgument) {
+                if ($methodInvocation->getInterceptedInterface()->hasMethodAnnotation($parameter->getTypeDescriptor())) {
+                    $resolvedArgument = $methodInvocation->getInterceptedInterface()->getMethodAnnotation($parameter->getTypeDescriptor());
+                }
                 foreach ($methodInvocation->getEndpointAnnotations() as $endpointAnnotation) {
                     if (TypeDescriptor::createFromVariable($endpointAnnotation)->equals($parameter->getTypeDescriptor())) {
                         $resolvedArgument = $endpointAnnotation;
-                        break;
                     }
                 }
             }

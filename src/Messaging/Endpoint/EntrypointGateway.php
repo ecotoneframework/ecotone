@@ -17,6 +17,7 @@ interface EntrypointGateway
      * @param mixed $data
      * @return mixed
      * @LogBefore()
+     * @LogError()
      */
     public function executeEntrypoint($data);
 }

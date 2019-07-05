@@ -8,8 +8,13 @@ use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransaction;
+use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
+use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use SimplyCodedSoftware\Messaging\Transaction\TransactionInterceptor;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerStoppingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingNoArguments;
@@ -128,6 +133,115 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
         $this->assertEquals($payload, $requestChannel->receive()->getPayload());
         $this->assertNull($requestChannel->receive());
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_running_with_interceptor_from_interface_method_annotation()
+    {
+        $payload = "testPayload";
+        $requestChannelName = "requestChannelName";
+        $requestChannel = QueueChannel::create();
+        $inboundChannelAdapterStoppingService = ConsumerContinuouslyWorkingService::createWithReturn($payload);
+
+        $transactionOne = NullTransaction::start();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
+
+        $inboundChannel = InboundChannelAdapterBuilder::create(
+            $requestChannelName, "someRef", "executeReturnWithInterceptor"
+        )
+            ->withEndpointId("test")
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject("transactionInterceptor",new TransactionInterceptor(), "transactional", 1, ""))
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    "someRef" => $inboundChannelAdapterStoppingService,
+                    "transactionFactory2" => $transactionFactoryOne
+                ]),
+                PollingMetadata::create("test")
+                    ->setHandledMessageLimit(1)
+            );
+
+        $inboundChannel->run();
+
+        $this->assertTrue($transactionOne->isCommitted());
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_running_with_interceptor_from_interface_class_annotation()
+    {
+        $payload = "testPayload";
+        $requestChannelName = "requestChannelName";
+        $requestChannel = QueueChannel::create();
+        $inboundChannelAdapterStoppingService = ConsumerContinuouslyWorkingService::createWithReturn($payload);
+
+        $transactionOne = NullTransaction::start();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
+
+        $inboundChannel = InboundChannelAdapterBuilder::create(
+            $requestChannelName, "someRef", "executeReturn"
+        )
+            ->withEndpointId("test")
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject("transactionInterceptor",new TransactionInterceptor(), "transactional", 1, ""))
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    "someRef" => $inboundChannelAdapterStoppingService,
+                    "transactionFactory1" => $transactionFactoryOne
+                ]),
+                PollingMetadata::create("test")
+                    ->setHandledMessageLimit(1)
+            );
+
+        $inboundChannel->run();
+
+        $this->assertTrue($transactionOne->isCommitted());
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    public function test_running_with_interceptor_from_endpoint_annotation()
+    {
+        $payload = "testPayload";
+        $requestChannelName = "requestChannelName";
+        $requestChannel = QueueChannel::create();
+        $inboundChannelAdapterStoppingService = ConsumerContinuouslyWorkingService::createWithReturn($payload);
+
+        $transactionOne = NullTransaction::start();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
+
+        $inboundChannel = InboundChannelAdapterBuilder::create(
+            $requestChannelName, "someRef", "executeReturnWithInterceptor"
+        )
+            ->withEndpointId("test")
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject("transactionInterceptor",new TransactionInterceptor(), "transactional", 1, ""))
+            ->withEndpointAnnotations([Transactional::createWith(["transactionFactory0"])])
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    "someRef" => $inboundChannelAdapterStoppingService,
+                    "transactionFactory0" => $transactionFactoryOne
+                ]),
+                PollingMetadata::create("test")
+                    ->setHandledMessageLimit(1)
+            );
+
+        $inboundChannel->run();
+
+        $this->assertTrue($transactionOne->isCommitted());
     }
 
     /**

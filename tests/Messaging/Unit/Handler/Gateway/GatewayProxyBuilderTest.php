@@ -22,6 +22,9 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\Calculatin
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway\DumbSendAndReceiveService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayClassAndMethodExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayClassExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayMethodExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\StatefulHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter\FakeMessageConverter;
@@ -732,7 +735,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_calling_interface_with_around_interceptor()
+    public function test_calling_interface_with_around_interceptor_from_endpoint_annotation()
     {
         $messageHandler     = NoReturnMessageHandler::create();
         $requestChannelName = "request-channel";
@@ -766,6 +769,135 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
 
         $gatewayProxy->sendMail('test');
+
+        $this->assertTrue($transactionOne->isCommitted());
+    }
+
+    public function test_calling_interface_with_around_interceptor_from_method_annotation()
+    {
+        $messageHandler     = NoReturnMessageHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $transactionOne = NullTransaction::start();
+        $transactionInterceptor = new TransactionInterceptor();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayMethodExample::class, 'invoke', $requestChannelName)
+            ->addAroundInterceptor(
+                AroundInterceptorReference::createWithDirectObject("transactionInterceptor",$transactionInterceptor, "transactional", 1, "")
+            );
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createWith([
+                "transactionFactory" => $transactionFactoryOne
+            ]),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                ]
+            )
+        );
+
+        $gatewayProxy->invoke('test');
+
+        $this->assertTrue($transactionOne->isCommitted());
+    }
+
+    public function test_calling_interface_with_around_interceptor_from_class_annotation()
+    {
+        $messageHandler     = NoReturnMessageHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $transactionOne = NullTransaction::start();
+        $transactionInterceptor = new TransactionInterceptor();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayClassExample::class, 'invoke', $requestChannelName)
+            ->addAroundInterceptor(
+                AroundInterceptorReference::createWithDirectObject("transactionInterceptor",$transactionInterceptor, "transactional", 1, "")
+            );
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createWith([
+                "transactionFactory" => $transactionFactoryOne
+            ]),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                ]
+            )
+        );
+
+        $gatewayProxy->invoke('test');
+
+        $this->assertTrue($transactionOne->isCommitted());
+    }
+
+    public function test_calling_interface_with_around_interceptor_and_choosing_method_annotation_over_class()
+    {
+        $messageHandler     = NoReturnMessageHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $transactionOne = NullTransaction::start();
+        $transactionInterceptor = new TransactionInterceptor();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayClassAndMethodExample::class, 'invoke', $requestChannelName)
+            ->addAroundInterceptor(
+                AroundInterceptorReference::createWithDirectObject("transactionInterceptor",$transactionInterceptor, "transactional", 1, "")
+            );
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createWith([
+                "transactionFactory2" => $transactionFactoryOne
+            ]),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                ]
+            )
+        );
+
+        $gatewayProxy->invoke('test');
+
+        $this->assertTrue($transactionOne->isCommitted());
+    }
+
+    public function test_calling_interface_with_around_interceptor_and_choosing_endpoint_annotation_over_method()
+    {
+        $messageHandler     = NoReturnMessageHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $transactionOne = NullTransaction::start();
+        $transactionInterceptor = new TransactionInterceptor();
+        $transactionFactoryOne = NullTransactionFactory::createWithPredefinedTransaction($transactionOne);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayClassAndMethodExample::class, 'invoke', $requestChannelName)
+            ->withEndpointAnnotations([Transactional::createWith(["transactionFactory0"])])
+            ->addAroundInterceptor(
+                AroundInterceptorReference::createWithDirectObject("transactionInterceptor",$transactionInterceptor, "transactional", 1, "")
+            );
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createWith([
+                "transactionFactory0" => $transactionFactoryOne
+            ]),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                ]
+            )
+        );
+
+        $gatewayProxy->invoke('test');
 
         $this->assertTrue($transactionOne->isCommitted());
     }

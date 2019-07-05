@@ -13,6 +13,7 @@ use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\SubscribableChannel;
@@ -373,6 +374,18 @@ class GatewayProxyBuilder implements GatewayBuilder
             $messageConverters[] = $referenceSearchService->get($messageConverterReferenceName);
         }
 
+        $registeredAnnotations = $this->endpointAnnotations;
+        foreach ($interfaceToCall->getMethodAnnotations() as $annotation) {
+            if ($this->canBeAddedToRegisteredAnnotations($registeredAnnotations, $annotation)) {
+                $registeredAnnotations[] = $annotation;
+            }
+        }
+        foreach ($interfaceToCall->getClassAnnotations() as $annotation) {
+            if ($this->canBeAddedToRegisteredAnnotations($registeredAnnotations, $annotation)) {
+                $registeredAnnotations[] = $annotation;
+            }
+        }
+
         return new Gateway(
             $interfaceToCall,
             new MethodCallToMessageConverter(
@@ -387,7 +400,7 @@ class GatewayProxyBuilder implements GatewayBuilder
             $aroundInterceptors,
             $this->getSortedInterceptors($this->beforeInterceptors),
             $this->getSortedInterceptors($this->afterInterceptors),
-            $this->endpointAnnotations
+            $registeredAnnotations
         );
     }
 
@@ -413,5 +426,23 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function __toString()
     {
         return sprintf("Gateway - %s:%s with reference name `%s` for request channel `%s`", $this->interfaceName, $this->methodName, $this->referenceName, $this->requestChannelName);
+    }
+
+    /**
+     * @param array $registeredAnnotations
+     * @param object $annotation
+     * @return bool
+     * @throws MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
+     */
+    private function canBeAddedToRegisteredAnnotations(array $registeredAnnotations, object $annotation): bool
+    {
+        foreach ($registeredAnnotations as $registeredAnnotation) {
+            if (TypeDescriptor::createFromVariable($registeredAnnotation)->equals(TypeDescriptor::createFromVariable($annotation))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

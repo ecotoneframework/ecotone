@@ -21,6 +21,8 @@ use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Scheduling\CronTrigger;
 use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
 use SimplyCodedSoftware\Messaging\Scheduling\SyncTaskScheduler;
@@ -215,7 +217,21 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         Assert::notNullAndEmpty($this->endpointId, "Endpoint Id for inbound channel adapter can't be empty");
 
         $referenceService = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
+        /** @var InterfaceToCall $interfaceToCall */
         $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($referenceService, $this->methodName);
+
+        $registeredAnnotations = $this->getEndpointAnnotations();
+        foreach ($interfaceToCall->getMethodAnnotations() as $annotation) {
+            if ($this->canBeAddedToRegisteredAnnotations($registeredAnnotations, $annotation)) {
+                $registeredAnnotations[] = $annotation;
+            }
+        }
+        foreach ($interfaceToCall->getClassAnnotations() as $annotation) {
+            if ($this->canBeAddedToRegisteredAnnotations($registeredAnnotations, $annotation)) {
+                $registeredAnnotations[] = $annotation;
+            }
+        }
+        $this->gatewayExecutor->withEndpointAnnotations($registeredAnnotations);
 
         if (!$interfaceToCall->hasNoParameters()) {
             throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not have any parameters");
@@ -242,5 +258,23 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
                 : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds()),
             $taskExecutor
         );
+    }
+
+    /**
+     * @param array $registeredAnnotations
+     * @param object $annotation
+     * @return bool
+     * @throws MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
+     */
+    private function canBeAddedToRegisteredAnnotations(array $registeredAnnotations, object $annotation): bool
+    {
+        foreach ($registeredAnnotations as $registeredAnnotation) {
+            if (TypeDescriptor::createFromVariable($registeredAnnotation)->equals(TypeDescriptor::createFromVariable($annotation))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

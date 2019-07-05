@@ -9,7 +9,6 @@ use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogAfter;
 use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogBefore;
@@ -17,10 +16,8 @@ use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogError;
 use SimplyCodedSoftware\Messaging\Handler\Logger\ExceptionLoggingInterceptorBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Logger\LoggingInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\Logger\LoggingService;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 /**
  * Class LoggingModule

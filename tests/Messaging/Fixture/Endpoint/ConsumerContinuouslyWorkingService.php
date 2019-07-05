@@ -3,10 +3,13 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint;
 
+use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+
 /**
  * Class ConsumerContinuouslyWorkingService
  * @package Fixture\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @Transactional({"transactionFactory1"})
  */
 class ConsumerContinuouslyWorkingService
 {
@@ -31,6 +34,15 @@ class ConsumerContinuouslyWorkingService
 
 
     public function executeReturn()
+    {
+        return $this->returnData;
+    }
+
+    /**
+     * @return mixed
+     * @Transactional({"transactionFactory2"})
+     */
+    public function executeReturnWithInterceptor()
     {
         return $this->returnData;
     }

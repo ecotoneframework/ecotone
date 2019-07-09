@@ -20,7 +20,8 @@ interface Calculator
      * @param int $amount
      * @return int
      * @BeforeMultiplyCalculation(amount=2)
-     * @AfterMultiplyCalculation(amount=3)
+     * @AroundResultCalculation()
+     * @AfterSumCalculation(amount=3)
      */
     public function calculate(int $amount) : int;
 }

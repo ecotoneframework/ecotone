@@ -36,32 +36,28 @@ class CalculatorInterceptor
 
     /**
      * @param int $amount
-     * @param AfterMultiplyCalculation $afterMultiplyCalculation
+     * @param AfterSumCalculation $afterMultiplyCalculation
      * @return int
      * @After(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AfterMultiplyCalculation)",
+     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AfterSumCalculation)",
      *     parameterConverters={
      *          @Payload(parameterName="amount")
      *     }
      * )
      */
-    public function multiplyAfter(int $amount, AfterMultiplyCalculation $afterMultiplyCalculation) : int
+    public function sumAfter(int $amount, AfterSumCalculation $afterMultiplyCalculation) : int
     {
-        return $amount * $afterMultiplyCalculation->amount;
+        return $amount + $afterMultiplyCalculation->amount;
     }
 
     /**
-     * @param MethodInvocation $methodInvocation
-     * @param AroundSumCalculation $aroundSumCalculation
-     * @return int
+     * @return void
      * @Around(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AroundSumCalculation)"
+     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AroundResultCalculation)"
      * )
      */
-    public function sumAround(MethodInvocation $methodInvocation, AroundSumCalculation $aroundSumCalculation) : int
+    public function resultAround() : void
     {
-        $proceed = $methodInvocation->proceed();
-
-        return $proceed + $aroundSumCalculation->amount;
+        return;
     }
 }

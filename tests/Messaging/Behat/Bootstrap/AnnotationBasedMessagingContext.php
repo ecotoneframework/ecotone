@@ -91,4 +91,26 @@ class AnnotationBasedMessagingContext implements Context
 
         Assert::assertEquals($result, $gateway->calculate($amount));
     }
+
+    /**
+     * @When I calculate using inbound channel adapter
+     */
+    public function iCalculateUsingInboundChannelAdapter()
+    {
+        $this->messagingSystem->runSeparatelyRunningConsumerBy("inboundCalculator");
+    }
+
+    /**
+     * @Then result should be :result in :channelName channel
+     * @param $result
+     * @param string $channelName
+     * @throws ConfigurationException
+     */
+    public function resultShouldBeInChannel($result, string $channelName)
+    {
+        /** @var PollableChannel $messageChannel */
+        $messageChannel = $this->messagingSystem->getMessageChannelByName($channelName);
+
+        Assert::assertEquals($result, $messageChannel->receive()->getPayload());
+    }
 }

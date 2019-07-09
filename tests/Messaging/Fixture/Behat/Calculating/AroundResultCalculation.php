@@ -9,10 +9,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class AroundSumCalculation
+class AroundResultCalculation
 {
-    /**
-     * @var integer
-     */
-    public $amount;
+
 }

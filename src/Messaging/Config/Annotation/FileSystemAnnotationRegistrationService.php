@@ -329,20 +329,10 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     {
         $paths = [];
 
-        $namespaceToRegex = "";
-        $isFirst = true;
-        foreach ($namespaces as $namespace) {
-            $namespaceSplit = explode("\\", $namespace);
-            $rootNamespace = $namespaceSplit[0];
-
-            $namespaceToRegex .= $isFirst ? ("^" . $rootNamespace) : ("|^" . $rootNamespace);
-            $isFirst = false;
-        }
-
         $autoloadPsr4 = require($rootProjectDir . '/vendor/composer/autoload_psr4.php');
         $autoloadPsr0 = require($rootProjectDir . '/vendor/composer/autoload_namespaces.php');
-        $paths = $this->mergeWith($namespaceToRegex, $autoloadPsr4, $paths, $rootProjectDir, $loadSrc);
-        $paths = $this->mergeWith($namespaceToRegex, $autoloadPsr0, $paths, $rootProjectDir, $loadSrc);
+        $paths = $this->mergeWith($namespaces, $autoloadPsr4, $paths, $rootProjectDir, $loadSrc);
+        $paths = $this->mergeWith($namespaces, $autoloadPsr0, $paths, $rootProjectDir, $loadSrc);
 
         return array_unique($paths);
     }
@@ -365,7 +355,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     }
 
     /**
-     * @param string $namespaceToRegex
+     * @param array $namespacesToUse
      * @param array $autoload
      * @param array $paths
      *
@@ -373,14 +363,22 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      * @param bool $loadSrc
      * @return array
      */
-    private function mergeWith(string $namespaceToRegex, array $autoload, array $paths, string $rootProjectDir, bool $loadSrc)
+    private function mergeWith(array $namespacesToUse, array $autoload, array $paths, string $rootProjectDir, bool $loadSrc)
     {
-        $regex = "#{$namespaceToRegex}#";
-        $resolvedPathToSrc = realpath($rootProjectDir) . '/src';
-        foreach ($autoload as $namespace => $namespacePath) {
-            if ($loadSrc && (in_array($resolvedPathToSrc, $namespacePath)) || preg_match($regex, $namespace)) {
-                foreach ($namespacePath as $pathForNamespace) {
-                    $paths[] = $pathForNamespace;
+        foreach ($namespacesToUse as $namespaceToUse) {
+            $namespaceSplit = explode("\\", $namespaceToUse);
+            $rootNamespace = $namespaceSplit[0];
+
+            $namespaceToRegex = ("^" . $rootNamespace);
+            $regex = "#^{$namespaceToRegex}#";
+
+            $resolvedPathToSrc = realpath($rootProjectDir) . '/src';
+            foreach ($autoload as $namespace => $namespacePath) {
+                if ($loadSrc && (in_array($resolvedPathToSrc, $namespacePath)) || preg_match($regex, $namespace)) {
+                    foreach ($namespacePath as $pathForNamespace) {
+                        $suffixPath = str_replace("\\", "/", trim(str_replace(trim($namespace, "\\"), "", $namespaceToUse), "\\"));
+                        $paths[] = $pathForNamespace . DIRECTORY_SEPARATOR . $suffixPath;
+                    }
                 }
             }
         }

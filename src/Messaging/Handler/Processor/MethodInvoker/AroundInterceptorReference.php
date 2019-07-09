@@ -47,11 +47,7 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     /**
      * @var bool
      */
-    private $allowForMethodArgumentReplacement = true;
-    /**
-     * @var string
-     */
-    private $argumentReplacementExceptionMessage = "";
+    private $allowOnlyForVoidInterface = false;
 
     /**
      * InterceptorReference constructor.
@@ -101,7 +97,6 @@ class AroundInterceptorReference implements InterceptorWithPointCut
      * @param int $precedence
      * @param string $pointcut
      * @return AroundInterceptorReference
-     * @throws MessagingException
      */
     public static function createWithDirectObject(string $interceptorName, object $referenceObject, string $methodName, int $precedence, string $pointcut): self
     {
@@ -176,29 +171,29 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
     {
         $referenceToCall = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
-
         if ($referenceToCall instanceof AroundInterceptorObjectBuilder) {
             $referenceToCall = $referenceToCall->build($referenceSearchService);
+        }
+
+        $interfaceToCall = InterfaceToCall::create($referenceToCall, $this->methodName);
+        if ($this->allowOnlyForVoidInterface && !$interfaceToCall->hasReturnTypeVoid()) {
+            throw InvalidArgumentException::create("{$interfaceToCall} should return void in order to be used for entrypoint (Gateway, Inbound Channel, Amqp etc.)");
         }
 
         return AroundMethodInterceptor::createWith(
             $referenceToCall,
             $this->methodName,
-            $referenceSearchService,
-            $this->allowForMethodArgumentReplacement,
-            $this->argumentReplacementExceptionMessage
+            $referenceSearchService
         );
     }
 
     /**
-     * @param string $errorMessage
      * @return AroundInterceptorReference
      */
-    public function disallowMethodArgumentReplacement(string $errorMessage) : self
+    public function allowOnlyVoidInterface() : self
     {
         $copy = clone $this;
-        $copy->allowForMethodArgumentReplacement = false;
-        $copy->argumentReplacementExceptionMessage = $errorMessage;
+        $copy->allowOnlyForVoidInterface = true;
 
         return $copy;
     }

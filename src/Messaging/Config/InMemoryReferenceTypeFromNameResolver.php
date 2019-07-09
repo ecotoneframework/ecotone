@@ -36,6 +36,21 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
     }
 
     /**
+     * @param array $references
+     * @return InMemoryReferenceTypeFromNameResolver
+     */
+    public static function createFromObjects(array $references) : self
+    {
+        $objectTypes = [];
+
+        foreach ($references as $referenceName => $object) {
+            $objectTypes[$referenceName] = get_class($object);
+        }
+
+        return self::createFromAssociativeArray($objectTypes);
+    }
+
+    /**
      * @return InMemoryReferenceTypeFromNameResolver
      */
     public static function createEmpty() : self

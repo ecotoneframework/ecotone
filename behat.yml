@@ -6,4 +6,4 @@ default:
     suites:
       default:
           paths:    [ tests/Messaging/Behat/features, tests/DomainModel/Behat/features ]
-          contexts: [ Test\SimplyCodedSoftware\Messaging\Behat\Bootstrap\DomainContext, Test\SimplyCodedSoftware\DomainModel\Behat\Bootstrap\DomainContext ]
+          contexts: [ Test\SimplyCodedSoftware\Messaging\Behat\Bootstrap\DomainContext, Test\SimplyCodedSoftware\DomainModel\Behat\Bootstrap\DomainContext, Test\SimplyCodedSoftware\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext ]

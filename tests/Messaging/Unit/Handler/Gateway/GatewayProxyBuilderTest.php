@@ -1104,36 +1104,6 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function test_throwing_exception_if_trying_to_replace_argument_using_around_interceptor_on_gateway()
-    {
-        $messageHandler     = NoReturnMessageHandler::create();
-        $requestChannelName = "request-channel";
-        $requestChannel     = DirectChannel::create();
-        $requestChannel->subscribe($messageHandler);
-
-        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
-            ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObject(
-                    "aroundCalculating",
-                    CalculatingServiceInterceptorExample::create(2), "sum",
-                    1,""
-                )
-            );
-
-        $gatewayProxy = $gatewayProxyBuilder->build(
-            InMemoryReferenceSearchService::createEmpty(),
-            InMemoryChannelResolver::create(
-                [
-                    NamedMessageChannel::create($requestChannelName, $requestChannel)
-                ]
-            )
-        );
-
-        $this->expectException(MethodArgumentReplacementException::class);
-
-        $gatewayProxy->calculate(5);
-    }
-
     /**
      * @param $interfaceName
      * @param $methodName

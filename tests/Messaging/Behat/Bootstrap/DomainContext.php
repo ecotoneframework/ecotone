@@ -2,18 +2,16 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Behat\Bootstrap;
 
+use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Booking\BookingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\Order;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Shopping\BookWasReserved;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Shopping\ShoppingService;
+use Exception;
+use PHPUnit\Framework\Assert;
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
+use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
@@ -27,6 +25,13 @@ use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use SimplyCodedSoftware\Messaging\MessagingException;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Booking\BookingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\Order;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Shopping\BookWasReserved;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Shopping\ShoppingService;
 
 /**
  * Defines application features from the specific context.
@@ -51,21 +56,11 @@ class DomainContext implements Context
     private $future;
 
     /**
-     * DomainContext constructor.
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function __construct()
-    {
-        $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
-        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
-    }
-
-    /**
      * @Given I register :bookingRequestName as :type
      * @param string $channelName
      * @param string $type
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws ConfigurationException
+     * @throws MessagingException
      */
     public function iRegisterAs(string $channelName, string $type)
     {
@@ -98,9 +93,9 @@ class DomainContext implements Context
      * @param string $className
      * @param string $methodName
      * @param string $channelName
-     * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws Exception
+     * @throws ConfigurationException
+     * @throws MessagingException
      */
     public function iActivateServiceWithNameForWithMethodToListenOnChannel(string $className, string $methodName, string $channelName)
     {
@@ -118,8 +113,8 @@ class DomainContext implements Context
     private function createServiceActivatorBuilder(string $endpointName, string $className, string $methodName, string $channelName): MessageHandlerBuilder
     {
         return ServiceActivatorBuilder::create($className, $methodName)
-                ->withInputChannelName($channelName)
-                ->withEndpointId($endpointName);
+            ->withInputChannelName($channelName)
+            ->withEndpointId($endpointName);
     }
 
     /**
@@ -129,9 +124,9 @@ class DomainContext implements Context
      * @param string $methodName
      * @param string $channelName
      * @param string $outputChannel
-     * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws Exception
+     * @throws ConfigurationException
+     * @throws MessagingException
      */
     public function iActivateServiceWithNameForWithMethodToListenOnChannelAndOutputChannel(string $endpointName, string $className, string $methodName, string $channelName, string $outputChannel)
     {
@@ -146,7 +141,7 @@ class DomainContext implements Context
     /**
      * @param string $className
      * @return null|object
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     private function registerReference(string $className)
     {
@@ -216,7 +211,7 @@ class DomainContext implements Context
         /** @var BookingService $gateway */
         $gateway = $this->getGatewayByName($gatewayName);
 
-        \PHPUnit\Framework\Assert::assertEquals(true, $gateway->checkIfIsBooked($flatNumber));
+        Assert::assertEquals(true, $gateway->checkIfIsBooked($flatNumber));
     }
 
     /**
@@ -237,9 +232,9 @@ class DomainContext implements Context
      * @param string $methodName
      * @param string $requestChannelName
      * @param string $responseChannelName
-     * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws Exception
+     * @throws ConfigurationException
+     * @throws MessagingException
      */
     public function iActivateTransformerWithNameForAndWithRequestChannelAndOutputChannel(string $name, string $className, string $methodName, string $requestChannelName, string $responseChannelName)
     {
@@ -267,7 +262,7 @@ class DomainContext implements Context
 
         $bookWasReserved = $gateway->reserve($bookName);
 
-        \PHPUnit\Framework\Assert::assertInstanceOf(BookWasReserved::class, $bookWasReserved, "Book must be reserved");
+        Assert::assertInstanceOf(BookWasReserved::class, $bookWasReserved, "Book must be reserved");
     }
 
     /**
@@ -276,9 +271,9 @@ class DomainContext implements Context
      * @param string $inputChannelName
      * @param string $headerName
      * @param TableNode $mapping
-     * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws Exception
+     * @throws ConfigurationException
+     * @throws MessagingException
      */
     public function iActivateHeaderRouterWithNameAndInputChannelForHeaderWithMapping(string $endpointName, string $inputChannelName, string $headerName, TableNode $mapping)
     {
@@ -323,8 +318,8 @@ class DomainContext implements Context
 
         try {
             $gateway->processOrder(Order::create($orderId, $productName));
-            \PHPUnit\Framework\Assert::assertTrue(false, "Expect exception got none");
-        } catch (\Exception $e) {
+            Assert::assertTrue(false, "Expect exception got none");
+        } catch (Exception $e) {
         }
     }
 
@@ -333,7 +328,7 @@ class DomainContext implements Context
      */
     public function iShouldReceiveConfirmation()
     {
-        \PHPUnit\Framework\Assert::assertInstanceOf(OrderConfirmation::class, $this->future->resolve());
+        Assert::assertInstanceOf(OrderConfirmation::class, $this->future->resolve());
     }
 
     /**
@@ -343,7 +338,7 @@ class DomainContext implements Context
     {
         try {
             $this->future->resolve();
-            \PHPUnit\Framework\Assert::assertTrue(false, "Expect exception got none");
+            Assert::assertTrue(false, "Expect exception got none");
         } catch (MessageHandlingException $e) {
         }
     }
@@ -354,9 +349,9 @@ class DomainContext implements Context
      * @param string $requestChannelName
      * @param string $outputChannelName
      * @param TableNode $headers
-     * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws Exception
+     * @throws ConfigurationException
+     * @throws MessagingException
      */
     public function iActivateHeaderEnricherTransformerWithNameWithRequestChannelAndOutputChannelWithHeaders(string $endpointName, string $requestChannelName, string $outputChannelName, TableNode $headers)
     {
@@ -383,5 +378,28 @@ class DomainContext implements Context
     public function handlesMessage(string $consumerName)
     {
         $this->messagingSystem->runSeparatelyRunningConsumerBy($consumerName);
+    }
+
+    /**
+     * @When :arg1 handles message with exception
+     */
+    public function handlesMessageWithException(string $consumerName)
+    {
+        try {
+            $this->handlesMessage($consumerName);
+        }catch (\Exception $e) {
+            return;
+        }
+
+        Assert::assertTrue(false,"Exception was not thrown");
+    }
+
+    /**
+     * @Given I configure messaging system
+     */
+    public function iConfigureMessagingSystem()
+    {
+        $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
     }
 }

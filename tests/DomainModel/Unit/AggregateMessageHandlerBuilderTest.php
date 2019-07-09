@@ -88,9 +88,6 @@ class AggregateMessageHandlerBuilderTest extends TestCase
 
         $this->assertEquals(ChangeShippingAddressCommand::class, $aggregateCallingCommandHandler->getInputMessageChannelName());
         $this->assertEquals([], $aggregateCallingCommandHandler->getRequiredReferenceNames());
-
-        $aggregateCallingCommandHandler->registerRequiredReference("some-ref");
-        $this->assertEquals(["some-ref"], $aggregateCallingCommandHandler->getRequiredReferenceNames());
     }
 
     /**

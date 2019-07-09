@@ -36,26 +36,16 @@ class AroundMethodInterceptor
      * @var ReferenceSearchService
      */
     private $referenceSearchService;
-    /**
-     * @var bool
-     */
-    private $allowForMethodArgumentReplacement;
-    /**
-     * @var string
-     */
-    private $methodArgumentReplacementExceptionMessage;
 
     /**
      * MethodInterceptor constructor.
      * @param object $referenceToCall
      * @param InterfaceToCall $interfaceToCall
      * @param ReferenceSearchService $referenceSearchService
-     * @param bool $allowForMethodArgumentReplacement
-     * @param string $methodArgumentReplacementExceptionMessage
      * @throws MessagingException
      * @throws TypeDefinitionException
      */
-    private function __construct($referenceToCall, InterfaceToCall $interfaceToCall, ReferenceSearchService $referenceSearchService, bool $allowForMethodArgumentReplacement, string $methodArgumentReplacementExceptionMessage)
+    private function __construct($referenceToCall, InterfaceToCall $interfaceToCall, ReferenceSearchService $referenceSearchService)
     {
         Assert::isObject($referenceToCall, "Method Interceptor should point to instance not class name");
 
@@ -66,8 +56,6 @@ class AroundMethodInterceptor
         $this->referenceToCall = $referenceToCall;
         $this->interceptorInterfaceToCall = $interfaceToCall;
         $this->referenceSearchService = $referenceSearchService;
-        $this->allowForMethodArgumentReplacement = $allowForMethodArgumentReplacement;
-        $this->methodArgumentReplacementExceptionMessage = $methodArgumentReplacementExceptionMessage;
     }
 
     /**
@@ -92,8 +80,6 @@ class AroundMethodInterceptor
      * @param object $referenceToCall
      * @param string $methodName
      * @param ReferenceSearchService $referenceSearchService
-     * @param bool $allowForMethodArgumentReplacement
-     * @param string $methodArgumentReplacementExceptionMessage
      * @return AroundMethodInterceptor
      * @throws AnnotationException
      * @throws InvalidArgumentException
@@ -102,14 +88,14 @@ class AroundMethodInterceptor
      * @throws ReflectionException
      * @throws TypeDefinitionException
      */
-    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService, bool $allowForMethodArgumentReplacement, string $methodArgumentReplacementExceptionMessage): self
+    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService): self
     {
         /** @var InterfaceToCallRegistry $interfaceRegistry */
         $interfaceRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
 
         $interfaceToCall = $interfaceRegistry->getFor($referenceToCall, $methodName);
 
-        return new self($referenceToCall, $interfaceToCall, $referenceSearchService, $allowForMethodArgumentReplacement, $methodArgumentReplacementExceptionMessage);
+        return new self($referenceToCall, $interfaceToCall, $referenceSearchService);
     }
 
     /**
@@ -201,21 +187,5 @@ class AroundMethodInterceptor
         }
 
         return $returnValue;
-    }
-
-    /**
-     * @return bool
-     */
-    public function doesAllowForMethodArgumentReplacement(): bool
-    {
-        return $this->allowForMethodArgumentReplacement;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMethodArgumentReplacementExceptionMessage(): string
-    {
-        return $this->methodArgumentReplacementExceptionMessage;
     }
 }

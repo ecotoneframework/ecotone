@@ -91,16 +91,6 @@ class DomainContext extends TestCase implements Context
         $this->assertEquals($shippingAddress, $execute);
     }
 
-
-
-    /**
-     * @BeforeScenario
-     */
-    public function setUpMessaging()
-    {
-        $this->prepareConfiguration([Order::class, OrderNotificator::class]);
-    }
-
     /**
      * @Then there should be :productsAmount products for order with id :orderId retrieved from :channelName
      *
@@ -172,5 +162,13 @@ class DomainContext extends TestCase implements Context
         $this->queryBus   = $configuredMessagingSystem->getGatewayByName(QueryBus::class);
         $this->eventBus   = $configuredMessagingSystem->getGatewayByName(EventBus::class);
         $lazyEventBus->setEventBus($this->eventBus);
+    }
+
+    /**
+     * @Given I configure messaging system for modelling
+     */
+    public function iConfigureMessagingSystemForModelling()
+    {
+        $this->prepareConfiguration([Order::class, OrderNotificator::class]);
     }
 }

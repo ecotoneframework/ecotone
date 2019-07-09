@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Filter;
+namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Filter;
 
+use SimplyCodedSoftware\Messaging\Handler\Filter\MessageFilterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainNoReturningInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;

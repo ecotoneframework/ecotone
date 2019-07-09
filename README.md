@@ -2,9 +2,6 @@
 
 - fix issue with reading annotations from src
 - change namespace to configuration instead of parameter
-- register transaction interceptor as direct object
-- inbound adapter as annotation
-- @inheritdoc + extra annotations
 - aggregate root as a service
 - allow simple types for aggregate commands/queries
 - write tests for bus routers
@@ -15,3 +12,4 @@
 - amqp add possibility to define point to point or publish subscribe amqp backend channel
 - possibility to order event handler
 - gateway and endpoint same parameter converters? Check how it's handled in java
+- should throw exception if class not found

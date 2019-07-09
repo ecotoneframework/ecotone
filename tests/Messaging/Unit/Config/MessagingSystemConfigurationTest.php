@@ -1266,6 +1266,39 @@ class MessagingSystemConfigurationTest extends MessagingTest
     }
 
     /**
+     * As there may be problems with passing reply/error channel headers when flow is controlled by interceptors
+     * the option is disabled to not lose the above headers. Gateway should not replace arguments from method invocation.
+     *
+     * @throws MessagingException
+     */
+    public function test_given_gateway_with_around_interceptor_controlling_invocation_then_exception_should_be_thrown()
+    {
+        $requestChannelName = "inputChannel";
+        $aroundInterceptor = CalculatingServiceInterceptorExample::create(0);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerGatewayBuilder(
+                GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
+                    ->withRequiredInterceptorNames(["around"])
+            )
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result")
+                    ->withInputChannelName($requestChannelName)
+            )
+            ->registerAroundMethodInterceptor(
+                AroundInterceptorReference::createWithDirectObject(
+                    "around",
+                    $aroundInterceptor, "result",
+                    1, ""
+                )
+            )
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+    }
+
+    /**
      * @throws MessagingException
      */
     public function test_throwing_exception_if_registering_handlers_with_same_endpoint_id()

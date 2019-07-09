@@ -296,6 +296,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
+        $this->validateInterceptorsCorrectness($referenceSearchService);
         $gateway = $this->buildWithoutProxyObject($referenceSearchService, $channelResolver);
 
         $factory = new RemoteObjectFactory(new class ($gateway) implements AdapterInterface
@@ -444,5 +445,20 @@ class GatewayProxyBuilder implements GatewayBuilder
         }
 
         return true;
+    }
+
+    /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \ReflectionException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
+     */
+    private function validateInterceptorsCorrectness(ReferenceSearchService $referenceSearchService): void
+    {
+        foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
+            $aroundInterceptorReference->buildAroundInterceptor($referenceSearchService);
+        }
     }
 }

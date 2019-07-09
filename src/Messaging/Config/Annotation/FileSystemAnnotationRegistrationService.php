@@ -331,8 +331,8 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
 
         $autoloadPsr4 = require($rootProjectDir . '/vendor/composer/autoload_psr4.php');
         $autoloadPsr0 = require($rootProjectDir . '/vendor/composer/autoload_namespaces.php');
-        $paths = $this->mergeWith($namespaces, $autoloadPsr4, $paths, $rootProjectDir, $loadSrc);
-        $paths = $this->mergeWith($namespaces, $autoloadPsr0, $paths, $rootProjectDir, $loadSrc);
+        $paths = $this->mergeWith($namespaces, $autoloadPsr4, $paths, $rootProjectDir, $loadSrc, true);
+        $paths = $this->mergeWith($namespaces, $autoloadPsr0, $paths, $rootProjectDir, $loadSrc, false);
 
         return array_unique($paths);
     }
@@ -361,9 +361,10 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      *
      * @param string $rootProjectDir
      * @param bool $loadSrc
+     * @param bool $autoloadPsr4
      * @return array
      */
-    private function mergeWith(array $namespacesToUse, array $autoload, array $paths, string $rootProjectDir, bool $loadSrc)
+    private function mergeWith(array $namespacesToUse, array $autoload, array $paths, string $rootProjectDir, bool $loadSrc, bool $autoloadPsr4)
     {
         foreach ($namespacesToUse as $namespaceToUse) {
             $namespaceSplit = explode("\\", $namespaceToUse);
@@ -376,7 +377,13 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
             foreach ($autoload as $namespace => $namespacePath) {
                 if ($loadSrc && (in_array($resolvedPathToSrc, $namespacePath)) || preg_match($regex, $namespace)) {
                     foreach ($namespacePath as $pathForNamespace) {
-                        $suffixPath = str_replace("\\", "/", trim(str_replace(trim($namespace, "\\"), "", $namespaceToUse), "\\"));
+                        if ($autoloadPsr4) {
+                            $suffixPath = trim(str_replace(trim($namespace, "\\"), "", $namespaceToUse), "\\");
+                        }else {
+                            $suffixPath = trim($namespace, "\\");
+                        }
+
+                        $suffixPath = str_replace("\\", "/", $suffixPath);
                         $paths[] = $pathForNamespace . DIRECTORY_SEPARATOR . $suffixPath;
                     }
                 }

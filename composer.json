@@ -20,7 +20,8 @@
             "Test\\SimplyCodedSoftware\\": "tests"
         },
         "psr-0": {
-            "FixtureAutoloadTest\\": "tests\\Messaging"
+            "FixtureAutoloadTest\\": "tests\\Messaging",
+            "FixtureIncorrectNamespace\\": "tests\\Messaging"
         }
     },
     "require": {

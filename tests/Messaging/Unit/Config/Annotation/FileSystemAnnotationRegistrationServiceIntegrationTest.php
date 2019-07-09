@@ -37,21 +37,9 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      */
     private static $annotationRegistrationService;
 
-    /**
-     * @throws ConfigurationException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     */
-    public function setUp() : void
-    {
-        if (!self::$annotationRegistrationService) {
-            self::$annotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture", "prod");
-        }
-    }
-
     public function test_retrieving_all_classes_with_annotation()
     {
-        $classes = self::$annotationRegistrationService->getAllClassesWithAnnotation(ApplicationContext::class);
+        $classes = $this->getAnnotationRegistrationService()->getAllClassesWithAnnotation(ApplicationContext::class);
 
         $this->assertNotEmpty($classes, "File system class locator didn't find application context");
     }
@@ -60,7 +48,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     {
         $this->assertEquals(
             new ApplicationContext(),
-            self::$annotationRegistrationService->getAnnotationForClass(ApplicationContextExample::class, ApplicationContext::class)
+            $this->getAnnotationRegistrationService()->getAnnotationForClass(ApplicationContextExample::class, ApplicationContext::class)
         );
     }
 
@@ -233,6 +221,21 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         );
     }
 
+    public function test_throwing_exception_if_class_is_registed_under_incorrect_namespace()
+    {
+        $this->expectException(\ReflectionException::class);
+
+        new FileSystemAnnotationRegistrationService(
+            new AnnotationReader(),
+            self::ROOT_DIR,
+            [
+                "FixtureIncorrectNamespace"
+            ],
+            "test",
+            false
+        );
+    }
+
     /**
      * @param string $namespace
      * @param string $environmentName
@@ -253,5 +256,20 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
             false
         );
         return $fileSystemAnnotationRegistrationService;
+    }
+
+    /**
+     * @return FileSystemAnnotationRegistrationService
+     * @throws ConfigurationException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     */
+    private function getAnnotationRegistrationService(): FileSystemAnnotationRegistrationService
+    {
+        if (!self::$annotationRegistrationService) {
+            self::$annotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture", "prod");
+        }
+
+        return self::$annotationRegistrationService;
     }
 }

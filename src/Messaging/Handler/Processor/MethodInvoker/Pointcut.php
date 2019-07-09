@@ -90,6 +90,11 @@ class Pointcut
                     || $interfaceToCall->hasClassAnnotation($annotationToCheck)) {
                     return true;
                 }
+            }else if (strpos($expression, "*") !== false) {
+                $expression = "#" . str_replace("*", ".*", $expression) . "#";
+                $expression = str_replace("\\", "\\\\", $expression);
+
+                return preg_match($expression, $interfaceToCall->getInterfaceName()) === 1;
             }
         }
 

@@ -82,6 +82,30 @@ class PointcutTest extends TestCase
         );
     }
 
+    public function test_intercepting_namespace_suffix()
+    {
+        $this->itShouldCut(
+            "Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\*",
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
+        );
+    }
+
+    public function test_intercepting_namespace_prefix()
+    {
+        $this->itShouldCut(
+            "*\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample",
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
+        );
+    }
+
+    public function test_intercepting_namespace_in_the_middle()
+    {
+        $this->itShouldCut(
+            "Test\SimplyCodedSoftware\Messaging\Fixture\*\Interceptor\MethodInterceptorWithoutAspectExample",
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
+        );
+    }
+
     public function test_targeting_on_endpoint_annotations()
     {
         $this->assertTrue(Pointcut::createWith("@(" . \stdClass::class . ")")->doesItCut(

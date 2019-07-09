@@ -26,7 +26,6 @@ use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
@@ -164,6 +163,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
         $this->configureInterceptors($interfaceToCallRegistry);
+        $this->configureDefaultMessageChannels();
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $relatedInterfaces = $messageHandlerBuilder->resolveRelatedReferences($interfaceToCallRegistry);
 
@@ -661,18 +661,10 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService): ConfiguredMessagingSystem
     {
-        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelBuilders)) {
-                if (array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->defaultChannelBuilders)) {
-                    $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = $this->defaultChannelBuilders[$messageHandlerBuilder->getInputMessageChannelName()];
-                } else {
-                    $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
-                }
-            }
-        }
-
-
+        $this->configureDefaultMessageChannels();
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall);
+        $this->configureInterceptors($interfaceToCallRegistry);
+
         $converters = [];
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->build($referenceSearchService);
@@ -687,97 +679,25 @@ final class MessagingSystemConfiguration implements Configuration
             )
         );
 
-        $channelResolver = $this->createChannelResolver($referenceSearchService);
-        $this->configureInterceptors($interfaceToCallRegistry);
-
-        /** @var GatewayBuilder[][] $preparedGateways */
-        $preparedGateways = [];
-        foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $preparedGateways[$gatewayBuilder->getReferenceName()][] = $gatewayBuilder;
-        }
-        $gateways = $this->configureGateways($preparedGateways, $referenceSearchService, $channelResolver);
-
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $this->consumerFactories, $this->pollingMetadata);
-        $consumers = [];
-
-        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder);
-        }
-
-        foreach ($this->channelAdapters as $channelAdapter) {
-            $consumers[] = $channelAdapter->build($channelResolver, $referenceSearchService, array_key_exists($channelAdapter->getEndpointId(), $this->pollingMetadata) ? $this->pollingMetadata[$channelAdapter->getEndpointId()] : PollingMetadata::create($channelAdapter->getEndpointId()));
-        }
-
-        return MessagingSystem::create($consumers, $gateways, $channelResolver);
-    }
-
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @return ChannelResolver
-     * @throws MessagingException
-     */
-    private function createChannelResolver(ReferenceSearchService $referenceSearchService): ChannelResolver
-    {
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
         arsort($channelInterceptorsByImportance);
         $channelInterceptorsByChannelName = [];
-
         foreach ($channelInterceptorsByImportance as $channelInterceptors) {
             foreach ($channelInterceptors as $channelInterceptor) {
-                $channelInterceptorsByChannelName[$channelInterceptor->relatedChannelName()][] = $channelInterceptor->build($referenceSearchService);
+                $channelInterceptorsByChannelName[$channelInterceptor->relatedChannelName()][] = $channelInterceptor;
             }
         }
 
-        $channels = [];
-        foreach ($this->channelBuilders as $channelsBuilder) {
-            $messageChannel = $channelsBuilder->build($referenceSearchService);
-            $interceptorsForChannel = [];
-            foreach ($channelInterceptorsByChannelName as $channelName => $interceptors) {
-                $regexChannel = str_replace("*", ".*", $channelName);
-                if (preg_match("#^{$regexChannel}$#", $channelsBuilder->getMessageChannelName())) {
-                    $interceptorsForChannel = array_merge($interceptorsForChannel, $interceptors);
-                }
-            }
-
-            if ($messageChannel instanceof PollableChannel && $interceptorsForChannel) {
-                $messageChannel = new PollableChannelInterceptorAdapter($messageChannel, $interceptorsForChannel);
-            } else if ($interceptorsForChannel) {
-                $messageChannel = new EventDrivenChannelInterceptorAdapter($messageChannel, $interceptorsForChannel);
-            }
-
-            $channels[] = NamedMessageChannel::create($channelsBuilder->getMessageChannelName(), $messageChannel);
-        }
-
-        return InMemoryChannelResolver::create($channels);
-    }
-
-    /**
-     * @param array $preparedGateways
-     * @param InMemoryReferenceSearchService $referenceSearchServiceWithExtras
-     * @param ChannelResolver $channelResolver
-     * @return array
-     * @throws MessagingException
-     */
-    private function configureGateways(array $preparedGateways, InMemoryReferenceSearchService $referenceSearchServiceWithExtras, ChannelResolver $channelResolver): array
-    {
-        $gateways = [];
-        foreach ($preparedGateways as $referenceName => $preparedGatewaysForReference) {
-            if (count($preparedGatewaysForReference) === 1) {
-                $gateways[] = GatewayReference::createWith(
-                    $preparedGatewaysForReference[0]->getReferenceName(),
-                    $preparedGatewaysForReference[0]->build($referenceSearchServiceWithExtras, $channelResolver)
-                );
-            } else {
-                $gateways[] =
-                    GatewayReference::createWith(
-                        $referenceName,
-                        CombinedGatewayBuilder::create(
-                            $preparedGatewaysForReference[0]->getInterfaceName(), $preparedGatewaysForReference
-                        )->build($referenceSearchServiceWithExtras, $channelResolver)
-                    );
-            }
-        }
-        return $gateways;
+        return MessagingSystem::createFrom(
+            $referenceSearchService,
+            $this->channelBuilders,
+            $channelInterceptorsByChannelName,
+            $this->gatewayBuilders,
+            $this->consumerFactories,
+            $this->pollingMetadata,
+            $this->messageHandlerBuilders,
+            $this->channelAdapters
+        );
     }
 
     /**
@@ -788,5 +708,21 @@ final class MessagingSystemConfiguration implements Configuration
     private function __clone()
     {
 
+    }
+
+    /**
+     * @return void
+     */
+    private function configureDefaultMessageChannels(): void
+    {
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelBuilders)) {
+                if (array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->defaultChannelBuilders)) {
+                    $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = $this->defaultChannelBuilders[$messageHandlerBuilder->getInputMessageChannelName()];
+                } else {
+                    $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
+                }
+            }
+        }
     }
 }

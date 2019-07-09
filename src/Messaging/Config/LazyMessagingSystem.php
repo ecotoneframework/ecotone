@@ -28,7 +28,7 @@ use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
  * @package SimplyCodedSoftware\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class MessagingSystem implements ConfiguredMessagingSystem
+final class LazyMessagingSystem implements ConfiguredMessagingSystem
 {
     /**
      * @var iterable|ConsumerLifecycle[]

@@ -46,7 +46,8 @@ class AnnotationBasedMessagingContext implements Context
             __DIR__ . "/../../../../",
             ["SimplyCodedSoftware\Messaging", $namespace],
             InMemoryReferenceTypeFromNameResolver::createFromObjects($objects),
-            "test"
+            "test",
+            true
         );
 
         $this->messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith($objects));

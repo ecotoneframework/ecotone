@@ -19,6 +19,7 @@ use SimplyCodedSoftware\Messaging\Conversion\StringToUuid\StringToUuidConverterB
 use SimplyCodedSoftware\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
@@ -70,7 +71,11 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             }
         }
 
-        $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
+        if ($configuration->isLazyLoaded()) {
+            $configuration->registerConsumerFactory(new LazyEventDrivenConsumerBuilder());
+        }else {
+            $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
+        }
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
         $configuration->registerConverter(new UuidToStringConverterBuilder());

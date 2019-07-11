@@ -75,6 +75,14 @@ class AmqpBackedMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
+     * @inheritDoc
+     */
+    public function isPollable(): bool
+    {
+        return true;
+    }
+
+    /**
      * @param string $mediaType
      *
      * @return AmqpBackedMessageChannelBuilder

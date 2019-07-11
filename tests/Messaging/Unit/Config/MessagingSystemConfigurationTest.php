@@ -279,7 +279,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ),
             InMemoryReferenceTypeFromNameResolver::createFromAssociativeArray([
                 "reference0" => TransactionalInterceptorExample::class
-            ])
+            ]),
+            true
         );
 
         $this->assertEquals(

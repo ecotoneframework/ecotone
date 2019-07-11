@@ -18,6 +18,11 @@ interface MessageChannelBuilder
     public function getMessageChannelName() : string;
 
     /**
+     * @return bool
+     */
+    public function isPollable() : bool;
+
+    /**
      * @param ReferenceSearchService $referenceSearchService
      * @return MessageChannel
      */

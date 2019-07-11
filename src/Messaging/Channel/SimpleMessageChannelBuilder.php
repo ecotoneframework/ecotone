@@ -5,6 +5,7 @@ namespace SimplyCodedSoftware\Messaging\Channel;
 
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessageChannel;
+use SimplyCodedSoftware\Messaging\PollableChannel;
 
 /**
  * Class SimpleMessageChannelBuilder
@@ -21,16 +22,22 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
      * @var MessageChannel
      */
     private $messageChannel;
+    /**
+     * @var bool
+     */
+    private $isPollable;
 
     /**
      * SimpleMessageChannelBuilder constructor.
      * @param string $messageChannelName
      * @param MessageChannel $messageChannel
+     * @param bool $isPollable
      */
-    private function __construct(string $messageChannelName, MessageChannel $messageChannel)
+    private function __construct(string $messageChannelName, MessageChannel $messageChannel, bool $isPollable)
     {
         $this->messageChannelName = $messageChannelName;
         $this->messageChannel = $messageChannel;
+        $this->isPollable = $isPollable;
     }
 
     /**
@@ -40,7 +47,7 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
      */
     public static function create(string $messageChannelName, MessageChannel $messageChannel) : self
     {
-        return new self($messageChannelName, $messageChannel);
+        return new self($messageChannelName, $messageChannel, $messageChannel instanceof PollableChannel);
     }
 
     /**
@@ -68,6 +75,14 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
     public static function createQueueChannel(string $messageChannelName) : self
     {
         return self::create($messageChannelName, QueueChannel::create());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isPollable(): bool
+    {
+        return $this->isPollable;
     }
 
     /**

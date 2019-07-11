@@ -1,28 +1,20 @@
 <?php
-declare(strict_types=1);
+
 
 namespace SimplyCodedSoftware\Messaging\Endpoint\EventDriven;
 
-use Ramsey\Uuid\Uuid;
+
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\InterceptedMessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\SubscribableChannel;
 
-/**
- * Class EventDrivenConsumerFactory
- * @package SimplyCodedSoftware\Messaging\Endpoint
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
-class EventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
+class LazyEventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
 {
     /**
      * @inheritDoc
@@ -35,7 +27,7 @@ class EventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
         return new EventDrivenConsumer(
             $messageHandlerBuilder->getEndpointId(),
             $subscribableChannel,
-            $messageHandlerBuilder->build($channelResolver, $referenceSearchService)
+            new LazyMessageHandler($messageHandlerBuilder, $channelResolver, $referenceSearchService)
         );
     }
 

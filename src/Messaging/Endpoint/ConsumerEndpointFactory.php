@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Endpoint;
 
+use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
@@ -61,14 +62,15 @@ class ConsumerEndpointFactory
 
     /**
      * @param MessageHandlerBuilder $messageHandlerBuilder
+     * @param MessageChannelBuilder[] $messageChannelBuilders
      * @return ConsumerLifecycle
-     * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function createForMessageHandler(MessageHandlerBuilder $messageHandlerBuilder) : ConsumerLifecycle
+    public function createForMessageHandler(MessageHandlerBuilder $messageHandlerBuilder, array $messageChannelBuilders) : ConsumerLifecycle
     {
         foreach ($this->consumerFactories as $consumerFactory) {
-            if ($consumerFactory->isSupporting($this->channelResolver, $messageHandlerBuilder)) {
+            Assert::keyExists($messageChannelBuilders, $messageHandlerBuilder->getInputMessageChannelName(), "Missing channel with name {$messageHandlerBuilder->getInputMessageChannelName()} for {$messageHandlerBuilder}");
+            if ($consumerFactory->isSupporting($messageHandlerBuilder, $messageChannelBuilders[$messageHandlerBuilder->getInputMessageChannelName()])) {
 
                 return $consumerFactory->build(
                     $this->channelResolver,

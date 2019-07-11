@@ -9,23 +9,19 @@ use Exception;
 use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Annotation\WithRequiredReferenceNameList;
 use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptorBuilder;
-use SimplyCodedSoftware\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Channel\PollableChannelInterceptorAdapter;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
+use SimplyCodedSoftware\Messaging\Config\Lazy\LazyMessagingSystem;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\ConverterBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerEndpointFactory;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
@@ -40,7 +36,6 @@ use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
 use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 
 /**
@@ -114,6 +109,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var ModuleReferenceSearchService
      */
     private $moduleReferenceSearchService;
+    /**
+     * @var bool
+     */
+    private $isLazyConfiguration;
 
     /**
      * Only one instance at time
@@ -122,11 +121,13 @@ final class MessagingSystemConfiguration implements Configuration
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param object[] $extensionObjects
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @throws TypeDefinitionException
+     * @param bool $isLazyLoaded
      * @throws MessagingException
+     * @throws TypeDefinitionException
      */
-    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver)
+    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded)
     {
+        $this->isLazyConfiguration = $isLazyLoaded;
         $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver);
     }
 
@@ -210,6 +211,14 @@ final class MessagingSystemConfiguration implements Configuration
         $this->requiredReferences = array_unique($this->requiredReferences);
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isLazyLoaded(): bool
+    {
+        return $this->isLazyConfiguration;
     }
 
     /**
@@ -366,7 +375,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public static function prepare(ModuleRetrievingService $moduleConfigurationRetrievingService): Configuration
     {
-        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty());
+        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), false);
     }
 
     /**
@@ -374,12 +383,14 @@ final class MessagingSystemConfiguration implements Configuration
      * @param array $namespaces
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
      * @param string $environment
+     * @param bool $isLazyLoaded
      * @return Configuration
+     * @throws AnnotationException
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws AnnotationException
+     * @throws TypeDefinitionException
      */
-    public static function createWithCachedReferenceObjectsForNamespaces(string $rootPathToSearchConfigurationFor, array $namespaces, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, string $environment): Configuration
+    public static function createWithCachedReferenceObjectsForNamespaces(string $rootPathToSearchConfigurationFor, array $namespaces, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, string $environment, bool $isLazyLoaded): Configuration
     {
         return MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
             new AnnotationModuleRetrievingService(
@@ -391,20 +402,22 @@ final class MessagingSystemConfiguration implements Configuration
                     false
                 )
             ),
-            $referenceTypeFromNameResolver
+            $referenceTypeFromNameResolver,
+            $isLazyLoaded
         );
     }
 
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
+     * @param bool $isLazyLoaded
      * @return Configuration
-     * @throws TypeDefinitionException
      * @throws MessagingException
+     * @throws TypeDefinitionException
      */
-    public static function prepareWithCachedReferenceObjects(ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver): Configuration
+    public static function prepareWithCachedReferenceObjects(ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded): Configuration
     {
-        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver);
+        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $isLazyLoaded);
     }
 
     /**
@@ -688,11 +701,17 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
+        /** @var GatewayBuilder[][] $preparedGateways */
+        $preparedGateways = [];
+        foreach ($this->gatewayBuilders as $gatewayBuilder) {
+            $preparedGateways[$gatewayBuilder->getReferenceName()][] = $gatewayBuilder;
+        }
+
         return MessagingSystem::createFrom(
             $referenceSearchService,
             $this->channelBuilders,
             $channelInterceptorsByChannelName,
-            $this->gatewayBuilders,
+            $preparedGateways,
             $this->consumerFactories,
             $this->pollingMetadata,
             $this->messageHandlerBuilders,

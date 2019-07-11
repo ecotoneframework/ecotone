@@ -8,7 +8,6 @@ use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorCollectionRegistry;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
@@ -172,19 +171,6 @@ class ServiceActivatorBuilderTest extends MessagingTest
 
         $this->assertNotNull($receivedMessage);
         $this->assertNotEquals($message,$receivedMessage);
-    }
-
-    public function test_converting_to_string()
-    {
-        $inputChannelName = 'inputChannel';
-        $endpointName = "someName";
-
-        $this->assertEquals(
-            ServiceActivatorBuilder::create("ref-name", "method-name")
-                ->withInputChannelName($inputChannelName)
-                ->withEndpointId($endpointName),
-            sprintf("Service Activator - %s:%s with name `%s` for input channel `%s`", "ref-name", "method-name", $endpointName, $inputChannelName)
-        );
     }
 
     /**

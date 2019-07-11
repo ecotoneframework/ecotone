@@ -93,18 +93,13 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     {
         $channelResolver = self::createChannelResolver($messageChannelInterceptors, $messageChannelBuilders, $referenceSearchService);
 
-        /** @var GatewayBuilder[][] $preparedGateways */
-        $preparedGateways = [];
-        foreach ($gatewayBuilders as $gatewayBuilder) {
-            $preparedGateways[$gatewayBuilder->getReferenceName()][] = $gatewayBuilder;
-        }
-        $gateways = self::configureGateways($preparedGateways, $referenceSearchService, $channelResolver);
+        $gateways = self::configureGateways($gatewayBuilders, $referenceSearchService, $channelResolver);
 
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $consumerFactories, $pollingMetadataConfigurations);
         $consumers = [];
 
         foreach ($messageHandlerBuilders as $messageHandlerBuilder) {
-            $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder);
+            $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder, $messageChannelBuilders);
         }
 
         foreach ($channelAdapterConsumerBuilders as $channelAdapter) {

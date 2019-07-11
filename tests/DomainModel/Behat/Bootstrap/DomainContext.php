@@ -152,7 +152,8 @@ class DomainContext extends TestCase implements Context
             InMemoryReferenceTypeFromNameResolver::createFromAssociativeArray([
                 Order::class => Order::class,
                 OrderNotificator::class => OrderNotificator::class
-            ])
+            ]),
+            true
         )
             ->registerConsumerFactory(new EventDrivenConsumerBuilder())
             ->registerConverter(new DeserializingConverterBuilder())

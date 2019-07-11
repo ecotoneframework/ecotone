@@ -108,6 +108,11 @@ interface Configuration
     public function getRegisteredGateways() : array;
 
     /**
+     * @return bool
+     */
+    public function isLazyLoaded() : bool;
+
+    /**
      * @param ConverterBuilder $converterBuilder
      * @return Configuration
      */

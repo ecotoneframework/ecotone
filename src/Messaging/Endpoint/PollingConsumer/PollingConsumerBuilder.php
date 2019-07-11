@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer;
 
 use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
+use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
+use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
@@ -144,8 +146,8 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     /**
      * @inheritDoc
      */
-    public function isSupporting(ChannelResolver $channelResolver, MessageHandlerBuilder $messageHandlerBuilder): bool
+    public function isSupporting(MessageHandlerBuilder $messageHandlerBuilder, MessageChannelBuilder $relatedMessageChannel): bool
     {
-        return false;
+        return $relatedMessageChannel instanceof SimpleMessageChannelBuilder && $relatedMessageChannel->isPollable();
     }
 }

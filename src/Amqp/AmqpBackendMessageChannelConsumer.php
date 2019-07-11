@@ -3,7 +3,7 @@
 
 namespace SimplyCodedSoftware\Amqp;
 
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
+use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
 use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
@@ -22,15 +22,9 @@ class AmqpBackendMessageChannelConsumer implements MessageHandlerConsumerBuilder
     /**
      * @inheritDoc
      */
-    public function isSupporting(ChannelResolver $channelResolver, MessageHandlerBuilder $messageHandlerBuilder): bool
+    public function isSupporting(MessageHandlerBuilder $messageHandlerBuilder, MessageChannelBuilder $relatedMessageChannel): bool
     {
-        $messageChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
-        if ($messageChannel instanceof MessageChannelInterceptorAdapter) {
-            return $messageChannel->getInternalMessageChannel() instanceof AmqpBackendMessageChannel;
-        }
-
-
-        return $messageChannel instanceof AmqpBackendMessageChannel;
+        return $relatedMessageChannel instanceof AmqpBackedMessageChannelBuilder;
     }
 
     /**

@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Endpoint;
 
+use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InterceptedEndpoint;
 use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
@@ -17,11 +16,9 @@ use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 interface MessageHandlerConsumerBuilder
 {
     /**
-     * @param ChannelResolver $channelResolver
-     * @param MessageHandlerBuilder $messageHandlerBuilder
-     * @return bool
+     * @inheritDoc
      */
-    public function isSupporting(ChannelResolver $channelResolver, MessageHandlerBuilder $messageHandlerBuilder) : bool;
+    public function isSupporting(MessageHandlerBuilder $messageHandlerBuilder, MessageChannelBuilder $relatedMessageChannel): bool;
 
     /**
      * @param ChannelResolver $channelResolver
@@ -30,5 +27,5 @@ interface MessageHandlerConsumerBuilder
      * @param PollingMetadata $pollingMetadata
      * @return ConsumerLifecycle
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata) : ConsumerLifecycle;
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle;
 }

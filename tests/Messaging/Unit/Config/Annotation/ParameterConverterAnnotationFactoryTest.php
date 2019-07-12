@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation;
 
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\AllHeaders;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AllHeadersBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Expression;
@@ -32,7 +32,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
         $referenceAnnotation = new Reference();
         $referenceAnnotation->parameterName = "object";
-        $allHeadersAnnotation = new AllHeaders();
+        $allHeadersAnnotation = new Headers();
         $allHeadersAnnotation->parameterName = "some";
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;

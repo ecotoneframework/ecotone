@@ -2,7 +2,8 @@
 declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
+
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 
 /**

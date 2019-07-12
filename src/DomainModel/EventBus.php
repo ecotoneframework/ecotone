@@ -2,10 +2,10 @@
 
 namespace SimplyCodedSoftware\DomainModel;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderArray;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 
 /**
  * Interface EventBus
@@ -40,8 +40,8 @@ interface EventBus
      * @Gateway(
      *     requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT,
      *     parameterConverters={
-     *         @GatewayPayload(parameterName="event"),
-     *         @GatewayHeaderArray(parameterName="metadata")
+     *         @Payload(parameterName="event"),
+     *         @Headers(parameterName="metadata")
      *     }
      * )
      */

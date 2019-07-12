@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeader;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderArray;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderValue;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 
 /**
  * Interface GatewayWithAllConvertersExample
@@ -30,11 +30,10 @@ interface BookStoreGatewayExample
      *      requestChannel="requestChannel",
      *      errorChannel="errorChannel",
      *      parameterConverters={
-     *          @GatewayPayload(parameterName="bookNumber", expression="upper(value)"),
-     *          @GatewayHeader(parameterName="rentTill", headerName="rentDate"),
-     *          @GatewayHeader(parameterName="cost", headerName="cost", expression="value * 5"),
-     *          @GatewayHeaderValue(headerName="owner", headerValue="Johny"),
-     *          @GatewayHeaderArray(parameterName="data")
+     *          @Payload(parameterName="bookNumber", expression="upper(value)"),
+     *          @Header(parameterName="rentTill", headerName="rentDate"),
+     *          @Header(parameterName="cost", headerName="cost"),
+     *          @Headers(parameterName="data")
      *      },
      *      requiredInterceptorNames={"dbalTransaction"},
      *      replyTimeoutInMilliseconds=100

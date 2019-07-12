@@ -2,11 +2,10 @@
 
 namespace SimplyCodedSoftware\DomainModel;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeader;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderArray;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\Messaging\MessageHeaders;
 
@@ -43,8 +42,8 @@ interface CommandBus
      * @Gateway(
      *     requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT,
      *     parameterConverters={
-     *          @GatewayPayload(parameterName="command"),
-     *          @GatewayHeaderArray(parameterName="metadata")
+     *          @Payload(parameterName="command"),
+     *          @Headers(parameterName="metadata")
      *     }
      * )
      */
@@ -59,9 +58,9 @@ interface CommandBus
      * @Gateway(
      *     requestChannel=CommandBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
-     *          @GatewayHeader(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
-     *          @GatewayHeader(parameterName="dataMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @GatewayPayload(parameterName="commandData")
+     *          @Header(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
+     *          @Header(parameterName="dataMediaType", headerName=MessageHeaders::CONTENT_TYPE),
+     *          @Payload(parameterName="commandData")
      *     }
      * )
      */
@@ -78,10 +77,10 @@ interface CommandBus
      * @Gateway(
      *     requestChannel=CommandBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
-     *          @GatewayHeaderArray(parameterName="metadata"),
-     *          @GatewayHeader(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
-     *          @GatewayHeader(parameterName="dataMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @GatewayPayload(parameterName="commandData")
+     *          @Headers(parameterName="metadata"),
+     *          @Header(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
+     *          @Header(parameterName="dataMediaType", headerName=MessageHeaders::CONTENT_TYPE),
+     *          @Payload(parameterName="commandData")
      *     }
      * )
      */

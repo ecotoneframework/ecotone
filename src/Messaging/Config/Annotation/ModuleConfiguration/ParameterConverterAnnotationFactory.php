@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\AllHeaders;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Expression;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\MessageParameter;
@@ -77,7 +77,7 @@ class ParameterConverterAnnotationFactory
                 );
             } else if ($parameterConverterAnnotation instanceof Value) {
                 $parameterConverters[] = ValueBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->value);
-            } else if ($parameterConverterAnnotation instanceof AllHeaders) {
+            } else if ($parameterConverterAnnotation instanceof Headers) {
                 $parameterConverters[] = AllHeadersBuilder::createWith($parameterConverterAnnotation->parameterName);
             }
         }

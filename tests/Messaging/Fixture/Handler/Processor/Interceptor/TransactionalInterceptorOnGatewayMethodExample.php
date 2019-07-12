@@ -3,7 +3,7 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Transaction\Transactional;
 

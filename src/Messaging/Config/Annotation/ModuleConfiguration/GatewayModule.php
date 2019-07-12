@@ -3,24 +3,23 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeader;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderArray;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderValue;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderArrayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
@@ -57,26 +56,20 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     {
         $gatewayBuilders = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Gateway::class) as $annotationRegistration) {
-            /** @var \SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway $annotation */
+            /** @var \SimplyCodedSoftware\Messaging\Annotation\Gateway $annotation */
             $annotation = $annotationRegistration->getAnnotationForMethod();
 
             $parameterConverters = [];
             foreach ($annotation->parameterConverters as $parameterToMessage) {
-                if ($parameterToMessage instanceof GatewayPayload) {
+                if ($parameterToMessage instanceof Payload) {
                     if ($parameterToMessage->expression) {
                         $parameterConverters[] = GatewayPayloadExpressionBuilder::create($parameterToMessage->parameterName, $parameterToMessage->expression);
                     } else {
                         $parameterConverters[] = GatewayPayloadBuilder::create($parameterToMessage->parameterName);
                     }
-                } else if ($parameterToMessage instanceof GatewayHeader) {
-                    if ($parameterToMessage->expression) {
-                        $parameterConverters[] = GatewayHeaderExpressionBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName, $parameterToMessage->expression);
-                    } else {
-                        $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
-                    }
-                } else if ($parameterToMessage instanceof GatewayHeaderValue) {
-                    $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
-                } else if ($parameterToMessage instanceof GatewayHeaderArray) {
+                } else if ($parameterToMessage instanceof Header) {
+                    $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
+                } else if ($parameterToMessage instanceof Headers) {
                     $parameterConverters[] = GatewayHeaderArrayBuilder::create($parameterToMessage->parameterName);
                 } else {
                     $converterClass = get_class($parameterToMessage);

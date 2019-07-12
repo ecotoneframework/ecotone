@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\FileSystem;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeader;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 
 /**
  * Class GatewayWithReplyChannelExample
@@ -23,7 +22,7 @@ interface GatewayWithReplyChannelExample
      * @Gateway(
      *      requestChannel="requestChannel",
      *      parameterConverters={
-     *          @GatewayPayload(parameterName="orderId")
+     *          @Payload(parameterName="orderId")
      *      },
      *      requiredInterceptorNames={"dbalTransaction"}
      * )

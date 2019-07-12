@@ -9,7 +9,7 @@ namespace SimplyCodedSoftware\Messaging\Annotation\Parameter;
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation()
  */
-class AllHeaders
+class Headers
 {
     /**
      * @var string

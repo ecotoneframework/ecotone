@@ -18,4 +18,8 @@ class Payload
      * @Required()
      */
     public $parameterName;
+    /**
+     * @var string
+     */
+    public $expression;
 }

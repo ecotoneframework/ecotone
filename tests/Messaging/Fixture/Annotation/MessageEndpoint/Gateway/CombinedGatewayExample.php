@@ -3,7 +3,7 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 
 /**

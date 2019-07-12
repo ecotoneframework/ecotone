@@ -51,8 +51,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
                         ->withParameterConverters([
                             GatewayPayloadExpressionBuilder::create("bookNumber", "upper(value)"),
                             GatewayHeaderBuilder::create("rentTill", "rentDate"),
-                            GatewayHeaderExpressionBuilder::create("cost", "cost", "value * 5"),
-                            GatewayHeaderValueBuilder::create("owner", "Johny"),
+                            GatewayHeaderBuilder::create("cost", "cost"),
                             GatewayHeaderArrayBuilder::create("data")
                         ])
                 ),

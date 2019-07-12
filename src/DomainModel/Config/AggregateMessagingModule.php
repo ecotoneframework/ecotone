@@ -16,7 +16,7 @@ use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
 use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\AllHeaders;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
 use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
@@ -358,7 +358,7 @@ class AggregateMessagingModule implements AnnotationModule
                 }
 
                 if ($interfaceParameter->getTypeDescriptor()->isNonCollectionArray()) {
-                    $allHeaders = new AllHeaders();
+                    $allHeaders = new Headers();
                     $allHeaders->parameterName = $interfaceParameter->getName();
 
                     $parameterConverterAnnotations[] = $allHeaders;

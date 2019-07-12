@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Http\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 
 /**
  * Class InboundHttpGateway

@@ -1,10 +1,11 @@
 <?php
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeader;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
+
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 
 /**
  * Interface FakeHttpMessageConverterGateway
@@ -21,8 +22,8 @@ interface FakeMessageConverterGatewayExample
      * @Gateway(
      *     requestChannel="requestChannel",
      *     parameterConverters={
-     *          @GatewayHeader(parameterName="some", headerName="some"),
-     *          @GatewayPayload(parameterName="amount")
+     *          @Header(parameterName="some", headerName="some"),
+     *          @Payload(parameterName="amount")
      *     }
      * )
      */

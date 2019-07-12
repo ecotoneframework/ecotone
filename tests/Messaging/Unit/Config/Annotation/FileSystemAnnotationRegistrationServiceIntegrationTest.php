@@ -4,15 +4,10 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment\ApplicationContextWithClassEnvironment;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment\ApplicationContextWithMethodEnvironmentExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment\ApplicationContextWithMethodMultipleEnvironmentsExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
 use SimplyCodedSoftware\Messaging\Annotation\ApplicationContext;
 use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\Extension;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\Gateway;
+use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\Messaging\Annotation\InputOutputEndpointAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
@@ -22,6 +17,11 @@ use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
 use SimplyCodedSoftware\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment\ApplicationContextWithClassEnvironment;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment\ApplicationContextWithMethodEnvironmentExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment\ApplicationContextWithMethodMultipleEnvironmentsExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 
@@ -61,7 +61,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     {
         $gatewayAnnotation = new Gateway();
         $gatewayAnnotation->requestChannel = "requestChannel";
-        $messageToPayloadParameter = new GatewayPayload();
+        $messageToPayloadParameter = new Payload();
         $messageToPayloadParameter->parameterName = "orderId";
         $gatewayAnnotation->parameterConverters = [$messageToPayloadParameter];
         $gatewayAnnotation->requiredInterceptorNames = ["dbalTransaction"];
@@ -83,7 +83,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     {
         $gatewayAnnotation = new Gateway();
         $gatewayAnnotation->requestChannel = "requestChannel";
-        $messageToPayloadParameter = new GatewayPayload();
+        $messageToPayloadParameter = new Payload();
         $messageToPayloadParameter->parameterName = "orderId";
         $gatewayAnnotation->parameterConverters = [$messageToPayloadParameter];
         $gatewayAnnotation->requiredInterceptorNames = ["dbalTransaction"];

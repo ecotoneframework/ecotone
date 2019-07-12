@@ -16,6 +16,11 @@ use Doctrine\Common\Annotations\Annotation\Target;
 class Router extends EndpointAnnotation
 {
     /**
+     * @var string
+     * @Required()
+     */
+    public $inputChannelName;
+    /**
      * @var bool
      */
     public $isResolutionRequired = true;

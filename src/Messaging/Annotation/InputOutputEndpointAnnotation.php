@@ -12,6 +12,11 @@ class InputOutputEndpointAnnotation extends EndpointAnnotation
 {
     /**
      * @var string
+     * @Required()
+     */
+    public $inputChannelName;
+    /**
+     * @var string
      */
     public $outputChannelName = '';
     /**

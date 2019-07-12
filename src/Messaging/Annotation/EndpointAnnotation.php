@@ -16,11 +16,6 @@ abstract class EndpointAnnotation
      */
     public $endpointId;
     /**
-     * @var string
-     * @Required()
-     */
-    public $inputChannelName;
-    /**
      * @var Poller|null
      */
     public $poller;

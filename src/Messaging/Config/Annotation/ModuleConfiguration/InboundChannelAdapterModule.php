@@ -35,7 +35,7 @@ class InboundChannelAdapterModule extends ConsumerRegisterConfiguration
         /** @var InboundChannelAdapter $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
-        return InboundChannelAdapterBuilder::create($annotation->inputChannelName, $annotationRegistration->getReferenceName(), $annotationRegistration->getMethodName())
+        return InboundChannelAdapterBuilder::create($annotation->requestChannelName, $annotationRegistration->getReferenceName(), $annotationRegistration->getMethodName())
                     ->withEndpointId($annotation->endpointId)
                     ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
     }

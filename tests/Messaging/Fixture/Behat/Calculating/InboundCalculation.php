@@ -20,7 +20,7 @@ class InboundCalculation
      * @return int
      * @InboundChannelAdapter(
      *     endpointId="inboundCalculator",
-     *     inputChannelName="calculateForInbound",
+     *     requestChannelName="calculateForInbound",
      *     poller=@Poller(
      *          handledMessageLimit=1
      *     )

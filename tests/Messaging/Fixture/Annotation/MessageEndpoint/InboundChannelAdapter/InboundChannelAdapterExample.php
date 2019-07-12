@@ -18,7 +18,7 @@ class InboundChannelAdapterExample
      * @return array
      * @InboundChannelAdapter(
      *     endpointId="run",
-     *     inputChannelName="requestChannel",
+     *     requestChannelName="requestChannel",
      *     requiredInterceptorNames={"some"}
      * )
      */

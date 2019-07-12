@@ -13,6 +13,11 @@ namespace SimplyCodedSoftware\Messaging\Annotation;
 class InboundChannelAdapter extends EndpointAnnotation
 {
     /**
+     * @var string
+     * @Required()
+     */
+    public $requestChannelName;
+    /**
      * Required interceptor reference names
      *
      * @var array

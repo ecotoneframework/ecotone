@@ -12,7 +12,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * Class InMemoryAggregateRepository
  * @package SimplyCodedSoftware\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @\SimplyCodedSoftware\DomainModel\Annotation\AggregateRepository(referenceName="aggregateRepository")
+ * @\SimplyCodedSoftware\DomainModel\Annotation\AggregateRepository()
  */
 class InMemoryAggregateRepository implements AggregateRepository
 {

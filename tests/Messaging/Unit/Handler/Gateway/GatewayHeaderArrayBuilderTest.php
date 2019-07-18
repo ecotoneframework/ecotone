@@ -2,8 +2,8 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderArrayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderArrayConverter;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersConverter;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
@@ -23,7 +23,7 @@ class GatewayHeaderArrayBuilderTest extends MessagingTest
      */
     public function test_evaluating_gateway_parameter()
     {
-        $converter = GatewayHeaderArrayBuilder::create("test")
+        $converter = GatewayHeadersBuilder::create("test")
             ->build(InMemoryReferenceSearchService::createEmpty());
 
         $this->assertEquals(
@@ -43,7 +43,7 @@ class GatewayHeaderArrayBuilderTest extends MessagingTest
 
     public function test_throwing_exception_if_passed_argument_is_not_array()
     {
-        $converter = GatewayHeaderArrayBuilder::create("test")
+        $converter = GatewayHeadersBuilder::create("test")
             ->build(InMemoryReferenceSearchService::createEmpty());
 
         $this->expectException(InvalidArgumentException::class);

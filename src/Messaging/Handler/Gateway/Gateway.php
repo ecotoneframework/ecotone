@@ -7,10 +7,9 @@ use Ramsey\Uuid\Uuid;
 use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
 use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
 use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
@@ -18,15 +17,11 @@ use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuild
 use SimplyCodedSoftware\Messaging\Message;
 use SimplyCodedSoftware\Messaging\MessageChannel;
 use SimplyCodedSoftware\Messaging\MessageConverter\MessageConverter;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
+use SimplyCodedSoftware\Messaging\MessageHandler;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use SimplyCodedSoftware\Messaging\Transaction\Transaction;
-use SimplyCodedSoftware\Messaging\Transaction\TransactionFactory;
+use Throwable;
 
 /**
  * Class GatewayProxy
@@ -84,6 +79,10 @@ class Gateway
      * @var iterable|object[]
      */
     private $endpointAnnotations;
+    /**
+     * @var ChannelResolver
+     */
+    private $channelResolver;
 
     /**
      * GatewayProxy constructor.
@@ -95,18 +94,18 @@ class Gateway
      * @param MessageChannel|null $errorChannel
      * @param int $replyMilliSecondsTimeout
      * @param ReferenceSearchService $referenceSearchService
+     * @param ChannelResolver $channelResolver
      * @param AroundInterceptorReference[] $aroundInterceptors
      * @param InputOutputMessageHandlerBuilder[] $sortedBeforeInterceptors
      * @param InputOutputMessageHandlerBuilder[] $sortedAfterInterceptors
      * @param object[] $endpointAnnotations
-     * @throws MessagingException
      */
     public function __construct(
         InterfaceToCall $interfaceToCall, MethodCallToMessageConverter $methodCallToMessageConverter,
         array $messageConverters, MessageChannel $requestChannel,
         ?PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $replyMilliSecondsTimeout,
-        ReferenceSearchService $referenceSearchService, iterable $aroundInterceptors,
-        iterable $sortedBeforeInterceptors, iterable $sortedAfterInterceptors, iterable $endpointAnnotations
+        ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver,
+        iterable $aroundInterceptors, iterable $sortedBeforeInterceptors, iterable $sortedAfterInterceptors, iterable $endpointAnnotations
     )
     {
         $this->methodCallToMessageConverter = $methodCallToMessageConverter;
@@ -121,13 +120,14 @@ class Gateway
         $this->endpointAnnotations = $endpointAnnotations;
         $this->sortedBeforeInterceptors = $sortedBeforeInterceptors;
         $this->sortedAfterInterceptors = $sortedAfterInterceptors;
+        $this->channelResolver = $channelResolver;
     }
 
     /**
      * @param array|MethodArgument[] $methodArgumentValues
      * @return mixed
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \Throwable
+     * @throws MessagingException
+     * @throws Throwable
      */
     public function execute(array $methodArgumentValues)
     {
@@ -170,7 +170,7 @@ class Gateway
                 ->build();
 
             $messageHandler = $this->buildHandler($internalReplyBridge);
-        }catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             throw GatewayMessageConversionException::createFromPreviousException("Can't convert parameters to message in gateway. \n" . $exception->getMessage(), $exception);
         }
 
@@ -189,7 +189,7 @@ class Gateway
 
     /**
      * @param QueueChannel $internalReplyBridge
-     * @return ServiceActivatorBuilder|\SimplyCodedSoftware\Messaging\MessageHandler
+     * @return ServiceActivatorBuilder|MessageHandler
      * @throws MessagingException
      */
     private function buildHandler(QueueChannel $internalReplyBridge)
@@ -223,7 +223,7 @@ class Gateway
         return $chainHandler
             ->withOutputMessageChannel($internalReplyBridgeName)
             ->build(
-                InMemoryChannelResolver::createFromAssociativeArray([$internalReplyBridgeName => $internalReplyBridge]),
+                InMemoryChannelResolver::createWithChannelResolver($this->channelResolver, [$internalReplyBridgeName => $internalReplyBridge]),
                 $this->referenceSearchService
             );
     }

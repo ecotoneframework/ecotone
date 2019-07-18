@@ -18,7 +18,7 @@ use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderArrayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
@@ -70,7 +70,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                 } else if ($parameterToMessage instanceof Header) {
                     $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
                 } else if ($parameterToMessage instanceof Headers) {
-                    $parameterConverters[] = GatewayHeaderArrayBuilder::create($parameterToMessage->parameterName);
+                    $parameterConverters[] = GatewayHeadersBuilder::create($parameterToMessage->parameterName);
                 } else {
                     $converterClass = get_class($parameterToMessage);
                     throw new \InvalidArgumentException("Not known converters for gateway {$converterClass} for {$annotationRegistration->getClassName()}::{$annotationRegistration->getMethodName()}. Have you registered converter starting with name @Gateway(...) e.g. @GatewayHeader?");

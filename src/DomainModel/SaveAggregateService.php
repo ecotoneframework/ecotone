@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\DomainModel;
 
 use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
+use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventBus;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyPath;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
@@ -24,16 +25,28 @@ class SaveAggregateService
      * @var PropertyReaderAccessor
      */
     private $propertyReaderAccessor;
+    /**
+     * @var LazyEventBus
+     */
+    private $lazyEventBus;
+    /**
+     * @var string|null
+     */
+    private $eventMethod;
 
     /**
      * SaveAggregateService constructor.
      * @param AggregateRepository $aggregateRepository
      * @param PropertyReaderAccessor $propertyReaderAccessor
+     * @param LazyEventBus $lazyEventBus
+     * @param string|null $eventMethod
      */
-    public function __construct(AggregateRepository $aggregateRepository, PropertyReaderAccessor $propertyReaderAccessor)
+    public function __construct(AggregateRepository $aggregateRepository, PropertyReaderAccessor $propertyReaderAccessor, LazyEventBus $lazyEventBus, ?string $eventMethod)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
+        $this->lazyEventBus = $lazyEventBus;
+        $this->eventMethod = $eventMethod;
     }
 
     /**
@@ -64,6 +77,13 @@ class SaveAggregateService
         }
 
         $this->aggregateRepository->save($message->getHeaders()->get(AggregateMessage::CALLING_MESSAGE), $aggregateIds, $aggregate);
+
+        if ($this->eventMethod) {
+            $events = call_user_func([$aggregate, $this->eventMethod]);
+            foreach ($events as $event) {
+                $this->lazyEventBus->sendWithMetadata($event, $message->getHeaders()->headers());
+            }
+        }
 
         return $message;
     }

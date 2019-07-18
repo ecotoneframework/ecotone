@@ -98,7 +98,6 @@ class AggregateMessageRouterModule implements AnnotationModule
             $eventHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
 
-
         return new self(
             BusRouterBuilder::createCommandBusByObject($commandHandlers),
             BusRouterBuilder::createCommandBusByName($commandHandlers),

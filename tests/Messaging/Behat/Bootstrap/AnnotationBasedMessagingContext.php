@@ -8,13 +8,30 @@ use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
 use PHPUnit\Framework\Assert;
+use SimplyCodedSoftware\DomainModel\CommandBus;
+use SimplyCodedSoftware\DomainModel\EventBus;
+use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventBus;
+use SimplyCodedSoftware\DomainModel\QueryBus;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
 use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
+use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\PollableChannel;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\OrderNotificator;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\ProxyEventBusFromMessagingSystem;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\ProxyLazyEventBusFromMessagingSystem;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\Renter\AppointmentRepository;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\Renter\CreateAppointmentCommand;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\Renter\RentCalendar;
+use Test\SimplyCodedSoftware\DomainModel\Fixture\TestingLazyEventBus;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\Calculator;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\InboundCalculation;
@@ -25,7 +42,7 @@ class AnnotationBasedMessagingContext implements Context
     /**
      * @var ConfiguredMessagingSystem
      */
-    private $messagingSystem;
+    private static $messagingSystem;
 
     /**
      * @Given I active messaging for namespace :namespace
@@ -36,21 +53,40 @@ class AnnotationBasedMessagingContext implements Context
      */
     public function iActiveMessagingForNamespace(string $namespace)
     {
-        $objects = [
-            InboundCalculation::class => new InboundCalculation(),
-            ResultService::class => new ResultService(),
-            CalculatorInterceptor::class => new CalculatorInterceptor()
-        ];
+        switch ($namespace) {
+            case "Test\SimplyCodedSoftware\DomainModel\Fixture\Renter": {
+                $objects = [
+                      RentCalendar::class => new RentCalendar(),
+                      AppointmentRepository::class => AppointmentRepository::createEmpty()
+                ];
+                break;
+            }
+            case "Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate": {
+                $objects = [
+                    OrderNotificator::class => new OrderNotificator(),
+                    InMemoryAggregateRepository::class => InMemoryAggregateRepository::createEmpty()
+                ];
+                break;
+            }
+            default: {
+                $objects = [
+                    InboundCalculation::class => new InboundCalculation(),
+                    ResultService::class => new ResultService(),
+                    CalculatorInterceptor::class => new CalculatorInterceptor()
+                ];
+                break;
+            }
+        }
 
         $messagingConfiguration = MessagingSystemConfiguration::createWithCachedReferenceObjectsForNamespaces(
             __DIR__ . "/../../../../",
-            ["SimplyCodedSoftware\Messaging", $namespace],
+            ["SimplyCodedSoftware", $namespace],
             InMemoryReferenceTypeFromNameResolver::createFromObjects($objects),
             "test",
             true
         );
 
-        $this->messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith($objects));
+        self::$messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith($objects));
     }
 
     /**
@@ -60,7 +96,7 @@ class AnnotationBasedMessagingContext implements Context
     public function iCalculateForUsingGateway(int $amount)
     {
         /** @var Calculator $gateway */
-        $gateway = $this->messagingSystem->getGatewayByName(Calculator::class);
+        $gateway = self::$messagingSystem->getGatewayByName(Calculator::class);
 
         $gateway->calculate($amount);
     }
@@ -73,7 +109,7 @@ class AnnotationBasedMessagingContext implements Context
     public function theResultShouldBe(int $amount)
     {
         /** @var PollableChannel $resultChannel */
-        $resultChannel = $this->messagingSystem->getMessageChannelByName("resultChannel");
+        $resultChannel = self::$messagingSystem->getMessageChannelByName("resultChannel");
 
         $message = $resultChannel->receive();
         Assert::assertNotNull($message, "Result was never received");
@@ -88,7 +124,7 @@ class AnnotationBasedMessagingContext implements Context
     public function iCalculateForUsingGatewayThenResultShouldBe(int $amount, int $result)
     {
         /** @var Calculator $gateway */
-        $gateway = $this->messagingSystem->getGatewayByName(Calculator::class);
+        $gateway = self::$messagingSystem->getGatewayByName(Calculator::class);
 
         Assert::assertEquals($result, $gateway->calculate($amount));
     }
@@ -98,7 +134,7 @@ class AnnotationBasedMessagingContext implements Context
      */
     public function iCalculateUsingInboundChannelAdapter()
     {
-        $this->messagingSystem->runSeparatelyRunningConsumerBy("inboundCalculator");
+        self::$messagingSystem->runSeparatelyRunningConsumerBy("inboundCalculator");
     }
 
     /**
@@ -110,8 +146,43 @@ class AnnotationBasedMessagingContext implements Context
     public function resultShouldBeInChannel($result, string $channelName)
     {
         /** @var PollableChannel $messageChannel */
-        $messageChannel = $this->messagingSystem->getMessageChannelByName($channelName);
+        $messageChannel = self::$messagingSystem->getMessageChannelByName($channelName);
 
         Assert::assertEquals($result, $messageChannel->receive()->getPayload());
+    }
+
+    /**
+     * @When I rent appointment with id :appointmentId and duration :duration
+     * @param int $appointmentId
+     * @param int $duration
+     */
+    public function iRentAppointmentWithIdAndDuration(int $appointmentId, int $duration)
+    {
+        self::getCommandBus()->send(new CreateAppointmentCommand($appointmentId, $duration));
+    }
+
+    /**
+     * @Then calendar should contain event with appointment id :appointmentId
+     * @param int $appointmentId
+     */
+    public function calendarShouldContainEventWithAppointmentId(int $appointmentId)
+    {
+        Assert::assertTrue(self::getQueryBus()->convertAndSend("doesCalendarContainAppointments", MediaType::APPLICATION_X_PHP_OBJECT, $appointmentId));
+    }
+
+    /**
+     * @return CommandBus
+     */
+    public static function getCommandBus(): CommandBus
+    {
+        return self::$messagingSystem->getGatewayByName(CommandBus::class);
+    }
+
+    /**
+     * @return QueryBus
+     */
+    public static function getQueryBus(): QueryBus
+    {
+        return self::$messagingSystem->getGatewayByName(QueryBus::class);
     }
 }

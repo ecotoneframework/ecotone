@@ -3,6 +3,7 @@
 namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
 
 use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
+use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 
 /**
@@ -26,9 +27,11 @@ class OrderNotificator
     }
 
     /**
+     * @param array $query
      * @return array
+     * @QueryHandler(inputChannelName="getOrderNotifications")
      */
-    public function getNotifications() : array
+    public function getNotifications(array $query) : array
     {
         return $this->notifications;
     }

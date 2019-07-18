@@ -9,7 +9,7 @@ use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderArrayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
@@ -52,7 +52,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
                             GatewayPayloadExpressionBuilder::create("bookNumber", "upper(value)"),
                             GatewayHeaderBuilder::create("rentTill", "rentDate"),
                             GatewayHeaderBuilder::create("cost", "cost"),
-                            GatewayHeaderArrayBuilder::create("data")
+                            GatewayHeadersBuilder::create("data")
                         ])
                 ),
             $messagingSystemConfiguration

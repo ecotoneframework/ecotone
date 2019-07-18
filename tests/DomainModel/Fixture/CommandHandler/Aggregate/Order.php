@@ -4,6 +4,7 @@ namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
 
 use SimplyCodedSoftware\DomainModel\Annotation\InitializeAggregateOnNotFound;
 use SimplyCodedSoftware\DomainModel\EventBus;
+use SimplyCodedSoftware\DomainModel\WithAggregateEvents;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptors;
 use SimplyCodedSoftware\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
@@ -20,6 +21,8 @@ use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
  */
 class Order implements VersionAggregate
 {
+    use WithAggregateEvents;
+
     /**
      * @var string
      * @AggregateIdentifier()
@@ -53,31 +56,29 @@ class Order implements VersionAggregate
         $this->amount = $createOrderCommand->getAmount();
         $this->shippingAddress = $createOrderCommand->getShippingAddress();
 
+        $this->record(new Notification());
         $this->increaseAggregateVersion();
     }
 
     /**
      * @param CreateOrderCommand $command
-     * @param EventBus           $eventBus
      *
      * @return Order
      * @CommandHandler(
      *     redirectToOnAlreadyExists="increaseAmount"
      * )
      */
-    public static function createWith(CreateOrderCommand $command, EventBus $eventBus) : self
+    public static function createWith(CreateOrderCommand $command) : self
     {
         $order = new self($command);
 
-        $eventBus->send(new Notification());
         return $order;
     }
 
     /**
      * @param IncreaseAmountCommand $command
-     * @param EventBus $eventBus
      */
-    public function increaseAmount(IncreaseAmountCommand $command, EventBus $eventBus) : void
+    public function increaseAmount(IncreaseAmountCommand $command) : void
     {
         $this->amount += $command->getAmount();
         $this->increaseAggregateVersion();

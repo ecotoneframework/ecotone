@@ -29,7 +29,7 @@ interface QueryBus
      *
      * @Gateway(requestChannel=QueryBus::CHANNEL_NAME_BY_OBJECT)
      */
-    public function send($query);
+    public function send(object $query);
 
     /**
      * Entrypoint for queries, when you access to instance of the command
@@ -47,12 +47,12 @@ interface QueryBus
      *     }
      * )
      */
-    public function sendWithMetadata($query, array $metadata);
+    public function sendWithMetadata(object $query, array $metadata);
 
     /**
      * @param string $name
      * @param string $dataMediaType
-     * @param mixed  $commandData
+     * @param mixed  $data
      *
      * @return mixed
      *
@@ -61,16 +61,16 @@ interface QueryBus
      *     parameterConverters={
      *          @Header(parameterName="name", headerName=QueryBus::CHANNEL_NAME_BY_NAME),
      *          @Header(parameterName="dataMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @Payload(parameterName="commandData")
+     *          @Payload(parameterName="data")
      *     }
      * )
      */
-    public function convertAndSend(string $name, string $dataMediaType, $commandData);
+    public function convertAndSend(string $name, string $dataMediaType, $data);
 
     /**
      * @param string $name
      * @param string $dataMediaType
-     * @param mixed  $commandData
+     * @param mixed  $data
      * @param array  $metadata
      *
      * @return mixed
@@ -81,9 +81,9 @@ interface QueryBus
      *          @Headers(parameterName="metadata"),
      *          @Header(parameterName="name", headerName=QueryBus::CHANNEL_NAME_BY_NAME),
      *          @Header(parameterName="dataMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @Payload(parameterName="commandData")
+     *          @Payload(parameterName="data")
      *     }
      * )
      */
-    public function convertAndSendWithMetadata(string $name, string $dataMediaType, $commandData, array $metadata);
+    public function convertAndSendWithMetadata(string $name, string $dataMediaType, $data, array $metadata);
 }

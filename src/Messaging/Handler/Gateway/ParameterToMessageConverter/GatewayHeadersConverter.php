@@ -12,7 +12,7 @@ use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
  * @package SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class GatewayHeaderArrayConverter implements GatewayParameterConverter
+class GatewayHeadersConverter implements GatewayParameterConverter
 {
     /**
      * @var string

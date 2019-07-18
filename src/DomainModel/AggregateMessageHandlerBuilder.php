@@ -5,9 +5,14 @@ namespace SimplyCodedSoftware\DomainModel;
 use Doctrine\Common\Annotations\AnnotationException;
 use ReflectionClass;
 use ReflectionException;
+use SimplyCodedSoftware\DomainModel\Annotation\AggregateEvents;
+use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventBus;
 use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
 use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
@@ -18,6 +23,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundIntercep
 use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
 use SimplyCodedSoftware\Messaging\MessageHandler;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Support\Assert;
@@ -88,6 +94,10 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      * @var ParameterConverterBuilder[]
      */
     private $withFactoryRedirectOnFoundParameterConverters = [];
+    /**
+     * @var string|null
+     */
+    private $aggregateMethodWithEvents;
 
     /**
      * AggregateCallingCommandHandlerBuilder constructor.
@@ -127,9 +137,19 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
 
         $reflectionClass = new ReflectionClass($aggregateClassName);
         $aggregateDefaultIdentifiers = [];
+        $aggregateMethodWithEvents = null;
+
         foreach ($reflectionClass->getProperties() as $property) {
             if (preg_match("*AggregateIdentifier*", $property->getDocComment())) {
                 $aggregateDefaultIdentifiers[$property->getName()] = null;
+            }
+        }
+        foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+            $methodInterface = InterfaceToCall::create($aggregateClassName, $method->getName());
+
+            if ($methodInterface->hasMethodAnnotation(TypeDescriptor::create(AggregateEvents::class))) {
+                $aggregateMethodWithEvents = $method->getName();
+                break;
             }
         }
 
@@ -171,9 +191,12 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             }
         }
 
+
+
         $this->messageIdentifierMapping = $aggregateDefaultIdentifiers;
         $this->expectedVersionPropertyName = $expectedVersionPropertyName;
         $this->interfaceToCall = $interfaceToCall;
+        $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
     }
 
     /**
@@ -305,11 +328,22 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                 )->withPassThroughMessageOnVoidInterface($this->isVoidMethod)
             );
 
+        $lazyEventBus = GatewayProxyBuilder::create("", LazyEventBus::class, "sendWithMetadata", LazyEventBus::CHANNEL_NAME)
+                            ->withParameterConverters([
+                                GatewayPayloadBuilder::create("event"),
+                                GatewayHeadersBuilder::create("metadata")
+                            ])
+                            ->build($referenceSearchService, $channelResolver);
         if ($this->isCommandHandler) {
             $chainCqrsMessageHandler
                 ->chain(
                     ServiceActivatorBuilder::createWithDirectReference(
-                        new SaveAggregateService($this->getAggregateRepository($referenceSearchService), $this->getPropertyReaderAccessor()),
+                        new SaveAggregateService(
+                            $this->getAggregateRepository($referenceSearchService),
+                            $this->getPropertyReaderAccessor(),
+                            $lazyEventBus,
+                            $this->aggregateMethodWithEvents
+                        ),
                         "save"
                     )
                 );

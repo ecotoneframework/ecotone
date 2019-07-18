@@ -7,7 +7,7 @@ use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderArray;
 use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
 use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
 use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderArrayBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodArgumentReplacementException;
@@ -269,7 +269,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxyBuilder->withParameterConverters(
             [
                 GatewayHeaderValueBuilder::create('personId', 1),
-                GatewayHeaderArrayBuilder::create('metadata'),
+                GatewayHeadersBuilder::create('metadata'),
                 GatewayHeaderBuilder::create('content', 'personId')
             ]
         );

@@ -398,6 +398,7 @@ class GatewayProxyBuilder implements GatewayBuilder
             $errorChannel,
             $this->replyMilliSecondsTimeout,
             $referenceSearchService,
+            $channelResolver,
             $aroundInterceptors,
             $this->getSortedInterceptors($this->beforeInterceptors),
             $this->getSortedInterceptors($this->afterInterceptors),

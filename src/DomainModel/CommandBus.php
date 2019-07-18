@@ -2,6 +2,7 @@
 
 namespace SimplyCodedSoftware\DomainModel;
 
+use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventPublishing;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
@@ -28,6 +29,7 @@ interface CommandBus
      * @return mixed
      *
      * @Gateway(requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT)
+     * @LazyEventPublishing()
      */
     public function send($command);
 
@@ -46,6 +48,7 @@ interface CommandBus
      *          @Headers(parameterName="metadata")
      *     }
      * )
+     * @LazyEventPublishing()
      */
     public function sendWithMetadata($command, array $metadata);
 
@@ -63,6 +66,7 @@ interface CommandBus
      *          @Payload(parameterName="commandData")
      *     }
      * )
+     * @LazyEventPublishing()
      */
     public function convertAndSend(string $name, string $dataMediaType, $commandData);
 
@@ -83,6 +87,7 @@ interface CommandBus
      *          @Payload(parameterName="commandData")
      *     }
      * )
+     * @LazyEventPublishing()
      */
     public function convertAndSendWithMetadata(string $name, string $dataMediaType, $commandData, array $metadata);
 }

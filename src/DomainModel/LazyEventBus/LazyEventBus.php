@@ -1,6 +1,7 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
+
+namespace SimplyCodedSoftware\DomainModel\LazyEventBus;
 
 use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
@@ -8,29 +9,17 @@ use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 
 /**
- * Interface EventBus
+ * Interface LazyEventBus
  * @package SimplyCodedSoftware\DomainModel
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */
-interface EventBus
+interface LazyEventBus
 {
-    const CHANNEL_NAME_BY_OBJECT = "ecotone.modelling.bus.event_by_object";
-    const CHANNEL_NAME_BY_NAME   = "ecotone.modelling.bus.event_by_name";
+    const CHANNEL_NAME = "ecotone.modelling.bus.lazy_event";
 
     /**
-     * Entrypoint for events, when you access to instance of the command
-     *
-     * @param object $event instance of command
-     *
-     * @return mixed
-     *
-     * @Gateway(requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT)
-     */
-    public function send(object $event);
-
-    /**
-     * Entrypoint for events, when you access to instance of the command
+     * Send event for lazy publish
      *
      * @param object $event instance of command
      * @param array  $metadata
@@ -38,7 +27,7 @@ interface EventBus
      * @return mixed
      *
      * @Gateway(
-     *     requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT,
+     *     requestChannel=LazyEventBus::CHANNEL_NAME,
      *     parameterConverters={
      *         @Payload(parameterName="event"),
      *         @Headers(parameterName="metadata")

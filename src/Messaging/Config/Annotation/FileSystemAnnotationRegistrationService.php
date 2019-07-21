@@ -125,7 +125,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
 
         foreach ($paths as $path) {
             if (!is_dir($path)) {
-                throw ConfigurationException::create("There is no path: {$path}");
+                continue;
             }
 
             $iterator = new RecursiveIteratorIterator(

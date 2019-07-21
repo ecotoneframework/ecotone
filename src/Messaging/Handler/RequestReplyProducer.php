@@ -62,29 +62,18 @@ class RequestReplyProducer
     }
 
     /**
-     * @param string $outputChannelName
+     * @param string|null $outputChannelName
      * @param MessageProcessor $messageProcessor
      * @param ChannelResolver $channelResolver
      * @param bool $isReplyRequired
      * @return RequestReplyProducer
      * @throws DestinationResolutionException
      */
-    public static function createRequestAndReply(string $outputChannelName, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
+    public static function createRequestAndReply(?string $outputChannelName, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
     {
         $outputChannel = $outputChannelName ? $channelResolver->resolve($outputChannelName) : null;
 
         return new self($outputChannel, $messageProcessor, $channelResolver, $isReplyRequired, self::REQUEST_REPLY_METHOD);
-    }
-
-    /**
-     * @param MessageProcessor $messageProcessor
-     * @param ChannelResolver $channelResolver
-     * @param bool $isReplyRequired
-     * @return RequestReplyProducer
-     */
-    public static function createRequestAndReplyFromHeaders(MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
-    {
-        return new self(null, $messageProcessor, $channelResolver, $isReplyRequired, self::REQUEST_REPLY_METHOD);
     }
 
     /**
@@ -118,7 +107,24 @@ class RequestReplyProducer
         }
 
         if (!is_null($replyData)) {
-            $replyChannel = $this->hasOutputChannel() ? $this->getOutputChannel() : ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $this->channelResolver->resolve($message->getHeaders()->getReplyChannel()) : null);
+            if ($replyData instanceof Message) {
+                $message = $replyData;
+            }
+            $replyChannel = null;
+            $routingSlip = $message->getHeaders()->containsKey(MessageHeaders::ROUTING_SLIP) ? $message->getHeaders()->get(MessageHeaders::ROUTING_SLIP) : "";
+            $routingSlipChannels = explode(",", $routingSlip);
+
+            if ($this->hasOutputChannel()) {
+                $replyChannel = $this->getOutputChannel();
+            }else {
+                if ($routingSlip) {
+                    $replyChannel = $this->channelResolver->resolve(array_shift($routingSlipChannels));
+                }else if ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
+                    $replyChannel = $this->channelResolver->resolve($message->getHeaders()->getReplyChannel());
+                }
+            }
+            $routingSlip = implode(",", $routingSlipChannels);
+
             if (!$replyChannel) {
                 if (!$this->isReplyRequired()) {
                     return;
@@ -129,15 +135,20 @@ class RequestReplyProducer
 
             if ($this->method === self::REQUEST_REPLY_METHOD) {
                 if ($replyData instanceof Message) {
-                    $replyChannel->send($replyData);
-                    return;
+                    $messageBuilder = MessageBuilder::fromMessage($replyData);
+                }else {
+                    $messageBuilder = MessageBuilder::fromMessage($message)
+                        ->setPayload($replyData);
                 }
 
-                $replyChannel->send(
-                    MessageBuilder::fromMessage($message)
-                        ->setPayload($replyData)
-                        ->build()
-                );
+                if (!$routingSlip) {
+                    $messageBuilder = $messageBuilder
+                                        ->removeHeader(MessageHeaders::ROUTING_SLIP);
+                }else {
+                    $messageBuilder = $messageBuilder
+                                        ->setHeader(MessageHeaders::ROUTING_SLIP, $routingSlip);
+                }
+                $replyChannel->send($messageBuilder->build());
             }else {
                 if (!is_iterable($replyData)) {
                     throw MessageDeliveryException::createWithFailedMessage("Can't split message {$message}, payload to split is not iterable in {$this->messageProcessor}", $message);

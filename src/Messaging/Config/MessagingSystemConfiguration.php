@@ -34,7 +34,9 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\InterceptorWit
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
 use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
+use SimplyCodedSoftware\Messaging\MessageHeaders;
 use SimplyCodedSoftware\Messaging\MessagingException;
 use SimplyCodedSoftware\Messaging\Support\Assert;
 
@@ -117,6 +119,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var bool
      */
     private $isLazyConfiguration;
+    /**
+     * @var array
+     */
+    private $asynchronousEndpoints = [];
 
     /**
      * Only one instance at time
@@ -167,6 +173,7 @@ final class MessagingSystemConfiguration implements Configuration
             );
         }
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
+        $this->configureAsynchronousEndpoints();
         $this->configureInterceptors($interfaceToCallRegistry);
         $this->configureDefaultMessageChannels();
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
@@ -555,6 +562,16 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
+    public function registerAsynchronousEndpoint(string $asynchronousChannelName, string $targetEndpointId): Configuration
+    {
+        $this->asynchronousEndpoints[$targetEndpointId] = $asynchronousChannelName;
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder): Configuration
     {
         $this->channelInterceptorBuilders[$channelInterceptorBuilder->getPrecedence()][] = $channelInterceptorBuilder;
@@ -691,6 +708,8 @@ final class MessagingSystemConfiguration implements Configuration
         return $this;
     }
 
+
+
     /**
      * Initialize messaging system from current configuration
      *
@@ -701,6 +720,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService): ConfiguredMessagingSystem
     {
+        $this->configureAsynchronousEndpoints();
         $this->configureDefaultMessageChannels();
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall);
         $this->configureInterceptors($interfaceToCallRegistry);
@@ -771,5 +791,39 @@ final class MessagingSystemConfiguration implements Configuration
                 }
             }
         }
+    }
+
+    /**
+     * @return void
+     */
+    private function configureAsynchronousEndpoints() : void
+    {
+        $messageHandlerBuilders = $this->messageHandlerBuilders;
+        $asynchronousChannels = [];
+
+        foreach ($this->asynchronousEndpoints as $targetEndpointId => $asynchronousMessageChannel) {
+            $asynchronousChannels[] = $asynchronousMessageChannel;
+            foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+                if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
+                    $targetChannelName = $messageHandlerBuilder->getInputMessageChannelName() . ".target";
+                    $messageHandlerBuilders[] = TransformerBuilder::createHeaderEnricher([
+                        MessageHeaders::ROUTING_SLIP => $targetChannelName
+                    ])
+                        ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
+                        ->withOutputMessageChannel($asynchronousMessageChannel);
+                    $messageHandlerBuilder->withInputChannelName($targetChannelName);
+                    break;
+                }
+            }
+        }
+
+        foreach (array_unique($asynchronousChannels) as $asychronousChannel) {
+            $messageHandlerBuilders[] = TransformerBuilder::createHeaderEnricher([])
+                ->withEndpointId($asychronousChannel)
+                ->withInputChannelName($asychronousChannel);
+        }
+
+        $this->messageHandlerBuilders = $messageHandlerBuilders;
+        $this->asynchronousEndpoints = [];
     }
 }

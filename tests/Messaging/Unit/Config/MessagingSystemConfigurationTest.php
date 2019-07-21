@@ -35,7 +35,9 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodIntercep
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use SimplyCodedSoftware\Messaging\MessageChannel;
 use SimplyCodedSoftware\Messaging\MessagingException;
+use SimplyCodedSoftware\Messaging\PollableChannel;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use SimplyCodedSoftware\Messaging\Transaction\Transactional;
@@ -244,6 +246,41 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ["reference1", "reference2", "reference3"],
             $messagingSystem->getRequiredReferences()
         );
+    }
+
+    public function test_registering_asynchronous_endpoint()
+    {
+        $calculatingService = CalculatingService::create(1);
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference($calculatingService, "result")
+                    ->withEndpointId("endpointId")
+                    ->withInputChannelName("inputChannel")
+            )
+            ->registerAsynchronousEndpoint("asyncChannel", "endpointId")
+            ->registerPollingMetadata(PollingMetadata::create("asyncChannel")->setExecutionAmountLimit(1))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("asyncChannel"))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $replyChannel = QueueChannel::create();
+        $message = MessageBuilder::withPayload(2)
+                        ->setReplyChannel($replyChannel)
+                        ->build();
+
+        /** @var MessageChannel $channel */
+        $channel = $configuredMessagingSystem->getMessageChannelByName("inputChannel");
+
+        $channel->send($message);
+        $this->assertNull($calculatingService->getLastResult());
+        $configuredMessagingSystem->runSeparatelyRunningConsumerBy("asyncChannel");
+        $this->assertEquals(2, $calculatingService->getLastResult());
+    }
+
+    public function test_registering_asynchronous_endpoint_with_channel_interceptor()
+    {
+
     }
 
     public function test_registering_reference_from_endpoint_annotation()

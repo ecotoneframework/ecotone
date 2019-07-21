@@ -15,6 +15,8 @@ class CalculatingService
      */
     private $secondValueForMathOperations;
 
+    private $lastResult;
+
     /**
      * @param int $secondValueForMathOperations
      * @return CalculatingService
@@ -29,6 +31,7 @@ class CalculatingService
 
     public function result(int $amount) : int
     {
+        $this->lastResult = $amount;
         return $amount;
     }
 
@@ -45,5 +48,13 @@ class CalculatingService
     public function multiply(int $amount) : int
     {
         return $amount * $this->secondValueForMathOperations;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastResult()
+    {
+        return $this->lastResult;
     }
 }

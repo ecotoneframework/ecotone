@@ -38,6 +38,10 @@ class MessageHeaders
      */
     const TIMESTAMP = 'timestamp';
     /**
+     * List of channels comma separated, where to is next endpoint
+     */
+    const ROUTING_SLIP = "routingSlip";
+    /**
      * A channel to which errors will be sent. It must represent a name from registry of a class implementing MessageChannel
      */
     const REPLY_CHANNEL = 'replyChannel';

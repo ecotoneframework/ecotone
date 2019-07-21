@@ -55,6 +55,13 @@ interface Configuration
     public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder) : Configuration;
 
     /**
+     * @param string $asynchronousChannelName
+     * @param string $targetEndpointId
+     * @return Configuration
+     */
+    public function registerAsynchronousEndpoint(string $asynchronousChannelName, string $targetEndpointId) : Configuration;
+
+    /**
      * @param MethodInterceptor $methodInterceptor
      * @return Configuration
      */

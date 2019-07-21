@@ -18,6 +18,7 @@ class PollingMetadata
     const DEFAULT_MEMORY_LIMIT_MEGABYTES = 0;
     const DEFAULT_HANDLED_MESSAGE_LIMIT = 0;
     const DEFAULT_EXECUTION_LIMIT = 0;
+    const DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS = 0;
 
     /**
      * @var string
@@ -55,6 +56,10 @@ class PollingMetadata
      * @var int
      */
     private $maxMessagePerPoll = self::DEFAULT_MAX_MESSAGES_PER_POLL;
+    /**
+     * @var int
+     */
+    private $executionTimeLimitInMilliseconds = self::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS;
     /**
      * @var bool
      */
@@ -179,6 +184,28 @@ class PollingMetadata
 
         return $copy;
     }
+
+    /**
+     * @return int
+     */
+    public function getExecutionTimeLimitInMilliseconds(): int
+    {
+        return $this->executionTimeLimitInMilliseconds;
+    }
+
+    /**
+     * @param int $executionTimeLimitInMilliseconds
+     * @return PollingMetadata
+     */
+    public function setExecutionTimeLimitInMilliseconds(int $executionTimeLimitInMilliseconds): PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->executionTimeLimitInMilliseconds = $executionTimeLimitInMilliseconds;
+
+        return $copy;
+    }
+
+
 
     /**
      * @param int $handledMessageLimit

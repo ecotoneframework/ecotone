@@ -96,6 +96,93 @@ class RequestReplyProducerTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException
+     */
+    public function test_passing_message_to_next_channel_if_defined_in_routing_slip()
+    {
+        $replyData = "some result";
+        $replyChannelName = "reply";
+        $replyChannel = QueueChannel::create();
+        $requestReplyProducer = $this->createRequestReplyProducerWithChannels(
+            FakeReplyMessageProducer::create($replyData),
+            [$replyChannelName => $replyChannel],
+            null
+        );
+
+        $message = MessageBuilder::withPayload('a')
+            ->setHeader(MessageHeaders::ROUTING_SLIP, $replyChannelName)
+            ->build();
+
+        $this->handleReplyWithMessage($message, $requestReplyProducer);
+
+        $this->assertMessages(
+            MessageBuilder::withPayload($replyData)
+                ->build(),
+            $replyChannel->receive()
+        );
+    }
+
+    /**
+     * @throws MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException
+     */
+    public function test_passing_message_to_next_routing_slip()
+    {
+        $replyData = "some result";
+        $replyChannelName = "reply1,reply2";
+        $replyChannel1 = QueueChannel::create();
+        $replyChannel2 = QueueChannel::create();
+        $requestReplyProducer = $this->createRequestReplyProducerWithChannels(
+            FakeReplyMessageProducer::create($replyData),
+            [
+                "reply1" => $replyChannel1,
+                "reply2" => $replyChannel2
+            ],
+            null
+        );
+
+        $message = MessageBuilder::withPayload('a')
+            ->setHeader(MessageHeaders::ROUTING_SLIP, $replyChannelName)
+            ->build();
+
+        $this->handleReplyWithMessage($message, $requestReplyProducer);
+        $message = $replyChannel1->receive();
+        $this->handleReplyWithMessage($message, $requestReplyProducer);
+        $this->assertNotNull($replyChannel2->receive());
+    }
+
+    /**
+     * @throws MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException
+     */
+    public function test_passing_message_to_reply_channel_when_routing_slip_is_finished()
+    {
+        $replyData = "some result";
+        $replyChannelName = "reply1";
+        $replyChannel1 = QueueChannel::create();
+        $replyChannel2 = QueueChannel::create();
+        $requestReplyProducer = $this->createRequestReplyProducerWithChannels(
+            FakeReplyMessageProducer::create($replyData),
+            [
+                "reply1" => $replyChannel1,
+                "replyHeader" => $replyChannel2
+            ],
+            null
+        );
+
+        $message = MessageBuilder::withPayload('a')
+            ->setHeader(MessageHeaders::ROUTING_SLIP, $replyChannelName)
+            ->setReplyChannel($replyChannel2)
+            ->build();
+
+        $this->handleReplyWithMessage($message, $requestReplyProducer);
+        $message = $replyChannel1->receive();
+        $this->handleReplyWithMessage($message, $requestReplyProducer);
+        $this->assertNotNull($replyChannel2->receive());
+    }
+
     public function test_propagating_message_headers()
     {
         $outputChannel = QueueChannel::create();
@@ -196,6 +283,19 @@ class RequestReplyProducerTest extends MessagingTest
         ]) : InMemoryChannelResolver::createEmpty();
 
         return RequestReplyProducer::createRequestAndReply($outputChannelName, $replyMessageProducer, $channelResolver, $requireReply);
+    }
+
+    /**
+     * @param \SimplyCodedSoftware\Messaging\Handler\MessageProcessor $replyMessageProducer
+     * @param array $messageChannels
+     * @param string|null $outputChannelName
+     * @return \SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer
+     * @throws MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException
+     */
+    private function createRequestReplyProducerWithChannels(MessageProcessor $replyMessageProducer, array $messageChannels, ?string $outputChannelName): RequestReplyProducer
+    {
+        return RequestReplyProducer::createRequestAndReply($outputChannelName, $replyMessageProducer, InMemoryChannelResolver::createFromAssociativeArray($messageChannels), false);
     }
 
     /**

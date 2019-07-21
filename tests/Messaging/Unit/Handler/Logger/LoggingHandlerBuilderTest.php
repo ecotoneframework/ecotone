@@ -16,13 +16,14 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\InterceptorCon
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageConverterBuilder;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithLogger\ServiceActivatorWithLoggerExample;
+use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
  * Class LoggingHandlerBuilderTest
  * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class LoggingHandlerBuilderTest extends TestCase
+class LoggingHandlerBuilderTest extends MessagingTest
 {
     public function test_logger_passing_messaging_through()
     {
@@ -47,7 +48,7 @@ class LoggingHandlerBuilderTest extends TestCase
         $message = MessageBuilder::withPayload("some")->build();
         $loggingHandler->handle($message);
 
-        $this->assertEquals(
+        $this->assertMessages(
             $message,
             $queueChannel->receive()
         );

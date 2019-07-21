@@ -52,4 +52,11 @@ class Poller
      * @var int
      */
     public $handledMessageLimit = PollingMetadata::DEFAULT_HANDLED_MESSAGE_LIMIT;
+    /**
+     * (NOT YET IMPLEMENTED)
+     * How long should poller handle messages before stopping
+     *
+     * @var int
+     */
+    public $executionTimeLimitInMilliseconds = PollingMetadata::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS;
 }

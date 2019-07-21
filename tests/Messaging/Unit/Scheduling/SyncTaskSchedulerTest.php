@@ -36,7 +36,6 @@ class SyncTaskSchedulerTest extends TestCase
 
         $trigger = PeriodicTrigger::create(1000, 0);
         $syncTaskExecutor->schedule($taskExecutor, $trigger);
-        $syncTaskExecutor->schedule($taskExecutor, $trigger);
 
         $this->assertEquals(1, $taskExecutor->getCalledTimes(), "Was called too many times");
 

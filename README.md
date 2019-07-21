@@ -1,6 +1,5 @@
 @TODO 
 
-- fix issue with reading annotations from src
 - change namespace to configuration instead of parameter
 - amqp add possibility to define point to point or publish subscribe amqp backend channel
 - define how event handler subscribing should work in context of classes and channel names

@@ -27,7 +27,7 @@ class SyncTaskScheduler implements TaskScheduler
     private function __construct(Clock $clock, TriggerContext $triggerContext)
     {
         $this->clock = $clock;
-        $this->triggerContext = SimpleTriggerContext::createEmpty();
+        $this->triggerContext = $triggerContext;
     }
 
     /**
@@ -60,6 +60,8 @@ class SyncTaskScheduler implements TaskScheduler
         if (!$this->isScheduleAndNextEqual() && $this->isItTimeForNextExecution()) {
             $this->triggerContext = $this->triggerContext->withLastActualExecutionTime($this->triggerContext->lastScheduledTime());
             $taskExecutor->execute();
+        }else {
+            usleep($this->howMuchMicrosecondsTimeToWait());
         }
     }
 
@@ -80,6 +82,16 @@ class SyncTaskScheduler implements TaskScheduler
      */
     private function isItTimeForNextExecution(): bool
     {
-        return ($this->clock->unixTimeInMilliseconds() > $this->triggerContext->lastScheduledTime()) || ($this->clock->unixTimeInMilliseconds() == $this->triggerContext->lastScheduledTime());
+        return $this->clock->unixTimeInMilliseconds() >= $this->triggerContext->lastScheduledTime();
+    }
+
+    /**
+     * @return int
+     */
+    private function howMuchMicrosecondsTimeToWait() : int
+    {
+        $toWait = $this->triggerContext->lastScheduledTime() - $this->clock->unixTimeInMilliseconds();
+
+        return $toWait < 0 ? 0 : $toWait * 1000;
     }
 }

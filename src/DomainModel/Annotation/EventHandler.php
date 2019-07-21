@@ -3,6 +3,7 @@
 namespace SimplyCodedSoftware\DomainModel\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
+use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\InputOutputEndpointAnnotation;
 
 /**
@@ -12,7 +13,7 @@ use SimplyCodedSoftware\Messaging\Annotation\InputOutputEndpointAnnotation;
  * @Annotation
  * @Target({"METHOD"})
  */
-class EventHandler extends InputOutputEndpointAnnotation
+class EventHandler extends EndpointAnnotation
 {
     /**
      * @var array
@@ -34,4 +35,14 @@ class EventHandler extends InputOutputEndpointAnnotation
      * @var string
      */
     public $redirectToOnAlreadyExists = "";
+    /**
+     * @var string
+     */
+    public $outputChannelName = '';
+    /**
+     * Required interceptor reference names
+     *
+     * @var array
+     */
+    public $requiredInterceptorNames = [];
 }

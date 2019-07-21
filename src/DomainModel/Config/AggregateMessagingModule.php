@@ -253,7 +253,7 @@ class AggregateMessagingModule implements AnnotationModule
         /** @var CommandHandler|QueryHandler $methodAnnotation */
         $methodAnnotation = $registration->getAnnotationForMethod();
 
-        return $methodAnnotation->inputChannelName ? $methodAnnotation->inputChannelName : self::getMessageClassFor($registration);
+        return property_exists($methodAnnotation, "inputChannelName") && $methodAnnotation->inputChannelName ? $methodAnnotation->inputChannelName : self::getMessageClassFor($registration);
     }
 
     /**

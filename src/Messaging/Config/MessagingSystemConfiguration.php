@@ -80,6 +80,10 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @var MethodInterceptor[]
      */
+    private $beforeSendInterceptors = [];
+    /**
+     * @var MethodInterceptor[]
+     */
     private $beforeCallMethodInterceptors = [];
     /**
      * @var AroundInterceptorReference[]
@@ -438,6 +442,28 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws ConfigurationException
      * @throws MessagingException
      */
+    public function registerBeforeSendInterceptor(MethodInterceptor $methodInterceptor): Configuration
+    {
+        $this->checkIfInterceptorIsCorrect($methodInterceptor);
+
+        $interceptingObject = $methodInterceptor->getInterceptingObject();
+        if ($interceptingObject instanceof ServiceActivatorBuilder) {
+            $interceptingObject->withPassThroughMessageOnVoidInterface(true);
+        }
+
+        $this->beforeSendInterceptors[] = $methodInterceptor;
+        $this->beforeSendInterceptors = $this->orderMethodInterceptors($this->beforeSendInterceptors);
+        $this->requireReferences($methodInterceptor->getMessageHandler()->getRequiredReferenceNames());
+
+        return $this;
+    }
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return Configuration
+     * @throws ConfigurationException
+     * @throws MessagingException
+     */
     public function registerBeforeMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration
     {
         $this->checkIfInterceptorIsCorrect($methodInterceptor);
@@ -531,7 +557,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder): Configuration
     {
-        $this->channelInterceptorBuilders[$channelInterceptorBuilder->getImportanceOrder()][] = $channelInterceptorBuilder;
+        $this->channelInterceptorBuilders[$channelInterceptorBuilder->getPrecedence()][] = $channelInterceptorBuilder;
         $this->requireReferences($channelInterceptorBuilder->getRequiredReferenceNames());
 
         return $this;
@@ -697,6 +723,7 @@ final class MessagingSystemConfiguration implements Configuration
         arsort($channelInterceptorsByImportance);
         $channelInterceptorsByChannelName = [];
         foreach ($channelInterceptorsByImportance as $channelInterceptors) {
+            /** @var ChannelInterceptorBuilder $channelInterceptor */
             foreach ($channelInterceptors as $channelInterceptor) {
                 $channelInterceptorsByChannelName[$channelInterceptor->relatedChannelName()][] = $channelInterceptor;
             }

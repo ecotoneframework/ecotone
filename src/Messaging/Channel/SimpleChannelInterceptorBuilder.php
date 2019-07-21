@@ -15,7 +15,7 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
     /**
      * @var int
      */
-    private $importanceOrder;
+    private $precedence;
     /**
      * @var string
      */
@@ -27,13 +27,13 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
 
     /**
      * SimpleChannelInterceptorBuilder constructor.
-     * @param int $orderNumber
+     * @param int $precedence
      * @param string $channelName
      * @param string $referenceName
      */
-    private function __construct(int $orderNumber, string $channelName, string $referenceName)
+    private function __construct(int $precedence, string $channelName, string $referenceName)
     {
-        $this->importanceOrder = $orderNumber;
+        $this->precedence = $precedence;
         $this->channelName = $channelName;
         $this->referenceName = $referenceName;
     }
@@ -57,12 +57,12 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
     }
 
     /**
-     * @param int $importance
+     * @param int $precedence
      * @return SimpleChannelInterceptorBuilder
      */
-    public function withImportance(int $importance) : self
+    public function withPrecedence(int $precedence) : self
     {
-        $this->importanceOrder = $importance;
+        $this->precedence = $precedence;
 
         return $this;
     }
@@ -70,9 +70,9 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
     /**
      * @inheritDoc
      */
-    public function getImportanceOrder(): int
+    public function getPrecedence(): int
     {
-        return $this->importanceOrder;
+        return $this->precedence;
     }
 
     /**

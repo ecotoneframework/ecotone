@@ -24,7 +24,7 @@ interface ChannelInterceptorBuilder
     /**
      * @return int
      */
-    public function getImportanceOrder() : int;
+    public function getPrecedence() : int;
 
     /**
      * @param ReferenceSearchService $referenceSearchService

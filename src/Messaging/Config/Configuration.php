@@ -58,6 +58,12 @@ interface Configuration
      * @param MethodInterceptor $methodInterceptor
      * @return Configuration
      */
+    public function registerBeforeSendInterceptor(MethodInterceptor $methodInterceptor): Configuration;
+
+    /**
+     * @param MethodInterceptor $methodInterceptor
+     * @return Configuration
+     */
     public function registerBeforeMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
 
     /**

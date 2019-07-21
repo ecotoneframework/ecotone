@@ -342,8 +342,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $referenceNameFirstToCall = "interceptor-2";
         $messagingSystemConfiguration
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($messageChannelName))
-            ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create($messageChannelName, $referenceNameSecondToCall)->withImportance(1))
-            ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create($messageChannelName, $referenceNameFirstToCall)->withImportance(2));
+            ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create($messageChannelName, $referenceNameSecondToCall)->withPrecedence(1))
+            ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create($messageChannelName, $referenceNameFirstToCall)->withPrecedence(2));
 
         $channelInterceptorSecondToCall = $this->createMock(ChannelInterceptor::class);
         $channelInterceptorFirstToCall = $this->createMock(ChannelInterceptor::class);

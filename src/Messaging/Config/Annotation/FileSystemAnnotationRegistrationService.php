@@ -4,10 +4,19 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Config\Annotation;
 
 use Doctrine\Common\Annotations\Reader;
+use InvalidArgumentException;
+use function json_decode;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionProperty;
 use SimplyCodedSoftware\Messaging\Annotation\Environment;
 use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
 use SimplyCodedSoftware\Messaging\Handler\TypeResolver;
+use SimplyCodedSoftware\Messaging\MessagingException;
+use SplFileInfo;
 
 /**
  * Class FileSystemAnnotationRegistrationService
@@ -50,7 +59,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      * @param string $environmentName
      * @param bool $loadSrc
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function __construct(Reader $annotationReader, string $rootProjectDir, array $namespaces, string $environmentName, bool $loadSrc)
     {
@@ -87,60 +96,143 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     }
 
     /**
-     * @inheritDoc
+     * @param string $rootProjectDir
+     * @param array $namespaces
+     * @param bool $loadSrc
+     * @throws ConfigurationException
+     * @throws MessagingException
      */
-    public function findRegistrationsFor(string $classAnnotationName, string $methodAnnotationClassName): array
+    private function init(string $rootProjectDir, array $namespaces, bool $loadSrc)
     {
-        $registrations = [];
-        foreach ($this->getAllClassesWithAnnotation($classAnnotationName) as $className) {
-            foreach (get_class_methods($className) as $method) {
-                if ($this->isMethodBannedFromCurrentEnvironment($className, $method)) {
-                    continue;
+        $classes = [];
+        $composerPath = $rootProjectDir . "/composer.json";
+        if ($loadSrc && !file_exists($composerPath)) {
+            throw new InvalidArgumentException("Can't load src, composer.json not found in {$composerPath}");
+        }
+        if ($loadSrc) {
+            $composerJsonDecoded = json_decode(file_get_contents($composerPath), true);
+
+            $autoload = $composerJsonDecoded['autoload'];
+
+            if (isset($autoload['autoload'])) {
+                if (isset($autoload['autoload']['psr-4'])) {
+                    foreach ($autoload['autoload']['psr-4'] as $autoloadNamespace => $path) {
+                        if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
+                            $namespaces[] = $autoloadNamespace;
+                        }
+                    }
                 }
-
-                $methodAnnotations = $this->getCachedMethodAnnotations($className, $method);
-                foreach ($methodAnnotations as $methodAnnotation) {
-                    if (get_class($methodAnnotation) === $methodAnnotationClassName || $methodAnnotation instanceof $methodAnnotationClassName) {
-                        $annotationRegistration = AnnotationRegistration::create(
-                            $this->getAnnotationForClass($className, $classAnnotationName),
-                            $methodAnnotation,
-                            $className,
-                            $method
-                        );
-
-                        $registrations[] = $annotationRegistration;
+                if (isset($autoload['autolaod']['psr-0'])) {
+                    foreach ($autoload['autoload']['psr-0'] as $autoloadNamespace => $path) {
+                        if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
+                            $namespaces[] = $autoloadNamespace;
+                        }
                     }
                 }
             }
         }
 
-        usort($registrations, function (AnnotationRegistration $annotationRegistration, AnnotationRegistration $annotationRegistrationToCheck){
-            if ($annotationRegistration->getClassName() == $annotationRegistrationToCheck->getClassName()) {
-                return 0;
+        $paths = $this->getPathsToSearchIn($rootProjectDir, $namespaces);
+
+        foreach ($paths as $path) {
+            if (!is_dir($path)) {
+                throw ConfigurationException::create("There is no path: {$path}");
             }
 
-            return $annotationRegistration->getClassName() > $annotationRegistrationToCheck->getClassName();
-        });
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($path),
+                RecursiveIteratorIterator::LEAVES_ONLY
+            );
 
-        return $registrations;
+            /** @var SplFileInfo $file */
+            foreach ($iterator as $file) {
+                $fileName = $file->getBasename(self::FILE_EXTENSION);
+
+                if ($this->isDirectory($fileName, $file)) {
+                    continue;
+                }
+                if ($this->isPHPFile($file)) {
+                    continue;
+                }
+
+                $file = $file->openFile();
+                while (!$file->eof()) {
+                    $line = $file->current();
+                    if ($line == false) {
+                        break;
+                    }
+
+                    if (preg_match_all("#namespace[\s]*([^\n\s\(\)\[\]\{\}\$]*);#", $line, $results)) {
+                        $namespace = isset($results[1][0]) ? trim($results[1][0]) : "";
+                        $namespace = trim($namespace);
+
+//                        Add all in resolved paths
+                        if ($this->isInAvailableNamespaces($namespaces, $namespace)) {
+                            $classes[] = trim($namespace) . '\\' . $fileName;
+                            break;
+                        }
+                    }
+
+                    $file->next();
+                }
+            }
+        }
+
+        $this->registeredClasses = array_unique($classes);
     }
 
     /**
-     * @inheritDoc
+     * @param string $rootProjectDir
+     * @param array $namespaces
+     * @return array
      */
-    public function getAnnotationsForMethod(string $className, string $methodName): iterable
+    private function getPathsToSearchIn(string $rootProjectDir, array $namespaces): array
     {
-        return $this->getCachedMethodAnnotations($className, $methodName);
+        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+        $paths = [];
+
+        $autoloadPsr4 = require($rootProjectDir . '/vendor/composer/autoload_psr4.php');
+        $autoloadPsr0 = require($rootProjectDir . '/vendor/composer/autoload_namespaces.php');
+        $paths = array_merge($paths, $getUsedPathsFromAutoload->getFor($namespaces, $autoloadPsr4, true));
+        $paths = array_merge($paths, $getUsedPathsFromAutoload->getFor($namespaces, $autoloadPsr0, false));
+
+        return array_unique($paths);
     }
 
     /**
-     * @inheritDoc
+     * @param $fileName
+     * @param $file
+     * @return bool
      */
-    public function getAnnotationsForProperty(string $className, string $propertyName): iterable
+    private function isDirectory($fileName, SplFileInfo $file): bool
     {
-        $reflectionProperty = new \ReflectionProperty($className, $propertyName);
+        return $fileName == $file->getBasename();
+    }
 
-        return $this->annotationReader->getPropertyAnnotations($reflectionProperty);
+    /**
+     * @param $file
+     * @return bool
+     */
+    private function isPHPFile(SplFileInfo $file): bool
+    {
+        return $file->getFileInfo()->getExtension() == self::FILE_EXTENSION;
+    }
+
+    /**
+     * @param array $namespaces
+     * @param $namespace
+     * @return bool
+     */
+    private function isInAvailableNamespaces(array $namespaces, $namespace): bool
+    {
+        foreach ($namespaces as $namespaceToUse) {
+            $namespaceToUse = trim($namespaceToUse);
+            if (strpos($namespace, trim($namespaceToUse)) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -189,23 +281,40 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     }
 
     /**
+     * @inheritDoc
+     */
+    private function getCachedAnnotationsForClass(string $className): iterable
+    {
+        if (isset($this->cachedClassAnnotations[$className])) {
+            return $this->cachedClassAnnotations[$className];
+        }
+
+
+        $reflectionClass = new ReflectionClass($className);
+        $classAnnotations = $this->annotationReader->getClassAnnotations($reflectionClass);
+
+        $this->cachedClassAnnotations[$className] = $classAnnotations;
+        return $classAnnotations;
+    }
+
+    /**
      * @param string $className
      * @param string $methodName
      * @return object[]
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws MessagingException
      */
-    private function getCachedMethodAnnotations(string $className, string $methodName) : array
+    private function getCachedMethodAnnotations(string $className, string $methodName): array
     {
         if (isset($this->cachedMethodAnnotations[$className . $methodName])) {
             return $this->cachedMethodAnnotations[$className . $methodName];
         }
 
         try {
-            $reflectionMethod = TypeResolver::getMethodOwnerClass(new \ReflectionClass($className), $methodName)->getMethod($methodName);
+            $reflectionMethod = TypeResolver::getMethodOwnerClass(new ReflectionClass($className), $methodName)->getMethod($methodName);
 
-            $annotations =  $this->annotationReader->getMethodAnnotations($reflectionMethod);
-        }catch (\ReflectionException $e) {
+            $annotations = $this->annotationReader->getMethodAnnotations($reflectionMethod);
+        } catch (ReflectionException $e) {
             throw ConfigurationException::create("Class {$className} with method {$methodName} does not exists or got annotation configured wrong: " . $e->getMessage());
         }
 
@@ -217,18 +326,40 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     /**
      * @inheritDoc
      */
-    private function getCachedAnnotationsForClass(string $className): iterable
+    public function findRegistrationsFor(string $classAnnotationName, string $methodAnnotationClassName): array
     {
-        if (isset($this->cachedClassAnnotations[$className])) {
-            return $this->cachedClassAnnotations[$className];
+        $registrations = [];
+        foreach ($this->getAllClassesWithAnnotation($classAnnotationName) as $className) {
+            foreach (get_class_methods($className) as $method) {
+                if ($this->isMethodBannedFromCurrentEnvironment($className, $method)) {
+                    continue;
+                }
+
+                $methodAnnotations = $this->getCachedMethodAnnotations($className, $method);
+                foreach ($methodAnnotations as $methodAnnotation) {
+                    if (get_class($methodAnnotation) === $methodAnnotationClassName || $methodAnnotation instanceof $methodAnnotationClassName) {
+                        $annotationRegistration = AnnotationRegistration::create(
+                            $this->getAnnotationForClass($className, $classAnnotationName),
+                            $methodAnnotation,
+                            $className,
+                            $method
+                        );
+
+                        $registrations[] = $annotationRegistration;
+                    }
+                }
+            }
         }
 
+        usort($registrations, function (AnnotationRegistration $annotationRegistration, AnnotationRegistration $annotationRegistrationToCheck) {
+            if ($annotationRegistration->getClassName() == $annotationRegistrationToCheck->getClassName()) {
+                return 0;
+            }
 
-        $reflectionClass = new \ReflectionClass($className);
-        $classAnnotations = $this->annotationReader->getClassAnnotations($reflectionClass);
+            return $annotationRegistration->getClassName() > $annotationRegistrationToCheck->getClassName();
+        });
 
-        $this->cachedClassAnnotations[$className] = $classAnnotations;
-        return $classAnnotations;
+        return $registrations;
     }
 
     /**
@@ -242,154 +373,20 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     }
 
     /**
-     * @param string $rootProjectDir
-     * @param array $namespaces
-     * @param bool $loadSrc
-     * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @inheritDoc
      */
-    private function init(string $rootProjectDir, array $namespaces, bool $loadSrc)
+    public function getAnnotationsForMethod(string $className, string $methodName): iterable
     {
-        $classes = [];
-        $paths = $this->getPathsToSearchIn($rootProjectDir, $namespaces, $loadSrc);
-
-        foreach ($paths as $path) {
-            if (!is_dir($path)) {
-                throw ConfigurationException::create("There is no path: {$path}");
-            }
-
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($path),
-                \RecursiveIteratorIterator::LEAVES_ONLY
-            );
-
-            /** @var \SplFileInfo $file */
-            foreach ($iterator as $file) {
-                $fileName = $file->getBasename(self::FILE_EXTENSION);
-
-                if ($this->isDirectory($fileName, $file)) {
-                    continue;
-                }
-                if ($this->isPHPFile($file)) {
-                    continue;
-                }
-
-                $file = $file->openFile();
-                while (!$file->eof()) {
-                    $line = $file->current();
-                    if ($line == false) {
-                        break;
-                    }
-
-                    if (preg_match_all("#namespace[\s]*([^\n\s\(\)\[\]\{\}\$]*);#", $line, $results)) {
-                        $namespace = isset($results[1][0]) ? trim($results[1][0]) : "";
-                        $namespace = trim($namespace);
-
-//                        Add all in resolved paths
-                        if ($this->isInAvailableNamespaces($namespaces, $namespace)) {
-                            $classes[] = trim($namespace) . '\\' . $fileName;
-                            break;
-                        }
-                    }
-
-                    $file->next();
-                }
-            }
-        }
-
-        $this->registeredClasses = array_unique($classes);
+        return $this->getCachedMethodAnnotations($className, $methodName);
     }
 
     /**
-     * @param $fileName
-     * @param $file
-     * @return bool
+     * @inheritDoc
      */
-    private function isDirectory($fileName, \SplFileInfo $file): bool
+    public function getAnnotationsForProperty(string $className, string $propertyName): iterable
     {
-        return $fileName == $file->getBasename();
-    }
+        $reflectionProperty = new ReflectionProperty($className, $propertyName);
 
-    /**
-     * @param $file
-     * @return bool
-     */
-    private function isPHPFile(\SplFileInfo $file): bool
-    {
-        return $file->getFileInfo()->getExtension() == self::FILE_EXTENSION;
-    }
-
-    /**
-     * @param string $rootProjectDir
-     * @param array $namespaces
-     * @param bool $loadSrc
-     * @return array
-     */
-    private function getPathsToSearchIn(string $rootProjectDir, array $namespaces, bool $loadSrc): array
-    {
-        $paths = [];
-
-        $autoloadPsr4 = require($rootProjectDir . '/vendor/composer/autoload_psr4.php');
-        $autoloadPsr0 = require($rootProjectDir . '/vendor/composer/autoload_namespaces.php');
-        $paths = $this->mergeWith($namespaces, $autoloadPsr4, $paths, $rootProjectDir, $loadSrc, true);
-        $paths = $this->mergeWith($namespaces, $autoloadPsr0, $paths, $rootProjectDir, $loadSrc, false);
-
-        return array_unique($paths);
-    }
-
-    /**
-     * @param array $namespaces
-     * @param $namespace
-     * @return bool
-     */
-    private function isInAvailableNamespaces(array $namespaces, $namespace): bool
-    {
-        foreach ($namespaces as $namespaceToUse) {
-            $namespaceToUse = trim($namespaceToUse);
-            if (strpos($namespace, trim($namespaceToUse)) !== false) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param array $namespacesToUse
-     * @param array $autoload
-     * @param array $paths
-     *
-     * @param string $rootProjectDir
-     * @param bool $loadSrc
-     * @param bool $autoloadPsr4
-     * @return array
-     */
-    private function mergeWith(array $namespacesToUse, array $autoload, array $paths, string $rootProjectDir, bool $loadSrc, bool $autoloadPsr4)
-    {
-        foreach ($namespacesToUse as $namespaceToUse) {
-            $namespaceSplit = explode("\\", $namespaceToUse);
-            $rootNamespace = $namespaceSplit[0];
-
-            $namespaceToRegex = ("^" . $rootNamespace);
-            $regex = "#^{$namespaceToRegex}#";
-
-            $resolvedPathToSrc = realpath($rootProjectDir) . '/src';
-            foreach ($autoload as $namespace => $namespacePath) {
-                if ($loadSrc && (in_array($resolvedPathToSrc, $namespacePath)) || preg_match($regex, $namespace)) {
-                    foreach ($namespacePath as $pathForNamespace) {
-                        if ($autoloadPsr4) {
-                            $suffixPath = trim(str_replace(trim($namespace, "\\"), "", $namespaceToUse), "\\");
-                        }else {
-                            $suffixPath = trim($namespace, "\\");
-                        }
-
-                        $suffixPath = str_replace("\\", "/", $suffixPath);
-                        $paths[] = $pathForNamespace . DIRECTORY_SEPARATOR . $suffixPath;
-                    }
-                }
-            }
-        }
-
-        return $paths;
+        return $this->annotationReader->getPropertyAnnotations($reflectionProperty);
     }
 }

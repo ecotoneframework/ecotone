@@ -86,6 +86,36 @@ class GetUsedPathsFromAutoloadTest extends TestCase
         $this->validateExpectedPaths($requiredNamepaces, $autoload, $autoloadPsr4, $expectedPaths);
     }
 
+    public function test_retrieving_src_catalog()
+    {
+        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+
+        $this->assertEquals(
+            ["SimplyCodedSoftware\One", "SimplyCodedSoftware\Two"],
+            $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
+                [
+                    "psr-4" => ["SimplyCodedSoftware\One" => "src"],
+                    "psr-0" => ["SimplyCodedSoftware\Two" => "src"]
+                ]
+            )
+        );
+    }
+
+    public function test_not_retrieving_when_not_in_src_catalog()
+    {
+        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+
+        $this->assertEquals(
+            [],
+            $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
+                [
+                    "psr-4" => ["SimplyCodedSoftware\One" => "tests"],
+                    "psr-0" => ["SimplyCodedSoftware\Two" => "tests"]
+                ]
+            )
+        );
+    }
+
     /**
      * @param array $requiredNamepaces
      * @param array $autoload

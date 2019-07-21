@@ -12,6 +12,31 @@ namespace SimplyCodedSoftware\Messaging\Config\Annotation;
 class GetUsedPathsFromAutoload
 {
     /**
+     * @param array $autoloadData
+     * @return array
+     */
+    public function getNamespacesForSrcCatalog(array $autoloadData) : array
+    {
+        $namespaces = [];
+        if (isset($autoloadData['psr-4'])) {
+            foreach ($autoloadData['psr-4'] as $autoloadNamespace => $path) {
+                if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
+                    $namespaces[] = $autoloadNamespace;
+                }
+            }
+        }
+        if (isset($autoloadData['psr-0'])) {
+            foreach ($autoloadData['psr-0'] as $autoloadNamespace => $path) {
+                if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
+                    $namespaces[] = $autoloadNamespace;
+                }
+            }
+        }
+
+        return $namespaces;
+    }
+
+    /**
      * @param array $requiredNamespaces
      * @param array $autoload
      *

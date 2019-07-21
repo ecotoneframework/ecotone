@@ -104,6 +104,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      */
     private function init(string $rootProjectDir, array $namespaces, bool $loadSrc)
     {
+        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
         $classes = [];
         $composerPath = $rootProjectDir . "/composer.json";
         if ($loadSrc && !file_exists($composerPath)) {
@@ -112,27 +113,15 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
         if ($loadSrc) {
             $composerJsonDecoded = json_decode(file_get_contents($composerPath), true);
 
-            $autoload = $composerJsonDecoded['autoload'];
-
-            if (isset($autoload['autoload'])) {
-                if (isset($autoload['autoload']['psr-4'])) {
-                    foreach ($autoload['autoload']['psr-4'] as $autoloadNamespace => $path) {
-                        if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
-                            $namespaces[] = $autoloadNamespace;
-                        }
-                    }
-                }
-                if (isset($autoload['autolaod']['psr-0'])) {
-                    foreach ($autoload['autoload']['psr-0'] as $autoloadNamespace => $path) {
-                        if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
-                            $namespaces[] = $autoloadNamespace;
-                        }
-                    }
-                }
+            if (isset($composerJsonDecoded['autoload'])) {
+                $namespaces = array_merge($namespaces, $composerJsonDecoded['autoload']);
+            }
+            if (isset($composerJsonDecoded['autoload-dev'])) {
+                $namespaces = array_merge($namespaces, $composerJsonDecoded['autoload-dev']);
             }
         }
 
-        $paths = $this->getPathsToSearchIn($rootProjectDir, $namespaces);
+        $paths = $this->getPathsToSearchIn($getUsedPathsFromAutoload, $rootProjectDir, $namespaces);
 
         foreach ($paths as $path) {
             if (!is_dir($path)) {
@@ -182,13 +171,13 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     }
 
     /**
+     * @param GetUsedPathsFromAutoload $getUsedPathsFromAutoload
      * @param string $rootProjectDir
      * @param array $namespaces
      * @return array
      */
-    private function getPathsToSearchIn(string $rootProjectDir, array $namespaces): array
+    private function getPathsToSearchIn(GetUsedPathsFromAutoload $getUsedPathsFromAutoload, string $rootProjectDir, array $namespaces): array
     {
-        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
         $paths = [];
 
         $autoloadPsr4 = require($rootProjectDir . '/vendor/composer/autoload_psr4.php');

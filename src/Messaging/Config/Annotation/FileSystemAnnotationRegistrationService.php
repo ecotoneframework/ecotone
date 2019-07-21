@@ -114,10 +114,10 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
             $composerJsonDecoded = json_decode(file_get_contents($composerPath), true);
 
             if (isset($composerJsonDecoded['autoload'])) {
-                $namespaces = array_merge($namespaces, $composerJsonDecoded['autoload']);
+                $namespaces = array_merge($namespaces, $getUsedPathsFromAutoload->getNamespacesForSrcCatalog($composerJsonDecoded['autoload']));
             }
             if (isset($composerJsonDecoded['autoload-dev'])) {
-                $namespaces = array_merge($namespaces, $composerJsonDecoded['autoload-dev']);
+                $namespaces = array_merge($namespaces, $getUsedPathsFromAutoload->getNamespacesForSrcCatalog($composerJsonDecoded['autoload-dev']));
             }
         }
 

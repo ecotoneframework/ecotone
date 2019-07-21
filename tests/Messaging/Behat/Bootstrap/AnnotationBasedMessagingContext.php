@@ -80,9 +80,10 @@ class AnnotationBasedMessagingContext implements Context
 
         $messagingConfiguration = MessagingSystemConfiguration::createWithCachedReferenceObjectsForNamespaces(
             __DIR__ . "/../../../../",
-            ["SimplyCodedSoftware", $namespace],
+            [$namespace],
             InMemoryReferenceTypeFromNameResolver::createFromObjects($objects),
             "test",
+            true,
             true
         );
 

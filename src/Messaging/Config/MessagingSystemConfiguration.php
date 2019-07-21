@@ -384,13 +384,14 @@ final class MessagingSystemConfiguration implements Configuration
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
      * @param string $environment
      * @param bool $isLazyLoaded
+     * @param bool $loadSrc
      * @return Configuration
      * @throws AnnotationException
      * @throws ConfigurationException
      * @throws MessagingException
      * @throws TypeDefinitionException
      */
-    public static function createWithCachedReferenceObjectsForNamespaces(string $rootPathToSearchConfigurationFor, array $namespaces, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, string $environment, bool $isLazyLoaded): Configuration
+    public static function createWithCachedReferenceObjectsForNamespaces(string $rootPathToSearchConfigurationFor, array $namespaces, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, string $environment, bool $isLazyLoaded, bool $loadSrc): Configuration
     {
         return MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
             new AnnotationModuleRetrievingService(
@@ -399,7 +400,7 @@ final class MessagingSystemConfiguration implements Configuration
                     realpath($rootPathToSearchConfigurationFor),
                     $namespaces,
                     $environment,
-                    false
+                    $loadSrc
                 )
             ),
             $referenceTypeFromNameResolver,

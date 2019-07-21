@@ -29,7 +29,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
      * @throws \Exception
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_building_service_activator()
+    public function test_building_service_activator()
     {
         $objectToInvokeOnReference = "service-a";
         $objectToInvoke = ServiceExpectingOneArgument::create();
@@ -76,7 +76,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
      * @throws \Exception
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_activating_statically_called_service()
+    public function test_activating_statically_called_service()
     {
         $reference = StaticallyCalledService::class;
 
@@ -102,7 +102,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
      * @throws \Exception
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_calling_direct_object_reference()
+    public function test_calling_direct_object_reference()
     {
         $objectToInvoke = ServiceExpectingOneArgument::create();
 
@@ -121,7 +121,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
      * @throws \Exception
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_passing_through_on_void()
+    public function test_passing_through_on_void()
     {
         $objectToInvoke = ServiceExpectingOneArgument::create();
 
@@ -149,7 +149,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
      * @throws \Exception
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_ignoring_passing_through_when_service_not_void()
+    public function test_ignoring_passing_through_when_service_not_void()
     {
         $objectToInvoke = ServiceExpectingOneArgument::create();
 
@@ -176,7 +176,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
     /**
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public function __test_creating_with_interceptors()
+    public function test_creating_with_interceptors()
     {
         $objectToInvoke = CalculatingService::create(0);
 
@@ -203,7 +203,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
         );
     }
 
-    public function __test_resolving_correct_interface_from_direct_object()
+    public function test_resolving_correct_interface_from_direct_object()
     {
         $objectToInvoke = CalculatingServiceInterceptorExample::create(0);
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, "result");
@@ -216,7 +216,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
         );
     }
 
-    public function __test_resolving_correct_interface_from_reference_object()
+    public function test_resolving_correct_interface_from_reference_object()
     {
         $objectToInvokeOnReference = "service-a";
         $objectToInvoke = CalculatingServiceInterceptorExample::create(0);

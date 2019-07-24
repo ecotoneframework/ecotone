@@ -24,6 +24,10 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
      * @var string
      */
     private $referenceName;
+    /**
+     * @var object
+     */
+    private $directObject;
 
     /**
      * SimpleChannelInterceptorBuilder constructor.
@@ -46,6 +50,14 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
     public static function create(string $channelName, string $referenceName) : self
     {
         return new self(0, $channelName, $referenceName);
+    }
+
+    public static function createWithDirectObject(string $channelName, object $object) : self
+    {
+        $self = new self(0, $channelName, "");
+        $self->directObject = $object;
+
+        return $self;
     }
 
     /**
@@ -80,9 +92,7 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
      */
     public function getRequiredReferenceNames(): array
     {
-        return [
-            $this->referenceName
-        ];
+        return $this->referenceName ? [$this->referenceName] : [];
     }
 
     /**
@@ -90,6 +100,6 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): ChannelInterceptor
     {
-        return $referenceSearchService->get($this->referenceName);
+        return $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
     }
 }

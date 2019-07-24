@@ -1,42 +1,48 @@
 <?php
+declare(strict_types=1);
 
-
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
-
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
- * Class AllHeadersBuilder
+ * Class StaticValueBuilder
  * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class AllHeadersBuilder implements ParameterConverterBuilder
+class ValueBuilder implements ParameterConverterBuilder
 {
     /**
      * @var string
      */
     private $parameterName;
+    /**
+     * @var mixed
+     */
+    private $staticValue;
 
     /**
-     * AllHeadersConverter constructor.
+     * HeaderArgument constructor.
      *
      * @param string $parameterName
+     * @param mixed $staticValue
      */
-    private function __construct(string $parameterName)
+    private function __construct(string $parameterName, $staticValue)
     {
         $this->parameterName = $parameterName;
+        $this->staticValue   = $staticValue;
     }
 
     /**
      * @param string $parameterName
+     * @param mixed  $staticValue
      *
-     * @return AllHeadersBuilder
+     * @return self
      */
-    public static function createWith(string $parameterName) : self
+    public static function create(string $parameterName, $staticValue) : self
     {
-        return new self($parameterName);
+        return new self($parameterName, $staticValue);
     }
 
     /**
@@ -52,6 +58,6 @@ class AllHeadersBuilder implements ParameterConverterBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
     {
-        return new AllHeadersConverter($this->parameterName);
+        return ValueConverter::createWith($this->parameterName, $this->staticValue);
     }
 }

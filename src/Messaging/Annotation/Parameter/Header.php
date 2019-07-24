@@ -24,6 +24,10 @@ class Header
      */
     public $headerName;
     /**
+     * @var string
+     */
+    public $expression;
+    /**
      * @var bool
      */
     public $isRequired = true;

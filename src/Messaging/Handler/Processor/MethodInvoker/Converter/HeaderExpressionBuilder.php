@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
@@ -14,7 +14,7 @@ use SimplyCodedSoftware\Messaging\Support\Assert;
  * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ExpressionBuilder implements ParameterConverterBuilder
+class HeaderExpressionBuilder implements ParameterConverterBuilder
 {
     /**
      * @var string
@@ -24,26 +24,40 @@ class ExpressionBuilder implements ParameterConverterBuilder
      * @var string
      */
     private $expression;
+    /**
+     * @var string
+     */
+    private $headerName;
+    /**
+     * @var bool
+     */
+    private $isRequired;
 
     /**
      * ExpressionBuilder constructor.
      * @param string $parameterName
+     * @param string $headerName
      * @param string $expression
+     * @param bool $isRequired
      */
-    private function __construct(string $parameterName, string $expression)
+    private function __construct(string $parameterName, string $headerName, string $expression, bool $isRequired)
     {
         $this->parameterName = $parameterName;
         $this->expression = $expression;
+        $this->headerName = $headerName;
+        $this->isRequired = $isRequired;
     }
 
     /**
      * @param string $parameterName
+     * @param string $headerName
      * @param string $expression
-     * @return ExpressionBuilder
+     * @param bool $isRequired
+     * @return HeaderExpressionBuilder
      */
-    public static function create(string $parameterName, string $expression): self
+    public static function create(string $parameterName, string $headerName, string $expression, bool $isRequired): self
     {
-        return new self($parameterName, $expression);
+        return new self($parameterName, $headerName, $expression, $isRequired);
     }
 
     /**
@@ -56,11 +70,13 @@ class ExpressionBuilder implements ParameterConverterBuilder
         Assert::isSubclassOf($expressionService, ExpressionEvaluationService::class, "You're using expression converter parameter, so you must define reference service " . ExpressionEvaluationService::REFERENCE . " in your registry container, which is subclass of " . ExpressionEvaluationService::class);
 
 
-        return new ExpressionConverter(
+        return new HeaderExpressionConverter(
             $referenceSearchService,
             $expressionService,
             $this->parameterName,
-            $this->expression
+            $this->headerName,
+            $this->expression,
+            $this->isRequired
         );
     }
 

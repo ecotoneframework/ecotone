@@ -1,6 +1,6 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;

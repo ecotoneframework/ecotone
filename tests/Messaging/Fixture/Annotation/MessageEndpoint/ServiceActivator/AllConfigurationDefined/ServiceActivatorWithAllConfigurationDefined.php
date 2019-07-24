@@ -31,12 +31,13 @@ class ServiceActivatorWithAllConfigurationDefined
      * @ServiceActivator(endpointId="test-name", inputChannelName="inputChannel", outputChannelName="outputChannel", requiresReply=true, parameterConverters={
      *     @Header(parameterName="to", headerName="sendTo"),
      *     @Payload(parameterName="content"),
+     *     @Payload(parameterName="content2", expression="value"),
      *     @MessageParameter(parameterName="message"),
      *     @Reference(parameterName="object", referenceName="reference"),
-     *     @Value(parameterName="name", value="some")
+     *     @Header(parameterName="name", headerName="token", expression="value", isRequired=false)
      * }, requiredInterceptorNames={"someReference"})
      */
-    public function sendMessage(string $to, string $content, Message $message, \stdClass $object, string $name) : void
+    public function sendMessage(string $to, string $content, string $content2, Message $message, \stdClass $object, string $name) : void
     {
         return;
     }

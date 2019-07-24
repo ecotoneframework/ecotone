@@ -3,23 +3,23 @@ declare(strict_types=1);
 
 namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Expression;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\MessageParameter;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Value;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AllHeadersBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ValueBuilder;
 
 /**
  * Class ParameterConverterAnnotationFactory
@@ -54,13 +54,24 @@ class ParameterConverterAnnotationFactory
 
         foreach ($parameterConverterAnnotations as $parameterConverterAnnotation) {
             if ($parameterConverterAnnotation instanceof Header) {
-                if ($parameterConverterAnnotation->isRequired) {
+                if ($parameterConverterAnnotation->expression) {
+                    $parameterConverters[] = HeaderExpressionBuilder::create(
+                        $parameterConverterAnnotation->parameterName,
+                        $parameterConverterAnnotation->headerName,
+                        $parameterConverterAnnotation->expression,
+                        $parameterConverterAnnotation->isRequired
+                    );
+                }else if ($parameterConverterAnnotation->isRequired) {
                     $parameterConverters[] = HeaderBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->headerName);
                 } else {
                     $parameterConverters[] = HeaderBuilder::createOptional($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->headerName);
                 }
             } else if ($parameterConverterAnnotation instanceof Payload) {
-                $parameterConverters[] = PayloadBuilder::create($parameterConverterAnnotation->parameterName);
+                if ($parameterConverterAnnotation->expression) {
+                    $parameterConverters[] = PayloadExpressionBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->expression);
+                }else {
+                    $parameterConverters[] = PayloadBuilder::create($parameterConverterAnnotation->parameterName);
+                }
             } else if ($parameterConverterAnnotation instanceof MessageParameter) {
                 $parameterConverters[] = MessageConverterBuilder::create($parameterConverterAnnotation->parameterName);
             } else if ($parameterConverterAnnotation instanceof Reference) {
@@ -71,12 +82,6 @@ class ParameterConverterAnnotationFactory
                 }else {
                     $parameterConverters[] = ReferenceBuilder::createWithDynamicResolve($parameterConverterAnnotation->parameterName);
                 }
-            } else if ($parameterConverterAnnotation instanceof Expression) {
-                $parameterConverters[] = ExpressionBuilder::create(
-                    $parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->expression
-                );
-            } else if ($parameterConverterAnnotation instanceof Value) {
-                $parameterConverters[] = ValueBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->value);
             } else if ($parameterConverterAnnotation instanceof Headers) {
                 $parameterConverters[] = AllHeadersBuilder::createWith($parameterConverterAnnotation->parameterName);
             }

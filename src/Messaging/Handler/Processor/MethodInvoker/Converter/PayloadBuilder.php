@@ -1,20 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
-use SimplyCodedSoftware\Messaging\Message;
+use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
- * Class MessageArgument
+ * Class PayloadParameterConverterBuilder
  * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @internal
  */
-class MessageConverter implements ParameterConverter
+class PayloadBuilder implements ParameterConverterBuilder
 {
     /**
      * @var string
@@ -22,7 +20,7 @@ class MessageConverter implements ParameterConverter
     private $parameterName;
 
     /**
-     * MessageArgument constructor.
+     * PayloadParameterConverterBuilder constructor.
      * @param string $parameterName
      */
     private function __construct(string $parameterName)
@@ -32,7 +30,7 @@ class MessageConverter implements ParameterConverter
 
     /**
      * @param string $parameterName
-     * @return MessageConverter
+     * @return PayloadBuilder
      */
     public static function create(string $parameterName) : self
     {
@@ -42,16 +40,16 @@ class MessageConverter implements ParameterConverter
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
+    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
     {
-        return $message;
+        return PayloadConverter::create($this->parameterName);
     }
 
     /**
      * @inheritDoc
      */
-    public function isHandling(InterfaceParameter $parameter): bool
+    public function getRequiredReferences(): array
     {
-        return $parameter->getName() == $this->parameterName;
+        return [];
     }
 }

@@ -1,18 +1,18 @@
 <?php
-declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
 
 /**
- * Class PayloadParameterConverterBuilder
+ * Class AllHeadersBuilder
  * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PayloadBuilder implements ParameterConverterBuilder
+class AllHeadersBuilder implements ParameterConverterBuilder
 {
     /**
      * @var string
@@ -20,7 +20,8 @@ class PayloadBuilder implements ParameterConverterBuilder
     private $parameterName;
 
     /**
-     * PayloadParameterConverterBuilder constructor.
+     * AllHeadersConverter constructor.
+     *
      * @param string $parameterName
      */
     private function __construct(string $parameterName)
@@ -30,19 +31,12 @@ class PayloadBuilder implements ParameterConverterBuilder
 
     /**
      * @param string $parameterName
-     * @return PayloadBuilder
+     *
+     * @return AllHeadersBuilder
      */
-    public static function create(string $parameterName) : self
+    public static function createWith(string $parameterName) : self
     {
         return new self($parameterName);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
-    {
-        return PayloadConverter::create($this->parameterName);
     }
 
     /**
@@ -51,5 +45,13 @@ class PayloadBuilder implements ParameterConverterBuilder
     public function getRequiredReferences(): array
     {
         return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
+    {
+        return new AllHeadersConverter($this->parameterName);
     }
 }

@@ -2,12 +2,12 @@
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Router\RouterWithNoResolutionRequiredExample;
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\RouterModule;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Router\RouterWithNoResolutionRequiredExample;
 
 /**
  * Class AnnotationRouterConfigurationTest

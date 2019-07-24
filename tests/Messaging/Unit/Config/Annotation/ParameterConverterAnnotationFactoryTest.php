@@ -3,17 +3,16 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation;
 
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AllHeadersBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Expression;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
 /**
@@ -49,34 +48,6 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
             $parameterConverterAnnotationFactory->createParameterConverters(
                 InterfaceToCall::create($relatedClassName, $methodName),
                 [$referenceAnnotation, $allHeadersAnnotation]
-            )
-        );
-    }
-
-    /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
-     */
-    public function test_converting_for_message_to_expression_evaluation()
-    {
-        $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
-        $parameterConverterAnnotation = new Expression();
-        $parameterConverterAnnotation->parameterName = "object";
-        $parameterConverterAnnotation->expression = "payload.name";
-
-        $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
-        $methodName = "sendMessage";
-
-        $this->assertEquals(
-            [
-                ExpressionBuilder::create(
-                    $parameterConverterAnnotation->parameterName,
-                    "payload.name"
-                )
-            ],
-            $parameterConverterAnnotationFactory->createParameterConverters(
-                InterfaceToCall::create($relatedClassName, $methodName),
-                [$parameterConverterAnnotation]
             )
         );
     }

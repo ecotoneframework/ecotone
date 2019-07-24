@@ -3,22 +3,17 @@
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ValueBuilder;
-use Test\SimplyCodedSoftware\Messaging\Builder\Annotation\HeaderAnnotationTestCaseBuilder;
-use Test\SimplyCodedSoftware\Messaging\Builder\Annotation\MessageParameterAnnotationTestCaseBuilder;
-use Test\SimplyCodedSoftware\Messaging\Builder\Annotation\PayloadAnnotationTestCaseBuilder;
-use Test\SimplyCodedSoftware\Messaging\Builder\Annotation\ReferenceAnnotationTestCaseBuilder;
-use Test\SimplyCodedSoftware\Messaging\Builder\Annotation\ServiceActivatorAnnotationTestCaseBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\HeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ReferenceBuilder;
+use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 
 /**
  * Class AnnotationServiceActivatorConfigurationTest
@@ -51,9 +46,10 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
                         ->withMethodParameterConverters([
                             HeaderBuilder::create("to", "sendTo"),
                             PayloadBuilder::create("content"),
+                            PayloadExpressionBuilder::create("content2", "value"),
                             MessageConverterBuilder::create("message"),
                             ReferenceBuilder::create("object", "reference"),
-                            ValueBuilder::create("name", "some")
+                            HeaderExpressionBuilder::create("name", "token", "value", false)
                         ])
                         ->withRequiredReply(true)
                         ->withRequiredInterceptorNames(["someReference"])

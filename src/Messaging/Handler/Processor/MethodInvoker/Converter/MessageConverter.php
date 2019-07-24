@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
 use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
@@ -9,12 +9,12 @@ use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
 use SimplyCodedSoftware\Messaging\Message;
 
 /**
- * Class PayloadArgument
- * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
+ * Class MessageArgument
+ * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class PayloadConverter implements ParameterConverter
+class MessageConverter implements ParameterConverter
 {
     /**
      * @var string
@@ -22,7 +22,7 @@ class PayloadConverter implements ParameterConverter
     private $parameterName;
 
     /**
-     * PayloadArgument constructor.
+     * MessageArgument constructor.
      * @param string $parameterName
      */
     private function __construct(string $parameterName)
@@ -32,9 +32,9 @@ class PayloadConverter implements ParameterConverter
 
     /**
      * @param string $parameterName
-     * @return PayloadConverter
+     * @return MessageConverter
      */
-    public static function create(string $parameterName)
+    public static function create(string $parameterName) : self
     {
         return new self($parameterName);
     }
@@ -44,7 +44,7 @@ class PayloadConverter implements ParameterConverter
      */
     public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
     {
-        return $message->getPayload();
+        return $message;
     }
 
     /**

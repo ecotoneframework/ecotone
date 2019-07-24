@@ -21,8 +21,9 @@ interface BookStoreGatewayExample
     /**
      * @param string $bookNumber
      * @param string $rentTill
-     * @param int    $cost
-     * @param array  $data
+     * @param int $cost
+     * @param string $token
+     * @param array $data
      *
      * @return bool
      *
@@ -33,11 +34,12 @@ interface BookStoreGatewayExample
      *          @Payload(parameterName="bookNumber", expression="upper(value)"),
      *          @Header(parameterName="rentTill", headerName="rentDate"),
      *          @Header(parameterName="cost", headerName="cost"),
+     *          @Header(parameterName="token", headerName="token", expression="value"),
      *          @Headers(parameterName="data")
      *      },
      *      requiredInterceptorNames={"dbalTransaction"},
      *      replyTimeoutInMilliseconds=100
      * )
      */
-    public function rent(string $bookNumber, string $rentTill, int $cost, array $data): bool;
+    public function rent(string $bookNumber, string $rentTill, int $cost, string $token, array $data): bool;
 }

@@ -18,6 +18,7 @@ use SimplyCodedSoftware\Messaging\Config\Configuration;
 use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
@@ -68,7 +69,11 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                         $parameterConverters[] = GatewayPayloadBuilder::create($parameterToMessage->parameterName);
                     }
                 } else if ($parameterToMessage instanceof Header) {
-                    $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
+                    if ($parameterToMessage->expression) {
+                        $parameterConverters[] = GatewayHeaderExpressionBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName, $parameterToMessage->expression);
+                    }else {
+                        $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
+                    }
                 } else if ($parameterToMessage instanceof Headers) {
                     $parameterConverters[] = GatewayHeadersBuilder::create($parameterToMessage->parameterName);
                 } else {

@@ -13,6 +13,7 @@ use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
 use SimplyCodedSoftware\Messaging\Config\Configuration;
+use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
 use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
 use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -68,7 +69,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     }
                 } else if ($parameterToMessage instanceof Header) {
                     if ($parameterToMessage->expression) {
-                        $parameterConverters[] = GatewayHeaderExpressionBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName, $parameterToMessage->expression);
+                        throw ConfigurationException::create("@Header annotation for Gateway ({$annotationRegistration->getReferenceName()}) cannot be used with expression");
                     }else {
                         $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
                     }

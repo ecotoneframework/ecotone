@@ -7,6 +7,7 @@ use SimplyCodedSoftware\Messaging\Annotation\Gateway;
 use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderValue;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\HeaderExpression;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\HeaderValue;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
@@ -23,7 +24,6 @@ interface BookStoreGatewayExample
      * @param string $bookNumber
      * @param string $rentTill
      * @param int $cost
-     * @param string $token
      * @param array $data
      *
      * @return bool
@@ -35,7 +35,6 @@ interface BookStoreGatewayExample
      *          @Payload(parameterName="bookNumber", expression="upper(value)"),
      *          @Header(parameterName="rentTill", headerName="rentDate"),
      *          @Header(parameterName="cost", headerName="cost"),
-     *          @Header(parameterName="token", headerName="token", expression="value"),
      *          @Headers(parameterName="data"),
      *          @HeaderValue(headerName="secret", headerValue="123")
      *      },
@@ -43,5 +42,5 @@ interface BookStoreGatewayExample
      *      replyTimeoutInMilliseconds=100
      * )
      */
-    public function rent(string $bookNumber, string $rentTill, int $cost, string $token, array $data): bool;
+    public function rent(string $bookNumber, string $rentTill, int $cost, array $data): bool;
 }

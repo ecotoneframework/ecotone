@@ -25,7 +25,7 @@ class InMemoryArticleRepository implements AggregateRepository
     private function __construct(array $articles)
     {
         foreach ($articles as $article) {
-            $this->save(MessageBuilder::withPayload("some")->build(), [], $article);
+            $this->save([], $article, []);
         }
     }
 
@@ -77,11 +77,11 @@ class InMemoryArticleRepository implements AggregateRepository
     }
 
     /**
-     * @param Message $requestMessage
-     * @param array   $identifiers
+     * @param array $identifiers
      * @param Article $aggregate
+     * @param array $metadata
      */
-    public function save(Message $requestMessage, array $identifiers, $aggregate): void
+    public function save(array $identifiers, $aggregate, array $metadata): void
     {
         $this->articles[$this->getIdentifier($aggregate)] = $aggregate;
     }

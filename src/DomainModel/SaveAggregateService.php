@@ -76,12 +76,15 @@ class SaveAggregateService
                     ->build();
         }
 
-        $this->aggregateRepository->save($message->getHeaders()->get(AggregateMessage::CALLING_MESSAGE), $aggregateIds, $aggregate);
+        /** @var Message $callingMessage */
+        $callingMessage = $message->getHeaders()->get(AggregateMessage::CALLING_MESSAGE);
+        $metadata = $callingMessage->getHeaders()->headers();
+        $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata);
 
         if ($this->eventMethod) {
             $events = call_user_func([$aggregate, $this->eventMethod]);
             foreach ($events as $event) {
-                $this->lazyEventBus->sendWithMetadata($event, $message->getHeaders()->headers());
+                $this->lazyEventBus->sendWithMetadata($event, $metadata);
             }
         }
 

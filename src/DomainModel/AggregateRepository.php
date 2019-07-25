@@ -36,9 +36,9 @@ interface AggregateRepository
     public function findWithLockingBy(string $aggregateClassName, array $identifiers, int $expectedVersion);
 
     /**
-     * @param Message $requestMessage
-     * @param array   $identifiers
-     * @param object  $aggregate
+     * @param array $identifiers
+     * @param object $aggregate
+     * @param array $metadata
      */
-    public function save(Message $requestMessage, array $identifiers, $aggregate): void;
+    public function save(array $identifiers, $aggregate, array $metadata): void;
 }

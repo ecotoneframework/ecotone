@@ -61,7 +61,7 @@ class AppointmentRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function save(Message $requestMessage, array $identifiers, $aggregate): void
+    public function save(array $identifiers, $aggregate, array $metadata): void
     {
         $this->appointments[$identifiers['appointmentId']] = $aggregate;
     }

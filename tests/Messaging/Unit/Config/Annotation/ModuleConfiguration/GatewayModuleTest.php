@@ -53,7 +53,8 @@ class GatewayModuleTest extends AnnotationConfigurationTest
                             GatewayHeaderBuilder::create("rentTill", "rentDate"),
                             GatewayHeaderBuilder::create("cost", "cost"),
                             GatewayHeaderExpressionBuilder::create("token", "token", "value"),
-                            GatewayHeadersBuilder::create("data")
+                            GatewayHeadersBuilder::create("data"),
+                            GatewayHeaderValueBuilder::create("secret", "123")
                         ])
                 ),
             $messagingSystemConfiguration

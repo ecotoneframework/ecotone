@@ -8,6 +8,7 @@ use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderValue;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\HeaderValue;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 
 /**
@@ -35,7 +36,8 @@ interface BookStoreGatewayExample
      *          @Header(parameterName="rentTill", headerName="rentDate"),
      *          @Header(parameterName="cost", headerName="cost"),
      *          @Header(parameterName="token", headerName="token", expression="value"),
-     *          @Headers(parameterName="data")
+     *          @Headers(parameterName="data"),
+     *          @HeaderValue(headerName="secret", headerValue="123")
      *      },
      *      requiredInterceptorNames={"dbalTransaction"},
      *      replyTimeoutInMilliseconds=100

@@ -4,13 +4,11 @@ declare(strict_types=1);
 namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
 
 use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeader;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderValue;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
 use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
 use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
+use SimplyCodedSoftware\Messaging\Annotation\Parameter\HeaderValue;
 use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
 use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
@@ -76,7 +74,9 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     }
                 } else if ($parameterToMessage instanceof Headers) {
                     $parameterConverters[] = GatewayHeadersBuilder::create($parameterToMessage->parameterName);
-                } else {
+                } else if ($parameterToMessage instanceof HeaderValue) {
+                    $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
+                }else {
                     $converterClass = get_class($parameterToMessage);
                     throw new \InvalidArgumentException("Not known converters for gateway {$converterClass} for {$annotationRegistration->getClassName()}::{$annotationRegistration->getMethodName()}. Have you registered converter starting with name @Gateway(...) e.g. @GatewayHeader?");
                 }

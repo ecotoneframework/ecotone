@@ -83,7 +83,9 @@ class HeaderExpressionConverter implements ParameterConverter
         return $this->expressionEvaluationService->evaluate(
             $this->expression,
             [
-                "value" => $message->getHeaders()->containsKey($this->headerName) ? $message->getHeaders()->get($this->headerName) : null
+                "value" => $message->getHeaders()->containsKey($this->headerName) ? $message->getHeaders()->get($this->headerName) : null,
+                "headers" => $message->getHeaders()->headers(),
+                "payload" => $message->getPayload()
             ],
             $this->referenceSearchService
         );

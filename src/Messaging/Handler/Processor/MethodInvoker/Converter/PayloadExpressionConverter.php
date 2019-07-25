@@ -66,7 +66,9 @@ class PayloadExpressionConverter implements ParameterConverter
         return $this->expressionEvaluationService->evaluate(
             $this->expression,
             [
-                "value" => $message->getPayload()
+                "value" => $message->getPayload(),
+                "headers" => $message->getHeaders()->headers(),
+                "payload" => $message->getPayload()
             ],
             $this->referenceSearchService
         );

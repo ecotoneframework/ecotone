@@ -163,7 +163,7 @@ class TypeResolver
     private function getDocComment(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection): string
     {
         $docComment = $methodReflection->getDocComment();
-        if (!$docComment) {
+        if (!$docComment || $this->isIgnoringDocblockTypeHints($docComment)) {
             return "";
         }
 
@@ -188,6 +188,16 @@ class TypeResolver
     private static function isInheritDocComment(string $docBlock) : bool
     {
         return preg_match("/@inheritDoc/", $docBlock);
+    }
+
+    /**
+     * @param string $docBlock
+     *
+     * @return bool
+     */
+    private function isIgnoringDocblockTypeHints(string $docBlock) : bool
+    {
+        return preg_match("/@IgnoreDocblockTypeHint/", $docBlock);
     }
 
     /**
@@ -272,7 +282,9 @@ class TypeResolver
 
     /**
      * @param string $className
+     *
      * @return bool
+     * @throws \ReflectionException
      */
     private function isInGlobalNamespace(string $className): bool
     {
@@ -284,8 +296,12 @@ class TypeResolver
             return true;
         }
 
+        if (TypeDescriptor::isInternalClassOrInterface($className)) {
+            return true;
+        }
+
         if (preg_match(self::COLLECTION_TYPE_REGEX, $className, $matches)) {
-            return TypeDescriptor::isItTypeOfPrimitive($matches[1]) || TypeDescriptor::isItTypeOfExistingClassOrInterface($matches[1]);
+            return TypeDescriptor::isItTypeOfPrimitive($matches[1]) || TypeDescriptor::isInternalClassOrInterface($matches[1]);
         }
 
         return count(explode("\\", $className)) == 2;

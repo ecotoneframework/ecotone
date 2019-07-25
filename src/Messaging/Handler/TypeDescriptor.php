@@ -124,6 +124,21 @@ final class TypeDescriptor
     }
 
     /**
+     * @param string $typeHint
+     *
+     * @return bool
+     * @throws \ReflectionException
+     */
+    public static function isInternalClassOrInterface(string $typeHint) : bool
+    {
+        if (!self::isItTypeOfExistingClassOrInterface($typeHint)) {
+            return false;
+        }
+
+        return (new \ReflectionClass($typeHint))->isInternal();
+    }
+
+    /**
      * @param TypeDescriptor $typeDescriptor
      * @return bool
      */

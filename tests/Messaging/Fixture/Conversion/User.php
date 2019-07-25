@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
 
+use SimplyCodedSoftware\Messaging\Annotation\IgnoreDocblockTypeHint;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Permission as AdminPermission;
 
@@ -101,4 +102,19 @@ interface User
 
 
     public function returnFromGlobalNamespace() : \stdClass;
+
+    /**
+     * @param \DateTimeInterface $dateTime
+     *
+     * @return \DateTimeInterface
+     */
+    public function interfaceFromGlobalNamespace(\DateTimeInterface $dateTime) : \DateTimeInterface;
+
+    /**
+     * @param (\stdClass|string)[] $data
+     *
+     * @return (\stdClass|string)[]
+     * @IgnoreDocblockTypeHint()
+     */
+    public function ignoreDocblockTypeHint(array $data) : array;
 }

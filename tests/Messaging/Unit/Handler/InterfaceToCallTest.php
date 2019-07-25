@@ -65,6 +65,8 @@ class InterfaceToCallTest extends TestCase
         );
     }
 
+
+
     /**
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
@@ -271,6 +273,27 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     */
+    public function test_ignoring_docblock_type_hint()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            User::class, "ignoreDocblockTypeHint"
+        );
+
+        $this->assertEquals(
+            InterfaceParameter::createNotNullable("data", TypeDescriptor::createArrayType()),
+            $interfaceToCall->getParameterWithName("data")
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::createArrayType(),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
+    /**
      * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
@@ -283,6 +306,28 @@ class InterfaceToCallTest extends TestCase
 
         $this->assertEquals(
             TypeDescriptor::create(Admin::class),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
+    /**
+     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     */
+    public function test_guessing_interface_return_parameter_from_global_namespace()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            User::class, "interfaceFromGlobalNamespace"
+        );
+
+        $this->assertEquals(
+            InterfaceParameter::createNotNullable("dateTime", TypeDescriptor::create(\DateTimeInterface::class)),
+            $interfaceToCall->getParameterWithName("dateTime")
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create(\DateTimeInterface::class),
             $interfaceToCall->getReturnType()
         );
     }

@@ -20,18 +20,29 @@ class CalculatorInterceptor
 {
     /**
      * @param int $amount
+     * @param array $metadata
      * @param BeforeMultiplyCalculation $beforeMultiplyCalculation
      * @return int
      * @Before(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\BeforeMultiplyCalculation)",
-     *     parameterConverters={
-     *          @Payload(parameterName="amount")
-     *     }
+     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\BeforeMultiplyCalculation)"
      * )
      */
-    public function multiplyBefore(int $amount, BeforeMultiplyCalculation $beforeMultiplyCalculation) : int
+    public function multiplyBefore(int $amount, array $metadata, BeforeMultiplyCalculation $beforeMultiplyCalculation) : int
     {
         return $amount * $beforeMultiplyCalculation->amount;
+    }
+
+    /**
+     * @param MethodInvocation $methodInvocation
+     * @param AroundMultiplyCalculation $aroundResultCalculation
+     * @return int
+     * @Around(
+     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AroundMultiplyCalculation)"
+     * )
+     */
+    public function resultAround(MethodInvocation $methodInvocation, AroundMultiplyCalculation $aroundResultCalculation) : int
+    {
+        return $methodInvocation->proceed() * $aroundResultCalculation->amount;
     }
 
     /**
@@ -39,25 +50,11 @@ class CalculatorInterceptor
      * @param AfterSumCalculation $afterMultiplyCalculation
      * @return int
      * @After(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AfterSumCalculation)",
-     *     parameterConverters={
-     *          @Payload(parameterName="amount")
-     *     }
+     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AfterSumCalculation)"
      * )
      */
     public function sumAfter(int $amount, AfterSumCalculation $afterMultiplyCalculation) : int
     {
         return $amount + $afterMultiplyCalculation->amount;
-    }
-
-    /**
-     * @return void
-     * @Around(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AroundResultCalculation)"
-     * )
-     */
-    public function resultAround() : void
-    {
-        return;
     }
 }

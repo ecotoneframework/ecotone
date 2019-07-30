@@ -177,7 +177,7 @@ class AroundInterceptorReference implements InterceptorWithPointCut
 
         $interfaceToCall = InterfaceToCall::create($referenceToCall, $this->methodName);
         if ($this->allowOnlyForVoidInterface && !$interfaceToCall->hasReturnTypeVoid()) {
-            throw InvalidArgumentException::create("{$interfaceToCall} should return void in order to be used for entrypoint (Gateway, Inbound Channel, Amqp etc.)");
+//            throw InvalidArgumentException::create("{$interfaceToCall} should return void in order to be used for entrypoint (Gateway, Inbound Channel, Amqp etc.)");
         }
 
         return AroundMethodInterceptor::createWith(

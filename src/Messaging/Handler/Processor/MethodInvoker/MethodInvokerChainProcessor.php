@@ -29,7 +29,7 @@ class MethodInvokerChainProcessor implements MethodInvocation
     /**
      * @var object
      */
-    private $interceptedInstance;
+    private $objectToInvokeOn;
     /**
      * @var InterfaceToCall
      */
@@ -48,17 +48,17 @@ class MethodInvokerChainProcessor implements MethodInvocation
      * @param MethodCall $methodCall
      * @param MethodInvoker $methodInvoker
      * @param AroundMethodInterceptor[]|array $aroundMethodInterceptors
-     * @param object $interceptedInstance
+     * @param object $objectToInvokeOn
      * @param InterfaceToCall $interceptedInterfaceToCall
      * @param Message $requestMessage
      * @param object[] $endpointAnnotations
      */
-    public function __construct(MethodCall $methodCall, MethodInvoker $methodInvoker, array $aroundMethodInterceptors, $interceptedInstance, InterfaceToCall $interceptedInterfaceToCall, Message $requestMessage, iterable $endpointAnnotations)
+    public function __construct(MethodCall $methodCall, MethodInvoker $methodInvoker, array $aroundMethodInterceptors, $objectToInvokeOn, InterfaceToCall $interceptedInterfaceToCall, Message $requestMessage, iterable $endpointAnnotations)
     {
         $this->methodCall = $methodCall;
         $this->methodInvoker = $methodInvoker;
         $this->aroundMethodInterceptors = new \ArrayIterator($aroundMethodInterceptors);
-        $this->interceptedInstance = $interceptedInstance;
+        $this->objectToInvokeOn = $objectToInvokeOn;
         $this->interceptedInterfaceToCall = $interceptedInterfaceToCall;
         $this->requestMessage = $requestMessage;
         $this->endpointAnnotations = $endpointAnnotations;
@@ -75,7 +75,9 @@ class MethodInvokerChainProcessor implements MethodInvocation
         $this->aroundMethodInterceptors->next();
 
         if (!$aroundMethodInterceptor) {
-            return call_user_func_array([$this->interceptedInstance, $this->interceptedInterfaceToCall->getMethodName()], $this->methodCall->getMethodArgumentValues());
+            $returnValue = call_user_func_array([$this->objectToInvokeOn, $this->interceptedInterfaceToCall->getMethodName()], $this->methodCall->getMethodArgumentValues());
+
+            return $returnValue;
         }
 
         return $aroundMethodInterceptor->invoke(
@@ -108,9 +110,9 @@ class MethodInvokerChainProcessor implements MethodInvocation
     /**
      * @inheritDoc
      */
-    public function getInterceptedInstance()
+    public function getObjectToInvokeOn()
     {
-        return $this->interceptedInstance;
+        return $this->objectToInvokeOn;
     }
 
     /**

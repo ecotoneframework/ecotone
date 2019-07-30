@@ -26,7 +26,7 @@ class InboundCalculation
      *     )
      * )
      * @BeforeMultiplyCalculation(amount=3)
-     * @AroundResultCalculation()
+     * @AroundMultiplyCalculation(amount=2)
      * @AfterSumCalculation(amount=10)
      */
     public function calculateFor() : int

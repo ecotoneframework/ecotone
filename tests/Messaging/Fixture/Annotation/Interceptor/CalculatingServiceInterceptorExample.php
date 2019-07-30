@@ -62,6 +62,17 @@ class CalculatingServiceInterceptorExample
 
     /**
      * @param MethodInvocation $methodInvocation
+     * @return integer
+     */
+    public function sumAfterCalling(MethodInvocation $methodInvocation) : int
+    {
+        $result = $methodInvocation->proceed();
+
+        return $this->secondValueForMathOperations + $result;
+    }
+
+    /**
+     * @param MethodInvocation $methodInvocation
      * @param int $amount
      * @return int
      * @Around()

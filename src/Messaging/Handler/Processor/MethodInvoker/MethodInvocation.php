@@ -22,7 +22,7 @@ interface MethodInvocation
     /**
      * @return object
      */
-    public function getInterceptedInstance();
+    public function getObjectToInvokeOn();
 
     /**
      * @return string

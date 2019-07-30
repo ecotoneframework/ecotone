@@ -54,6 +54,14 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      * @var bool
      */
     private $shouldPassThroughMessage = false;
+    /**
+     * @var bool
+     */
+    private $canAroundInterceptorsReplaceArguments = true;
+    /**
+     * @var bool
+     */
+    private $shouldWrapResultInMessage = true;
 
     /**
      * ServiceActivatorBuilder constructor.
@@ -102,6 +110,17 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     public function withRequiredReply(bool $isReplyRequired): self
     {
         $this->isReplyRequired = $isReplyRequired;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $canAroundInterceptorReplaceArgument
+     * @return ServiceActivatorBuilder
+     */
+    public function withPossibilityToReplaceArgumentsInAroundInterceptors(bool $canAroundInterceptorReplaceArgument) : self
+    {
+        $this->canAroundInterceptorsReplaceArguments = $canAroundInterceptorReplaceArgument;
 
         return $this;
     }
@@ -161,6 +180,8 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         ];
     }
 
+
+
     /**
      * @inheritDoc
      */
@@ -179,18 +200,30 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
             $objectToInvoke = $this->directObjectReference ? $this->directObjectReference : $referenceSearchService->get($this->objectToInvokeReferenceName);
         }
         $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($objectToInvoke, $this->methodName);
-        
-        $methodToInvoke = WrapWithMessageBuildProcessor::createWith(
-            $objectToInvoke,
-            $this->methodName,
-            MethodInvoker::createWithInterceptors(
+
+        if ($this->canAroundInterceptorsReplaceArguments) {
+            $messageProcessor = MethodInvoker::createWithInterceptors(
                 $objectToInvoke,
                 $this->methodName,
                 $this->methodParameterConverterBuilders,
                 $referenceSearchService,
                 $this->orderedAroundInterceptors,
                 $this->getEndpointAnnotations()
-            ),
+            );
+        }else {
+            $messageProcessor = MethodInvoker::createWithInterceptorsNotChangingCallArguments(
+                $objectToInvoke,
+                $this->methodName,
+                $this->methodParameterConverterBuilders,
+                $referenceSearchService,
+                $this->orderedAroundInterceptors,
+                $this->getEndpointAnnotations()
+            );
+        }
+        $methodToInvoke = WrapWithMessageBuildProcessor::createWith(
+            $objectToInvoke,
+            $this->methodName,
+            $messageProcessor,
             $referenceSearchService
         );
         if ($this->shouldPassThroughMessage && $interfaceToCall->hasReturnTypeVoid()) {

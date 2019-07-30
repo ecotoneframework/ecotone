@@ -773,6 +773,33 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertTrue($transactionOne->isCommitted());
     }
 
+    public function test_throwing_exception_when_replacing_argument_in_around_interceptor()
+    {
+        $messageHandler     = NoReturnMessageHandler::create();
+        $requestChannelName = "request-channel";
+        $requestChannel     = DirectChannel::create();
+        $requestChannel->subscribe($messageHandler);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
+            ->addAroundInterceptor(
+                AroundInterceptorReference::createWithDirectObject("",CalculatingServiceInterceptorExample::create(1), "sum", 1, "")
+            );
+
+        $gatewayProxy = $gatewayProxyBuilder->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InMemoryChannelResolver::create(
+                [
+                    NamedMessageChannel::create($requestChannelName, $requestChannel)
+                ]
+            )
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $gatewayProxy->calculate(5);
+    }
+
+
     public function test_calling_interface_with_around_interceptor_from_method_annotation()
     {
         $messageHandler     = NoReturnMessageHandler::create();

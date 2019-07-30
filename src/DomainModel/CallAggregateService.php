@@ -94,7 +94,9 @@ class CallAggregateService
                 $this->withFactoryRedirectOnFoundMethodName,
                 $this->withFactoryRedirectOnFoundParameterConverters,
                 $this->referenceSearchService,
-                $this->aroundMethodInterceptors
+                $this->aroundMethodInterceptors,
+                [],
+                true
             );
         }else {
             $methodInvoker = MethodInvoker::createWithBuiltParameterConverters(
@@ -102,7 +104,9 @@ class CallAggregateService
                 $message->getHeaders()->get(AggregateMessage::METHOD_NAME),
                 $this->messageToParameterConverters,
                 $this->referenceSearchService,
-                $this->aroundMethodInterceptors
+                $this->aroundMethodInterceptors,
+                [],
+                true
             );
         }
 

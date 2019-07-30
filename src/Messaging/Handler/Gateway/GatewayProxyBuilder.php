@@ -360,6 +360,13 @@ class GatewayProxyBuilder implements GatewayBuilder
             ErrorChannelInterceptor::PRECEDENCE,
             ""
         );
+        $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
+            "",
+            new ReplyMessageInterceptor(),
+            "buildReply",
+            ErrorChannelInterceptor::PRECEDENCE + 1,
+            ""
+        );
 
         if (!$interfaceToCall->hasReturnValue() && $this->replyChannelName) {
             throw InvalidArgumentException::create("Can't set reply channel for {$interfaceToCall}");

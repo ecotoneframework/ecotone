@@ -19,26 +19,33 @@ class MethodCall
      * @var MethodArgument[]
      */
     private $methodArguments;
+    /**
+     * @var bool
+     */
+    private $canReplaceArguments;
 
     /**
      * MethodCall constructor.
      * @param MethodArgument[] $methodArguments
+     * @param bool $canReplaceArguments
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    private function __construct(array $methodArguments)
+    private function __construct(array $methodArguments, bool $canReplaceArguments)
     {
         Assert::allInstanceOfType($methodArguments, MethodArgument::class);
         $this->methodArguments = $methodArguments;
+        $this->canReplaceArguments = $canReplaceArguments;
     }
 
     /**
      * @param MethodArgument[] $methodArguments
+     * @param bool $canReplaceArguments
      * @return MethodCall
      * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
-    public static function createWith(array $methodArguments) : self
+    public static function createWith(array $methodArguments, bool $canReplaceArguments) : self
     {
-        return new self($methodArguments);
+        return new self($methodArguments, $canReplaceArguments);
     }
 
     /**
@@ -60,9 +67,14 @@ class MethodCall
     /**
      * @param string $parameterName
      * @param mixed $value
+     * @throws \SimplyCodedSoftware\Messaging\MessagingException
      */
     public function replaceArgument(string $parameterName, $value) : void
     {
+        if (!$this->canReplaceArguments) {
+            throw InvalidArgumentException::create("Gateways, Inbound Adapters, Pollable Consumers can't replace arguments in Around Interceptors");
+        }
+
         $this->methodArguments = array_map(function (MethodArgument $methodArgument) use ($parameterName, $value) {
             if ($methodArgument->getParameterName() == $parameterName) {
                 return $methodArgument->replaceValue($value);

@@ -78,9 +78,6 @@ class GatewayInternalHandler
      */
     public function handle(Message $requestMessage)
     {
-        $replyChannelComingFromPreviousGateway = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
-        $errorChannelComingFromPreviousGateway = $requestMessage->getHeaders()->containsKey(MessageHeaders::ERROR_CHANNEL) ? $requestMessage->getHeaders()->getErrorChannel() : null;
-
         $requestMessage = MessageBuilder::fromMessage($requestMessage);
         $replyChannel = $this->replyChannel ? $this->replyChannel : QueueChannel::create();
         if ($this->interfaceToCall->hasReturnValue()) {
@@ -125,20 +122,7 @@ class GatewayInternalHandler
             }
         }
 
-        if (!is_null($reply)) {
-            $replyMessageBuilder = MessageBuilder::fromMessage($replyMessage)
-                ->setPayload($reply);
-            if ($replyChannelComingFromPreviousGateway) {
-                $replyMessageBuilder->setHeader(MessageHeaders::REPLY_CHANNEL, $replyChannelComingFromPreviousGateway);
-            }
-            if ($errorChannelComingFromPreviousGateway) {
-                $replyMessageBuilder->setHeader(MessageHeaders::ERROR_CHANNEL, $errorChannelComingFromPreviousGateway);
-            }
-
-            return $replyMessageBuilder->build();
-        }
-
-        return null;
+        return $reply;
     }
 
     /**

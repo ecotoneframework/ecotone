@@ -296,6 +296,14 @@ class InterfaceToCall
     }
 
     /**
+     * @return int
+     */
+    public function getInterfaceParameterAmount() : int
+    {
+        return count($this->parameters);
+    }
+
+    /**
      * @param int $index
      * @return InterfaceParameter
      * @throws InvalidArgumentException

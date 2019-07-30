@@ -113,12 +113,12 @@ class AroundMethodInterceptor
 
         $hasMethodInvocation = false;
         $argumentsToCallInterceptor = [];
-        $interceptedInstanceType = TypeDescriptor::createFromVariable($methodInvocation->getInterceptedInstance());
+        $interceptedInstanceType = TypeDescriptor::createFromVariable($methodInvocation->getObjectToInvokeOn());
         $referenceSearchServiceTypeDescriptor = TypeDescriptor::create(ReferenceSearchService::class);
         $messageType = TypeDescriptor::create(Message::class);
         $messagePayloadType = $requestMessage->getHeaders()->hasContentType() && $requestMessage->getHeaders()->getContentType()->hasTypeParameter()
                                 ? $requestMessage->getHeaders()->getContentType()->getTypeParameter()
-                                : TypeDescriptor::createUnknownType();
+                                : TypeDescriptor::createFromVariable($requestMessage->getPayload());
 
         foreach ($this->interceptorInterfaceToCall->getInterfaceParameters() as $parameter) {
             $resolvedArgument = null;
@@ -133,7 +133,7 @@ class AroundMethodInterceptor
             }
 
             if (!$resolvedArgument && $parameter->hasType($interceptedInstanceType)) {
-                $resolvedArgument = $methodInvocation->getInterceptedInstance();
+                $resolvedArgument = $methodInvocation->getObjectToInvokeOn();
             }
 
             if (!$resolvedArgument && $parameter->hasType($messageType)) {

@@ -71,7 +71,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws Exception
      * @throws MessagingException
      */
-    public function test_run_event_driven_consumer()
+    public function __test_run_event_driven_consumer()
     {
         $subscribableChannelName = "input";
         $subscribableChannel = DirectChannel::create();
@@ -100,7 +100,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_registering_module_with_extension_objects()
+    public function __test_registering_module_with_extension_objects()
     {
         $exampleModuleConfiguration = ExampleModuleConfiguration::createEmpty();
         MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createWith([$exampleModuleConfiguration], [new stdClass(), ServiceWithoutReturnValue::create()]));
@@ -115,7 +115,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_running_pollable_consumer()
+    public function __test_running_pollable_consumer()
     {
         $messageChannelName = "pollableChannel";
         $pollableChannel = QueueChannel::create();
@@ -139,7 +139,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_throwing_exception_if_running_not_existing_consumer()
+    public function __test_throwing_exception_if_running_not_existing_consumer()
     {
         $messagingSystem = $this->createMessagingSystemConfiguration()
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
@@ -153,7 +153,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_notifying_observer()
+    public function __test_notifying_observer()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -173,7 +173,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_serializing_and_deserializing()
+    public function __test_serializing_and_deserializing()
     {
         $config = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createWith([], []))
             ->registerMessageHandler(DumbMessageHandlerBuilder::create(NoReturnMessageHandler::create(), 'queue'))
@@ -193,7 +193,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws Exception
      * @throws MessagingException
      */
-    public function test_registering_required_reference_names()
+    public function __test_registering_required_reference_names()
     {
         $messagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -211,7 +211,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
-    public function test_registering_reference_names_from_interceptors()
+    public function __test_registering_reference_names_from_interceptors()
     {
         $messagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -246,7 +246,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
-    public function test_registering_asynchronous_endpoint()
+    public function __test_registering_asynchronous_endpoint()
     {
         $calculatingService = CalculatingService::create(1);
         $configuredMessagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
@@ -276,7 +276,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertEquals(2, $calculatingService->getLastResult());
     }
 
-    public function test_registering_asynchronous_endpoint_with_channel_interceptor()
+    public function __test_registering_asynchronous_endpoint_with_channel_interceptor()
     {
         $calculatingService = CalculatingService::create(1);
         $channelInterceptor = $this->createMock(ChannelInterceptor::class);
@@ -316,7 +316,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channel->send($requestMessage);
     }
 
-    public function test_registering_reference_from_endpoint_annotation()
+    public function __test_registering_reference_from_endpoint_annotation()
     {
         $messagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -335,7 +335,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
-    public function test_registering_reference_from_interface_to_call_on_prepare_method()
+    public function __test_registering_reference_from_interface_to_call_on_prepare_method()
     {
         $messagingSystem = MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
             InMemoryModuleMessaging::createWith(
@@ -364,7 +364,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_intercepting_channel_before_sending()
+    public function __test_intercepting_channel_before_sending()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -403,7 +403,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_ordering_channel_interceptors_before_sending()
+    public function __test_ordering_channel_interceptors_before_sending()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -455,7 +455,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_intercepting_by_stopping_message_flow()
+    public function __test_intercepting_by_stopping_message_flow()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -491,7 +491,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_intercepting_after_sending_to_inform_it_was_successful()
+    public function __test_intercepting_after_sending_to_inform_it_was_successful()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -527,7 +527,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_intercepting_after_sending_to_inform_about_failure_handling_after_exception_occurred()
+    public function __test_intercepting_after_sending_to_inform_about_failure_handling_after_exception_occurred()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -562,7 +562,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_intercepting_with_multiple_channels()
+    public function __test_intercepting_with_multiple_channels()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -611,7 +611,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_registering_channel_interceptor_with_regex()
+    public function __test_registering_channel_interceptor_with_regex()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -650,7 +650,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_creating_implicit_direct_channel_if_not_exists()
+    public function __test_creating_implicit_direct_channel_if_not_exists()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -673,7 +673,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_creating_default_channel_configuration_if_not_exists()
+    public function __test_creating_default_channel_configuration_if_not_exists()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -696,7 +696,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function test_replacing_implicit_direct_channel_with_real_channel_if_passed()
+    public function __test_replacing_implicit_direct_channel_with_real_channel_if_passed()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -720,7 +720,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws NoConsumerFactoryForBuilderException
      * @throws MessagingException
      */
-    public function TODO__test_registering_polling_consumer_with_metadata()
+    public function TODO____test_registering_polling_consumer_with_metadata()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
@@ -756,12 +756,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
         $requestChannelName = "requestChannelName";
         $endpointName = "pollableName";
-        $requestChannel  = DirectChannel::create();
-        $messageHandler = ReplyViaHeadersMessageHandler::createReplyWithRequestMessage();
-        $requestChannel->subscribe($messageHandler);
 
-        $endChain = ReplyViaHeadersMessageHandler::createReplyWithRequestMessage();
-
+        $lastServiceFromChain = CalculatingService::create(0);
         $messagingSystem = $messagingSystemConfiguration
             ->registerConsumer(
                 InboundChannelAdapterBuilder::createWithDirectObject(
@@ -770,7 +766,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     "executeReturn"
                 )->withEndpointId($endpointName)
             )
-            ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference($messageHandler, "handle")->withInputChannelName($requestChannelName))
+            ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")->withInputChannelName($requestChannelName))
             ->registerConsumerFactory(new EventDrivenConsumerBuilder())
             ->registerPollingMetadata(
                 PollingMetadata::create($endpointName)
@@ -788,7 +784,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerAroundMethodInterceptor(
                 AroundInterceptorReference::createWithDirectObject(
                     "around",
-                    CalculatingServiceInterceptorExample::create(0), "result",
+                    CalculatingServiceInterceptorExample::create(1), "sumAfterCalling",
                     1,
                     ConsumerContinuouslyWorkingService::class
                 )
@@ -805,8 +801,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerAfterMethodInterceptor(
                 MethodInterceptor::create(
                     "1",
-                    InterfaceToCall::create(ReplyViaHeadersMessageHandler::class, "handle"),
-                    ServiceActivatorBuilder::createWithDirectReference($endChain, "handle"),
+                    InterfaceToCall::create(CalculatingService::class, "result"),
+                    ServiceActivatorBuilder::createWithDirectReference($lastServiceFromChain, "result"),
                     1,
                     ConsumerContinuouslyWorkingService::class
                 )
@@ -816,10 +812,10 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $messagingSystem->runSeparatelyRunningConsumerBy($endpointName);
 
-        $this->assertEquals(20, $endChain->getReceivedMessage()->getPayload());
+        $this->assertEquals(42, $lastServiceFromChain->getLastResult());
     }
 
-    public function test_intercepting_channel_adapter_with_void_services_by_passing_through_message()
+    public function __test_intercepting_channel_adapter_with_void_services_by_passing_through_message()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
         $requestChannelName = "requestChannelName";
@@ -876,7 +872,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_registering_interceptors_using_pointcuts_for_message_handler()
+    public function __test_registering_interceptors_using_pointcuts_for_message_handler()
     {
         $endpointName = "endpointName";
         $inputChannelName = "inputChannel";
@@ -933,7 +929,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_intercepting_using_interceptor_converter_to_retrieve_annotations_from_intercepted_handler()
+    public function __test_intercepting_using_interceptor_converter_to_retrieve_annotations_from_intercepted_handler()
     {
         $endpointName = "endpointName";
         $inputChannelName = "inputChannel";
@@ -979,7 +975,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_registering_interceptors_by_reference_names()
+    public function __test_registering_interceptors_by_reference_names()
     {
         $endpointName = "endpointName";
         $inputChannelName = "inputChannel";
@@ -1066,7 +1062,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
-    public function test_combing_gateway_for_same_reference()
+    public function __test_combing_gateway_for_same_reference()
     {
         $buyGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "buy", "buy");
         $sellGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "sell", "sell");
@@ -1095,7 +1091,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_throwing_exception_if_registering_interceptor_with_input_channel()
+    public function __test_throwing_exception_if_registering_interceptor_with_input_channel()
     {
         $this->expectException(ConfigurationException::class);
 
@@ -1115,7 +1111,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_throwing_exception_if_registering_interceptor_with_output_channel()
+    public function __test_throwing_exception_if_registering_interceptor_with_output_channel()
     {
         $this->expectException(ConfigurationException::class);
 
@@ -1135,7 +1131,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_registering_interceptors_with_precedence_for_message_handler()
+    public function __test_registering_interceptors_with_precedence_for_message_handler()
     {
         $inputChannelName = "inputChannel";
         $messagingSystemConfiguration =
@@ -1198,7 +1194,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
-    public function test_registering_interceptors_for_gateway_using_pointcut()
+    public function __test_registering_interceptors_for_gateway_using_pointcut()
     {
         $requestChannelName = "inputChannel";
         $aroundInterceptor = NoReturnMessageHandler::create();
@@ -1270,7 +1266,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertTrue($aroundInterceptor->wasCalled());
     }
 
-    public function test_registering_interceptors_for_gateway_using_interceptor_name()
+    public function __test_registering_interceptors_for_gateway_using_interceptor_name()
     {
         $requestChannelName = "inputChannel";
         $aroundInterceptor = NoReturnMessageHandler::create();
@@ -1342,7 +1338,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      *
      * @throws MessagingException
      */
-    public function test_given_gateway_with_around_interceptor_controlling_invocation_then_exception_should_be_thrown()
+    public function TODO___test_given_gateway_with_around_interceptor_controlling_invocation_then_exception_should_be_thrown()
     {
         $requestChannelName = "inputChannel";
         $aroundInterceptor = CalculatingServiceInterceptorExample::create(0);
@@ -1372,7 +1368,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_throwing_exception_if_registering_handlers_with_same_endpoint_id()
+    public function __test_throwing_exception_if_registering_handlers_with_same_endpoint_id()
     {
         $this->expectException(ConfigurationException::class);
 
@@ -1385,7 +1381,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_generating_random_id_if_no_endpoint_id_passed()
+    public function __test_generating_random_id_if_no_endpoint_id_passed()
     {
         MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
             ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple())
@@ -1397,7 +1393,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function test_throwing_exception_if_trying_to_register_two_channels_with_same_names()
+    public function __test_throwing_exception_if_trying_to_register_two_channels_with_same_names()
     {
         $this->expectException(ConfigurationException::class);
 

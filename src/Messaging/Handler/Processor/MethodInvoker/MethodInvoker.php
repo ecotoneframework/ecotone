@@ -68,6 +68,10 @@ final class MethodInvoker implements MessageProcessor
      * @var object[]
      */
     private $endpointAnnotations;
+    /**
+     * @var bool
+     */
+    private $canInterceptorReplaceArguments;
 
     /**
      * MethodInvocation constructor.
@@ -78,10 +82,11 @@ final class MethodInvoker implements MessageProcessor
      * @param ConversionService $conversionService
      * @param AroundMethodInterceptor[] $aroundMethodInterceptors
      * @param object[] $endpointAnnotations
+     * @param bool $canInterceptorReplaceArguments
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall, ConversionService $conversionService, array $aroundMethodInterceptors, array $endpointAnnotations)
+    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall, ConversionService $conversionService, array $aroundMethodInterceptors, array $endpointAnnotations, bool $canInterceptorReplaceArguments)
     {
         Assert::allInstanceOfType($methodParameterConverters, ParameterConverter::class);
 
@@ -92,6 +97,7 @@ final class MethodInvoker implements MessageProcessor
         $this->interfaceToCall = $interfaceToCall;
         $this->aroundMethodInterceptors = $aroundMethodInterceptors;
         $this->endpointAnnotations = $endpointAnnotations;
+        $this->canInterceptorReplaceArguments = $canInterceptorReplaceArguments;
     }
 
     /**
@@ -140,7 +146,7 @@ final class MethodInvoker implements MessageProcessor
         $requiredArgumentsCount = count($interfaceToCall->getInterfaceParameters());
 
         if (self::canBeInvokedWithDefaultArgument($interfaceToCall, $passedArgumentsCount, $requiredArgumentsCount)) {
-            if ($interfaceToCall->hasMoreThanOneParameter()) {
+            if (($interfaceToCall->getInterfaceParameterAmount() - count($passedMethodParameterConverters)) == 2) {
                 $methodParameterConverters = [
                     self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild),
                     $shouldBeBuild ? new AllHeadersConverter($interfaceToCall->getSecondParameter()->getName()) : AllHeadersBuilder::createWith($interfaceToCall->getSecondParameter()->getName())
@@ -202,7 +208,7 @@ final class MethodInvoker implements MessageProcessor
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, []);
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, [], [], true);
     }
 
     /**
@@ -212,21 +218,22 @@ final class MethodInvoker implements MessageProcessor
      * @param ReferenceSearchService $referenceSearchService
      * @param AroundMethodInterceptor[] $interceptorsReferences
      * @param object[] $endpointAnnotations
+     * @param bool $canInterceptorsReplaceMethodArguments
      * @return MethodInvoker
-     * @throws InvalidArgumentException
      * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws ReferenceNotFoundException
+     * @throws InvalidArgumentException
      * @throws MessagingException
+     * @throws ReferenceNotFoundException
+     * @throws ReflectionException
      */
-    public static function createWithBuiltParameterConverters($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $interceptorsReferences = [], array $endpointAnnotations = []): self
+    public static function createWithBuiltParameterConverters($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $interceptorsReferences, array $endpointAnnotations, bool $canInterceptorsReplaceMethodArguments): self
     {
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
         $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
         /** @var ConversionService $conversionService */
         $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
 
-        return new self($objectToInvokeOn, $objectMethodName, $methodParameters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService, $interceptorsReferences, $endpointAnnotations);
+        return new self($objectToInvokeOn, $objectMethodName, $methodParameters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService, $interceptorsReferences, $endpointAnnotations, $canInterceptorsReplaceMethodArguments);
     }
 
     /**
@@ -250,7 +257,31 @@ final class MethodInvoker implements MessageProcessor
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $orderedAroundMethodInterceptorReferences), $endpointAnnotations);
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $orderedAroundMethodInterceptorReferences), $endpointAnnotations, true);
+    }
+
+    /**
+     * @param $objectToInvokeOn
+     * @param string $objectMethodName
+     * @param ParameterConverterBuilder[] $methodParameters
+     * @param ReferenceSearchService $referenceSearchService
+     * @param AroundInterceptorReference[] $orderedAroundMethodInterceptorReferences
+     * @param object[] $endpointAnnotations
+     * @return MethodInvoker
+     * @throws InvalidArgumentException
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws ReferenceNotFoundException
+     * @throws MessagingException
+     */
+    public static function createWithInterceptorsNotChangingCallArguments($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $orderedAroundMethodInterceptorReferences, array $endpointAnnotations): self
+    {
+        $messageConverters = [];
+        foreach ($methodParameters as $methodParameter) {
+            $messageConverters[] = $methodParameter->build($referenceSearchService);
+        }
+
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $orderedAroundMethodInterceptorReferences), $endpointAnnotations, false);
     }
 
     /**
@@ -315,7 +346,7 @@ final class MethodInvoker implements MessageProcessor
             $methodArguments[] = MethodArgument::createWith($interfaceParameter, $data);
         }
 
-        return MethodCall::createWith($methodArguments);
+        return MethodCall::createWith($methodArguments, $this->canInterceptorReplaceArguments);
     }
 
     /**

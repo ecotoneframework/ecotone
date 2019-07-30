@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
 
 use Ramsey\Uuid\Uuid;
+use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
 use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
 use SimplyCodedSoftware\Messaging\Conversion\MediaType;
 use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverter;
@@ -21,6 +22,7 @@ use SimplyCodedSoftware\Messaging\Handler\Processor\WrapWithMessageBuildProcesso
 use SimplyCodedSoftware\Messaging\MessageHeaders;
 use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
 use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\Order;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderProcessor;
@@ -41,11 +43,13 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\Cal
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithStdClassInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithUnorderedClassInvocationInterceptorExample;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\StubCallSavingService;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingThreeArguments;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
+use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceReturningMessage;
 use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutAnyMethods;
 use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
 
@@ -379,7 +383,7 @@ class MethodInvokerTest extends MessagingTest
         $this->assertTrue($interceptingService3->wasCalled());
     }
 
-    public function test_calling_with_method_interceptor_changing_return_value()
+    public function test_calling_with_around_method_interceptor_changing_return_value()
     {
         $interceptingService1 = CallWithEndingChainAndReturningInterceptorExample::createWithReturnType("changed");
         $interceptedService = StubCallSavingService::createWithReturnType("original");
@@ -395,6 +399,23 @@ class MethodInvokerTest extends MessagingTest
             "changed",
             $methodInvocation->processMessage(MessageBuilder::withPayload("some")->build())
         );
+    }
+
+    public function test_throwing_exception_when_replacing_arguments_when_blocked()
+    {
+        $methodInvocation = MethodInvoker::createWithInterceptorsNotChangingCallArguments(
+            CalculatingService::create(3), 'result', [], InMemoryReferenceSearchService::createEmpty(),
+            [AroundInterceptorReference::createWithDirectObject("",
+                CalculatingServiceInterceptorExample::create(1), "sum",
+                0,
+                ""
+            )],
+            []
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $methodInvocation->processMessage(MessageBuilder::withPayload(5)->build());
     }
 
     public function test_calling_with_method_interceptor_changing_return_value_at_second_call()

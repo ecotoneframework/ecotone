@@ -1,19 +1,19 @@
 <?php
 
 
-namespace SimplyCodedSoftware\Messaging\Handler\Chain;
+namespace Ecotone\Messaging\Handler\Chain;
 
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class ChainForwardPublisher
- * @package SimplyCodedSoftware\Messaging\Handler\Chain
+ * @package Ecotone\Messaging\Handler\Chain
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ChainForwardPublisher

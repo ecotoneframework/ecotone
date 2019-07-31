@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating;
+namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-use SimplyCodedSoftware\Messaging\Annotation\InboundChannelAdapter;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Poller;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Annotation\InboundChannelAdapter;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Poller;
+use Ecotone\Messaging\Annotation\ServiceActivator;
 
 /**
  * Class InboundCalculation

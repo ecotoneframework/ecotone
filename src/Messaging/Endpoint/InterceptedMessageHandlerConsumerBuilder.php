@@ -2,18 +2,18 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace Ecotone\Messaging\Endpoint;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ErrorChannelInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\InterceptedEndpoint;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
+use Ecotone\Messaging\Handler\InterceptedEndpoint;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class InterceptedMessageHandlerConsumerBuilder
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class InterceptedMessageHandlerConsumerBuilder implements MessageHandlerConsumerBuilder, InterceptedEndpoint

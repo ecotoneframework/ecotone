@@ -1,22 +1,22 @@
 <?php
 
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Endpoint\NullEntrypointGateway;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageConverter\DefaultHeaderMapper;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Endpoint\NullEntrypointGateway;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class AmqpBackedMessageChannelBuilder
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpBackedMessageChannelBuilder implements MessageChannelBuilder

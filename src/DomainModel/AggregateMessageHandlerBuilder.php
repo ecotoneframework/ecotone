@@ -1,37 +1,37 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
+namespace Ecotone\DomainModel;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use ReflectionClass;
 use ReflectionException;
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateEvents;
-use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventBus;
-use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\DomainModel\Annotation\AggregateEvents;
+use Ecotone\DomainModel\LazyEventBus\LazyEventBus;
+use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\ReferenceNotFoundException;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class AggregateCallingCommandHandlerBuilder
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel

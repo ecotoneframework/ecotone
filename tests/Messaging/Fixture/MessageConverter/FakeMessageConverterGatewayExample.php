@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter;
+namespace Test\Ecotone\Messaging\Fixture\MessageConverter;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Parameter\Header;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
 
 /**
  * Interface FakeHttpMessageConverterGateway
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter
+ * @package Test\Ecotone\Messaging\Fixture\MessageConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

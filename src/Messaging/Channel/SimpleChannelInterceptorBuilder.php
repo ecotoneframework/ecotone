@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace Ecotone\Messaging\Channel;
 
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class SimpleChannelInterceptorBuilder
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder

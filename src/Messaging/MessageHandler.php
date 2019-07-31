@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging;
+namespace Ecotone\Messaging;
 
 /**
  * Interface MessageHandler
- * @package SimplyCodedSoftware\Messaging
+ * @package Ecotone\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageHandler

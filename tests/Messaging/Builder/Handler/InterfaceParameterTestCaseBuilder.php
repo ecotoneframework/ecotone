@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Builder\Handler;
+namespace Test\Ecotone\Messaging\Builder\Handler;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceParameter;
 
 /**
  * Class InterfaceParameterTestCaseBuilder
- * @package Test\SimplyCodedSoftware\Messaging\Builder\Handler
+ * @package Test\Ecotone\Messaging\Builder\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceParameterTestCaseBuilder

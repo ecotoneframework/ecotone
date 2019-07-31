@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
  * Interface MultipleMethodsGatewayExample
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

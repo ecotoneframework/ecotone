@@ -1,43 +1,43 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Transformer;
+namespace Test\Ecotone\Messaging\Unit\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithReturnValue;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MessageToHeaderParameterConverterBuilder;
+use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceWithoutReturnValue;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceWithReturnValue;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class TransformerBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Transformer
+ * @package Ecotone\Messaging\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TransformerBuilderTest extends MessagingTest
 {
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passing_message_to_transforming_class_if_there_is_type_hint_for_it()
     {
@@ -68,7 +68,7 @@ class TransformerBuilderTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passing_message_payload_as_default()
     {
@@ -98,7 +98,7 @@ class TransformerBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_void_method_provided_for_transformation()
     {
@@ -120,7 +120,7 @@ class TransformerBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_not_sending_message_to_output_channel_if_transforming_method_returns_null()
     {
@@ -145,7 +145,7 @@ class TransformerBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_transforming_headers_if_array_returned_by_transforming_method()
     {
@@ -183,7 +183,7 @@ class TransformerBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_transforming_headers_if_array_returned_and_message_payload_is_also_array()
     {
@@ -215,7 +215,7 @@ class TransformerBuilderTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_transforming_with_custom_method_arguments_converters()
     {
@@ -258,7 +258,7 @@ class TransformerBuilderTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_transforming_with_header_enricher()
     {
@@ -297,7 +297,7 @@ class TransformerBuilderTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_transforming_with_transformer_instance_of_object()
     {
@@ -360,7 +360,7 @@ class TransformerBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_with_interceptors()
     {

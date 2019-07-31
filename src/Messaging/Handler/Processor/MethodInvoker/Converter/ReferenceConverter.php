@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter;
+namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class ServiceReferenceParameterConverter
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
@@ -36,7 +36,7 @@ class ReferenceConverter implements ParameterConverter
      * @param ReferenceSearchService $referenceSearchService
      * @param string $parameterName
      * @param object|null $serviceReference
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(ReferenceSearchService $referenceSearchService, string $parameterName, $serviceReference)
     {
@@ -51,7 +51,7 @@ class ReferenceConverter implements ParameterConverter
      * @param string $parameterName
      * @param string $serviceReference
      * @return ReferenceConverter
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function create(ReferenceSearchService $referenceSearchService, string $parameterName, string $serviceReference) : self
     {
@@ -80,7 +80,7 @@ class ReferenceConverter implements ParameterConverter
 
     /**
      * @param object|null $serviceReference
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function initialize($serviceReference) : void
     {

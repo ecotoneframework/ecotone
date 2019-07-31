@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Enricher;
+namespace Ecotone\Messaging\Handler\Enricher;
 
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Interface EnrichReferenceService
- * @package SimplyCodedSoftware\Messaging\Handler\Transformer
+ * @package Ecotone\Messaging\Handler\Transformer
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

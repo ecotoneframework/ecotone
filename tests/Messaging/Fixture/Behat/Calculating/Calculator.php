@@ -2,10 +2,10 @@
 declare(strict_types=1);
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating;
+namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
  * Interface Calculator

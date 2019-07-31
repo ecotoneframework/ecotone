@@ -2,19 +2,19 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Handler\Logger;
+namespace Ecotone\Messaging\Handler\Logger;
 
-use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogAfter;
-use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogBefore;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class LoggingInterceptor
- * @package SimplyCodedSoftware\Messaging\Handler\Logger
+ * @package Ecotone\Messaging\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LoggingInterceptor

@@ -2,11 +2,11 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation;
+namespace Ecotone\Messaging\Config\Annotation;
 
 /**
  * Class GetUsedPathsFromAutoload
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GetUsedPathsFromAutoload

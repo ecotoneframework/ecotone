@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * Class SymfonyExpressionEvaluationAdapter
- * @package Test\SimplyCodedSoftware\Messaging\Handler\Enricher
+ * @package Test\Ecotone\Messaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class SymfonyExpressionEvaluationAdapter implements \SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService
+class SymfonyExpressionEvaluationAdapter implements \Ecotone\Messaging\Handler\ExpressionEvaluationService
 {
     /**
      * @var ExpressionLanguage

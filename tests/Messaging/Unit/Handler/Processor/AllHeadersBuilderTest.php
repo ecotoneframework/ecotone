@@ -1,21 +1,21 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
+namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CallableService;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Fixture\Service\CallableService;
 
 /**
  * Class AllHeadersBuilderTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor
+ * @package Test\Ecotone\Messaging\Unit\Handler\Processor
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AllHeadersBuilderTest extends TestCase

@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Poller;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Poller;
+use Ecotone\Messaging\Annotation\ServiceActivator;
 
 /**
  * Class ServiceActivatorWithAllConfigurationDefined
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint
+ * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace Ecotone\Messaging\Config;
 
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class InMemoryReferenceTypeFromNameResolver
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameResolver

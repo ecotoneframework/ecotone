@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\Interceptor;
+namespace Ecotone\Messaging\Endpoint\Interceptor;
 
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerInterceptor;
+use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 
 /**
  * Class LimitConsumedMessagesExtension
- * @package SimplyCodedSoftware\Messaging\Endpoint\Extension
+ * @package Ecotone\Messaging\Endpoint\Extension
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LimitConsumedMessagesInterceptor implements ConsumerInterceptor

@@ -1,19 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer;
+namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
-use SimplyCodedSoftware\Messaging\Endpoint\NullAcknowledgementCallback;
-use SimplyCodedSoftware\Messaging\Endpoint\StoppableConsumer;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
+use Ecotone\Messaging\Endpoint\StoppableConsumer;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Scheduling\TaskExecutor;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class PollingConsumerTaskExecutor
- * @package SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer
+ * @package Ecotone\Messaging\Endpoint\PollingConsumer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PollerTaskExecutor implements TaskExecutor

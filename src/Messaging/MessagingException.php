@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging;
+namespace Ecotone\Messaging;
 
 /**
  * Class MessagingException
- * @package SimplyCodedSoftware\Messaging\Exception
+ * @package Ecotone\Messaging\Exception
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class MessagingException extends \Exception

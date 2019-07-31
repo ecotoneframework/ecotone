@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Interop\Amqp\AmqpTopic as EnqueueExchange;
 use Interop\Amqp\AmqpTopic;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class AmqpExchange
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpExchange
@@ -29,7 +29,7 @@ class AmqpExchange
      * AmqpExchange constructor.
      * @param string $exchangeName
      * @param string $exchangeType
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(string $exchangeName, string $exchangeType)
     {
@@ -101,7 +101,7 @@ class AmqpExchange
     /**
      * @param string $exchangeName
      * @return AmqpExchange
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createDirectExchange(string $exchangeName) : self
     {
@@ -111,7 +111,7 @@ class AmqpExchange
     /**
      * @param string $exchangeName
      * @return AmqpExchange
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createFanoutExchange(string $exchangeName) : self
     {
@@ -121,7 +121,7 @@ class AmqpExchange
     /**
      * @param string $exchangeName
      * @return AmqpExchange
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createTopicExchange(string $exchangeName) : self
     {
@@ -131,7 +131,7 @@ class AmqpExchange
     /**
      * @param string $exchangeName
      * @return AmqpExchange
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createHeadersExchange(string $exchangeName) : self
     {

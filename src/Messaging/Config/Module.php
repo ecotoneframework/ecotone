@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace Ecotone\Messaging\Config;
 
 /**
  * Interface ExternalConfiguration
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface Module

@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler;
+namespace Test\Ecotone\DomainModel\Fixture\Annotation\QueryHandler;
 
-use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateIdentifier;
-use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
+use Ecotone\DomainModel\Annotation\Aggregate;
+use Ecotone\DomainModel\Annotation\AggregateIdentifier;
+use Ecotone\DomainModel\Annotation\QueryHandler;
 
 /**
  * Class AggregateQueryHandlerWithOutputChannelExample
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler
+ * @package Test\Ecotone\DomainModel\Fixture\Annotation\QueryHandler
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  */

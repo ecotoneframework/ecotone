@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Enricher\Converter;
+namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyEditorAccessor;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyEditor;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
+use Ecotone\Messaging\Handler\Enricher\PropertyPath;
+use Ecotone\Messaging\Message;
 
 /**
  * Class StaticPropertySetter
- * @package SimplyCodedSoftware\Messaging\Handler\Enricher\Converter
+ * @package Ecotone\Messaging\Handler\Enricher\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

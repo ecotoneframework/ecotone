@@ -1,17 +1,17 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Support;
+namespace Ecotone\Messaging\Support;
 
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageHeaderDoesNotExistsException;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\Clock\ServerClock;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\Clock\ServerClock;
 
 /**
  * Class MessageBuilder
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package Ecotone\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessageBuilder
@@ -29,7 +29,7 @@ final class MessageBuilder
      * MessageBuilder constructor.
      * @param $payload
      * @param HeaderAccessor $headerAccessor
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct($payload, HeaderAccessor $headerAccessor)
     {
@@ -154,7 +154,7 @@ final class MessageBuilder
     /**
      * @param string $name
      * @return mixed
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getHeaderWithName(string $name)
     {
@@ -200,7 +200,7 @@ final class MessageBuilder
 
     /**
      * @param $payload
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function initialize($payload) : void
     {

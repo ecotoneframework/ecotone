@@ -1,25 +1,25 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpDestination;
 use Interop\Amqp\AmqpMessage;
 use Interop\Amqp\AmqpTopic;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
-use SimplyCodedSoftware\Messaging\MessageConverter\MessageConverter;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageConverter\HeaderMapper;
+use Ecotone\Messaging\MessageConverter\MessageConverter;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class OutboundAmqpGateway
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpOutboundChannelAdapter implements MessageHandler

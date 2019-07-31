@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace Ecotone\Messaging\Channel;
 
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageChannel;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\MessageChannel;
 
 /**
  * Interface MessageChannelBuilder
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageChannelBuilder

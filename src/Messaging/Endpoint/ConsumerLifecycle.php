@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace Ecotone\Messaging\Endpoint;
 
 /**
  * Interface Lifecycle
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ConsumerLifecycle

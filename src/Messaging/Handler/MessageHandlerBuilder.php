@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Interface MessageHandlerBuilder
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageHandlerBuilder

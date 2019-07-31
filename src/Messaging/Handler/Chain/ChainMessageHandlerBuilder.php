@@ -1,26 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Chain;
+namespace Ecotone\Messaging\Handler\Chain;
 
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class ChainMessageHandlerBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Chain
+ * @package Ecotone\Messaging\Handler\Chain
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder

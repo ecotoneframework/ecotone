@@ -6,12 +6,12 @@
  * Time: 20:02
  */
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
+namespace Test\Ecotone\Messaging\Fixture\Handler;
     
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHandler;
 
 class ForwardMessageHandler implements MessageHandler
 {

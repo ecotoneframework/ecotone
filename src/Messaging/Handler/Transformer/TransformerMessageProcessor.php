@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
+namespace Ecotone\Messaging\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class TransformerMessageProcessor

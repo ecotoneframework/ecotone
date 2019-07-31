@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 /**
  * Interface AmqpHeader
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface AmqpHeader

@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodInvokerProcessor
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodInvokerChainProcessor implements MethodInvocation

@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate;
+namespace Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Aggregate;
 
-use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateIdentifier;
-use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
+use Ecotone\DomainModel\Annotation\Aggregate;
+use Ecotone\DomainModel\Annotation\AggregateIdentifier;
+use Ecotone\DomainModel\Annotation\CommandHandler;
 
 /**
  * Class AggregateCommandHandlerWithReferencesExample
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate
+ * @package Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Aggregate
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  */

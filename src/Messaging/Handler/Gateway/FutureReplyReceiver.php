@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace Ecotone\Messaging\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Future;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
+use Ecotone\Messaging\Future;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\ErrorMessage;
 
 /**
  * Class FutureReplySender
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway
+ * @package Ecotone\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

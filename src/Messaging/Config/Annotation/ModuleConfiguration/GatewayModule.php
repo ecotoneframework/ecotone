@@ -1,32 +1,32 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\HeaderValue;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
+use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Annotation\Parameter\Header;
+use Ecotone\Messaging\Annotation\Parameter\Headers;
+use Ecotone\Messaging\Annotation\Parameter\HeaderValue;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 
 /**
  * Class AnnotationGatewayConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationToBuilder
+ * @package Ecotone\Messaging\Config\Annotation\AnnotationToBuilder
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
@@ -56,7 +56,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     {
         $gatewayBuilders = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Gateway::class) as $annotationRegistration) {
-            /** @var \SimplyCodedSoftware\Messaging\Annotation\Gateway $annotation */
+            /** @var \Ecotone\Messaging\Annotation\Gateway $annotation */
             $annotation = $annotationRegistration->getAnnotationForMethod();
 
             $parameterConverters = [];

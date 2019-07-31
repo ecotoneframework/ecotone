@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Transaction\Null;
+namespace Ecotone\Messaging\Transaction\Null;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Transaction\Transaction;
-use SimplyCodedSoftware\Messaging\Transaction\TransactionFactory;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Transaction\Transaction;
+use Ecotone\Messaging\Transaction\TransactionFactory;
 
 /**
  * Class NullTransactionFactory
- * @package SimplyCodedSoftware\Messaging\Transaction\Null
+ * @package Ecotone\Messaging\Transaction\Null
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class NullTransactionFactory implements TransactionFactory

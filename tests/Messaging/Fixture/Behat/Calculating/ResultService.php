@@ -1,9 +1,9 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating;
+namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\ServiceActivator;
 
 /**
  * Class ResultService

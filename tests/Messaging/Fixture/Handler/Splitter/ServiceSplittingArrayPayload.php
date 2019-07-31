@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Splitter;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Splitter;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class ServiceSplittingArrayPayload
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Splitter
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Splitter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceSplittingArrayPayload

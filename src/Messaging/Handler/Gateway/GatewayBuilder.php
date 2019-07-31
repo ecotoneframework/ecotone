@@ -1,19 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace Ecotone\Messaging\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InterceptedEndpoint;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InterceptedEndpoint;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Interface Gateway
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway
+ * @package Ecotone\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface GatewayBuilder extends InterceptedEndpoint

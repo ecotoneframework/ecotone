@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace Ecotone\Messaging\Config;
 
-use SimplyCodedSoftware\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageChannel;
 
 /**
  * Interface ConfiguredMessagingSystem
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ConfiguredMessagingSystem

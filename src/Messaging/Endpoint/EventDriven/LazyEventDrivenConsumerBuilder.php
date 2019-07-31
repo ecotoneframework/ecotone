@@ -1,18 +1,18 @@
 <?php
 
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\EventDriven;
+namespace Ecotone\Messaging\Endpoint\EventDriven;
 
 
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\SubscribableChannel;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\SubscribableChannel;
 
 class LazyEventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
 {

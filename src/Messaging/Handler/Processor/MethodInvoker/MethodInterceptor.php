@@ -1,19 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class Interceptor
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodInterceptor implements InterceptorWithPointCut

@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\EventHandler;
+namespace Test\Ecotone\DomainModel\Fixture\Annotation\EventHandler;
 
-use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use Ecotone\DomainModel\Annotation\EventHandler;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
  * Class ExampleEventEventHandler
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\EventHandler
+ * @package Test\Ecotone\DomainModel\Fixture\Annotation\EventHandler
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

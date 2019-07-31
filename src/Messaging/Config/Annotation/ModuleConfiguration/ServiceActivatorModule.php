@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 /**
  * Class AnnotationServiceActivatorConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */

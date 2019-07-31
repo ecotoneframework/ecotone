@@ -1,24 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace Ecotone\Messaging\Config;
 
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptorBuilder;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Conversion\ConverterBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Conversion\ConverterBuilder;
+use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
+use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 
 /**
  * Class Configuration
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface Configuration
@@ -74,7 +74,7 @@ interface Configuration
     public function registerBeforeMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
 
     /**
-     * @param \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference $aroundInterceptorReference
+     * @param \Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference $aroundInterceptorReference
      * @return Configuration
      */
     public function registerAroundMethodInterceptor(AroundInterceptorReference $aroundInterceptorReference) : Configuration;

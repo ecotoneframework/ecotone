@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit;
+namespace Test\Ecotone\Messaging\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\MessageHeaderDoesNotExistsException;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
+use Ecotone\Messaging\MessageHeaders;
 
 /**
  * Class MessageHeaderTest
- * @package SimplyCodedSoftware\Messaging
+ * @package Ecotone\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageHeadersTest extends TestCase

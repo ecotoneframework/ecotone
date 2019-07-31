@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
+namespace Ecotone\DomainModel;
 
-use SimplyCodedSoftware\Messaging\MessagingException;
+use Ecotone\Messaging\MessagingException;
 
 /**
  * Class AggregateVersionMismatchException
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AggregateVersionMismatchException extends MessagingException

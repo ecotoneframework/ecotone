@@ -2,15 +2,15 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace Ecotone\Messaging\Handler\Gateway;
 
 
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
+use Ecotone\Messaging\Handler\MessageHandlingException;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\ErrorMessage;
 
 class ErrorChannelInterceptor
 {

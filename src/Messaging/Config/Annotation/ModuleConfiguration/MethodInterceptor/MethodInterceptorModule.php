@@ -1,40 +1,40 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
 
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\After;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Before;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\BeforeSend;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\EnricherInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\EnrichHeader;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\EnrichPayload;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\GatewayInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptorAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptors;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\TransformerInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayInterceptorBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Annotation\Interceptor\After;
+use Ecotone\Messaging\Annotation\Interceptor\Around;
+use Ecotone\Messaging\Annotation\Interceptor\Before;
+use Ecotone\Messaging\Annotation\Interceptor\BeforeSend;
+use Ecotone\Messaging\Annotation\Interceptor\EnricherInterceptor;
+use Ecotone\Messaging\Annotation\Interceptor\EnrichHeader;
+use Ecotone\Messaging\Annotation\Interceptor\EnrichPayload;
+use Ecotone\Messaging\Annotation\Interceptor\GatewayInterceptor;
+use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptorAnnotation;
+use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptors;
+use Ecotone\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
+use Ecotone\Messaging\Annotation\Interceptor\TransformerInterceptor;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Gateway\GatewayInterceptorBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class MethodInterceptorModule
- * @package SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration
+ * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
@@ -114,7 +114,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
             if ($interfaceToCall->hasMethodAnnotation($beforeSendAnnotation)) {
                 /** @var Before $beforeInterceptor */
                 $beforeSendInterceptor = $interfaceToCall->getMethodAnnotation($beforeSendAnnotation);
-                $beforeSendInterceptors[] = \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                $beforeSendInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     $methodInterceptor->getReferenceName(),
                     InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
                     self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
@@ -126,7 +126,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
             if ($interfaceToCall->hasMethodAnnotation($beforeAnnotation)) {
                 /** @var Before $beforeInterceptor */
                 $beforeInterceptor = $interfaceToCall->getMethodAnnotation($beforeAnnotation);
-                $preCallInterceptors[] = \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                $preCallInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     $methodInterceptor->getReferenceName(),
                     InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
                     self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
@@ -138,7 +138,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
             if ($interfaceToCall->hasMethodAnnotation($afterAnnotation)) {
                 /** @var After $afterInterceptor */
                 $afterInterceptor = $interfaceToCall->getMethodAnnotation($afterAnnotation);
-                $postCallInterceptors[] = \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                $postCallInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     $methodInterceptor->getReferenceName(),
                     InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
                     self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
@@ -156,8 +156,8 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
      * @param ParameterConverterAnnotationFactory $parameterConverterFactory
      * @param InterfaceToCall $interfaceToCall
      * @return MessageHandlerBuilderWithOutputChannel
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     private static function createMessageHandler(AnnotationRegistration $methodInterceptor, ParameterConverterAnnotationFactory $parameterConverterFactory, InterfaceToCall $interfaceToCall): MessageHandlerBuilderWithOutputChannel
     {

@@ -2,26 +2,26 @@
 declare(strict_types=1);
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Logger;
+namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Conversion\ArrayToJson\ArrayToJsonConverter;
-use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
-use SimplyCodedSoftware\Messaging\Handler\Logger\LoggingLevel;
-use SimplyCodedSoftware\Messaging\Handler\Logger\LoggingService;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Conversion\ArrayToJson\ArrayToJsonConverter;
+use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
+use Ecotone\Messaging\Handler\Logger\LoggingLevel;
+use Ecotone\Messaging\Handler\Logger\LoggingService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class LoggingServiceTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Logger
+ * @package Test\Ecotone\Messaging\Unit\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LoggingServiceTest extends TestCase

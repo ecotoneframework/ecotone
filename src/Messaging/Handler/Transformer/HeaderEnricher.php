@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
+namespace Ecotone\Messaging\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class HeaderEnricher
- * @package SimplyCodedSoftware\Messaging\Handler\Transformer
+ * @package Ecotone\Messaging\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

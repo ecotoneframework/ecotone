@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
 /**
  * Class PropertyDescriptor
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class ClassPropertyDefinition

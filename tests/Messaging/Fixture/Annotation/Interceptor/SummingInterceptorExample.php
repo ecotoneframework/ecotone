@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
 
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Annotation\Interceptor\Around;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 /**
  * Class CalculatingService
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Service
+ * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SummingInterceptorExample

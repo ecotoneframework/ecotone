@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion;
+namespace Ecotone\Messaging\Conversion;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class ReferenceConverterBuilder
- * @package SimplyCodedSoftware\Messaging\Conversion
+ * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReferenceServiceConverterBuilder implements ConverterBuilder

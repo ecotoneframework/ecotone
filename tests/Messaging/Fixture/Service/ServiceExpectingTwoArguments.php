@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Service;
+namespace Test\Ecotone\Messaging\Fixture\Service;
 
 /**
  * Class ServiceExpectingTwoArguments
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Service
+ * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceExpectingTwoArguments

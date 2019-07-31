@@ -1,19 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+namespace Test\Ecotone\Messaging\Fixture\Handler;
+use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class ReplyViaHeadersMessageHandlerBuilder
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler
+ * @package Test\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder

@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
+namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Pointcut;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\AspectWithoutMethodInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample;
+use Ecotone\Messaging\Annotation\Interceptor\Around;
+use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\AspectWithoutMethodInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample;
 
 /**
  * Class PointcutTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor
+ * @package Test\Ecotone\Messaging\Unit\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PointcutTest extends TestCase
@@ -85,7 +85,7 @@ class PointcutTest extends TestCase
     public function test_intercepting_namespace_suffix()
     {
         $this->itShouldCut(
-            "Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\*",
+            "Test\Ecotone\Messaging\Fixture\Handler\Processor\*",
             InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
     }
@@ -93,7 +93,7 @@ class PointcutTest extends TestCase
     public function test_intercepting_namespace_prefix()
     {
         $this->itShouldCut(
-            "*\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample",
+            "*\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample",
             InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
     }
@@ -101,7 +101,7 @@ class PointcutTest extends TestCase
     public function test_intercepting_namespace_in_the_middle()
     {
         $this->itShouldCut(
-            "Test\SimplyCodedSoftware\Messaging\Fixture\*\Interceptor\MethodInterceptorWithoutAspectExample",
+            "Test\Ecotone\Messaging\Fixture\*\Interceptor\MethodInterceptorWithoutAspectExample",
             InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
     }
@@ -119,8 +119,8 @@ class PointcutTest extends TestCase
     /**
      * @param string $expression
      * @param InterfaceToCall $doesItCut
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function itShouldCut(string $expression, InterfaceToCall $doesItCut): void
     {
@@ -130,8 +130,8 @@ class PointcutTest extends TestCase
     /**
      * @param string $expression
      * @param InterfaceToCall $doesItCut
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function itShouldNotCut(string $expression, InterfaceToCall $doesItCut): void
     {

@@ -1,17 +1,17 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace Ecotone\Messaging\Endpoint;
 
-use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
-use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
-use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
-use SimplyCodedSoftware\Messaging\Endpoint\Interceptor\SignalInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ErrorChannelInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 
 /**
  * Class ContinuouslyRunningConsumer
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterceptedConsumer implements ConsumerLifecycle
@@ -74,7 +74,7 @@ class InterceptedConsumer implements ConsumerLifecycle
      * @param PollingMetadata $pollingMetadata
      * @param array $interceptor
      * @return array
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata): array
     {

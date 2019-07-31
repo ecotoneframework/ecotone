@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Store;
+namespace Test\Ecotone\Messaging\Unit\Store;
 
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Store\SimpleMessageStore;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Store\SimpleMessageStore;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class SimpleMessageStoreTest
- * @package SimplyCodedSoftware\Messaging\Store
+ * @package Ecotone\Messaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SimpleMessageStoreTest extends TestCase

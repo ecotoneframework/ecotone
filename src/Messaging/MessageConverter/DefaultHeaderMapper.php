@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\MessageConverter;
+namespace Ecotone\Messaging\MessageConverter;
 
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class DefaultHeaderMapper
- * @package SimplyCodedSoftware\Messaging\Endpoint\Mapper
+ * @package Ecotone\Messaging\Endpoint\Mapper
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DefaultHeaderMapper implements HeaderMapper
@@ -94,8 +94,8 @@ class DefaultHeaderMapper implements HeaderMapper
      * @param array $mappingHeaders
      * @param array $sourceHeaders
      * @return mixed
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function mapHeaders(array $mappingHeaders, array $sourceHeaders)
     {
@@ -134,8 +134,8 @@ class DefaultHeaderMapper implements HeaderMapper
     /**
      * @param $headerValue
      * @return bool
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function isScalarType($headerValue) : bool
     {

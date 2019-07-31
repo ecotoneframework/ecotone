@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter;
+namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class ReferenceBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReferenceBuilder implements ParameterConverterBuilder
@@ -58,8 +58,8 @@ class ReferenceBuilder implements ParameterConverterBuilder
      * @param string $parameterName
      * @param InterfaceToCall $referenceClass
      * @return ReferenceBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public static function createFromParameterTypeHint(string $parameterName, InterfaceToCall $referenceClass) : self
     {

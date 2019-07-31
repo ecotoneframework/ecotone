@@ -1,33 +1,33 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\ServiceActivator;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceReturningMessage;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\StaticallyCalledService;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+namespace Test\Ecotone\Messaging\Unit\Handler\ServiceActivator;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceReturningMessage;
+use Test\Ecotone\Messaging\Fixture\Service\StaticallyCalledService;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class ServiceActivatorBuilderTest
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceActivatorBuilderTest extends MessagingTest
 {
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_building_service_activator()
     {
@@ -49,7 +49,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_replacing_with_result_message_no_containing_reply_channel()
     {
@@ -74,7 +74,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_activating_statically_called_service()
     {
@@ -100,7 +100,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_calling_direct_object_reference()
     {
@@ -119,7 +119,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passing_through_on_void()
     {
@@ -147,7 +147,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_ignoring_passing_through_when_service_not_void()
     {
@@ -174,7 +174,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_with_interceptors()
     {

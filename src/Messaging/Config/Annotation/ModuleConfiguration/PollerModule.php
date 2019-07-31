@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use Ecotone\Messaging\Annotation\EndpointAnnotation;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Transaction\Transactional;
 
 /**
  * Class PollerModule
- * @package SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration
+ * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */

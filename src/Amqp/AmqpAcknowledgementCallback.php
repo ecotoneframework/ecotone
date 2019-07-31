@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Interop\Queue\Consumer as EnqueueConsumer;
 use Interop\Queue\Message as EnqueueMessage;
-use SimplyCodedSoftware\Messaging\Endpoint\AcknowledgementCallback;
+use Ecotone\Messaging\Endpoint\AcknowledgementCallback;
 
 /**
  * Class EnqueueAcknowledgementCallback
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpAcknowledgementCallback implements AcknowledgementCallback

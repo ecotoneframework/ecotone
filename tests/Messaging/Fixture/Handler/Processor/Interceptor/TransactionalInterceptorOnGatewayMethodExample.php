@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Transaction\Transactional;
 
 /**
  * Interface TransactionalInterceptorOnGatewayMethodExample

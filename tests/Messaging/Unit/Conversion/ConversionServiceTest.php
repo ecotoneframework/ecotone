@@ -1,31 +1,31 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Conversion;
+namespace Test\Ecotone\Messaging\Unit\Conversion;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverter;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverter;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class ConversionServiceTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Conversion
+ * @package Test\Ecotone\Messaging\Unit\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ConversionServiceTest extends TestCase
 {
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_using_php_serializing_converters()
     {
         $conversionService = AutoCollectionConversionService::createWith([
             new DeserializingConverter(),
-            new \SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverter()
+            new \Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter()
         ]);
 
 
@@ -55,7 +55,7 @@ class ConversionServiceTest extends TestCase
 
     public function test_not_converting_when_source_is_null()
     {
-        $conversionService = AutoCollectionConversionService::createWith([new \SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverter()]);
+        $conversionService = AutoCollectionConversionService::createWith([new \Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter()]);
 
         $this->assertEquals(
             null,

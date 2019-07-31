@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayHeaderValue;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\HeaderExpression;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\HeaderValue;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\Gateway\GatewayHeaderValue;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Parameter\Header;
+use Ecotone\Messaging\Annotation\Parameter\HeaderExpression;
+use Ecotone\Messaging\Annotation\Parameter\Headers;
+use Ecotone\Messaging\Annotation\Parameter\HeaderValue;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
 
 /**
  * Interface GatewayWithAllConvertersExample
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway
+ * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

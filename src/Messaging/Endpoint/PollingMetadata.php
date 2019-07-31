@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace Ecotone\Messaging\Endpoint;
 
 /**
  * Class PollingMetadata
- * @package SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer
+ * @package Ecotone\Messaging\Endpoint\PollingConsumer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PollingMetadata

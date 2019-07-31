@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+namespace Ecotone\Messaging\Handler\Gateway;
+use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Interface ParameterDefinition
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
+ * @package Ecotone\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface GatewayParameterConverter

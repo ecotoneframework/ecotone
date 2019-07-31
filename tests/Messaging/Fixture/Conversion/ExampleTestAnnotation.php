@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
+namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
 /**
  * Class ExampleAnnotation

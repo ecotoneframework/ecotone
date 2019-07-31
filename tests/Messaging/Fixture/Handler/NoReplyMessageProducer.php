@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
+namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Message;
 
 /**
  * Class NoReplyMessageProducer
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler
+ * @package Test\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class NoReplyMessageProducer implements MessageProcessor

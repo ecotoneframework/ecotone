@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering;
+namespace Test\Ecotone\Messaging\Fixture\Behat\Ordering;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class OrderProcessor
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering
+ * @package Test\Ecotone\Messaging\Fixture\Behat\Ordering
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OrderProcessor
@@ -24,7 +24,7 @@ class OrderProcessor
     /**
      * @param Uuid[]|array $ids
      * @return OrderConfirmation[]|array
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function buyMultiple(array $ids) : array
     {

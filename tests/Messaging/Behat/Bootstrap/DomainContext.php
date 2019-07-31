@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Behat\Bootstrap;
+namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
@@ -8,30 +8,30 @@ use Behat\Gherkin\Node\TableNode;
 use Exception;
 use PHPUnit\Framework\Assert;
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Future;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
-use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Booking\BookingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\Order;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Shopping\BookWasReserved;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Shopping\ShoppingService;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
+use Ecotone\Messaging\Config\InMemoryModuleMessaging;
+use Ecotone\Messaging\Config\MessagingSystemConfiguration;
+use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Future;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\MessageHandlingException;
+use Ecotone\Messaging\Handler\Router\RouterBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\MessagingException;
+use Test\Ecotone\Messaging\Fixture\Behat\Booking\BookingService;
+use Test\Ecotone\Messaging\Fixture\Behat\Ordering\Order;
+use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
+use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderingService;
+use Test\Ecotone\Messaging\Fixture\Behat\Shopping\BookWasReserved;
+use Test\Ecotone\Messaging\Fixture\Behat\Shopping\ShoppingService;
 
 /**
  * Defines application features from the specific context.

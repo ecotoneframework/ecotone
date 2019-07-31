@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Blog;
-use SimplyCodedSoftware\DomainModel\AggregateNotFoundException;
-use SimplyCodedSoftware\DomainModel\AggregateRepository;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+namespace Test\Ecotone\DomainModel\Fixture\Blog;
+use Ecotone\DomainModel\AggregateNotFoundException;
+use Ecotone\DomainModel\AggregateRepository;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class InMemoryArticleRepository
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Blog
+ * @package Test\Ecotone\DomainModel\Fixture\Blog
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryArticleRepository implements AggregateRepository

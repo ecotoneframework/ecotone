@@ -2,16 +2,16 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace Ecotone\Messaging\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class ReplyMessageInterceptor
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway
+ * @package Ecotone\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReplyMessageInterceptor

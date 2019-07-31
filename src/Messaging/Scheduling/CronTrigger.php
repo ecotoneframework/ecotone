@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Scheduling;
+namespace Ecotone\Messaging\Scheduling;
 
 use Cron\CronExpression;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class CronTrigger
- * @package SimplyCodedSoftware\Messaging\Scheduling
+ * @package Ecotone\Messaging\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CronTrigger implements Trigger
@@ -22,7 +22,7 @@ class CronTrigger implements Trigger
      * CronTrigger constructor.
      * @param string $cronExpression
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(string $cronExpression)
     {
@@ -33,7 +33,7 @@ class CronTrigger implements Trigger
      * @param string $cronExpression
      * @return CronTrigger
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWith(string $cronExpression) : self
     {
@@ -68,7 +68,7 @@ class CronTrigger implements Trigger
     /**
      * @param string $cronExpression
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function initialize(string $cronExpression) : void
     {

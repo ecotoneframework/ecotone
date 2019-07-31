@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging;
+namespace Ecotone\Messaging;
 
 /**
  * Class MessagingServiceIsNotAvailable
- * @package SimplyCodedSoftware\Messaging
+ * @package Ecotone\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessagingServiceIsNotAvailableException extends MessagingException

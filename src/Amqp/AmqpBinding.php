@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Interop\Amqp\Impl\AmqpBind as EnqueueBinding;
 
 /**
  * Class AmqpBinding
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpBinding
@@ -102,7 +102,7 @@ class AmqpBinding
     /**
      * @param AmqpQueue $amqpQueue
      * @return AmqpBinding
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createForDefaultExchange(AmqpQueue $amqpQueue) : self
     {
@@ -114,7 +114,7 @@ class AmqpBinding
      * @param string $amqpQueueName
      * @param string|null $routingKey
      * @return AmqpBinding
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createFromNames(string $amqpExchangeName, string $amqpQueueName, ?string $routingKey) : self
     {
@@ -126,7 +126,7 @@ class AmqpBinding
      * @param string $amqpQueueName
      *
      * @return AmqpBinding
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createFromNamesWithoutRoutingKey(string $amqpExchangeName, string $amqpQueueName) : self
     {

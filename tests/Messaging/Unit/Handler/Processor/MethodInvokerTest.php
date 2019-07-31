@@ -1,61 +1,61 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
+namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverter;
-use SimplyCodedSoftware\Messaging\Conversion\StringToUuid\StringToUuidConverter;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorCollection;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorCollectionRegistry;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocationException;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\Order;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering\OrderProcessor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\AroundInterceptorObjectBuilderExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromClassInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainNoReturningInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithInterceptedObjectInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithNullableStdClassInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithPassThroughInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithProceedingAndReturningInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithProceedingInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithReferenceSearchServiceExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithReplacingArgumentsInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithRequestMessageInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithStdClassInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithUnorderedClassInvocationInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\StubCallSavingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingThreeArguments;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceReturningMessage;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutAnyMethods;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverter;
+use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorCollection;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorCollectionRegistry;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocationException;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Behat\Ordering\Order;
+use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
+use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderProcessor;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\AroundInterceptorObjectBuilderExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromClassInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainNoReturningInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithInterceptedObjectInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithNullableStdClassInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithPassThroughInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithProceedingAndReturningInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithProceedingInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithReferenceSearchServiceExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithReplacingArgumentsInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithRequestMessageInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithStdClassInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithUnorderedClassInvocationInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
+use Test\Ecotone\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingThreeArguments;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceReturningMessage;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceWithoutAnyMethods;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class MethodInvocationTest
- * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
+ * @package Ecotone\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodInvokerTest extends MessagingTest
@@ -63,7 +63,7 @@ class MethodInvokerTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_class_has_no_defined_method()
     {
@@ -75,7 +75,7 @@ class MethodInvokerTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_not_enough_arguments_provided()
     {
@@ -87,7 +87,7 @@ class MethodInvokerTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_invoking_service()
     {
@@ -104,8 +104,8 @@ class MethodInvokerTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_not_changing_content_type_of_message_if_message_is_return()
     {
@@ -125,7 +125,7 @@ class MethodInvokerTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_invoking_service_with_return_value_from_header()
     {
@@ -149,7 +149,7 @@ class MethodInvokerTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_if_method_requires_one_argument_and_there_was_not_passed_any_then_use_payload_one_as_default()
     {
@@ -170,7 +170,7 @@ class MethodInvokerTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_if_method_requires_two_argument_and_there_was_not_passed_any_then_use_payload_and_headers_if_possible_as_default()
     {
@@ -192,7 +192,7 @@ class MethodInvokerTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_passed_wrong_argument_names()
     {
@@ -208,7 +208,7 @@ class MethodInvokerTest extends MessagingTest
     /**
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_invoking_service_with_multiple_not_ordered_arguments()
     {
@@ -232,8 +232,8 @@ class MethodInvokerTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_invoking_with_payload_conversion()
     {
@@ -267,8 +267,8 @@ class MethodInvokerTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_invoking_with_header_conversion()
     {
@@ -296,8 +296,8 @@ class MethodInvokerTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_invoking_with_converter_for_collection_if_types_are_compatible()
     {

@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Blog;
+namespace Test\Ecotone\DomainModel\Fixture\Blog;
 
 /**
  * Class PublishArticleWithoutAuthorCommand
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Blog
+ * @package Test\Ecotone\DomainModel\Fixture\Blog
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PublishArticleWithTitleOnlyCommand

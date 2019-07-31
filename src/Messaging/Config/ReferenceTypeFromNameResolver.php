@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace Ecotone\Messaging\Config;
 
-use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\ReferenceNotFoundException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Interface ReferenceTypeFromNameExtractor
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ReferenceTypeFromNameResolver

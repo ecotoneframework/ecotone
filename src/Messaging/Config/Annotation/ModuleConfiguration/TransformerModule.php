@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\Transformer;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Annotation\Transformer;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 
 /**
  * Class AnnotationTransformerConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */

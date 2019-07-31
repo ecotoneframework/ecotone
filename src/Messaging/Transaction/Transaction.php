@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Transaction;
+namespace Ecotone\Messaging\Transaction;
 
 /**
  * Interface Transaction
- * @package SimplyCodedSoftware\Messaging\Transaction
+ * @package Ecotone\Messaging\Transaction
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface Transaction

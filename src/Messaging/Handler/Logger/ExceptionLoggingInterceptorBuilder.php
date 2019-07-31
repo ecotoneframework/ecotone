@@ -2,15 +2,15 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Handler\Logger;
+namespace Ecotone\Messaging\Handler\Logger;
 
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorObjectBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorObjectBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class ExceptionLoggingInterceptorBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Logger
+ * @package Ecotone\Messaging\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ExceptionLoggingInterceptorBuilder implements AroundInterceptorObjectBuilder

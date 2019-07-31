@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycleBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 
 /**
  * Class BaseAnnotationConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

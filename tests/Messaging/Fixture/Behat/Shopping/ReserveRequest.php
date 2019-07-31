@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Shopping;
+namespace Test\Ecotone\Messaging\Fixture\Behat\Shopping;
 
 /**
  * Class OrderRequest
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Shopping
+ * @package Test\Ecotone\Messaging\Fixture\Behat\Shopping
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReserveRequest

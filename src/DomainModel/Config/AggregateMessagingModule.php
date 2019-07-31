@@ -1,43 +1,43 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel\Config;
+namespace Ecotone\DomainModel\Config;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use ReflectionException;
-use SimplyCodedSoftware\DomainModel\AggregateMessage;
-use SimplyCodedSoftware\DomainModel\AggregateMessageConversionService;
-use SimplyCodedSoftware\DomainModel\AggregateMessageConversionServiceBuilder;
-use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
-use SimplyCodedSoftware\DomainModel\AggregateRepositoryFactory;
-use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateRepository;
-use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
-use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
-use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\DomainModel\AggregateMessage;
+use Ecotone\DomainModel\AggregateMessageConversionService;
+use Ecotone\DomainModel\AggregateMessageConversionServiceBuilder;
+use Ecotone\DomainModel\AggregateMessageHandlerBuilder;
+use Ecotone\DomainModel\AggregateRepositoryFactory;
+use Ecotone\DomainModel\Annotation\Aggregate;
+use Ecotone\DomainModel\Annotation\AggregateRepository;
+use Ecotone\DomainModel\Annotation\CommandHandler;
+use Ecotone\DomainModel\Annotation\EventHandler;
+use Ecotone\DomainModel\Annotation\QueryHandler;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Annotation\Parameter\Headers;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Parameter\Reference;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class IntegrationMessagingCqrsModule
- * @package SimplyCodedSoftware\DomainModel\Config
+ * @package Ecotone\DomainModel\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */

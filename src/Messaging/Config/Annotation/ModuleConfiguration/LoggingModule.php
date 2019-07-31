@@ -2,26 +2,26 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogAfter;
-use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogBefore;
-use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogError;
-use SimplyCodedSoftware\Messaging\Handler\Logger\ExceptionLoggingInterceptorBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Logger\LoggingHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Logger\LoggingInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
+use Ecotone\Messaging\Handler\Logger\ExceptionLoggingInterceptorBuilder;
+use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
+use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 
 /**
  * Class LoggingModule
- * @package SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration
+ * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */

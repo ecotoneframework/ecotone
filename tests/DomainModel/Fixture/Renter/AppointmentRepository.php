@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Renter;
+namespace Test\Ecotone\DomainModel\Fixture\Renter;
 
-use SimplyCodedSoftware\DomainModel\AggregateRepository;
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\DomainModel\AggregateRepository;
+use Ecotone\Messaging\Message;
 
 /**
  * Class AppointmentCalendar
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Renter
+ * @package Test\Ecotone\DomainModel\Fixture\Renter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @\SimplyCodedSoftware\DomainModel\Annotation\AggregateRepository()
+ * @\Ecotone\DomainModel\Annotation\AggregateRepository()
  */
 class AppointmentRepository implements AggregateRepository
 {

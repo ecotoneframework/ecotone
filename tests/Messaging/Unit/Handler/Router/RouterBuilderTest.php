@@ -1,32 +1,32 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Router;
+namespace Test\Ecotone\Messaging\Unit\Handler\Router;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Router\MultipleChannelRouter;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Router\Order;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Router\SingleChannelRouter;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Fixture\Router\MultipleChannelRouter;
+use Test\Ecotone\Messaging\Fixture\Router\Order;
+use Test\Ecotone\Messaging\Fixture\Router\SingleChannelRouter;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\DestinationResolutionException;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\Router\RouterBuilder;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class RouterBuilderTest
- * @package SimplyCodedSoftware\Messaging\Handler\Router
+ * @package Ecotone\Messaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RouterBuilderTest extends MessagingTest
 {
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_message_to_single_channel()
     {
@@ -54,7 +54,7 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_message_to_multiple_channels()
     {
@@ -87,7 +87,7 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_resolution_is_required()
     {
@@ -110,7 +110,7 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_if_no_resolution_required_not_throwing_exception_when_no_resolution()
     {
@@ -134,7 +134,7 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_with_payload_type()
     {
@@ -165,7 +165,7 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_to_default_when_not_hit()
     {
@@ -193,7 +193,7 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_by_payload_type_without_mapping()
     {
@@ -219,7 +219,7 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_with_header_value()
     {
@@ -250,7 +250,7 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_payload_is_not_object()
     {
@@ -269,7 +269,7 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      * @throws \Exception
      */
     public function test_recipient_list_router()
@@ -296,7 +296,7 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_applying_sequence_to_recipient_list()
     {

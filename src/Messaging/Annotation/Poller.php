@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Annotation;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
+namespace Ecotone\Messaging\Annotation;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 /**
  * Class PollingMetadata
- * @package SimplyCodedSoftware\Messaging\Annotation
+ * @package Ecotone\Messaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */

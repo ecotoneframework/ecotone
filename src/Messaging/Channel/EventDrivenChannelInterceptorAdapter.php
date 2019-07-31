@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace Ecotone\Messaging\Channel;
 
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\SubscribableChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\SubscribableChannel;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class EventDrivenChannelInterceptorAdapter
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EventDrivenChannelInterceptorAdapter extends SendingInterceptorAdapter implements SubscribableChannel

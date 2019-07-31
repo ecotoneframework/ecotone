@@ -1,67 +1,67 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Config;
+namespace Test\Ecotone\Messaging\Unit\Config;
 
 use Exception;
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
-use SimplyCodedSoftware\Messaging\Channel\PublishSubscribeChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Channel\SimpleChannelInterceptorBuilder;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
-use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use Ecotone\Messaging\Channel\ChannelInterceptor;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
+use Ecotone\Messaging\Channel\PublishSubscribeChannel;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Channel\SimpleChannelInterceptorBuilder;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Config\InMemoryModuleMessaging;
+use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Config\MessagingSystemConfiguration;
+use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Handler\Gateway\CombinedGatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Transaction\Transactional;
 use stdClass;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Channel\DumbChannelInterceptor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbGatewayBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\StubCallSavingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithReturnValue;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
+use Test\Ecotone\Messaging\Fixture\Channel\DumbChannelInterceptor;
+use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
+use Test\Ecotone\Messaging\Fixture\Handler\DumbGatewayBuilder;
+use Test\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
+use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
+use Test\Ecotone\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceWithoutReturnValue;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceWithReturnValue;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class ApplicationTest
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessagingSystemConfigurationTest extends MessagingTest

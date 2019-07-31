@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
+namespace Test\Ecotone\Messaging\Fixture\Endpoint;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 
 /**
  * Class InboundChannelAdapterStoppingService
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint
+ * @package Test\Ecotone\Messaging\Fixture\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ConsumerThrowingExceptionService

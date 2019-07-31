@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace Ecotone\Messaging\Endpoint;
 
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\SubscribableChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\SubscribableChannel;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class ConsumerEndpointFactory - Responsible for creating consumers from builders

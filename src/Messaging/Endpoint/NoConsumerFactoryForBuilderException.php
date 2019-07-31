@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace Ecotone\Messaging\Endpoint;
 
-use SimplyCodedSoftware\Messaging\MessagingException;
+use Ecotone\Messaging\MessagingException;
 
 /**
  * Class NoConsumerFactoryException
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class NoConsumerFactoryForBuilderException extends MessagingException

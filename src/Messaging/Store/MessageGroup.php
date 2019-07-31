@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Store;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessagingException;
+namespace Ecotone\Messaging\Store;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessagingException;
 
 /**
  * Interface MessageGroup - used in multiple messages scenarios
- * @package SimplyCodedSoftware\Messaging\Store
+ * @package Ecotone\Messaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageGroup

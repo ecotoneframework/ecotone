@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace Ecotone\Messaging\Channel;
 
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\PollableChannel;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\PollableChannel;
 
 /**
  * Class SimpleMessageChannelBuilder
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SimpleMessageChannelBuilder implements MessageChannelBuilder

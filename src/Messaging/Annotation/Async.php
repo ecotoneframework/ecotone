@@ -2,13 +2,13 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Annotation;
+namespace Ecotone\Messaging\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Required;
 
 /**
  * Class Async
- * @package SimplyCodedSoftware\Messaging\Annotation
+ * @package Ecotone\Messaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */

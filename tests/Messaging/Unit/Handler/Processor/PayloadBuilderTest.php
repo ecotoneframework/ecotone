@@ -1,28 +1,28 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
+namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CallableService;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Fixture\Service\CallableService;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class PayloadBuilder
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PayloadBuilderTest extends MessagingTest
 {
     /**
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_payload_converter()
     {

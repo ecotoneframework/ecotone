@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace Ecotone\Messaging\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class MethodCallToMessageConverter
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
+ * @package Ecotone\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodCallToMessageConverter
@@ -30,7 +30,7 @@ class MethodCallToMessageConverter
      * MethodCallToMessageConverter constructor.
      * @param InterfaceToCall $interfaceToCall
      * @param array|GatewayParameterConverter[] $methodArgumentConverters
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __construct(InterfaceToCall $interfaceToCall, array $methodArgumentConverters)
     {
@@ -41,7 +41,7 @@ class MethodCallToMessageConverter
      * @param MessageBuilder $messageBuilder
      * @param array|MethodArgument[] $methodArguments
      * @return MessageBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function convertFor(MessageBuilder $messageBuilder, array $methodArguments) : MessageBuilder
     {
@@ -80,7 +80,7 @@ class MethodCallToMessageConverter
      * @param InterfaceToCall $interfaceToCall
      * @param array|GatewayParameterConverter[] $methodArgumentConverters
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function initialize(InterfaceToCall $interfaceToCall, array $methodArgumentConverters) : void
     {

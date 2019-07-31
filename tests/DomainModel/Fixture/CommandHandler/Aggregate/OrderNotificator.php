@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
+namespace Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate;
 
-use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
-use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use Ecotone\DomainModel\Annotation\EventHandler;
+use Ecotone\DomainModel\Annotation\QueryHandler;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
  * Class OrderNotificator
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate
+ * @package Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating;
+namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-use SimplyCodedSoftware\Messaging\Annotation\ApplicationContext;
-use SimplyCodedSoftware\Messaging\Annotation\Extension;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\Extension;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 
 /**
  * Class CalculateChannel

@@ -1,41 +1,41 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler;
+namespace Test\Ecotone\Messaging\Unit\Handler;
 
-use SimplyCodedSoftware\Messaging\Annotation\Converter;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\AbstractSuperAdmin;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Admin;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Email;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\ExampleTestAnnotation;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\LazyUser;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Permission;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\InCorrectInterfaceExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\OnlineShop;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Password;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\SuperAdmin;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\TwoStepPassword;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\User;
+use Ecotone\Messaging\Annotation\Converter;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
+use Test\Ecotone\Messaging\Fixture\Conversion\AbstractSuperAdmin;
+use Test\Ecotone\Messaging\Fixture\Conversion\Admin;
+use Test\Ecotone\Messaging\Fixture\Conversion\Email;
+use Test\Ecotone\Messaging\Fixture\Conversion\ExampleTestAnnotation;
+use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite;
+use Test\Ecotone\Messaging\Fixture\Conversion\Extra\LazyUser;
+use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Permission;
+use Test\Ecotone\Messaging\Fixture\Conversion\InCorrectInterfaceExample;
+use Test\Ecotone\Messaging\Fixture\Conversion\OnlineShop;
+use Test\Ecotone\Messaging\Fixture\Conversion\Password;
+use Test\Ecotone\Messaging\Fixture\Conversion\SuperAdmin;
+use Test\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword;
+use Test\Ecotone\Messaging\Fixture\Conversion\User;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class InterfaceToCallTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler
+ * @package Test\Ecotone\Messaging\Unit\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceToCallTest extends TestCase
 {
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint()
     {
@@ -50,8 +50,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_from_doc_block_guessing_namespace()
     {
@@ -68,8 +68,8 @@ class InterfaceToCallTest extends TestCase
 
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_from_global_namespace()
     {
@@ -84,8 +84,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_from_different_namespace_than_class_it_self()
     {
@@ -94,14 +94,14 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_from_different_namespace_using_use_statements()
     {
@@ -110,14 +110,14 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("favourite", TypeDescriptor::create("\Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite")),
+            InterfaceParameter::createNotNullable("favourite", TypeDescriptor::create("\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite")),
             $interfaceToCall->getParameterWithName("favourite")
         );
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_collection_transformation()
     {
@@ -126,14 +126,14 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<\Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_collection_class_name_from_use_statements()
     {
@@ -142,14 +142,14 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<\Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_use_statement_alias()
     {
@@ -164,8 +164,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_collection_of_scalar_type()
     {
@@ -180,8 +180,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_primitive_type()
     {
@@ -196,8 +196,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_guessing_parameter_type_hint_from_scalar_and_compound_type()
     {
@@ -212,8 +212,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_guessing_parameter_first_type_hint_from_method_annotation()
     {
@@ -228,8 +228,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_guessing_parameter_type_hint_from_scalar_and_class_name()
     {
@@ -244,9 +244,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_guessing_parameter_from_interface_inherit_doc_with_different_parameter_name()
     {
@@ -273,8 +273,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_ignoring_docblock_type_hint()
     {
@@ -294,9 +294,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_guessing_parameter_from_inherit_doc_with_return_type_from_super_class_namespace()
     {
@@ -311,9 +311,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_guessing_interface_return_parameter_from_global_namespace()
     {
@@ -333,9 +333,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_guessing_parameter_from_abstract_class_inherit_doc()
     {
@@ -398,8 +398,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_guessing_return_type_based_on_inherit_doc_annotation()
     {
@@ -411,9 +411,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_guessing_unknown_if_no_type_hint_information_available()
     {
@@ -428,9 +428,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_choosing_unknown_type_if_mixed_type_hint_in_doc_block()
     {
@@ -445,8 +445,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_choosing_declaring_class_if_use_this_or_self_or_static()
     {
@@ -479,8 +479,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_guessing_type_hint_with_full_qualified_name()
     {
@@ -491,8 +491,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_guessing_type_hint_from_global_namespace()
     {
@@ -503,8 +503,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_resolving_sub_class_for_static_type_hint_return_type()
     {
@@ -515,8 +515,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_resolving_declaring_class_for_self_type_hint_declared_in_interface()
     {
@@ -527,8 +527,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_resolving_declaring_class_for_self_type_hint_declared_in_abstract_class()
     {

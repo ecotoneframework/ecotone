@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Transaction;
+namespace Ecotone\Messaging\Transaction;
 
 /**
  * Class TransactionException
- * @package SimplyCodedSoftware\Messaging\Transaction
+ * @package Ecotone\Messaging\Transaction
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TransactionException extends \RuntimeException

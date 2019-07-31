@@ -1,24 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Filter;
+namespace Ecotone\Messaging\Handler\Filter;
 
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MessageFilterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Filter
+ * @package Ecotone\Messaging\Handler\Filter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters

@@ -1,18 +1,18 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel\Config;
+namespace Ecotone\DomainModel\Config;
 
-use SimplyCodedSoftware\DomainModel\AggregateMessage;
-use SimplyCodedSoftware\DomainModel\CommandBus;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\DomainModel\AggregateMessage;
+use Ecotone\DomainModel\CommandBus;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\DestinationResolutionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class CommandBusRouter
- * @package SimplyCodedSoftware\DomainModel\Config
+ * @package Ecotone\DomainModel\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CommandBusRouter
@@ -51,8 +51,8 @@ class CommandBusRouter
      * @param object $object
      *
      * @return array
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function routeByObject($object) : array
     {
@@ -70,7 +70,7 @@ class CommandBusRouter
      * @param string $name
      *
      * @return array
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function routeByName(?string $name) : string
     {

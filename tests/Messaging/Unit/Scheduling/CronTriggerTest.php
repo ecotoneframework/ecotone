@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Scheduling;
+namespace Test\Ecotone\Messaging\Unit\Scheduling;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Scheduling\CronTrigger;
-use SimplyCodedSoftware\Messaging\Scheduling\SimpleTriggerContext;
-use SimplyCodedSoftware\Messaging\Scheduling\StubUTCClock;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Scheduling\CronTrigger;
+use Ecotone\Messaging\Scheduling\SimpleTriggerContext;
+use Ecotone\Messaging\Scheduling\StubUTCClock;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class CronTriggerTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Scheduling
+ * @package Test\Ecotone\Messaging\Unit\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CronTriggerTest extends TestCase

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 
 /**
  * Interface MethodInvocation
- * @package SimplyCodedSoftware\Messaging\MethodInterceptor
+ * @package Ecotone\Messaging\MethodInterceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MethodInvocation

@@ -1,19 +1,19 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
 
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\After;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Before;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\BeforeSend;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\TransformerInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Interceptor\After;
+use Ecotone\Messaging\Annotation\Interceptor\Before;
+use Ecotone\Messaging\Annotation\Interceptor\BeforeSend;
+use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
+use Ecotone\Messaging\Annotation\Interceptor\TransformerInterceptor;
+use Ecotone\Messaging\Annotation\Parameter\Header;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
 
 /**
  * Class ServiceActivatorInterceptorExample
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor
+ * @package Test\Ecotone\Messaging\Fixture\Annotation\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MethodInterceptor(referenceName="someMethodInterceptor")
  */

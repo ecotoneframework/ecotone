@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Selector;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Selector;
 
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Class TrueMessageSelector
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Selector
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Selector
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageSelectorExample

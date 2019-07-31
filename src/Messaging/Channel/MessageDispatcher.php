@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace Ecotone\Messaging\Channel;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Interface MessageDispatcher
- * @package SimplyCodedSoftware\Messaging\Dispatcher
+ * @package Ecotone\Messaging\Dispatcher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageDispatcher

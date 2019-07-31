@@ -2,16 +2,16 @@
 declare(strict_types=1);
 
 
-namespace Test\SimplyCodedSoftware\DomainModel\Unit\LazyEventBus;
+namespace Test\Ecotone\DomainModel\Unit\LazyEventBus;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\DomainModel\EventBus;
-use SimplyCodedSoftware\DomainModel\LazyEventBus\InMemoryEventStore;
-use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventBusInterceptor;
+use Ecotone\DomainModel\EventBus;
+use Ecotone\DomainModel\LazyEventBus\InMemoryEventStore;
+use Ecotone\DomainModel\LazyEventBus\LazyEventBusInterceptor;
 
 /**
  * Class LazyEventBusInterceptorTest
- * @package Test\SimplyCodedSoftware\DomainModel\Unit\LazyEventBus
+ * @package Test\Ecotone\DomainModel\Unit\LazyEventBus
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LazyEventBusInterceptorTest extends TestCase

@@ -1,22 +1,22 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
+namespace Ecotone\DomainModel;
 
-use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\DomainModel\Config\AggregateMessagingModule;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\MessageHandlingException;
+use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class CallAggregateService
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CallAggregateService
@@ -55,7 +55,7 @@ class CallAggregateService
      * @param ReferenceSearchService $referenceSearchService
      * @param string $withFactoryRedirectOnFoundMethodName
      * @param ParameterConverterBuilder[] $withFactoryRedirectOnFoundParameterConverters
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __construct(ChannelResolver $channelResolver, array $messageToParameterConverters, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService,
                                 string $withFactoryRedirectOnFoundMethodName, array $withFactoryRedirectOnFoundParameterConverters
@@ -78,9 +78,9 @@ class CallAggregateService
      * @throws MessageHandlingException
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function call(Message $message) : Message
     {

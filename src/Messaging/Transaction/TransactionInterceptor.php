@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Transaction;
+namespace Ecotone\Messaging\Transaction;
 
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Annotation\Interceptor\Around;
+use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Message;
 
 /**
  * Class TransactionInterceptor
- * @package SimplyCodedSoftware\Messaging\Transaction
+ * @package Ecotone\Messaging\Transaction
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TransactionInterceptor
@@ -22,9 +22,9 @@ class TransactionInterceptor
      * @param Transactional $transactional
      * @param Message $message
      * @return mixed
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
      * @throws \Throwable
-     * @Around(precedence=-10, pointcut="@(SimplyCodedSoftware\Messaging\Transaction\Transactional)")
+     * @Around(precedence=-10, pointcut="@(Ecotone\Messaging\Transaction\Transactional)")
      */
     public function transactional(MethodInvocation $methodInvocation, ReferenceSearchService $referenceSearchService, Transactional $transactional, Message $message)
     {

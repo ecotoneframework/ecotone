@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Future;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Future;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class InterfaceToCall
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
+ * @package Ecotone\Messaging\Handler\Gateway\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceToCall

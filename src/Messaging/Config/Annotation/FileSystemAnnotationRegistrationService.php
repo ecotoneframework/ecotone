@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation;
+namespace Ecotone\Messaging\Config\Annotation;
 
 use Doctrine\Common\Annotations\Reader;
 use InvalidArgumentException;
@@ -11,22 +11,22 @@ use RecursiveIteratorIterator;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
-use SimplyCodedSoftware\Messaging\Annotation\Environment;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
-use SimplyCodedSoftware\Messaging\Handler\TypeResolver;
-use SimplyCodedSoftware\Messaging\MessagingException;
+use Ecotone\Messaging\Annotation\Environment;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Handler\AnnotationParser;
+use Ecotone\Messaging\Handler\TypeResolver;
+use Ecotone\Messaging\MessagingException;
 use SplFileInfo;
 
 /**
  * Class FileSystemAnnotationRegistrationService
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FileSystemAnnotationRegistrationService implements AnnotationRegistrationService, AnnotationParser
 {
     const INTEGRATION_MESSAGING_NAMESPACE = 'IntegrationMessaging';
-    const SIMPLY_CODED_SOFTWARE_NAMESPACE = 'SimplyCodedSoftware';
+    const SIMPLY_CODED_SOFTWARE_NAMESPACE = 'Ecotone';
     private const FILE_EXTENSION = '.php';
 
     /**

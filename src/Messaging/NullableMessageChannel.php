@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging;
+namespace Ecotone\Messaging;
 
 /**
  * Class NullableMessageChannel
- * @package SimplyCodedSoftware\Messaging
+ * @package Ecotone\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class NullableMessageChannel implements SubscribableChannel

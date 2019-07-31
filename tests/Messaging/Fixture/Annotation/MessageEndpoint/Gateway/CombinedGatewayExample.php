@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
  * Interface CombinedGateway

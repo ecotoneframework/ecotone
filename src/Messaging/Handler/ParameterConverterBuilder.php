@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
 /**
  * Interface MethodParameterConverterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ParameterConverterBuilder

@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodCall
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodCall
@@ -28,7 +28,7 @@ class MethodCall
      * MethodCall constructor.
      * @param MethodArgument[] $methodArguments
      * @param bool $canReplaceArguments
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(array $methodArguments, bool $canReplaceArguments)
     {
@@ -41,7 +41,7 @@ class MethodCall
      * @param MethodArgument[] $methodArguments
      * @param bool $canReplaceArguments
      * @return MethodCall
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWith(array $methodArguments, bool $canReplaceArguments) : self
     {
@@ -67,7 +67,7 @@ class MethodCall
     /**
      * @param string $parameterName
      * @param mixed $value
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function replaceArgument(string $parameterName, $value) : void
     {

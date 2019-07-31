@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Channel\Dispatcher;
+namespace Test\Ecotone\Messaging\Unit\Channel\Dispatcher;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\Dispatcher\BroadcastingDispatcher;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Channel\Dispatcher\BroadcastingDispatcher;
+use Ecotone\Messaging\Channel\MessageDispatchingException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class BroadcastingDispatcherTest
- * @package SimplyCodedSoftware\Messaging\Channel\Dispatcher
+ * @package Ecotone\Messaging\Channel\Dispatcher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class BroadcastingDispatcherTest extends TestCase

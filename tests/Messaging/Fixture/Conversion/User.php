@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
+namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
-use SimplyCodedSoftware\Messaging\Annotation\IgnoreDocblockTypeHint;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Permission as AdminPermission;
+use Ecotone\Messaging\Annotation\IgnoreDocblockTypeHint;
+use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite;
+use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Permission as AdminPermission;
 
 /**
  * Interface Order
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Conversion
+ * @package Test\Ecotone\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface User
@@ -27,7 +27,7 @@ interface User
     public function changeDetails($details) : void;
 
     /**
-     * @param  array<Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra\Favourite> $favourites
+     * @param  array<Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite> $favourites
      */
     public function changeFavourites(array $favourites) : void;
 
@@ -98,7 +98,7 @@ interface User
      */
     public function getStatic();
 
-    public function returnFullUser() : \Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\User;
+    public function returnFullUser() : \Test\Ecotone\Messaging\Fixture\Conversion\User;
 
 
     public function returnFromGlobalNamespace() : \stdClass;

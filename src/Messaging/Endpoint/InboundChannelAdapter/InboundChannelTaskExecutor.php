@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter;
+namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
-use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
-use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Scheduling\TaskExecutor;
 
 /**
  * Class InboundChannelGatewayExecutor
- * @package SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter
+ * @package Ecotone\Messaging\Endpoint\InboundChannelAdapter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

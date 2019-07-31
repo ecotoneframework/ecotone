@@ -1,33 +1,33 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use ReflectionException;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersConverter;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverter;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter;
+use Ecotone\Messaging\Handler\ReferenceNotFoundException;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodInvocation

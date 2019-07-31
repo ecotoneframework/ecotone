@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+namespace Test\Ecotone\Messaging\Fixture\Handler;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class ExceptionalMessageHandler
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler
+ * @package Test\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ExceptionalMessageHandler implements MessageHandler

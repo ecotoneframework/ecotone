@@ -1,11 +1,11 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Router;
-use SimplyCodedSoftware\Messaging\Message;
+namespace Ecotone\Messaging\Handler\Router;
+use Ecotone\Messaging\Message;
 
 /**
  * Class RecipientListRouter
- * @package SimplyCodedSoftware\Messaging\Handler\Router
+ * @package Ecotone\Messaging\Handler\Router
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

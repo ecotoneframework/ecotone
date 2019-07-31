@@ -1,11 +1,11 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering;
-use SimplyCodedSoftware\Messaging\Future;
+namespace Test\Ecotone\Messaging\Fixture\Behat\Ordering;
+use Ecotone\Messaging\Future;
 
 /**
  * Interface OrderingService
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Ordering
+ * @package Test\Ecotone\Messaging\Fixture\Behat\Ordering
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface OrderingService

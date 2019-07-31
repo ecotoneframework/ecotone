@@ -1,31 +1,31 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace Ecotone\Messaging\Config;
 
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptorBuilder;
-use SimplyCodedSoftware\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Channel\PollableChannelInterceptorAdapter;
-use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerEndpointFactory;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycleBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
+use Ecotone\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\PollableChannelInterceptorAdapter;
+use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
+use Ecotone\Messaging\Endpoint\ConsumerEndpointFactory;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
+use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\CombinedGatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class Application
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessagingSystem implements ConfiguredMessagingSystem

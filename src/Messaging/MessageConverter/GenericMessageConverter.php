@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\MessageConverter;
+namespace Ecotone\Messaging\MessageConverter;
 
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class GenericMessageConverter
- * @package SimplyCodedSoftware\Messaging\Conversion
+ * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  *
  * An extension of the MessageConverter that uses a ConversionService to convert the payload of the message to the requested type.

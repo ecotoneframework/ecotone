@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Http;
+namespace Ecotone\Http;
 
 /**
  * Class HttpConfiguration
- * @package SimplyCodedSoftware\Http
+ * @package Ecotone\Http
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class HttpConfiguration

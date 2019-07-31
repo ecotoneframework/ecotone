@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler;
+namespace Test\Ecotone\Messaging\Unit\Handler;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Handler\ClassDefinition;
-use SimplyCodedSoftware\Messaging\Handler\ClassPropertyDefinition;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\OrderPropertyExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\OrderWithTraits;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\PropertyAnnotationExample;
+use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\ClassPropertyDefinition;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\OrderPropertyExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\OrderWithTraits;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\PropertyAnnotationExample;
 
 /**
  * Class ClassDefinitionTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler
+ * @package Test\Ecotone\Messaging\Unit\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ClassDefinitionTest extends TestCase

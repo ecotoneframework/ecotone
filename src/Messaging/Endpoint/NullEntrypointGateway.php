@@ -1,11 +1,11 @@
 <?php
 
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace Ecotone\Messaging\Endpoint;
 
 /**
  * Class NullEntrypointGateway
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class NullEntrypointGateway implements EntrypointGateway

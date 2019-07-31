@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
 /**
  * Interface ExpressionEvaluationService
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ExpressionEvaluationService

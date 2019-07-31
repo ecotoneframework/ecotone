@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Support;
+namespace Ecotone\Messaging\Support;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 
 /**
  * Class GenericMessage
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package Ecotone\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GenericMessage implements Message
@@ -29,7 +29,7 @@ class GenericMessage implements Message
      * @param MessageHeaders $messageHeaders
      *
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct($payload, MessageHeaders $messageHeaders)
     {

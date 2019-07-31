@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Http;
+namespace Ecotone\Http;
 
 use Psr\Http\Message\UploadedFileInterface;
 
 /**
  * Interface FileMover
- * @package SimplyCodedSoftware\Http
+ * @package Ecotone\Http
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface UploadedFileMover

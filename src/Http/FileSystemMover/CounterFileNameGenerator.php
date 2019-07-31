@@ -1,11 +1,11 @@
 <?php
 
-namespace SimplyCodedSoftware\Http\FileSystemMover;
+namespace Ecotone\Http\FileSystemMover;
 use Psr\Http\Message\UploadedFileInterface;
 
 /**
  * Class CustomFileNameGenerator
- * @package SimplyCodedSoftware\Http\FileSystemMover
+ * @package Ecotone\Http\FileSystemMover
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CounterFileNameGenerator implements FileNameGenerator

@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
+namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class StatefulHandler
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler
+ * @package Test\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class StatefulHandler implements MessageHandler

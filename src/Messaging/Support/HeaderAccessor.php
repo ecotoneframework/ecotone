@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Support;
-use SimplyCodedSoftware\Messaging\MessageHeaderDoesNotExistsException;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\MessagingException;
+namespace Ecotone\Messaging\Support;
+use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
 
 /**
  * Class HeaderAccessor
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package Ecotone\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal class intent to be used with {@link Message}
  */

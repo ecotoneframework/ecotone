@@ -1,20 +1,20 @@
 <?php
 
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class AmqpBackendMessageChannelConsumer
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpBackendMessageChannelConsumer implements MessageHandlerConsumerBuilder

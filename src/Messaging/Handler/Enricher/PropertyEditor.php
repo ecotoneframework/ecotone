@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Enricher;
+namespace Ecotone\Messaging\Handler\Enricher;
 
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Interface PropertySetter
- * @package SimplyCodedSoftware\Messaging\Handler\Enricher
+ * @package Ecotone\Messaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface PropertyEditor

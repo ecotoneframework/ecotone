@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
+namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
 /**
  * Interface BlackListedUser
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Conversion
+ * @package Test\Ecotone\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface BlackListedUser

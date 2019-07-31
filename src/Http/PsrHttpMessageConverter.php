@@ -1,27 +1,27 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Http;
+namespace Ecotone\Http;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use SimplyCodedSoftware\Http\KeepAsTemporaryMover\KeepAsTemporaryFileMover;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyEditorAccessor;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageConverter\DefaultHeaderMapper;
-use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
-use SimplyCodedSoftware\Messaging\MessageConverter\MessageConverter;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Http\KeepAsTemporaryMover\KeepAsTemporaryFileMover;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
+use Ecotone\Messaging\Handler\Enricher\PropertyPath;
+use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
+use Ecotone\Messaging\MessageConverter\HeaderMapper;
+use Ecotone\Messaging\MessageConverter\MessageConverter;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class PsrHttpMessageConverter
- * @package SimplyCodedSoftware\Http
+ * @package Ecotone\Http
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PsrHttpMessageConverter implements MessageConverter
@@ -108,8 +108,8 @@ class PsrHttpMessageConverter implements MessageConverter
      * @param array $dataToEnrich
      * @return mixed
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\Enricher\EnrichException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\Enricher\EnrichException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function addUploadedFiles(string $key, array $uploadedFiles, array $dataToEnrich)
     {

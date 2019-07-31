@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
 /**
  * Interface AnnotationParser
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface AnnotationParser

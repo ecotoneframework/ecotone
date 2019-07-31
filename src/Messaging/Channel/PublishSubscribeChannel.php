@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace Ecotone\Messaging\Channel;
 
-use SimplyCodedSoftware\Messaging\Channel\Dispatcher\BroadcastingDispatcher;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\SubscribableChannel;
+use Ecotone\Messaging\Channel\Dispatcher\BroadcastingDispatcher;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\SubscribableChannel;
 
 /**
  * Class PublishSubscribeChannel
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PublishSubscribeChannel implements SubscribableChannel

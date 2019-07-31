@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion\StringToUuid;
+namespace Ecotone\Messaging\Conversion\StringToUuid;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
-use SimplyCodedSoftware\Messaging\Conversion\Converter;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Conversion\Converter;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class StringToUuidConverter
- * @package SimplyCodedSoftware\Messaging\Conversion
+ * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class StringToUuidConverter implements Converter

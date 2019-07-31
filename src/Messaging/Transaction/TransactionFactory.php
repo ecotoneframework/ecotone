@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Transaction;
+namespace Ecotone\Messaging\Transaction;
 
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Interface TransactionManager
- * @package SimplyCodedSoftware\Messaging\Transaction
+ * @package Ecotone\Messaging\Transaction
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface TransactionFactory

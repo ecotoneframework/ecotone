@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
-use SimplyCodedSoftware\Messaging\MessagingException;
+namespace Ecotone\Messaging\Handler;
+use Ecotone\Messaging\MessagingException;
 
 /**
  * Class TypeDefinitionException
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TypeDefinitionException extends MessagingException

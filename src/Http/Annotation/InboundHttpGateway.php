@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Http\Annotation;
+namespace Ecotone\Http\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\Gateway;
 
 /**
  * Class InboundHttpGateway
- * @package SimplyCodedSoftware\Http\Annotation
+ * @package Ecotone\Http\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  * @Target({"METHOD"})

@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Support;
+namespace Ecotone\Messaging\Support;
 
-use SimplyCodedSoftware\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessageHeaders;
 
 /**
  * Class MutableMessageHeaders
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package Ecotone\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MutableMessageHeaders extends MessageHeaders

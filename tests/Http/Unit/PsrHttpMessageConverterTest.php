@@ -1,37 +1,37 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Http\Unit;
+namespace Test\Ecotone\Http\Unit;
 
 use GuzzleHttp\Psr7\FnStream;
 use GuzzleHttp\Psr7\UploadedFile;
-use SimplyCodedSoftware\Http\HttpHeaders;
-use SimplyCodedSoftware\Http\KeepAsTemporaryMover\KeepAsTemporaryFileMover;
-use SimplyCodedSoftware\Http\PsrHttpMessageConverter;
-use SimplyCodedSoftware\Http\UploadedMultipartFile;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyEditorAccessor;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\MessageConverter\DefaultHeaderMapper;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Http\Fixture\ServerRequestMother;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Http\HttpHeaders;
+use Ecotone\Http\KeepAsTemporaryMover\KeepAsTemporaryFileMover;
+use Ecotone\Http\PsrHttpMessageConverter;
+use Ecotone\Http\UploadedMultipartFile;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
+use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Http\Fixture\ServerRequestMother;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 use function GuzzleHttp\Psr7\stream_for;
 
 /**
  * Class PsrHttpMessageConverter
- * @package Test\SimplyCodedSoftware\Http
+ * @package Test\Ecotone\Http
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PsrHttpMessageConverterTest extends MessagingTest
 {
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function TODO__test_transforming_get_request_to_message()
     {
@@ -55,7 +55,7 @@ class PsrHttpMessageConverterTest extends MessagingTest
 
     /**
      * @return PsrHttpMessageConverter
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createPsrHttpMessageConverter(): PsrHttpMessageConverter
     {
@@ -71,8 +71,8 @@ class PsrHttpMessageConverterTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function TODO__test_transforming_default_ocet_header_without_request_content_type()
     {
@@ -94,8 +94,8 @@ class PsrHttpMessageConverterTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function TODO__test_transforming_multipart_parameters()
     {
@@ -126,8 +126,8 @@ class PsrHttpMessageConverterTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function TODO__test_transforming_multipart_multi_dimension_array_parameter()
     {
@@ -166,8 +166,8 @@ class PsrHttpMessageConverterTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function TODO__test_merging_multi_dimensional_parameters_and_files()
     {
@@ -238,8 +238,8 @@ class PsrHttpMessageConverterTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function TODO__test_mapping_headers()
     {

@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithLogger;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithLogger;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
-use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogAfter;
-use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogBefore;
-use SimplyCodedSoftware\Messaging\Handler\Logger\Annotation\LogError;
-use SimplyCodedSoftware\Messaging\Handler\Logger\LoggingLevel;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
+use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 
 /**
  * Class ServiceActivatorWithLoggerExample

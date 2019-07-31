@@ -1,36 +1,36 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer;
+namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelInterceptorAdapter;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
-use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
-use SimplyCodedSoftware\Messaging\Endpoint\InterceptedMessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageHandlerConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Scheduling\EpochBasedClock;
-use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
-use SimplyCodedSoftware\Messaging\Scheduling\SyncTaskScheduler;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
+use Ecotone\Messaging\Endpoint\InterceptedMessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Scheduling\EpochBasedClock;
+use Ecotone\Messaging\Scheduling\PeriodicTrigger;
+use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class PollingConsumerBuilder
- * @package SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer
+ * @package Ecotone\Messaging\Endpoint\PollingConsumer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder implements MessageHandlerConsumerBuilder

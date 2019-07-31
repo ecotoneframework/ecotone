@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Enricher;
+namespace Ecotone\Messaging\Handler\Enricher;
 
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class PropertyPath
- * @package SimplyCodedSoftware\Messaging\Handler\Enricher
+ * @package Ecotone\Messaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PropertyPath
@@ -76,7 +76,7 @@ class PropertyPath
     /**
      * @param string $path
      *
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function initialize(string $path) : void
     {

@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion\SerializedToObject;
-use SimplyCodedSoftware\Messaging\Conversion\Converter;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+namespace Ecotone\Messaging\Conversion\SerializedToObject;
+use Ecotone\Messaging\Conversion\Converter;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class DeserializingConverter
- * @package SimplyCodedSoftware\Messaging\Conversion
+ * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DeserializingConverter implements Converter

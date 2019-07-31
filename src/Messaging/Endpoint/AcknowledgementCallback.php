@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint;
+namespace Ecotone\Messaging\Endpoint;
 
 /**
  * Allows to ack message
  *
  * Interface Acknowledge
- * @package SimplyCodedSoftware\Messaging\Amqp
+ * @package Ecotone\Messaging\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface AcknowledgementCallback

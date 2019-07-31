@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace Ecotone\Messaging\Handler\Gateway;
 
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use ProxyManager\Factory\RemoteObjectFactory;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class MultipleMethodGatewayBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway
+ * @package Ecotone\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CombinedGatewayBuilder

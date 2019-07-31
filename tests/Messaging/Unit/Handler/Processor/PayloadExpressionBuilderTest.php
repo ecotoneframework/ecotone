@@ -1,24 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
+namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CallableService;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
+use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Test\Ecotone\Messaging\Fixture\Service\CallableService;
 
 /**
  * Class ExpressionBuilderTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor
+ * @package Test\Ecotone\Messaging\Unit\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PayloadExpressionBuilderTest extends TestCase
@@ -26,9 +26,9 @@ class PayloadExpressionBuilderTest extends TestCase
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function test_creating_payload_expression()
     {
@@ -50,8 +50,8 @@ class PayloadExpressionBuilderTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_using_reference_service_in_expression()
     {

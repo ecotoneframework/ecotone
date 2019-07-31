@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Scheduling;
+namespace Test\Ecotone\Messaging\Unit\Scheduling;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
-use SimplyCodedSoftware\Messaging\Scheduling\SimpleTriggerContext;
-use SimplyCodedSoftware\Messaging\Scheduling\StubUTCClock;
+use Ecotone\Messaging\Scheduling\PeriodicTrigger;
+use Ecotone\Messaging\Scheduling\SimpleTriggerContext;
+use Ecotone\Messaging\Scheduling\StubUTCClock;
 
 /**
  * Class PeriodTriggerTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Scheduling
+ * @package Test\Ecotone\Messaging\Unit\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PeriodTriggerTest extends TestCase

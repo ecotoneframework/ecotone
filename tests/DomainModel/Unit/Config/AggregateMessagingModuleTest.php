@@ -1,43 +1,43 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Unit\Config;
+namespace Test\Ecotone\DomainModel\Unit\Config;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\DomainModel\AggregateMessage;
-use SimplyCodedSoftware\DomainModel\AggregateMessageConversionServiceBuilder;
-use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
-use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
-use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
-use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithReferencesExample;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\DoStuffCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoCommandInformationConfiguration;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithReturnValue;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service\SomeCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\EventHandler\ExampleEventEventHandler;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\EventHandler\ExampleEventHandlerWithServices;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\AggregateQueryHandlerExample;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\AggregateQueryHandlerWithOutputChannelExample;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\QueryHandlerWithNoReturnValue;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler\SomeQuery;
+use Ecotone\DomainModel\AggregateMessage;
+use Ecotone\DomainModel\AggregateMessageConversionServiceBuilder;
+use Ecotone\DomainModel\AggregateMessageHandlerBuilder;
+use Ecotone\DomainModel\Annotation\CommandHandler;
+use Ecotone\DomainModel\Annotation\QueryHandler;
+use Ecotone\DomainModel\Config\AggregateMessagingModule;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\InMemoryModuleMessaging;
+use Ecotone\Messaging\Config\MessagingSystemConfiguration;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
+use Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithReferencesExample;
+use Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Aggregate\DoStuffCommand;
+use Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoCommandInformationConfiguration;
+use Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithReturnValue;
+use Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Service\SomeCommand;
+use Test\Ecotone\DomainModel\Fixture\Annotation\EventHandler\ExampleEventEventHandler;
+use Test\Ecotone\DomainModel\Fixture\Annotation\EventHandler\ExampleEventHandlerWithServices;
+use Test\Ecotone\DomainModel\Fixture\Annotation\QueryHandler\AggregateQueryHandlerExample;
+use Test\Ecotone\DomainModel\Fixture\Annotation\QueryHandler\AggregateQueryHandlerWithOutputChannelExample;
+use Test\Ecotone\DomainModel\Fixture\Annotation\QueryHandler\QueryHandlerWithNoReturnValue;
+use Test\Ecotone\DomainModel\Fixture\Annotation\QueryHandler\SomeQuery;
 
 /**
  * Class IntegrationMessagingCqrsModule
- * @package Test\SimplyCodedSoftware\DomainModel\Config
+ * @package Test\Ecotone\DomainModel\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AggregateMessagingModuleTest extends TestCase
@@ -45,7 +45,7 @@ class AggregateMessagingModuleTest extends TestCase
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_throwing_configuration_exception_if_command_handler_has_no_information_about_command()
     {
@@ -62,7 +62,7 @@ class AggregateMessagingModuleTest extends TestCase
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_throwing_exception_if_query_handler_has_no_return_value()
     {
@@ -108,8 +108,8 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_registering_aggregate_command_handler()
     {
@@ -168,8 +168,8 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_registering_service_command_handler()
     {
@@ -204,8 +204,8 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_registering_aggregate_command_handler_with_extra_services()
     {
@@ -244,8 +244,8 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_registering_aggregate_query_handler()
     {
@@ -278,8 +278,8 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_registering_aggregate_query_handler_with_output_channel()
     {
@@ -313,8 +313,8 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_registering_aggregate_with_custom_input_channel()
     {
@@ -333,7 +333,7 @@ class AggregateMessagingModuleTest extends TestCase
                 ->addAnnotationToClassMethod(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", $customQueryHandler),
             $this->createMessagingSystemConfiguration()
                 ->registerMessageHandler($commandHandler)
-                ->registerBeforeMethodInterceptor(\SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
+                ->registerBeforeMethodInterceptor(\Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     "",
                     AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
@@ -350,8 +350,8 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_registering_aggregate_without_query_class_with_only_input_channel()
     {
@@ -387,8 +387,8 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_registering_service_event_handler()
     {
@@ -414,8 +414,8 @@ class AggregateMessagingModuleTest extends TestCase
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_registering_service_event_handler_with_extra_services()
     {
@@ -445,7 +445,7 @@ class AggregateMessagingModuleTest extends TestCase
 
     /**
      * @return MessagingSystemConfiguration
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     protected function createMessagingSystemConfiguration(): Configuration
     {
@@ -458,7 +458,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @param array $messageMapping
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createModuleAndAssertConfiguration(array $annotationClassesToRegister, Configuration $expectedConfiguration, array $messageMapping): void
     {
@@ -472,7 +472,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @param AnnotationRegistrationService $annotationRegistrationService
      * @param Configuration $expectedConfiguration
      * @param array $messageMapping
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createModuleWithCustomConfigAndAssertConfiguration(AnnotationRegistrationService $annotationRegistrationService, Configuration $expectedConfiguration, array $messageMapping): void
     {
@@ -485,7 +485,7 @@ class AggregateMessagingModuleTest extends TestCase
     /**
      * @param AnnotationRegistrationService $annotationRegistrationService
      * @return MessagingSystemConfiguration
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function prepareConfiguration(AnnotationRegistrationService $annotationRegistrationService): MessagingSystemConfiguration
     {

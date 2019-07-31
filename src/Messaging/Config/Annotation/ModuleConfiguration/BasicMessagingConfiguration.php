@@ -1,36 +1,36 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptorBuilder;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Config\RequiredReference;
-use SimplyCodedSoftware\Messaging\Conversion\ArrayToJson\ArrayToJsonConverterBuilder;
-use SimplyCodedSoftware\Messaging\Conversion\JsonToArray\JsonToArrayConverterBuilder;
-use SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
-use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilder;
-use SimplyCodedSoftware\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
-use SimplyCodedSoftware\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\RequiredReference;
+use Ecotone\Messaging\Conversion\ArrayToJson\ArrayToJsonConverterBuilder;
+use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverterBuilder;
+use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
+use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilder;
+use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
+use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
+use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
+use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use Ecotone\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\NullableMessageChannel;
 
 /**
  * Class BasicMessagingConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */

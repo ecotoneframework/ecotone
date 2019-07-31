@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Http\Fixture;
+namespace Test\Ecotone\Http\Fixture;
 
 use GuzzleHttp\Psr7\ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
-use SimplyCodedSoftware\Http\HttpHeaders;
+use Ecotone\Http\HttpHeaders;
 
 /**
  * Class ServerRequest

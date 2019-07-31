@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Unit\Config;
+namespace Test\Ecotone\DomainModel\Unit\Config;
 
 /**
  * Class AggregateMessageRouterModuleTest
- * @package Test\SimplyCodedSoftware\DomainModel\Config
+ * @package Test\Ecotone\DomainModel\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AggregateMessageRouterModuleTest

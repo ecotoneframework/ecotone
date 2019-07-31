@@ -1,11 +1,11 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+namespace Ecotone\Messaging\Config;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class InMemoryModuleMessagingConfiguration
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryModuleMessaging implements ModuleRetrievingService
@@ -23,7 +23,7 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
      * InMemoryModuleMessagingConfiguration constructor.
      * @param array|Module[] $moduleMessagingConfigurations
      * @param array $extensionObjects
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(array $moduleMessagingConfigurations, array $extensionObjects)
     {
@@ -35,7 +35,7 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
 
     /**
      * @return InMemoryModuleMessaging
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createEmpty() : self
     {
@@ -46,7 +46,7 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
      * @param Module[] $moduleConfigurations
      * @param object[] $moduleExtensions
      * @return InMemoryModuleMessaging
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWith(array $moduleConfigurations, array $moduleExtensions) : self
     {

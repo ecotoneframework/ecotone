@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\MessageConverter;
+namespace Ecotone\Messaging\MessageConverter;
 
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class GlobalMessageConverterService
- * @package SimplyCodedSoftware\Messaging\MessageConverter
+ * @package Ecotone\Messaging\MessageConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageConverterRegistry
@@ -29,7 +29,7 @@ class MessageConverterRegistry
     /**
      * @param MessageConverter[] $messageConverters
      * @return MessageConverterRegistry
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWith(iterable $messageConverters) : self
     {

@@ -1,19 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Channel;
+namespace Test\Ecotone\Messaging\Unit\Channel;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\PollableChannelInterceptorAdapter;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
+use Ecotone\Messaging\Channel\ChannelInterceptor;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\PollableChannelInterceptorAdapter;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
 
 /**
  * Class ChannelInterceptorTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Channel
+ * @package Test\Ecotone\Messaging\Unit\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ChannelInterceptorTest extends TestCase

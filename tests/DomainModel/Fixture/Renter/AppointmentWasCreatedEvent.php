@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Renter;
+namespace Test\Ecotone\DomainModel\Fixture\Renter;
 
 
 class AppointmentWasCreatedEvent

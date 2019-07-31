@@ -1,29 +1,29 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Expression;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Header;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\MessageParameter;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Reference;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Value;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
+use Ecotone\Messaging\Annotation\Parameter\Expression;
+use Ecotone\Messaging\Annotation\Parameter\Header;
+use Ecotone\Messaging\Annotation\Parameter\Headers;
+use Ecotone\Messaging\Annotation\Parameter\MessageParameter;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Parameter\Reference;
+use Ecotone\Messaging\Annotation\Parameter\Value;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 
 /**
  * Class ParameterConverterAnnotationFactory
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ParameterConverterAnnotationFactory
@@ -45,8 +45,8 @@ class ParameterConverterAnnotationFactory
      * @param array $parameterConverterAnnotations
      *
      * @return array
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function createParameterConverters(?InterfaceToCall $relatedClassInterface, array $parameterConverterAnnotations): array
     {

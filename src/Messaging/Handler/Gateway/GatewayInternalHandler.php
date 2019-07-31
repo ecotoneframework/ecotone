@@ -1,27 +1,27 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway;
+namespace Ecotone\Messaging\Handler\Gateway;
 
 use foo\bar;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlingException;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageConverter\MessageConverter;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use SimplyCodedSoftware\Messaging\Transaction\Transaction;
-use SimplyCodedSoftware\Messaging\Transaction\TransactionFactory;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\MessageHandlingException;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageConverter\MessageConverter;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\ErrorMessage;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Transaction\Transaction;
+use Ecotone\Messaging\Transaction\TransactionFactory;
 
 /**
  * Class GatewayInternalHandler
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway
+ * @package Ecotone\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayInternalHandler

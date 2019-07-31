@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
 /**
  * Class BaseInterceptorExample
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class BaseInterceptorExample

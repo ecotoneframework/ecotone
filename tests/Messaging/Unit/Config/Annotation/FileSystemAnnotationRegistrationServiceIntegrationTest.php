@@ -1,33 +1,33 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation;
+namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use SimplyCodedSoftware\Messaging\Annotation\ApplicationContext;
-use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\Extension;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\Gateway\GatewayPayload;
-use SimplyCodedSoftware\Messaging\Annotation\InputOutputEndpointAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Annotation\Splitter;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
-use SimplyCodedSoftware\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment\ApplicationContextWithClassEnvironment;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment\ApplicationContextWithMethodEnvironmentExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment\ApplicationContextWithMethodMultipleEnvironmentsExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\EndpointAnnotation;
+use Ecotone\Messaging\Annotation\Extension;
+use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\Gateway\GatewayPayload;
+use Ecotone\Messaging\Annotation\InputOutputEndpointAnnotation;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Splitter;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
+use Ecotone\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\Environment\ApplicationContextWithClassEnvironment;
+use Test\Ecotone\Messaging\Fixture\Annotation\Environment\ApplicationContextWithMethodEnvironmentExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\Environment\ApplicationContextWithMethodMultipleEnvironmentsExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 
 /**
  * Class FileSystemAnnotationRegistrationServiceTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTest
@@ -55,7 +55,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     /**
      * @throws ConfigurationException
      * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_retrieving_annotation_registration_for_application_context()
     {
@@ -75,7 +75,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
                     "buy"
                 )
             ],
-            $this->createAnnotationRegistrationService("Test\\SimplyCodedSoftware\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")->findRegistrationsFor(MessageEndpoint::class, Gateway::class)
+            $this->createAnnotationRegistrationService("Test\\Ecotone\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")->findRegistrationsFor(MessageEndpoint::class, Gateway::class)
         );
     }
 
@@ -92,7 +92,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
             [
                 $gatewayAnnotation
             ],
-            $this->createAnnotationRegistrationService("Test\\SimplyCodedSoftware\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")
+            $this->createAnnotationRegistrationService("Test\\Ecotone\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")
                 ->getAnnotationsForMethod(GatewayWithReplyChannelExample::class, "buy")
         );
     }
@@ -103,7 +103,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
             [
                 new MessageEndpoint()
             ],
-            $this->createAnnotationRegistrationService("Test\\SimplyCodedSoftware\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")
+            $this->createAnnotationRegistrationService("Test\\Ecotone\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")
                 ->getAnnotationsForClass(GatewayWithReplyChannelExample::class)
         );
     }
@@ -112,11 +112,11 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      * @throws ConfigurationException
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_retrieving_for_specific_environment()
     {
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment", "dev");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\Environment", "dev");
         $this->assertEquals(
             [
                 $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodEnvironmentExample::class, "configSingleEnvironment"),
@@ -126,7 +126,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         );
 
 
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment", "test");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\Environment", "test");
         $this->assertEquals(
             [
                 $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodMultipleEnvironmentsExample::class, "configMultipleEnvironments")
@@ -134,7 +134,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
             $fileSystemAnnotationRegistrationService->findRegistrationsFor(ApplicationContext::class, Extension::class)
         );
 
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Environment", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\Environment", "prod");
         $this->assertEquals(
             [
                 $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithClassEnvironment::class, "someAction"),
@@ -150,7 +150,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      * @param string $className
      * @param string $methodName
      * @return AnnotationRegistration
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createAnnotationRegistration($classAnnotation, $methodAnnotation, string $className, string $methodName) : AnnotationRegistration
     {
@@ -166,7 +166,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      * @throws ConfigurationException
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __test_retrieving_subclass_annotation()
     {
@@ -179,7 +179,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $messageToPayloadParameter->parameterName = "payload";
         $annotation->parameterConverters          = [$messageToPayloadParameter];
 
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Splitter", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Splitter", "prod");
 
         $this->assertEquals(
             [
@@ -197,11 +197,11 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     /**
      * @throws ConfigurationException
      * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_retrieving_with_random_endpoint_id_if_not_defined()
     {
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\NoEndpointIdSplitter", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\NoEndpointIdSplitter", "prod");
 
         /** @var AnnotationRegistration[] $annotationRegistrations */
         $annotationRegistrations = $fileSystemAnnotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EndpointAnnotation::class);
@@ -242,7 +242,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      * @return FileSystemAnnotationRegistrationService
      * @throws ConfigurationException
      * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createAnnotationRegistrationService(string $namespace, string $environmentName): FileSystemAnnotationRegistrationService
     {
@@ -262,12 +262,12 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      * @return FileSystemAnnotationRegistrationService
      * @throws ConfigurationException
      * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function getAnnotationRegistrationService(): FileSystemAnnotationRegistrationService
     {
         if (!self::$annotationRegistrationService) {
-            self::$annotationRegistrationService = $this->createAnnotationRegistrationService("Test\SimplyCodedSoftware\Messaging\Fixture", "prod");
+            self::$annotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture", "prod");
         }
 
         return self::$annotationRegistrationService;

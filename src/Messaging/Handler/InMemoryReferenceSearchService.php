@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class InMemoryReferenceSearchService
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryReferenceSearchService implements ReferenceSearchService
@@ -26,7 +26,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      * InMemoryReferenceSearchService constructor.
      * @param array|object[] $objectsToResolve
      * @param ReferenceSearchService|null $referenceSearchService
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(array $objectsToResolve, ?ReferenceSearchService $referenceSearchService)
     {
@@ -38,7 +38,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     /**
      * @param array|object[] $objects
      * @return InMemoryReferenceSearchService
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWith(array $objects) : self
     {
@@ -47,7 +47,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
 
     /**
      * @return InMemoryReferenceSearchService
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createEmpty() : self
     {
@@ -58,7 +58,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      * @param ReferenceSearchService $referenceSearchService
      * @param array $objects
      * @return InMemoryReferenceSearchService
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWithReferenceService(ReferenceSearchService $referenceSearchService, array $objects) : self
     {
@@ -68,7 +68,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     /**
      * @param string $referenceName
      * @param $object
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function registerReferencedObject(string $referenceName, $object)
     {
@@ -97,7 +97,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
 
     /**
      * @param array|object[] $objects
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function initialize(array $objects) : void
     {

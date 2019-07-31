@@ -1,23 +1,23 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 
 /**
  * Class AnnotationServiceActivatorConfigurationTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\Annotation
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceActivatorModuleTest extends AnnotationConfigurationTest

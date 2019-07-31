@@ -1,26 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Splitter;
+namespace Ecotone\Messaging\Handler\Splitter;
 
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\RequestReplyProducer;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class SplitterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Splitter
+ * @package Ecotone\Messaging\Handler\Splitter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SplitterBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
@@ -34,7 +34,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
      */
     private $methodName;
     /**
-     * @var array|\SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder[]
+     * @var array|\Ecotone\Messaging\Handler\ParameterConverterBuilder[]
      */
     private $methodParameterConverterBuilders = [];
     /**
@@ -87,7 +87,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
      * Splits directly from message payload, without using any service
      *
      * @return SplitterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createMessagePayloadSplitter() : self
     {
@@ -98,7 +98,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
      * @param object $directReferenceObject
      * @param string $methodName
      * @return SplitterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWithDirectObject($directReferenceObject, string $methodName): self
     {

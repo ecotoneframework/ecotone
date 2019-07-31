@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Router;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Router;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Annotation\Router;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Router;
 
 /**
  * Class RouterWithNoResolutionRequiredExample
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Router
+ * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

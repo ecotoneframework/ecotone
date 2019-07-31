@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Blog;
+namespace Test\Ecotone\DomainModel\Fixture\Blog;
 
 /**
  * Class ChangeArticleContentCommand
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Blog
+ * @package Test\Ecotone\DomainModel\Fixture\Blog
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ChangeArticleContentCommand

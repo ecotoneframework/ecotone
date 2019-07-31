@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
+namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\MethodArgument;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
+use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class GatewayHeaderArrayConverter
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter
+ * @package Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayHeadersConverter implements GatewayParameterConverter

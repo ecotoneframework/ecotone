@@ -1,25 +1,25 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\BookStoreGatewayExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Gateway\CombinedGatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\CombinedGatewayDefinition;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\BookStoreGatewayExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
 
 /**
  * Class AnnotationTransformerConfigurationTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\Annotation
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayModuleTest extends AnnotationConfigurationTest
@@ -27,7 +27,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_registering_gateway()
     {
@@ -63,7 +63,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_registering_gateway_with_multiple_methods()
     {

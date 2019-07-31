@@ -1,16 +1,16 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Config;
+namespace Ecotone\Messaging\Config;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\NullableMessageChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\DestinationResolutionException;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class InMemoryChannelResolver
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryChannelResolver implements ChannelResolver
@@ -27,7 +27,7 @@ class InMemoryChannelResolver implements ChannelResolver
     /**
      * InMemoryChannelResolver constructor.
      * @param array|NamedMessageChannel[] $resolvableChannels
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(array $resolvableChannels)
     {
@@ -37,7 +37,7 @@ class InMemoryChannelResolver implements ChannelResolver
     /**
      * @param array|NamedMessageChannel[] $namedMessageChannels
      * @return InMemoryChannelResolver
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function create(array $namedMessageChannels) : self
     {
@@ -47,7 +47,7 @@ class InMemoryChannelResolver implements ChannelResolver
     /**
      * @param array|string[] $resolvableChannelsArray
      * @return InMemoryChannelResolver
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createFromAssociativeArray(array $resolvableChannelsArray) : self
     {
@@ -66,7 +66,7 @@ class InMemoryChannelResolver implements ChannelResolver
      * @param ChannelResolver $channelResolver
      * @param array $associativeAdditionalChannels
      * @return InMemoryChannelResolver
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWithChannelResolver(ChannelResolver $channelResolver, array $associativeAdditionalChannels) : self
     {
@@ -78,7 +78,7 @@ class InMemoryChannelResolver implements ChannelResolver
 
     /**
      * @return InMemoryChannelResolver
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createEmpty() : self
     {
@@ -127,7 +127,7 @@ class InMemoryChannelResolver implements ChannelResolver
 
     /**
      * @param array|NamedMessageChannel[] $namedMessageChannels
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function initialize($namedMessageChannels) : void
     {

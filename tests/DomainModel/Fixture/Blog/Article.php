@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Blog;
+namespace Test\Ecotone\DomainModel\Fixture\Blog;
 
-use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateIdentifier;
-use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
+use Ecotone\DomainModel\Annotation\Aggregate;
+use Ecotone\DomainModel\Annotation\AggregateIdentifier;
+use Ecotone\DomainModel\Annotation\CommandHandler;
 
 /**
  * Class Article
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Blog
+ * @package Test\Ecotone\DomainModel\Fixture\Blog
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  */

@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\EventDriven;
+namespace Ecotone\Messaging\Endpoint\EventDriven;
 
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\SubscribableChannel;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\SubscribableChannel;
 
 /**
  * Class EventDrivenConsumer
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EventDrivenConsumer implements ConsumerLifecycle

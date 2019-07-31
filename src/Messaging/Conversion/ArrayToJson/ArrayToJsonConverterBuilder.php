@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion\ArrayToJson;
-use SimplyCodedSoftware\Messaging\Conversion\Converter;
-use SimplyCodedSoftware\Messaging\Conversion\ConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+namespace Ecotone\Messaging\Conversion\ArrayToJson;
+use Ecotone\Messaging\Conversion\Converter;
+use Ecotone\Messaging\Conversion\ConverterBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class ArrayToJsonConverterBuilder
- * @package SimplyCodedSoftware\Messaging\Conversion\ArrayToJson
+ * @package Ecotone\Messaging\Conversion\ArrayToJson
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ArrayToJsonConverterBuilder implements ConverterBuilder

@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Annotation\Interceptor;
+namespace Ecotone\Messaging\Annotation\Interceptor;
 
 /**
  * Class Around
- * @package SimplyCodedSoftware\Messaging\Annotation\Interceptor
+ * @package Ecotone\Messaging\Annotation\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
@@ -19,7 +19,7 @@ class Around
      *
      * @var int
      */
-    public $precedence = \SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::DEFAULT_PRECEDENCE;
+    public $precedence = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::DEFAULT_PRECEDENCE;
 
     /**
      * Advice is associated with a pointcut expression and runs at any join point matched by the pointcut (for example, the execution of a method with a certain name)

@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property\Extra\PrivatePropertyTrait;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\Extra\PrivatePropertyTrait;
 
 /**
  * Class OrderWithTraits
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Property
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OrderWithTraits

@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
+namespace Ecotone\DomainModel;
 
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Interface AggregateRepository
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface AggregateRepository

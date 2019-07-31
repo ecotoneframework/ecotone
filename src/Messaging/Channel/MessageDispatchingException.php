@@ -6,10 +6,10 @@
  * Time: 14:29
  */
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace Ecotone\Messaging\Channel;
 
 
-use SimplyCodedSoftware\Messaging\MessagingException;
+use Ecotone\Messaging\MessagingException;
 
 class MessageDispatchingException extends MessagingException
 {

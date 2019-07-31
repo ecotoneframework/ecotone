@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Support;
+namespace Test\Ecotone\Messaging\Unit\Support;
 
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class MessageBuilderTest
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package Ecotone\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageBuilderTest extends MessagingTest

@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion\ArrayToJson;
+namespace Ecotone\Messaging\Conversion\ArrayToJson;
 
-use SimplyCodedSoftware\Messaging\Conversion\Converter;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Conversion\Converter;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class ArrayToJsonConverter
- * @package SimplyCodedSoftware\Messaging\Conversion\ArrayToJson
+ * @package Ecotone\Messaging\Conversion\ArrayToJson
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ArrayToJsonConverter implements Converter

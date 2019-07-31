@@ -1,16 +1,16 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+namespace Ecotone\DomainModel;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class AggregateMessageConversionService
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AggregateMessageConversionService
@@ -38,9 +38,9 @@ class AggregateMessageConversionService
     /**
      * @param Message $message
      * @return Message
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function convert(Message $message) : Message
     {

@@ -1,29 +1,29 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use ReflectionException;
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\MethodInterceptorModule;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Interceptor\TransformerInterceptorExample;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\MethodInterceptorModule;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\MessagingException;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\TransformerInterceptorExample;
 
 /**
  * Class MethodInterceptorModuleTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodInterceptorModuleTest extends AnnotationConfigurationTest

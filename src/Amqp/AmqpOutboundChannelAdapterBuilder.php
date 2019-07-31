@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageConverter\DefaultHeaderMapper;
-use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
+use Ecotone\Messaging\MessageConverter\HeaderMapper;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class OutboundAmqpGatewayBuilder
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
@@ -71,8 +71,8 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
      * @param string $exchangeName
      * @param string $amqpConnectionFactoryReferenceName
      *
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     private function __construct(string $exchangeName, string $amqpConnectionFactoryReferenceName)
     {
@@ -87,8 +87,8 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
      * @param string $amqpConnectionFactoryReferenceName
      *
      * @return AmqpOutboundChannelAdapterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public static function create(string $exchangeName, string $amqpConnectionFactoryReferenceName): self
     {
@@ -99,8 +99,8 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
      * @param string $amqpConnectionFactoryReferenceName
      *
      * @return AmqpOutboundChannelAdapterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public static function createForDefaultExchange(string $amqpConnectionFactoryReferenceName): self
     {
@@ -123,8 +123,8 @@ class AmqpOutboundChannelAdapterBuilder implements MessageHandlerBuilder
      * @param string $mediaType
      *
      * @return AmqpOutboundChannelAdapterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function withDefaultConversionMediaType(string $mediaType) : self
     {

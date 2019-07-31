@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Enricher;
-use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+namespace Ecotone\Messaging\Handler\Enricher;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class PayloadPropertySetter
- * @package SimplyCodedSoftware\Messaging\Handler\Enricher\Converter
+ * @package Ecotone\Messaging\Handler\Enricher\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PropertyEditorAccessor
@@ -45,7 +45,7 @@ class PropertyEditorAccessor
      * @param ReferenceSearchService $referenceSearchService
      * @param string $mappingExpression
      * @return PropertyEditorAccessor
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
      */
     public static function createWithMapping(ReferenceSearchService $referenceSearchService, string $mappingExpression): self
     {
@@ -59,7 +59,7 @@ class PropertyEditorAccessor
     /**
      * @param ReferenceSearchService $referenceSearchService
      * @return PropertyEditorAccessor
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
      */
     public static function create(ReferenceSearchService $referenceSearchService) : self
     {
@@ -76,7 +76,7 @@ class PropertyEditorAccessor
      * @return mixed enriched data
      * @throws EnrichException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function enrichDataWith(PropertyPath $propertyNamePath, $dataToEnrich, $dataToEnrichWith, Message $requestMessage, ?Message $replyMessage)
     {

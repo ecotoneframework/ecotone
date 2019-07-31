@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Builder\Annotation;
+namespace Test\Ecotone\Messaging\Builder\Annotation;
 
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
 
 /**
  * Class PayloadTestBuilder
- * @package Test\SimplyCodedSoftware\Messaging\Builder\Annotation
+ * @package Test\Ecotone\Messaging\Builder\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PayloadAnnotationTestCaseBuilder

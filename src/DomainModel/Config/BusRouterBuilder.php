@@ -1,21 +1,21 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel\Config;
+namespace Ecotone\DomainModel\Config;
 
-use SimplyCodedSoftware\DomainModel\CommandBus;
-use SimplyCodedSoftware\DomainModel\EventBus;
-use SimplyCodedSoftware\DomainModel\QueryBus;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use Ecotone\DomainModel\CommandBus;
+use Ecotone\DomainModel\EventBus;
+use Ecotone\DomainModel\QueryBus;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Router\RouterBuilder;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class BusRouterBuilder
- * @package SimplyCodedSoftware\DomainModel\Config
+ * @package Ecotone\DomainModel\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class BusRouterBuilder implements MessageHandlerBuilder

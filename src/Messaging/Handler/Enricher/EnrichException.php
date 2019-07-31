@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Enricher;
+namespace Ecotone\Messaging\Handler\Enricher;
 
-use SimplyCodedSoftware\Messaging\MessagingException;
+use Ecotone\Messaging\MessagingException;
 
 /**
  * Class EnrichException
- * @package SimplyCodedSoftware\Messaging\Handler\Enricher
+ * @package Ecotone\Messaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EnrichException extends MessagingException

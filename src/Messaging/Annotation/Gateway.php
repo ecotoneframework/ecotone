@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Annotation;
+namespace Ecotone\Messaging\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 
 /**
  * Class GatewayAnnotation
- * @package SimplyCodedSoftware\Messaging\Annotation
+ * @package Ecotone\Messaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  * @Target({"METHOD"})

@@ -1,17 +1,17 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Channel;
+namespace Test\Ecotone\Messaging\Unit\Channel;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\Dispatcher\UnicastingDispatcher;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\Dispatcher\UnicastingDispatcher;
+use Ecotone\Messaging\Channel\MessageDispatchingException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class DirectChannelTest
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DirectChannelTest extends TestCase

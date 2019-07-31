@@ -1,18 +1,18 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
+namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class DumbGatewayBuilder
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler
+ * @package Test\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DumbGatewayBuilder implements GatewayBuilder

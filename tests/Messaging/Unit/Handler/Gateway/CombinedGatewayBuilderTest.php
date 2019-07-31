@@ -1,23 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway;
+namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
+use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayDefinition;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\CombinedGatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\CombinedGatewayDefinition;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\CombinedGatewayBuilder;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MultipleMethodGatewayBuilder
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway
+ * @package Test\Ecotone\Messaging\Unit\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CombinedGatewayBuilderTest extends TestCase

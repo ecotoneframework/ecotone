@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation;
+namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionObject;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
+use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionObject;
+use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class AnnotationModuleConfigurationRetrievingServiceTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationModuleRetrievingServiceTest extends MessagingTest

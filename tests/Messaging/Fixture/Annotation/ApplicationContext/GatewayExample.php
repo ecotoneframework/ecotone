@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ApplicationContext {
+namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext {
 
-    use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-    use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+    use Ecotone\Messaging\Annotation\Gateway;
+    use Ecotone\Messaging\Annotation\MessageEndpoint;
 
     /**
      * Interface Gateway
-     * @package Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ApplicationContext
+     * @package Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext
      * @author Dariusz Gafka <dgafka.mail@gmail.com>
      * @MessageEndpoint()
      */

@@ -2,16 +2,16 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
 
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
-use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
+use Ecotone\Messaging\Channel\ChannelInterceptor;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 
 /**
  * Class BeforeSendInterceptor
- * @package SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor
+ * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class BeforeSendInterceptor implements ChannelInterceptor

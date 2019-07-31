@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
+namespace Ecotone\DomainModel;
 
-use SimplyCodedSoftware\Messaging\MessagingException;
+use Ecotone\Messaging\MessagingException;
 
 /**
  * Class AggregateNotFoundException
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AggregateNotFoundException extends MessagingException

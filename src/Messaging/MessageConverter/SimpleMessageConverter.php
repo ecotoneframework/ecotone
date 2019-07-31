@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\MessageConverter;
+namespace Ecotone\Messaging\MessageConverter;
 
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class SimpleMessageConverter
- * @package SimplyCodedSoftware\Messaging\MessageConverter
+ * @package Ecotone\Messaging\MessageConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SimpleMessageConverter implements MessageConverter

@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceInterface;
+namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
 
 /**
  * Interface ServiceInterface
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Service
+ * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ServiceInterfaceReceiveOnly

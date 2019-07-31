@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel\Config;
+namespace Ecotone\DomainModel\Config;
 
 /**
  * Class ByNameRouter
- * @package SimplyCodedSoftware\DomainModel\Config
+ * @package Ecotone\DomainModel\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ByNameRouter

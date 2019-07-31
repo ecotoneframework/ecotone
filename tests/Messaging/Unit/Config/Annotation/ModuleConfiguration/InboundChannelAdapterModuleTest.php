@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\InboundChannelAdapterModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\InboundChannelAdapterExample;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\InboundChannelAdapterModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\InboundChannelAdapterExample;
 
 /**
  * Class InboundChannelAdapterModuleTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InboundChannelAdapterModuleTest extends AnnotationConfigurationTest

@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Transaction\Null;
+namespace Ecotone\Messaging\Transaction\Null;
 
-use SimplyCodedSoftware\Messaging\Transaction\Transaction;
-use SimplyCodedSoftware\Messaging\Transaction\TransactionException;
+use Ecotone\Messaging\Transaction\Transaction;
+use Ecotone\Messaging\Transaction\TransactionException;
 
 /**
  * Class NullTransaction
- * @package SimplyCodedSoftware\Messaging\Transaction\Null
+ * @package Ecotone\Messaging\Transaction\Null
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class NullTransaction implements Transaction

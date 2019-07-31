@@ -1,17 +1,17 @@
 <?php
 
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\EventDriven;
+namespace Ecotone\Messaging\Endpoint\EventDriven;
 
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class LazyMessageHandler
- * @package SimplyCodedSoftware\Messaging\Endpoint\EventDriven
+ * @package Ecotone\Messaging\Endpoint\EventDriven
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LazyMessageHandler implements MessageHandler

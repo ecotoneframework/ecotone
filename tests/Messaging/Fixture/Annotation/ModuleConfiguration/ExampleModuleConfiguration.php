@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ModuleConfiguration;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class ExampleModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
-class ExampleModuleConfiguration implements \SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule
+class ExampleModuleConfiguration implements \Ecotone\Messaging\Config\Annotation\AnnotationModule
 {
     /**
      * @var array
@@ -55,7 +55,7 @@ class ExampleModuleConfiguration implements \SimplyCodedSoftware\Messaging\Confi
     /**
      * @inheritDoc
      */
-    public static function create(\SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService $annotationRegistrationService): \SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule
+    public static function create(\Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
     {
         return new self([]);
     }

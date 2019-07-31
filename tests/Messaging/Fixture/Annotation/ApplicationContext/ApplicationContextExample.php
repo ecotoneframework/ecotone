@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ApplicationContext;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext;
 
-use SimplyCodedSoftware\Messaging\Annotation\ApplicationContext;
-use SimplyCodedSoftware\Messaging\Annotation\Extension;
-use SimplyCodedSoftware\Messaging\Channel\MessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Channel\SimpleChannelInterceptorBuilder;
-use SimplyCodedSoftware\Messaging\Channel\SimpleMessageChannelBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\Extension;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\SimpleChannelInterceptorBuilder;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 
 /**
  * Class ApplicationContext
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\ApplicationContext
+ * @package Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ApplicationContext()
  */

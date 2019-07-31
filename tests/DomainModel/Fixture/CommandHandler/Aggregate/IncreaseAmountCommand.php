@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
+namespace Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate;
 
 
 interface IncreaseAmountCommand

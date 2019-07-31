@@ -1,9 +1,9 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
+namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\TwoStepPassword as AdminPassword;
+use Test\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword as AdminPassword;
 
 interface Admin
 {

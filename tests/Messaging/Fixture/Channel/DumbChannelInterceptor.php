@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Channel;
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
+namespace Test\Ecotone\Messaging\Fixture\Channel;
+use Ecotone\Messaging\Channel\ChannelInterceptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 
 /**
  * Class DumbChannelInterceptor
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Channel
+ * @package Test\Ecotone\Messaging\Fixture\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DumbChannelInterceptor implements ChannelInterceptor

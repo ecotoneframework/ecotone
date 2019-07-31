@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\PollOrThrow;
+namespace Ecotone\Messaging\Endpoint\PollOrThrow;
 
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\MessageDeliveryException;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\PollableChannel;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\MessageDeliveryException;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\PollableChannel;
 
 /**
  * Class PollingConsumer
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PollOrThrowExceptionConsumer implements ConsumerLifecycle

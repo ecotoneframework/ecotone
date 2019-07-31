@@ -1,5 +1,5 @@
 {
-    "name": "simplycodedsoftware/integration-messaging",
+    "name": "ecotone/ecotone",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -8,16 +8,16 @@
             "email": "dgafka.mail@gmail.com"
         }
     ],
-    "keywords": ["messaging", "asynchronous", "message", "spring", "enterprise integration patterns", "eip", "distributed architecture", "event driven architecture", "eda"],
-    "description": "Framework to provide pipe and filters architecture and solutions to work in distributed architecture. Based on enterprise integration patterns and java spring framework.",
+    "keywords": ["cqrs","event","command","ecotone","query","ddd","messaging", "aggregate","asynchronous", "message", "spring", "enterprise integration patterns", "eip", "distributed architecture", "event driven architecture", "eda","domain driven design"],
+    "description": "The open source Ecotone provides a clean, elegant API for writing DDD, CQRS applications on top off the well-known Enterprise Integration Patterns. It provides basic building blocks for writing aggregates, commands, queries, events, command handlers, event handlers, query handlers, communication buses and so on.",
     "autoload": {
         "psr-4": {
-            "SimplyCodedSoftware\\": "src"
+            "Ecotone\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Test\\SimplyCodedSoftware\\": "tests"
+            "Test\\Ecotone\\": "tests"
         },
         "psr-0": {
             "FixtureAutoloadTest\\": "tests\\Messaging",
@@ -51,8 +51,5 @@
         "enqueue/amqp-lib": "^0.9",
         "enqueue/dsn": "^0.9",
         "enqueue/enqueue": "^0.9"
-    },
-    "config": {
-        "bin-dir": "bin/"
     }
 }

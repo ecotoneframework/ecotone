@@ -2,11 +2,11 @@
 declare(strict_types=1);
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Processor;
 
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorObjectBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\StubCallSavingService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorObjectBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
 
 /**
  * Class AroundInterceptorObjectBuilderExample

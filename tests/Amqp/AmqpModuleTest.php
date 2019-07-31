@@ -1,25 +1,25 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Amqp;
+namespace Test\Ecotone\Amqp;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Amqp\AmqpAdmin;
-use SimplyCodedSoftware\Amqp\AmqpBackedMessageChannelBuilder;
-use SimplyCodedSoftware\Amqp\AmqpBinding;
-use SimplyCodedSoftware\Amqp\AmqpExchange;
-use SimplyCodedSoftware\Amqp\AmqpQueue;
-use SimplyCodedSoftware\Amqp\Configuration\AmqpModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\InMemoryModuleMessaging;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessagingException;
+use Ecotone\Amqp\AmqpAdmin;
+use Ecotone\Amqp\AmqpBackedMessageChannelBuilder;
+use Ecotone\Amqp\AmqpBinding;
+use Ecotone\Amqp\AmqpExchange;
+use Ecotone\Amqp\AmqpQueue;
+use Ecotone\Amqp\Configuration\AmqpModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\InMemoryModuleMessaging;
+use Ecotone\Messaging\Config\MessagingSystemConfiguration;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\MessagingException;
 
 /**
  * Class AmqpModuleTest
- * @package Test\SimplyCodedSoftware\Amqp
+ * @package Test\Ecotone\Amqp
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpModuleTest extends TestCase

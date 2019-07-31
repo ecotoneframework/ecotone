@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Store;
+namespace Test\Ecotone\Messaging\Unit\Store;
 
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Store\InMemoryMessageGroup;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Store\InMemoryMessageGroup;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class InMemoryMessageGroupTest
- * @package SimplyCodedSoftware\Messaging\Store
+ * @package Ecotone\Messaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryMessageGroupTest extends TestCase

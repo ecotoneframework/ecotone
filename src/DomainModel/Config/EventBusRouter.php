@@ -1,16 +1,16 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel\Config;
+namespace Ecotone\DomainModel\Config;
 
-use SimplyCodedSoftware\DomainModel\EventBus;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\DomainModel\EventBus;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class EventPublisherRouter
- * @package SimplyCodedSoftware\DomainModel\Config
+ * @package Ecotone\DomainModel\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EventBusRouter
@@ -46,8 +46,8 @@ class EventBusRouter
      *
      * @return array
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function routeByObject($object) : array
     {
@@ -88,7 +88,7 @@ class EventBusRouter
      * @param string $name
      *
      * @return string|null
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function routeByName(?string $name) : ?string
     {

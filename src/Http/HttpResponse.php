@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Http;
+namespace Ecotone\Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 /**
  * Class HttpResponse
- * @package SimplyCodedSoftware\Http
+ * @package Ecotone\Http
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class HttpResponse implements ResponseInterface

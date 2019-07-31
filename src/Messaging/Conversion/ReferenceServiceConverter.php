@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion;
+namespace Ecotone\Messaging\Conversion;
 
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class ReferenceConverter
- * @package SimplyCodedSoftware\Messaging\Conversion
+ * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReferenceServiceConverter implements Converter
@@ -36,7 +36,7 @@ class ReferenceServiceConverter implements Converter
      * @param string $method
      * @param TypeDescriptor $sourceType
      * @param TypeDescriptor $targetType
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct($object, string $method, TypeDescriptor $sourceType, TypeDescriptor $targetType)
     {
@@ -53,7 +53,7 @@ class ReferenceServiceConverter implements Converter
      * @param TypeDescriptor $sourceType
      * @param TypeDescriptor $targetType
      * @return ReferenceServiceConverter
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function create($object, string $method, TypeDescriptor $sourceType, TypeDescriptor $targetType) : self
     {

@@ -2,13 +2,13 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\Interceptor;
+namespace Ecotone\Messaging\Endpoint\Interceptor;
 
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerInterceptor;
+use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 
 /**
  * Class LimitExecutionAmountInterceptor
- * @package SimplyCodedSoftware\Messaging\Endpoint\Interceptor
+ * @package Ecotone\Messaging\Endpoint\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LimitExecutionAmountInterceptor implements ConsumerInterceptor

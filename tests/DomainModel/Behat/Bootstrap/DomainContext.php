@@ -1,19 +1,19 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Behat\Bootstrap;
+namespace Test\Ecotone\DomainModel\Behat\Bootstrap;
 
 require_once __DIR__ . "/../../../TestBootstrap.php";
 
 use Behat\Behat\Context\Context;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\DomainModel\CommandBus;
-use SimplyCodedSoftware\DomainModel\QueryBus;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
-use Test\SimplyCodedSoftware\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext;
+use Ecotone\DomainModel\CommandBus;
+use Ecotone\DomainModel\QueryBus;
+use Ecotone\Messaging\Conversion\MediaType;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
+use Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext;
 
 /**
  * Defines application features from the specific context.

@@ -1,16 +1,16 @@
 <?php
 
 
-namespace SimplyCodedSoftware\DomainModel\LazyEventBus;
+namespace Ecotone\DomainModel\LazyEventBus;
 
-use SimplyCodedSoftware\Messaging\Annotation\Gateway;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Headers;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Parameter\Headers;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
 
 /**
  * Interface LazyEventBus
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

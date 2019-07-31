@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Http\FileSystemMover;
+namespace Ecotone\Http\FileSystemMover;
 use Psr\Http\Message\UploadedFileInterface;
-use SimplyCodedSoftware\Http\UploadedFileMover;
+use Ecotone\Http\UploadedFileMover;
 
 /**
  * Class FileSystemFileMover
- * @package SimplyCodedSoftware\Http
+ * @package Ecotone\Http
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FileSystemFileMover implements UploadedFileMover

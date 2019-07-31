@@ -1,11 +1,11 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Router;
-use SimplyCodedSoftware\Messaging\Message;
+namespace Test\Ecotone\Messaging\Fixture\Router;
+use Ecotone\Messaging\Message;
 
 /**
  * Class MultipleChannelRouter
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Router
+ * @package Test\Ecotone\Messaging\Fixture\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MultipleChannelRouter

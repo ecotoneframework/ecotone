@@ -1,14 +1,14 @@
 <?php
 
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\PollableChannel;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\PollableChannel;
 
 /**
  * Class AmqpBackedQueue
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpBackendMessageChannel implements PollableChannel

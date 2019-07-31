@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler;
+namespace Test\Ecotone\DomainModel\Fixture\Annotation\QueryHandler;
 
-use SimplyCodedSoftware\DomainModel\Annotation\TargetAggregateIdentifier;
+use Ecotone\DomainModel\Annotation\TargetAggregateIdentifier;
 
 /**
  * Class SomeResult
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\QueryHandler
+ * @package Test\Ecotone\DomainModel\Fixture\Annotation\QueryHandler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SomeResult

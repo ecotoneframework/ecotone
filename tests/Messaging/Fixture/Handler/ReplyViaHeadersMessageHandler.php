@@ -1,17 +1,17 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
+namespace Test\Ecotone\Messaging\Fixture\Handler;
 
 use Psr\Http\Message\ResponseInterface;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class DumbMessageHandler
- * @package Test\SimplyCodedSoftware\Messaging\Http
+ * @package Test\Ecotone\Messaging\Http
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReplyViaHeadersMessageHandler implements MessageHandler

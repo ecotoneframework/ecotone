@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Converter;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\Converter;
 
-use SimplyCodedSoftware\Messaging\Annotation\Converter;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Converter;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
  * Class ExampleConverterService
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Converter
+ * @package Test\Ecotone\Messaging\Fixture\Annotation\Converter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

@@ -1,38 +1,38 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Chain;
+namespace Test\Ecotone\Messaging\Unit\Handler\Chain;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Transformer\PassThroughTransformer;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Transformer\StdClassTransformer;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Transformer\StringTransformer;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CalculatingService;
+use Test\Ecotone\Messaging\Fixture\Handler\Transformer\PassThroughTransformer;
+use Test\Ecotone\Messaging\Fixture\Handler\Transformer\StdClassTransformer;
+use Test\Ecotone\Messaging\Fixture\Handler\Transformer\StringTransformer;
+use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\EnricherBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Logger\LoggingHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Router\RouterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
+use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
+use Ecotone\Messaging\Handler\Enricher\EnricherBuilder;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
+use Ecotone\Messaging\Handler\Router\RouterBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class ChainMessageHandlerBuilderTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Chain
+ * @package Test\Ecotone\Messaging\Unit\Handler\Chain
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ChainMessageHandlerBuilderTest extends TestCase
 {
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      * @throws \Exception
      */
     public function test_chaining_with_single_message_handler()
@@ -53,7 +53,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_chaining_with_two_message_handlers()
     {
@@ -86,7 +86,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_with_chain_handler_at_the_end()
     {
@@ -137,7 +137,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_chaining_with_other_chain_inside()
     {
@@ -163,7 +163,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_chaining_with_other_chain_at_the_beginning_of_flow()
     {
@@ -197,7 +197,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_setting_output_channel()
     {
@@ -227,7 +227,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_chaining_with_three_levels()
     {
@@ -264,7 +264,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_chaining_multiple_handlers()
     {
@@ -331,7 +331,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      * @throws \Exception
      */
     public function test_chaining_with_router_at_the_end()
@@ -357,7 +357,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_configured_output_channel_and_output_handler()
     {
@@ -378,7 +378,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @param $requestPayload
      * @param $replyChannel
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createChainHandlerAndHandle(array $messageHandlers, $requestPayload, $replyChannel): void
     {

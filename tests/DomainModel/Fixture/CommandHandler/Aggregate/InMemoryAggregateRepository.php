@@ -1,18 +1,18 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
-use SimplyCodedSoftware\DomainModel\AggregateNotFoundException;
-use SimplyCodedSoftware\DomainModel\AggregateRepository;
-use SimplyCodedSoftware\DomainModel\AggregateVersionMismatchException;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+namespace Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate;
+use Ecotone\DomainModel\AggregateNotFoundException;
+use Ecotone\DomainModel\AggregateRepository;
+use Ecotone\DomainModel\AggregateVersionMismatchException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class InMemoryAggregateRepository
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @\SimplyCodedSoftware\DomainModel\Annotation\AggregateRepository()
+ * @\Ecotone\DomainModel\Annotation\AggregateRepository()
  */
 class InMemoryAggregateRepository implements AggregateRepository
 {

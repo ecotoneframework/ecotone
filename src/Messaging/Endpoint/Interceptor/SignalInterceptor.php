@@ -2,14 +2,14 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\Interceptor;
+namespace Ecotone\Messaging\Endpoint\Interceptor;
 
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerInterceptor;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 
 /**
  * Class SignalInterceptor
- * @package SimplyCodedSoftware\Messaging\Endpoint\Interceptor
+ * @package Ecotone\Messaging\Endpoint\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SignalInterceptor implements ConsumerInterceptor

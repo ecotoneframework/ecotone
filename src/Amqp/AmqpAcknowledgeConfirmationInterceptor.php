@@ -2,21 +2,21 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Endpoint\AcknowledgementCallback;
-use SimplyCodedSoftware\Messaging\Endpoint\InterceptedConsumer;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ErrorChannelInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessagingException;
+use Ecotone\Messaging\Endpoint\AcknowledgementCallback;
+use Ecotone\Messaging\Endpoint\InterceptedConsumer;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessagingException;
 use Throwable;
 
 /**
  * Class AmqpAcknowledgeConfirmationInterceptor
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpAcknowledgeConfirmationInterceptor

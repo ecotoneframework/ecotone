@@ -1,25 +1,25 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway;
+namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersConverter;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersConverter;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class GatewayHeaderArrayBuilderTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Gateway
+ * @package Test\Ecotone\Messaging\Unit\Handler\Gateway
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayHeaderArrayBuilderTest extends MessagingTest
 {
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_evaluating_gateway_parameter()
     {
@@ -31,7 +31,7 @@ class GatewayHeaderArrayBuilderTest extends MessagingTest
                 ->setHeader("token", 123)
                 ->setHeader("password", "some"),
             $converter->convertToMessage(
-                \SimplyCodedSoftware\Messaging\Handler\MethodArgument::createWith(InterfaceParameter::createNullable("test", TypeDescriptor::createArrayType()), [
+                \Ecotone\Messaging\Handler\MethodArgument::createWith(InterfaceParameter::createNullable("test", TypeDescriptor::createArrayType()), [
                     "token" => 123,
                     "password" => "some",
                     "rabbit" => null
@@ -49,7 +49,7 @@ class GatewayHeaderArrayBuilderTest extends MessagingTest
         $this->expectException(InvalidArgumentException::class);
 
         $converter->convertToMessage(
-            \SimplyCodedSoftware\Messaging\Handler\MethodArgument::createWith(InterfaceParameter::createNullable("test", TypeDescriptor::createStringType()), "sine"),
+            \Ecotone\Messaging\Handler\MethodArgument::createWith(InterfaceParameter::createNullable("test", TypeDescriptor::createStringType()), "sine"),
             MessageBuilder::withPayload("some")
         );
     }

@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint;
+namespace Test\Ecotone\Messaging\Fixture\Endpoint;
 
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use Ecotone\Messaging\Transaction\Transactional;
 
 /**
  * Class ConsumerContinuouslyWorkingService

@@ -2,7 +2,7 @@
 
 namespace FixtureAutoloadTest;
 
-use SimplyCodedSoftware\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ApplicationContext;
 
 /**
  * Class ApplicationContextExample

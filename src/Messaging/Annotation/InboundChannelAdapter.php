@@ -2,11 +2,11 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Annotation;
+namespace Ecotone\Messaging\Annotation;
 
 /**
  * Class InboundChannelAdapter
- * @package SimplyCodedSoftware\Messaging\Annotation
+ * @package Ecotone\Messaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */

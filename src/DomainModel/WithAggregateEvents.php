@@ -1,13 +1,13 @@
 <?php
 
 
-namespace SimplyCodedSoftware\DomainModel;
+namespace Ecotone\DomainModel;
 
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateEvents;
+use Ecotone\DomainModel\Annotation\AggregateEvents;
 
 /**
  * Class WithAggregateEvents
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 trait WithAggregateEvents

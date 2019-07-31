@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter;
 
-use SimplyCodedSoftware\Messaging\Annotation\InboundChannelAdapter;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\InboundChannelAdapter;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
  * Class InboundChannelAdapterExample

@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler;
+namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Class ReplyMessageProducer
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler
+ * @package Test\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class FakeReplyMessageProducer implements \SimplyCodedSoftware\Messaging\Handler\MessageProcessor
+class FakeReplyMessageProducer implements \Ecotone\Messaging\Handler\MessageProcessor
 {
     private $replyData;
 

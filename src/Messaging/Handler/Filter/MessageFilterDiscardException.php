@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Filter;
+namespace Ecotone\Messaging\Handler\Filter;
 
-use SimplyCodedSoftware\Messaging\MessagingException;
+use Ecotone\Messaging\MessagingException;
 
 /**
  * Class MessageFilterDiscardException
- * @package SimplyCodedSoftware\Messaging\Handler\Filter
+ * @package Ecotone\Messaging\Handler\Filter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageFilterDiscardException extends MessagingException

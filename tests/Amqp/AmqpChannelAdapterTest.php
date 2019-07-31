@@ -1,39 +1,39 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Amqp;
+namespace Test\Ecotone\Amqp;
 
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Amqp\AmqpAcknowledgeConfirmationInterceptor;
-use SimplyCodedSoftware\Amqp\AmqpAdmin;
-use SimplyCodedSoftware\Amqp\AmqpBackedMessageChannelBuilder;
-use SimplyCodedSoftware\Amqp\AmqpBackendMessageChannel;
-use SimplyCodedSoftware\Amqp\AmqpBinding;
-use SimplyCodedSoftware\Amqp\AmqpExchange;
-use SimplyCodedSoftware\Amqp\AmqpHeader;
-use SimplyCodedSoftware\Amqp\AmqpQueue;
-use SimplyCodedSoftware\Amqp\AmqpInboundChannelAdapterBuilder;
-use SimplyCodedSoftware\Amqp\AmqpOutboundChannelAdapterBuilder;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
-use SimplyCodedSoftware\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
-use SimplyCodedSoftware\Messaging\Conversion\SerializedToObject\DeserializingConverter;
-use SimplyCodedSoftware\Messaging\Endpoint\AcknowledgementCallback;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ExceptionMessageHandler;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ForwardMessageHandler;
+use Ecotone\Amqp\AmqpAcknowledgeConfirmationInterceptor;
+use Ecotone\Amqp\AmqpAdmin;
+use Ecotone\Amqp\AmqpBackedMessageChannelBuilder;
+use Ecotone\Amqp\AmqpBackendMessageChannel;
+use Ecotone\Amqp\AmqpBinding;
+use Ecotone\Amqp\AmqpExchange;
+use Ecotone\Amqp\AmqpHeader;
+use Ecotone\Amqp\AmqpQueue;
+use Ecotone\Amqp\AmqpInboundChannelAdapterBuilder;
+use Ecotone\Amqp\AmqpOutboundChannelAdapterBuilder;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
+use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
+use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverter;
+use Ecotone\Messaging\Endpoint\AcknowledgementCallback;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Handler\ForwardMessageHandler;
 
 /**
  * Class InboundAmqpGatewayBuilder
@@ -43,7 +43,7 @@ use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ForwardMessageHandler;
 class AmqpChannelAdapterTest extends AmqpMessagingTest
 {
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_sending_to_default_exchange_with_routing_by_queue_name()
     {
@@ -78,7 +78,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_sending_non_string_payload_without_media_type_information()
     {
@@ -102,7 +102,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_sending_non_string_payload_with_media_type_but_no_converter_available()
     {
@@ -128,7 +128,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_converting_payload_to_string_if_converter_exists_and_media_type_passed()
     {
@@ -165,7 +165,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_not_receiving_a_message_when_queue_is_empty()
     {
@@ -189,7 +189,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_sending_and_receiving_with_routing_key_to_custom_exchange()
     {
@@ -230,7 +230,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_sending_and_receiving_from_fanout_exchange()
     {
@@ -271,7 +271,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_sending_and_receiving_from_topic_exchange()
     {
@@ -312,7 +312,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_sending_and_receiving_with_header_mapping()
     {
@@ -352,7 +352,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_sending_message_with_auto_acking()
     {
@@ -387,7 +387,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_receiving_message_second_time_when_requeued()
     {
@@ -407,7 +407,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_not_receiving_message_second_time_when_acked()
     {
@@ -427,7 +427,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_not_receiving_message_second_time_when_rejected()
     {
@@ -451,7 +451,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
      * @param MessageChannel $inboundRequestChannel
      *
      * @return InMemoryChannelResolver
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createChannelResolver(string $requestChannelName, MessageChannel $inboundRequestChannel): InMemoryChannelResolver
     {
@@ -472,7 +472,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
      * @param array  $converters
      *
      * @return InMemoryReferenceSearchService
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createReferenceSearchService(string $amqpConnectionReferenceName, array $amqpExchanges, array $amqpQueues, array $amqpBindings, array $converters): InMemoryReferenceSearchService
     {
@@ -491,12 +491,12 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
      * @param AmqpOutboundChannelAdapterBuilder             $outboundAmqpGatewayBuilder
      * @param ChannelResolver                        $channelResolver
      * @param ReferenceSearchService                 $referenceSearchService
-     * @param \SimplyCodedSoftware\Messaging\Message $messageToSend
+     * @param \Ecotone\Messaging\Message $messageToSend
      *
      * @return void
      * @throws \Exception
      */
-    private function send(AmqpOutboundChannelAdapterBuilder $outboundAmqpGatewayBuilder, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, \SimplyCodedSoftware\Messaging\Message $messageToSend)
+    private function send(AmqpOutboundChannelAdapterBuilder $outboundAmqpGatewayBuilder, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, \Ecotone\Messaging\Message $messageToSend)
     {
         $outboundAmqpGatewayBuilder
             ->withAutoDeclareOnSend(true)
@@ -558,7 +558,7 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     /**
      * @param string $queueName
      * @return AmqpBackendMessageChannel
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createAmqpBackendMessageChannel(string $queueName) : AmqpBackendMessageChannel
     {

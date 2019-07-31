@@ -1,23 +1,23 @@
 <?php declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Router;
+namespace Ecotone\Messaging\Handler\Router;
 
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class RouterBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Router
+ * @package Ecotone\Messaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
@@ -91,7 +91,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @param array $typeToChannelMapping
      * @return RouterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createPayloadTypeRouter(array $typeToChannelMapping) : self
     {
@@ -115,7 +115,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @param $customRouterObject
      * @param string $methodName
      * @return RouterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createRouterFromObject($customRouterObject, string $methodName) : self
     {
@@ -129,7 +129,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 
     /**
      * @return RouterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createPayloadTypeRouterByClassName() : self
     {
@@ -143,7 +143,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @param array  $recipientLists
      *
      * @return RouterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createRecipientListRouter(array $recipientLists) : self
     {
@@ -157,7 +157,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @param string $headerName
      * @param array $headerValueToChannelMapping
      * @return RouterBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createHeaderValueRouter(string $headerName, array $headerValueToChannelMapping) : self
     {
@@ -286,7 +286,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 
     /**
      * @param object $objectToInvoke
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function setObjectToInvoke($objectToInvoke) : void
     {

@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Router;
+namespace Ecotone\Messaging\Handler\Router;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class PayloadTypeRouter
- * @package SimplyCodedSoftware\Messaging\Handler\Router
+ * @package Ecotone\Messaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

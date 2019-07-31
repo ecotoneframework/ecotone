@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Scheduling;
+namespace Test\Ecotone\Messaging\Unit\Scheduling;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Scheduling\StubTaskExecutor;
+use Test\Ecotone\Messaging\Fixture\Scheduling\StubTaskExecutor;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
-use SimplyCodedSoftware\Messaging\Scheduling\StubUTCClock;
-use SimplyCodedSoftware\Messaging\Scheduling\SyncTaskScheduler;
+use Ecotone\Messaging\Scheduling\PeriodicTrigger;
+use Ecotone\Messaging\Scheduling\StubUTCClock;
+use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
 
 /**
  * Class SyncTaskSchedulerTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Scheduling
+ * @package Test\Ecotone\Messaging\Unit\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SyncTaskSchedulerTest extends TestCase

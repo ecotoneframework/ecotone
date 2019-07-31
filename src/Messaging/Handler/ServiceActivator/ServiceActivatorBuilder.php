@@ -1,27 +1,27 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\ServiceActivator;
+namespace Ecotone\Messaging\Handler\ServiceActivator;
 
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InputOutputMessageHandlerBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InterceptableHandler;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use SimplyCodedSoftware\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use SimplyCodedSoftware\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\InterceptableHandler;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\RequestReplyProducer;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class ServiceActivatorFactory
- * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
+ * @package Ecotone\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
@@ -39,7 +39,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      */
     private $isReplyRequired = false;
     /**
-     * @var array|\SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder[]
+     * @var array|\Ecotone\Messaging\Handler\ParameterConverterBuilder[]
      */
     private $methodParameterConverterBuilders = [];
     /**
@@ -95,7 +95,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      * @param string $methodName
      *
      * @return ServiceActivatorBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWithDirectReference($directObjectReference, string $methodName) : self
     {
@@ -279,7 +279,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
      * @param object $object
      *
      * @return ServiceActivatorBuilder
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function withDirectObjectReference($object) : self
     {

@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Service;
+namespace Test\Ecotone\Messaging\Fixture\Service;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Transaction\Transactional;
 
 /**
  * Class ServiceWithoutReturnValue
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Service
+ * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceWithoutReturnValue implements CallableService

@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Conversion;
+namespace Test\Ecotone\Messaging\Unit\Conversion;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MediaTypeTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Conversion
+ * @package Test\Ecotone\Messaging\Unit\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MediaTypeTest extends TestCase
 {
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_parsing_media_type_from_string()
     {
@@ -38,7 +38,7 @@ class MediaTypeTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_converting_to_string()
     {
@@ -53,7 +53,7 @@ class MediaTypeTest extends TestCase
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_retrieving_parameters()
     {
@@ -66,7 +66,7 @@ class MediaTypeTest extends TestCase
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_retrieving_not_existing_parameter()
     {
@@ -78,7 +78,7 @@ class MediaTypeTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_when_there_is_no_primary_type()
     {
@@ -88,7 +88,7 @@ class MediaTypeTest extends TestCase
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_when_there_is_no_subtype_defined()
     {
@@ -99,7 +99,7 @@ class MediaTypeTest extends TestCase
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_parsed_mime_type_has_no_subtype()
     {
@@ -110,7 +110,7 @@ class MediaTypeTest extends TestCase
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_parsed_mime_type_has_no_type()
     {
@@ -121,7 +121,7 @@ class MediaTypeTest extends TestCase
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_media_types_compatibility()
     {
@@ -148,7 +148,7 @@ class MediaTypeTest extends TestCase
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_x_php_object_with_type_parameter()
     {

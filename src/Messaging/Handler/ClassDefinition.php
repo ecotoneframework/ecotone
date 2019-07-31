@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class ClassDefinition
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ClassDefinition
@@ -45,7 +45,7 @@ class ClassDefinition
      * @throws TypeDefinitionException
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createFor(TypeDescriptor $classType) : self
     {
@@ -66,7 +66,7 @@ class ClassDefinition
      * @throws TypeDefinitionException
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationParser $annotationParser)
     {
@@ -91,7 +91,7 @@ class ClassDefinition
      * @param string $name
      *
      * @return ClassPropertyDefinition
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getProperty(string $name) : ClassPropertyDefinition
     {
@@ -108,7 +108,7 @@ class ClassDefinition
      * @param TypeDescriptor $annotationClass
      * @return array
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getPropertiesWithAnnotation(TypeDescriptor $annotationClass)
     {

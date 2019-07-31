@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace Ecotone\Messaging\Channel;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class ChannelInterceptorAdapter
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
@@ -28,7 +28,7 @@ abstract class SendingInterceptorAdapter implements MessageChannelInterceptorAda
      * ChannelInterceptorAdapter constructor.
      * @param MessageChannel $messageChannel
      * @param ChannelInterceptor[] $sortedChannelInterceptors
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __construct(MessageChannel $messageChannel, array $sortedChannelInterceptors)
     {

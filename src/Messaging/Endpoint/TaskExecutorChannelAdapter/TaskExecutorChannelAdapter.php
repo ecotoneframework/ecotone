@@ -2,23 +2,23 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\TaskExecutorChannelAdapter;
+namespace Ecotone\Messaging\Endpoint\TaskExecutorChannelAdapter;
 
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
-use SimplyCodedSoftware\Messaging\Endpoint\InterceptedConsumer;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Scheduling\CronTrigger;
-use SimplyCodedSoftware\Messaging\Scheduling\EpochBasedClock;
-use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
-use SimplyCodedSoftware\Messaging\Scheduling\SyncTaskScheduler;
-use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
-use SimplyCodedSoftware\Messaging\Scheduling\TaskScheduler;
-use SimplyCodedSoftware\Messaging\Scheduling\Trigger;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
+use Ecotone\Messaging\Endpoint\InterceptedConsumer;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Scheduling\CronTrigger;
+use Ecotone\Messaging\Scheduling\EpochBasedClock;
+use Ecotone\Messaging\Scheduling\PeriodicTrigger;
+use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
+use Ecotone\Messaging\Scheduling\TaskExecutor;
+use Ecotone\Messaging\Scheduling\TaskScheduler;
+use Ecotone\Messaging\Scheduling\Trigger;
 
 /**
  * Class ChannelAdapter
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TaskExecutorChannelAdapter implements ConsumerLifecycle
@@ -60,8 +60,8 @@ class TaskExecutorChannelAdapter implements ConsumerLifecycle
      * @param PollingMetadata $pollingMetadata
      * @param TaskExecutor $taskExecutor
      * @return TaskExecutorChannelAdapter
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public static function createFrom(string $endpointId, PollingMetadata $pollingMetadata, TaskExecutor $taskExecutor) : self
     {

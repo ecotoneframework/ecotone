@@ -2,8 +2,7 @@ sudo: false
 language: php
 
 php:
-  - 7.1
-  - 7.2
+  - 7.3
   - nightly
 
 before_install:
@@ -16,7 +15,6 @@ install:
 script:
   - bin/phpunit --coverage-clover ./tests/coverage/clover.xml
   - bin/behat
-  - bin/phan
 
 after_success:
   - travis_retry php bin/coveralls -v

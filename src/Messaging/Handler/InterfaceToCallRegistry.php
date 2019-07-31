@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\Config\ReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 
 /**
  * Class InterfaceToCallBuilder
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceToCallRegistry
@@ -70,8 +70,8 @@ class InterfaceToCallRegistry
      * @return InterfaceToCall
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function getFor($interfaceName, string $methodName) : InterfaceToCall
     {
@@ -90,8 +90,8 @@ class InterfaceToCallRegistry
      * @return InterfaceToCall[]
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function getForAllPublicMethodOf($interfaceName) : iterable
     {
@@ -111,9 +111,9 @@ class InterfaceToCallRegistry
      * @return InterfaceToCall
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\Config\ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function getForReferenceName(string $referenceName, string $methodName) : InterfaceToCall
     {

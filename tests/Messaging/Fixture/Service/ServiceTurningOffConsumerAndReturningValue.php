@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Service;
+namespace Test\Ecotone\Messaging\Fixture\Service;
 
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 
 /**
  * Class ServiceTurningOffConsumer
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Service
+ * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceTurningOffConsumerAndReturningValue

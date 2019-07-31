@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
+namespace Ecotone\DomainModel;
 
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 
 /**
  * Interface CQRS
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface AggregateMessage

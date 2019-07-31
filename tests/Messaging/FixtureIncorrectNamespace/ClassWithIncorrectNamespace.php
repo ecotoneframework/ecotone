@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace FixtureIncorrectNamespace\Wrong;
 
-use SimplyCodedSoftware\Messaging\Annotation\ApplicationContext;
-use SimplyCodedSoftware\Messaging\Annotation\Extension;
+use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\Extension;
 
 /**
  * Class ClassWithIncorrectNamespace

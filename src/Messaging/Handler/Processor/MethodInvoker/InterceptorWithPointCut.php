@@ -1,13 +1,13 @@
 <?php
 
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker;
+namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 
 /**
  * Interface Interceptor
- * @package SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker
+ * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface InterceptorWithPointCut

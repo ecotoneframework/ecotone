@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Logger;
+namespace Ecotone\Messaging\Handler\Logger;
 
 use Psr\Log\LoggerInterface;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Throwable;
 
 /**
  * Class LoggingService
- * @package SimplyCodedSoftware\Messaging\Handler\Logger
+ * @package Ecotone\Messaging\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LoggingService

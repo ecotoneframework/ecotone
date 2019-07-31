@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
 
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Transaction\Transactional;
 use stdClass as SomeClass;
 
 /**
  * Class OrderPropertyExample
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Property
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Property
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OrderPropertyExample

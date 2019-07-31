@@ -1,21 +1,21 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
+namespace Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate;
 
-use SimplyCodedSoftware\DomainModel\Annotation\InitializeAggregateOnNotFound;
-use SimplyCodedSoftware\DomainModel\EventBus;
-use SimplyCodedSoftware\DomainModel\WithAggregateEvents;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptors;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
-use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateIdentifier;
-use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
-use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
+use Ecotone\DomainModel\Annotation\InitializeAggregateOnNotFound;
+use Ecotone\DomainModel\EventBus;
+use Ecotone\DomainModel\WithAggregateEvents;
+use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptors;
+use Ecotone\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
+use Ecotone\Messaging\Annotation\ServiceActivator;
+use Ecotone\DomainModel\Annotation\Aggregate;
+use Ecotone\DomainModel\Annotation\AggregateIdentifier;
+use Ecotone\DomainModel\Annotation\CommandHandler;
+use Ecotone\DomainModel\Annotation\QueryHandler;
 
 /**
  * Class Order
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate
+ * @package Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  */

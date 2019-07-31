@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Extra;
+namespace Test\Ecotone\Messaging\Fixture\Conversion\Extra;
 
 /**
  * Class GetFavouriteTrait

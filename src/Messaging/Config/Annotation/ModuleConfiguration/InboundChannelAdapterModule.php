@@ -2,18 +2,18 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 
-use SimplyCodedSoftware\Messaging\Annotation\InboundChannelAdapter;
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistration;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycleBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Annotation\InboundChannelAdapter;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 
 /**
  * Class InboundChannelAdapterModule
- * @package SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration
+ * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */

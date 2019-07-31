@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
 /**
  * Class MethodArgument
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\Gateway
+ * @package Ecotone\Messaging\Handler\Gateway\Gateway
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodArgument

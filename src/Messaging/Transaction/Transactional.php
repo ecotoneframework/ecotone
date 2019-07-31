@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Transaction;
+namespace Ecotone\Messaging\Transaction;
 
-use SimplyCodedSoftware\Messaging\Annotation\WithRequiredReferenceNameList;
+use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
 
 /**
  * Class Transactional
- * @package SimplyCodedSoftware\Messaging\Transaction
+ * @package Ecotone\Messaging\Transaction
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */

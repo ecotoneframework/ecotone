@@ -1,13 +1,13 @@
 <?php
 
 
-namespace SimplyCodedSoftware\DomainModel\LazyEventBus;
+namespace Ecotone\DomainModel\LazyEventBus;
 
-use SimplyCodedSoftware\DomainModel\EventBus;
+use Ecotone\DomainModel\EventBus;
 
 /**
  * Class LazyEventBusInterceptor
- * @package SimplyCodedSoftware\DomainModel\LazyEventBus
+ * @package Ecotone\DomainModel\LazyEventBus
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LazyEventBusInterceptor

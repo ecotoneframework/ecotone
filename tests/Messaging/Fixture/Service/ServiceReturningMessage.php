@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Service;
-use SimplyCodedSoftware\Messaging\Message;
+namespace Test\Ecotone\Messaging\Fixture\Service;
+use Ecotone\Messaging\Message;
 
 /**
  * Class ServiceReturningMessage
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Service
+ * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceReturningMessage

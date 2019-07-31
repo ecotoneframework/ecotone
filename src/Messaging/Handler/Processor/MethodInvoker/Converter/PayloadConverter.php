@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter;
+namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverter;
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Message;
 
 /**
  * Class PayloadArgument
- * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
+ * @package Ecotone\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

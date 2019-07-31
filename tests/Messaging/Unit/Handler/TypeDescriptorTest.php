@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler;
+namespace Test\Ecotone\Messaging\Unit\Handler;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class TypeDescriptorTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler
+ * @package Test\Ecotone\Messaging\Unit\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TypeDescriptorTest extends TestCase
 {
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_guessing_type_hint_from_compound_type_and_array_of_scalar_type()
     {
@@ -30,7 +30,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_guessing_type_hint_from_null()
     {
@@ -55,7 +55,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_doc_block_type_is_incorrect()
     {
@@ -66,7 +66,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_type_hint_is_incorrect()
     {
@@ -77,7 +77,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passing_incompatible_scalar_type_hint_and_compound_doc_block_type()
     {
@@ -88,7 +88,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passing_incompatible_compound_type_hint_and_scalar_doc_block_type()
     {
@@ -99,7 +99,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passing_incompatible_resource_type_hint_and_scalar_doc_block_type()
     {
@@ -110,7 +110,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passing_incompatible_scalar_type_hint_and_resource_doc_block_type()
     {
@@ -121,7 +121,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passing_incompatible_resource_hint_and_compound_doc_block_type()
     {
@@ -132,7 +132,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passing_incompatible_compound_hint_and_resource_doc_block_type()
     {
@@ -143,7 +143,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_converting_doc_block_array_type_to_generic()
     {
@@ -155,7 +155,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_on_incompatible_class_type_hint_and_array_doc_block()
     {
@@ -166,7 +166,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_on_incompatible_array_type_hint_and_class_doc_block()
     {
@@ -177,7 +177,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_choosing_doc_block_type_hint_over_compound()
     {
@@ -189,7 +189,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_choosing_doc_block_collection_type_hint_over_compound()
     {
@@ -208,7 +208,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_resolving_collection_type_for_non_collection()
     {
@@ -221,7 +221,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_checking_equality()
     {
@@ -243,7 +243,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_choosing_doc_block_class_type_over_class_type_hint()
     {
@@ -255,7 +255,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_picking_class_from_doc_block_if_type_hint_is_compound_object()
     {
@@ -267,7 +267,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_choosing_first_type_if_union_doc_block_type_hint()
     {
@@ -279,7 +279,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_choosing_doc_block_type_if_type_hint_is_unknown()
     {
@@ -291,7 +291,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_with_prefixed_type()
     {
@@ -303,7 +303,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_with_compound_object_type_hint()
     {
@@ -315,7 +315,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_for_void_return_type_hint()
     {
@@ -327,7 +327,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_with_mixed_type_result_in_unknown_type_hint()
     {
@@ -339,7 +339,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_guessing_type_from_variable()
     {
@@ -355,7 +355,7 @@ class TypeDescriptorTest extends TestCase
 
     /**
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_collection_type()
     {

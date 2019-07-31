@@ -1,21 +1,21 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
+namespace Ecotone\DomainModel;
 
-use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\NullableMessageChannel;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
+use Ecotone\DomainModel\Config\AggregateMessagingModule;
+use Ecotone\Messaging\Handler\Enricher\PropertyPath;
+use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 
 /**
  * Class LoadAggregateService
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
@@ -90,7 +90,7 @@ class LoadAggregateService
      * @return Message
      * @throws AggregateNotFoundException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function load(Message $message) : ?Message
     {

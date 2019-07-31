@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Converter;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\Converter;
 
-use SimplyCodedSoftware\Messaging\Annotation\MediaTypeConverter;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Conversion\Converter;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Annotation\MediaTypeConverter;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Conversion\Converter;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class ExampleMediaTypeConverter
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\Converter
+ * @package Test\Ecotone\Messaging\Fixture\Annotation\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @MediaTypeConverter()
  */

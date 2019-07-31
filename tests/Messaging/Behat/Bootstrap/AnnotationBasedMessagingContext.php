@@ -1,42 +1,42 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Behat\Bootstrap;
+namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
 
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
 use PHPUnit\Framework\Assert;
-use SimplyCodedSoftware\DomainModel\CommandBus;
-use SimplyCodedSoftware\DomainModel\CommandBusWithEventPublishing;
-use SimplyCodedSoftware\DomainModel\EventBus;
-use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventBus;
-use SimplyCodedSoftware\DomainModel\QueryBus;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\ConfiguredMessagingSystem;
-use SimplyCodedSoftware\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
-use SimplyCodedSoftware\Messaging\Config\MessagingSystemConfiguration;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\OrderNotificator;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\ProxyEventBusFromMessagingSystem;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\ProxyLazyEventBusFromMessagingSystem;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Renter\AppointmentRepository;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Renter\CreateAppointmentCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Renter\RentCalendar;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\TestingLazyEventBus;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\Calculator;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\InboundCalculation;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\ResultService;
+use Ecotone\DomainModel\CommandBus;
+use Ecotone\DomainModel\CommandBusWithEventPublishing;
+use Ecotone\DomainModel\EventBus;
+use Ecotone\DomainModel\LazyEventBus\LazyEventBus;
+use Ecotone\DomainModel\QueryBus;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
+use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Config\MessagingSystemConfiguration;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\PollableChannel;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\OrderNotificator;
+use Test\Ecotone\DomainModel\Fixture\ProxyEventBusFromMessagingSystem;
+use Test\Ecotone\DomainModel\Fixture\ProxyLazyEventBusFromMessagingSystem;
+use Test\Ecotone\DomainModel\Fixture\Renter\AppointmentRepository;
+use Test\Ecotone\DomainModel\Fixture\Renter\CreateAppointmentCommand;
+use Test\Ecotone\DomainModel\Fixture\Renter\RentCalendar;
+use Test\Ecotone\DomainModel\Fixture\TestingLazyEventBus;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\InboundCalculation;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\ResultService;
 
 class AnnotationBasedMessagingContext implements Context
 {
@@ -55,14 +55,14 @@ class AnnotationBasedMessagingContext implements Context
     public function iActiveMessagingForNamespace(string $namespace)
     {
         switch ($namespace) {
-            case "Test\SimplyCodedSoftware\DomainModel\Fixture\Renter": {
+            case "Test\Ecotone\DomainModel\Fixture\Renter": {
                 $objects = [
                       RentCalendar::class => new RentCalendar(),
                       AppointmentRepository::class => AppointmentRepository::createEmpty()
                 ];
                 break;
             }
-            case "Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate": {
+            case "Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate": {
                 $objects = [
                     OrderNotificator::class => new OrderNotificator(),
                     InMemoryAggregateRepository::class => InMemoryAggregateRepository::createEmpty()

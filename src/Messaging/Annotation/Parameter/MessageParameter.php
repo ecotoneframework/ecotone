@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Annotation\Parameter;
+namespace Ecotone\Messaging\Annotation\Parameter;
 
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Class MessageParameterConverterAnnotation
- * @package SimplyCodedSoftware\Messaging\Annotation\MessageToParameter
+ * @package Ecotone\Messaging\Annotation\MessageToParameter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */

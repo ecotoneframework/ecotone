@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
+namespace Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate;
 
 /**
  * Class CreateOrderCommand
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate
+ * @package Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CreateOrderCommand implements IncreaseAmountCommand

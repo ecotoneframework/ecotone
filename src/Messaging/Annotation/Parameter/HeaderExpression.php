@@ -2,13 +2,13 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Annotation\Parameter;
+namespace Ecotone\Messaging\Annotation\Parameter;
 
 use Doctrine\Common\Annotations\Annotation\Required;
 
 /**
  * Class HeaderExpression
- * @package SimplyCodedSoftware\Messaging\Annotation\Parameter
+ * @package Ecotone\Messaging\Annotation\Parameter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */

@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging;
+namespace Ecotone\Messaging;
 
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class MessageHeaders
- * @package SimplyCodedSoftware\Messaging
+ * @package Ecotone\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageHeaders
@@ -160,7 +160,7 @@ class MessageHeaders
     /**
      * @param string $headerName
      * @return mixed
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     final public function get(string $headerName)
     {
@@ -260,7 +260,7 @@ class MessageHeaders
 
     /**
      * @param array|string[] $headers
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     final private function initialize(array $headers) : void
     {

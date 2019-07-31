@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\ErrorMessage;
 
 /**
  * Class MessageHandlingException
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MessageHandlingException extends MessagingException

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Dto;
+namespace Test\Ecotone\Messaging\Fixture\Dto;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Dto\WithCustomer\Customer;
+use Test\Ecotone\Messaging\Fixture\Dto\WithCustomer\Customer;
 
 /**
  * Class Order
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Dto
+ * @package Test\Ecotone\Messaging\Fixture\Dto
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OrderExample

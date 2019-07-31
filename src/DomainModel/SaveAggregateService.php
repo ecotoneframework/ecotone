@@ -1,18 +1,18 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel;
+namespace Ecotone\DomainModel;
 
-use SimplyCodedSoftware\DomainModel\Config\AggregateMessagingModule;
-use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventBus;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyEditorAccessor;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\DomainModel\Config\AggregateMessagingModule;
+use Ecotone\DomainModel\LazyEventBus\LazyEventBus;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
+use Ecotone\Messaging\Handler\Enricher\PropertyPath;
+use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class SaveAggregateService
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SaveAggregateService
@@ -54,8 +54,8 @@ class SaveAggregateService
      *
      * @return Message
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public function save(Message $message) : ?Message
     {

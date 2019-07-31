@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation;
+namespace Ecotone\Messaging\Config\Annotation;
 
-use SimplyCodedSoftware\Messaging\Config\Module;
+use Ecotone\Messaging\Config\Module;
 
 /**
  * Interface AnnotationConfiguration
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface AnnotationModule extends Module

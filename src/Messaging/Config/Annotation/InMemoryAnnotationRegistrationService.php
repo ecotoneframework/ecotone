@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation;
+namespace Ecotone\Messaging\Config\Annotation;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use SimplyCodedSoftware\Messaging\Handler\AnnotationParser;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Handler\TypeResolver;
+use Ecotone\Messaging\Handler\AnnotationParser;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\TypeResolver;
 
 /**
  * Class InMemoryAnnotationRegistrationService
- * @package SimplyCodedSoftware\Messaging\Config\Annotation
+ * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryAnnotationRegistrationService implements AnnotationRegistrationService, AnnotationParser
@@ -58,7 +58,7 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
      * @return InMemoryAnnotationRegistrationService
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function registerClassWithAnnotations(string $className) : self
     {

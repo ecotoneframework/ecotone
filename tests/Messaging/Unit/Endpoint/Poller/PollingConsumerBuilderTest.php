@@ -1,26 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Endpoint\Poller;
+namespace Test\Ecotone\Messaging\Unit\Endpoint\Poller;
 
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransaction;
-use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerStoppingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerThrowingExceptionService;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Transaction\Null\NullTransaction;
+use Ecotone\Messaging\Transaction\Null\NullTransactionFactory;
+use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
+use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
+use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerThrowingExceptionService;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class PollingConsumerBuilderTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Endpoint
+ * @package Test\Ecotone\Messaging\Unit\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PollingConsumerBuilderTest extends MessagingTest

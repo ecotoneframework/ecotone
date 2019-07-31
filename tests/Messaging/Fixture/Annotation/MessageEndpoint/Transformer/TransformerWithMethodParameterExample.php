@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Transformer;
+namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Transformer;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Annotation\Transformer;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Annotation\Transformer;
 
 /**
  * Class TransformerExample
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Transformer
+ * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint(referenceName="")
  */

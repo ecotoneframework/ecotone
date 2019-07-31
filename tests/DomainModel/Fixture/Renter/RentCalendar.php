@@ -2,15 +2,15 @@
 declare(strict_types=1);
 
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Renter;
+namespace Test\Ecotone\DomainModel\Fixture\Renter;
 
-use SimplyCodedSoftware\DomainModel\Annotation\EventHandler;
-use SimplyCodedSoftware\DomainModel\Annotation\QueryHandler;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
+use Ecotone\DomainModel\Annotation\EventHandler;
+use Ecotone\DomainModel\Annotation\QueryHandler;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
  * Class RentCalendar
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Renter
+ * @package Test\Ecotone\DomainModel\Fixture\Renter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

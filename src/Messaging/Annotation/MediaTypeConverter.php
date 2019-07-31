@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Annotation;
+namespace Ecotone\Messaging\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
  * Class MediaTypeConverter
- * @package SimplyCodedSoftware\Messaging\Annotation
+ * @package Ecotone\Messaging\Annotation
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  * @Target({"CLASS"})

@@ -1,40 +1,40 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter;
+namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
-use SimplyCodedSoftware\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\InterceptedConsumer;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Scheduling\CronTrigger;
-use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
-use SimplyCodedSoftware\Messaging\Scheduling\SyncTaskScheduler;
-use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
-use SimplyCodedSoftware\Messaging\Scheduling\Trigger;
-use SimplyCodedSoftware\Messaging\Scheduling\EpochBasedClock;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
+use Ecotone\Messaging\Endpoint\InterceptedConsumer;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Scheduling\CronTrigger;
+use Ecotone\Messaging\Scheduling\PeriodicTrigger;
+use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
+use Ecotone\Messaging\Scheduling\TaskExecutor;
+use Ecotone\Messaging\Scheduling\Trigger;
+use Ecotone\Messaging\Scheduling\EpochBasedClock;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class InboundChannelAdapterBuilder
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
@@ -265,7 +265,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      * @param object $annotation
      * @return bool
      * @throws MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
      */
     private function canBeAddedToRegisteredAnnotations(array $registeredAnnotations, object $annotation): bool
     {

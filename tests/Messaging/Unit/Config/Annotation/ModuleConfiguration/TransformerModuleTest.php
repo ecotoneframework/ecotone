@@ -1,25 +1,25 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Transformer\TransformerBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
 
 /**
  * Class AnnotationTransformerConfigurationTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation\Annotation
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TransformerModuleTest extends AnnotationConfigurationTest
 {
     /**
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_transformer_builder()
     {

@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Processor;
 
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Message;
 
 /**
  * Class ThrowExceptionMessageProcessor
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ThrowExceptionMessageProcessor implements MessageProcessor

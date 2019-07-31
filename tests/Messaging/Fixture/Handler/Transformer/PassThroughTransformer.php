@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Transformer;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Class PassThroughTransformer
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Transformer
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Transformer
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PassThroughTransformer

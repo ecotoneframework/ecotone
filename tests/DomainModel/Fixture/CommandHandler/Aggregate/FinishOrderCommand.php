@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
+namespace Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate;
 
-use SimplyCodedSoftware\DomainModel\Annotation\TargetAggregateIdentifier;
+use Ecotone\DomainModel\Annotation\TargetAggregateIdentifier;
 
 /**
  * Class FinishOrderCommand
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate
+ * @package Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FinishOrderCommand

@@ -1,37 +1,37 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\Impl\AmqpTopic;
 use Ramsey\Uuid\Uuid;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
-use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenConsumer;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Endpoint\TaskExecutorChannelAdapter\TaskExecutorChannelAdapter;
-use SimplyCodedSoftware\Messaging\Handler\ChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessageConverter\DefaultHeaderMapper;
-use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
+use Ecotone\Messaging\Endpoint\MessageDrivenChannelAdapter\MessageDrivenConsumer;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Endpoint\TaskExecutorChannelAdapter\TaskExecutorChannelAdapter;
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
+use Ecotone\Messaging\MessageConverter\HeaderMapper;
 
 /**
  * Class InboundEnqueueGatewayBuilder
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
@@ -106,7 +106,7 @@ class AmqpInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 //     * @param string $exchangeName
 //     * @param string $routingKey
 //     * @return AmqpInboundChannelAdapterBuilder
-//     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+//     * @throws \Ecotone\Messaging\MessagingException
 //     */
 //    public function withBinding(string $exchangeName, string $routingKey) : self
 //    {

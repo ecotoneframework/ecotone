@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Scheduling;
+namespace Ecotone\Messaging\Scheduling;
 
 /**
  * Class SyncTaskScheduler
- * @package SimplyCodedSoftware\Messaging\Scheduling
+ * @package Ecotone\Messaging\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SyncTaskScheduler implements TaskScheduler

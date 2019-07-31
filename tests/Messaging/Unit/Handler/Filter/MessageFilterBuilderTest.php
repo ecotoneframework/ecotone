@@ -1,22 +1,22 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Filter;
+namespace Test\Ecotone\Messaging\Unit\Handler\Filter;
 
-use SimplyCodedSoftware\Messaging\Handler\Filter\MessageFilterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Handler\Filter\MessageFilterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class MessageFilterBuilderTest
- * @package SimplyCodedSoftware\Messaging\Handler\Filter
+ * @package Ecotone\Messaging\Handler\Filter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageFilterBuilderTest extends MessagingTest

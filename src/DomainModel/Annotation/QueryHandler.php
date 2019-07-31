@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\DomainModel\Annotation;
+namespace Ecotone\DomainModel\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
-use SimplyCodedSoftware\Messaging\Annotation\EndpointAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\InputOutputEndpointAnnotation;
+use Ecotone\Messaging\Annotation\EndpointAnnotation;
+use Ecotone\Messaging\Annotation\InputOutputEndpointAnnotation;
 
 /**
  * Class QueryHandler
- * @package SimplyCodedSoftware\DomainModel\Annotation
+ * @package Ecotone\DomainModel\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  * @Target({"METHOD"})

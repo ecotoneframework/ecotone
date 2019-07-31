@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating;
+namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\After;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Around;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\Before;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\Payload;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Annotation\Interceptor\After;
+use Ecotone\Messaging\Annotation\Interceptor\Around;
+use Ecotone\Messaging\Annotation\Interceptor\Before;
+use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 /**
  * Class PreCallAdd
@@ -24,7 +24,7 @@ class CalculatorInterceptor
      * @param BeforeMultiplyCalculation $beforeMultiplyCalculation
      * @return int
      * @Before(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\BeforeMultiplyCalculation)"
+     *     pointcut="@(Test\Ecotone\Messaging\Fixture\Behat\Calculating\BeforeMultiplyCalculation)"
      * )
      */
     public function multiplyBefore(int $amount, array $metadata, BeforeMultiplyCalculation $beforeMultiplyCalculation) : int
@@ -37,7 +37,7 @@ class CalculatorInterceptor
      * @param AroundSumCalculation $aroundResultCalculation
      * @return int
      * @Around(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AroundSumCalculation)"
+     *     pointcut="@(Test\Ecotone\Messaging\Fixture\Behat\Calculating\AroundSumCalculation)"
      * )
      */
     public function sumAround(MethodInvocation $methodInvocation, AroundSumCalculation $aroundResultCalculation) : int
@@ -51,7 +51,7 @@ class CalculatorInterceptor
      * @param AfterMultiplyCalculation $afterMultiplyCalculation
      * @return int
      * @After(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AfterMultiplyCalculation)"
+     *     pointcut="@(Test\Ecotone\Messaging\Fixture\Behat\Calculating\AfterMultiplyCalculation)"
      * )
      */
     public function multiplyAfter(int $amount, AfterMultiplyCalculation $afterMultiplyCalculation) : int

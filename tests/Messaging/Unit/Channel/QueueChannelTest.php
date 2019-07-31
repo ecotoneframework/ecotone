@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Channel;
+namespace Test\Ecotone\Messaging\Unit\Channel;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class QueueChannelTest
- * @package SimplyCodedSoftware\Messaging\Channel
+ * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class QueueChannelTest extends TestCase

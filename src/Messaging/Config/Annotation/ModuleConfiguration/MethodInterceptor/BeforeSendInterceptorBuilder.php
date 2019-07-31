@@ -2,21 +2,21 @@
 declare(strict_types=1);
 
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
+namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
 
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptor;
-use SimplyCodedSoftware\Messaging\Channel\ChannelInterceptorBuilder;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Channel\ChannelInterceptor;
+use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 /**
  * Class BeforeSendInterceptorBuilder
- * @package SimplyCodedSoftware\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor
+ * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class BeforeSendInterceptorBuilder implements ChannelInterceptorBuilder

@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service;
+namespace Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Service;
 
 /**
  * Class HelloWorldCommand
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service
+ * @package Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Service
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class HelloWorldCommand

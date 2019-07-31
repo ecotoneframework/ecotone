@@ -1,17 +1,17 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Channel\Dispatcher;
+namespace Test\Ecotone\Messaging\Unit\Channel\Dispatcher;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\Dispatcher\UnicastingDispatcher;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Channel\WrongHandlerAmountException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Channel\Dispatcher\UnicastingDispatcher;
+use Ecotone\Messaging\Channel\MessageDispatchingException;
+use Ecotone\Messaging\Channel\WrongHandlerAmountException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class UnicastingDispatcherTest
- * @package SimplyCodedSoftware\Messaging\Dispatcher
+ * @package Ecotone\Messaging\Dispatcher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class UnicastingDispatcherTest extends TestCase

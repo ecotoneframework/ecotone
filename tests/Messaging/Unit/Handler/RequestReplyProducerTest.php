@@ -1,28 +1,28 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler;
+namespace Test\Ecotone\Messaging\Unit\Handler;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReplyMessageProducer;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\FakeReplyMessageProducer;
+use Test\Ecotone\Messaging\Fixture\Handler\NoReplyMessageProducer;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
+use Test\Ecotone\Messaging\Fixture\Handler\FakeReplyMessageProducer;
 use Prophecy\Argument;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageDeliveryException;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\Support\ErrorMessage;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Handler\RequestReplyProducer;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageDeliveryException;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\ErrorMessage;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class RequestReplyProducerTest
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RequestReplyProducerTest extends MessagingTest
@@ -98,7 +98,7 @@ class RequestReplyProducerTest extends MessagingTest
 
     /**
      * @throws MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException
+     * @throws \Ecotone\Messaging\Handler\DestinationResolutionException
      */
     public function test_passing_message_to_next_channel_if_defined_in_routing_slip()
     {
@@ -126,7 +126,7 @@ class RequestReplyProducerTest extends MessagingTest
 
     /**
      * @throws MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException
+     * @throws \Ecotone\Messaging\Handler\DestinationResolutionException
      */
     public function test_passing_message_to_next_routing_slip()
     {
@@ -155,7 +155,7 @@ class RequestReplyProducerTest extends MessagingTest
 
     /**
      * @throws MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException
+     * @throws \Ecotone\Messaging\Handler\DestinationResolutionException
      */
     public function test_passing_message_to_reply_channel_when_routing_slip_is_finished()
     {
@@ -270,10 +270,10 @@ class RequestReplyProducerTest extends MessagingTest
     }
 
     /**
-     * @param \SimplyCodedSoftware\Messaging\Handler\MessageProcessor $replyMessageProducer
+     * @param \Ecotone\Messaging\Handler\MessageProcessor $replyMessageProducer
      * @param MessageChannel|null $outputChannel
      * @param bool $requireReply
-     * @return \SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer
+     * @return \Ecotone\Messaging\Handler\RequestReplyProducer
      */
     private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, MessageChannel $outputChannel = null, bool $requireReply = false): RequestReplyProducer
     {
@@ -286,12 +286,12 @@ class RequestReplyProducerTest extends MessagingTest
     }
 
     /**
-     * @param \SimplyCodedSoftware\Messaging\Handler\MessageProcessor $replyMessageProducer
+     * @param \Ecotone\Messaging\Handler\MessageProcessor $replyMessageProducer
      * @param array $messageChannels
      * @param string|null $outputChannelName
-     * @return \SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer
+     * @return \Ecotone\Messaging\Handler\RequestReplyProducer
      * @throws MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Handler\DestinationResolutionException
+     * @throws \Ecotone\Messaging\Handler\DestinationResolutionException
      */
     private function createRequestReplyProducerWithChannels(MessageProcessor $replyMessageProducer, array $messageChannels, ?string $outputChannelName): RequestReplyProducer
     {

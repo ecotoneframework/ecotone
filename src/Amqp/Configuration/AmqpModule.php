@@ -1,24 +1,24 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp\Configuration;
+namespace Ecotone\Amqp\Configuration;
 
-use SimplyCodedSoftware\Amqp\AmqpAdmin;
-use SimplyCodedSoftware\Amqp\AmqpBackedMessageChannelBuilder;
-use SimplyCodedSoftware\Amqp\AmqpBackendMessageChannelConsumer;
-use SimplyCodedSoftware\Amqp\AmqpBinding;
-use SimplyCodedSoftware\Amqp\AmqpExchange;
-use SimplyCodedSoftware\Amqp\AmqpQueue;
-use SimplyCodedSoftware\Messaging\Annotation\ModuleAnnotation;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationModule;
-use SimplyCodedSoftware\Messaging\Config\Annotation\AnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Config\Configuration;
-use SimplyCodedSoftware\Messaging\Config\ModuleReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Amqp\AmqpAdmin;
+use Ecotone\Amqp\AmqpBackedMessageChannelBuilder;
+use Ecotone\Amqp\AmqpBackendMessageChannelConsumer;
+use Ecotone\Amqp\AmqpBinding;
+use Ecotone\Amqp\AmqpExchange;
+use Ecotone\Amqp\AmqpQueue;
+use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class AmqpModule
- * @package SimplyCodedSoftware\Amqp\Configuration
+ * @package Ecotone\Amqp\Configuration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */

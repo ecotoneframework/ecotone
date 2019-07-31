@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+namespace Ecotone\Messaging\Handler;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class TypeDescriptor
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class TypeDescriptor
@@ -152,7 +152,7 @@ final class TypeDescriptor
      * @param string $type
      * @param string $docBlockTypeDescription
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(string $type, string $docBlockTypeDescription)
     {
@@ -163,7 +163,7 @@ final class TypeDescriptor
      * @param $variable
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createFromVariable($variable) : self
     {
@@ -197,7 +197,7 @@ final class TypeDescriptor
      *
      * @return TypeDescriptor[]
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function resolveGenericTypes() : array
     {
@@ -215,7 +215,7 @@ final class TypeDescriptor
      * @param string|null $docBlockTypeDescription
      * @return self
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWithDocBlock(?string $type, ?string $docBlockTypeDescription) : self
     {
@@ -226,7 +226,7 @@ final class TypeDescriptor
      * @param string $className
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createCollection(string $className) : self
     {
@@ -237,7 +237,7 @@ final class TypeDescriptor
      * @param string $type
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function create(?string $type) : self
     {
@@ -247,7 +247,7 @@ final class TypeDescriptor
     /**
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createUnknownType() : self
     {
@@ -257,7 +257,7 @@ final class TypeDescriptor
     /**
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createBooleanType() : self
     {
@@ -267,7 +267,7 @@ final class TypeDescriptor
     /**
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createIntegerType() : self
     {
@@ -277,7 +277,7 @@ final class TypeDescriptor
     /**
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createArrayType() : self
     {
@@ -289,7 +289,7 @@ final class TypeDescriptor
      *
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createIterable() : self
     {
@@ -299,7 +299,7 @@ final class TypeDescriptor
     /**
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createStringType() : self
     {
@@ -482,7 +482,7 @@ final class TypeDescriptor
      * @param string $typeHint
      * @param string $docBlockTypeDescription
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function initialize(string $typeHint, string $docBlockTypeDescription) : void
     {
@@ -530,7 +530,7 @@ final class TypeDescriptor
      * @param string $typeHint
      * @return string
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function resolveType(string $typeHint) : string
     {

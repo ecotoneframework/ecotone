@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateIdentifier;
-use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
-use SimplyCodedSoftware\DomainModel\Annotation\ReferenceCallInterceptorAnnotation;
-use SimplyCodedSoftware\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
+namespace Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Aggregate;
+use Ecotone\DomainModel\Annotation\Aggregate;
+use Ecotone\DomainModel\Annotation\AggregateIdentifier;
+use Ecotone\DomainModel\Annotation\CommandHandler;
+use Ecotone\DomainModel\Annotation\ReferenceCallInterceptorAnnotation;
+use Ecotone\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
 
 /**
  * Class AggregateCommandHandlerExample
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate
+ * @package Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  */

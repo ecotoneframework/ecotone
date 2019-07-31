@@ -1,8 +1,7 @@
-@TODO 
+# Ecotone
 
-- change namespace to configuration instead of parameter
-- amqp add possibility to define point to point or publish subscribe amqp backend channel
-- define how non class command/queries/events should work
-- amqp pecl events to keep running consumer
-- allow simple types for aggregate commands/queries
-- presend interceptor. So it can be called before sending to channel
+
+The open source Ecotone provides a clean, elegant API for writing DDD, CQRS applications on top off the well-known Enterprise Integration Patterns.  
+It provides basic building blocks for writing aggregates, commands, queries, events, command handlers, event handlers, query handlers, communication buses and so on.
+
+Documentation will be available soon...

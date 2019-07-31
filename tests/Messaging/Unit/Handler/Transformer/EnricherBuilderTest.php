@@ -1,44 +1,44 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Transformer;
+namespace Test\Ecotone\Messaging\Unit\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\ConfigurationException;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Conversion\AutoCollectionConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\ConversionService;
-use SimplyCodedSoftware\Messaging\Conversion\Converter;
-use SimplyCodedSoftware\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\Converter\EnrichPayloadWithValueBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\EnricherBuilder;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\EnrichException;
-use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\FakeConverterService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Dto\OrderExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\Converter;
+use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
+use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
+use Ecotone\Messaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
+use Ecotone\Messaging\Handler\Enricher\Converter\EnrichPayloadWithValueBuilder;
+use Ecotone\Messaging\Handler\Enricher\EnricherBuilder;
+use Ecotone\Messaging\Handler\Enricher\EnrichException;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Fixture\Conversion\FakeConverterService;
+use Test\Ecotone\Messaging\Fixture\Dto\OrderExample;
+use Test\Ecotone\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class PayloadEnricherBuilderTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Transformer
+ * @package Test\Ecotone\Messaging\Unit\Handler\Transformer
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EnricherBuilderTest extends MessagingTest
 {
     /**
      * @throws ConfigurationException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_no_property_or_header_setters_configured()
     {
@@ -52,7 +52,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_enriching_array_with_multiple_static_properties()
     {
@@ -82,7 +82,7 @@ class EnricherBuilderTest extends MessagingTest
      * @param array $setterBuilders
      * @throws ConfigurationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createEnricherAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, array $setterBuilders): void
     {
@@ -107,7 +107,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_enriching_message_with_content_type_conversion()
     {
@@ -202,7 +202,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_enriching_property_with_quotes_in_names()
     {
@@ -229,7 +229,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_copying_headers_from_input_message()
     {
@@ -251,7 +251,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_enriching_with_static_headers()
     {
@@ -297,7 +297,7 @@ class EnricherBuilderTest extends MessagingTest
      * @param array $setterBuilders
      * @throws ConfigurationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createEnricherWithRequestChannelAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, $replyPayload, array $setterBuilders): void
     {
@@ -786,7 +786,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws \Exception
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function TODO_test_converting_reply_message_for_evaluation()
     {

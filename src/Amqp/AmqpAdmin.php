@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Amqp\AmqpContext;
@@ -10,11 +10,11 @@ use Interop\Amqp\AmqpQueue as EnqueueQueue;
 use Interop\Amqp\Impl\AmqpBind as EnqueueBinding;
 use Interop\Amqp\Impl\AmqpBind;
 use Interop\Amqp\Impl\AmqpTopic;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class AmqpAdmin
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpAdmin
@@ -52,7 +52,7 @@ class AmqpAdmin
      * @param AmqpQueue[] $amqpQueues
      * @param AmqpBinding[] $amqpBindings
      * @return AmqpAdmin
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWith(iterable $amqpExchanges, iterable $amqpQueues, iterable $amqpBindings) : self
     {

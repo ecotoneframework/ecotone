@@ -1,10 +1,10 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging;
+namespace Ecotone\Messaging;
 
 /**
  * Class MessageSendException
- * @package SimplyCodedSoftware\Messaging\Exception
+ * @package Ecotone\Messaging\Exception
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageDeliveryException extends MessagingException

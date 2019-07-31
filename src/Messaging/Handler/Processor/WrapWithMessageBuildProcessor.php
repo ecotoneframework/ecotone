@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Processor;
+namespace Ecotone\Messaging\Handler\Processor;
 
 
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCallRegistry;
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class WrapWithMessageProcessor Constructs reply message with correct content type
- * @package SimplyCodedSoftware\Messaging\Handler\Processor
+ * @package Ecotone\Messaging\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class WrapWithMessageBuildProcessor implements MessageProcessor
@@ -45,7 +45,7 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
      * @param MessageProcessor $messageProcessor
      * @param ReferenceSearchService $referenceSearchService
      * @return WrapWithMessageBuildProcessor
-     * @throws \SimplyCodedSoftware\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
      */
     public static function createWith($objectToInvokeOn, string $objectMethodName, MessageProcessor $messageProcessor, ReferenceSearchService $referenceSearchService)
     {

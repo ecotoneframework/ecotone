@@ -1,17 +1,17 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Endpoint;
+namespace Test\Ecotone\Messaging\Unit\Endpoint;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\NoReturnMessageHandler;
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumer;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\MessageDispatchingException;
+use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumer;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class EventDrivenConsumerTest
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EventDrivenConsumerTest extends MessagingTest
@@ -47,7 +47,7 @@ class EventDrivenConsumerTest extends MessagingTest
     {
         $directChannel = DirectChannel::create();
         $handler = NoReturnMessageHandler::create();
-        $eventDrivenConsumer = new \SimplyCodedSoftware\Messaging\Endpoint\EventDriven\EventDrivenConsumer('some', $directChannel, $handler);
+        $eventDrivenConsumer = new \Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumer('some', $directChannel, $handler);
 
         $this->assertEquals("some", $eventDrivenConsumer->getConsumerName());
     }

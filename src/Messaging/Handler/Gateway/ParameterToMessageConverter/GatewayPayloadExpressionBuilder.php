@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
+namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
-use SimplyCodedSoftware\Messaging\Handler\ExpressionEvaluationService;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
+use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class GatewayExpressionBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter
+ * @package Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayPayloadExpressionBuilder implements GatewayParameterConverterBuilder

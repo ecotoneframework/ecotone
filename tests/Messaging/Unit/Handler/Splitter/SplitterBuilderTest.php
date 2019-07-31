@@ -1,22 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Splitter;
+namespace Test\Ecotone\Messaging\Unit\Handler\Splitter;
 
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Splitter\ServiceSplittingArrayPayload;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Splitter\WrongSplittingService;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Splitter\SplitterBuilder;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Fixture\Handler\Splitter\ServiceSplittingArrayPayload;
+use Test\Ecotone\Messaging\Fixture\Handler\Splitter\WrongSplittingService;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class SplitterBuilderTest
- * @package SimplyCodedSoftware\Messaging\Handler\Splitter
+ * @package Ecotone\Messaging\Handler\Splitter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SplitterBuilderTest extends MessagingTest

@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service;
+namespace Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Service;
 
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\DomainModel\Annotation\Aggregate;
+use Ecotone\DomainModel\Annotation\CommandHandler;
 
 /**
  * Class CommandHandlerWithReturnValue
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Service
+ * @package Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Service
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

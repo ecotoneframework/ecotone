@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Support;
-use SimplyCodedSoftware\Messaging\Support\GenericMessage;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+namespace Test\Ecotone\Messaging\Unit\Support;
+use Ecotone\Messaging\Support\GenericMessage;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 
 /**
  * Class GenericMessageTest
- * @package SimplyCodedSoftware\Messaging\Support
+ * @package Ecotone\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GenericMessageTest extends MessagingTest

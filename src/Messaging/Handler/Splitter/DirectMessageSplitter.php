@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Splitter;
+namespace Ecotone\Messaging\Handler\Splitter;
 
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Class DirectMessageSplitter
- * @package SimplyCodedSoftware\Messaging\Handler\Splitter
+ * @package Ecotone\Messaging\Handler\Splitter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

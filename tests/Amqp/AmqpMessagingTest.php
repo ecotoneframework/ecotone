@@ -1,15 +1,15 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Amqp;
+namespace Test\Ecotone\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
 use Enqueue\AmqpLib\AmqpConnectionFactory as AmqpLibConnection;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Amqp\CachedAmqpConnectionFactory;
+use Ecotone\Amqp\CachedAmqpConnectionFactory;
 
 /**
  * Class RabbitmqMessagingTest
- * @package Test\SimplyCodedSoftware\IntegrationMessaging\Amqp
+ * @package Test\Ecotone\IntegrationMessaging\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class AmqpMessagingTest extends TestCase

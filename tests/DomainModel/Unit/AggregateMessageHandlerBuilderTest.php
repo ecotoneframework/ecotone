@@ -1,44 +1,44 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Unit;
+namespace Test\Ecotone\DomainModel\Unit;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\DomainModel\AggregateMessageHandlerBuilder;
-use SimplyCodedSoftware\DomainModel\AggregateNotFoundException;
-use SimplyCodedSoftware\DomainModel\AggregateVersionMismatchException;
-use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventBus;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\NullableMessageChannel;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\Article;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\ChangeArticleContentCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\CloseArticleCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\InMemoryArticleRepository;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\InMemoryArticleRepositoryFactory;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\PublishArticleCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\PublishArticleWithTitleOnlyCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Blog\RepublishArticleCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CommandWithoutAggregateIdentifier;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryOrderAggregateRepositoryConstructor;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryOrderRepositoryFactory;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\MultiplyAmountCommand;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate\Order;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\Handler\ReplyViaHeadersMessageHandler;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\TestingEventBus;
-use Test\SimplyCodedSoftware\DomainModel\Fixture\TestingLazyEventBus;
+use Ecotone\DomainModel\AggregateMessageHandlerBuilder;
+use Ecotone\DomainModel\AggregateNotFoundException;
+use Ecotone\DomainModel\AggregateVersionMismatchException;
+use Ecotone\DomainModel\LazyEventBus\LazyEventBus;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Test\Ecotone\DomainModel\Fixture\Blog\Article;
+use Test\Ecotone\DomainModel\Fixture\Blog\ChangeArticleContentCommand;
+use Test\Ecotone\DomainModel\Fixture\Blog\CloseArticleCommand;
+use Test\Ecotone\DomainModel\Fixture\Blog\InMemoryArticleRepository;
+use Test\Ecotone\DomainModel\Fixture\Blog\InMemoryArticleRepositoryFactory;
+use Test\Ecotone\DomainModel\Fixture\Blog\PublishArticleCommand;
+use Test\Ecotone\DomainModel\Fixture\Blog\PublishArticleWithTitleOnlyCommand;
+use Test\Ecotone\DomainModel\Fixture\Blog\RepublishArticleCommand;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\CommandWithoutAggregateIdentifier;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryOrderAggregateRepositoryConstructor;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryOrderRepositoryFactory;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\MultiplyAmountCommand;
+use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\Order;
+use Test\Ecotone\DomainModel\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Test\Ecotone\DomainModel\Fixture\TestingEventBus;
+use Test\Ecotone\DomainModel\Fixture\TestingLazyEventBus;
 
 /**
  * Class ServiceCallToAggregateAdapterTest
- * @package Test\SimplyCodedSoftware\DomainModel
+ * @package Test\Ecotone\DomainModel
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AggregateMessageHandlerBuilderTest extends TestCase

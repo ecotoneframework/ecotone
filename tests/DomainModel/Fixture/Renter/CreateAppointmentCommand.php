@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Renter;
+namespace Test\Ecotone\DomainModel\Fixture\Renter;
 
 /**
  * Class CreateAppointmentCommand
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Renter
+ * @package Test\Ecotone\DomainModel\Fixture\Renter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CreateAppointmentCommand

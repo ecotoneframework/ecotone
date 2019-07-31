@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Conversion;
-use SimplyCodedSoftware\Messaging\Conversion\Converter;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+namespace Test\Ecotone\Messaging\Fixture\Conversion;
+use Ecotone\Messaging\Conversion\Converter;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class FakeConverterService
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Conversion
+ * @package Test\Ecotone\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FakeConverterService implements Converter
@@ -44,9 +44,9 @@ class FakeConverterService implements Converter
      * @param string $requestTypeDescriptor
      * @param string $requestMediaType
      * @return FakeConverterService
-     * @throws \SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public static function create($data, string $requestTypeDescriptor, string $requestMediaType) : self
     {

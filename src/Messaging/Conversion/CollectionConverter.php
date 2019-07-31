@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
+namespace Ecotone\Messaging\Conversion;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class CollectionConverter
- * @package SimplyCodedSoftware\Messaging\Conversion
+ * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CollectionConverter implements Converter

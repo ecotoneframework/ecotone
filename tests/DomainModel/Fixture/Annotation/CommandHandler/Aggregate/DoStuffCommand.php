@@ -6,11 +6,11 @@
  * Time: 17:14
  */
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate;
+namespace Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Aggregate;
 
 /**
  * Class DoStuffCommand
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Annotation\CommandHandler\Aggregate
+ * @package Test\Ecotone\DomainModel\Fixture\Annotation\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DoStuffCommand

@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Enricher;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+namespace Ecotone\Messaging\Handler\Enricher;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class PropertyReaderAccessor
- * @package SimplyCodedSoftware\Messaging\Handler\Enricher
+ * @package Ecotone\Messaging\Handler\Enricher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PropertyReaderAccessor
@@ -18,7 +18,7 @@ class PropertyReaderAccessor
      * @return mixed
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getPropertyValue(PropertyPath $propertyPath, $fromData)
     {
@@ -38,7 +38,7 @@ class PropertyReaderAccessor
      *
      * @return bool
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function hasPropertyValue(PropertyPath $propertyPath, $fromData) : bool
     {
@@ -57,7 +57,7 @@ class PropertyReaderAccessor
      * @return mixed
      * @throws InvalidArgumentException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function getValueForCurrentState($fromData, string $currentAccessProperty)
     {

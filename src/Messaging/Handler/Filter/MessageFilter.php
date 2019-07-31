@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler\Filter;
+namespace Ecotone\Messaging\Handler\Filter;
 
-use SimplyCodedSoftware\Messaging\Handler\MessageProcessor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
+use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHeaders;
 
 /**
  * Class MessageFilter
- * @package SimplyCodedSoftware\Messaging\Handler\Filter
+ * @package Ecotone\Messaging\Handler\Filter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

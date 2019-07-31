@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\DomainModel\LazyEventBus;
+namespace Ecotone\DomainModel\LazyEventBus;
 
 /**
  * Class LazyEventPublishing
- * @package SimplyCodedSoftware\DomainModel\LazyEventBus
+ * @package Ecotone\DomainModel\LazyEventBus
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */

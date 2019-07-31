@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating;
+namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
 /**
  * Class BeforeCalculation

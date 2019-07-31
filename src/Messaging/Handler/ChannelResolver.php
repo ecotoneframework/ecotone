@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Channel\DirectChannel;
-use SimplyCodedSoftware\Messaging\MessageChannel;
-use SimplyCodedSoftware\Messaging\PollableChannel;
-use SimplyCodedSoftware\Messaging\SubscribableChannel;
+use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\SubscribableChannel;
 
 /**
  * Interface ChannelResolver
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ChannelResolver

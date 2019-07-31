@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\TargetAggregateIdentifier;
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateExpectedVersion;
+namespace Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate;
+use Ecotone\DomainModel\Annotation\TargetAggregateIdentifier;
+use Ecotone\DomainModel\Annotation\AggregateExpectedVersion;
 
 /**
  * Class MultiplyAmountCommand
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\CommandHandler\Aggregate
+ * @package Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MultiplyAmountCommand

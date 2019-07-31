@@ -1,23 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Endpoint\Poller;
+namespace Test\Ecotone\Messaging\Unit\Endpoint\Poller;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
-use SimplyCodedSoftware\Messaging\Endpoint\NullAcknowledgementCallback;
-use SimplyCodedSoftware\Messaging\Endpoint\NullConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingConsumer\PollerTaskExecutor;
-use SimplyCodedSoftware\Messaging\Endpoint\StoppableConsumer;
-use SimplyCodedSoftware\Messaging\MessageHeaders;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
+use Ecotone\Messaging\Endpoint\NullConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PollerTaskExecutor;
+use Ecotone\Messaging\Endpoint\StoppableConsumer;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class PollerTaskExecutorTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Endpoint\Poller
+ * @package Test\Ecotone\Messaging\Unit\Endpoint\Poller
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PollerTaskExecutorTest extends TestCase

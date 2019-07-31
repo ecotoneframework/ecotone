@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler;
+namespace Test\Ecotone\Messaging\Unit\Handler;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 
 /**
  * Class SymfonyExpressionEvaluationAdapterTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler
+ * @package Test\Ecotone\Messaging\Unit\Handler
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SymfonyExpressionEvaluationAdapterTest extends TestCase

@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Transformer;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Dto\OrderExample;
+namespace Test\Ecotone\Messaging\Unit\Handler\Transformer;
+use Test\Ecotone\Messaging\Fixture\Dto\OrderExample;
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyEditorAccessor;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyPath;
-use SimplyCodedSoftware\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
+use Ecotone\Messaging\Handler\Enricher\PropertyPath;
+use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 
 /**
  * Class PropertyEditorAccessorTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Transformer
+ * @package Test\Ecotone\Messaging\Unit\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PropertyReaderAccessorTest extends TestCase

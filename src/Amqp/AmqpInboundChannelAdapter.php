@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Enqueue\AmqpLib\AmqpConsumer;
 use Interop\Amqp\AmqpConnectionFactory;
@@ -9,20 +9,20 @@ use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpMessage;
 use Interop\Queue\Consumer as EnqueueConsumer;
 use Interop\Queue\Message as EnqueueMessage;
-use SimplyCodedSoftware\Messaging\Conversion\MediaType;
-use SimplyCodedSoftware\Messaging\Endpoint\AcknowledgementCallback;
-use SimplyCodedSoftware\Messaging\Endpoint\EntrypointGateway;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
-use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Endpoint\AcknowledgementCallback;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageConverter\HeaderMapper;
+use Ecotone\Messaging\Scheduling\TaskExecutor;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Throwable;
 
 /**
  * Class InboundEnqueueGateway
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AmqpInboundChannelAdapter implements TaskExecutor, EntrypointGateway
@@ -130,7 +130,7 @@ class AmqpInboundChannelAdapter implements TaskExecutor, EntrypointGateway
     /**
      * @return Message|null
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getMessage() : ?Message
     {

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Config\Annotation;
+namespace Ecotone\Messaging\Config\Annotation;
 
-use SimplyCodedSoftware\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class AnnotationRegistration
- * @package SimplyCodedSoftware\Messaging\Config\Annotation\Annotation
+ * @package Ecotone\Messaging\Config\Annotation\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationRegistration
@@ -45,7 +45,7 @@ class AnnotationRegistration
      * @param object $annotationForMethod
      * @param string $className
      * @param string $methodName
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function __construct($annotationForClass, $annotationForMethod, string $className, string $methodName)
     {
@@ -66,7 +66,7 @@ class AnnotationRegistration
      * @param string $className
      * @param string $methodName
      * @return AnnotationRegistration
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function create($annotationForClass, $annotationForMethod, string $className, string $methodName) : self
     {
@@ -116,7 +116,7 @@ class AnnotationRegistration
     /**
      * @param object $annotationForClass
      * @param string $classNameWithAnnotation
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function initialize($annotationForClass, string $classNameWithAnnotation) : void
     {

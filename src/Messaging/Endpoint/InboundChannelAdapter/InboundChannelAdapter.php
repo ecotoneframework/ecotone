@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter;
+namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
-use SimplyCodedSoftware\Messaging\Endpoint\ConsumerLifecycle;
-use SimplyCodedSoftware\Messaging\Scheduling\TaskExecutor;
-use SimplyCodedSoftware\Messaging\Scheduling\TaskScheduler;
-use SimplyCodedSoftware\Messaging\Scheduling\Trigger;
+use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Scheduling\TaskExecutor;
+use Ecotone\Messaging\Scheduling\TaskScheduler;
+use Ecotone\Messaging\Scheduling\Trigger;
 
 /**
  * Class InboundChannelAdapter
- * @package SimplyCodedSoftware\Messaging\Endpoint
+ * @package Ecotone\Messaging\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InboundChannelAdapter implements ConsumerLifecycle

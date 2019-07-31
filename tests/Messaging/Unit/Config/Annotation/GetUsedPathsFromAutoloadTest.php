@@ -1,14 +1,14 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation;
+namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\Messaging\Config\Annotation\GetUsedPathsFromAutoload;
+use Ecotone\Messaging\Config\Annotation\GetUsedPathsFromAutoload;
 
 /**
  * Class GetUsedPathsFromAutoloadTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Config\Annotation
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GetUsedPathsFromAutoloadTest extends TestCase
@@ -91,11 +91,11 @@ class GetUsedPathsFromAutoloadTest extends TestCase
         $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
 
         $this->assertEquals(
-            ["SimplyCodedSoftware\One", "SimplyCodedSoftware\Two"],
+            ["Ecotone\One", "Ecotone\Two"],
             $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
                 [
-                    "psr-4" => ["SimplyCodedSoftware\One" => "src"],
-                    "psr-0" => ["SimplyCodedSoftware\Two" => "src"]
+                    "psr-4" => ["Ecotone\One" => "src"],
+                    "psr-0" => ["Ecotone\Two" => "src"]
                 ]
             )
         );
@@ -109,8 +109,8 @@ class GetUsedPathsFromAutoloadTest extends TestCase
             [],
             $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
                 [
-                    "psr-4" => ["SimplyCodedSoftware\One" => "tests"],
-                    "psr-0" => ["SimplyCodedSoftware\Two" => "tests"]
+                    "psr-4" => ["Ecotone\One" => "tests"],
+                    "psr-0" => ["Ecotone\Two" => "tests"]
                 ]
             )
         );

@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Scheduling;
+namespace Ecotone\Messaging\Scheduling;
 
 /**
  * Interface TaskScheduler
- * @package SimplyCodedSoftware\Messaging\Scheduling
+ * @package Ecotone\Messaging\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface TaskScheduler

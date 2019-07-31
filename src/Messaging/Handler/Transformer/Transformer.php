@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Transformer;
+namespace Ecotone\Messaging\Handler\Transformer;
 
-use SimplyCodedSoftware\Messaging\MessageHandler;
-use SimplyCodedSoftware\Messaging\Handler\RequestReplyProducer;
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Handler\RequestReplyProducer;
+use Ecotone\Messaging\Message;
 
 /**
  * Class TransformerHandler
- * @package SimplyCodedSoftware\Messaging\Handler\Transformer
+ * @package Ecotone\Messaging\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */

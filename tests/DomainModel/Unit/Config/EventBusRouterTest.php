@@ -1,18 +1,18 @@
 <?php
 
 
-namespace Test\SimplyCodedSoftware\DomainModel\Unit\Config;
+namespace Test\Ecotone\DomainModel\Unit\Config;
 
 use PHPUnit\Framework\TestCase;
-use SimplyCodedSoftware\DomainModel\Config\EventBusRouter;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\AbstractSuperAdmin;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Admin;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\Email;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Conversion\SuperAdmin;
+use Ecotone\DomainModel\Config\EventBusRouter;
+use Test\Ecotone\Messaging\Fixture\Conversion\AbstractSuperAdmin;
+use Test\Ecotone\Messaging\Fixture\Conversion\Admin;
+use Test\Ecotone\Messaging\Fixture\Conversion\Email;
+use Test\Ecotone\Messaging\Fixture\Conversion\SuperAdmin;
 
 /**
  * Class EventBusRouterTest
- * @package Test\SimplyCodedSoftware\DomainModel\Unit\Config
+ * @package Test\Ecotone\DomainModel\Unit\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EventBusRouterTest extends TestCase

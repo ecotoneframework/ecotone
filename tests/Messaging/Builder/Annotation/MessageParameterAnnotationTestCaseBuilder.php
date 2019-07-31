@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Builder\Annotation;
-use SimplyCodedSoftware\Messaging\Annotation\Parameter\MessageParameter;
+namespace Test\Ecotone\Messaging\Builder\Annotation;
+use Ecotone\Messaging\Annotation\Parameter\MessageParameter;
 
 /**
  * Class MessageParameterTestBuilder
- * @package Test\SimplyCodedSoftware\Messaging\Builder\Annotation
+ * @package Test\Ecotone\Messaging\Builder\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageParameterAnnotationTestCaseBuilder

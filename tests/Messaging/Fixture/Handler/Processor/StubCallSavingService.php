@@ -1,16 +1,16 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Processor;
 
 use PHPUnit\Framework\Assert;
-use SimplyCodedSoftware\Messaging\Annotation\MessageEndpoint;
-use SimplyCodedSoftware\Messaging\Annotation\ServiceActivator;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Message;
 
 /**
  * Class StubCallSavingService
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */

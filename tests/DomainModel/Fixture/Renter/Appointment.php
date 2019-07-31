@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\DomainModel\Fixture\Renter;
+namespace Test\Ecotone\DomainModel\Fixture\Renter;
 
-use SimplyCodedSoftware\DomainModel\Annotation\Aggregate;
-use SimplyCodedSoftware\DomainModel\Annotation\AggregateIdentifier;
-use SimplyCodedSoftware\DomainModel\Annotation\CommandHandler;
-use SimplyCodedSoftware\DomainModel\WithAggregateEvents;
+use Ecotone\DomainModel\Annotation\Aggregate;
+use Ecotone\DomainModel\Annotation\AggregateIdentifier;
+use Ecotone\DomainModel\Annotation\CommandHandler;
+use Ecotone\DomainModel\WithAggregateEvents;
 
 /**
  * Class Appointment
- * @package Test\SimplyCodedSoftware\DomainModel\Fixture\Renter
+ * @package Test\Ecotone\DomainModel\Fixture\Renter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  */

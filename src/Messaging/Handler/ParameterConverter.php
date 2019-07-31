@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
-use SimplyCodedSoftware\Messaging\InvalidMessageHeaderException;
-use SimplyCodedSoftware\Messaging\Message;
+use Ecotone\Messaging\InvalidMessageHeaderException;
+use Ecotone\Messaging\Message;
 
 /**
  * Class MethodArgument
- * @package SimplyCodedSoftware\Messaging\Handler\ServiceActivator
+ * @package Ecotone\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ParameterConverter

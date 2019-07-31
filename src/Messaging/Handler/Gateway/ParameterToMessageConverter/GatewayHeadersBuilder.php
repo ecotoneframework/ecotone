@@ -1,14 +1,14 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter;
+namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayParameterConverter;
-use SimplyCodedSoftware\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
+use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class GatewayHeaderArrayBuilder
- * @package SimplyCodedSoftware\Messaging\Handler\Gateway\ParameterToMessageConverter
+ * @package Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayHeadersBuilder implements GatewayParameterConverterBuilder

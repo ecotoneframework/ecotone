@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace SimplyCodedSoftware\Messaging\Conversion;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+namespace Ecotone\Messaging\Conversion;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MediaType
- * @package SimplyCodedSoftware\Messaging\Conversion
+ * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 final class MediaType
@@ -50,7 +50,7 @@ final class MediaType
      * @param string $type
      * @param string $subtype
      * @param string[] $parameters
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(string $type, string $subtype, array $parameters)
     {
@@ -66,7 +66,7 @@ final class MediaType
      * @param string $type primary type
      * @param string $subtype subtype
      * @return MediaType
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function create(string $type, string $subtype) : self
     {
@@ -75,7 +75,7 @@ final class MediaType
 
     /**
      * @return MediaType
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createApplicationJson() : self
     {
@@ -84,7 +84,7 @@ final class MediaType
 
     /**
      * @return MediaType
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createApplicationXml() : self
     {
@@ -93,7 +93,7 @@ final class MediaType
 
     /**
      * @return MediaType
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createMultipartFormData() : self
     {
@@ -103,7 +103,7 @@ final class MediaType
     /**
      * @return MediaType
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createApplicationOcetStream() : self
     {
@@ -113,7 +113,7 @@ final class MediaType
     /**
      * @return MediaType
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createApplicationXPHPObject() : self
     {
@@ -124,7 +124,7 @@ final class MediaType
      * @param string $type
      * @return MediaType
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createApplicationXPHPObjectWithTypeParameter(string $type) : self
     {
@@ -139,7 +139,7 @@ final class MediaType
     /**
      * @return MediaType
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createApplicationXPHPSerializedObject() : self
     {
@@ -149,7 +149,7 @@ final class MediaType
     /**
      * @return MediaType
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createTextPlain() : self
     {
@@ -161,7 +161,7 @@ final class MediaType
      * @param string $subtype
      * @param string[] $parameters
      * @return MediaType
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createWithParameters(string $type, string $subtype, array $parameters) : self
     {
@@ -171,8 +171,8 @@ final class MediaType
     /**
      * @param string $mediaType
      * @return MediaType
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
-     * @throws \SimplyCodedSoftware\Messaging\Support\InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     public static function parseMediaType(string $mediaType) : self
     {
@@ -204,7 +204,7 @@ final class MediaType
      * @param string $name
      * @param string $value
      * @return MediaType
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function addParameter(string $name, string $value) : self
     {
@@ -277,7 +277,7 @@ final class MediaType
     /**
      * @return TypeDescriptor
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getTypeParameter() : TypeDescriptor
     {
@@ -288,7 +288,7 @@ final class MediaType
      * @param string $name
      * @return string
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getParameter(string $name) : string
     {
@@ -314,7 +314,7 @@ final class MediaType
      * @param string $otherMediaTypeToParse
      * @return bool
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function isCompatibleWithParsed(string $otherMediaTypeToParse) : bool
     {

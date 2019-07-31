@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Handler;
+namespace Ecotone\Messaging\Handler;
 
-use SimplyCodedSoftware\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class TypeResolver
- * @package SimplyCodedSoftware\Messaging\Handler
+ * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
@@ -58,7 +58,7 @@ class TypeResolver
      * @return InterfaceParameter[]
      * @throws TypeDefinitionException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getMethodParameters(string $interfaceName, string $methodName): iterable
     {
@@ -87,7 +87,7 @@ class TypeResolver
      * @param string $methodName
      * @return array
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function getMethodDocBlockParameterTypeHints(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, string $methodName): array
     {
@@ -125,7 +125,7 @@ class TypeResolver
      * @param string $methodName
      * @return array|\ReflectionClass
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public static function getMethodOwnerClass(\ReflectionClass $analyzedClass, string $methodName)
     {
@@ -391,7 +391,7 @@ class TypeResolver
      * @param string $methodName
      * @return \ReflectionClass
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private static function getMethodDeclaringClass(\ReflectionClass $analyzedClass, string $methodName): \ReflectionClass
     {
@@ -404,7 +404,7 @@ class TypeResolver
      * @throws TypeDefinitionException
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getClassProperties(string $className): iterable
     {
@@ -443,7 +443,7 @@ class TypeResolver
      * @param \ReflectionProperty $reflectionProperty
      * @return TypeDescriptor|null
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function getPropertyDocblockTypeHint(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionClass $declaringClass, \ReflectionProperty $reflectionProperty): ?TypeDescriptor
     {
@@ -471,7 +471,7 @@ class TypeResolver
      * @return TypeDescriptor
      * @throws TypeDefinitionException
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function getReturnType(string $interfaceName, string $methodName): TypeDescriptor
     {
@@ -499,7 +499,7 @@ class TypeResolver
      * @param string $methodName
      * @return string
      * @throws \ReflectionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function getReturnTypeDocBlockParameterTypeHint(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, string $methodName): ?string
     {
@@ -535,7 +535,7 @@ class TypeResolver
      * @param TypeDescriptor|null $type
      * @return ClassPropertyDefinition|null
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createClassProperty(string $className, AnnotationParser $annotationParser, $property, ?TypeDescriptor $type)
     {
@@ -577,7 +577,7 @@ class TypeResolver
      * @param AnnotationParser $annotationParser
      * @return ClassPropertyDefinition|null
      * @throws TypeDefinitionException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     private function createClassPropertyUsingTraitsIfExists(string $className, \ReflectionClass $reflectionClass, \ReflectionProperty $property, AnnotationParser $annotationParser)
     {

@@ -1,15 +1,15 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel\Dispatcher;
+namespace Ecotone\Messaging\Channel\Dispatcher;
 
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatcher;
-use SimplyCodedSoftware\Messaging\Channel\MessageDispatchingException;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageHandler;
+use Ecotone\Messaging\Channel\MessageDispatcher;
+use Ecotone\Messaging\Channel\MessageDispatchingException;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class BroadcastingDispatcher
- * @package SimplyCodedSoftware\Messaging\Channel\Dispatcher
+ * @package Ecotone\Messaging\Channel\Dispatcher
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class BroadcastingDispatcher implements MessageDispatcher

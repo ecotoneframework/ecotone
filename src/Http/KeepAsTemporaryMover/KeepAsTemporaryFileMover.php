@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Http\KeepAsTemporaryMover;
+namespace Ecotone\Http\KeepAsTemporaryMover;
 
 use Psr\Http\Message\UploadedFileInterface;
-use SimplyCodedSoftware\Http\UploadedFileMover;
+use Ecotone\Http\UploadedFileMover;
 
 /**
  * Class KeepAsTemporaryFileMover
- * @package SimplyCodedSoftware\IntegrationMessaging\Http\KeepAsTemporaryMover
+ * @package Ecotone\IntegrationMessaging\Http\KeepAsTemporaryMover
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class KeepAsTemporaryFileMover implements UploadedFileMover

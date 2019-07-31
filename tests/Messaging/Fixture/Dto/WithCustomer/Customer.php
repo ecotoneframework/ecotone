@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Dto\WithCustomer;
+namespace Test\Ecotone\Messaging\Fixture\Dto\WithCustomer;
 
 /**
  * Class Customer
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Dto\WithCustomer
+ * @package Test\Ecotone\Messaging\Fixture\Dto\WithCustomer
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class Customer

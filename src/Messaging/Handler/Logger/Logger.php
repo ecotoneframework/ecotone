@@ -1,7 +1,7 @@
 <?php
 
 
-namespace SimplyCodedSoftware\Messaging\Handler\Logger;
+namespace Ecotone\Messaging\Handler\Logger;
 
 
 abstract class Logger

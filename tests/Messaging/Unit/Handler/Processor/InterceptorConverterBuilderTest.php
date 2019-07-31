@@ -2,30 +2,30 @@
 declare(strict_types=1);
 
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor;
+namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
-use SimplyCodedSoftware\Messaging\Annotation\Interceptor\MethodInterceptor;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceParameter;
-use SimplyCodedSoftware\Messaging\Handler\InterfaceToCall;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
-use SimplyCodedSoftware\Messaging\Handler\TypeDefinitionException;
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\MessagingException;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\CallWithUnorderedClassInvocationInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\CallableService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceWithoutReturnValue;
+use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Transaction\Transactional;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithUnorderedClassInvocationInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Service\CallableService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 
 /**
  * Class InterceptorConverterBuilderTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Handler\Processor
+ * @package Test\Ecotone\Messaging\Unit\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterceptorConverterBuilderTest extends TestCase

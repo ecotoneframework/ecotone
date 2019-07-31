@@ -1,35 +1,35 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Unit\Endpoint;
+namespace Test\Ecotone\Messaging\Unit\Endpoint;
 
-use SimplyCodedSoftware\Messaging\Channel\QueueChannel;
-use SimplyCodedSoftware\Messaging\Config\InMemoryChannelResolver;
-use SimplyCodedSoftware\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
-use SimplyCodedSoftware\Messaging\Endpoint\PollingMetadata;
-use SimplyCodedSoftware\Messaging\Handler\InMemoryReferenceSearchService;
-use SimplyCodedSoftware\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use SimplyCodedSoftware\Messaging\Scheduling\PeriodicTrigger;
-use SimplyCodedSoftware\Messaging\Support\InvalidArgumentException;
-use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransaction;
-use SimplyCodedSoftware\Messaging\Transaction\Null\NullTransactionFactory;
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
-use SimplyCodedSoftware\Messaging\Transaction\TransactionInterceptor;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Endpoint\ConsumerStoppingService;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingNoArguments;
-use Test\SimplyCodedSoftware\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Test\SimplyCodedSoftware\Messaging\Unit\MessagingTest;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Scheduling\PeriodicTrigger;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Transaction\Null\NullTransaction;
+use Ecotone\Messaging\Transaction\Null\NullTransactionFactory;
+use Ecotone\Messaging\Transaction\Transactional;
+use Ecotone\Messaging\Transaction\TransactionInterceptor;
+use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
+use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingNoArguments;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class InboundChannelAdapterBuilderTest
- * @package Test\SimplyCodedSoftware\Messaging\Unit\Endpoint
+ * @package Test\Ecotone\Messaging\Unit\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InboundChannelAdapterBuilderTest extends MessagingTest
 {
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_passed_reference_service_has_parameters()
     {
@@ -50,7 +50,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_passed_reference_should_return_parameters()
     {
@@ -71,7 +71,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_running_with_default_period_trigger()
     {
@@ -105,7 +105,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_running_with_message_consumption_limit()
     {
@@ -137,7 +137,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_running_with_interceptor_from_interface_method_annotation()
     {
@@ -173,7 +173,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_running_with_interceptor_from_interface_class_annotation()
     {
@@ -209,7 +209,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_running_with_interceptor_from_endpoint_annotation()
     {
@@ -246,7 +246,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_running_with_memory_limit()
     {
@@ -276,7 +276,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_running_with_custom_trigger()
     {
@@ -312,7 +312,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
     /**
      * @throws InvalidArgumentException
-     * @throws \SimplyCodedSoftware\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_reference_service_has_no_passed_method()
     {

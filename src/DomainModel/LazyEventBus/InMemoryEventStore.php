@@ -1,13 +1,13 @@
 <?php
 
 
-namespace SimplyCodedSoftware\DomainModel\LazyEventBus;
+namespace Ecotone\DomainModel\LazyEventBus;
 
 use SplQueue;
 
 /**
  * Class InMemoryEventStore
- * @package SimplyCodedSoftware\DomainModel
+ * @package Ecotone\DomainModel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryEventStore

@@ -1,12 +1,12 @@
 <?php
 
-namespace SimplyCodedSoftware\Messaging\Channel;
+namespace Ecotone\Messaging\Channel;
 
-use SimplyCodedSoftware\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageChannel;
 
 /**
  * Interface ChannelInterceptorAdapter
- * @package SimplyCodedSoftware\Messaging\Config
+ * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface MessageChannelInterceptorAdapter extends MessageChannel

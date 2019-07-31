@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter;
+namespace Test\Ecotone\Messaging\Fixture\MessageConverter;
 
-use SimplyCodedSoftware\Messaging\Handler\TypeDescriptor;
-use SimplyCodedSoftware\Messaging\Message;
-use SimplyCodedSoftware\Messaging\MessageConverter\HeaderMapper;
-use SimplyCodedSoftware\Messaging\MessageConverter\MessageConverter;
-use SimplyCodedSoftware\Messaging\Support\Assert;
-use SimplyCodedSoftware\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageConverter\HeaderMapper;
+use Ecotone\Messaging\MessageConverter\MessageConverter;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class FakeMessageConverter
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\MessageConverter
+ * @package Test\Ecotone\Messaging\Fixture\MessageConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FakeMessageConverter implements MessageConverter

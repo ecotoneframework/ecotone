@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor;
+namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
-use SimplyCodedSoftware\Messaging\Transaction\Transactional;
+use Ecotone\Messaging\Transaction\Transactional;
 
 /**
  * Class TransactionalInterceptorExample
- * @package Test\SimplyCodedSoftware\Messaging\Fixture\Handler\Processor\Interceptor
+ * @package Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Transactional({"reference1"})
  */

@@ -1,13 +1,13 @@
 <?php
 
-namespace SimplyCodedSoftware\Amqp;
+namespace Ecotone\Amqp;
 
 use Interop\Amqp\AmqpConnectionFactory;
 use Interop\Queue\Context;
 
 /**
  * Class CachedAmqpConnectionFactory
- * @package SimplyCodedSoftware\Amqp
+ * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CachedAmqpConnectionFactory implements AmqpConnectionFactory

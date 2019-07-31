@@ -34,27 +34,28 @@ class CalculatorInterceptor
 
     /**
      * @param MethodInvocation $methodInvocation
-     * @param AroundMultiplyCalculation $aroundResultCalculation
+     * @param AroundSumCalculation $aroundResultCalculation
      * @return int
      * @Around(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AroundMultiplyCalculation)"
+     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AroundSumCalculation)"
      * )
      */
-    public function resultAround(MethodInvocation $methodInvocation, AroundMultiplyCalculation $aroundResultCalculation) : int
+    public function sumAround(MethodInvocation $methodInvocation, AroundSumCalculation $aroundResultCalculation) : int
     {
-        return $methodInvocation->proceed() * $aroundResultCalculation->amount;
+        $proceed = $methodInvocation->proceed();
+        return $proceed + $aroundResultCalculation->amount;
     }
 
     /**
      * @param int $amount
-     * @param AfterSumCalculation $afterMultiplyCalculation
+     * @param AfterMultiplyCalculation $afterMultiplyCalculation
      * @return int
      * @After(
-     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AfterSumCalculation)"
+     *     pointcut="@(Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating\AfterMultiplyCalculation)"
      * )
      */
-    public function sumAfter(int $amount, AfterSumCalculation $afterMultiplyCalculation) : int
+    public function multiplyAfter(int $amount, AfterMultiplyCalculation $afterMultiplyCalculation) : int
     {
-        return $amount + $afterMultiplyCalculation->amount;
+        return $amount * $afterMultiplyCalculation->amount;
     }
 }

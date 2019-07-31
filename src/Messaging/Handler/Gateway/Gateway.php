@@ -204,6 +204,7 @@ class Gateway
         );
 
         $gatewayInternalHandler = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle")
+            ->withWrappingResultInMessage(false)
             ->withPossibilityToReplaceArgumentsInAroundInterceptors(false)
             ->withEndpointAnnotations($this->endpointAnnotations);
         foreach ($this->aroundInterceptors as $aroundInterceptorReference) {

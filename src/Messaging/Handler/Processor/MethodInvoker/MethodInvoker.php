@@ -134,7 +134,7 @@ final class MethodInvoker implements MessageProcessor
 
     /**
      * @param InterfaceToCall $interfaceToCall
-     * @param array $passedMethodParameterConverters
+     * @param ParameterConverterBuilder[] $passedMethodParameterConverters
      * @param bool $shouldBeBuild
      * @return array
      * @throws InvalidArgumentException
@@ -144,18 +144,15 @@ final class MethodInvoker implements MessageProcessor
     {
         $passedArgumentsCount = count($passedMethodParameterConverters);
         $requiredArgumentsCount = count($interfaceToCall->getInterfaceParameters());
+        $missingParametersAmount = $requiredArgumentsCount - $passedArgumentsCount;
 
-        if (self::canBeInvokedWithDefaultArgument($interfaceToCall, $passedArgumentsCount, $requiredArgumentsCount)) {
-            if (($interfaceToCall->getInterfaceParameterAmount() - count($passedMethodParameterConverters)) == 2) {
-                $methodParameterConverters = [
-                    self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild),
-                    $shouldBeBuild ? new AllHeadersConverter($interfaceToCall->getSecondParameter()->getName()) : AllHeadersBuilder::createWith($interfaceToCall->getSecondParameter()->getName())
-                ];
+        if ($missingParametersAmount > 0) {
+            if ($missingParametersAmount >= 2 && $interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()) {
+                $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild);
+                $passedMethodParameterConverters[] = $shouldBeBuild ? new AllHeadersConverter($interfaceToCall->getSecondParameter()->getName()) : AllHeadersBuilder::createWith($interfaceToCall->getSecondParameter()->getName());
             } else {
-                $methodParameterConverters = [self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild)];
+                $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild);
             }
-
-            return $methodParameterConverters;
         }
 
         return $passedMethodParameterConverters;
@@ -405,24 +402,6 @@ final class MethodInvoker implements MessageProcessor
     public function __toString()
     {
         return (string)$this->interfaceToCall;
-    }
-
-    /**
-     * @param InterfaceToCall $interfaceToCall
-     * @param int $passedArgumentsCount
-     * @param int $requiredArgumentsCount
-     *
-     * @return bool
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     */
-    private static function canBeInvokedWithDefaultArgument(InterfaceToCall $interfaceToCall, int $passedArgumentsCount, int $requiredArgumentsCount): bool
-    {
-        return (
-                $requiredArgumentsCount === 1
-                ||
-                $requiredArgumentsCount === 2 && $interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()
-            ) && $passedArgumentsCount === 0;
     }
 
     /**

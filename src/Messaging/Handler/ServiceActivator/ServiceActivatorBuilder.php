@@ -115,6 +115,17 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     }
 
     /**
+     * @param bool $shouldWrapInMessage
+     * @return ServiceActivatorBuilder
+     */
+    public function withWrappingResultInMessage(bool $shouldWrapInMessage) : self
+    {
+        $this->shouldWrapResultInMessage = $shouldWrapInMessage;
+
+        return $this;
+    }
+
+    /**
      * @param bool $canAroundInterceptorReplaceArgument
      * @return ServiceActivatorBuilder
      */
@@ -220,15 +231,17 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
                 $this->getEndpointAnnotations()
             );
         }
-        $methodToInvoke = WrapWithMessageBuildProcessor::createWith(
-            $objectToInvoke,
-            $this->methodName,
-            $messageProcessor,
-            $referenceSearchService
-        );
+        if ($this->shouldWrapResultInMessage) {
+            $messageProcessor = WrapWithMessageBuildProcessor::createWith(
+                $objectToInvoke,
+                $this->methodName,
+                $messageProcessor,
+                $referenceSearchService
+            );
+        }
         if ($this->shouldPassThroughMessage && $interfaceToCall->hasReturnTypeVoid()) {
-            $methodToInvoke = MethodInvoker::createWith(
-                new PassThroughService($methodToInvoke),
+            $messageProcessor = MethodInvoker::createWith(
+                new PassThroughService($messageProcessor),
                 "invoke",
                 [],
                 $referenceSearchService
@@ -238,7 +251,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         return new ServiceActivatingHandler(
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
-                $methodToInvoke,
+                $messageProcessor,
                 $channelResolver,
                 $this->isReplyRequired
             )

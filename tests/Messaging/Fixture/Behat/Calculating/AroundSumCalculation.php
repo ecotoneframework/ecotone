@@ -9,7 +9,7 @@ namespace Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class AroundMultiplyCalculation
+class AroundSumCalculation
 {
     /**
      * @var integer

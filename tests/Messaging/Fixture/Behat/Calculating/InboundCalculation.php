@@ -26,8 +26,8 @@ class InboundCalculation
      *     )
      * )
      * @BeforeMultiplyCalculation(amount=3)
-     * @AroundMultiplyCalculation(amount=2)
-     * @AfterSumCalculation(amount=10)
+     * @AroundSumCalculation(amount=2)
+     * @AfterMultiplyCalculation(amount=10)
      */
     public function calculateFor() : int
     {
@@ -35,6 +35,8 @@ class InboundCalculation
     }
 
     /**
+     * The result will be published to channel after this method
+     *
      * @param int $number
      * @return int
      * @ServiceActivator(

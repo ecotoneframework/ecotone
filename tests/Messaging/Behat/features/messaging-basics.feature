@@ -127,7 +127,7 @@ Feature: Service activator
     Calculations are combined with interceptors.
     This will focus on synchronous scenario using gateway
     Given I active messaging for namespace "Test\SimplyCodedSoftware\Messaging\Fixture\Behat\Calculating"
-    When I calculate for 10 using gateway then result should be 23
+    When I calculate for 3 using gateway then result should be 18
 
   Scenario: Application consist of calculator. It receives number and perform few calculations.
     Calculations are combined with interceptors.

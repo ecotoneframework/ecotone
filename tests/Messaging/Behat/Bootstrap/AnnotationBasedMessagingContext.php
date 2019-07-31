@@ -9,6 +9,7 @@ use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
 use PHPUnit\Framework\Assert;
 use SimplyCodedSoftware\DomainModel\CommandBus;
+use SimplyCodedSoftware\DomainModel\CommandBusWithEventPublishing;
 use SimplyCodedSoftware\DomainModel\EventBus;
 use SimplyCodedSoftware\DomainModel\LazyEventBus\LazyEventBus;
 use SimplyCodedSoftware\DomainModel\QueryBus;
@@ -176,7 +177,7 @@ class AnnotationBasedMessagingContext implements Context
      */
     public static function getCommandBus(): CommandBus
     {
-        return self::$messagingSystem->getGatewayByName(CommandBus::class);
+        return self::$messagingSystem->getGatewayByName(CommandBusWithEventPublishing::class);
     }
 
     /**

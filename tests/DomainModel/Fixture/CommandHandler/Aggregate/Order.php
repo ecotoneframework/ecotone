@@ -92,6 +92,8 @@ class Order implements VersionAggregate
     {
         $this->shippingAddress = $command->getShippingAddress();
         $this->increaseAggregateVersion();
+
+        $this->record(new Notification());
     }
 
 

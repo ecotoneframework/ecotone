@@ -12,7 +12,7 @@ install:
   - composer install --prefer-dist --no-interaction
 
 script:
-  - vendor/bin/phpunit --coverage-html ./tests/coverage/html --coverage-clover ./tests/coverage/clover.xml
+  - vendor/bin/phpunit --coverage-clover ./tests/coverage/clover.xml
   - vendor/bin/behat
 
 after_success:

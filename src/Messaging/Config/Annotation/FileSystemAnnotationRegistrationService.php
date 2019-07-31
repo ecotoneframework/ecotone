@@ -25,8 +25,7 @@ use SplFileInfo;
  */
 class FileSystemAnnotationRegistrationService implements AnnotationRegistrationService, AnnotationParser
 {
-    const INTEGRATION_MESSAGING_NAMESPACE = 'IntegrationMessaging';
-    const SIMPLY_CODED_SOFTWARE_NAMESPACE = 'Ecotone';
+    const FRAMEWORK_NAMESPACE = 'Ecotone';
     private const FILE_EXTENSION = '.php';
 
     /**

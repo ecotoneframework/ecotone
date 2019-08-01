@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Logger;
 
 use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Message;
@@ -59,15 +60,16 @@ class LoggingInterceptor
 
     /**
      * @param MethodInvocation $methodInvocation
-     * @param Message $message
-     * @param Logger $log
+     * @param Message          $message
+     * @param LogError         $log
+     *
      * @return mixed
      * @throws InvalidArgumentException
      * @throws MessagingException
      * @throws TypeDefinitionException
      * @throws \Throwable
      */
-    public function logException(MethodInvocation $methodInvocation, Message $message, Logger $log)
+    public function logException(MethodInvocation $methodInvocation, Message $message, LogError $log)
     {
         try {
             $returnValue = $methodInvocation->proceed();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Logger\Annotation;
 
 use Ecotone\Messaging\Handler\Logger\Logger;
+use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 
 /**
  * Class LogError
@@ -13,5 +14,8 @@ use Ecotone\Messaging\Handler\Logger\Logger;
  */
 class LogError extends Logger
 {
-
+    /**
+     * @var string
+     */
+    public $logLevel = LoggingLevel::CRITICAL;
 }

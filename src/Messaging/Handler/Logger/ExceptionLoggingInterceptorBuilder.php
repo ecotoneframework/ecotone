@@ -23,7 +23,7 @@ class ExceptionLoggingInterceptorBuilder implements AroundInterceptorObjectBuild
         return new LoggingInterceptor(
                 new LoggingService(
                     $referenceSearchService->get(ConversionService::REFERENCE_NAME),
-                    $referenceSearchService->get(self::LOGGER_REFERENCE)
+                    $referenceSearchService->get(LoggingHandlerBuilder::LOGGER_REFERENCE)
                 )
             );
     }

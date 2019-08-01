@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use ProxyManager\Factory\RemoteObject\AdapterInterface;
-use ProxyManager\Factory\RemoteObjectFactory;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use ProxyManager\Factory\LazyLoadingValueHolderFactory;
+use ProxyManager\Factory\RemoteObject\AdapterInterface;
+use ProxyManager\Factory\RemoteObjectFactory;
 
 /**
  * Class MultipleMethodGatewayBuilder
@@ -23,6 +24,10 @@ class CombinedGatewayBuilder
      * @var GatewayProxyBuilder[]
      */
     private $gatewayBuilders;
+    /**
+     * @var bool
+     */
+    private $withLazyBuild = false;
 
     /**
      * MultipleMethodGatewayBuilder constructor.
@@ -46,41 +51,77 @@ class CombinedGatewayBuilder
     }
 
     /**
+     * @param bool $withLazyBuild
+     * @return CombinedGatewayBuilder
+     */
+    public function withLazyBuild(bool $withLazyBuild) : self
+    {
+        $this->withLazyBuild = $withLazyBuild;
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
-        $gateways = [];
-        foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $gateways[$gatewayBuilder->getRelatedMethodName()] = $gatewayBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+        if ($this->withLazyBuild) {
+            $buildCallback = function() use ($referenceSearchService, $channelResolver) {
+                $gateways = [];
+                foreach ($this->gatewayBuilders as $gatewayBuilder) {
+                    $gateways[$gatewayBuilder->getRelatedMethodName()] = $gatewayBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+                }
+
+                return $gateways;
+            };
+        }else {
+            $gateways = [];
+            foreach ($this->gatewayBuilders as $gatewayBuilder) {
+                $gateways[$gatewayBuilder->getRelatedMethodName()] = $gatewayBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+            }
+
+            $buildCallback = function() use ($gateways) {
+                return $gateways;
+            };
         }
 
-        $factory = new RemoteObjectFactory(new class ($gateways) implements AdapterInterface
-        {
-            /**
-             * @var array
-             */
-            private $gateways;
 
-            /**
-             *  constructor.
-             *
-             * @param array $gateways
-             */
-            public function __construct(array $gateways)
-            {
-                $this->gateways = $gateways;
+        $factory = new LazyLoadingValueHolderFactory();
+        return $factory->createProxy(
+            $this->interfaceName,
+            function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($buildCallback) {
+                $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
+                {
+                    /**
+                     * @var \Closure
+                     */
+                    private $buildCallback;
+
+                    /**
+                     *  constructor.
+                     *
+                     * @param \Closure $buildCallback
+                     */
+                    public function __construct(\Closure $buildCallback)
+                    {
+                        $this->buildCallback = $buildCallback;
+                    }
+
+                    /**
+                     * @inheritDoc
+                     */
+                    public function call(string $wrappedClass, string $method, array $params = [])
+                    {
+                        $buildCallback = $this->buildCallback;
+                        $gateways = $buildCallback();
+
+                        return call_user_func_array([$gateways[$method], "execute"], [$params]);
+                    }
+                });
+
+                $wrappedObject = $factory->createProxy($this->interfaceName);
             }
-
-            /**
-             * @inheritDoc
-             */
-            public function call(string $wrappedClass, string $method, array $params = [])
-            {
-                return call_user_func_array([$this->gateways[$method], "execute"], [$params]);
-            }
-        });
-
-        return $factory->createProxy($this->interfaceName);
+        );
     }
 }

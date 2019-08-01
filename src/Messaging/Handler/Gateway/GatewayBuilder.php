@@ -47,6 +47,12 @@ interface GatewayBuilder extends InterceptedEndpoint
     public function addBeforeInterceptor(MethodInterceptor $methodInterceptor);
 
     /**
+     * @param bool $withLazyBuild
+     * @return $this
+     */
+    public function withLazyBuild(bool $withLazyBuild);
+
+    /**
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */

@@ -15,6 +15,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\CombinedGatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageChannel;
@@ -80,20 +81,21 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @param PollingMetadata[] $pollingMetadataConfigurations
      * @param MessageHandlerBuilder[] $messageHandlerBuilders
      * @param ChannelAdapterConsumerBuilder[] $channelAdapterConsumerBuilders
+     * @param bool $isLazyConfiguration
      * @return MessagingSystem
      * @throws MessagingException
-     * @throws NoConsumerFactoryForBuilderException
      */
     public static function createFrom(
         ReferenceSearchService $referenceSearchService,
         array $messageChannelBuilders, array $messageChannelInterceptors,
         array $gatewayBuilders, array $consumerFactories,
-        array $pollingMetadataConfigurations, array $messageHandlerBuilders, array $channelAdapterConsumerBuilders
+        array $pollingMetadataConfigurations, array $messageHandlerBuilders, array $channelAdapterConsumerBuilders,
+        bool $isLazyConfiguration
     )
     {
         $channelResolver = self::createChannelResolver($messageChannelInterceptors, $messageChannelBuilders, $referenceSearchService);
 
-        $gateways = self::configureGateways($gatewayBuilders, $referenceSearchService, $channelResolver);
+        $gateways = self::configureGateways($gatewayBuilders, $referenceSearchService, $channelResolver, $isLazyConfiguration);
 
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $consumerFactories, $pollingMetadataConfigurations);
         $consumers = [];
@@ -144,20 +146,23 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     }
 
     /**
-     * @param array $preparedGateways
+     * @param GatewayProxyBuilder[][] $preparedGateways
      * @param ReferenceSearchService $referenceSearchService
      * @param ChannelResolver $channelResolver
+     * @param bool $isLazyConfiguration
      * @return array
      * @throws MessagingException
      */
-    private static function configureGateways(array $preparedGateways, ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): array
+    private static function configureGateways(array $preparedGateways, ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver, bool $isLazyConfiguration): array
     {
         $gateways = [];
         foreach ($preparedGateways as $referenceName => $preparedGatewaysForReference) {
             if (count($preparedGatewaysForReference) === 1) {
                 $gateways[] = GatewayReference::createWith(
                     $preparedGatewaysForReference[0]->getReferenceName(),
-                    $preparedGatewaysForReference[0]->build($referenceSearchService, $channelResolver)
+                    $preparedGatewaysForReference[0]
+                        ->withLazyBuild($isLazyConfiguration)
+                        ->build($referenceSearchService, $channelResolver)
                 );
             } else {
                 $gateways[] =
@@ -165,7 +170,10 @@ final class MessagingSystem implements ConfiguredMessagingSystem
                         $referenceName,
                         CombinedGatewayBuilder::create(
                             $preparedGatewaysForReference[0]->getInterfaceName(), $preparedGatewaysForReference
-                        )->build($referenceSearchService, $channelResolver)
+
+                        )
+                            ->withLazyBuild($isLazyConfiguration)
+                            ->build($referenceSearchService, $channelResolver)
                     );
             }
         }

@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use ProxyManager\Factory\RemoteObject\AdapterInterface;
-use ProxyManager\Factory\RemoteObjectFactory;
+use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
@@ -12,13 +11,19 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\SubscribableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use ProxyManager\Factory\LazyLoadingValueHolderFactory;
+use ProxyManager\Factory\RemoteObject\AdapterInterface;
+use ProxyManager\Factory\RemoteObjectFactory;
+use ReflectionException;
 
 /**
  * Class GatewayProxySpec
@@ -89,6 +94,10 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @var string[]
      */
     private $requiredInterceptorNames = [];
+    /**
+     * @var bool
+     */
+    private $withLazyBuild = false;
 
     /**
      * GatewayProxyBuilder constructor.
@@ -146,6 +155,17 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function withReplyMillisecondTimeout(int $replyMillisecondsTimeout): self
     {
         $this->replyMilliSecondsTimeout = $replyMillisecondsTimeout;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $withLazyBuild
+     * @return GatewayProxyBuilder
+     */
+    public function withLazyBuild(bool $withLazyBuild)
+    {
+        $this->withLazyBuild = $withLazyBuild;
 
         return $this;
     }
@@ -296,40 +316,57 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
-        $this->validateInterceptorsCorrectness($referenceSearchService);
-        $gateway = $this->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+        if ($this->withLazyBuild) {
+            $buildCallback = function() use ($referenceSearchService, $channelResolver) {
+                return $this->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+            };
+        }else {
+            $gateway = $this->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+            $buildCallback = function() use ($gateway) {
+                return $gateway;
+            };
+        }
 
-        $factory = new RemoteObjectFactory(new class ($gateway) implements AdapterInterface
-        {
-            /**
-             * @var Gateway
-             */
-            private $gatewayProxy;
+        $factory = new LazyLoadingValueHolderFactory();
+        return $factory->createProxy(
+            $this->interfaceName,
+            function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($buildCallback) {
+                $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
+                {
+                    /**
+                     * @var \Closure
+                     */
+                    private $buildCallback;
 
-            /**
-             *  constructor.
-             *
-             * @param Gateway $gatewayProxy
-             */
-            public function __construct(Gateway $gatewayProxy)
-            {
-                $this->gatewayProxy = $gatewayProxy;
+                    /**
+                     *  constructor.
+                     *
+                     * @param \Closure $buildCallback
+                     */
+                    public function __construct(\Closure $buildCallback)
+                    {
+                        $this->buildCallback = $buildCallback;
+                    }
+
+                    /**
+                     * @inheritDoc
+                     */
+                    public function call(string $wrappedClass, string $method, array $params = [])
+                    {
+                        $buildCallback = $this->buildCallback;
+                        $gateway = $buildCallback();
+                        return $gateway->execute($params);
+                    }
+                });
+
+                $wrappedObject = $factory->createProxy($this->interfaceName);
             }
-
-            /**
-             * @inheritDoc
-             */
-            public function call(string $wrappedClass, string $method, array $params = [])
-            {
-                return $this->gatewayProxy->execute($params);
-            }
-        });
-
-        return $factory->createProxy($this->interfaceName);
+        );
     }
 
     public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
+        $this->validateInterceptorsCorrectness($referenceSearchService);
         Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName}");
 
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
@@ -414,6 +451,39 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws ReferenceNotFoundException
+     */
+    private function validateInterceptorsCorrectness(ReferenceSearchService $referenceSearchService): void
+    {
+        foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
+            $aroundInterceptorReference->buildAroundInterceptor($referenceSearchService);
+        }
+    }
+
+    /**
+     * @param array $registeredAnnotations
+     * @param object $annotation
+     * @return bool
+     * @throws MessagingException
+     * @throws TypeDefinitionException
+     */
+    private function canBeAddedToRegisteredAnnotations(array $registeredAnnotations, object $annotation): bool
+    {
+        foreach ($registeredAnnotations as $registeredAnnotation) {
+            if (TypeDescriptor::createFromVariable($registeredAnnotation)->equals(TypeDescriptor::createFromVariable($annotation))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * @param MethodInterceptor[] $methodInterceptors
      * @return InputOutputMessageHandlerBuilder[]
      */
@@ -435,38 +505,5 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function __toString()
     {
         return sprintf("Gateway - %s:%s with reference name `%s` for request channel `%s`", $this->interfaceName, $this->methodName, $this->referenceName, $this->requestChannelName);
-    }
-
-    /**
-     * @param array $registeredAnnotations
-     * @param object $annotation
-     * @return bool
-     * @throws MessagingException
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     */
-    private function canBeAddedToRegisteredAnnotations(array $registeredAnnotations, object $annotation): bool
-    {
-        foreach ($registeredAnnotations as $registeredAnnotation) {
-            if (TypeDescriptor::createFromVariable($registeredAnnotation)->equals(TypeDescriptor::createFromVariable($annotation))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
-     */
-    private function validateInterceptorsCorrectness(ReferenceSearchService $referenceSearchService): void
-    {
-        foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
-            $aroundInterceptorReference->buildAroundInterceptor($referenceSearchService);
-        }
     }
 }

@@ -27,12 +27,9 @@ class GatewayReference
      * GatewayReference constructor.
      * @param string $referenceName
      * @param object $gateway
-     * @throws MessagingException
      */
-    private function __construct(string $referenceName, $gateway)
+    private function __construct(string $referenceName, object $gateway)
     {
-        Assert::isObject($gateway, "Gateway should always be object");
-
         $this->referenceName = $referenceName;
         $this->gateway = $gateway;
     }
@@ -41,9 +38,8 @@ class GatewayReference
      * @param string $referenceName
      * @param object $gateway
      * @return GatewayReference
-     * @throws MessagingException
      */
-    public static function createWith(string $referenceName, $gateway) : self
+    public static function createWith(string $referenceName, object $gateway) : self
     {
         return new self($referenceName, $gateway);
     }

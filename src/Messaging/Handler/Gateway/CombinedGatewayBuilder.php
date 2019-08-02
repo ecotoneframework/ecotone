@@ -67,45 +67,46 @@ class CombinedGatewayBuilder
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
         if ($this->withLazyBuild) {
-            $buildCallback = function() use ($referenceSearchService, $channelResolver) {
-                $gateways = [];
-                foreach ($this->gatewayBuilders as $gatewayBuilder) {
-                    $gateways[$gatewayBuilder->getRelatedMethodName()] = $gatewayBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver);
-                }
-
-                return $gateways;
-            };
+            $gateways = [];
+            foreach ($this->gatewayBuilders as $gatewayBuilder) {
+                $gateways[$gatewayBuilder->getRelatedMethodName()] = function() use ($gatewayBuilder, $referenceSearchService, $channelResolver) {
+                    return $gatewayBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+                };
+            }
         }else {
             $gateways = [];
             foreach ($this->gatewayBuilders as $gatewayBuilder) {
-                $gateways[$gatewayBuilder->getRelatedMethodName()] = $gatewayBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+                $builtGateway = $gatewayBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+                $gateways[$gatewayBuilder->getRelatedMethodName()] = function() use ($builtGateway) {
+                    return $builtGateway;
+                };
             }
-
-            $buildCallback = function() use ($gateways) {
-                return $gateways;
-            };
         }
 
 
         $factory = new LazyLoadingValueHolderFactory();
         return $factory->createProxy(
             $this->interfaceName,
-            function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($buildCallback) {
-                $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
+            function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($gateways) {
+                $factory = new RemoteObjectFactory(new class ($gateways) implements AdapterInterface
                 {
                     /**
-                     * @var \Closure
+                     * @var \Closure[]
                      */
-                    private $buildCallback;
+                    private $buildCallbacks;
+                    /**
+                     * @var object[]
+                     */
+                    private $builtGateways;
 
                     /**
                      *  constructor.
                      *
-                     * @param \Closure $buildCallback
+                     * @param \Closure[] $buildCallbacks
                      */
-                    public function __construct(\Closure $buildCallback)
+                    public function __construct(array $buildCallbacks)
                     {
-                        $this->buildCallback = $buildCallback;
+                        $this->buildCallbacks = $buildCallbacks;
                     }
 
                     /**
@@ -113,10 +114,16 @@ class CombinedGatewayBuilder
                      */
                     public function call(string $wrappedClass, string $method, array $params = [])
                     {
-                        $buildCallback = $this->buildCallback;
-                        $gateways = $buildCallback();
+                        if (!isset($this->buildCallbacks[$method])) {
+                            throw new \InvalidArgumentException("{$wrappedClass}:{$method} has not registered gateway");
+                        }
 
-                        return call_user_func_array([$gateways[$method], "execute"], [$params]);
+                        if (!isset($this->builtGateways[$method])) {
+                            $buildCallback = $this->buildCallbacks[$method];
+                            $this->builtGateways[$method] = $buildCallback();
+                        }
+
+                        return call_user_func_array([$this->builtGateways[$method], "execute"], [$params]);
                     }
                 });
 

@@ -483,7 +483,7 @@ class TypeResolver
         $finalType = TypeDescriptor::create(
             $returnType
                 ? $returnType
-                : $this->expandParameterTypeHint((string)$reflectionMethod->getReturnType(), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName))
+                : $this->expandParameterTypeHint($reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->getName() : "", $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName))
         );
 
         if ($reflectionMethod->getReturnType() && $reflectionMethod->getReturnType()->getName() === TypeDescriptor::VOID && !$finalType->isVoid()) {

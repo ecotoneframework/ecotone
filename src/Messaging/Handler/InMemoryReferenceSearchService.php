@@ -4,7 +4,9 @@ namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyConfiguration;
 use Ecotone\Messaging\Support\Assert;
+use ProxyManager\Configuration;
 
 /**
  * Class InMemoryReferenceSearchService
@@ -112,6 +114,9 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
         }
         if (!array_key_exists(ConversionService::REFERENCE_NAME, $this->objectsToResolve)) {
             $this->objectsToResolve[ConversionService::REFERENCE_NAME] = AutoCollectionConversionService::createEmpty();
+        }
+        if (!$this->referenceSearchService) {
+            $this->objectsToResolve[GatewayProxyConfiguration::REFERENCE_NAME] = new Configuration();
         }
     }
 }

@@ -20,6 +20,7 @@ use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\SubscribableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use ProxyManager\Configuration;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use ProxyManager\Factory\RemoteObjectFactory;
@@ -112,6 +113,7 @@ class GatewayProxyBuilder implements GatewayBuilder
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;
         $this->requestChannelName = $requestChannelName;
+        $this->requiredReferenceNames[] = GatewayProxyConfiguration::REFERENCE_NAME;
     }
 
     /**
@@ -316,6 +318,9 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
+        /** @var Configuration $gatewayProxyConfiguration */
+        $gatewayProxyConfiguration = $referenceSearchService->get(GatewayProxyConfiguration::REFERENCE_NAME);
+
         if ($this->withLazyBuild) {
             $buildCallback = function() use ($referenceSearchService, $channelResolver) {
                 return $this->buildWithoutProxyObject($referenceSearchService, $channelResolver);
@@ -327,10 +332,10 @@ class GatewayProxyBuilder implements GatewayBuilder
             };
         }
 
-        $factory = new LazyLoadingValueHolderFactory();
+        $factory = new LazyLoadingValueHolderFactory($gatewayProxyConfiguration);
         return $factory->createProxy(
             $this->interfaceName,
-            function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($buildCallback) {
+            function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($buildCallback, $gatewayProxyConfiguration) {
                 $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
                 {
                     /**
@@ -357,7 +362,7 @@ class GatewayProxyBuilder implements GatewayBuilder
                         $gateway = $buildCallback();
                         return $gateway->execute($params);
                     }
-                });
+                }, $gatewayProxyConfiguration);
 
                 $wrappedObject = $factory->createProxy($this->interfaceName);
             }

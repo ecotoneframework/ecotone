@@ -7,6 +7,7 @@ use Ecotone\Messaging\Annotation\Gateway\GatewayHeaderArray;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyConfiguration;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -754,7 +755,7 @@ class GatewayProxyBuilderTest extends MessagingTest
                 AroundInterceptorReference::create("transactionInterceptor","transactionInterceptor", "transactional", 1, "")
             );
 
-        $this->assertEquals(["transactionInterceptor"], $gatewayProxyBuilder->getRequiredReferences());
+        $this->assertEquals([GatewayProxyConfiguration::REFERENCE_NAME, "transactionInterceptor"], $gatewayProxyBuilder->getRequiredReferences());
 
         $gatewayProxy = $gatewayProxyBuilder->build(
             InMemoryReferenceSearchService::createWith([

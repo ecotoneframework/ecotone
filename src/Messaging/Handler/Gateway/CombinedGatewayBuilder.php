@@ -128,6 +128,8 @@ class CombinedGatewayBuilder
                 });
 
                 $wrappedObject = $factory->createProxy($this->interfaceName);
+
+                return true;
             }
         );
     }

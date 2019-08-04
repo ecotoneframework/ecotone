@@ -365,6 +365,8 @@ class GatewayProxyBuilder implements GatewayBuilder
                 }, $gatewayProxyConfiguration);
 
                 $wrappedObject = $factory->createProxy($this->interfaceName);
+
+                return true;
             }
         );
     }

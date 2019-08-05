@@ -27,6 +27,7 @@ use Ecotone\Messaging\Scheduling\EpochBasedClock;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
 use Ecotone\Messaging\Support\Assert;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class PollingConsumerBuilder
@@ -39,14 +40,19 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
      * @var GatewayProxyBuilder
      */
     private $entrypointGateway;
+    /**
+     * @var string
+     */
+    private $requestChannelName;
 
     public function __construct()
     {
+        $this->requestChannelName = Uuid::uuid4()->toString();
         $this->entrypointGateway = GatewayProxyBuilder::create(
             "handler",
             EntrypointGateway::class,
             "executeEntrypoint",
-            "inputChannel"
+            $this->requestChannelName
         );
     }
 
@@ -97,6 +103,14 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     /**
      * @inheritDoc
      */
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    {
+        return [$interfaceToCallRegistry->getFor(EntrypointGateway::class, "executeEntrypoint")];
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function withRequiredInterceptorNames(iterable $interceptorNames)
     {
         $this->entrypointGateway->withRequiredInterceptorNames($interceptorNames);
@@ -128,7 +142,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
                     ]
                 ),
                 InMemoryChannelResolver::createWithChannelResolver($channelResolver, [
-                    "inputChannel" => $connectionChannel
+                    $this->requestChannelName => $connectionChannel
                 ])
             );
 

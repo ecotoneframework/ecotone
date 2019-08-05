@@ -12,6 +12,7 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayload
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHandler;
@@ -27,10 +28,19 @@ class LazyEventBusInterceptorBuilder extends InputOutputMessageHandlerBuilder
      * @var InMemoryEventStore
      */
     private $inMemoryEventStore;
+    /**
+     * @var GatewayProxyBuilder
+     */
+    private $eventBusGateway;
 
     public function __construct(InMemoryEventStore $inMemoryEventStore)
     {
         $this->inMemoryEventStore = $inMemoryEventStore;
+        $this->eventBusGateway = GatewayProxyBuilder::create("", EventBus::class, "sendWithMetadata", EventBus::CHANNEL_NAME_BY_OBJECT)
+                                    ->withParameterConverters([
+                                        GatewayPayloadBuilder::create("event"),
+                                        GatewayHeadersBuilder::create("metadata")
+                                    ]);
     }
 
     /**
@@ -44,9 +54,12 @@ class LazyEventBusInterceptorBuilder extends InputOutputMessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [];
+        return [
+            $interfaceToCallRegistry->getFor(LazyEventBusInterceptor::class, "publish"),
+            $interfaceToCallRegistry->getFor(EventBus::class, "sendWithMetadata")
+        ];
     }
 
     /**
@@ -63,11 +76,7 @@ class LazyEventBusInterceptorBuilder extends InputOutputMessageHandlerBuilder
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         /** @var EventBus $gateway */
-        $gateway = GatewayProxyBuilder::create("", EventBus::class, "sendWithMetadata", EventBus::CHANNEL_NAME_BY_OBJECT)
-            ->withParameterConverters([
-                GatewayPayloadBuilder::create("event"),
-                GatewayHeadersBuilder::create("metadata")
-            ])
+        $gateway = $this->eventBusGateway
             ->build($referenceSearchService, $channelResolver);
 
         return ServiceActivatorBuilder::createWithDirectReference(

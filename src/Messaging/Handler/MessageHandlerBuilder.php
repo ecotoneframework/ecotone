@@ -26,7 +26,7 @@ interface MessageHandlerBuilder
      * @param InterfaceToCallRegistry $interfaceToCallRegistry
      * @return InterfaceToCall[]
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable;
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable;
 
     /**
      * @param string $inputChannelName

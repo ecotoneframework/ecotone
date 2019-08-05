@@ -25,14 +25,20 @@ class InterfaceToCallRegistry
      * @var ReferenceTypeFromNameResolver
      */
     private $referenceTypeFromNameResolver;
+    /**
+     * @var bool
+     */
+    private $isLocked;
 
     /**
      * InterfaceToCallRegistry constructor.
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
+     * @param bool $isLocked
      */
-    private function __construct(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver)
+    private function __construct(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLocked)
     {
         $this->referenceTypeFromNameResolver = $referenceTypeFromNameResolver;
+        $this->isLocked = $isLocked;
     }
 
     /**
@@ -40,7 +46,7 @@ class InterfaceToCallRegistry
      */
     public static function createEmpty() : self
     {
-        return new self(InMemoryReferenceTypeFromNameResolver::createEmpty());
+        return new self(InMemoryReferenceTypeFromNameResolver::createEmpty(), false);
     }
 
     /**
@@ -49,17 +55,21 @@ class InterfaceToCallRegistry
      */
     public static function createWith(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver) : self
     {
-        return new self($referenceTypeFromNameResolver);
+        return new self($referenceTypeFromNameResolver, false);
     }
 
     /**
-     * @param iterable $interfacesToCall
+     * @param InterfaceToCall[] $interfacesToCall
+     * @param bool $isLocked
+     * @param ReferenceSearchService $referenceSearchService
      * @return InterfaceToCallRegistry
      */
-    public static function createWithInterfaces(iterable $interfacesToCall) : self
+    public static function createWithInterfaces(iterable $interfacesToCall, bool $isLocked, ReferenceSearchService $referenceSearchService) : self
     {
-        $self = new self(InMemoryReferenceTypeFromNameResolver::createEmpty());
-        $self->interfacesToCall = $interfacesToCall;
+        $self = new self(InMemoryReferenceTypeFromNameResolver::createFromReferenceSearchService($referenceSearchService), $isLocked);
+        foreach ($interfacesToCall as $interfaceToCall) {
+            $self->interfacesToCall[self::getName($interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName())] = $interfaceToCall;
+        }
 
         return $self;
     }
@@ -75,12 +85,15 @@ class InterfaceToCallRegistry
      */
     public function getFor($interfaceName, string $methodName) : InterfaceToCall
     {
-        if (array_key_exists($this->getName($interfaceName, $methodName), $this->interfacesToCall)) {
-            return $this->interfacesToCall[$this->getName($interfaceName, $methodName)];
+        if (array_key_exists(self::getName($interfaceName, $methodName), $this->interfacesToCall)) {
+            return $this->interfacesToCall[self::getName($interfaceName, $methodName)];
+        }else if ($this->isLocked) {
+            $interfaceName = is_object($interfaceName) ? get_class($interfaceName) : $interfaceName;
+            throw ConfigurationException::create("There is problem with configuration. Interface to call {$interfaceName}:{$methodName} was never registered via related interfaces.");
         }
 
         $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName);
-        $this->interfacesToCall[$this->getName($interfaceName, $methodName)] = $interfaceToCall;
+        $this->interfacesToCall[self::getName($interfaceName, $methodName)] = $interfaceToCall;
 
         return $interfaceToCall;
     }
@@ -117,6 +130,10 @@ class InterfaceToCallRegistry
      */
     public function getForReferenceName(string $referenceName, string $methodName) : InterfaceToCall
     {
+        if ($this->isLocked) {
+            throw ConfigurationException::create("Cannot resolve interface {$referenceName}:{$methodName} via reference name after locking configuration.");
+        }
+
         try {
             $objectClassType = $this->referenceTypeFromNameResolver->resolve($referenceName);
         }catch (ReferenceNotFoundException $exception) {
@@ -135,7 +152,7 @@ class InterfaceToCallRegistry
      * @param string $methodName
      * @return string
      */
-    private function getName($interfaceName, string $methodName) : string
+    private static function getName($interfaceName, string $methodName) : string
     {
         if (is_object($interfaceName)) {
             $interfaceName = get_class($interfaceName);

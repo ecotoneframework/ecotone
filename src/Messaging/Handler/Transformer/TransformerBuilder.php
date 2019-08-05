@@ -68,7 +68,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         if ($this->expression) {
             $interfaceToCallRegistry->getFor(ExpressionTransformer::class, "transform");

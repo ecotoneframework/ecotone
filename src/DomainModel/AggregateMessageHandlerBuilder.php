@@ -410,14 +410,20 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [
+        $interfaces = [
             $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->methodName),
             $interfaceToCallRegistry->getFor(LoadAggregateService::class, "load"),
             $interfaceToCallRegistry->getFor(CallAggregateService::class, "call"),
             $interfaceToCallRegistry->getFor(SaveAggregateService::class, "save")
         ];
+
+        if ($this->withFactoryRedirectOnFoundMethodName) {
+            $interfaces[] = $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->withFactoryRedirectOnFoundMethodName);
+        }
+
+        return $interfaces;
     }
 
     /**

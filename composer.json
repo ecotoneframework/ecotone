@@ -9,7 +9,7 @@
         }
     ],
     "keywords": ["cqrs","event","command","ecotone","query","ddd","messaging", "aggregate","asynchronous", "message", "spring", "enterprise integration patterns", "eip", "distributed architecture", "event driven architecture", "eda","domain driven design"],
-    "description": "The open source Ecotone provides a clean, elegant API for writing DDD, CQRS applications on top off the well-known Enterprise Integration Patterns. It provides basic building blocks for writing aggregates, commands, queries, events, command handlers, event handlers, query handlers, communication buses and so on.",
+    "description": "Provides a clean, elegant API for writing DDD, CQRS applications on top off the well-known Enterprise Integration Patterns. It provides basic building blocks for aggregates, commands, queries, events, command handlers, event handlers, query handlers, communication buses and so on.",
     "autoload": {
         "psr-4": {
             "Ecotone\\": "src"

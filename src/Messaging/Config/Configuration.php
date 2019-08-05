@@ -10,6 +10,7 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -114,6 +115,12 @@ interface Configuration
      * @return string[]
      */
     public function getRequiredReferences() : array;
+
+    /**
+     * @param InterfaceToCall[] $relatedInterfaces
+     * @return Configuration
+     */
+    public function registerRelatedInterfaces(array $relatedInterfaces) : Configuration;
 
     /**
      * @return string[]

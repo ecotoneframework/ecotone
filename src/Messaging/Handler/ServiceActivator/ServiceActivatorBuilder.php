@@ -182,12 +182,13 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [
             $this->directObjectReference
                 ? $interfaceToCallRegistry->getFor($this->directObjectReference, $this->methodName)
-                : $interfaceToCallRegistry->getForReferenceName($this->objectToInvokeReferenceName, $this->methodName)
+                : $interfaceToCallRegistry->getForReferenceName($this->objectToInvokeReferenceName, $this->methodName),
+            $interfaceToCallRegistry->getFor(PassThroughService::class, "invoke")
         ];
     }
 

@@ -20,9 +20,15 @@ use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
+use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use Ecotone\Messaging\Handler\Chain\ChainForwardPublisher;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\MessageHeaders;
@@ -82,8 +88,14 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
         $configuration->registerConverter(new StringToUuidConverterBuilder());
         $configuration->registerConverter(new SerializingConverterBuilder());
         $configuration->registerConverter(new DeserializingConverterBuilder());
-        $configuration->registerConverter(new ArrayToJsonConverterBuilder());
-        $configuration->registerConverter(new JsonToArrayConverterBuilder());
+
+        $configuration->registerRelatedInterfaces([
+            InterfaceToCall::create(LimitConsumedMessagesInterceptor::class, "postSend"),
+            InterfaceToCall::create(LimitExecutionAmountInterceptor::class, "postSend"),
+            InterfaceToCall::create(LimitMemoryUsageInterceptor::class, "postSend"),
+            InterfaceToCall::create(SignalInterceptor::class, "postSend"),
+            InterfaceToCall::create(ChainForwardPublisher::class, "forward")
+        ]);
     }
 
     /**

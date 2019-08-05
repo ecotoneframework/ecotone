@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -16,6 +17,10 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
      * @var string[]
      */
     private $references;
+    /**
+     * @var ReferenceSearchService|null
+     */
+    private $referenceSearchService;
 
     /**
      * InMemoryReferenceTypeFromNameResolver constructor.
@@ -50,6 +55,14 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
         return self::createFromAssociativeArray($objectTypes);
     }
 
+    public static function createFromReferenceSearchService(ReferenceSearchService $referenceSearchService) : self
+    {
+        $self = new self([]);
+        $self->referenceSearchService = $referenceSearchService;
+
+        return $self;
+    }
+
     /**
      * @return InMemoryReferenceTypeFromNameResolver
      */
@@ -63,8 +76,11 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
      */
     public function resolve(string $referenceName): TypeDescriptor
     {
+        if ($this->referenceSearchService) {
+            return TypeDescriptor::createFromVariable($this->referenceSearchService->get($referenceName));
+        }
         if (!array_key_exists($referenceName, $this->references)) {
-            throw ConfigurationException::create("Reference not found `{$referenceName}`.");
+            throw ConfigurationException::create("Reference not found for name resolver `{$referenceName}`.");
         }
 
         return TypeDescriptor::create($this->references[$referenceName]);

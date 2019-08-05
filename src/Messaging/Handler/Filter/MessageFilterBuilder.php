@@ -76,7 +76,7 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
         return [$interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName)];
     }

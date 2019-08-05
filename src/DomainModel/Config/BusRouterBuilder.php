@@ -6,6 +6,7 @@ use Ecotone\DomainModel\CommandBus;
 use Ecotone\DomainModel\EventBus;
 use Ecotone\DomainModel\QueryBus;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
@@ -214,9 +215,16 @@ class BusRouterBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [];
+        return [
+            $interfaceToCallRegistry->getFor(QueryBusRouter::class, "routeByName"),
+            $interfaceToCallRegistry->getFor(QueryBusRouter::class, "routeByObject"),
+            $interfaceToCallRegistry->getFor(CommandBusRouter::class, "routeByName"),
+            $interfaceToCallRegistry->getFor(CommandBusRouter::class, "routeByObject"),
+            $interfaceToCallRegistry->getFor(EventBusRouter::class, "routeByName"),
+            $interfaceToCallRegistry->getFor(EventBusRouter::class, "routeByObject"),
+        ];
     }
 
     /**

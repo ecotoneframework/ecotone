@@ -62,7 +62,7 @@ class AggregateMessageConversionServiceBuilder extends InputOutputMessageHandler
     /**
      * @inheritDoc
      */
-    public function resolveRelatedReferences(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [$interfaceToCallRegistry->getFor(AggregateMessageConversionService::class, "convert")];
     }

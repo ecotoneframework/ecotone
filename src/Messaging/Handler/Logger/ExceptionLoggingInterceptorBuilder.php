@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Logger;
 
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorObjectBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
@@ -26,6 +27,14 @@ class ExceptionLoggingInterceptorBuilder implements AroundInterceptorObjectBuild
                     $referenceSearchService->get(LoggingHandlerBuilder::LOGGER_REFERENCE)
                 )
             );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getInterceptingInterfaceClassName(): string
+    {
+        return LoggingService::class;
     }
 
     /**

@@ -36,6 +36,14 @@ interface InterceptedEndpoint
     public function getEndpointAnnotations(): array;
 
     /**
+     * It returns, internal reference objects that will be called during handling method
+     *
+     * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     * @return InterfaceToCall[]
+     */
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable;
+
+    /**
      * @return string[]
      */
     public function getRequiredInterceptorNames() : iterable;

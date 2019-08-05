@@ -166,6 +166,14 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     /**
      * @inheritDoc
      */
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    {
+        return [$interfaceToCallRegistry->getFor(EntrypointGateway::class, "executeEntrypoint")];
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
         return $this->directObject

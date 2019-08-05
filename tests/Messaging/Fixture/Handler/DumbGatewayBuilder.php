@@ -43,7 +43,7 @@ class DumbGatewayBuilder implements GatewayBuilder
      */
     public function withLazyBuild(bool $withLazyBuild)
     {
-        // TODO: Implement withLazyBuild() method.
+        return $this;
     }
 
     /**
@@ -52,6 +52,14 @@ class DumbGatewayBuilder implements GatewayBuilder
     public function getReferenceName(): string
     {
         return 'dumb';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    {
+        return [];
     }
 
     /**

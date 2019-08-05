@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use ReflectionException;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
@@ -44,10 +45,6 @@ class AroundInterceptorReference implements InterceptorWithPointCut
      * @var string
      */
     private $referenceName = "";
-    /**
-     * @var bool
-     */
-    private $allowOnlyForVoidInterface = false;
 
     /**
      * InterceptorReference constructor.
@@ -121,6 +118,28 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     }
 
     /**
+     * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     * @return InterfaceToCall
+     * @throws AnnotationException
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws ReflectionException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     */
+    public function getInterceptingInterface(InterfaceToCallRegistry $interfaceToCallRegistry) : InterfaceToCall
+    {
+        if ($this->directObject instanceof AroundInterceptorObjectBuilder) {
+            return $interfaceToCallRegistry->getFor($this->directObject->getInterceptingInterfaceClassName(), $this->methodName);
+        }
+
+        if ($this->directObject) {
+            return $interfaceToCallRegistry->getFor($this->directObject, $this->methodName);
+        }
+
+        return $interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName);
+    }
+
+    /**
      * @param ReferenceSearchService $referenceSearchService
      * @param AroundInterceptorReference[] $interceptorsReferences
      * @return MethodInterceptor[]
@@ -175,11 +194,6 @@ class AroundInterceptorReference implements InterceptorWithPointCut
             $referenceToCall = $referenceToCall->build($referenceSearchService);
         }
 
-        $interfaceToCall = InterfaceToCall::create($referenceToCall, $this->methodName);
-        if ($this->allowOnlyForVoidInterface && !$interfaceToCall->hasReturnTypeVoid()) {
-//            throw InvalidArgumentException::create("{$interfaceToCall} should return void in order to be used for entrypoint (Gateway, Inbound Channel, Amqp etc.)");
-        }
-
         return AroundMethodInterceptor::createWith(
             $referenceToCall,
             $this->methodName,
@@ -188,19 +202,6 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     }
 
     /**
-     * @return AroundInterceptorReference
-     */
-    public function allowOnlyVoidInterface() : self
-    {
-        $copy = clone $this;
-        $copy->allowOnlyForVoidInterface = true;
-
-        return $copy;
-    }
-
-    /**
-     * For Around interceptor, name is also a reference name
-     *
      * @return string
      */
     public function getInterceptorName(): string

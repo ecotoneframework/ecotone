@@ -9,6 +9,7 @@ use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\ServiceActivator\PassThroughService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
@@ -209,8 +210,11 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, "result");
 
         $this->assertEquals(
-            [InterfaceToCall::create($objectToInvoke, "result")],
-            $serviceActivator->resolveRelatedReferences(
+            [
+                InterfaceToCall::create($objectToInvoke, "result"),
+                InterfaceToCall::create(PassThroughService::class, "invoke")
+            ],
+            $serviceActivator->resolveRelatedInterfaces(
                 InterfaceToCallRegistry::createWith(InMemoryReferenceTypeFromNameResolver::createEmpty())
             )
         );
@@ -224,8 +228,11 @@ class ServiceActivatorBuilderTest extends MessagingTest
         $serviceActivator = ServiceActivatorBuilder::create($objectToInvokeOnReference, 'result');
 
         $this->assertEquals(
-            [InterfaceToCall::create($objectToInvoke, "result")],
-            $serviceActivator->resolveRelatedReferences(
+            [
+                InterfaceToCall::create($objectToInvoke, "result"),
+                InterfaceToCall::create(PassThroughService::class, "invoke")
+            ],
+            $serviceActivator->resolveRelatedInterfaces(
                 InterfaceToCallRegistry::createWith(
                     InMemoryReferenceTypeFromNameResolver::createFromAssociativeArray([
                         $objectToInvokeOnReference => CalculatingServiceInterceptorExample::class

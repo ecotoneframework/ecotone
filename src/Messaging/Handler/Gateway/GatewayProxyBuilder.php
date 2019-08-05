@@ -275,6 +275,18 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
+     * @inheritDoc
+     */
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    {
+        return [
+            $interfaceToCallRegistry->getFor(GatewayInternalHandler::class, "handle"),
+            $interfaceToCallRegistry->getFor(ErrorChannelInterceptor::class, "handle"),
+            $interfaceToCallRegistry->getFor(ReplyMessageInterceptor::class, "buildReply")
+        ];
+    }
+
+    /**
      * @param object[] $endpointAnnotations
      * @return static
      */

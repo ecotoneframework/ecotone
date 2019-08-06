@@ -72,16 +72,10 @@ class ProxyFactory implements \Serializable
         return new self(new Configuration(), null);
     }
 
-    /**
-     * @return ProxyFactory
-     */
-    public function lockConfiguration(): self
+    public function lockConfiguration() : void
     {
+        $this->isLocked = true;
         spl_autoload_register($this->configuration->getProxyAutoloader());
-        $self = clone $this;
-        $self->isLocked = true;
-
-        return $self;
     }
 
     /**
@@ -181,8 +175,8 @@ class ProxyFactory implements \Serializable
      */
     public function hasCachedVersion(string $interfaceName): bool
     {
-        $proxyClassName = $this
-            ->configuration
+        $proxyClassName =
+            $this->configuration
             ->getClassNameInflector()
             ->getProxyClassName($interfaceName, [
                 'className' => $interfaceName,
@@ -198,7 +192,7 @@ class ProxyFactory implements \Serializable
      */
     public function serialize()
     {
-        return $this->cacheDirectoryPath;
+        return serialize(["path" => $this->cacheDirectoryPath]);
     }
 
     /**
@@ -206,10 +200,15 @@ class ProxyFactory implements \Serializable
      */
     public function unserialize($serialized)
     {
-        if ($serialized) {
-            return self::createWithCache($serialized);
+        $serialized = unserialize($serialized)['path'];
+        if (is_null($serialized)) {
+            $cache = self::createNoCache();
         }else {
-            return self::createNoCache();
+            $cache = self::createWithCache($serialized);
         }
+
+        $this->configuration = $cache->configuration;
+        $this->isLocked = $cache->isLocked;
+        $this->cacheDirectoryPath = $cache->cacheDirectoryPath;
     }
 }

@@ -2,7 +2,11 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
+
+use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Class PropertyReaderAccessor
@@ -15,10 +19,29 @@ class PropertyReaderAccessor
      * @param PropertyPath $propertyPath
      * @param mixed $fromData
      *
+     * @return bool
+     * @throws ReflectionException
+     * @throws MessagingException
+     */
+    public function hasPropertyValue(PropertyPath $propertyPath, $fromData): bool
+    {
+        try {
+            $this->getPropertyValue($propertyPath, $fromData);
+        } catch (InvalidArgumentException $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param PropertyPath $propertyPath
+     * @param mixed $fromData
+     *
      * @return mixed
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws ReflectionException
+     * @throws MessagingException
      */
     public function getPropertyValue(PropertyPath $propertyPath, $fromData)
     {
@@ -33,31 +56,12 @@ class PropertyReaderAccessor
     }
 
     /**
-     * @param PropertyPath $propertyPath
-     * @param mixed $fromData
-     *
-     * @return bool
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function hasPropertyValue(PropertyPath $propertyPath, $fromData) : bool
-    {
-        try {
-            $this->getPropertyValue($propertyPath, $fromData);
-        }catch (InvalidArgumentException $e) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * @param mixed $fromData
      * @param string $currentAccessProperty
      * @return mixed
      * @throws InvalidArgumentException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws ReflectionException
+     * @throws MessagingException
      */
     private function getValueForCurrentState($fromData, string $currentAccessProperty)
     {
@@ -67,13 +71,13 @@ class PropertyReaderAccessor
             }
 
             return $fromData[$currentAccessProperty];
-        }elseif (is_object($fromData)) {
+        } elseif (is_object($fromData)) {
             $getterMethod = "get" . ucfirst($currentAccessProperty);
 
             if (method_exists($fromData, $getterMethod)) {
                 return call_user_func([$fromData, $getterMethod]);
-            }else {
-                $objectReflection = new \ReflectionClass($fromData);
+            } else {
+                $objectReflection = new ReflectionClass($fromData);
                 $classProperty = $objectReflection->getProperty($currentAccessProperty);
                 $classProperty->setAccessible(true);
 

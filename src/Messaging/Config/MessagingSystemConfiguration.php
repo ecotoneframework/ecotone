@@ -185,7 +185,7 @@ final class MessagingSystemConfiguration implements Configuration
             $module->prepare(
                 $this,
                 $moduleExtensions[$module->getName()],
-                ModuleReferenceSearchService::createEmpty()
+                $moduleReferenceSearchService
             );
         }
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
@@ -871,16 +871,13 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->build($referenceSearchService);
         }
-        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService,
-            array_merge(
-                $this->moduleReferenceSearchService->getAllRegisteredReferences(),
-                [
-                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
-                    InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry,
-                    ProxyFactory::REFERENCE_NAME => $this->isLazyConfiguration ? $referenceSearchService->get(ProxyFactory::REFERENCE_NAME)->lockConfiguration() : $referenceSearchService->get(ProxyFactory::REFERENCE_NAME)
-                ]
-            )
-        );
+        $referenceSearchService = $this->prepareReferenceSearchServiceWithInternalReferences($referenceSearchService, $converters, $interfaceToCallRegistry);
+        if ($this->isLazyConfiguration) {
+            /** @var ProxyFactory $proxyFactory */
+            $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);
+            $proxyFactory->lockConfiguration();
+        }
+
 
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
         arsort($channelInterceptorsByImportance);
@@ -919,5 +916,30 @@ final class MessagingSystemConfiguration implements Configuration
     private function __clone()
     {
 
+    }
+
+    /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @param array $converters
+     * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     * @return InMemoryReferenceSearchService|ReferenceSearchService
+     * @throws MessagingException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
+     */
+    private function prepareReferenceSearchServiceWithInternalReferences(ReferenceSearchService $referenceSearchService, array $converters, InterfaceToCallRegistry $interfaceToCallRegistry)
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService,
+            array_merge(
+                $this->moduleReferenceSearchService->getAllRegisteredReferences(),
+                [
+                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
+                    InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry
+                ]
+            )
+        );
+//        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
+//            ProxyFactory::REFERENCE_NAME => $this->isLazyConfiguration ? $referenceSearchService->get(ProxyFactory::REFERENCE_NAME)->lockConfiguration() : $referenceSearchService->get(ProxyFactory::REFERENCE_NAME)
+//        ]);
+        return $referenceSearchService;
     }
 }

@@ -71,6 +71,7 @@ class ProxyFactory
      */
     public function lockConfiguration(): self
     {
+        spl_autoload_register($this->configuration->getProxyAutoloader());
         $self = clone $this;
         $self->isLocked = true;
 
@@ -116,21 +117,8 @@ class ProxyFactory
      */
     public function createProxyClass(string $interfaceName, Closure $buildCallback): object
     {
-        if ($this->isLocked) {
-            spl_autoload_register($this->configuration->getProxyAutoloader());
-
-            $proxyClassName = $this
-                ->configuration
-                ->getClassNameInflector()
-                ->getProxyClassName($interfaceName, [
-                    'className' => $interfaceName,
-                    'factory' => RemoteObjectFactory::class,
-                    'proxyManagerVersion' => Version::getVersion(),
-                ]);
-
-            if (!class_exists($proxyClassName)) {
-                throw ConfigurationException::create("There is problem with configuration. Proxy class for {$interfaceName} was not pregenerated. Can't use lazy loading configuration.");
-            }
+        if ($this->isLocked && !$this->hasCachedVersion($interfaceName)) {
+            throw ConfigurationException::create("There is problem with configuration. Proxy class for {$interfaceName} was not pregenerated. Can't use lazy loading configuration.");
         }
 
         $factory = new LazyLoadingValueHolderFactory($this->configuration);
@@ -171,5 +159,23 @@ class ProxyFactory
                 return true;
             }
         );
+    }
+
+    /**
+     * @param string $interfaceName
+     * @return bool
+     */
+    public function hasCachedVersion(string $interfaceName): bool
+    {
+        $proxyClassName = $this
+            ->configuration
+            ->getClassNameInflector()
+            ->getProxyClassName($interfaceName, [
+                'className' => $interfaceName,
+                'factory' => RemoteObjectFactory::class,
+                'proxyManagerVersion' => Version::getVersion(),
+            ]);
+
+        return class_exists($proxyClassName);
     }
 }

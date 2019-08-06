@@ -179,7 +179,7 @@ class ProxyFactory implements \Serializable
      * @param string $interfaceName
      * @return bool
      */
-    private function hasCachedVersion(string $interfaceName): bool
+    public function hasCachedVersion(string $interfaceName): bool
     {
         $proxyClassName = $this
             ->configuration

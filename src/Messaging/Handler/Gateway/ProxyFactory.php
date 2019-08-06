@@ -168,10 +168,18 @@ class ProxyFactory implements \Serializable
     }
 
     /**
+     * @return Configuration
+     */
+    public function getConfiguration() : Configuration
+    {
+        return $this->configuration;
+    }
+
+    /**
      * @param string $interfaceName
      * @return bool
      */
-    public function hasCachedVersion(string $interfaceName): bool
+    private function hasCachedVersion(string $interfaceName): bool
     {
         $proxyClassName = $this
             ->configuration

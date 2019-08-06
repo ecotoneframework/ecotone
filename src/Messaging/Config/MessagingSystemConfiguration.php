@@ -211,7 +211,7 @@ final class MessagingSystemConfiguration implements Configuration
                 $requiredReferenceName = $requiredReferenceName->getReferenceName();
             }
 
-            if (in_array($requiredReferenceName, [InterfaceToCallRegistry::REFERENCE_NAME, ConversionService::REFERENCE_NAME])) {
+            if (in_array($requiredReferenceName, [InterfaceToCallRegistry::REFERENCE_NAME, ConversionService::REFERENCE_NAME, ProxyFactory::REFERENCE_NAME])) {
                 continue;
             }
 

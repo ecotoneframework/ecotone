@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config;
 
+use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Exception;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\DirectChannel;
@@ -157,15 +158,16 @@ class MessagingSystemConfigurationTest extends MessagingTest
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
 
+        $gatewayBuilder = DumbGatewayBuilder::create()->withRequiredReference("some");
         $messagingSystemConfiguration
             ->registerMessageHandler(DumbMessageHandlerBuilder::create(NoReturnMessageHandler::create(), 'queue'))
-            ->registerGatewayBuilder(DumbGatewayBuilder::create()->withRequiredReference("some"))
+            ->registerGatewayBuilder($gatewayBuilder)
             ->registerMessageChannel(SimpleMessageChannelBuilder::create("queue", QueueChannel::create()))
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
             ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create("queue", "interceptor"))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(["interceptor" => new DumbChannelInterceptor()]));
 
-        $this->assertEquals(["dumb" => stdClass::class], $messagingSystemConfiguration->getRegisteredGateways());
+        $this->assertEquals([$gatewayBuilder], $messagingSystemConfiguration->getRegisteredGateways());
         $this->assertEquals([NoReturnMessageHandler::class, "some", "interceptor"], $messagingSystemConfiguration->getRequiredReferences());
     }
 
@@ -350,7 +352,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
             InMemoryReferenceTypeFromNameResolver::createFromAssociativeArray([
                 "reference0" => TransactionalInterceptorExample::class
             ]),
-            true
+            true,
+            ProxyFactory::createNoCache()
         );
 
         $this->assertEquals(
@@ -992,7 +995,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
             MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
                     InMemoryModuleMessaging::createEmpty(),
                     InMemoryReferenceTypeFromNameResolver::createFromObjects($objects),
-                    false
+                    false,
+                    ProxyFactory::createNoCache()
             )
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")

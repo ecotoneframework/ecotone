@@ -130,10 +130,6 @@ class InterfaceToCallRegistry
      */
     public function getForReferenceName(string $referenceName, string $methodName) : InterfaceToCall
     {
-        if ($this->isLocked) {
-            throw ConfigurationException::create("Cannot resolve interface {$referenceName}:{$methodName} via reference name after locking configuration.");
-        }
-
         try {
             $objectClassType = $this->referenceTypeFromNameResolver->resolve($referenceName);
         }catch (ReferenceNotFoundException $exception) {

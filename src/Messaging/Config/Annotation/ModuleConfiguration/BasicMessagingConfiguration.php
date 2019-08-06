@@ -18,6 +18,7 @@ use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilde
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
 use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
+use Ecotone\Messaging\Endpoint\EntrypointGateway;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
@@ -26,11 +27,13 @@ use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainForwardPublisher;
+use Ecotone\Messaging\Handler\Enricher\EnrichGateway;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
 
@@ -96,6 +99,9 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             InterfaceToCall::create(SignalInterceptor::class, "postSend"),
             InterfaceToCall::create(ChainForwardPublisher::class, "forward")
         ]);
+        $configuration
+            ->registerInternalGateway(TypeDescriptor::create(EntrypointGateway::class))
+            ->registerInternalGateway(TypeDescriptor::create(EnrichGateway::class));
     }
 
     /**

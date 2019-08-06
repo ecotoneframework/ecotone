@@ -17,10 +17,10 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
-use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -35,11 +35,14 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Exception;
+use ProxyManager\FileLocator\FileLocator;
+use ProxyManager\GeneratorStrategy\FileWriterGeneratorStrategy;
 use Ramsey\Uuid\Uuid;
 use ReflectionException;
 
@@ -103,10 +106,6 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private $requiredReferences = [];
     /**
-     * @var string[]
-     */
-    private $registeredGateways = [];
-    /**
      * @var ConverterBuilder[]
      */
     private $converterBuilders = [];
@@ -126,6 +125,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var array
      */
     private $asynchronousEndpoints = [];
+    /**
+     * @var string[]
+     */
+    private $gatewayClassesToGenerateProxies = [];
 
     /**
      * Only one instance at time
@@ -135,25 +138,35 @@ final class MessagingSystemConfiguration implements Configuration
      * @param object[] $extensionObjects
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
      * @param bool $isLazyLoaded
+     * @param ProxyFactory $proxyFactory
+     * @throws AnnotationException
+     * @throws ConfigurationException
+     * @throws InvalidArgumentException
      * @throws MessagingException
-     * @throws TypeDefinitionException
+     * @throws ReflectionException
      */
-    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded)
+    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded, ProxyFactory $proxyFactory)
     {
         $this->isLazyConfiguration = $isLazyLoaded;
-        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver);
+        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $proxyFactory);
     }
 
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param object[] $extensionObjects
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @throws TypeDefinitionException
+     * @param ProxyFactory $proxyFactory
+     * @throws AnnotationException
+     * @throws ConfigurationException
+     * @throws InvalidArgumentException
      * @throws MessagingException
+     * @throws ReflectionException
      */
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver): void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ProxyFactory $proxyFactory): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
+        $moduleReferenceSearchService->store(ProxyFactory::REFERENCE_NAME, $proxyFactory);
+
         $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
         $moduleExtensions = [];
 
@@ -178,6 +191,10 @@ final class MessagingSystemConfiguration implements Configuration
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
 
         $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry);
+        if ($this->isLazyConfiguration) {
+            $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);
+            $this->gatewayClassesToGenerateProxies = [];
+        }
 
         $this->interfacesToCall = array_unique($this->interfacesToCall);
         $this->moduleReferenceSearchService = $moduleReferenceSearchService;
@@ -472,7 +489,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public static function prepare(ModuleRetrievingService $moduleConfigurationRetrievingService): Configuration
     {
-        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), false);
+        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), false, ProxyFactory::createNoCache());
     }
 
     /**
@@ -482,13 +499,15 @@ final class MessagingSystemConfiguration implements Configuration
      * @param string $environment
      * @param bool $isLazyLoaded
      * @param bool $loadSrc
+     * @param ProxyFactory $proxyFactory
      * @return Configuration
      * @throws AnnotationException
      * @throws ConfigurationException
+     * @throws InvalidArgumentException
      * @throws MessagingException
-     * @throws TypeDefinitionException
+     * @throws ReflectionException
      */
-    public static function createWithCachedReferenceObjectsForNamespaces(string $rootPathToSearchConfigurationFor, array $namespaces, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, string $environment, bool $isLazyLoaded, bool $loadSrc): Configuration
+    public static function createWithCachedReferenceObjectsForNamespaces(string $rootPathToSearchConfigurationFor, array $namespaces, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, string $environment, bool $isLazyLoaded, bool $loadSrc, ProxyFactory $proxyFactory): Configuration
     {
         return MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
             new AnnotationModuleRetrievingService(
@@ -501,7 +520,8 @@ final class MessagingSystemConfiguration implements Configuration
                 )
             ),
             $referenceTypeFromNameResolver,
-            $isLazyLoaded
+            $isLazyLoaded,
+            $proxyFactory
         );
     }
 
@@ -509,13 +529,17 @@ final class MessagingSystemConfiguration implements Configuration
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
      * @param bool $isLazyLoaded
+     * @param ProxyFactory $proxyFactory
      * @return Configuration
+     * @throws AnnotationException
+     * @throws ConfigurationException
+     * @throws InvalidArgumentException
      * @throws MessagingException
-     * @throws TypeDefinitionException
+     * @throws ReflectionException
      */
-    public static function prepareWithCachedReferenceObjects(ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded): Configuration
+    public static function prepareWithCachedReferenceObjects(ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded, ProxyFactory $proxyFactory): Configuration
     {
-        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $isLazyLoaded);
+        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $isLazyLoaded, $proxyFactory);
     }
 
     /**
@@ -760,8 +784,8 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder): Configuration
     {
         $this->gatewayBuilders[] = $gatewayBuilder;
-        $this->registeredGateways[$gatewayBuilder->getReferenceName()] = $gatewayBuilder->getInterfaceName();
         $this->requireReferences($gatewayBuilder->getRequiredReferences());
+        $this->gatewayClassesToGenerateProxies[] = $gatewayBuilder->getInterfaceName();
 
         return $this;
     }
@@ -795,11 +819,23 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @return string[]
+     * @inheritDoc
      */
     public function getRegisteredGateways(): array
     {
-        return $this->registeredGateways;
+        return $this->gatewayBuilders;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function registerInternalGateway(TypeDescriptor $interfaceName): Configuration
+    {
+        Assert::isTrue($interfaceName->isObject(), "Passed internal gateway must be class, passed: {$interfaceName->toString()}");
+
+        $this->gatewayClassesToGenerateProxies[] = $interfaceName->toString();
+
+        return $this;
     }
 
     /**
@@ -827,7 +863,9 @@ final class MessagingSystemConfiguration implements Configuration
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService): ConfiguredMessagingSystem
     {
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall, $this->isLazyConfiguration, $referenceSearchService);
-        $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry);
+        if (!$this->isLazyConfiguration) {
+            $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry);
+        }
 
         $converters = [];
         foreach ($this->converterBuilders as $converterBuilder) {
@@ -838,7 +876,8 @@ final class MessagingSystemConfiguration implements Configuration
                 $this->moduleReferenceSearchService->getAllRegisteredReferences(),
                 [
                     ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
-                    InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry
+                    InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry,
+                    ProxyFactory::REFERENCE_NAME => $this->isLazyConfiguration ? $referenceSearchService->get(ProxyFactory::REFERENCE_NAME)->lockConfiguration() : $referenceSearchService->get(ProxyFactory::REFERENCE_NAME)
                 ]
             )
         );

@@ -7,6 +7,8 @@ namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
+use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Assert;
 use Ecotone\DomainModel\CommandBus;
 use Ecotone\DomainModel\CommandBusWithEventPublishing;
@@ -21,6 +23,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ramsey\Uuid\Uuid;
 use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
 use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
@@ -79,13 +82,16 @@ class AnnotationBasedMessagingContext implements Context
             }
         }
 
+        $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString();
+        mkdir($cacheDirectoryPath);
         $messagingConfiguration = MessagingSystemConfiguration::createWithCachedReferenceObjectsForNamespaces(
             __DIR__ . "/../../../../",
             [$namespace],
             InMemoryReferenceTypeFromNameResolver::createFromObjects($objects),
             "test",
             true,
-            true
+            true,
+            ProxyFactory::createWithCache($cacheDirectoryPath)
         );
 
         self::$messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith($objects));

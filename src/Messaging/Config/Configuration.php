@@ -10,11 +10,13 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 
 /**
@@ -123,9 +125,15 @@ interface Configuration
     public function registerRelatedInterfaces(array $relatedInterfaces) : Configuration;
 
     /**
-     * @return string[]
+     * @return GatewayProxyBuilder[]
      */
     public function getRegisteredGateways() : array;
+
+    /**
+     * @param TypeDescriptor $interfaceName
+     * @return Configuration
+     */
+    public function registerInternalGateway(TypeDescriptor $interfaceName) : Configuration;
 
     /**
      * @return bool

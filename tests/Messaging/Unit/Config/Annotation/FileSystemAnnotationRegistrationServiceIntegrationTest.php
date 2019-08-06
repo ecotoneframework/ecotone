@@ -37,14 +37,14 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      */
     private static $annotationRegistrationService;
 
-    public function __test_retrieving_all_classes_with_annotation()
+    public function test_retrieving_all_classes_with_annotation()
     {
         $classes = $this->getAnnotationRegistrationService()->getAllClassesWithAnnotation(ApplicationContext::class);
 
         $this->assertNotEmpty($classes, "File system class locator didn't find application context");
     }
 
-    public function __test_retrieving_annotation_for_class()
+    public function test_retrieving_annotation_for_class()
     {
         $this->assertEquals(
             new ApplicationContext(),
@@ -57,7 +57,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_retrieving_annotation_registration_for_application_context()
+    public function test_retrieving_annotation_registration_for_application_context()
     {
         $gatewayAnnotation = new Gateway();
         $gatewayAnnotation->requestChannel = "requestChannel";
@@ -79,7 +79,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         );
     }
 
-    public function __test_retrieving_method_and_class_annotations()
+    public function test_retrieving_method_and_class_annotations()
     {
         $gatewayAnnotation = new Gateway();
         $gatewayAnnotation->requestChannel = "requestChannel";
@@ -97,7 +97,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         );
     }
 
-    public function __test_retrieving_class_annotations()
+    public function test_retrieving_class_annotations()
     {
         $this->assertEquals(
             [
@@ -114,7 +114,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_retrieving_for_specific_environment()
+    public function test_retrieving_for_specific_environment()
     {
         $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\Environment", "dev");
         $this->assertEquals(
@@ -168,7 +168,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_retrieving_subclass_annotation()
+    public function test_retrieving_subclass_annotation()
     {
         $annotation                               = new Splitter();
         $annotation->endpointId                   = "testId";
@@ -221,7 +221,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         );
     }
 
-    public function __test_throwing_exception_if_class_is_registed_under_incorrect_namespace()
+    public function test_throwing_exception_if_class_is_registed_under_incorrect_namespace()
     {
         $this->expectException(\ReflectionException::class);
 

@@ -42,10 +42,6 @@
         "behat/behat": "^3.3.1",
         "phan/phan": "^1.2.0",
 
-        "guzzlehttp/psr7": "^1.4",
-
-        "enqueue/amqp-lib": "^0.9",
-        "enqueue/dsn": "^0.9",
-        "enqueue/enqueue": "^0.9"
+        "guzzlehttp/psr7": "^1.4"
     }
 }

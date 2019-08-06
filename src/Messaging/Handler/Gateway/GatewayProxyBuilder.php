@@ -113,7 +113,7 @@ class GatewayProxyBuilder implements GatewayBuilder
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;
         $this->requestChannelName = $requestChannelName;
-        $this->requiredReferenceNames[] = GatewayProxyConfiguration::REFERENCE_NAME;
+        $this->requiredReferenceNames[] = ProxyFactory::REFERENCE_NAME;
     }
 
     /**
@@ -330,8 +330,8 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
-        /** @var Configuration $gatewayProxyConfiguration */
-        $gatewayProxyConfiguration = $referenceSearchService->get(GatewayProxyConfiguration::REFERENCE_NAME);
+        /** @var ProxyFactory $proxyFactory */
+        $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);
 
         if ($this->withLazyBuild) {
             $buildCallback = function() use ($referenceSearchService, $channelResolver) {
@@ -344,43 +344,7 @@ class GatewayProxyBuilder implements GatewayBuilder
             };
         }
 
-        $factory = new LazyLoadingValueHolderFactory($gatewayProxyConfiguration);
-        return $factory->createProxy(
-            $this->interfaceName,
-            function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($buildCallback, $gatewayProxyConfiguration) {
-                $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
-                {
-                    /**
-                     * @var \Closure
-                     */
-                    private $buildCallback;
-
-                    /**
-                     *  constructor.
-                     *
-                     * @param \Closure $buildCallback
-                     */
-                    public function __construct(\Closure $buildCallback)
-                    {
-                        $this->buildCallback = $buildCallback;
-                    }
-
-                    /**
-                     * @inheritDoc
-                     */
-                    public function call(string $wrappedClass, string $method, array $params = [])
-                    {
-                        $buildCallback = $this->buildCallback;
-                        $gateway = $buildCallback();
-                        return $gateway->execute($params);
-                    }
-                }, $gatewayProxyConfiguration);
-
-                $wrappedObject = $factory->createProxy($this->interfaceName);
-
-                return true;
-            }
-        );
+        return $proxyFactory->createProxyClass($this->interfaceName, $buildCallback);
     }
 
     public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)

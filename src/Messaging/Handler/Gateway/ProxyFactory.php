@@ -22,7 +22,7 @@ use stdClass;
  * @package Ecotone\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ProxyFactory
+class ProxyFactory implements \Serializable
 {
     const REFERENCE_NAME = "gatewayProxyConfiguration";
 
@@ -34,14 +34,20 @@ class ProxyFactory
      * @var bool
      */
     private $isLocked = false;
+    /**
+     * @var string|null
+     */
+    private $cacheDirectoryPath;
 
     /**
      * ProxyConfiguration constructor.
      * @param Configuration $configuration
+     * @param string|null $cacheDirectoryPath
      */
-    private function __construct(Configuration $configuration)
+    private function __construct(Configuration $configuration, ?string $cacheDirectoryPath)
     {
         $this->configuration = $configuration;
+        $this->cacheDirectoryPath = $cacheDirectoryPath;
     }
 
     /**
@@ -55,7 +61,7 @@ class ProxyFactory
         $fileLocator = new FileLocator($configuration->getProxiesTargetDir());
         $configuration->setGeneratorStrategy(new FileWriterGeneratorStrategy($fileLocator));
 
-        return new self($configuration);
+        return new self($configuration, $cacheDirectoryPath);
     }
 
     /**
@@ -63,7 +69,7 @@ class ProxyFactory
      */
     public static function createNoCache() : self
     {
-        return new self(new Configuration());
+        return new self(new Configuration(), null);
     }
 
     /**
@@ -177,5 +183,25 @@ class ProxyFactory
             ]);
 
         return class_exists($proxyClassName);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function serialize()
+    {
+        return $this->cacheDirectoryPath;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function unserialize($serialized)
+    {
+        if ($serialized) {
+            return self::createWithCache($serialized);
+        }else {
+            return self::createNoCache();
+        }
     }
 }

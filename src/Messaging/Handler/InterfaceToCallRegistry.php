@@ -3,10 +3,15 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
+use Ecotone\Messaging\MessagingException;
+use InvalidArgumentException;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
 
 /**
  * Class InterfaceToCallBuilder
@@ -44,7 +49,7 @@ class InterfaceToCallRegistry
     /**
      * @return InterfaceToCallRegistry
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self(InMemoryReferenceTypeFromNameResolver::createEmpty(), false);
     }
@@ -53,7 +58,7 @@ class InterfaceToCallRegistry
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
      * @return InterfaceToCallRegistry
      */
-    public static function createWith(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver) : self
+    public static function createWith(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver): self
     {
         return new self($referenceTypeFromNameResolver, false);
     }
@@ -64,7 +69,7 @@ class InterfaceToCallRegistry
      * @param ReferenceSearchService $referenceSearchService
      * @return InterfaceToCallRegistry
      */
-    public static function createWithInterfaces(iterable $interfacesToCall, bool $isLocked, ReferenceSearchService $referenceSearchService) : self
+    public static function createWithInterfaces(iterable $interfacesToCall, bool $isLocked, ReferenceSearchService $referenceSearchService): self
     {
         $self = new self(InMemoryReferenceTypeFromNameResolver::createFromReferenceSearchService($referenceSearchService), $isLocked);
         foreach ($interfacesToCall as $interfaceToCall) {
@@ -77,17 +82,51 @@ class InterfaceToCallRegistry
     /**
      * @param string|object $interfaceName
      * @param string $methodName
-     * @return InterfaceToCall
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @return string
+     */
+    private static function getName($interfaceName, string $methodName): string
+    {
+        if (is_object($interfaceName)) {
+            $interfaceName = get_class($interfaceName);
+        }
+
+        return $interfaceName . $methodName;
+    }
+
+    /**
+     * @param string|object $interfaceName
+     * @return InterfaceToCall[]
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    public function getFor($interfaceName, string $methodName) : InterfaceToCall
+    public function getForAllPublicMethodOf($interfaceName): iterable
+    {
+        $interfaces = [];
+        foreach ((new ReflectionClass($interfaceName))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            if (!$method->isConstructor()) {
+                $interfaces[] = $this->getFor($interfaceName, $method->getName());
+            }
+        }
+
+        return $interfaces;
+    }
+
+    /**
+     * @param string|object $interfaceName
+     * @param string $methodName
+     * @return InterfaceToCall
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     */
+    public function getFor($interfaceName, string $methodName): InterfaceToCall
     {
         if (array_key_exists(self::getName($interfaceName, $methodName), $this->interfacesToCall)) {
             return $this->interfacesToCall[self::getName($interfaceName, $methodName)];
-        }else if ($this->isLocked) {
+        } else if ($this->isLocked) {
             $interfaceName = is_object($interfaceName) ? get_class($interfaceName) : $interfaceName;
             throw ConfigurationException::create("There is problem with configuration. Interface to call {$interfaceName}:{$methodName} was never registered via related interfaces.");
         }
@@ -99,61 +138,27 @@ class InterfaceToCallRegistry
     }
 
     /**
-     * @param string|object $interfaceName
-     * @return InterfaceToCall[]
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
-     */
-    public function getForAllPublicMethodOf($interfaceName) : iterable
-    {
-        $interfaces = [];
-        foreach ((new \ReflectionClass($interfaceName))->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-            if (!$method->isConstructor()) {
-                $interfaces[] = $this->getFor($interfaceName, $method->getName());
-            }
-        }
-
-        return $interfaces;
-    }
-
-    /**
      * @param string $referenceName
      * @param string $methodName
      * @return InterfaceToCall
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\Config\ConfigurationException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws AnnotationException
+     * @throws ReflectionException
+     * @throws ConfigurationException
+     * @throws MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    public function getForReferenceName(string $referenceName, string $methodName) : InterfaceToCall
+    public function getForReferenceName(string $referenceName, string $methodName): InterfaceToCall
     {
         try {
             $objectClassType = $this->referenceTypeFromNameResolver->resolve($referenceName);
-        }catch (ReferenceNotFoundException $exception) {
+        } catch (ReferenceNotFoundException $exception) {
             throw ConfigurationException::create("Cannot find reference with name `$referenceName` for method {$methodName}. " . $exception->getMessage());
         }
 
         if (!$objectClassType->isObject()) {
-            throw new \InvalidArgumentException("Reference {$referenceName} is not an object");
+            throw new InvalidArgumentException("Reference {$referenceName} is not an object");
         }
 
         return $this->getFor($objectClassType->toString(), $methodName);
-    }
-
-    /**
-     * @param string|object $interfaceName
-     * @param string $methodName
-     * @return string
-     */
-    private static function getName($interfaceName, string $methodName) : string
-    {
-        if (is_object($interfaceName)) {
-            $interfaceName = get_class($interfaceName);
-        }
-
-        return $interfaceName . $methodName;
     }
 }

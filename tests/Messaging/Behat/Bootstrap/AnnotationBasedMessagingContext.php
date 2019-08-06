@@ -94,6 +94,7 @@ class AnnotationBasedMessagingContext implements Context
             ProxyFactory::createWithCache($cacheDirectoryPath)
         );
 
+        $messagingConfiguration = unserialize(serialize($messagingConfiguration));
         self::$messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith($objects));
     }
 

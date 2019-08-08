@@ -41,7 +41,7 @@
         "phpunit/phpunit": "^8.0.0",
         "behat/behat": "^3.3.1",
         "phan/phan": "^1.2.0",
-
-        "guzzlehttp/psr7": "^1.4"
+        "guzzlehttp/psr7": "^1.4",
+        "php-coveralls/php-coveralls": "^2.1.0"
     }
 }

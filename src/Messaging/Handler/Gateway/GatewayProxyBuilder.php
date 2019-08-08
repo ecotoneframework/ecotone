@@ -114,6 +114,14 @@ class GatewayProxyBuilder implements GatewayBuilder
         $this->methodName = $methodName;
         $this->requestChannelName = $requestChannelName;
         $this->requiredReferenceNames[] = ProxyFactory::REFERENCE_NAME;
+
+        $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
+            "",
+            new ReplyMessageInterceptor(),
+            "buildReply",
+            ErrorChannelInterceptor::PRECEDENCE + 1,
+            ""
+        );
     }
 
     /**
@@ -279,11 +287,17 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [
+        $resolvedInterfaces = [
             $interfaceToCallRegistry->getFor(GatewayInternalHandler::class, "handle"),
             $interfaceToCallRegistry->getFor(ErrorChannelInterceptor::class, "handle"),
             $interfaceToCallRegistry->getFor(ReplyMessageInterceptor::class, "buildReply")
         ];
+
+        foreach ($this->aroundInterceptors as $aroundInterceptor) {
+            $resolvedInterfaces[] = $aroundInterceptor->getInterceptingInterface($interfaceToCallRegistry);
+        }
+
+        return $resolvedInterfaces;
     }
 
     /**
@@ -378,13 +392,6 @@ class GatewayProxyBuilder implements GatewayBuilder
             new ErrorChannelInterceptor($errorChannel),
             "handle",
             ErrorChannelInterceptor::PRECEDENCE,
-            ""
-        );
-        $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
-            "",
-            new ReplyMessageInterceptor(),
-            "buildReply",
-            ErrorChannelInterceptor::PRECEDENCE + 1,
             ""
         );
 

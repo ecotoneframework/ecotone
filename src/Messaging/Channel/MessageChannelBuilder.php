@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageChannel;
 
@@ -32,4 +34,11 @@ interface MessageChannelBuilder
      * @return string[] empty string means no required reference name exists
      */
     public function getRequiredReferenceNames() : array;
+
+    /**
+     * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     *
+     * @return InterfaceToCall[]
+     */
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable;
 }

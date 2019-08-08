@@ -34,7 +34,7 @@ class ExceptionLoggingInterceptorBuilder implements AroundInterceptorObjectBuild
      */
     public function getInterceptingInterfaceClassName(): string
     {
-        return LoggingService::class;
+        return LoggingInterceptor::class;
     }
 
     /**

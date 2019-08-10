@@ -29,7 +29,7 @@ interface CommandBusWithEventPublishing extends CommandBus
      * @Gateway(requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT)
      * @LazyEventPublishing()
      */
-    public function send($command);
+    public function send(object $command);
 
     /**
      * Entrypoint for commands, when you access to instance of the command
@@ -48,7 +48,7 @@ interface CommandBusWithEventPublishing extends CommandBus
      * )
      * @LazyEventPublishing()
      */
-    public function sendWithMetadata($command, array $metadata);
+    public function sendWithMetadata(object $command, array $metadata);
 
     /**
      * @param string $name

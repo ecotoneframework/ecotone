@@ -168,7 +168,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [$interfaceToCallRegistry->getFor(EntrypointGateway::class, "executeEntrypoint")];
+        return array_merge([$interfaceToCallRegistry->getFor(EntrypointGateway::class, "executeEntrypoint")], $this->gatewayExecutor->resolveRelatedInterfaces($interfaceToCallRegistry));
     }
 
     /**

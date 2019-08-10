@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation;
 
 use Doctrine\Common\Annotations\Reader;
+use http\Env;
 use InvalidArgumentException;
 use function json_decode;
 use RecursiveDirectoryIterator;
@@ -82,12 +83,28 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
 
         foreach ($this->registeredClasses as $className) {
             foreach (get_class_methods($className) as $method) {
-                $methodAnnotations = $this->getCachedMethodAnnotations($className, $method);
-                foreach ($methodAnnotations as $methodAnnotation) {
-                    if ($methodAnnotation instanceof Environment) {
-                        if (!in_array($environmentName, $methodAnnotation->names)) {
-                            $this->bannedEnvironmentClassMethods[$className][$method] = true;
-                        }
+                $classAnnotations = array_values(array_filter($methodAnnotations = array_map(function(object $annotation){
+                    if ($annotation instanceof Environment) {
+                        return $annotation;
+                    }
+
+                    return null;
+                }, $this->getCachedAnnotationsForClass($className))));
+                $methodAnnotations = array_values(array_filter(array_map(function(object $annotation){
+                    if ($annotation instanceof Environment) {
+                        return $annotation;
+                    }
+
+                    return null;
+                }, $this->getCachedMethodAnnotations($className, $method))));
+
+                if ($methodAnnotations) {
+                    if (!in_array($environmentName, $methodAnnotations[0]->names)) {
+                        $this->bannedEnvironmentClassMethods[$className][$method] = true;
+                    }
+                }else if ($classAnnotations) {
+                    if (!in_array($environmentName, $classAnnotations[0]->names)) {
+                        $this->bannedEnvironmentClassMethods[$className][$method] = true;
                     }
                 }
             }
@@ -271,7 +288,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     /**
      * @inheritDoc
      */
-    private function getCachedAnnotationsForClass(string $className): iterable
+    private function getCachedAnnotationsForClass(string $className): array
     {
         if (isset($this->cachedClassAnnotations[$className])) {
             return $this->cachedClassAnnotations[$className];

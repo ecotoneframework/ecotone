@@ -10,12 +10,15 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateMessage;
+use Ecotone\Modelling\AggregateMessageConversionService;
 use Ecotone\Modelling\AggregateMessageConversionServiceBuilder;
 use Ecotone\Modelling\AggregateMessageHandlerBuilder;
 use Ecotone\Modelling\Annotation\CommandHandler;
@@ -25,6 +28,9 @@ use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithReferencesExample;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\DoStuffCommand;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithAnnotationClassNameWithMetadataAndService;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithAnnotationClassNameWithService;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithClassNameInAnnotation;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoCommandInformationConfiguration;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithReturnValue;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\SomeCommand;
@@ -111,7 +117,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Ecotone\Messaging\Config\ConfigurationException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_registering_aggregate_command_handler()
+    public function test_registering_aggregate_command_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerExample::class, "doAction",  DoStuffCommand::class)
                             ->withInputChannelName(DoStuffCommand::class)
@@ -122,6 +128,7 @@ class AggregateMessagingModuleTest extends TestCase
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
+                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith( DoStuffCommand::class),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                     AggregateCommandHandlerExample::class . "::doAction"
@@ -139,7 +146,7 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
-    public function __test_registering_service_command_handler_with_return_value()
+    public function test_registering_service_command_handler_with_return_value()
     {
         $commandHandler = ServiceActivatorBuilder::create( CommandHandlerWithReturnValue::class, "execute")
             ->withMethodParameterConverters([
@@ -163,38 +170,69 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \Exception
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\Config\ConfigurationException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function __test_registering_service_command_handler()
+    public function test_registering_handler_with_class_name_in_annotation()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerExample::class, "doAction",  DoStuffCommand::class)
-            ->withInputChannelName(DoStuffCommand::class)
+        $commandHandler = ServiceActivatorBuilder::create( CommandHandlerWithClassNameInAnnotation::class, "execute")
+            ->withInputChannelName("input")
             ->withEndpointId('command-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler($commandHandler)
-            ->registerBeforeMethodInterceptor(
-                MethodInterceptor::create(
-                    "",
-                    AggregateMessageConversionServiceBuilder::createWith( DoStuffCommand::class),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                    AggregateCommandHandlerExample::class . "::doAction"
-                )
+            ->registerMessageHandler($commandHandler);
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                CommandHandlerWithClassNameInAnnotation::class
+            ],
+            $expectedConfiguration,
+            [
+                SomeCommand::class => "input"
+            ]
+        );
+    }
+
+    public function test_registering_handler_with_class_name_in_annotation_and_service_injected()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::create( CommandHandlerWithAnnotationClassNameWithService::class, "execute")
+                    ->withMethodParameterConverters([
+                        ReferenceBuilder::create("service", \stdClass::class)
+                    ])
+                    ->withInputChannelName("input")
+                    ->withEndpointId('command-id')
             );
 
         $this->createModuleAndAssertConfiguration(
             [
-                AggregateCommandHandlerExample::class
+                CommandHandlerWithAnnotationClassNameWithService::class
             ],
             $expectedConfiguration,
             [
-                DoStuffCommand::class => DoStuffCommand::class
+                SomeCommand::class => "input"
+            ]
+        );
+    }
+
+    public function test_registering_handler_with_class_name_in_annotation_and_metadata_and_service_injected()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::create( CommandHandlerWithAnnotationClassNameWithMetadataAndService::class, "execute")
+                    ->withMethodParameterConverters([
+                        AllHeadersBuilder::createWith("metadata"),
+                        ReferenceBuilder::create("service", \stdClass::class)
+                    ])
+                    ->withInputChannelName("input")
+                    ->withEndpointId('command-id')
+            );
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                CommandHandlerWithAnnotationClassNameWithMetadataAndService::class
+            ],
+            $expectedConfiguration,
+            [
+                SomeCommand::class => "input"
             ]
         );
     }
@@ -207,7 +245,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Ecotone\Messaging\Config\ConfigurationException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_registering_aggregate_command_handler_with_extra_services()
+    public function test_registering_aggregate_command_handler_with_extra_services()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerWithReferencesExample::class, "doAction",  DoStuffCommand::class)
             ->withInputChannelName("input")
@@ -222,6 +260,7 @@ class AggregateMessagingModuleTest extends TestCase
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
+                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith( DoStuffCommand::class),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                     AggregateCommandHandlerWithReferencesExample::class . "::doAction"
@@ -247,7 +286,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Ecotone\Messaging\Config\ConfigurationException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_registering_aggregate_query_handler()
+    public function test_registering_aggregate_query_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerExample::class, "doStuff",  SomeQuery::class)
                             ->withInputChannelName( SomeQuery::class)
@@ -255,12 +294,15 @@ class AggregateMessagingModuleTest extends TestCase
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
-            ->registerBeforeMethodInterceptor(MethodInterceptor::create(
-                "",
-                AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
-                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                AggregateQueryHandlerExample::class . "::doStuff"
-            ));
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "",
+                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
+                    AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    AggregateQueryHandlerExample::class . "::doStuff"
+                )
+            );
 
         $this->createModuleAndAssertConfiguration(
             [
@@ -281,7 +323,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Ecotone\Messaging\Config\ConfigurationException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_registering_aggregate_query_handler_with_output_channel()
+    public function test_registering_aggregate_query_handler_with_output_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
             ->withInputChannelName( SomeQuery::class)
@@ -292,6 +334,7 @@ class AggregateMessagingModuleTest extends TestCase
             ->registerMessageHandler($commandHandler)
             ->registerBeforeMethodInterceptor(MethodInterceptor::create(
                 "",
+                InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                 AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                 AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
@@ -316,7 +359,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Ecotone\Messaging\Config\ConfigurationException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_registering_aggregate_with_custom_input_channel()
+    public function test_registering_aggregate_with_custom_input_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
             ->withInputChannelName("inputChannel")
@@ -335,6 +378,7 @@ class AggregateMessagingModuleTest extends TestCase
                 ->registerMessageHandler($commandHandler)
                 ->registerBeforeMethodInterceptor(\Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     "",
+                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                     AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
@@ -353,7 +397,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Ecotone\Messaging\Config\ConfigurationException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_registering_aggregate_without_query_class_with_only_input_channel()
+    public function test_registering_aggregate_without_query_class_with_only_input_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
             ->withInputChannelName("inputChannel")
@@ -372,6 +416,7 @@ class AggregateMessagingModuleTest extends TestCase
                 ->registerMessageHandler($commandHandler)
                 ->registerBeforeMethodInterceptor(MethodInterceptor::create(
                     "",
+                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith( SomeQuery::class),
                     AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                     AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
@@ -390,7 +435,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Ecotone\Messaging\Config\ConfigurationException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_registering_service_event_handler()
+    public function test_registering_service_event_handler()
     {
         $commandHandler = ServiceActivatorBuilder::create( ExampleEventEventHandler::class, "doSomething")
             ->withInputChannelName("someInput")
@@ -417,7 +462,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \Ecotone\Messaging\Config\ConfigurationException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_registering_service_event_handler_with_extra_services()
+    public function test_registering_service_event_handler_with_extra_services()
     {
         $commandHandler = ServiceActivatorBuilder::create( ExampleEventHandlerWithServices::class, "doSomething")
             ->withInputChannelName("someInput")

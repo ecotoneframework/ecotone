@@ -195,7 +195,7 @@ class AggregateMessagingModule implements AnnotationModule
 
             $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
             $parameterConverterAnnotations = $annotation->parameterConverters;
-            $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations);
+            $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations, $registration);
 
 
             $endpointId = $registration->getAnnotationForMethod()->endpointId;
@@ -299,7 +299,7 @@ class AggregateMessagingModule implements AnnotationModule
 
         $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
         $parameterConverterAnnotations = $annotation->parameterConverters;
-        $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations);
+        $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations, $registration);
 
         $endpointId = $registration->getAnnotationForMethod()->endpointId;
         $handledMessageClassName = self::getMessageClassFor($registration);
@@ -307,7 +307,7 @@ class AggregateMessagingModule implements AnnotationModule
         $redirectMethodConverters = [];
         $redirectOnFoundMethod = false;
         if ($annotation->redirectToOnAlreadyExists) {
-            $redirectMethodConverters = $this->getParameterConverters(InterfaceToCall::create($registration->getClassName(), $annotation->redirectToOnAlreadyExists), []);
+            $redirectMethodConverters = $this->getParameterConverters(InterfaceToCall::create($registration->getClassName(), $annotation->redirectToOnAlreadyExists), [], $registration);
             $redirectOnFoundMethod = $annotation->redirectToOnAlreadyExists;
         }
 
@@ -338,14 +338,27 @@ class AggregateMessagingModule implements AnnotationModule
     /**
      * @param InterfaceToCall $relatedClassInterface
      * @param array $parameterConverterAnnotations
+     * @param AnnotationRegistration $registration
      *
      * @return array
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    private function getParameterConverters(InterfaceToCall $relatedClassInterface, array $parameterConverterAnnotations): array
+    private function getParameterConverters(InterfaceToCall $relatedClassInterface, array $parameterConverterAnnotations, AnnotationRegistration $registration): array
     {
-        if ($relatedClassInterface->hasMoreThanOneParameter() && !$parameterConverterAnnotations) {
+        if ($registration->getAnnotationForMethod()->messageClassName) {
+            foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
+                if ($relatedClassInterface->getFirstParameter()->getName() === $interfaceParameter->getName() && $interfaceParameter->getTypeDescriptor()->isNonCollectionArray()) {
+                    $allHeaders = new Headers();
+                    $allHeaders->parameterName = $interfaceParameter->getName();
+
+                    $parameterConverterAnnotations[] = $allHeaders;
+                    continue;
+                }
+
+                $parameterConverterAnnotations[] = $this->createReferenceConverter($interfaceParameter);
+            }
+        }else if ($relatedClassInterface->hasMoreThanOneParameter() && !$parameterConverterAnnotations) {
             $interfaceParameters = $relatedClassInterface->getInterfaceParameters();
 
             for ($index = 0; $index < count($interfaceParameters); $index++) {
@@ -363,17 +376,12 @@ class AggregateMessagingModule implements AnnotationModule
 
                     $parameterConverterAnnotations[] = $allHeaders;
                 }else {
-                    $reference = new Reference();
-                    $reference->parameterName = $interfaceParameter->getName();
-                    $reference->referenceName = $interfaceParameter->getTypeHint();
-                    $parameterConverterAnnotations[] = $reference;
+                    $parameterConverterAnnotations[] = $this->createReferenceConverter($interfaceParameter);
                 }
             }
         }
 
-        $parameterConverters = $this->parameterConverterAnnotationFactory->createParameterConverters($relatedClassInterface, $parameterConverterAnnotations);
-
-        return $parameterConverters;
+        return $this->parameterConverterAnnotationFactory->createParameterConverters($relatedClassInterface, $parameterConverterAnnotations);
     }
 
     /**
@@ -409,7 +417,7 @@ class AggregateMessagingModule implements AnnotationModule
 
         $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
         $parameterConverterAnnotations = $annotation->parameterConverters;
-        $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations);
+        $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations, $registration);
 
         $messageHandlerBuilder = ServiceActivatorBuilder::create($registration->getReferenceName(), $registration->getMethodName())
             ->withInputChannelName($inputChannelName)
@@ -419,5 +427,17 @@ class AggregateMessagingModule implements AnnotationModule
             ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
 
         return $messageHandlerBuilder;
+    }
+
+    /**
+     * @param \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter
+     * @return Reference
+     */
+    private function createReferenceConverter(\Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter): Reference
+    {
+        $reference = new Reference();
+        $reference->parameterName = $interfaceParameter->getName();
+        $reference->referenceName = $interfaceParameter->getTypeHint();
+        return $reference;
     }
 }

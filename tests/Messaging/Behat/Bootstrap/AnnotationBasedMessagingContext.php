@@ -4,38 +4,31 @@
 namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
-use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
-use org\bovigo\vfs\vfsStream;
-use PHPUnit\Framework\Assert;
-use Ecotone\DomainModel\CommandBus;
-use Ecotone\DomainModel\CommandBusWithEventPublishing;
-use Ecotone\DomainModel\EventBus;
-use Ecotone\DomainModel\LazyEventBus\LazyEventBus;
-use Ecotone\DomainModel\QueryBus;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\CommandBusWithEventPublishing;
+use Ecotone\Modelling\QueryBus;
+use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Assert;
 use Ramsey\Uuid\Uuid;
-use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
-use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
-use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
-use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
-use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
-use Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate\OrderNotificator;
-use Test\Ecotone\DomainModel\Fixture\ProxyEventBusFromMessagingSystem;
-use Test\Ecotone\DomainModel\Fixture\ProxyLazyEventBusFromMessagingSystem;
-use Test\Ecotone\DomainModel\Fixture\Renter\AppointmentRepository;
-use Test\Ecotone\DomainModel\Fixture\Renter\CreateAppointmentCommand;
-use Test\Ecotone\DomainModel\Fixture\Renter\RentCalendar;
-use Test\Ecotone\DomainModel\Fixture\TestingLazyEventBus;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
+use Test\Ecotone\Modelling\Fixture\ProxyEventBusFromMessagingSystem;
+use Test\Ecotone\Modelling\Fixture\ProxyLazyEventBusFromMessagingSystem;
+use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepository;
+use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
+use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
+use Test\Ecotone\Modelling\Fixture\TestingLazyEventBus;
 use Test\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
 use Test\Ecotone\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
 use Test\Ecotone\Messaging\Fixture\Behat\Calculating\InboundCalculation;
@@ -58,14 +51,14 @@ class AnnotationBasedMessagingContext implements Context
     public function iActiveMessagingForNamespace(string $namespace)
     {
         switch ($namespace) {
-            case "Test\Ecotone\DomainModel\Fixture\Renter": {
+            case "Test\Ecotone\Modelling\Fixture\Renter": {
                 $objects = [
                       RentCalendar::class => new RentCalendar(),
                       AppointmentRepository::class => AppointmentRepository::createEmpty()
                 ];
                 break;
             }
-            case "Test\Ecotone\DomainModel\Fixture\CommandHandler\Aggregate": {
+            case "Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate": {
                 $objects = [
                     OrderNotificator::class => new OrderNotificator(),
                     InMemoryAggregateRepository::class => InMemoryAggregateRepository::createEmpty()

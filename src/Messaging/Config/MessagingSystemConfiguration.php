@@ -31,18 +31,16 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\InterceptorWithPointCut;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
-use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Exception;
-use ProxyManager\FileLocator\FileLocator;
-use ProxyManager\GeneratorStrategy\FileWriterGeneratorStrategy;
 use Ramsey\Uuid\Uuid;
 use ReflectionException;
 
@@ -109,6 +107,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var ConverterBuilder[]
      */
     private $converterBuilders = [];
+    /**
+     * @var string[]
+     */
+    private $messageConverterReferenceNames = [];
     /**
      * @var InterfaceToCall[]
      */
@@ -850,6 +852,17 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
+     * @inheritDoc
+     */
+    public function registerMessageConverter(string $referenceName): Configuration
+    {
+        $this->messageConverterReferenceNames[] = $referenceName;
+
+        return $this;
+    }
+
+
+    /**
      * Initialize messaging system from current configuration
      *
      * @param ReferenceSearchService $referenceSearchService
@@ -892,7 +905,7 @@ final class MessagingSystemConfiguration implements Configuration
         /** @var GatewayBuilder[][] $preparedGateways */
         $preparedGateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $preparedGateways[$gatewayBuilder->getReferenceName()][] = $gatewayBuilder;
+            $preparedGateways[$gatewayBuilder->getReferenceName()][] = $gatewayBuilder->withMessageConverters($this->messageConverterReferenceNames);
         }
 
         return MessagingSystem::createFrom(
@@ -909,26 +922,16 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * Only one instance at time
-     *
-     * @internal
-     */
-    private function __clone()
-    {
-
-    }
-
-    /**
      * @param ReferenceSearchService $referenceSearchService
      * @param array $converters
      * @param InterfaceToCallRegistry $interfaceToCallRegistry
      * @return InMemoryReferenceSearchService|ReferenceSearchService
      * @throws MessagingException
-     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
+     * @throws ReferenceNotFoundException
      */
     private function prepareReferenceSearchServiceWithInternalReferences(ReferenceSearchService $referenceSearchService, array $converters, InterfaceToCallRegistry $interfaceToCallRegistry)
     {
-        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService,
+        return InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService,
             array_merge(
                 $this->moduleReferenceSearchService->getAllRegisteredReferences(),
                 [
@@ -937,9 +940,15 @@ final class MessagingSystemConfiguration implements Configuration
                 ]
             )
         );
-//        $referenceSearchService = InMemoryReferenceSearchService::createWithReferenceService($referenceSearchService, [
-//            ProxyFactory::REFERENCE_NAME => $this->isLazyConfiguration ? $referenceSearchService->get(ProxyFactory::REFERENCE_NAME)->lockConfiguration() : $referenceSearchService->get(ProxyFactory::REFERENCE_NAME)
-//        ]);
-        return $referenceSearchService;
+    }
+
+    /**
+     * Only one instance at time
+     *
+     * @internal
+     */
+    private function __clone()
+    {
+
     }
 }

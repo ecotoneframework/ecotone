@@ -139,7 +139,7 @@ class DefaultHeaderMapper implements HeaderMapper
      */
     private function isScalarType($headerValue) : bool
     {
-        return TypeDescriptor::isItTypeOfScalar(TypeDescriptor::createFromVariable($headerValue)->toString());
+        return (TypeDescriptor::createFromVariable($headerValue))->isScalar();
     }
 
     /**

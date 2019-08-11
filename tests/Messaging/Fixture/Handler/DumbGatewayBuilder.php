@@ -57,6 +57,14 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
+    public function withMessageConverters(array $messageConverterReferenceNames)
+    {
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [];

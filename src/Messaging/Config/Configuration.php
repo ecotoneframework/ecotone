@@ -147,6 +147,12 @@ interface Configuration
     public function registerConverter(ConverterBuilder $converterBuilder) : Configuration;
 
     /**
+     * @param string $referenceName
+     * @return Configuration
+     */
+    public function registerMessageConverter(string $referenceName) : Configuration;
+
+    /**
      * @param ReferenceSearchService $externalReferenceSearchService
      * @return ConfiguredMessagingSystem
      */

@@ -2,8 +2,6 @@
 
 namespace Test\Ecotone\Http\Unit;
 
-use GuzzleHttp\Psr7\FnStream;
-use GuzzleHttp\Psr7\UploadedFile;
 use Ecotone\Http\HttpHeaders;
 use Ecotone\Http\KeepAsTemporaryMover\KeepAsTemporaryFileMover;
 use Ecotone\Http\PsrHttpMessageConverter;
@@ -14,10 +12,16 @@ use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use GuzzleHttp\Psr7\FnStream;
+use GuzzleHttp\Psr7\UploadedFile;
+use function json_encode;
 use Test\Ecotone\Http\Fixture\ServerRequestMother;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 use function GuzzleHttp\Psr7\stream_for;
@@ -30,10 +34,10 @@ use function GuzzleHttp\Psr7\stream_for;
 class PsrHttpMessageConverterTest extends MessagingTest
 {
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
-    public function TODO__test_transforming_get_request_to_message()
+    public function test_transforming_get_request_to_message()
     {
         $psrHttpMessageConverter = $this->createPsrHttpMessageConverter();
 
@@ -42,39 +46,22 @@ class PsrHttpMessageConverterTest extends MessagingTest
                 ->setContentType(MediaType::createApplicationJson())
                 ->setMultipleHeaders([
                     HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_GET,
-                    HttpHeaders::REQUEST_URL => "http://localhost"
+                    HttpHeaders::REQUEST_URL => "http://localhost",
+                    HttpHeaders::HOST => 'localhost'
                 ]),
             $psrHttpMessageConverter->toMessage(
                 ServerRequestMother::createGet()
-                    ->withAddedHeader(HttpHeaders::CONTENT_TYPE, MediaType::APPLICATION_JSON),
-                [],
-                DefaultHeaderMapper::createNoMapping()
+                    ->withAddedHeader("content-type", MediaType::APPLICATION_JSON),
+                []
             )
         );
     }
 
     /**
-     * @return PsrHttpMessageConverter
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
-    private function createPsrHttpMessageConverter(): PsrHttpMessageConverter
-    {
-        $psrHttpMessageConverter = new PsrHttpMessageConverter(
-            new KeepAsTemporaryFileMover(),
-            PropertyEditorAccessor::create(InMemoryReferenceSearchService::createWith([
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
-            ])),
-            new PropertyReaderAccessor()
-        );
-
-        return $psrHttpMessageConverter;
-    }
-
-    /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
-     */
-    public function TODO__test_transforming_default_ocet_header_without_request_content_type()
+    public function test_transforming_default_ocet_header_without_request_content_type()
     {
         $psrHttpMessageConverter = $this->createPsrHttpMessageConverter();
 
@@ -83,21 +70,21 @@ class PsrHttpMessageConverterTest extends MessagingTest
                 ->setContentType(MediaType::createApplicationOcetStream())
                 ->setMultipleHeaders([
                     HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_GET,
-                    HttpHeaders::REQUEST_URL => "http://localhost"
+                    HttpHeaders::REQUEST_URL => "http://localhost",
+                    HttpHeaders::HOST => 'localhost'
                 ]),
             $psrHttpMessageConverter->toMessage(
                 ServerRequestMother::createGet(),
-                [],
-                DefaultHeaderMapper::createNoMapping()
+                []
             )
         );
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
-    public function TODO__test_transforming_multipart_parameters()
+    public function test_transforming_multipart_parameters()
     {
         $psrHttpMessageConverter = $this->createPsrHttpMessageConverter();
 
@@ -106,7 +93,8 @@ class PsrHttpMessageConverterTest extends MessagingTest
                 ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY))
                 ->setMultipleHeaders([
                     HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_POST,
-                    HttpHeaders::REQUEST_URL => "http://localhost"
+                    HttpHeaders::REQUEST_URL => "http://localhost",
+                    HttpHeaders::HOST => 'localhost'
                 ])
                 ->setPayload([
                     "name" => "johny",
@@ -119,17 +107,16 @@ class PsrHttpMessageConverterTest extends MessagingTest
                         "name" => "johny",
                         "surname" => "bravo"
                     ]),
-                [],
-                DefaultHeaderMapper::createNoMapping()
+                []
             )
         );
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
-    public function TODO__test_transforming_multipart_multi_dimension_array_parameter()
+    public function test_transforming_multipart_multi_dimension_array_parameter()
     {
         $psrHttpMessageConverter = $this->createPsrHttpMessageConverter();
 
@@ -138,7 +125,8 @@ class PsrHttpMessageConverterTest extends MessagingTest
                 ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY))
                 ->setMultipleHeaders([
                     HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_POST,
-                    HttpHeaders::REQUEST_URL => "http://localhost"
+                    HttpHeaders::REQUEST_URL => "http://localhost",
+                    HttpHeaders::HOST => 'localhost'
                 ])
                 ->setPayload([
                     "order" => [
@@ -159,17 +147,16 @@ class PsrHttpMessageConverterTest extends MessagingTest
                             ]
                         ]
                     ]),
-                [],
-                DefaultHeaderMapper::createNoMapping()
+                []
             )
         );
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
-    public function TODO__test_merging_multi_dimensional_parameters_and_files()
+    public function test_merging_multi_dimensional_parameters_and_files()
     {
         $psrHttpMessageConverter = $this->createPsrHttpMessageConverter();
 
@@ -178,7 +165,8 @@ class PsrHttpMessageConverterTest extends MessagingTest
                 ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY))
                 ->setMultipleHeaders([
                     HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_POST,
-                    HttpHeaders::REQUEST_URL => "http://localhost"
+                    HttpHeaders::REQUEST_URL => "http://localhost",
+                    HttpHeaders::HOST => 'localhost'
                 ])
                 ->setPayload([
                     "order" => [
@@ -200,7 +188,7 @@ class PsrHttpMessageConverterTest extends MessagingTest
                 ]),
             $psrHttpMessageConverter->toMessage(
                 ServerRequestMother::createPost()
-                    ->withHeader(HttpHeaders::CONTENT_TYPE, MediaType::MULTIPART_FORM_DATA)
+                    ->withHeader("content-type", MediaType::MULTIPART_FORM_DATA)
                     ->withParsedBody([
                         "order" => [
                             "name" => "good product",
@@ -217,8 +205,7 @@ class PsrHttpMessageConverterTest extends MessagingTest
                                         FnStream::decorate(stream_for('bar'), [
                                             'getMetadata' => function () {
                                                 return [
-                                                    KeepAsTemporaryFileMover::WRAPPER_TYPE_META_DATA_KEY => "plainfile",
-                                                    KeepAsTemporaryFileMover::URI_META_DATA_KEY => "/tmp/werdfds"
+                                                    PsrHttpMessageConverter::URI_META_DATA_KEY => "/tmp/werdfds"
                                                 ];
                                             }
                                         ]),
@@ -231,17 +218,16 @@ class PsrHttpMessageConverterTest extends MessagingTest
                             ]
                         ]
                     ]),
-                [],
-                DefaultHeaderMapper::createNoMapping()
+                []
             )
         );
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
-    public function TODO__test_mapping_headers()
+    public function test_mapping_headers()
     {
         $psrHttpMessageConverter = $this->createPsrHttpMessageConverter();
 
@@ -252,33 +238,73 @@ class PsrHttpMessageConverterTest extends MessagingTest
                 ->setContentType(MediaType::createApplicationXml())
                 ->setMultipleHeaders([
                     HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_POST,
-                    HttpHeaders::REQUEST_URL => "http://localhost"
-                ])
-                ->setMultipleHeaders([
-                    "authorization" => $token,
-                    "host" => $host
+                    HttpHeaders::REQUEST_URL => "http://localhost",
+                    HttpHeaders::AUTHORIZATION => $token,
+                    HttpHeaders::HOST => $host
                 ])
                 ->setPayload("[]"),
             $psrHttpMessageConverter->toMessage(
                 ServerRequestMother::createPost()
-                    ->withHeader("content-type", MediaType::APPLICATION_JSON)
-                    ->withHeader(HttpHeaders::AUTHORIZATION, $token)
-                    ->withHeader(HttpHeaders::HOST, $host)
-                    ->withBody(FnStream::decorate(stream_for(\json_encode([])),
+                    ->withHeader("authorization", $token)
+                    ->withHeader("host", $host)
+                    ->withBody(FnStream::decorate(stream_for(json_encode([])),
                         ['getMetadata' => function () {
                             return [];
                         }]
                     )),
                 [
                     MessageHeaders::CONTENT_TYPE => MediaType::APPLICATION_XML
-                ],
-                DefaultHeaderMapper::createWith([HttpHeaders::AUTHORIZATION, HttpHeaders::HOST], [])
+                ]
             )
         );
     }
 
-    public function TODO__test_converting_to_response()
+    /**
+     * @throws MessagingException
+     * @throws InvalidArgumentException
+     */
+    public function test_mapping_custom_headers()
     {
+        $psrHttpMessageConverter = $this->createPsrHttpMessageConverter();
 
+        $token = "BEARER 1233da";
+        $this->assertEquals(
+            MessageBuilder::withPayload([])
+                ->setContentType(MediaType::createApplicationJson())
+                ->setMultipleHeaders([
+                    HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_POST,
+                    HttpHeaders::REQUEST_URL => "http://localhost",
+                    HttpHeaders::HOST => 'localhost',
+                    "x-token" => $token
+                ])
+                ->setPayload("[]"),
+            $psrHttpMessageConverter->toMessage(
+                ServerRequestMother::createPost()
+                    ->withHeader("content-type", MediaType::APPLICATION_JSON)
+                    ->withHeader("x-token", $token)
+                    ->withBody(FnStream::decorate(stream_for(json_encode([])),
+                        ['getMetadata' => function () {
+                            return [];
+                        }]
+                    )),
+                []
+            )
+        );
+    }
+
+    /**
+     * @return PsrHttpMessageConverter
+     * @throws MessagingException
+     */
+    private function createPsrHttpMessageConverter(): PsrHttpMessageConverter
+    {
+        $psrHttpMessageConverter = new PsrHttpMessageConverter(
+            PropertyEditorAccessor::create(InMemoryReferenceSearchService::createWith([
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])),
+            new PropertyReaderAccessor()
+        );
+
+        return $psrHttpMessageConverter;
     }
 }

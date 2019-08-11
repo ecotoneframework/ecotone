@@ -59,6 +59,12 @@ interface GatewayBuilder extends InterceptedEndpoint
     public function addAfterInterceptor(MethodInterceptor $methodInterceptor);
 
     /**
+     * @param string[] $messageConverterReferenceNames
+     * @return $this
+     */
+    public function withMessageConverters(array $messageConverterReferenceNames);
+
+    /**
      * @param ReferenceSearchService $referenceSearchService
      * @param ChannelResolver $channelResolver
      * @return object

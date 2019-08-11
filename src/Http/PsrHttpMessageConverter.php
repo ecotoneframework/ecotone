@@ -3,34 +3,36 @@ declare(strict_types=1);
 
 namespace Ecotone\Http;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UploadedFileInterface;
-use Ecotone\Http\KeepAsTemporaryMover\KeepAsTemporaryFileMover;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Enricher\EnrichException;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\ReferenceNotFoundException;
+use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
-use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageConverter\MessageConverter;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UploadedFileInterface;
+use ReflectionException;
 
 /**
  * Class PsrHttpMessageConverter
  * @package Ecotone\Http
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PsrHttpMessageConverter implements MessageConverter
+class PsrHttpMessageConverter implements MessageConverter, \Serializable
 {
+    public const URI_META_DATA_KEY = 'uri';
+
     private const HTTP_HEADER_PREFIX = "http_";
-    /**
-     * @var UploadedFileMover
-     */
-    private $uploadedFileMover;
     /**
      * @var PropertyEditorAccessor
      */
@@ -42,15 +44,25 @@ class PsrHttpMessageConverter implements MessageConverter
 
     /**
      * PsrHttpMessageConverter constructor.
-     * @param UploadedFileMover $uploadedFileMover
      * @param PropertyEditorAccessor $propertyEditorAccessor
      * @param PropertyReaderAccessor $propertyReaderAccessor
      */
-    public function __construct(UploadedFileMover $uploadedFileMover, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor)
+    public function __construct(PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor)
     {
-        $this->uploadedFileMover = $uploadedFileMover;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
+    }
+
+    /**
+     * @return PsrHttpMessageConverter
+     * @throws MessagingException
+     * @throws ReferenceNotFoundException
+     */
+    public static function create(): self
+    {
+        return new self (PropertyEditorAccessor::create(InMemoryReferenceSearchService::createWith([
+            SymfonyExpressionEvaluationAdapter::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+        ])), new PropertyReaderAccessor());
     }
 
     /**
@@ -58,11 +70,8 @@ class PsrHttpMessageConverter implements MessageConverter
      */
     public function fromMessage(Message $message, TypeDescriptor $targetType)
     {
-        if (!$targetType->isClassOfType(ResponseInterface::class)) {
-            return null;
-        }
-
-//http://www.jcombat.com/spring/understanding-http-message-converters-in-spring-framework
+        return null;
+        //http://www.jcombat.com/spring/understanding-http-message-converters-in-spring-framework
     }
 
     /**
@@ -74,15 +83,21 @@ class PsrHttpMessageConverter implements MessageConverter
             return null;
         }
 
-        $headerMapper = DefaultHeaderMapper::createWith(HttpHeaders::HTTP_REQUEST_HEADER_NAMES, []);
+        $headerMapper = DefaultHeaderMapper::createAllHeadersMapping();
         $data = (string)$source->getBody();
-        $contentType = $source->hasHeader(HttpHeaders::CONTENT_TYPE) ? $source->getHeaderLine(HttpHeaders::CONTENT_TYPE) : MediaType::APPLICATION_OCTET_STREAM;
+        $contentType = $source->hasHeader("content-type") ? $source->getHeaderLine("content-type") : MediaType::APPLICATION_OCTET_STREAM;
 
         $headersToMap = [];
         foreach ($source->getHeaders() as $headerName => $header) {
-            $headersToMap[strtolower($headerName)] = implode(",", $header);
+            $headerName = strtolower($headerName);
+            if (in_array($headerName, HttpHeaders::HTTP_REQUEST_HEADER_NAMES)) {
+                $headerName = $this->dashesToCamelCase($headerName);
+            }
+            $headersToMap[$headerName] = implode(",", $header);
         }
-        $headers = $headerMapper->mapToMessageHeaders($headersToMap, self::HTTP_HEADER_PREFIX);
+        unset($headersToMap[self::HTTP_HEADER_PREFIX . HttpHeaders::CONTENT_TYPE]);
+
+        $headers = $headerMapper->mapToMessageHeaders($headersToMap);
         if ($contentType === MediaType::MULTIPART_FORM_DATA) {
             $data = [];
             $contentType = MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY)->toString();
@@ -95,11 +110,11 @@ class PsrHttpMessageConverter implements MessageConverter
         }
 
         return MessageBuilder::withPayload(is_null($data) ? "" : $data)
-                ->setHeader(HttpHeaders::REQUEST_URL, (string)$source->getUri())
-                ->setHeader(HttpHeaders::REQUEST_METHOD, strtoupper($source->getMethod()))
-                ->setHeader(MessageHeaders::CONTENT_TYPE, is_array($contentType) ? array_shift($contentType) : $contentType)
-                ->setMultipleHeaders($headers)
-                ->setMultipleHeaders($messageHeaders);
+            ->setHeader(HttpHeaders::REQUEST_URL, (string)$source->getUri())
+            ->setHeader(HttpHeaders::REQUEST_METHOD, strtoupper($source->getMethod()))
+            ->setHeader(MessageHeaders::CONTENT_TYPE, is_array($contentType) ? array_shift($contentType) : $contentType)
+            ->setMultipleHeaders($headers)
+            ->setMultipleHeaders($messageHeaders);
     }
 
     /**
@@ -107,9 +122,9 @@ class PsrHttpMessageConverter implements MessageConverter
      * @param array $uploadedFiles
      * @param array $dataToEnrich
      * @return mixed
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\Handler\Enricher\EnrichException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws ReflectionException
+     * @throws EnrichException
+     * @throws MessagingException
      */
     private function addUploadedFiles(string $key, array $uploadedFiles, array $dataToEnrich)
     {
@@ -117,8 +132,11 @@ class PsrHttpMessageConverter implements MessageConverter
             $key .= "[" . $name . "]";
 
             if ($uploadedFileOrArray instanceof UploadedFileInterface) {
+                $metadata = $uploadedFileOrArray->getStream()->getMetadata();
+                Assert::keyExists($metadata, self::URI_META_DATA_KEY, "Unknown uri for uploaded file");
+
                 $uploadedMultipartFile = UploadedMultipartFile::createWith(
-                    $this->uploadedFileMover->move($uploadedFileOrArray),
+                    "file:/{$metadata[self::URI_META_DATA_KEY]}",
                     $uploadedFileOrArray->getClientFilename(),
                     $uploadedFileOrArray->getClientMediaType(),
                     $uploadedFileOrArray->getSize() ? $uploadedFileOrArray->getSize() : 0
@@ -130,7 +148,7 @@ class PsrHttpMessageConverter implements MessageConverter
                     MessageBuilder::withPayload("tmp")->build(),
                     null
                 );
-            }else {
+            } else {
                 if (!$this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($key), $dataToEnrich)) {
                     $dataToEnrich = $this->propertyEditorAccessor->enrichDataWith(
                         PropertyPath::createWith($key),
@@ -146,5 +164,29 @@ class PsrHttpMessageConverter implements MessageConverter
         }
 
         return $dataToEnrich;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function serialize()
+    {
+        return "psrHttpMessageConverter";
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function unserialize($serialized)
+    {
+        return PsrHttpMessageConverter::create();
+    }
+
+    private function dashesToCamelCase(string $header)
+    {
+        $header = str_replace(' ', '', ucwords(str_replace('-', ' ', $header)));
+        $header[0] = strtolower($header[0]);
+
+        return self::HTTP_HEADER_PREFIX . $header;
     }
 }

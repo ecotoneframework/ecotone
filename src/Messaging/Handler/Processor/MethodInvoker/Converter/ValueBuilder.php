@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -43,6 +44,14 @@ class ValueBuilder implements ParameterConverterBuilder
     public static function create(string $parameterName, $staticValue) : self
     {
         return new self($parameterName, $staticValue);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isHandling(InterfaceParameter $parameter): bool
+    {
+        return $parameter->getName() === $this->parameterName;
     }
 
     /**

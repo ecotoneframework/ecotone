@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -44,6 +45,14 @@ class PayloadExpressionBuilder implements ParameterConverterBuilder
     public static function create(string $parameterName, string $expression): self
     {
         return new self($parameterName, $expression);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isHandling(InterfaceParameter $parameter): bool
+    {
+        return $parameter->getName() === $this->parameterName;
     }
 
     /**

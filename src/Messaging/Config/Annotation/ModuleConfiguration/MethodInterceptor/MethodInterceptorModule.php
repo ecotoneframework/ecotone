@@ -28,6 +28,8 @@ use Ecotone\Messaging\Handler\Gateway\GatewayInterceptorBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -166,22 +168,43 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $isTransformer = $annotationForMethod->changeHeaders;
         $parameterConverters = $annotationForMethod->parameterConverters;
 
-        if ($isTransformer) {
-            $messageHandler = TransformerBuilder::create($methodInterceptor->getReferenceName(), $methodInterceptor->getMethodName())
-                ->withMethodParameterConverters($parameterConverterFactory->createParameterConverters(
-                    $interfaceToCall, $parameterConverters
-                ));
+        $methodParameterConverterBuilders = $parameterConverterFactory->createParameterConverters($interfaceToCall, $parameterConverters);
+        if (!$methodParameterConverterBuilders) {
+            $methodParameterConverterBuilders = MethodInvoker::createDefaultMethodParameters($interfaceToCall, $methodParameterConverterBuilders, false);
+        }
+        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+            if (self::hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
+                continue;
+            }
 
-            return $messageHandler;
+            $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
+        }
+
+        if ($isTransformer) {
+            return TransformerBuilder::create($methodInterceptor->getReferenceName(), $methodInterceptor->getMethodName())
+                ->withMethodParameterConverters($methodParameterConverterBuilders);
         }
 
         $messageHandler = ServiceActivatorBuilder::create($methodInterceptor->getReferenceName(), $methodInterceptor->getMethodName())
             ->withPassThroughMessageOnVoidInterface(true)
-            ->withMethodParameterConverters($parameterConverterFactory->createParameterConverters(
-                $interfaceToCall, $parameterConverters
-            ));
+            ->withMethodParameterConverters($methodParameterConverterBuilders);
 
         return $messageHandler;
+    }
+
+    /**
+     * @param $methodParameterConverterBuilders
+     * @param \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter
+     * @return bool
+     */
+    private static function hasParameterConverterFor($methodParameterConverterBuilders, \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter): bool
+    {
+        foreach ($methodParameterConverterBuilders as $methodParameterConverterBuilder) {
+            if ($methodParameterConverterBuilder->isHandling($interfaceParameter)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

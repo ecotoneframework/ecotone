@@ -2,10 +2,12 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class AnnotationInterceptorConverterBuilder
@@ -43,6 +45,17 @@ class InterceptorConverterBuilder implements ParameterConverterBuilder
     public static function create(InterfaceToCall $interfaceToCall, array $endpointAnnotations) : self
     {
         return new self($interfaceToCall, $endpointAnnotations);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isHandling(InterfaceParameter $parameter): bool
+    {
+        return
+            $parameter->hasType(TypeDescriptor::create(InterfaceToCall::class))
+            || $this->interceptedInterface->hasMethodAnnotation($parameter->getTypeDescriptor())
+            || $this->interceptedInterface->hasClassAnnotation($parameter->getTypeDescriptor());
     }
 
     /**

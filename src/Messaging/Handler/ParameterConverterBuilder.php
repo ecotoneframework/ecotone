@@ -16,6 +16,12 @@ interface ParameterConverterBuilder
     public function getRequiredReferences() : array;
 
     /**
+     * @param InterfaceParameter $parameter
+     * @return bool
+     */
+    public function isHandling(InterfaceParameter $parameter) : bool;
+
+    /**
      * @param ReferenceSearchService $referenceSearchService
      * @return ParameterConverter
      */

@@ -16,8 +16,13 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAn
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -336,52 +341,64 @@ class AggregateMessagingModule implements AnnotationModule
     }
 
     /**
+     * @param $methodParameterConverterBuilders
+     * @param \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter
+     * @return bool
+     */
+    private static function hasParameterConverterFor($methodParameterConverterBuilders, \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter): bool
+    {
+        foreach ($methodParameterConverterBuilders as $methodParameterConverterBuilder) {
+            if ($methodParameterConverterBuilder->isHandling($interfaceParameter)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param InterfaceToCall $relatedClassInterface
-     * @param array $parameterConverterAnnotations
+     * @param array $methodParameterConverterBuilders
      * @param AnnotationRegistration $registration
      *
      * @return array
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    private function getParameterConverters(InterfaceToCall $relatedClassInterface, array $parameterConverterAnnotations, AnnotationRegistration $registration): array
+    private function getParameterConverters(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotationRegistration $registration): array
     {
+        $methodParameterConverterBuilders = $this->parameterConverterAnnotationFactory->createParameterConverters($relatedClassInterface, $methodParameterConverterBuilders);
+
         if ($registration->getAnnotationForMethod()->messageClassName) {
-            foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
-                if ($relatedClassInterface->getFirstParameter()->getName() === $interfaceParameter->getName() && $interfaceParameter->getTypeDescriptor()->isNonCollectionArray()) {
-                    $allHeaders = new Headers();
-                    $allHeaders->parameterName = $interfaceParameter->getName();
-
-                    $parameterConverterAnnotations[] = $allHeaders;
-                    continue;
-                }
-
-                $parameterConverterAnnotations[] = $this->createReferenceConverter($interfaceParameter);
+            if ($relatedClassInterface->hasNoParameters()) {
+                return [];
             }
-        }else if ($relatedClassInterface->hasMoreThanOneParameter() && !$parameterConverterAnnotations) {
-            $interfaceParameters = $relatedClassInterface->getInterfaceParameters();
 
-            for ($index = 0; $index < count($interfaceParameters); $index++) {
-                $interfaceParameter = $interfaceParameters[$index];
-                if ($index == 0) {
-                    $payload = new Payload();
-                    $payload->parameterName = $interfaceParameter->getName();
-                    $parameterConverterAnnotations[] = $payload;
+            if ($relatedClassInterface->getFirstParameter()->getTypeDescriptor()->isNonCollectionArray() && !self::hasParameterConverterFor($methodParameterConverterBuilders, $relatedClassInterface->getFirstParameter())) {
+                $methodParameterConverterBuilders[] = AllHeadersBuilder::createWith($relatedClassInterface->getFirstParameterName());
+            }
+
+            foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
+                if (self::hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
                     continue;
                 }
 
-                if ($interfaceParameter->getTypeDescriptor()->isNonCollectionArray()) {
-                    $allHeaders = new Headers();
-                    $allHeaders->parameterName = $interfaceParameter->getName();
-
-                    $parameterConverterAnnotations[] = $allHeaders;
-                }else {
-                    $parameterConverterAnnotations[] = $this->createReferenceConverter($interfaceParameter);
-                }
+                $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
             }
         }
 
-        return $this->parameterConverterAnnotationFactory->createParameterConverters($relatedClassInterface, $parameterConverterAnnotations);
+        if (!$methodParameterConverterBuilders) {
+            $methodParameterConverterBuilders = MethodInvoker::createDefaultMethodParameters($relatedClassInterface, $methodParameterConverterBuilders, false);
+        }
+
+        foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
+            if (self::hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
+                continue;
+            }
+
+            $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
+        }
+
+        return $methodParameterConverterBuilders;
     }
 
     /**
@@ -427,17 +444,5 @@ class AggregateMessagingModule implements AnnotationModule
             ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
 
         return $messageHandlerBuilder;
-    }
-
-    /**
-     * @param \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter
-     * @return Reference
-     */
-    private function createReferenceConverter(\Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter): Reference
-    {
-        $reference = new Reference();
-        $reference->parameterName = $interfaceParameter->getName();
-        $reference->referenceName = $interfaceParameter->getTypeHint();
-        return $reference;
     }
 }

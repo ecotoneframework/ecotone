@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -60,6 +61,14 @@ class HeaderBuilder implements ParameterConverterBuilder
     public static function createOptional(string $parameterName, string $headerName) : self
     {
         return new self($parameterName, $headerName, false);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isHandling(InterfaceParameter $parameter): bool
+    {
+        return $parameter->getName() === $this->parameterName;
     }
 
     /**

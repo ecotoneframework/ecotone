@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use ReflectionException;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\MethodInterceptorModule;
@@ -19,6 +21,7 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\MessagingException;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorWithServicesExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\TransformerInterceptorExample;
 
 /**
@@ -108,6 +111,54 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         $this->assertEquals(
             ["someMethodInterceptor"],
             $configuration->getRequiredReferences()
+        );
+    }
+
+    public function test_registering_with_interceptor_containing_service_references_for_parameter()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    ServiceActivatorInterceptorWithServicesExample::class,
+                    InterfaceToCall::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingBefore"),
+                    ServiceActivatorBuilder::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingBefore")
+                        ->withPassThroughMessageOnVoidInterface(true)
+                        ->withMethodParameterConverters([
+                            PayloadBuilder::create("name"),
+                            AllHeadersBuilder::createWith("metadata"),
+                            ReferenceBuilder::create("stdClass", \stdClass::class)
+                        ]),
+                    2,
+                    ""
+
+                )
+            )
+            ->registerAfterMethodInterceptor(
+                MethodInterceptor::create(
+                    ServiceActivatorInterceptorWithServicesExample::class,
+                    InterfaceToCall::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingAfter"),
+                    ServiceActivatorBuilder::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingAfter")
+                        ->withPassThroughMessageOnVoidInterface(true)
+                        ->withMethodParameterConverters([
+                            PayloadBuilder::create("name"),
+                            ReferenceBuilder::create("stdClass", \stdClass::class)
+                        ]),
+                    2,
+                    ""
+
+                )
+            );
+
+        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
+            ServiceActivatorInterceptorWithServicesExample::class
+        ]);
+        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
+        $configuration = $this->createMessagingSystemConfiguration();
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+
+        $this->assertEquals(
+            $expectedConfiguration,
+            $configuration
         );
     }
 

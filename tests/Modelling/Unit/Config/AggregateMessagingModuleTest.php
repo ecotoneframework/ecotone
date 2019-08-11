@@ -120,6 +120,9 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_aggregate_command_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith( AggregateCommandHandlerExample::class, "doAction",  DoStuffCommand::class)
+                            ->withMethodParameterConverters([
+                                PayloadBuilder::create("command")
+                            ])
                             ->withInputChannelName(DoStuffCommand::class)
                             ->withEndpointId('command-id');
 
@@ -289,6 +292,9 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_aggregate_query_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerExample::class, "doStuff",  SomeQuery::class)
+                            ->withMethodParameterConverters([
+                                PayloadBuilder::create("query")
+                            ])
                             ->withInputChannelName( SomeQuery::class)
                             ->withEndpointId('some-id');
 
@@ -326,6 +332,9 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_aggregate_query_handler_with_output_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
+            ->withMethodParameterConverters([
+                PayloadBuilder::create("query")
+            ])
             ->withInputChannelName( SomeQuery::class)
             ->withEndpointId("some-id")
             ->withOutputMessageChannel("outputChannel");
@@ -362,6 +371,9 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_aggregate_with_custom_input_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
+            ->withMethodParameterConverters([
+                PayloadBuilder::create("query")
+            ])
             ->withInputChannelName("inputChannel")
             ->withEndpointId("some-id");
 
@@ -400,6 +412,9 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_aggregate_without_query_class_with_only_input_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith( AggregateQueryHandlerWithOutputChannelExample::class, "doStuff",  SomeQuery::class)
+            ->withMethodParameterConverters([
+                PayloadBuilder::create("query")
+            ])
             ->withInputChannelName("inputChannel")
             ->withEndpointId("some-id");
 

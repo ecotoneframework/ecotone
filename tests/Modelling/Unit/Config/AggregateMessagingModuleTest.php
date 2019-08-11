@@ -47,7 +47,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \ReflectionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_throwing_configuration_exception_if_command_handler_has_no_information_about_command()
+    public function test_throwing_configuration_exception_if_command_handler_has_no_information_about_command()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -64,7 +64,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws \ReflectionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_throwing_exception_if_query_handler_has_no_return_value()
+    public function test_throwing_exception_if_query_handler_has_no_return_value()
     {
         $this->expectException(InvalidArgumentException::class);
 

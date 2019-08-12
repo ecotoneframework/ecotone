@@ -114,54 +114,6 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         );
     }
 
-    public function test_registering_with_interceptor_containing_service_references_for_parameter()
-    {
-        $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerBeforeMethodInterceptor(
-                MethodInterceptor::create(
-                    ServiceActivatorInterceptorWithServicesExample::class,
-                    InterfaceToCall::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingBefore"),
-                    ServiceActivatorBuilder::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingBefore")
-                        ->withPassThroughMessageOnVoidInterface(true)
-                        ->withMethodParameterConverters([
-                            PayloadBuilder::create("name"),
-                            AllHeadersBuilder::createWith("metadata"),
-                            ReferenceBuilder::create("stdClass", \stdClass::class)
-                        ]),
-                    2,
-                    ""
-
-                )
-            )
-            ->registerAfterMethodInterceptor(
-                MethodInterceptor::create(
-                    ServiceActivatorInterceptorWithServicesExample::class,
-                    InterfaceToCall::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingAfter"),
-                    ServiceActivatorBuilder::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingAfter")
-                        ->withPassThroughMessageOnVoidInterface(true)
-                        ->withMethodParameterConverters([
-                            PayloadBuilder::create("name"),
-                            ReferenceBuilder::create("stdClass", \stdClass::class)
-                        ]),
-                    2,
-                    ""
-
-                )
-            );
-
-        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
-            ServiceActivatorInterceptorWithServicesExample::class
-        ]);
-        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
-        $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
-
-        $this->assertEquals(
-            $expectedConfiguration,
-            $configuration
-        );
-    }
-
     public function test_registering_transformer_interceptor()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()

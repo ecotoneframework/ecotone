@@ -182,6 +182,7 @@ class ProxyFactory implements \Serializable
                 'className' => $interfaceName,
                 'factory' => RemoteObjectFactory::class,
                 'proxyManagerVersion' => Version::getVersion(),
+                'proxyOptions' => []
             ]);
 
         return class_exists($proxyClassName);

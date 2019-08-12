@@ -7,6 +7,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -104,17 +105,27 @@ class MethodInterceptor implements InterceptorWithPointCut
         $interceptedMessageHandler = clone $clone->messageHandler;
 
         if ($interceptedMessageHandler instanceof MessageHandlerBuilderWithParameterConverters) {
-            $parameterConverters =
+            $methodParameterConverterBuilders = $interceptedMessageHandler->getParameterConverters();
+            $methodParameterConverterBuilders = MethodInvoker::createDefaultMethodParameters($this->interceptorInterfaceToCall, $methodParameterConverterBuilders, false);
+            $methodParameterConverterBuilders =
                 array_merge(
                     [InterceptorConverterBuilder::create($interceptedInterface, $endpointAnnotations)],
                     MethodInvoker::createDefaultMethodParameters(
                         $this->interceptorInterfaceToCall,
-                        $interceptedMessageHandler->getParameterConverters(),
+                        $methodParameterConverterBuilders,
                         false
                     )
                 );
 
-            $interceptedMessageHandler->withMethodParameterConverters($parameterConverters);
+            foreach ($this->interceptorInterfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+                if (MethodInvoker::hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
+                    continue;
+                }
+
+                $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
+            }
+
+            $interceptedMessageHandler->withMethodParameterConverters($methodParameterConverterBuilders);
         }
         $clone->messageHandler = $interceptedMessageHandler;
 

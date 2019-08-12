@@ -148,10 +148,14 @@ final class MethodInvoker implements MessageProcessor
 
         if ($missingParametersAmount > 0) {
             if ($missingParametersAmount >= 2 && $interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()) {
-                $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild);
+                if (!self::hasPayloadConverter($passedMethodParameterConverters)) {
+                    $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild);
+                }
                 $passedMethodParameterConverters[] = $shouldBeBuild ? new AllHeadersConverter($interfaceToCall->getSecondParameter()->getName()) : AllHeadersBuilder::createWith($interfaceToCall->getSecondParameter()->getName());
             } else {
-                $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild);
+                if (!self::hasPayloadConverter($passedMethodParameterConverters)) {
+                    $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild);
+                }
             }
         }
 
@@ -258,6 +262,21 @@ final class MethodInvoker implements MessageProcessor
     }
 
     /**
+     * @param ParameterConverterBuilder[] $methodParameterConverterBuilders
+     * @param InterfaceParameter $interfaceParameter
+     * @return bool
+     */
+    public static function hasParameterConverterFor(array $methodParameterConverterBuilders, InterfaceParameter $interfaceParameter): bool
+    {
+        foreach ($methodParameterConverterBuilders as $methodParameterConverterBuilder) {
+            if ($methodParameterConverterBuilder->isHandling($interfaceParameter)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param $objectToInvokeOn
      * @param string $objectMethodName
      * @param ParameterConverterBuilder[] $methodParameters
@@ -279,6 +298,21 @@ final class MethodInvoker implements MessageProcessor
         }
 
         return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $orderedAroundMethodInterceptorReferences), $endpointAnnotations, false);
+    }
+
+    /**
+     * @param array $passedMethodParameterConverters
+     * @return bool
+     */
+    private static function hasPayloadConverter(array $passedMethodParameterConverters): bool
+    {
+        foreach ($passedMethodParameterConverters as $parameterConverter) {
+            if ($parameterConverter instanceof PayloadBuilder) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

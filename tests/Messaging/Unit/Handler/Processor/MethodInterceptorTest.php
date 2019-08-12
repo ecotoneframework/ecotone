@@ -3,6 +3,7 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
@@ -10,6 +11,8 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConve
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorWithServicesExample;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
 use Test\Ecotone\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
@@ -43,9 +46,26 @@ class MethodInterceptorTest extends TestCase
 
         $this->assertEquals(
             [
-                InterceptorConverterBuilder::create(InterfaceToCall::create(CalculatorInterceptor::class, "multiplyBefore"), []),
+                InterceptorConverterBuilder::create(InterfaceToCall::create(Calculator::class, "calculate"), []),
                 PayloadBuilder::create("amount"),
                 AllHeadersBuilder::createWith("metadata")
+            ],
+            $methodInterceptor->addInterceptedInterfaceToCall(InterfaceToCall::create(Calculator::class, "calculate"), [])
+                ->getInterceptingObject()
+                ->getParameterConverters()
+        );
+    }
+
+    public function test_adding_reference_parameter_converters()
+    {
+        $methodInterceptor = MethodInterceptor::create(ServiceActivatorInterceptorWithServicesExample::class, InterfaceToCall::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingBefore"), ServiceActivatorBuilder::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingBefore"), 1, "");
+
+        $this->assertEquals(
+            [
+                InterceptorConverterBuilder::create(InterfaceToCall::create(CalculatorInterceptor::class, "multiplyBefore"), []),
+                PayloadBuilder::create("name"),
+                AllHeadersBuilder::createWith("metadata"),
+                ReferenceBuilder::create("stdClass", \stdClass::class)
             ],
             $methodInterceptor->addInterceptedInterfaceToCall(InterfaceToCall::create(CalculatorInterceptor::class, "multiplyBefore"), [])
                 ->getInterceptingObject()

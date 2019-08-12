@@ -25,14 +25,18 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAn
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Gateway\GatewayInterceptorBuilder;
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MethodInterceptorModule
@@ -99,11 +103,11 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $aroundInterceptors = [];
         $postCallInterceptors = [];
         foreach ($methodsInterceptors as $methodInterceptor) {
-            $interfaceToCall = InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName());
+            $interceptorInterface = InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName());
 
-            if ($interfaceToCall->hasMethodAnnotation($aroundAnnotation)) {
+            if ($interceptorInterface->hasMethodAnnotation($aroundAnnotation)) {
                 /** @var Around $aroundInterceptor */
-                $aroundInterceptor = $interfaceToCall->getMethodAnnotation($aroundAnnotation);
+                $aroundInterceptor = $interceptorInterface->getMethodAnnotation($aroundAnnotation);
                 $aroundInterceptors[] = AroundInterceptorReference::create(
                     $methodInterceptor->getReferenceName(),
                     $methodInterceptor->getReferenceName(),
@@ -113,37 +117,37 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 );
             }
 
-            if ($interfaceToCall->hasMethodAnnotation($beforeSendAnnotation)) {
+            if ($interceptorInterface->hasMethodAnnotation($beforeSendAnnotation)) {
                 /** @var Before $beforeInterceptor */
-                $beforeSendInterceptor = $interfaceToCall->getMethodAnnotation($beforeSendAnnotation);
+                $beforeSendInterceptor = $interceptorInterface->getMethodAnnotation($beforeSendAnnotation);
                 $beforeSendInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     $methodInterceptor->getReferenceName(),
                     InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
-                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
+                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface),
                     $beforeSendInterceptor->precedence,
                     $beforeSendInterceptor->pointcut
                 );
             }
 
-            if ($interfaceToCall->hasMethodAnnotation($beforeAnnotation)) {
+            if ($interceptorInterface->hasMethodAnnotation($beforeAnnotation)) {
                 /** @var Before $beforeInterceptor */
-                $beforeInterceptor = $interfaceToCall->getMethodAnnotation($beforeAnnotation);
+                $beforeInterceptor = $interceptorInterface->getMethodAnnotation($beforeAnnotation);
                 $preCallInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     $methodInterceptor->getReferenceName(),
                     InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
-                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
+                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface),
                     $beforeInterceptor->precedence,
                     $beforeInterceptor->pointcut
                 );
             }
 
-            if ($interfaceToCall->hasMethodAnnotation($afterAnnotation)) {
+            if ($interceptorInterface->hasMethodAnnotation($afterAnnotation)) {
                 /** @var After $afterInterceptor */
-                $afterInterceptor = $interfaceToCall->getMethodAnnotation($afterAnnotation);
+                $afterInterceptor = $interceptorInterface->getMethodAnnotation($afterAnnotation);
                 $postCallInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     $methodInterceptor->getReferenceName(),
                     InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
-                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interfaceToCall),
+                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface),
                     $afterInterceptor->precedence,
                     $afterInterceptor->pointcut
                 );
@@ -158,8 +162,8 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
      * @param ParameterConverterAnnotationFactory $parameterConverterFactory
      * @param InterfaceToCall $interfaceToCall
      * @return MessageHandlerBuilderWithOutputChannel
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     private static function createMessageHandler(AnnotationRegistration $methodInterceptor, ParameterConverterAnnotationFactory $parameterConverterFactory, InterfaceToCall $interfaceToCall): MessageHandlerBuilderWithOutputChannel
     {
@@ -169,17 +173,6 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $parameterConverters = $annotationForMethod->parameterConverters;
 
         $methodParameterConverterBuilders = $parameterConverterFactory->createParameterConverters($interfaceToCall, $parameterConverters);
-        if (!$methodParameterConverterBuilders) {
-            $methodParameterConverterBuilders = MethodInvoker::createDefaultMethodParameters($interfaceToCall, $methodParameterConverterBuilders, false);
-        }
-        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-            if (self::hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
-                continue;
-            }
-
-            $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
-        }
-
         if ($isTransformer) {
             return TransformerBuilder::create($methodInterceptor->getReferenceName(), $methodInterceptor->getMethodName())
                 ->withMethodParameterConverters($methodParameterConverterBuilders);
@@ -190,21 +183,6 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
             ->withMethodParameterConverters($methodParameterConverterBuilders);
 
         return $messageHandler;
-    }
-
-    /**
-     * @param $methodParameterConverterBuilders
-     * @param \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter
-     * @return bool
-     */
-    private static function hasParameterConverterFor($methodParameterConverterBuilders, \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter): bool
-    {
-        foreach ($methodParameterConverterBuilders as $methodParameterConverterBuilder) {
-            if ($methodParameterConverterBuilder->isHandling($interfaceParameter)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

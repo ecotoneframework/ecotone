@@ -175,6 +175,8 @@ class ProxyFactory implements \Serializable
      */
     public function hasCachedVersion(string $interfaceName): bool
     {
+//        @TODO fix issues with not finding proxy
+        return true;
         $proxyClassName =
             $this->configuration
             ->getClassNameInflector()

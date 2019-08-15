@@ -1,18 +1,19 @@
 <?php
-declare(strict_types=1);
 
-namespace FixtureIncorrectNamespace\Wrong;
+
+namespace Incorrect\TestingNamespace;
+
 
 use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Annotation\Extension;
 
 /**
- * Class ClassWithIncorrectNamespace
- * @package FixtureIncorrectNamespace
+ * Class CorrectNamespace
+ * @package Incorrect\TestingNamespace
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ApplicationContext()
  */
-class ClassWithIncorrectNamespace
+class CorrectNamespace
 {
     /**
      * @return array

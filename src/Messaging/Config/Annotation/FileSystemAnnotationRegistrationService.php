@@ -113,13 +113,17 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
 
     /**
      * @param string $rootProjectDir
-     * @param array $namespaces
+     * @param array $namespacesToUse
      * @param bool $loadSrc
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    private function init(string $rootProjectDir, array $namespaces, bool $loadSrc)
+    private function init(string $rootProjectDir, array $namespacesToUse, bool $loadSrc)
     {
+        $namespacesToUse = array_map(function(string $namespace) {
+            return trim($namespace, "\t\n\r\\");
+        }, $namespacesToUse);
+
         $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
         $classes = [];
         $composerPath = $rootProjectDir . "/composer.json";
@@ -130,14 +134,14 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
             $composerJsonDecoded = json_decode(file_get_contents($composerPath), true);
 
             if (isset($composerJsonDecoded['autoload'])) {
-                $namespaces = array_merge($namespaces, $getUsedPathsFromAutoload->getNamespacesForSrcCatalog($composerJsonDecoded['autoload']));
+                $namespacesToUse = array_merge($namespacesToUse, $getUsedPathsFromAutoload->getNamespacesForSrcCatalog($composerJsonDecoded['autoload']));
             }
             if (isset($composerJsonDecoded['autoload-dev'])) {
-                $namespaces = array_merge($namespaces, $getUsedPathsFromAutoload->getNamespacesForSrcCatalog($composerJsonDecoded['autoload-dev']));
+                $namespacesToUse = array_merge($namespacesToUse, $getUsedPathsFromAutoload->getNamespacesForSrcCatalog($composerJsonDecoded['autoload-dev']));
             }
         }
 
-        $paths = $this->getPathsToSearchIn($getUsedPathsFromAutoload, $rootProjectDir, $namespaces);
+        $paths = $this->getPathsToSearchIn($getUsedPathsFromAutoload, $rootProjectDir, $namespacesToUse);
 
         foreach ($paths as $path) {
             if (!is_dir($path)) {
@@ -169,11 +173,11 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
 
                     if (preg_match_all("#namespace[\s]*([^\n\s\(\)\[\]\{\}\$]*);#", $line, $results)) {
                         $namespace = isset($results[1][0]) ? trim($results[1][0]) : "";
-                        $namespace = trim($namespace);
+                        $namespace = trim($namespace, "\t\n\r\\");
 
 //                        Add all in resolved paths
-                        if ($this->isInAvailableNamespaces($namespaces, $namespace)) {
-                            $classes[] = trim($namespace) . '\\' . $fileName;
+                        if ($this->isInAvailableNamespaces($namespacesToUse, $namespace)) {
+                            $classes[] = $namespace . '\\' . $fileName;
                             break;
                         }
                     }
@@ -231,8 +235,7 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     private function isInAvailableNamespaces(array $namespaces, $namespace): bool
     {
         foreach ($namespaces as $namespaceToUse) {
-            $namespaceToUse = trim($namespaceToUse);
-            if (strpos($namespace, trim($namespaceToUse)) !== false) {
+            if (strpos($namespace, $namespaceToUse) === 0) {
                 return true;
             }
         }

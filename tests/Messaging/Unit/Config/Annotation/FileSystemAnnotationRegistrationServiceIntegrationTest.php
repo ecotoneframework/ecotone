@@ -229,11 +229,26 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
             new AnnotationReader(),
             self::ROOT_DIR,
             [
-                "FixtureIncorrectNamespace"
+                "Incorrect"
             ],
             "test",
             false
         );
+    }
+
+    public function test_not_including_classes_from_unregistered_namespace()
+    {
+        new FileSystemAnnotationRegistrationService(
+            new AnnotationReader(),
+            self::ROOT_DIR,
+            [
+                "TestingNamespace"
+            ],
+            "test",
+            false
+        );
+
+        $this->assertTrue(true);
     }
 
     /**

@@ -21,7 +21,8 @@
         },
         "psr-0": {
             "FixtureAutoloadTest\\": "tests\\Messaging",
-            "FixtureIncorrectNamespace\\": "tests\\Messaging"
+            "TestingNamespace\\": "tests\\Messaging",
+            "Incorrect\\": "tests\\Messaging\\TestingNamespace"
         }
     },
     "require": {

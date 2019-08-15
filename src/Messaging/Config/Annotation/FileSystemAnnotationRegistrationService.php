@@ -236,7 +236,13 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     {
         foreach ($namespaces as $namespaceToUse) {
             if (strpos($namespace, $namespaceToUse) === 0) {
-                return true;
+                $namespaceSuffix = str_replace($namespaceToUse, "", $namespace);
+
+                if ($namespaceSuffix === "") {
+                    return true;
+                }
+
+                return $namespaceSuffix[0] === "\\";
             }
         }
 

@@ -22,7 +22,7 @@ class CommandBusRouter
     /**
      * @var array
      */
-    private $availableChannelNames;
+    private $availableChannelNames = [];
     /**
      * @var ChannelResolver
      */

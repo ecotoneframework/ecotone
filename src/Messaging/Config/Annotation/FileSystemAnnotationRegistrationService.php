@@ -120,10 +120,6 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
      */
     private function init(string $rootProjectDir, array $namespacesToUse, bool $loadSrc)
     {
-        $namespacesToUse = array_map(function(string $namespace) {
-            return trim($namespace, "\t\n\r\\");
-        }, $namespacesToUse);
-
         $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
         $classes = [];
         $composerPath = $rootProjectDir . "/composer.json";
@@ -141,6 +137,9 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
             }
         }
 
+        $namespacesToUse = array_map(function(string $namespace) {
+            return trim($namespace, "\t\n\r\\");
+        }, $namespacesToUse);
         $paths = $this->getPathsToSearchIn($getUsedPathsFromAutoload, $rootProjectDir, $namespacesToUse);
 
         foreach ($paths as $path) {

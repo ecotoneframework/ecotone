@@ -23,7 +23,7 @@ class QueryBusRouter
     /**
      * @var array
      */
-    private $availableCommandChannels;
+    private $availableCommandChannels = [];
     /**
      * @var ChannelResolver
      */

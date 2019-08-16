@@ -340,6 +340,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     public function test_registering_reference_from_interface_to_call_on_prepare_method()
     {
         $messagingSystem = MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
+            null,
             InMemoryModuleMessaging::createWith(
                 [
                     ExampleModuleConfiguration::createWithHandlers([
@@ -993,6 +994,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $messagingSystemConfiguration =
             MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
+                null,
                     InMemoryModuleMessaging::createEmpty(),
                     InMemoryReferenceTypeFromNameResolver::createFromObjects($objects),
                     false,

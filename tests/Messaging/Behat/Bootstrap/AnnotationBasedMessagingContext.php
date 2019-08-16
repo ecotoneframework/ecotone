@@ -44,9 +44,11 @@ class AnnotationBasedMessagingContext implements Context
     /**
      * @Given I active messaging for namespace :namespace
      * @param string $namespace
-     * @throws MessagingException
      * @throws AnnotationException
      * @throws ConfigurationException
+     * @throws MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function iActiveMessagingForNamespace(string $namespace)
     {

@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Config;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
@@ -131,11 +132,16 @@ final class MessagingSystemConfiguration implements Configuration
      * @var string[]
      */
     private $gatewayClassesToGenerateProxies = [];
+    /**
+     * @var string
+     */
+    private $rootPathToSearchConfigurationFor;
 
     /**
      * Only one instance at time
      *
      * Configuration constructor.
+     * @param string|null $rootPathToSearchConfigurationFor
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param object[] $extensionObjects
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
@@ -147,9 +153,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReflectionException
      */
-    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded, ProxyFactory $proxyFactory)
+    private function __construct(?string $rootPathToSearchConfigurationFor, ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded, ProxyFactory $proxyFactory)
     {
         $this->isLazyConfiguration = $isLazyLoaded;
+        $this->rootPathToSearchConfigurationFor = $rootPathToSearchConfigurationFor;
         $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $proxyFactory);
     }
 
@@ -487,11 +494,15 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @return Configuration
+     * @throws AnnotationException
+     * @throws ConfigurationException
+     * @throws InvalidArgumentException
      * @throws MessagingException
+     * @throws ReflectionException
      */
     public static function prepare(ModuleRetrievingService $moduleConfigurationRetrievingService): Configuration
     {
-        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), false, ProxyFactory::createNoCache());
+        return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), false, ProxyFactory::createNoCache());
     }
 
     /**
@@ -511,7 +522,10 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public static function createWithCachedReferenceObjectsForNamespaces(string $rootPathToSearchConfigurationFor, array $namespaces, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, string $environment, bool $isLazyLoaded, bool $loadSrc, ProxyFactory $proxyFactory): Configuration
     {
+        self::registerAnnotationAutoloader($rootPathToSearchConfigurationFor);
+
         return MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
+            $rootPathToSearchConfigurationFor,
             new AnnotationModuleRetrievingService(
                 new FileSystemAnnotationRegistrationService(
                     new AnnotationReader(),
@@ -528,6 +542,7 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
+     * @param string|null $rootProjectDirectoryPath
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
      * @param bool $isLazyLoaded
@@ -539,9 +554,9 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReflectionException
      */
-    public static function prepareWithCachedReferenceObjects(ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded, ProxyFactory $proxyFactory): Configuration
+    public static function prepareWithCachedReferenceObjects(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded, ProxyFactory $proxyFactory): Configuration
     {
-        return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $isLazyLoaded, $proxyFactory);
+        return new self($rootProjectDirectoryPath, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $isLazyLoaded, $proxyFactory);
     }
 
     /**
@@ -875,6 +890,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService): ConfiguredMessagingSystem
     {
+        self::registerAnnotationAutoloader($this->rootPathToSearchConfigurationFor);
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall, $this->isLazyConfiguration, $referenceSearchService);
         if (!$this->isLazyConfiguration) {
             $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry);
@@ -950,5 +966,20 @@ final class MessagingSystemConfiguration implements Configuration
     private function __clone()
     {
 
+    }
+
+    /**
+     * @param string|null $rootPathToSearchConfigurationFor
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    private static function registerAnnotationAutoloader(?string $rootPathToSearchConfigurationFor): void
+    {
+        if ($rootPathToSearchConfigurationFor) {
+            $path = $rootPathToSearchConfigurationFor . '/vendor/autoload.php';
+            Assert::isTrue(file_exists($path), "Can't find autoload file on {$path}. Is autoload generated correctly?");
+            $loader = require $path;
+            AnnotationRegistry::registerLoader(array($loader, "loadClass"));
+        }
     }
 }

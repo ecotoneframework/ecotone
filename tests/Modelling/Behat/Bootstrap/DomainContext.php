@@ -2,8 +2,6 @@
 
 namespace Test\Ecotone\Modelling\Behat\Bootstrap;
 
-require_once __DIR__ . "/../../../TestBootstrap.php";
-
 use Behat\Behat\Context\Context;
 use Ecotone\Messaging\Conversion\MediaType;
 use PHPUnit\Framework\TestCase;

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
+use Ecotone\Messaging\ContextualPollableChannel;
 use Ecotone\Messaging\Endpoint\EntrypointGateway;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\StoppableConsumer;
@@ -19,6 +20,10 @@ use Ecotone\Messaging\Support\MessageBuilder;
 class PollerTaskExecutor implements TaskExecutor
 {
     /**
+     * @var string
+     */
+    private $endpointId;
+    /**
      * @var PollableChannel
      */
     private $pollableChannel;
@@ -29,18 +34,25 @@ class PollerTaskExecutor implements TaskExecutor
 
     /**
      * PollingConsumerTaskExecutor constructor.
+     * @param string $endpointId
      * @param PollableChannel $pollableChannel
      * @param EntrypointGateway $entrypointGateway
      */
-    public function __construct(PollableChannel $pollableChannel, EntrypointGateway $entrypointGateway)
+    public function __construct(string $endpointId, PollableChannel $pollableChannel, EntrypointGateway $entrypointGateway)
     {
+        $this->endpointId = $endpointId;
         $this->pollableChannel = $pollableChannel;
         $this->entrypointGateway = $entrypointGateway;
     }
 
     public function execute(): void
     {
-        $message = $this->pollableChannel->receive();
+        if ($this->pollableChannel instanceof ContextualPollableChannel) {
+            $message = $this->pollableChannel->receiveWithEndpointId($this->endpointId);
+        }else {
+            $message = $this->pollableChannel->receive();
+        }
+
 
         if ($message) {
             $acknowledgementCallback = NullAcknowledgementCallback::create();

@@ -46,7 +46,7 @@ class PollerTaskExecutorTest extends TestCase
      */
     private function createPoller(QueueChannel $pollableChannel, MockObject $gateway): PollerTaskExecutor
     {
-        $pollingExecutor = new PollerTaskExecutor($pollableChannel, $gateway);
+        $pollingExecutor = new PollerTaskExecutor("", $pollableChannel, $gateway);
         return $pollingExecutor;
     }
 

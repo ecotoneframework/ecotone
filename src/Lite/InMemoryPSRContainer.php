@@ -36,6 +36,20 @@ class InMemoryPSRContainer implements ContainerInterface
     }
 
     /**
+     * @param array $objects
+     * @return InMemoryPSRContainer
+     */
+    public static function createFromObjects(array $objects) : self
+    {
+        $map = [];
+        foreach ($objects as $object) {
+            $map[get_class($object)] = $object;
+        }
+
+        return new self($map);
+    }
+
+    /**
      * @return InMemoryPSRContainer
      */
     public static function createEmpty() : self

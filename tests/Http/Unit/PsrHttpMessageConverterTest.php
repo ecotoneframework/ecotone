@@ -298,12 +298,7 @@ class PsrHttpMessageConverterTest extends MessagingTest
      */
     private function createPsrHttpMessageConverter(): PsrHttpMessageConverter
     {
-        $psrHttpMessageConverter = new PsrHttpMessageConverter(
-            PropertyEditorAccessor::create(InMemoryReferenceSearchService::createWith([
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
-            ])),
-            new PropertyReaderAccessor()
-        );
+        $psrHttpMessageConverter = PsrHttpMessageConverter::create();
 
         return $psrHttpMessageConverter;
     }

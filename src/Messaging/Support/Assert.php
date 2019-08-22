@@ -24,6 +24,19 @@ class Assert
     }
 
     /**
+     * @param bool $toCheck
+     * @param string $message
+     * @throws InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public static function isFalse(bool $toCheck, string $message) : void
+    {
+        if ($toCheck) {
+            throw InvalidArgumentException::create($message);
+        }
+    }
+
+    /**
      * @param $valueToCheck
      * @param string $exceptionMessage
      * @throws \Ecotone\Messaging\MessagingException

@@ -44,25 +44,18 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
 
     /**
      * PsrHttpMessageConverter constructor.
-     * @param PropertyEditorAccessor $propertyEditorAccessor
-     * @param PropertyReaderAccessor $propertyReaderAccessor
      */
-    public function __construct(PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor)
+    private function __construct()
     {
-        $this->propertyEditorAccessor = $propertyEditorAccessor;
-        $this->propertyReaderAccessor = $propertyReaderAccessor;
+
     }
 
     /**
      * @return PsrHttpMessageConverter
-     * @throws MessagingException
-     * @throws ReferenceNotFoundException
      */
     public static function create(): self
     {
-        return new self (PropertyEditorAccessor::create(InMemoryReferenceSearchService::createWith([
-            SymfonyExpressionEvaluationAdapter::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
-        ])), new PropertyReaderAccessor());
+        return new self();
     }
 
     /**
@@ -141,7 +134,7 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
                     $uploadedFileOrArray->getClientMediaType(),
                     $uploadedFileOrArray->getSize() ? $uploadedFileOrArray->getSize() : 0
                 );
-                $dataToEnrich = $this->propertyEditorAccessor->enrichDataWith(
+                $dataToEnrich = $this->getPropertyEditorAccessor()->enrichDataWith(
                     PropertyPath::createWith($key),
                     $dataToEnrich,
                     $uploadedMultipartFile,
@@ -149,8 +142,8 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
                     null
                 );
             } else {
-                if (!$this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($key), $dataToEnrich)) {
-                    $dataToEnrich = $this->propertyEditorAccessor->enrichDataWith(
+                if (!$this->getPropertyReaderAccessor()->hasPropertyValue(PropertyPath::createWith($key), $dataToEnrich)) {
+                    $dataToEnrich = $this->getPropertyEditorAccessor()->enrichDataWith(
                         PropertyPath::createWith($key),
                         $dataToEnrich,
                         [],
@@ -188,5 +181,33 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
         $header[0] = strtolower($header[0]);
 
         return self::HTTP_HEADER_PREFIX . $header;
+    }
+
+    /**
+     * @return PropertyEditorAccessor
+     * @throws MessagingException
+     * @throws ReferenceNotFoundException
+     */
+    private function getPropertyEditorAccessor(): PropertyEditorAccessor
+    {
+        if (!$this->propertyEditorAccessor) {
+           $this->propertyEditorAccessor = PropertyEditorAccessor::create(InMemoryReferenceSearchService::createWith([
+               SymfonyExpressionEvaluationAdapter::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+           ]));
+        }
+
+        return $this->propertyEditorAccessor;
+    }
+
+    /**
+     * @return PropertyReaderAccessor
+     */
+    private function getPropertyReaderAccessor(): PropertyReaderAccessor
+    {
+        if (!$this->propertyReaderAccessor) {
+            $this->propertyReaderAccessor = new PropertyReaderAccessor();
+        }
+
+        return $this->propertyReaderAccessor;
     }
 }

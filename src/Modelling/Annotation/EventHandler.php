@@ -19,11 +19,11 @@ class EventHandler extends EndpointAnnotation
      */
     public $parameterConverters = [];
     /**
-     * If handler has no need in message payload, you can add name of the class name in annotation
+     * if endpoint is not interested in message, set to true.
      *
      * @var string
      */
-    public $messageClassName;
+    public $ignoreMessage = false;
     /**
      * @var bool
      */

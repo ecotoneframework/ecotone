@@ -18,6 +18,7 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
@@ -258,28 +259,43 @@ class AggregateMessagingModule implements AnnotationModule
         /** @var CommandHandler|QueryHandler $methodAnnotation */
         $methodAnnotation = $registration->getAnnotationForMethod();
 
-        return property_exists($methodAnnotation, "inputChannelName") && $methodAnnotation->inputChannelName ? $methodAnnotation->inputChannelName : self::getMessageClassFor($registration);
+        $inputChannel = property_exists($methodAnnotation, "inputChannelName") && $methodAnnotation->inputChannelName ? $methodAnnotation->inputChannelName : self::getMessageClassFor($registration);
+
+        return $inputChannel ?? "";
     }
 
     /**
      * @param AnnotationRegistration $registration
      *
-     * @return string
-     * @throws InvalidArgumentException
+     * @return string|null
      * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws TypeDefinitionException
+     * @throws InvalidArgumentException
      * @throws MessagingException
+     * @throws ReflectionException
      */
     public static function getMessageClassFor(AnnotationRegistration $registration)
     {
         $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
-        $messageClassName = $registration->getAnnotationForMethod()->messageClassName;
-        if ($messageClassName) {
-            return (TypeDescriptor::create($messageClassName)->getTypeHint());
+
+        $parameterConverters = ParameterConverterAnnotationFactory::create();
+        /** @var ParameterConverterBuilder[] $parameterConverters */
+        $parameterConverters = $parameterConverters->createParameterConverters(InterfaceToCall::create($registration->getClassName(), $registration->getMethodName()), $registration->getAnnotationForMethod()->parameterConverters);
+        foreach ($parameterConverters as $parameterConverter) {
+            if ($parameterConverter->isHandling($interfaceToCall->getFirstParameter())) {
+                return null;
+            }
+        }
+
+        if ($registration->getAnnotationForMethod()->ignoreMessage) {
+            return null;
         }
 
         return $interfaceToCall->getFirstParameterTypeHint();
+    }
+
+    public static function getMessageClassOrInputChannel(AnnotationRegistration $registration) : string
+    {
+        return self::getMessageClassFor($registration) ?? $registration->getAnnotationForMethod()->inputChannelName;
     }
 
     /**
@@ -333,7 +349,7 @@ class AggregateMessagingModule implements AnnotationModule
             MethodInterceptor::create(
                 "",
                 InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
+                AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName ?? TypeDescriptor::ARRAY),
                 AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
                 $registration->getClassName() . "::" . $registration->getMethodName()
             )
@@ -368,7 +384,7 @@ class AggregateMessagingModule implements AnnotationModule
     {
         $methodParameterConverterBuilders = $this->parameterConverterAnnotationFactory->createParameterConverters($relatedClassInterface, $methodParameterConverterBuilders);
 
-        if ($registration->getAnnotationForMethod()->messageClassName) {
+        if ($registration->getAnnotationForMethod()->ignoreMessage) {
             if ($relatedClassInterface->hasNoParameters()) {
                 return [];
             }

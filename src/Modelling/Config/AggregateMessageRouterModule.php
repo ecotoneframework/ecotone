@@ -75,24 +75,24 @@ class AggregateMessageRouterModule implements AnnotationModule
     {
         $commandHandlers = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, CommandHandler::class) as $registration) {
-            $commandHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            $commandHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, CommandHandler::class) as $registration) {
-            $commandHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            $commandHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
         $queryHandlers = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, QueryHandler::class) as $registration) {
-            $queryHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            $queryHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, QueryHandler::class) as $registration) {
-            $queryHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            $queryHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
         $eventHandlers = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
-            $eventHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            $eventHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
-            $eventHandlers[AggregateMessagingModule::getMessageClassFor($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            $eventHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
 
         return new self(

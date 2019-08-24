@@ -6,6 +6,7 @@ use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -15,6 +16,7 @@ use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\AggregateVersionMismatchException;
 use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 use PHPUnit\Framework\TestCase;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
 use Test\Ecotone\Modelling\Fixture\Blog\ChangeArticleContentCommand;
 use Test\Ecotone\Modelling\Fixture\Blog\CloseArticleCommand;
@@ -43,6 +45,23 @@ use Test\Ecotone\Modelling\Fixture\TestingLazyEventBus;
  */
 class AggregateMessageHandlerBuilderTest extends TestCase
 {
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_configuring_command_handler()
+    {
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            Order::class,
+            "changeShippingAddress",
+            ChangeShippingAddressCommand::class
+        )->withInputChannelName(ChangeShippingAddressCommand::class);
+
+        $this->assertEquals(ChangeShippingAddressCommand::class, $aggregateCallingCommandHandler->getInputMessageChannelName());
+        $this->assertEquals([], $aggregateCallingCommandHandler->getRequiredReferenceNames());
+    }
+
     /**
      * @throws InvalidArgumentException
      * @throws MessagingException
@@ -78,16 +97,120 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_configuring_command_handler()
+    public function test_calling_existing_aggregate_method_with_command_and_no_command()
     {
+        $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
-            Order::class,
-            "changeShippingAddress",
-            ChangeShippingAddressCommand::class
-        )->withInputChannelName(ChangeShippingAddressCommand::class);
+            AggregateWithoutMessageClassesExample::class,
+            "doSomething",
+            null
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
 
-        $this->assertEquals(ChangeShippingAddressCommand::class, $aggregateCallingCommandHandler->getInputMessageChannelName());
-        $this->assertEquals([], $aggregateCallingCommandHandler->getRequiredReferenceNames());
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+            ])
+        );
+
+        $aggregateCommandHandler->handle(MessageBuilder::withPayload(["id" => 1])->build());
+
+        $this->assertTrue($aggregate->getChangedState());
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_calling_existing_aggregate_method_with_command_as_array()
+    {
+        $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            AggregateWithoutMessageClassesExample::class,
+            "doSomethingWithData",
+            null
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+            ])
+        );
+
+        $data = ["id" => 1, "someData" => 100];
+        $aggregateCommandHandler->handle(MessageBuilder::withPayload($data)->build());
+
+        $this->assertEquals($data, $aggregate->getChangedState());
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_calling_existing_aggregate_method_with_no_command_data_and_reference()
+    {
+        $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            AggregateWithoutMessageClassesExample::class,
+            "doSomethingWithReference",
+            null
+        )
+            ->withMethodParameterConverters([
+                ReferenceBuilder::create("class", \stdClass::class)
+            ])
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate]),
+                \stdClass::class => new \stdClass()
+            ])
+        );
+
+        $aggregateCommandHandler->handle(MessageBuilder::withPayload(["id" => 1])->build());
+
+        $this->assertTrue($aggregate->getChangedState());
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_throwing_exception_if_no_id_found_in_command()
+    {
+        $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            AggregateWithoutMessageClassesExample::class,
+            "doSomething",
+            null
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+            ])
+        );
+
+        $this->expectException(AggregateNotFoundException::class);
+
+        $aggregateCommandHandler->handle(MessageBuilder::withPayload([])->build());
     }
 
     /**
@@ -124,6 +247,81 @@ class AggregateMessageHandlerBuilderTest extends TestCase
 
         $this->assertEquals(
             $orderAmount,
+            $replyChannel->receive()->getPayload()
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_calling_aggregate_for_query_handler_with_no_query()
+    {
+        $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
+            AggregateWithoutMessageClassesExample::class,
+            "querySomething",
+            null
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateQueryHandler->handle(
+            MessageBuilder::withPayload(["id" => 1])
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            true,
+            $replyChannel->receive()->getPayload()
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_calling_aggregate_for_query_handler_with_query_as_array()
+    {
+        $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
+            AggregateWithoutMessageClassesExample::class,
+            "querySomethingWithData",
+            null
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $payload = ["id" => 1, "some" => 123];
+        $aggregateQueryHandler->handle(
+            MessageBuilder::withPayload($payload)
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            $payload,
             $replyChannel->receive()->getPayload()
         );
     }
@@ -364,6 +562,78 @@ class AggregateMessageHandlerBuilderTest extends TestCase
 
         $this->assertEquals(["author" => "johny", "title" => "Tolkien"], $replyChannel->receive()->getPayload());
     }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_creating_new_aggregate_with_command_as_array_type()
+    {
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            AggregateWithoutMessageClassesExample::class,
+            "createWithData",
+            null
+        )
+            ->withAggregateRepositoryFactories(["repository"])
+            ->withInputChannelName("createAggregate");
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryAggregateRepository::createEmpty()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload(["id" => 1])
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+
+        $this->assertEquals(["id" => 1], $replyChannel->receive()->getPayload());
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_creating_new_aggregate_with_no_command_data()
+    {
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            AggregateWithoutMessageClassesExample::class,
+            "create",
+            null
+        )
+            ->withAggregateRepositoryFactories(["repository"])
+            ->withInputChannelName("createAggregate");
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryAggregateRepository::createEmpty()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload([])
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+
+        $this->assertEquals(["id" => 1], $replyChannel->receive()->getPayload());
+    }
+
+
 
     /**
      * @throws MessagingException

@@ -19,11 +19,11 @@ class CommandHandler extends InputOutputEndpointAnnotation
      */
     public $parameterConverters = [];
     /**
-     * If handler has no need in message payload, you can add name of the class name in annotation
+     * if endpoint is not interested in message, set to true.
      *
-     * @var string
+     * @var boolean
      */
-    public $messageClassName;
+    public $ignoreMessage = false;
     /**
      * @var bool
      */

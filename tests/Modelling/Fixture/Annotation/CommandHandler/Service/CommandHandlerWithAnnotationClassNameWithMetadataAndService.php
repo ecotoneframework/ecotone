@@ -17,7 +17,7 @@ class CommandHandlerWithAnnotationClassNameWithMetadataAndService
      * @param array $metadata
      * @param \stdClass $service
      * @return int
-     * @CommandHandler(inputChannelName="input", endpointId="command-id", messageClassName=SomeCommand::class)
+     * @CommandHandler(inputChannelName="input", endpointId="command-id", ignoreMessage=true)
      */
     public function execute(array $metadata, \stdClass $service) : int
     {

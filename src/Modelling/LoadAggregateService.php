@@ -96,7 +96,13 @@ class LoadAggregateService
         $expectedVersion = null;
 
         foreach ($this->aggregateIdentifierMapping as $aggregateIdentifierName => $aggregateIdentifierMappingName) {
-            $aggregateIdentifiers[$aggregateIdentifierName] = ($this->isFactoryMethod && !$this->loadForFactoryMethod) ? null : $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload());
+            $aggregateIdentifiers[$aggregateIdentifierName] = ($this->isFactoryMethod && !$this->loadForFactoryMethod)
+                ? null
+                : (
+                    $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload())
+                    ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload())
+                    : null
+                );
         }
 
         $aggregate = null;
@@ -109,7 +115,13 @@ class LoadAggregateService
                 }
             }
 
-            $expectedVersion = $this->expectedVersionName ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($this->expectedVersionName), $message->getPayload()) : null;
+            $expectedVersion = $this->expectedVersionName
+                ? (
+                    $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($this->expectedVersionName), $message->getPayload())
+                    ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($this->expectedVersionName), $message->getPayload())
+                    : null
+                )
+                : null;
             if ($this->expectedVersionName && !$expectedVersion) {
                 throw InvalidArgumentException::create("Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} has defined version locking, but no version during command handling was provided");
             }

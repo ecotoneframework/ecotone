@@ -105,14 +105,13 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      * @param string $aggregateClassName
      * @param string $methodName
      * @param bool $isCommandHandler
-     * @param string $handledMessageClassName
-     * @param bool $filterOutOnNotFound
-     *
+     * @param string|null $handledMessageClassName
+     * @throws AnnotationException
      * @throws InvalidArgumentException
-     * @throws ReflectionException
      * @throws MessagingException
+     * @throws ReflectionException
      */
-    private function __construct(string $aggregateClassName, string $methodName, bool $isCommandHandler, string $handledMessageClassName)
+    private function __construct(string $aggregateClassName, string $methodName, bool $isCommandHandler, ?string $handledMessageClassName)
     {
         $this->aggregateClassName = $aggregateClassName;
         $this->methodName = $methodName;
@@ -123,13 +122,13 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
 
     /**
      * @param string $aggregateClassName
-     * @param string $handledMessageClassName
+     * @param string|null $handledMessageClassName
      * @throws InvalidArgumentException
      * @throws MessagingException
      * @throws ReflectionException
      * @throws AnnotationException
      */
-    private function initialize(string $aggregateClassName, string $handledMessageClassName): void
+    private function initialize(string $aggregateClassName, ?string $handledMessageClassName): void
     {
         $interfaceToCall = InterfaceToCall::create($this->aggregateClassName, $this->methodName);
         $this->isFactoryMethod = $interfaceToCall->isStaticallyCalled();
@@ -157,33 +156,40 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             throw InvalidArgumentException::create("Aggregate {$aggregateClassName} has no identifiers defined. How you forgot to mark @AggregateIdentifier?");
         }
 
-        $messageReflection = new ReflectionClass($handledMessageClassName);
+        $messageProperties = [];
         $expectedVersionPropertyName = null;
-        foreach ($messageReflection->getProperties() as $property) {
-            if (preg_match("*TargetAggregateIdentifier*", $property->getDocComment())) {
-                preg_match('#@TargetAggregateIdentifier\([^"]*"([^"]*)\"\)#', $property->getDocComment(), $matches);
-                $mappingName = $property->getName();
-                if (isset($matches[1])) {
-                    $mappingName = trim($matches[1]);
-                }
+        if ($handledMessageClassName) {
+            $messageReflection = new ReflectionClass($handledMessageClassName);
+            foreach ($messageReflection->getProperties() as $property) {
+                if (preg_match("*TargetAggregateIdentifier*", $property->getDocComment())) {
+                    preg_match('#@TargetAggregateIdentifier\([^"]*"([^"]*)\"\)#', $property->getDocComment(), $matches);
+                    $mappingName = $property->getName();
+                    if (isset($matches[1])) {
+                        $mappingName = trim($matches[1]);
+                    }
 
-                $aggregateDefaultIdentifiers[$mappingName] = $property->getName();
+                    $aggregateDefaultIdentifiers[$mappingName] = $property->getName();
+                }
+                if (preg_match("*AggregateExpectedVersion*", $property->getDocComment())) {
+                    $expectedVersionPropertyName = $property->getName();
+                }
             }
-            if (preg_match("*AggregateExpectedVersion*", $property->getDocComment())) {
-                $expectedVersionPropertyName = $property->getName();
-            }
+
+            $messageProperties = $messageReflection->getProperties();
         }
 
         foreach ($aggregateDefaultIdentifiers as $aggregateIdentifierName => $aggregateIdentifierMappingKey) {
             if (is_null($aggregateIdentifierMappingKey)) {
                 $mappingKey = null;
-                foreach ($messageReflection->getProperties() as $property) {
+                foreach ($messageProperties as $property) {
                     if ($aggregateIdentifierName === $property->getName()) {
                         $mappingKey = $property->getName();
                     }
                 }
 
-                if (is_null($mappingKey) && !$this->isFactoryMethod) {
+                if (is_null($handledMessageClassName) && is_null($mappingKey)) {
+                    $aggregateDefaultIdentifiers[$aggregateIdentifierName] = $aggregateIdentifierName;
+                }else if (is_null($mappingKey) && !$this->isFactoryMethod) {
                     throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` in {$handledMessageClassName} for {$aggregateClassName}. How you forgot to mark @TargetAggregateIdentifier?");
                 } else {
                     $aggregateDefaultIdentifiers[$aggregateIdentifierName] = $mappingKey;
@@ -202,30 +208,31 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     /**
      * @param string $aggregateClassName
      * @param string $methodName
-     *
-     * @param string $handledMessageClassName
+     * @param string|null $handledMessageClassName
      *
      * @return AggregateMessageHandlerBuilder
+     * @throws AnnotationException
      * @throws InvalidArgumentException
-     * @throws ReflectionException
      * @throws MessagingException
+     * @throws ReflectionException
      */
-    public static function createAggregateCommandHandlerWith(string $aggregateClassName, string $methodName, string $handledMessageClassName): self
+    public static function createAggregateCommandHandlerWith(string $aggregateClassName, string $methodName, ?string $handledMessageClassName): self
     {
         return new self($aggregateClassName, $methodName, true, $handledMessageClassName);
     }
 
     /**
      * @param string $aggregateClassName
-     * @param string $methodName
+     * @param string|null $methodName
      *
      * @param string $handledMessageClassName
      * @return AggregateMessageHandlerBuilder
+     * @throws AnnotationException
      * @throws InvalidArgumentException
-     * @throws ReflectionException
      * @throws MessagingException
+     * @throws ReflectionException
      */
-    public static function createAggregateQueryHandlerWith(string $aggregateClassName, string $methodName, string $handledMessageClassName): self
+    public static function createAggregateQueryHandlerWith(string $aggregateClassName, string $methodName, ?string $handledMessageClassName): self
     {
         return new self($aggregateClassName, $methodName, false, $handledMessageClassName);
     }

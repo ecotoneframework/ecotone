@@ -3,6 +3,7 @@
 
 namespace Ecotone\Lite;
 
+use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -62,6 +63,10 @@ class InMemoryPSRContainer implements ContainerInterface
      */
     public function get($id)
     {
+        if (!isset($this->objects[$id])) {
+            throw ReferenceNotFoundException::create("Reference with id {$id} was not found");
+        }
+
         return $this->objects[$id];
     }
 

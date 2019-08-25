@@ -131,7 +131,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $message = MessageBuilder::withPayload("a")->build();
         $pollableChannel->send($message);
 
-        $messagingSystem->runSeparatelyRunningConsumerBy($messagingSystem->getListOfSeparatelyRunningConsumers()[0]);
+        $messagingSystem->runSeparatelyRunningEndpointBy($messagingSystem->getListOfSeparatelyRunningConsumers()[0]);
 
         $this->assertTrue($messageHandler->wasCalled());
     }
@@ -147,7 +147,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $this->expectException(InvalidArgumentException::class);
 
-        $messagingSystem->runSeparatelyRunningConsumerBy("some");
+        $messagingSystem->runSeparatelyRunningEndpointBy("some");
     }
 
     /**
@@ -274,7 +274,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $channel->send($message);
         $this->assertNull($calculatingService->getLastResult());
-        $configuredMessagingSystem->runSeparatelyRunningConsumerBy("asyncChannel");
+        $configuredMessagingSystem->runSeparatelyRunningEndpointBy("asyncChannel");
         $this->assertEquals(2, $calculatingService->getLastResult());
     }
 
@@ -746,7 +746,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $this->expectException(\InvalidArgumentException::class);
 
-        $messagingSystem->runSeparatelyRunningConsumerBy($endpointName);
+        $messagingSystem->runSeparatelyRunningEndpointBy($endpointName);
     }
 
     /**
@@ -814,7 +814,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $messagingSystem->runSeparatelyRunningConsumerBy($endpointName);
+        $messagingSystem->runSeparatelyRunningEndpointBy($endpointName);
 
         $this->assertEquals(42, $lastServiceFromChain->getLastResult());
     }
@@ -868,7 +868,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             )
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $messagingSystem->runSeparatelyRunningConsumerBy($endpointName);
+        $messagingSystem->runSeparatelyRunningEndpointBy($endpointName);
 
         $this->assertEquals(3, $interceptingHandler->getCallCount());
     }

@@ -138,7 +138,7 @@ class AnnotationBasedMessagingContext implements Context
      */
     public function iCalculateUsingInboundChannelAdapter()
     {
-        self::$messagingSystem->runSeparatelyRunningConsumerBy("inboundCalculator");
+        self::$messagingSystem->runSeparatelyRunningEndpointBy("inboundCalculator");
     }
 
     /**

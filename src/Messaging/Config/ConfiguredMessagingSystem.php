@@ -31,9 +31,9 @@ interface ConfiguredMessagingSystem
     public function getMessageChannelByName(string $channelName) : MessageChannel;
 
     /**
-     * @param string $consumerName
+     * @param string $endpointId
      */
-    public function runSeparatelyRunningConsumerBy(string $consumerName) : void;
+    public function runSeparatelyRunningEndpointBy(string $endpointId) : void;
 
     /**
      * @return array|string[]

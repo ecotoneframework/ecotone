@@ -38,7 +38,7 @@ class TypeResolver implements ReferenceTypeFromNameResolver
      */
     public function resolve(string $referenceName): TypeDescriptor
     {
-        if ($this->container->has($referenceName)) {
+        if (!$this->container->has($referenceName)) {
             throw ReferenceNotFoundException::create("Reference {$referenceName} was not found");
         }
 

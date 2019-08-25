@@ -17,27 +17,18 @@ class EventBusRouter
     /**
      * @var array
      */
-    private $classNameToChannelNameMapping;
-    /**
-     * @var array
-     */
-    private $availableChannelNames = [];
+    private $listenNameToChannelNameMapping;
 
     /**
      * CommandBusRouter constructor.
      *
-     * @param array           $classNameToChannelNameMapping
+     * @param array           $listenNameToTargetChannelsMapping
      */
-    public function __construct(array $classNameToChannelNameMapping)
+    public function __construct(array $listenNameToTargetChannelsMapping)
     {
-        foreach ($classNameToChannelNameMapping as $className => $channelNames) {
-            foreach ($channelNames as $channelName) {
-                $this->availableChannelNames[$channelName] = $className;
-            }
+        foreach ($listenNameToTargetChannelsMapping as $nameToListenFor => $channelNames) {
+            $this->listenNameToChannelNameMapping[$nameToListenFor] = array_unique($channelNames);
         }
-        $this->classNameToChannelNameMapping = array_map(function(array $channels) {
-            return array_unique($channels);
-        }, $classNameToChannelNameMapping);
     }
 
     /**
@@ -76,29 +67,32 @@ class EventBusRouter
         }
 
         $className = $class->getName();
-        if (array_key_exists($className, $this->classNameToChannelNameMapping)) {
-            $channelNames =  array_merge($channelNames, $this->classNameToChannelNameMapping[$className]);
+        if (array_key_exists($className, $this->listenNameToChannelNameMapping)) {
+            $channelNames =  array_merge($channelNames, $this->listenNameToChannelNameMapping[$className]);
         }
 
         return $channelNames;
     }
 
     /**
-     * @param string $name
+     * @param string|null $name
      *
-     * @return string|null
+     * @return array
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function routeByName(?string $name) : ?string
+    public function routeByName(?string $name) : array
     {
         if (is_null($name)) {
             throw ConfigurationException::create("Can't send via name using EventBus without " . EventBus::CHANNEL_NAME_BY_NAME . " header defined");
         }
 
-        if (!array_key_exists($name, $this->availableChannelNames)) {
-            return null;
+        $resultChannels = [];
+        foreach ($this->listenNameToChannelNameMapping as $listenFor => $destinationChannels) {
+            if (preg_match("#^" . str_replace("*", ".*", $listenFor) . "$#", $name)) {
+                $resultChannels = array_merge($resultChannels, $destinationChannels);
+            }
         }
 
-        return $name;
+        return array_unique($resultChannels);
     }
 }

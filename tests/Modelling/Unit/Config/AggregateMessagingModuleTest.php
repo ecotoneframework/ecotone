@@ -546,12 +546,11 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_service_event_handler()
     {
         $commandHandler = ServiceActivatorBuilder::create(ExampleEventEventHandler::class, "doSomething")
-            ->withInputChannelName("someInput")
+            ->withInputChannelName('some-id')
             ->withEndpointId('some-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler($commandHandler)
-            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("someInput"));
+            ->registerMessageHandler($commandHandler);
 
         $this->createModuleAndAssertConfiguration(
             [
@@ -573,7 +572,7 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_service_event_handler_with_extra_services()
     {
         $commandHandler = ServiceActivatorBuilder::create(ExampleEventHandlerWithServices::class, "doSomething")
-            ->withInputChannelName("someInput")
+            ->withInputChannelName('some-id')
             ->withMethodParameterConverters([
                 PayloadBuilder::create("command"),
                 ReferenceBuilder::create("service1", stdClass::class),
@@ -582,8 +581,7 @@ class AggregateMessagingModuleTest extends TestCase
             ->withEndpointId('some-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler($commandHandler)
-            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("someInput"));
+            ->registerMessageHandler($commandHandler);
 
         $this->createModuleAndAssertConfiguration(
             [
@@ -591,7 +589,7 @@ class AggregateMessagingModuleTest extends TestCase
             ],
             $expectedConfiguration,
             [
-                DoStuffCommand::class => "someInput"
+                DoStuffCommand::class => "'some-id"
             ]
         );
     }

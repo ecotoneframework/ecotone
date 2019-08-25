@@ -4,8 +4,10 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Annotation\Gateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\MessageHeaders;
 
 /**
  * Interface EventBus
@@ -46,4 +48,43 @@ interface EventBus
      * )
      */
     public function sendWithMetadata(object $event, array $metadata);
+
+
+    /**
+     * @param string $name
+     * @param string $sourceMediaType
+     * @param mixed  $commandData
+     *
+     * @return mixed
+     *
+     * @Gateway(
+     *     requestChannel=EventBus::CHANNEL_NAME_BY_NAME,
+     *     parameterConverters={
+     *          @Header(parameterName="name", headerName=EventBus::CHANNEL_NAME_BY_NAME),
+     *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
+     *          @Payload(parameterName="commandData")
+     *     }
+     * )
+     */
+    public function convertAndSend(string $name, string $sourceMediaType, $commandData);
+
+    /**
+     * @param string $name
+     * @param string $sourceMediaType
+     * @param mixed  $commandData
+     * @param array  $metadata
+     *
+     * @return mixed
+     *
+     * @Gateway(
+     *     requestChannel=EventBus::CHANNEL_NAME_BY_NAME,
+     *     parameterConverters={
+     *          @Headers(parameterName="metadata"),
+     *          @Header(parameterName="name", headerName=EventBus::CHANNEL_NAME_BY_NAME),
+     *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
+     *          @Payload(parameterName="commandData")
+     *     }
+     * )
+     */
+    public function convertAndSendWithMetadata(string $name, string $sourceMediaType, $commandData, array $metadata);
 }

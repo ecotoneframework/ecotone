@@ -51,7 +51,7 @@ interface CommandBus
 
     /**
      * @param string $name
-     * @param string $dataMediaType
+     * @param string $sourceMediaType
      * @param mixed  $commandData
      *
      * @return mixed
@@ -59,16 +59,16 @@ interface CommandBus
      *     requestChannel=CommandBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
      *          @Header(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
-     *          @Header(parameterName="dataMediaType", headerName=MessageHeaders::CONTENT_TYPE),
+     *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
      *          @Payload(parameterName="commandData")
      *     }
      * )
      */
-    public function convertAndSend(string $name, string $dataMediaType, $commandData);
+    public function convertAndSend(string $name, string $sourceMediaType, $commandData);
 
     /**
      * @param string $name
-     * @param string $dataMediaType
+     * @param string $sourceMediaType
      * @param mixed  $commandData
      * @param array  $metadata
      *
@@ -79,10 +79,10 @@ interface CommandBus
      *     parameterConverters={
      *          @Headers(parameterName="metadata"),
      *          @Header(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
-     *          @Header(parameterName="dataMediaType", headerName=MessageHeaders::CONTENT_TYPE),
+     *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
      *          @Payload(parameterName="commandData")
      *     }
      * )
      */
-    public function convertAndSendWithMetadata(string $name, string $dataMediaType, $commandData, array $metadata);
+    public function convertAndSendWithMetadata(string $name, string $sourceMediaType, $commandData, array $metadata);
 }

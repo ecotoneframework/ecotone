@@ -85,7 +85,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     /**
      * @var bool
      */
-    private $filterOutOnNotFound = self::DEFAULT_FILTER_OUT_ON_NOT_FOUND;
+    private $dropMessageOnNotFound = self::DEFAULT_FILTER_OUT_ON_NOT_FOUND;
     /**
      * @var string
      */
@@ -265,13 +265,13 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     }
 
     /**
-     * @param bool $filterOutOnNotFound
+     * @param bool $dropMessageOnNotFound
      *
      * @return AggregateMessageHandlerBuilder
      */
-    public function withFilterOutOnNotFound(bool $filterOutOnNotFound): self
+    public function withFilterOutOnNotFound(bool $dropMessageOnNotFound): self
     {
-        $this->filterOutOnNotFound = $filterOutOnNotFound;
+        $this->dropMessageOnNotFound = $dropMessageOnNotFound;
 
         return $this;
     }
@@ -378,7 +378,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             $this->messageIdentifierMapping,
             $this->expectedVersionPropertyName,
             $this->getPropertyReaderAccessor(),
-            $this->filterOutOnNotFound,
+            $this->dropMessageOnNotFound,
             (bool)$this->withFactoryRedirectOnFoundMethodName
         );
     }

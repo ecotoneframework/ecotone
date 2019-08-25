@@ -27,16 +27,6 @@ class EventBusRouterTest extends TestCase
         );
     }
 
-    public function test_routing_by_channel_name()
-    {
-        $classNameToChannelNameMapping = [\stdClass::class => ["some"]];
-
-        $this->assertEquals(
-            "some",
-            $this->createEventRouter($classNameToChannelNameMapping)->routeByName("some")
-        );
-    }
-
     public function test_routing_by_abstract_class()
     {
         $classNameToChannelNameMapping = [
@@ -63,6 +53,36 @@ class EventBusRouterTest extends TestCase
         $this->assertEquals(
             ["admin", "email", "superAdmin"],
             $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new SuperAdmin())
+        );
+    }
+
+    public function test_routing_by_channel_name()
+    {
+        $classNameToChannelNameMapping = ["createOffer" => ["channel"]];
+
+        $this->assertEquals(
+            ["channel"],
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByName("createOffer")
+        );
+    }
+
+    public function test_routing_by_expression()
+    {
+        $classNameToChannelNameMapping = ["input.*" => ["someId"]];
+
+        $this->assertEquals(
+            ["someId"],
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByName("input.test")
+        );
+    }
+
+    public function test_merging_multiple_endpoints()
+    {
+        $classNameToChannelNameMapping = ["input.*" => ["someId1"], "*.test" => ["someId2"], "test" => ["someId3"], "input" => ["someId4"]];
+
+        $this->assertEquals(
+            ["someId1", "someId2"],
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByName("input.test")
         );
     }
 

@@ -50,7 +50,7 @@ class LoadAggregateService
     /**
      * @var bool
      */
-    private $filterOutOnNotFound;
+    private $dropMessageOnNotFound;
     /**
      * @var bool
      */
@@ -66,10 +66,10 @@ class LoadAggregateService
      * @param array $aggregateIdentifierMapping
      * @param null|string $expectedVersionName
      * @param PropertyReaderAccessor $propertyReaderAccessor
-     * @param bool $filterOutOnNotFound
+     * @param bool $dropMessageOnNotFound
      * @param bool $loadForFactoryMethod
      */
-    public function __construct(AggregateRepository $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?string $expectedVersionName, PropertyReaderAccessor $propertyReaderAccessor, bool $filterOutOnNotFound, bool $loadForFactoryMethod)
+    public function __construct(AggregateRepository $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?string $expectedVersionName, PropertyReaderAccessor $propertyReaderAccessor, bool $dropMessageOnNotFound, bool $loadForFactoryMethod)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->isFactoryMethod = $isFactoryMethod;
@@ -78,7 +78,7 @@ class LoadAggregateService
         $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->expectedVersionName = $expectedVersionName;
-        $this->filterOutOnNotFound = $filterOutOnNotFound;
+        $this->dropMessageOnNotFound = $dropMessageOnNotFound;
         $this->loadForFactoryMethod = $loadForFactoryMethod;
     }
 
@@ -130,7 +130,7 @@ class LoadAggregateService
                 ? $this->aggregateRepository->findBy($this->aggregateClassName, $aggregateIdentifiers)
                 : $this->aggregateRepository->findWithLockingBy($this->aggregateClassName, $aggregateIdentifiers, $expectedVersion);
 
-            if (!$aggregate && $this->filterOutOnNotFound) {
+            if (!$aggregate && $this->dropMessageOnNotFound) {
                 return null;
             }
 

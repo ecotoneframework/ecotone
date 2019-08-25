@@ -20,16 +20,19 @@ class CommandHandler extends InputOutputEndpointAnnotation
     public $parameterConverters = [];
     /**
      * if endpoint is not interested in message, set to true.
+     * inputChannelName must be defined to connect with external channels
      *
      * @var boolean
      */
     public $ignoreMessage = false;
     /**
+     * If @Aggregate was not found, message can be dropped instead of throwing exception
+     *
      * @var bool
      */
-    public $filterOutOnNotFound = false;
+    public $dropMessageOnNotFound = false;
     /**
-     * Redirect to channel when factory method found already existing aggregate
+     * If @Aggregate was found, redirect to aggregate's method
      *
      * @var string
      */

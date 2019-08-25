@@ -87,12 +87,15 @@ class AggregateMessageRouterModule implements AnnotationModule
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, QueryHandler::class) as $registration) {
             $queryHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
         }
-        $eventHandlers = [];
+        $eventHandlersClassToChannelMapping = [];
+        $eventHandlersRegexChannelToChannelMapping = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
-            $eventHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
-            $eventHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
         }
 
         return new self(
@@ -100,8 +103,8 @@ class AggregateMessageRouterModule implements AnnotationModule
             BusRouterBuilder::createCommandBusByName($commandHandlers),
             BusRouterBuilder::createQueryBusByObject($queryHandlers),
             BusRouterBuilder::createQueryBusByName($queryHandlers),
-            BusRouterBuilder::createEventBusByObject($eventHandlers),
-            BusRouterBuilder::createEventBusByName($eventHandlers)
+            BusRouterBuilder::createEventBusByObject($eventHandlersClassToChannelMapping),
+            BusRouterBuilder::createEventBusByName($eventHandlersRegexChannelToChannelMapping)
         );
     }
 

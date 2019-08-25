@@ -52,7 +52,7 @@ interface CommandBusWithEventPublishing extends CommandBus
 
     /**
      * @param string $name
-     * @param string $dataMediaType
+     * @param string $sourceMediaType
      * @param mixed  $commandData
      *
      * @return mixed
@@ -66,11 +66,11 @@ interface CommandBusWithEventPublishing extends CommandBus
      * )
      * @LazyEventPublishing()
      */
-    public function convertAndSend(string $name, string $dataMediaType, $commandData);
+    public function convertAndSend(string $name, string $sourceMediaType, $commandData);
 
     /**
      * @param string $name
-     * @param string $dataMediaType
+     * @param string $sourceMediaType
      * @param mixed  $commandData
      * @param array  $metadata
      *
@@ -87,5 +87,5 @@ interface CommandBusWithEventPublishing extends CommandBus
      * )
      * @LazyEventPublishing()
      */
-    public function convertAndSendWithMetadata(string $name, string $dataMediaType, $commandData, array $metadata);
+    public function convertAndSendWithMetadata(string $name, string $sourceMediaType, $commandData, array $metadata);
 }

@@ -15,21 +15,32 @@ use Ecotone\Messaging\Annotation\EndpointAnnotation;
 class EventHandler extends EndpointAnnotation
 {
     /**
+     * Registers event handler to listen from defined inputs
+     * e.g. from single - "ecotone.modelling.created"
+     * e.g. from multiple - "ecotone.modelling.*"
+     *
+     * @var string
+     */
+    public $listenTo = "";
+    /**
      * @var array
      */
     public $parameterConverters = [];
     /**
      * if endpoint is not interested in message, set to true.
+     * ListenTo must be defined to connect endpoint with external channels
      *
      * @var string
      */
     public $ignoreMessage = false;
     /**
+     * If @Aggregate was not found, message can be dropped instead of throwing exception
+     *
      * @var bool
      */
-    public $filterOutOnNotFound = false;
+    public $dropMessageOnNotFound = false;
     /**
-     * Redirect to channel when factory method found already existing aggregate
+     * If @Aggregate was found, redirect to aggregate's method
      *
      * @var string
      */

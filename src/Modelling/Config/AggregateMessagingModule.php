@@ -183,16 +183,14 @@ class AggregateMessagingModule implements AnnotationModule
 
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
             $inputChannelName = self::getMessageChannelFor($registration);
-            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->filterOutOnNotFound);
+            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->dropMessageOnNotFound);
 
             $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames);
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {
-            $inputChannelName = self::getMessageChannelFor($registration);
-            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->filterOutOnNotFound);
-
-            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
+            $inputChannelName = $registration->getAnnotationForMethod()->endpointId;
+            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->dropMessageOnNotFound);
         }
 
         foreach ($this->aggregateQueryHandlerRegistrations as $registration) {
@@ -239,8 +237,7 @@ class AggregateMessagingModule implements AnnotationModule
             $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames);
         }
         foreach ($this->serviceEventHandlers as $registration) {
-            $configuration->registerMessageHandler($this->createServiceActivator($registration));
-            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(self::getMessageChannelFor($registration)));
+            $configuration->registerMessageHandler($this->createServiceActivatorForEvent($registration));
         }
     }
 
@@ -262,6 +259,19 @@ class AggregateMessagingModule implements AnnotationModule
         $inputChannel = property_exists($methodAnnotation, "inputChannelName") && $methodAnnotation->inputChannelName ? $methodAnnotation->inputChannelName : self::getMessageClassFor($registration);
 
         return $inputChannel ?? "";
+    }
+
+    /***
+     * @param AnnotationRegistration $registration
+     *
+     * @return string
+     */
+    public static function getMessageChannelForEventHandler(AnnotationRegistration $registration): string
+    {
+        /** @var CommandHandler|QueryHandler $methodAnnotation */
+        $methodAnnotation = $registration->getAnnotationForMethod();
+
+        return $methodAnnotation->endpointId;
     }
 
     /**
@@ -304,7 +314,7 @@ class AggregateMessagingModule implements AnnotationModule
      * @param AnnotationRegistration $registration
      * @param string $inputChannelName
      *
-     * @param bool $filterOutOnNotFound
+     * @param bool $dropMessageOnNotFound
      *
      * @return void
      * @throws InvalidArgumentException
@@ -313,7 +323,7 @@ class AggregateMessagingModule implements AnnotationModule
      * @throws TypeDefinitionException
      * @throws MessagingException
      */
-    private function registerAggregateCommandHandler(Configuration $configuration, array $aggregateRepositoryReferenceNames, AnnotationRegistration $registration, string $inputChannelName, bool $filterOutOnNotFound): void
+    private function registerAggregateCommandHandler(Configuration $configuration, array $aggregateRepositoryReferenceNames, AnnotationRegistration $registration, string $inputChannelName, bool $dropMessageOnNotFound): void
     {
         /** @var CommandHandler $annotation */
         $annotation = $registration->getAnnotationForMethod();
@@ -339,7 +349,7 @@ class AggregateMessagingModule implements AnnotationModule
                 ->withOutputMessageChannel($annotation->outputChannelName)
                 ->withEndpointId($endpointId)
                 ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
-                ->withFilterOutOnNotFound($filterOutOnNotFound)
+                ->withFilterOutOnNotFound($dropMessageOnNotFound)
                 ->withRedirectToOnAlreadyExists($redirectOnFoundMethod, $redirectMethodConverters)
                 ->withMethodParameterConverters($parameterConverters)
                 ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
@@ -460,5 +470,11 @@ class AggregateMessagingModule implements AnnotationModule
             ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
 
         return $messageHandlerBuilder;
+    }
+
+    private function createServiceActivatorForEvent(AnnotationRegistration $registration) : ServiceActivatorBuilder
+    {
+        return $this->createServiceActivator($registration)
+                ->withInputChannelName($registration->getAnnotationForMethod()->endpointId);
     }
 }

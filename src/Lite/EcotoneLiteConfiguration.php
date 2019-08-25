@@ -24,6 +24,12 @@ class EcotoneLiteConfiguration
 {
     private const MESSAGING_SYSTEM_CONFIGURATION_FILE = "messaging_system";
 
+    public static function createNoCache(string $rootProjectDirectoryPath, ContainerInterface $container, array $namespaces) : ConfiguredMessagingSystem
+    {
+        $messagingSystemConfiguration = self::create($rootProjectDirectoryPath, null, $container, $namespaces, true, false, "prod");
+        return $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(new PsrContainerReferenceSearchService($container));
+    }
+
     /**
      * @param string $rootProjectDirectoryPath
      * @param string $cacheDirectoryPath

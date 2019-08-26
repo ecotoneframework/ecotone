@@ -29,10 +29,22 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      * InMemoryReferenceSearchService constructor.
      * @param array|object[] $objectsToResolve
      * @param ReferenceSearchService|null $referenceSearchService
+     * @param bool $withDefaults
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function __construct(array $objectsToResolve, ?ReferenceSearchService $referenceSearchService)
+    private function __construct(array $objectsToResolve, ?ReferenceSearchService $referenceSearchService, bool $withDefaults)
     {
+        if ($withDefaults) {
+            if (!array_key_exists(InterfaceToCallRegistry::REFERENCE_NAME, $objectsToResolve)) {
+                $objectsToResolve[InterfaceToCallRegistry::REFERENCE_NAME] = InterfaceToCallRegistry::createEmpty();
+            }
+            if (!array_key_exists(ConversionService::REFERENCE_NAME, $objectsToResolve)) {
+                $objectsToResolve[ConversionService::REFERENCE_NAME] = AutoCollectionConversionService::createEmpty();
+            }
+            if (!array_key_exists(ProxyFactory::REFERENCE_NAME, $objectsToResolve)) {
+                $objectsToResolve[ProxyFactory::REFERENCE_NAME] = ProxyFactory::createNoCache();
+            }
+        }
         $this->referenceSearchService = $referenceSearchService;
 
         $this->initialize($objectsToResolve);
@@ -45,7 +57,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      */
     public static function createWith(array $objects) : self
     {
-        return new self($objects, null);
+        return new self($objects, null, true);
     }
 
     /**
@@ -54,7 +66,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      */
     public static function createEmpty() : self
     {
-        return new self([], null);
+        return new self([], null, true);
     }
 
     /**
@@ -65,7 +77,18 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      */
     public static function createWithReferenceService(ReferenceSearchService $referenceSearchService, array $objects) : self
     {
-        return new self($objects, $referenceSearchService);
+        return new self($objects, $referenceSearchService, true);
+    }
+
+    /**
+     * @param ReferenceSearchService $referenceSearchService
+     * @param array $objects
+     * @return InMemoryReferenceSearchService
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public static function createWithNoDefaultsReferenceService(ReferenceSearchService $referenceSearchService, array $objects) : self
+    {
+        return new self($objects, $referenceSearchService, false);
     }
 
     /**
@@ -109,15 +132,5 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
         }
 
         $this->objectsToResolve = $objects;
-
-        if (!array_key_exists(InterfaceToCallRegistry::REFERENCE_NAME, $this->objectsToResolve)) {
-            $this->objectsToResolve[InterfaceToCallRegistry::REFERENCE_NAME] = InterfaceToCallRegistry::createEmpty();
-        }
-        if (!array_key_exists(ConversionService::REFERENCE_NAME, $this->objectsToResolve)) {
-            $this->objectsToResolve[ConversionService::REFERENCE_NAME] = AutoCollectionConversionService::createEmpty();
-        }
-        if (!$this->referenceSearchService) {
-            $this->objectsToResolve[ProxyFactory::REFERENCE_NAME] = ProxyFactory::createNoCache();
-        }
     }
 }

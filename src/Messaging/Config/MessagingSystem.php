@@ -16,6 +16,7 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\CombinedGatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageChannel;
@@ -97,6 +98,11 @@ final class MessagingSystem implements ConfiguredMessagingSystem
 
         $gateways = self::configureGateways($gatewayBuilders, $referenceSearchService, $channelResolver, $isLazyConfiguration);
 
+        $gatewayReferences = [];
+        foreach ($gateways as $gateway) {
+            $gatewayReferences[$gateway->getReferenceName()] = $gateway->getGateway();
+        }
+        $referenceSearchService = InMemoryReferenceSearchService::createWithNoDefaultsReferenceService($referenceSearchService, $gatewayReferences);
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $consumerFactories, $pollingMetadataConfigurations);
         $consumers = [];
 
@@ -150,7 +156,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @param ReferenceSearchService $referenceSearchService
      * @param ChannelResolver $channelResolver
      * @param bool $isLazyConfiguration
-     * @return array
+     * @return GatewayReference[]
      * @throws MessagingException
      */
     private static function configureGateways(array $preparedGateways, ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver, bool $isLazyConfiguration): array

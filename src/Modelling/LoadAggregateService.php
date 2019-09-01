@@ -44,9 +44,9 @@ class LoadAggregateService
      */
     private $propertyReaderAccessor;
     /**
-     * @var null|string
+     * @var null|array
      */
-    private $expectedVersionName;
+    private $expectedVersionMapping;
     /**
      * @var bool
      */
@@ -64,12 +64,12 @@ class LoadAggregateService
      * @param string $aggregateMethod
      * @param bool $isFactoryMethod
      * @param array $aggregateIdentifierMapping
-     * @param null|string $expectedVersionName
+     * @param null|array $expectedVersionMapping
      * @param PropertyReaderAccessor $propertyReaderAccessor
      * @param bool $dropMessageOnNotFound
      * @param bool $loadForFactoryMethod
      */
-    public function __construct(AggregateRepository $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?string $expectedVersionName, PropertyReaderAccessor $propertyReaderAccessor, bool $dropMessageOnNotFound, bool $loadForFactoryMethod)
+    public function __construct(AggregateRepository $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, bool $dropMessageOnNotFound, bool $loadForFactoryMethod)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->isFactoryMethod = $isFactoryMethod;
@@ -77,7 +77,7 @@ class LoadAggregateService
         $this->aggregateMethod = $aggregateMethod;
         $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
-        $this->expectedVersionName = $expectedVersionName;
+        $this->expectedVersionMapping = $expectedVersionMapping;
         $this->dropMessageOnNotFound = $dropMessageOnNotFound;
         $this->loadForFactoryMethod = $loadForFactoryMethod;
     }
@@ -115,20 +115,15 @@ class LoadAggregateService
                 }
             }
 
-            $expectedVersion = $this->expectedVersionName
+            $expectedVersion = $this->expectedVersionMapping
                 ? (
-                    $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($this->expectedVersionName), $message->getPayload())
-                    ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($this->expectedVersionName), $message->getPayload())
+                    $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith(array_key_first($this->expectedVersionMapping)), $message->getPayload())
+                    ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith(array_key_first($this->expectedVersionMapping)), $message->getPayload())
                     : null
                 )
                 : null;
-            if ($this->expectedVersionName && !$expectedVersion) {
-                throw InvalidArgumentException::create("Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} has defined version locking, but no version during command handling was provided");
-            }
 
-            $aggregate = is_null($this->expectedVersionName)
-                ? $this->aggregateRepository->findBy($this->aggregateClassName, $aggregateIdentifiers)
-                : $this->aggregateRepository->findWithLockingBy($this->aggregateClassName, $aggregateIdentifiers, $expectedVersion);
+            $aggregate = $this->aggregateRepository->findBy($this->aggregateClassName, $aggregateIdentifiers);
 
             if (!$aggregate && $this->dropMessageOnNotFound) {
                 return null;
@@ -143,8 +138,8 @@ class LoadAggregateService
         if ($aggregate) {
             $messageBuilder = $messageBuilder->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate);
         }
-        if ($expectedVersion) {
-            $messageBuilder = $messageBuilder->setHeader(AggregateMessage::EXPECTED_VERSION, $expectedVersion);
+        if (!is_null($this->expectedVersionMapping)) {
+            $messageBuilder = $messageBuilder->setHeader(AggregateMessage::TARGET_VERSION, $expectedVersion);
         }
 
         if (!$message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {

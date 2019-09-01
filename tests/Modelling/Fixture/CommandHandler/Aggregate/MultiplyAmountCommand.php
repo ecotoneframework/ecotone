@@ -1,7 +1,7 @@
 <?php
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
-use Ecotone\Modelling\Annotation\AggregateExpectedVersion;
+use Ecotone\Modelling\Annotation\TargetAggregateVersion;
 use Ecotone\Modelling\Annotation\TargetAggregateIdentifier;
 
 /**
@@ -18,7 +18,7 @@ class MultiplyAmountCommand
     private $orderId;
     /**
      * @var int
-     * @AggregateExpectedVersion()
+     * @TargetAggregateVersion()
      */
     private $version;
     /**

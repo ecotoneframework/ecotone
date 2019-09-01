@@ -27,7 +27,8 @@ class PropertyReaderAccessor
     {
         try {
             $this->getPropertyValue($propertyPath, $fromData);
-        } catch (InvalidArgumentException $e) {
+        } catch (ReflectionException | InvalidArgumentException $e) {
+//            Handle it without exceptions
             return false;
         }
 

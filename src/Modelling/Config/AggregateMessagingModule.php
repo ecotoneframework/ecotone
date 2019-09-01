@@ -5,10 +5,6 @@ namespace Ecotone\Modelling\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
-use Ecotone\Messaging\Annotation\Parameter\Headers;
-use Ecotone\Messaging\Annotation\Parameter\Payload;
-use Ecotone\Messaging\Annotation\Parameter\Reference;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
@@ -20,7 +16,6 @@ use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -33,7 +28,6 @@ use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateMessageConversionService;
 use Ecotone\Modelling\AggregateMessageConversionServiceBuilder;
 use Ecotone\Modelling\AggregateMessageHandlerBuilder;
-use Ecotone\Modelling\AggregateRepositoryFactory;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateRepository;
 use Ecotone\Modelling\Annotation\CommandHandler;
@@ -146,6 +140,24 @@ class AggregateMessagingModule implements AnnotationModule
             $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class),
             $aggregateRepositoryReferenceNames
         );
+    }
+
+    /***
+     * @param AnnotationRegistration $registration
+     *
+     * @return string
+     */
+    public static function getMessageChannelForEventHandler(AnnotationRegistration $registration): string
+    {
+        /** @var CommandHandler|QueryHandler $methodAnnotation */
+        $methodAnnotation = $registration->getAnnotationForMethod();
+
+        return $methodAnnotation->endpointId;
+    }
+
+    public static function getMessageClassOrInputChannel(AnnotationRegistration $registration): string
+    {
+        return self::getMessageClassFor($registration) ?? $registration->getAnnotationForMethod()->inputChannelName;
     }
 
     /**
@@ -261,19 +273,6 @@ class AggregateMessagingModule implements AnnotationModule
         return $inputChannel ?? "";
     }
 
-    /***
-     * @param AnnotationRegistration $registration
-     *
-     * @return string
-     */
-    public static function getMessageChannelForEventHandler(AnnotationRegistration $registration): string
-    {
-        /** @var CommandHandler|QueryHandler $methodAnnotation */
-        $methodAnnotation = $registration->getAnnotationForMethod();
-
-        return $methodAnnotation->endpointId;
-    }
-
     /**
      * @param AnnotationRegistration $registration
      *
@@ -301,11 +300,6 @@ class AggregateMessagingModule implements AnnotationModule
         }
 
         return $interfaceToCall->getFirstParameterTypeHint();
-    }
-
-    public static function getMessageClassOrInputChannel(AnnotationRegistration $registration) : string
-    {
-        return self::getMessageClassFor($registration) ?? $registration->getAnnotationForMethod()->inputChannelName;
     }
 
     /**
@@ -367,21 +361,6 @@ class AggregateMessagingModule implements AnnotationModule
     }
 
     /**
-     * @param $methodParameterConverterBuilders
-     * @param \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter
-     * @return bool
-     */
-    private static function hasParameterConverterFor($methodParameterConverterBuilders, \Ecotone\Messaging\Handler\InterfaceParameter $interfaceParameter): bool
-    {
-        foreach ($methodParameterConverterBuilders as $methodParameterConverterBuilder) {
-            if ($methodParameterConverterBuilder->isHandling($interfaceParameter)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * @param InterfaceToCall $relatedClassInterface
      * @param array $methodParameterConverterBuilders
      * @param AnnotationRegistration $registration
@@ -425,6 +404,21 @@ class AggregateMessagingModule implements AnnotationModule
         }
 
         return $methodParameterConverterBuilders;
+    }
+
+    /**
+     * @param $methodParameterConverterBuilders
+     * @param InterfaceParameter $interfaceParameter
+     * @return bool
+     */
+    private static function hasParameterConverterFor($methodParameterConverterBuilders, InterfaceParameter $interfaceParameter): bool
+    {
+        foreach ($methodParameterConverterBuilders as $methodParameterConverterBuilder) {
+            if ($methodParameterConverterBuilder->isHandling($interfaceParameter)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -472,9 +466,9 @@ class AggregateMessagingModule implements AnnotationModule
         return $messageHandlerBuilder;
     }
 
-    private function createServiceActivatorForEvent(AnnotationRegistration $registration) : ServiceActivatorBuilder
+    private function createServiceActivatorForEvent(AnnotationRegistration $registration): ServiceActivatorBuilder
     {
         return $this->createServiceActivator($registration)
-                ->withInputChannelName($registration->getAnnotationForMethod()->endpointId);
+            ->withInputChannelName($registration->getAnnotationForMethod()->endpointId);
     }
 }

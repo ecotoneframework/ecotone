@@ -16,7 +16,7 @@ interface AggregateMessage
     const METHOD_NAME = "domain.aggregate.method";
     const IS_FACTORY_METHOD = "domain.aggregate.is_factory_method";
     const AGGREGATE_ID = "domain.aggregate.id";
-    const EXPECTED_VERSION = "domain.aggregate.expected_version";
+    const TARGET_VERSION = "domain.aggregate.target_version";
     const CALLING_MESSAGE = "domain.aggregate.calling_message";
 
     const BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE = MethodInterceptor::DEFAULT_PRECEDENCE + 10;

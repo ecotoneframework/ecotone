@@ -23,7 +23,7 @@ class InMemoryArticleRepository implements AggregateRepository
     private function __construct(array $articles)
     {
         foreach ($articles as $article) {
-            $this->save([], $article, []);
+            $this->save([], $article, [], null);
         }
     }
 
@@ -61,14 +61,6 @@ class InMemoryArticleRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findWithLockingBy(string $aggregateClassName, array $identifiers, int $expectedVersion)
-    {
-        return $this->findBy($identifiers);
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function canHandle(string $aggregateClassName): bool
     {
         return $aggregateClassName === Article::class;
@@ -78,8 +70,9 @@ class InMemoryArticleRepository implements AggregateRepository
      * @param array $identifiers
      * @param Article $aggregate
      * @param array $metadata
+     * @param int|null $expectedVersion
      */
-    public function save(array $identifiers, $aggregate, array $metadata): void
+    public function save(array $identifiers, $aggregate, array $metadata, ?int $expectedVersion): void
     {
         $this->articles[$this->getIdentifier($aggregate)] = $aggregate;
     }

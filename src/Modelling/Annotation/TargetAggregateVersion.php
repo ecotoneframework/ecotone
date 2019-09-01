@@ -11,7 +11,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"PROPERTY"})
  */
-class AggregateExpectedVersion
+class TargetAggregateVersion
 {
 
 }

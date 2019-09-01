@@ -5,6 +5,7 @@ namespace Ecotone\Modelling;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
@@ -79,9 +80,9 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      */
     private $messageIdentifierMapping;
     /**
-     * @var ?string
+     * @var ?array
      */
-    private $expectedVersionPropertyName;
+    private $versionMapping;
     /**
      * @var bool
      */
@@ -137,10 +138,14 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         $reflectionClass = new ReflectionClass($aggregateClassName);
         $aggregateDefaultIdentifiers = [];
         $aggregateMethodWithEvents = null;
+        $aggregateVersionPropertyName = null;
 
         foreach ($reflectionClass->getProperties() as $property) {
             if (preg_match("*AggregateIdentifier*", $property->getDocComment())) {
                 $aggregateDefaultIdentifiers[$property->getName()] = null;
+            }
+            if (preg_match("*Version*", $property->getDocComment())) {
+                $aggregateVersionPropertyName = $property->getName();
             }
         }
         foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
@@ -157,7 +162,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         }
 
         $messageProperties = [];
-        $expectedVersionPropertyName = null;
+        $aggregateVersionMapping = null;
         if ($handledMessageClassName) {
             $messageReflection = new ReflectionClass($handledMessageClassName);
             foreach ($messageReflection->getProperties() as $property) {
@@ -170,12 +175,16 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
 
                     $aggregateDefaultIdentifiers[$mappingName] = $property->getName();
                 }
-                if (preg_match("*AggregateExpectedVersion*", $property->getDocComment())) {
-                    $expectedVersionPropertyName = $property->getName();
+                if (preg_match("*TargetAggregateVersion*", $property->getDocComment())) {
+                    $aggregateVersionMapping[$property->getName()] = $aggregateVersionPropertyName;
                 }
             }
 
             $messageProperties = $messageReflection->getProperties();
+        }
+
+        if (!$aggregateVersionMapping && $aggregateVersionPropertyName) {
+            $aggregateVersionMapping[$aggregateVersionPropertyName] = $aggregateVersionPropertyName;
         }
 
         foreach ($aggregateDefaultIdentifiers as $aggregateIdentifierName => $aggregateIdentifierMappingKey) {
@@ -197,10 +206,8 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             }
         }
 
-
-
         $this->messageIdentifierMapping = $aggregateDefaultIdentifiers;
-        $this->expectedVersionPropertyName = $expectedVersionPropertyName;
+        $this->versionMapping = $aggregateVersionMapping;
         $this->interfaceToCall = $interfaceToCall;
         $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
     }
@@ -347,9 +354,11 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                     ServiceActivatorBuilder::createWithDirectReference(
                         new SaveAggregateService(
                             $this->getAggregateRepository($referenceSearchService),
+                            PropertyEditorAccessor::create($referenceSearchService),
                             $this->getPropertyReaderAccessor(),
                             $lazyEventBus,
-                            $this->aggregateMethodWithEvents
+                            $this->aggregateMethodWithEvents,
+                            $this->versionMapping
                         ),
                         "save"
                     )
@@ -376,7 +385,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             $this->methodName,
             $this->isFactoryMethod,
             $this->messageIdentifierMapping,
-            $this->expectedVersionPropertyName,
+            $this->versionMapping,
             $this->getPropertyReaderAccessor(),
             $this->dropMessageOnNotFound,
             (bool)$this->withFactoryRedirectOnFoundMethodName

@@ -4,15 +4,18 @@ namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessageHandlerBuilder;
 use Ecotone\Modelling\AggregateNotFoundException;
+use Ecotone\Modelling\AggregateRepository;
 use Ecotone\Modelling\AggregateVersionMismatchException;
 use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 use PHPUnit\Framework\TestCase;
@@ -70,6 +73,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_calling_existing_aggregate_method_with_only_command_as_parameter()
     {
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
+        $order->increaseAggregateVersion();
+
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
             "changeShippingAddress",
@@ -82,7 +87,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -112,7 +118,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -141,7 +148,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -175,7 +183,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             ]),
             InMemoryReferenceSearchService::createWith([
                 "repository" => InMemoryAggregateRepository::createWith([$aggregate]),
-                \stdClass::class => new \stdClass()
+                \stdClass::class => new \stdClass(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -204,7 +213,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -222,6 +232,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $orderAmount = 5;
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
+        $order->increaseAggregateVersion();
+
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getAmountWithQuery",
@@ -234,7 +246,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -271,7 +284,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -308,7 +322,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryAggregateRepository::createWith([$aggregate])
+                "repository" => InMemoryAggregateRepository::createWith([$aggregate]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -336,6 +351,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $outputChannelName = "output";
         $orderAmount = 5;
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
+        $order->increaseAggregateVersion();
+
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getAmountWithQuery",
@@ -354,7 +371,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 ]
             ),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -378,6 +396,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $orderAmount = 5;
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
+        $order->increaseAggregateVersion();
+
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getAmount",
@@ -391,7 +411,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -428,7 +449,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryAggregateRepository::createEmpty()
+                "orderRepository" => InMemoryAggregateRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -451,6 +473,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_redirect_to_channel_on_factory_creation_already_found()
     {
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
+        $order->increaseAggregateVersion();
+
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
             "createWith",
@@ -472,7 +496,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             InMemoryReferenceSearchService::createWith([
                 "orderRepository" => InMemoryAggregateRepository::createWith([
                     $order
-                ])
+                ]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -513,7 +538,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryAggregateRepository::createEmpty()
+                "orderRepository" => InMemoryAggregateRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -548,7 +574,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "articleRepository" => InMemoryArticleRepository::createEmpty()
+                "articleRepository" => InMemoryArticleRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -583,7 +610,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryAggregateRepository::createEmpty()
+                "repository" => InMemoryAggregateRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -618,7 +646,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryAggregateRepository::createEmpty()
+                "repository" => InMemoryAggregateRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -656,7 +685,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             InMemoryReferenceSearchService::createWith([
                 "articleRepository" => InMemoryArticleRepository::createWith([
                     Article::createWith(PublishArticleCommand::createWith("johny", "Tolkien", "some bla bla"))
-                ])
+                ]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -688,7 +718,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             InMemoryReferenceSearchService::createWith([
                 "articleRepository" => InMemoryArticleRepository::createWith([
                     Article::createWith(PublishArticleCommand::createWith("johny", "Tolkien", "some bla bla"))
-                ])
+                ]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -705,9 +736,11 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_aggregate_with_version_locking()
+    public function test_calling_aggregate_with_version_locking_from_command()
     {
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
+        $order->increaseAggregateVersion();
+
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
             "multiplyOrder",
@@ -721,7 +754,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -736,11 +770,105 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws InvalidArgumentException
      * @throws MessagingException
      * @throws \Exception
+     */
+    public function test_calling_save_method_with_next_version()
+    {
+        $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
+        $order->increaseAggregateVersion();
+
+        $commandToRun = MultiplyAmountCommand::create(1, 1, 10);
+
+        $orderRepository = $this->createMock(AggregateRepository::class);
+        $orderRepository->method("canHandle")
+            ->with(Order::class)
+            ->willReturn(true);
+        $orderRepository->method("findBy")
+                        ->with(Order::class, ["orderId" => 1])
+                        ->willReturn($order);
+
+        $order->multiplyOrder($commandToRun);
+        $orderRepository->expects($this->once())
+                        ->method("save")
+                        ->with(["orderId" => 1], $order, $this->callback(function(){return true;}), 2);
+
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            Order::class,
+            "multiplyOrder",
+            MultiplyAmountCommand::class
+        )
+            ->withAggregateRepositoryFactories(["orderRepository"])
+            ->withInputChannelName("inputChannel");
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => $orderRepository,
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $aggregateCommandHandler->handle(MessageBuilder::withPayload($commandToRun)->setReplyChannel(NullableMessageChannel::create())->build());
+    }
+
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_calling_save_method_with_first_version_for_factory_method()
+    {
+        $commandToRun = CreateOrderCommand::createWith(1, 1, "Poland");
+
+        $orderRepository = $this->createMock(AggregateRepository::class);
+        $orderRepository->method("canHandle")
+            ->with(Order::class)
+            ->willReturn(true);
+        $orderRepository->method("findBy")
+            ->with(Order::class, ["orderId" => 1])
+            ->willReturn(null);
+
+        $order = Order::createWith($commandToRun);
+        $order->increaseAggregateVersion();
+
+        $orderRepository->expects($this->once())
+            ->method("save")
+            ->with(["orderId" => 1], $order, $this->callback(function(){return true;}), 1);
+
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            Order::class,
+            "createWith",
+            CreateOrderCommand::class
+        )
+            ->withAggregateRepositoryFactories(["orderRepository"])
+            ->withInputChannelName("inputChannel");
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => $orderRepository,
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $aggregateCommandHandler->handle(MessageBuilder::withPayload($commandToRun)->setReplyChannel(NullableMessageChannel::create())->build());
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
      * @throws \Throwable
      */
     public function test_throwing_exception_when_trying_to_handle_command_without_aggregate_id()
     {
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
+        $order->increaseAggregateVersion();
+
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
             "finish",
@@ -754,7 +882,8 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                 LazyEventBus::CHANNEL_NAME => QueueChannel::create()
             ]),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
+                "orderRepository" => InMemoryAggregateRepository::createWith([$order]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
 
@@ -807,36 +936,5 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             "handle",
             PublishArticleCommand::class
         );
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws \Exception
-     * @throws \ReflectionException
-     */
-    public function test_throwing_exception_if_version_locking_defined_and_no_version_provided()
-    {
-        $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
-            Order::class,
-            "multiplyOrder",
-            MultiplyAmountCommand::class
-        )
-            ->withAggregateRepositoryFactories(["orderRepository"])
-            ->withInputChannelName("inputChannel");
-
-        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
-            ]),
-            InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryAggregateRepository::createWith([$order])
-            ])
-        );
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $aggregateCommandHandler->handle(MessageBuilder::withPayload(MultiplyAmountCommand::create(1, null, 10))->build());
     }
 }

@@ -52,15 +52,7 @@ class AppointmentRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findWithLockingBy(string $aggregateClassName, array $identifiers, int $expectedVersion)
-    {
-        return;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function save(array $identifiers, $aggregate, array $metadata): void
+    public function save(array $identifiers, $aggregate, array $metadata, ?int $expectedVersion): void
     {
         $this->appointments[$identifiers['appointmentId']] = $aggregate;
     }

@@ -32,7 +32,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     private function __construct(array $aggregates)
     {
         foreach ($aggregates as $aggregate) {
-            $this->save([], $aggregate, []);
+            $this->save([], $aggregate, [], null);
         }
     }
 
@@ -70,22 +70,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findWithLockingBy(string $aggregateClassName, array $identifiers, int $expectedVersion)
-    {
-        /** @var VersionAggregate $aggregate */
-        $aggregate =  $this->findBy($aggregateClassName, $identifiers);
-
-        if ($expectedVersion != $aggregate->getVersion()) {
-            throw AggregateVersionMismatchException::create("Expected aggregate version {$expectedVersion} got {$aggregate->getVersion()}");
-        }
-
-        return $aggregate;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function save(array $identifiers, $aggregate, array $metadata): void
+    public function save(array $identifiers, $aggregate, array $metadata, ?int $expectedVersion): void
     {
         $this->aggregates[$aggregate->getId()] = $aggregate;
     }

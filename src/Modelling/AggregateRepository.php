@@ -25,18 +25,10 @@ interface AggregateRepository
     public function findBy(string $aggregateClassName, array $identifiers);
 
     /**
-     * @param string $aggregateClassName
-     * @param array  $identifiers
-     * @param int    $expectedVersion
-     *
-     * @return object|null
-     */
-    public function findWithLockingBy(string $aggregateClassName, array $identifiers, int $expectedVersion);
-
-    /**
      * @param array $identifiers
      * @param object $aggregate
      * @param array $metadata
+     * @param int|null $expectedVersion if optimistic locking in enabled current version + 1
      */
-    public function save(array $identifiers, $aggregate, array $metadata): void;
+    public function save(array $identifiers, $aggregate, array $metadata, ?int $expectedVersion): void;
 }

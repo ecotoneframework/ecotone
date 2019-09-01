@@ -9,6 +9,7 @@ use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\InitializeAggregateOnNotFound;
 use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\Annotation\Version;
 use Ecotone\Modelling\WithAggregateEvents;
 
 /**
@@ -36,8 +37,9 @@ class Order implements VersionAggregate
     private $shippingAddress;
     /**
      * @var int
+     * @Version()
      */
-    private $version = 0;
+    private $version;
     /**
      * @var string
      */
@@ -55,7 +57,6 @@ class Order implements VersionAggregate
         $this->shippingAddress = $createOrderCommand->getShippingAddress();
 
         $this->record(new Notification());
-        $this->increaseAggregateVersion();
     }
 
     /**
@@ -79,7 +80,6 @@ class Order implements VersionAggregate
     public function increaseAmount(IncreaseAmountCommand $command) : void
     {
         $this->amount += $command->getAmount();
-        $this->increaseAggregateVersion();
     }
 
     /**
@@ -89,7 +89,6 @@ class Order implements VersionAggregate
     public function changeShippingAddress(ChangeShippingAddressCommand $command) : void
     {
         $this->shippingAddress = $command->getShippingAddress();
-        $this->increaseAggregateVersion();
 
         $this->record(new Notification());
     }
@@ -102,7 +101,6 @@ class Order implements VersionAggregate
     public function multiplyOrder(MultiplyAmountCommand $command) : void
     {
         $this->amount *= $command->getAmount();
-        $this->increaseAggregateVersion();
     }
 
     /**
@@ -164,14 +162,14 @@ class Order implements VersionAggregate
     }
 
     /**
-     * @inheritDoc
+     * @QueryHandler(inputChannelName="getVersion", ignoreMessage=true)
      */
-    public function getVersion(): int
+    public function getVersion(): ?int
     {
         return $this->version;
     }
 
-    private function increaseAggregateVersion() : void
+    public function increaseAggregateVersion() : void
     {
         $this->version += 1;
     }

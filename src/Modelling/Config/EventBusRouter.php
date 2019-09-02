@@ -17,7 +17,7 @@ class EventBusRouter
     /**
      * @var array
      */
-    private $listenNameToChannelNameMapping;
+    private $listenNameToChannelNameMapping = [];
 
     /**
      * CommandBusRouter constructor.

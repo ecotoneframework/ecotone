@@ -19,7 +19,7 @@ class QueryBusRouter
     /**
      * @var array
      */
-    private $classNameToChannelNameMapping;
+    private $classNameToChannelNameMapping = [];
     /**
      * @var array
      */

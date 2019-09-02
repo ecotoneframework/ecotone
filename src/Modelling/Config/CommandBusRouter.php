@@ -18,7 +18,7 @@ class CommandBusRouter
     /**
      * @var array
      */
-    private $classNameToChannelNameMapping;
+    private $classNameToChannelNameMapping = [];
     /**
      * @var array
      */

@@ -62,4 +62,9 @@ class LazyMessageHandler implements MessageHandler
 
         return $this->initializedMessageHandler;
     }
+
+    public function __toString()
+    {
+        return (string)$this->messageHandlerBuilder;
+    }
 }

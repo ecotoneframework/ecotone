@@ -201,7 +201,7 @@ class AggregateMessagingModule implements AnnotationModule
             $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames, $registration->getAnnotationForMethod()->mustBeUnique);
 
             if (!$registration->getAnnotationForMethod()->mustBeUnique) {
-                $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(
+                $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(
                     $inputChannelName
                 ));
             }
@@ -249,7 +249,14 @@ class AggregateMessagingModule implements AnnotationModule
 
         foreach ($this->serviceCommandHandlersRegistrations as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
-            $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames, $registration->getAnnotationForMethod()->mustBeUnique);
+            $inputChannelName = self::getMessageChannelFor($registration);
+            $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames, $registration->getAnnotationForMethod()->mustBeUnique);
+
+            if (!$registration->getAnnotationForMethod()->mustBeUnique) {
+                $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(
+                    $inputChannelName
+                ));
+            }
         }
         foreach ($this->serviceQueryHandlerRegistrations as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));

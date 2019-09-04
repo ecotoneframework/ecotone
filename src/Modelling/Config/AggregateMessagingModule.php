@@ -199,6 +199,12 @@ class AggregateMessagingModule implements AnnotationModule
             $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->dropMessageOnNotFound);
 
             $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames, $registration->getAnnotationForMethod()->mustBeUnique);
+
+            if (!$registration->getAnnotationForMethod()->mustBeUnique) {
+                $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(
+                    $inputChannelName
+                ));
+            }
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {

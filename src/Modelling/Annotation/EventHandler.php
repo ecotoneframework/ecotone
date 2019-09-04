@@ -4,6 +4,7 @@ namespace Ecotone\Modelling\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
+use Ecotone\Messaging\Annotation\IdentifiedAnnotation;
 
 /**
  * Class EventHandler
@@ -12,7 +13,7 @@ use Ecotone\Messaging\Annotation\EndpointAnnotation;
  * @Annotation
  * @Target({"METHOD"})
  */
-class EventHandler extends EndpointAnnotation
+class EventHandler extends IdentifiedAnnotation
 {
     /**
      * Registers event handler to listen from defined inputs

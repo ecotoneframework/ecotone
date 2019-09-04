@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\Messaging\Annotation\ChannelAdapter;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
@@ -43,8 +44,10 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
     {
         $multiplePollingMetadata = [];
 
-        $endpoints = $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EndpointAnnotation::class);
-
+        $endpoints = array_merge(
+            $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EndpointAnnotation::class),
+            $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, ChannelAdapter::class)
+        );
         foreach ($endpoints as $endpoint) {
             /** @var EndpointAnnotation $endpointAnnotation */
             $endpointAnnotation = $endpoint->getAnnotationForMethod();

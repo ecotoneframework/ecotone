@@ -5,6 +5,7 @@ namespace Ecotone\Modelling\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
@@ -197,7 +198,7 @@ class AggregateMessagingModule implements AnnotationModule
             $inputChannelName = self::getMessageChannelFor($registration);
             $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->dropMessageOnNotFound);
 
-            $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames);
+            $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames, $registration->getAnnotationForMethod()->mustBeUnique);
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {
@@ -237,16 +238,16 @@ class AggregateMessagingModule implements AnnotationModule
                 )
             );
 
-            $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames);
+            $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames, true);
         }
 
         foreach ($this->serviceCommandHandlersRegistrations as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
-            $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames);
+            $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames, $registration->getAnnotationForMethod()->mustBeUnique);
         }
         foreach ($this->serviceQueryHandlerRegistrations as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivator($registration));
-            $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames);
+            $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames, true);
         }
         foreach ($this->serviceEventHandlers as $registration) {
             $configuration->registerMessageHandler($this->createServiceActivatorForEvent($registration));
@@ -425,13 +426,14 @@ class AggregateMessagingModule implements AnnotationModule
      * @param string $channelName
      * @param array $inputChannelNames
      *
+     * @param string $throwExceptionOnFound
      * @return array
      * @throws MessagingException
      */
-    private function addUniqueChannelName(string $channelName, array $inputChannelNames): array
+    private function addUniqueChannelName(string $channelName, array $inputChannelNames, string $throwExceptionOnFound): array
     {
-        if (in_array($channelName, $inputChannelNames)) {
-            throw ConfigurationException::create("Trying to register Command Handler twice for input {$channelName}");
+        if (in_array($channelName, $inputChannelNames) && $throwExceptionOnFound) {
+            throw ConfigurationException::create("Trying to register Handler twice for input {$channelName}");
         }
         $inputChannelNames[] = $channelName;
 

@@ -8,13 +8,8 @@ namespace Ecotone\Messaging\Annotation;
  * @package Ecotone\Messaging\Annotation
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-abstract class EndpointAnnotation extends IdentifiedAnnotation
+abstract class ChannelAdapter extends IdentifiedAnnotation
 {
-    /**
-     * @var string
-     * @Required()
-     */
-    public $inputChannelName;
     /**
      * @var Poller|null
      */

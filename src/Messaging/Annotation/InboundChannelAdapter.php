@@ -10,7 +10,7 @@ namespace Ecotone\Messaging\Annotation;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class InboundChannelAdapter extends EndpointAnnotation
+class InboundChannelAdapter extends ChannelAdapter
 {
     /**
      * @var string

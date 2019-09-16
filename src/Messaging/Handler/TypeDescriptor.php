@@ -132,7 +132,7 @@ final class TypeDescriptor
             if ($toCompare->isClass()) {
                 $toCompareClass = new \ReflectionClass($toCompare->getTypeHint());
 
-                if ($toCompareClass->hasMethod("__toString")) {
+                if ($this->isString() && $toCompareClass->hasMethod("__toString")) {
                     return true;
                 }
             }
@@ -144,7 +144,7 @@ final class TypeDescriptor
             if ($this->isClass()) {
                 $toCompareClass = new \ReflectionClass($this->getTypeHint());
 
-                if ($toCompareClass->hasMethod("__toString")) {
+                if ($toCompare->isString() && $toCompareClass->hasMethod("__toString")) {
                     return true;
                 }
             }
@@ -170,6 +170,13 @@ final class TypeDescriptor
 
         if ($this->isClass() && $toCompare->isClass()) {
             if (!$this->equals($toCompare)) {
+                if (!$this->isCompoundClass() && $toCompare->isCompoundClass()) {
+                    return true;
+                }
+                if ($this->isCompoundClass() && !$toCompare->isCompoundClass()) {
+                    return false;
+                }
+
                 $thisClass = new \ReflectionClass($this->getTypeHint());
                 $toCompareClass = new \ReflectionClass($toCompare->getTypeHint());
 
@@ -480,6 +487,14 @@ final class TypeDescriptor
     /**
      * @return bool
      */
+    public function isCompoundClass() : bool
+    {
+        return $this->type === self::OBJECT;
+    }
+
+    /**
+     * @return bool
+     */
     public function isPrimitive() : bool
     {
         return self::isItTypeOfPrimitive($this->type);
@@ -689,16 +704,7 @@ final class TypeDescriptor
      */
     private function isCompoundAndClass(string $typeHint, string $docBlockTypeDescription): bool
     {
-        return self::isItTypeOfCompoundType($typeHint) && self::isClassOrInterface($docBlockTypeDescription) && !$this->isCompoundClass($typeHint);
-    }
-
-    /**
-     * @param string $typeHint
-     * @return bool
-     */
-    private function isCompoundClass(string $typeHint): bool
-    {
-        return $typeHint === self::OBJECT;
+        return self::isItTypeOfCompoundType($typeHint) && self::isClassOrInterface($docBlockTypeDescription) && $typeHint != self::OBJECT;
     }
 
     /**

@@ -72,12 +72,15 @@ final class InterfaceParameter
     }
 
     /**
-     * @param TypeDescriptor $typeDescriptor
+     * @param TypeDescriptor $toCompare
      * @return bool
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws \ReflectionException
      */
-    public function hasType(TypeDescriptor $typeDescriptor) : bool
+    public function canBePassedIn(TypeDescriptor $toCompare) : bool
     {
-        return $this->typeDescriptor->equals($typeDescriptor);
+        return $toCompare->isCompatibleWith($this->typeDescriptor);
     }
 
     /**

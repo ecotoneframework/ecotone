@@ -68,7 +68,7 @@ class AroundMethodInterceptor
     {
         $methodInvocation = TypeDescriptor::create(MethodInvocation::class);
         foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-            if ($interfaceParameter->hasType($methodInvocation)) {
+            if ($interfaceParameter->canBePassedIn($methodInvocation)) {
                 return true;
             }
         }
@@ -123,20 +123,20 @@ class AroundMethodInterceptor
         foreach ($this->interceptorInterfaceToCall->getInterfaceParameters() as $parameter) {
             $resolvedArgument = null;
 
-            if (!$resolvedArgument && $parameter->hasType($messagePayloadType)) {
+            if (!$resolvedArgument && $parameter->canBePassedIn($messagePayloadType)) {
                 $resolvedArgument = $requestMessage->getPayload();
             }
 
-            if (!$resolvedArgument && $parameter->hasType($methodInvocationType)) {
+            if (!$resolvedArgument && $parameter->canBePassedIn($methodInvocationType)) {
                 $hasMethodInvocation = true;
                 $resolvedArgument = $methodInvocation;
             }
 
-            if (!$resolvedArgument && $parameter->hasType($interceptedInstanceType)) {
+            if (!$resolvedArgument && $parameter->canBePassedIn($interceptedInstanceType)) {
                 $resolvedArgument = $methodInvocation->getObjectToInvokeOn();
             }
 
-            if (!$resolvedArgument && $parameter->hasType($messageType)) {
+            if (!$resolvedArgument && $parameter->canBePassedIn($messageType)) {
                 $resolvedArgument = $requestMessage;
             }
 
@@ -155,7 +155,7 @@ class AroundMethodInterceptor
             }
 
             if (!$resolvedArgument) {
-                if ($parameter->hasType($referenceSearchServiceTypeDescriptor)) {
+                if ($parameter->canBePassedIn($referenceSearchServiceTypeDescriptor)) {
                     $resolvedArgument = $this->referenceSearchService;
                 }
             }

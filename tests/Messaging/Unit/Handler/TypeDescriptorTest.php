@@ -479,11 +479,11 @@ class TypeDescriptorTest extends TestCase
     public function test_compatibility_when_comparing_scalar_with_object_containing_to_string_method()
     {
         $this->assertTrue(
-            TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::createIntegerType())
+            TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::createStringType())
         );
 
         $this->assertTrue(
-            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::create(DumbMessageHandlerBuilder::class))
+            TypeDescriptor::createStringType()->isCompatibleWith(TypeDescriptor::create(DumbMessageHandlerBuilder::class))
         );
     }
 
@@ -558,6 +558,28 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertFalse(
             TypeDescriptor::create(TypeDescriptor::VOID)->isCompatibleWith(TypeDescriptor::create(TypeDescriptor::VOID))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_compatibility_when_comparing_actual_class_to_object_type_hint()
+    {
+        $this->assertTrue(
+            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::create(TypeDescriptor::OBJECT))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_object_type_hint_to_actual_class()
+    {
+        $this->assertFalse(
+            TypeDescriptor::create(TypeDescriptor::OBJECT)->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
         );
     }
 

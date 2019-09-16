@@ -53,7 +53,7 @@ class InterceptorConverterBuilder implements ParameterConverterBuilder
     public function isHandling(InterfaceParameter $parameter): bool
     {
         return
-            $parameter->hasType(TypeDescriptor::create(InterfaceToCall::class))
+            $parameter->canBePassedIn(TypeDescriptor::create(InterfaceToCall::class))
             || $this->interceptedInterface->hasMethodAnnotation($parameter->getTypeDescriptor())
             || $this->interceptedInterface->hasClassAnnotation($parameter->getTypeDescriptor());
     }

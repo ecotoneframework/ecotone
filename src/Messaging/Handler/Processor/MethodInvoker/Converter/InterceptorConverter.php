@@ -42,12 +42,12 @@ class InterceptorConverter implements ParameterConverter
      */
     public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
     {
-        if ($relatedParameter->hasType(TypeDescriptor::create(InterfaceToCall::class))) {
+        if ($relatedParameter->canBePassedIn(TypeDescriptor::create(InterfaceToCall::class))) {
             return $this->interceptedInterface;
         }
 
         foreach ($this->endpointAnnotations as $endpointAnnotation) {
-            if ($relatedParameter->hasType(TypeDescriptor::createFromVariable($endpointAnnotation))) {
+            if ($relatedParameter->canBePassedIn(TypeDescriptor::createFromVariable($endpointAnnotation))) {
                 return $endpointAnnotation;
             }
         }
@@ -65,7 +65,7 @@ class InterceptorConverter implements ParameterConverter
     public function isHandling(InterfaceParameter $parameter): bool
     {
         return
-            $parameter->hasType(TypeDescriptor::create(InterfaceToCall::class))
+            $parameter->canBePassedIn(TypeDescriptor::create(InterfaceToCall::class))
             || $this->interceptedInterface->hasMethodAnnotation($parameter->getTypeDescriptor())
             || $this->interceptedInterface->hasClassAnnotation($parameter->getTypeDescriptor());
     }

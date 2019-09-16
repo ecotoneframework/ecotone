@@ -2,10 +2,15 @@
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
+use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Message;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Test\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 
 /**
  * Class TypeDescriptorTest
@@ -334,6 +339,225 @@ class TypeDescriptorTest extends TestCase
         $this->assertEquals(
             TypeDescriptor::UNKNOWN,
             TypeDescriptor::createWithDocBlock(TypeDescriptor::UNKNOWN,  "mixed")->getTypeHint()
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_unknown_with_unknown()
+    {
+        $this->assertFalse(
+            TypeDescriptor::createUnknownType()->isCompatibleWith(TypeDescriptor::createUnknownType())
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_compatibility_when_comparing_class_of_the_same_type()
+    {
+        $this->assertTrue(
+            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_class_with_scalar()
+    {
+        $this->assertFalse(
+            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::createIntegerType())
+        );
+
+        $this->assertFalse(
+            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_class_with_compound()
+    {
+        $this->assertFalse(
+            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::createArrayType())
+        );
+
+        $this->assertFalse(
+            TypeDescriptor::createArrayType()->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_different_collections()
+    {
+        $this->assertFalse(
+            TypeDescriptor::createCollection(\stdClass::class)->isCompatibleWith(TypeDescriptor::createCollection(Message::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_compatibility_when_comparing_same_collections()
+    {
+        $this->assertTrue(
+            TypeDescriptor::createCollection(\stdClass::class)->isCompatibleWith(TypeDescriptor::createCollection(\stdClass::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_compatibility_when_comparing_collection_of_subclass()
+    {
+        $this->assertTrue(
+            TypeDescriptor::createCollection(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::createCollection(MessageHandlerBuilder::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_scalar_with_compound()
+    {
+        $this->assertFalse(
+            TypeDescriptor::createArrayType()->isCompatibleWith(TypeDescriptor::createIntegerType())
+        );
+
+        $this->assertFalse(
+            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::createArrayType())
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_compatibility_when_comparing_scalar_with_compound()
+    {
+        $this->assertFalse(
+            TypeDescriptor::createArrayType()->isCompatibleWith(TypeDescriptor::createIntegerType())
+        );
+
+        $this->assertFalse(
+            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::createArrayType())
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_scalar_with_object()
+    {
+        $this->assertFalse(
+            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::createIntegerType())
+        );
+
+        $this->assertFalse(
+            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_compatibility_when_comparing_scalar_with_object_containing_to_string_method()
+    {
+        $this->assertTrue(
+            TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::createIntegerType())
+        );
+
+        $this->assertTrue(
+            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::create(DumbMessageHandlerBuilder::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_different_classes()
+    {
+        $this->assertFalse(
+            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::create(DumbMessageHandlerBuilder::class))
+        );
+
+        $this->assertFalse(
+            TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_compatibility_when_comparing_class_and_its_interface()
+    {
+        $this->assertTrue(
+            TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::create(MessageHandlerBuilder::class))
+        );
+
+        $this->assertTrue(
+            TypeDescriptor::create(MessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::create(DumbMessageHandlerBuilder::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_compatibility_when_comparing_subclass_interface_with_base_interface()
+    {
+        $this->assertTrue(
+            TypeDescriptor::create(MessageHandlerBuilderWithParameterConverters::class)->isCompatibleWith(TypeDescriptor::create(MessageHandlerBuilder::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_interface_with_subclass_interface()
+    {
+        $this->assertFalse(
+            TypeDescriptor::create(MessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::create(MessageHandlerBuilderWithParameterConverters::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_compatibility_when_comparing_class_with_its_abstract_class()
+    {
+        $this->assertTrue(
+            TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::create(InputOutputMessageHandlerBuilder::class))
+        );
+    }
+
+    /**
+     * @throws TypeDefinitionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_no_compatibility_when_comparing_void_with_void()
+    {
+        $this->assertFalse(
+            TypeDescriptor::create(TypeDescriptor::VOID)->isCompatibleWith(TypeDescriptor::create(TypeDescriptor::VOID))
         );
     }
 

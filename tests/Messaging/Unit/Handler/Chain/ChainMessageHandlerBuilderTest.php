@@ -3,6 +3,17 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Chain;
 
+use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Conversion\ReferenceServiceConverter;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageHeaders;
+use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\Order;
+use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderConverter;
+use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderIdIncreaser;
+use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderNamePrefixer;
+use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderReceiver;
 use Test\Ecotone\Messaging\Fixture\Handler\Transformer\PassThroughTransformer;
 use Test\Ecotone\Messaging\Fixture\Handler\Transformer\StdClassTransformer;
 use Test\Ecotone\Messaging\Fixture\Handler\Transformer\StringTransformer;
@@ -352,6 +363,39 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $this->assertEquals(
             2,
+            $outputChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_chaining_with_conversions_flow_using_x_type_to_keep_class_type_when_final_endpoint_is_not_compatible_with_payload()
+    {
+        $outputChannelName = "outputChannel";
+        $outputChannel = QueueChannel::create();
+        $chainBuilder = ChainMessageHandlerBuilder::create()
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(new OrderNamePrefixer("ecotone."), "transform"))
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(new OrderIdIncreaser(), "increase"))
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(new OrderReceiver(), "receive"))
+            ->withOutputMessageChannel($outputChannelName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $outputChannelName => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
+                        ReferenceServiceConverter::create(new OrderConverter(), "convertFromArrayToObject", TypeDescriptor::createArrayType(), TypeDescriptor::create(Order::class)),
+                        ReferenceServiceConverter::create(new OrderConverter(), "fromObjectToArray", TypeDescriptor::create(Order::class), TypeDescriptor::createArrayType())
+                    ])
+                ])
+            );
+
+        $chainBuilder->handle(
+            MessageBuilder::withPayload(new Order("1", "shop"))
+                ->setHeader(MessageHeaders::TYPE_ID, Order::class)
+                ->build()
+        );
+
+        $this->assertEquals(
+            new Order("2", "ecotone.shop"),
             $outputChannel->receive()->getPayload()
         );
     }

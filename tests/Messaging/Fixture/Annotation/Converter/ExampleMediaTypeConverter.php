@@ -30,6 +30,6 @@ class ExampleMediaTypeConverter implements Converter
     public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
     {
         return $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_JSON)
-            && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP_OBJECT);
+            && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP);
     }
 }

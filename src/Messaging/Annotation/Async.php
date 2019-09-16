@@ -18,5 +18,5 @@ class Async
      * @var string
      * @Required()
      */
-    public $inputChannelName;
+    public $channelName;
 }

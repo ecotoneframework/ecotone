@@ -135,7 +135,7 @@ class EnricherBuilderTest extends MessagingTest
             $transformedMessage->getPayload()
         );
         $this->assertEquals(
-            MediaType::parseMediaType(MediaType::APPLICATION_X_PHP_OBJECT)
+            MediaType::parseMediaType(MediaType::APPLICATION_X_PHP)
                 ->addParameter("type", TypeDescriptor::ARRAY)->toString(),
             $transformedMessage->getHeaders()->get(MessageHeaders::CONTENT_TYPE)
         );
@@ -187,7 +187,7 @@ class EnricherBuilderTest extends MessagingTest
             [
                 EnrichPayloadWithValueBuilder::createWith("token", "123")
             ],
-            [FakeConverterService::create(["wrong" => 12], TypeDescriptor::OBJECT, MediaType::APPLICATION_X_PHP_OBJECT)]
+            [FakeConverterService::create(["wrong" => 12], TypeDescriptor::OBJECT, MediaType::APPLICATION_X_PHP)]
         );
 
         $this->assertEquals(

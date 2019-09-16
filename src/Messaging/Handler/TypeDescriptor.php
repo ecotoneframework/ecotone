@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
+
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
@@ -112,6 +113,94 @@ final class TypeDescriptor
     public static function isNull(string $type) : bool
     {
         return $type === self::NULL;
+    }
+
+    /**
+     * @param TypeDescriptor $toCompare
+     * @return bool
+     * @throws InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \ReflectionException
+     */
+    public function isCompatibleWith(TypeDescriptor $toCompare) : bool
+    {
+        if ($this->isUnknown() || $toCompare->isUnknown()) {
+            return false;
+        }
+
+        if ($this->isScalar() && !$toCompare->isScalar()) {
+            if ($toCompare->isClass()) {
+                $toCompareClass = new \ReflectionClass($toCompare->getTypeHint());
+
+                if ($toCompareClass->hasMethod("__toString")) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        if ($toCompare->isScalar() && !$this->isScalar()) {
+            if ($this->isClass()) {
+                $toCompareClass = new \ReflectionClass($this->getTypeHint());
+
+                if ($toCompareClass->hasMethod("__toString")) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        if (($this->isClass() && !$toCompare->isClass()) || ($toCompare->isClass() && !$this->isClass())) {
+            return false;
+        }
+
+        if ($this->isCollection() && $toCompare->isCollection()) {
+            if ($this->resolveGenericTypes() == $toCompare->resolveGenericTypes()) {
+                return true;
+            }
+
+            if ($this->resolveGenericTypes()[0]->isCompatibleWith($toCompare->resolveGenericTypes()[0])) {
+                return true;
+            }
+
+            return false;
+        }
+
+        if ($this->isClass() && $toCompare->isClass()) {
+            if (!$this->equals($toCompare)) {
+                $thisClass = new \ReflectionClass($this->getTypeHint());
+                $toCompareClass = new \ReflectionClass($toCompare->getTypeHint());
+
+                if ($thisClass->isInterface() && !$toCompareClass->isInterface()) {
+                    return $toCompareClass->implementsInterface($this->getTypeHint());
+                }
+                if ($toCompareClass->isInterface() && !$thisClass->isInterface()) {
+                    return $thisClass->implementsInterface($toCompare->getTypeHint());
+                }
+
+                if ($thisClass->isInterface() && $toCompareClass->isInterface()) {
+                    if ($thisClass->implementsInterface($toCompare->getTypeHint())) {
+                        return true;
+                    }
+                }
+
+                if ($this->isClass() && $toCompareClass->isAbstract()) {
+                    if ($thisClass->isSubclassOf($toCompare->getTypeHint())) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        if ($this->isVoid() && $toCompare->isVoid()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -383,7 +472,7 @@ final class TypeDescriptor
     /**
      * @return bool
      */
-    public function isObject() : bool
+    public function isClass() : bool
     {
         return $this->type === self::OBJECT || $this->isClassOrInterface($this->type);
     }

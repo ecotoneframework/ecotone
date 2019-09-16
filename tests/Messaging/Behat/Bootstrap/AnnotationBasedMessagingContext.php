@@ -171,7 +171,7 @@ class AnnotationBasedMessagingContext implements Context
      */
     public function calendarShouldContainEventWithAppointmentId(int $appointmentId)
     {
-        Assert::assertTrue(self::getQueryBus()->convertAndSend("doesCalendarContainAppointments", MediaType::APPLICATION_X_PHP_OBJECT, $appointmentId));
+        Assert::assertTrue(self::getQueryBus()->convertAndSend("doesCalendarContainAppointments", MediaType::APPLICATION_X_PHP, $appointmentId));
     }
 
     /**

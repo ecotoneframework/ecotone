@@ -155,7 +155,7 @@ class InterfaceToCallRegistry
             throw ConfigurationException::create("Cannot find reference with name `$referenceName` for method {$methodName}. " . $exception->getMessage());
         }
 
-        if (!$objectClassType->isObject()) {
+        if (!$objectClassType->isClass()) {
             throw new InvalidArgumentException("Reference {$referenceName} is not an object");
         }
 

@@ -19,6 +19,7 @@ use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
@@ -290,7 +291,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         foreach (array_unique($asynchronousChannels) as $asychronousChannel) {
-            $messageHandlerBuilders[] = TransformerBuilder::createHeaderEnricher([])
+            $messageHandlerBuilders[] = BridgeBuilder::create()
                 ->withEndpointId($asychronousChannel)
                 ->withInputChannelName($asychronousChannel);
         }
@@ -848,7 +849,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerInternalGateway(TypeDescriptor $interfaceName): Configuration
     {
-        Assert::isTrue($interfaceName->isObject(), "Passed internal gateway must be class, passed: {$interfaceName->toString()}");
+        Assert::isTrue($interfaceName->isClass(), "Passed internal gateway must be class, passed: {$interfaceName->toString()}");
 
         $this->gatewayClassesToGenerateProxies[] = $interfaceName->toString();
 

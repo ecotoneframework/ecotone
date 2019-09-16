@@ -27,8 +27,8 @@ final class MediaType
     const APPLICATION_ATOM_XML = "application/atom+xml";
     const APPLICATION_XHTML_XML = "application/xhtml+xml";
     const APPLICATION_OCTET_STREAM = "application/octet-stream";
-    const APPLICATION_X_PHP_OBJECT = "application/x-php-object";
-    const APPLICATION_X_PHP_SERIALIZED_OBJECT = "application/x-php-serialized-object";
+    const APPLICATION_X_PHP = "application/x-php";
+    const APPLICATION_X_PHP_SERIALIZED = "application/x-php-serialized";
 
     private const TYPE_PARAMETER = "type";
 
@@ -117,7 +117,7 @@ final class MediaType
      */
     public static function createApplicationXPHPObject() : self
     {
-        return self::parseMediaType(self::APPLICATION_X_PHP_OBJECT);
+        return self::parseMediaType(self::APPLICATION_X_PHP);
     }
 
     /**
@@ -129,10 +129,10 @@ final class MediaType
     public static function createApplicationXPHPObjectWithTypeParameter(string $type) : self
     {
         if ($type === TypeDescriptor::UNKNOWN) {
-            return self::parseMediaType(self::APPLICATION_X_PHP_OBJECT);
+            return self::parseMediaType(self::APPLICATION_X_PHP);
         }
 
-        return self::parseMediaType(self::APPLICATION_X_PHP_OBJECT . ";type={$type}");
+        return self::parseMediaType(self::APPLICATION_X_PHP . ";type={$type}");
     }
 
 
@@ -143,7 +143,7 @@ final class MediaType
      */
     public static function createApplicationXPHPSerializedObject() : self
     {
-        return self::parseMediaType(self::APPLICATION_X_PHP_SERIALIZED_OBJECT);
+        return self::parseMediaType(self::APPLICATION_X_PHP_SERIALIZED);
     }
 
     /**

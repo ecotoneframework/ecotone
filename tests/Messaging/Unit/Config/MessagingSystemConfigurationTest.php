@@ -278,6 +278,31 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertEquals(2, $calculatingService->getLastResult());
     }
 
+    public function test_registering_asynchronous_endpoint_with_direct_channel()
+    {
+        $calculatingService = CalculatingService::create(1);
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty())
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference($calculatingService, "result")
+                    ->withEndpointId("endpointId")
+                    ->withInputChannelName("inputChannel")
+            )
+            ->registerAsynchronousEndpoint("fakeAsyncChannel", "endpointId")
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $replyChannel = QueueChannel::create();
+        $message = MessageBuilder::withPayload(2)
+            ->setReplyChannel($replyChannel)
+            ->build();
+
+        /** @var MessageChannel $channel */
+        $channel = $configuredMessagingSystem->getMessageChannelByName("inputChannel");
+
+        $channel->send($message);
+        $this->assertEquals(2, $calculatingService->getLastResult());
+    }
+
     public function test_registering_asynchronous_endpoint_with_channel_interceptor()
     {
         $calculatingService = CalculatingService::create(1);

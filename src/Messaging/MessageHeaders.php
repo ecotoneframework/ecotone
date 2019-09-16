@@ -30,6 +30,10 @@ class MessageHeaders
      */
     const CONTENT_TYPE = 'contentType';
     /**
+     * Type of object under payload
+     */
+    const TYPE_ID = "__TypeId__";
+    /**
      * Encoding of payload body
      */
     const CONTENT_ENCODING = 'contentEncoding';

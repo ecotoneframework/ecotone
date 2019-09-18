@@ -11,11 +11,15 @@ use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Annotation\EventHandler;
+use Ecotone\Modelling\Annotation\QueryHandler;
 
 /**
  * Class ConverterModule
@@ -50,9 +54,15 @@ class AsyncModule extends NoExternalConfigurationModule implements AnnotationMod
             MessageEndpoint::class,
             Async::class
         );
-        $endpoints = $annotationRegistrationService->findRegistrationsFor(
-            MessageEndpoint::class,
-            EndpointAnnotation::class
+        $endpoints = array_merge(
+            $annotationRegistrationService->findRegistrationsFor(
+                MessageEndpoint::class,
+                EndpointAnnotation::class
+            ),
+            $annotationRegistrationService->findRegistrationsFor(
+                MessageEndpoint::class,
+                EventHandler::class
+            )
         );
 
         $registeredAsyncEndpoints = [];
@@ -63,6 +73,15 @@ class AsyncModule extends NoExternalConfigurationModule implements AnnotationMod
                 if ($endpoint->getClassName() === $asynchronousMethod->getClassName() && $endpoint->getMethodName() === $asynchronousMethod->getMethodName()) {
                     /** @var EndpointAnnotation $annotationForMethod */
                     $annotationForMethod = $endpoint->getAnnotationForMethod();
+                    if ($annotationForMethod instanceof QueryHandler) {
+                        continue;
+                    }
+                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
+                        if ($annotationForMethod->isEndpointIdGenerated()) {
+                            throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
+                        }
+                    }
+
                     $registeredAsyncEndpoints[$inputChannel][] = $annotationForMethod->endpointId;
                     unset($endpoints[$key]);
                 }
@@ -77,6 +96,15 @@ class AsyncModule extends NoExternalConfigurationModule implements AnnotationMod
                 if ($asynchronousClass === $endpoint->getClassName()) {
                     /** @var EndpointAnnotation $annotationForMethod */
                     $annotationForMethod = $endpoint->getAnnotationForMethod();
+                    if ($annotationForMethod instanceof QueryHandler) {
+                        continue;
+                    }
+                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
+                        if ($annotationForMethod->isEndpointIdGenerated()) {
+                            throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
+                        }
+                    }
+
                     $registeredAsyncEndpoints[$asyncClass->channelName][] = $annotationForMethod->endpointId;
                 }
             }

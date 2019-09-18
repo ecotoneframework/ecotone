@@ -124,4 +124,9 @@ class AnnotationRegistration
 
         $this->referenceName = (property_exists($annotationForClass, 'referenceName') && $annotationForClass->referenceName) ? $annotationForClass->referenceName : $classNameWithAnnotation;
     }
+
+    public function __toString()
+    {
+        return $this->className . "::" . $this->methodName . "::" . get_class($this->annotationForMethod);
+    }
 }

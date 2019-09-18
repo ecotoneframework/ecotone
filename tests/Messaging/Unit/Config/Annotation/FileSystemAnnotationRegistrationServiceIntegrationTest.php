@@ -170,8 +170,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      */
     public function test_retrieving_subclass_annotation()
     {
-        $annotation                               = new Splitter();
-        $annotation->endpointId                   = "testId";
+        $annotation                               = new Splitter(["endpointId" => "testId"]);
         $annotation->inputChannelName             = "inputChannel";
         $annotation->outputChannelName            = "outputChannel";
         $annotation->requiredInterceptorNames     = ["someReference"];

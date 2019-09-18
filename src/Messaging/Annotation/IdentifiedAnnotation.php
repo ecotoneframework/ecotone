@@ -16,6 +16,10 @@ class IdentifiedAnnotation
      * @var string
      */
     public $endpointId;
+    /**
+     * @var bool
+     */
+    private $isGenerated = false;
 
     /**
      * @param array $values
@@ -29,6 +33,15 @@ class IdentifiedAnnotation
 
         if (!$this->endpointId) {
             $this->endpointId = Uuid::uuid4()->toString();
+            $this->isGenerated = true;
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEndpointIdGenerated() : bool
+    {
+        return $this->isGenerated;
     }
 }

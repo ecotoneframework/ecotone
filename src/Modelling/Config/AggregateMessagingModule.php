@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAn
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -196,15 +197,22 @@ class AggregateMessagingModule implements AnnotationModule
 
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
             $inputChannelName = self::getMessageChannelFor($registration);
-            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->dropMessageOnNotFound);
-
+            /** @var CommandHandler $annotationForMethod */
+            $annotationForMethod = $registration->getAnnotationForMethod();
             $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames, $registration->getAnnotationForMethod()->mustBeUnique);
 
-            if (!$registration->getAnnotationForMethod()->mustBeUnique) {
-                $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(
-                    $inputChannelName
-                ));
-            }
+            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(
+                $inputChannelName
+            ));
+
+            $configuration->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId($inputChannelName . "." . $annotationForMethod->endpointId)
+                    ->withInputChannelName(self::getMessageChannelFor($registration))
+                    ->withOutputMessageChannel($annotationForMethod->endpointId)
+            );
+
+            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $annotationForMethod->endpointId, $annotationForMethod->dropMessageOnNotFound);
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {
@@ -248,22 +256,30 @@ class AggregateMessagingModule implements AnnotationModule
         }
 
         foreach ($this->serviceCommandHandlersRegistrations as $registration) {
-            $configuration->registerMessageHandler($this->createServiceActivator($registration));
             $inputChannelName = self::getMessageChannelFor($registration);
+            /** @var CommandHandler $annotationForMethod */
+            $annotationForMethod = $registration->getAnnotationForMethod();
             $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames, $registration->getAnnotationForMethod()->mustBeUnique);
 
-            if (!$registration->getAnnotationForMethod()->mustBeUnique) {
-                $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(
-                    $inputChannelName
-                ));
-            }
+            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(
+                $inputChannelName
+            ));
+
+            $configuration->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId($inputChannelName . "." . $annotationForMethod->endpointId)
+                    ->withInputChannelName($inputChannelName)
+                    ->withOutputMessageChannel($annotationForMethod->endpointId)
+            );
+
+            $configuration->registerMessageHandler($this->createServiceActivator($annotationForMethod->endpointId, $registration));
         }
         foreach ($this->serviceQueryHandlerRegistrations as $registration) {
-            $configuration->registerMessageHandler($this->createServiceActivator($registration));
+            $configuration->registerMessageHandler($this->createServiceActivator(self::getMessageChannelFor($registration), $registration));
             $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames, true);
         }
         foreach ($this->serviceEventHandlers as $registration) {
-            $configuration->registerMessageHandler($this->createServiceActivatorForEvent($registration));
+            $configuration->registerMessageHandler($this->createServiceActivator($registration->getAnnotationForMethod()->endpointId, $registration));
         }
     }
 
@@ -309,7 +325,7 @@ class AggregateMessagingModule implements AnnotationModule
             }
         }
 
-        if ($registration->getAnnotationForMethod()->ignoreMessage) {
+        if ($registration->getAnnotationForMethod()->ignoreMessage || TypeDescriptor::create($interfaceToCall->getFirstParameterTypeHint())->isIterable()) {
             return null;
         }
 
@@ -454,17 +470,17 @@ class AggregateMessagingModule implements AnnotationModule
     }
 
     /**
+     * @param string $inputChannelName
      * @param AnnotationRegistration $registration
      *
      * @return ServiceActivatorBuilder
-     * @throws InvalidArgumentException
      * @throws AnnotationException
-     * @throws ReflectionException
+     * @throws InvalidArgumentException
      * @throws MessagingException
+     * @throws ReflectionException
      */
-    private function createServiceActivator(AnnotationRegistration $registration): ServiceActivatorBuilder
+    private function createServiceActivator(string $inputChannelName, AnnotationRegistration $registration): ServiceActivatorBuilder
     {
-        $inputChannelName = self::getMessageChannelFor($registration);
         $annotation = $registration->getAnnotationForMethod();
 
         $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
@@ -479,11 +495,5 @@ class AggregateMessagingModule implements AnnotationModule
             ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
 
         return $messageHandlerBuilder;
-    }
-
-    private function createServiceActivatorForEvent(AnnotationRegistration $registration): ServiceActivatorBuilder
-    {
-        return $this->createServiceActivator($registration)
-            ->withInputChannelName($registration->getAnnotationForMethod()->endpointId);
     }
 }

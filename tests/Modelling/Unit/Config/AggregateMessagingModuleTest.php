@@ -11,6 +11,7 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
@@ -48,6 +49,8 @@ use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\AggregateQueryHandler
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\AggregateQueryHandlerWithOutputChannelExample;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\QueryHandlerWithNoReturnValue;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\SomeQuery;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod\MultiMethodAggregateCommandHandlerExample;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod\MultiMethodServiceCommandHandlerExample;
 
 /**
  * Class IntegrationMessagingCqrsModule
@@ -158,11 +161,18 @@ class AggregateMessagingModuleTest extends TestCase
             ->withMethodParameterConverters([
                 PayloadBuilder::create("command")
             ])
-            ->withInputChannelName(DoStuffCommand::class)
+            ->withInputChannelName("command-id")
             ->withEndpointId('command-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId(DoStuffCommand::class . ".command-id")
+                    ->withInputChannelName(DoStuffCommand::class)
+                    ->withOutputMessageChannel("command-id")
+            )
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel(DoStuffCommand::class))
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
@@ -183,6 +193,7 @@ class AggregateMessagingModuleTest extends TestCase
             ]
         );
     }
+
 
     /**
      * @param array $annotationClassesToRegister
@@ -214,11 +225,18 @@ class AggregateMessagingModuleTest extends TestCase
             ->withMethodParameterConverters([
                 ReferenceBuilder::create("class", \stdClass::class)
             ])
-            ->withInputChannelName("doActionChannel")
+            ->withInputChannelName("command-id")
             ->withEndpointId('command-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("doActionChannel.command-id")
+                    ->withInputChannelName("doActionChannel")
+                    ->withOutputMessageChannel("command-id")
+            )
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("doActionChannel"))
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
@@ -242,16 +260,23 @@ class AggregateMessagingModuleTest extends TestCase
 
     public function test_registering_service_command_handler_with_return_value()
     {
-        $commandHandler = ServiceActivatorBuilder::create(CommandHandlerWithReturnValue::class, "execute")
-            ->withMethodParameterConverters([
-                PayloadBuilder::create("command"),
-                ReferenceBuilder::create("service1", stdClass::class)
-            ])
-            ->withInputChannelName("input")
-            ->withEndpointId('command-id');
-
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler($commandHandler);
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::create(CommandHandlerWithReturnValue::class, "execute")
+                    ->withMethodParameterConverters([
+                        PayloadBuilder::create("command"),
+                        ReferenceBuilder::create("service1", stdClass::class)
+                    ])
+                    ->withInputChannelName('command-id')
+                    ->withEndpointId('command-id')
+            )
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("input.command-id")
+                    ->withInputChannelName("input")
+                    ->withOutputMessageChannel("command-id")
+            )
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("input"));
 
         $this->createModuleAndAssertConfiguration(
             [
@@ -264,14 +289,135 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
+    public function test_registering_service_two_command_handler_under_same_channel()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::create(MultiMethodServiceCommandHandlerExample::class, "doAction1")
+                    ->withMethodParameterConverters([
+                        PayloadBuilder::create("data")
+                    ])
+                    ->withInputChannelName("1")
+                    ->withEndpointId("1")
+            )
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("register.1")
+                    ->withInputChannelName("register")
+                    ->withOutputMessageChannel("1")
+            )
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::create(MultiMethodServiceCommandHandlerExample::class, "doAction2")
+                    ->withMethodParameterConverters([
+                        PayloadBuilder::create("data")
+                    ])
+                    ->withInputChannelName("2")
+                    ->withEndpointId("2")
+            )
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("register.2")
+                    ->withInputChannelName("register")
+                    ->withOutputMessageChannel("2")
+            )
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("register"));
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                MultiMethodServiceCommandHandlerExample::class
+            ],
+            $expectedConfiguration,
+            [
+                SomeCommand::class => "input"
+            ]
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws AnnotationException
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws ConfigurationException
+     * @throws MessagingException
+     */
+    public function test_registering_aggregate_two_command_handler_under_same_channel()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler(
+                AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(MultiMethodAggregateCommandHandlerExample::class, "doAction1", null)
+                    ->withMethodParameterConverters([
+                        PayloadBuilder::create("data")
+                    ])
+                    ->withInputChannelName("1")
+                    ->withEndpointId('1')
+            )
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "",
+                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
+                    AggregateMessageConversionServiceBuilder::createWith(TypeDescriptor::ARRAY),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    MultiMethodAggregateCommandHandlerExample::class . "::doAction1"
+                )
+            )
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("register.1")
+                    ->withInputChannelName("register")
+                    ->withOutputMessageChannel("1")
+            )
+            ->registerMessageHandler(
+                AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(MultiMethodAggregateCommandHandlerExample::class, "doAction2", null)
+                    ->withMethodParameterConverters([
+                        PayloadBuilder::create("data")
+                    ])
+                    ->withInputChannelName("2")
+                    ->withEndpointId('2')
+            )
+            ->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "",
+                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
+                    AggregateMessageConversionServiceBuilder::createWith(TypeDescriptor::ARRAY),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    MultiMethodAggregateCommandHandlerExample::class . "::doAction2"
+                )
+            )
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("register.2")
+                    ->withInputChannelName("register")
+                    ->withOutputMessageChannel("2")
+            )
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("register"));
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                MultiMethodAggregateCommandHandlerExample::class
+            ],
+            $expectedConfiguration,
+            [
+                DoStuffCommand::class => DoStuffCommand::class
+            ]
+        );
+    }
+
     public function test_registering_handler_with_class_name_in_annotation()
     {
-        $commandHandler = ServiceActivatorBuilder::create(CommandHandlerWithClassNameInAnnotation::class, "execute")
-            ->withInputChannelName("input")
-            ->withEndpointId('command-id');
-
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler($commandHandler);
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::create(CommandHandlerWithClassNameInAnnotation::class, "execute")
+                    ->withInputChannelName("command-id")
+                    ->withEndpointId('command-id')
+            )
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("input.command-id")
+                    ->withInputChannelName("input")
+                    ->withOutputMessageChannel("command-id")
+            )
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("input"));
 
         $this->createModuleAndAssertConfiguration(
             [
@@ -293,9 +439,16 @@ class AggregateMessagingModuleTest extends TestCase
                         AllHeadersBuilder::createWith("metadata"),
                         ReferenceBuilder::create("service", stdClass::class)
                     ])
-                    ->withInputChannelName("input")
+                    ->withInputChannelName("command-id")
                     ->withEndpointId('command-id')
-            );
+            )
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("input.command-id")
+                    ->withInputChannelName("input")
+                    ->withOutputMessageChannel("command-id")
+            )
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("input"));
 
         $this->createModuleAndAssertConfiguration(
             [
@@ -330,7 +483,7 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_aggregate_command_handler_with_extra_services()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateCommandHandlerWithReferencesExample::class, "doAction", DoStuffCommand::class)
-            ->withInputChannelName("input")
+            ->withInputChannelName("command-id-with-references")
             ->withMethodParameterConverters([
                 PayloadBuilder::create("command"),
                 ReferenceBuilder::create("injectedService", stdClass::class)
@@ -339,6 +492,13 @@ class AggregateMessagingModuleTest extends TestCase
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("input.command-id-with-references")
+                    ->withInputChannelName("input")
+                    ->withOutputMessageChannel("command-id-with-references")
+            )
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("input"))
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",

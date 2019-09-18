@@ -536,6 +536,14 @@ final class TypeDescriptor
     }
 
     /**
+     * @return bool
+     */
+    public function isInterface() : bool
+    {
+        return interface_exists($this->type);
+    }
+
+    /**
      * @param string $typeHint
      * @return bool
      */

@@ -6,6 +6,7 @@ use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHandler;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -328,6 +329,12 @@ class TypeDescriptorTest extends TestCase
             TypeDescriptor::VOID,
             TypeDescriptor::create(TypeDescriptor::VOID)->getTypeHint()
         );
+    }
+
+    public function test_is_interface()
+    {
+        $this->assertTrue(TypeDescriptor::create(MessageHandler::class)->isInterface());
+        $this->assertFalse(TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isInterface());
     }
 
     /**

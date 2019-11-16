@@ -36,6 +36,7 @@ use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\Aggregate
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithNoCommandDataExample;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithReferencesExample;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateNoInputChannelAndNoMessage;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithNoParametersAndInputChannelAndNoIgnoreMessage;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\DoStuffCommand;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithAnnotationClassNameWithMetadataAndService;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithAnnotationClassNameWithService;
@@ -236,16 +237,7 @@ class AggregateMessagingModuleTest extends TestCase
                     ->withInputChannelName("doActionChannel")
                     ->withOutputMessageChannel("command-id")
             )
-            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("doActionChannel"))
-            ->registerBeforeMethodInterceptor(
-                MethodInterceptor::create(
-                    "",
-                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                    AggregateMessageConversionServiceBuilder::createWith(TypeDescriptor::ARRAY),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                    AggregateCommandHandlerWithNoCommandDataExample::class . "::doAction"
-                )
-            );
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("doActionChannel"));
 
         $this->createModuleAndAssertConfiguration(
             [
@@ -460,6 +452,49 @@ class AggregateMessagingModuleTest extends TestCase
             ]
         );
     }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws AnnotationException
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws ConfigurationException
+     * @throws MessagingException
+     */
+    public function test_registering_aggregate_command_handler_with_input_channel_and_no_parameters_but_no_ignore_message()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler(
+                AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateWithNoParametersAndInputChannelAndNoIgnoreMessage::class, "doCommand", null)
+                    ->withInputChannelName("endpoint-command")
+                    ->withEndpointId('endpoint-command')
+            )
+            ->registerMessageHandler(
+                BridgeBuilder::create()
+                    ->withEndpointId("command.endpoint-command")
+                    ->withInputChannelName("command")
+                    ->withOutputMessageChannel("endpoint-command")
+            )
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("command"))
+
+            ->registerMessageHandler(
+                AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateWithNoParametersAndInputChannelAndNoIgnoreMessage::class, "doQuery", null)
+                    ->withInputChannelName("query")
+                    ->withEndpointId('endpoint-query')
+            )
+        ;
+
+        $this->createModuleAndAssertConfiguration(
+            [
+                AggregateWithNoParametersAndInputChannelAndNoIgnoreMessage::class
+            ],
+            $expectedConfiguration,
+            [
+                "input" => "input"
+            ]
+        );
+    }
+
 
     public function test_throwing_exception_if_no_message_defined_and_no_input_channel_passed()
     {

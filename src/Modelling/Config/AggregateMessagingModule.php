@@ -233,7 +233,7 @@ class AggregateMessagingModule implements AnnotationModule
             $inputChannelName = self::getMessageChannelFor($registration);
             $handledMessageClassName = self::getMessageClassFor($registration);
             $configuration->registerMessageHandler(
-                AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith($registration->getClassName(), $registration->getMethodName(), $handledMessageClassName)
+                AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith($registration->getClassName(), $registration->getMethodName(), TypeDescriptor::create($handledMessageClassName)->isIterable() ? null : $handledMessageClassName)
                     ->withInputChannelName($inputChannelName)
                     ->withOutputMessageChannel($registration->getAnnotationForMethod()->outputChannelName)
                     ->withEndpointId($endpointId)
@@ -242,15 +242,17 @@ class AggregateMessagingModule implements AnnotationModule
                     ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
             );
 
-            $configuration->registerBeforeMethodInterceptor(
-                MethodInterceptor::create(
-                    "",
-                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                    AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                    $registration->getClassName() . "::" . $registration->getMethodName()
-                )
-            );
+            if ($handledMessageClassName) {
+                $configuration->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        "",
+                        InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
+                        AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
+                        AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                        $registration->getClassName() . "::" . $registration->getMethodName()
+                    )
+                );
+            }
 
             $inputChannelNames = $this->addUniqueChannelName($inputChannelName, $inputChannelNames, true);
         }
@@ -325,8 +327,12 @@ class AggregateMessagingModule implements AnnotationModule
             }
         }
 
-        if ($registration->getAnnotationForMethod()->ignoreMessage || TypeDescriptor::create($interfaceToCall->getFirstParameterTypeHint())->isIterable()) {
+        if ($registration->getAnnotationForMethod()->ignoreMessage || $interfaceToCall->hasNoParameters()) {
             return null;
+        }
+
+        if (TypeDescriptor::create($interfaceToCall->getFirstParameterTypeHint())->isIterable()) {
+            return TypeDescriptor::ARRAY;
         }
 
         return $interfaceToCall->getFirstParameterTypeHint();
@@ -368,7 +374,7 @@ class AggregateMessagingModule implements AnnotationModule
 
 
         $configuration->registerMessageHandler(
-            AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith($registration->getClassName(), $registration->getMethodName(), $handledMessageClassName)
+            AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith($registration->getClassName(), $registration->getMethodName(), TypeDescriptor::create($handledMessageClassName)->isIterable()  ? null : $handledMessageClassName)
                 ->withInputChannelName($inputChannelName)
                 ->withOutputMessageChannel($annotation->outputChannelName)
                 ->withEndpointId($endpointId)
@@ -379,15 +385,17 @@ class AggregateMessagingModule implements AnnotationModule
                 ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
         );
 
-        $configuration->registerBeforeMethodInterceptor(
-            MethodInterceptor::create(
-                "",
-                InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName ?? TypeDescriptor::ARRAY),
-                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
-                $registration->getClassName() . "::" . $registration->getMethodName()
-            )
-        );
+        if ($handledMessageClassName) {
+            $configuration->registerBeforeMethodInterceptor(
+                MethodInterceptor::create(
+                    "",
+                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
+                    AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
+                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    $registration->getClassName() . "::" . $registration->getMethodName()
+                )
+            );
+        }
     }
 
     /**

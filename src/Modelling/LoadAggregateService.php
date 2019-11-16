@@ -8,6 +8,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -20,7 +21,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 class LoadAggregateService
 {
     /**
-     * @var AggregateRepository
+     * @var StandardRepository|EventSourcedRepository
      */
     private $aggregateRepository;
     /**
@@ -55,11 +56,15 @@ class LoadAggregateService
      * @var bool
      */
     private $loadForFactoryMethod;
+    /**
+     * @var string|null
+     */
+    private $eventSourcedFactoryMethod;
 
     /**
      * ServiceCallToAggregateAdapter constructor.
      *
-     * @param AggregateRepository $aggregateRepository
+     * @param object|StandardRepository|EventSourcedRepository $aggregateRepository
      * @param string $aggregateClassName
      * @param string $aggregateMethod
      * @param bool $isFactoryMethod
@@ -68,8 +73,9 @@ class LoadAggregateService
      * @param PropertyReaderAccessor $propertyReaderAccessor
      * @param bool $dropMessageOnNotFound
      * @param bool $loadForFactoryMethod
+     * @param string|null $eventSourcedFactoryMethod
      */
-    public function __construct(AggregateRepository $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, bool $dropMessageOnNotFound, bool $loadForFactoryMethod)
+    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, bool $dropMessageOnNotFound, bool $loadForFactoryMethod, ?string $eventSourcedFactoryMethod)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->isFactoryMethod = $isFactoryMethod;
@@ -80,6 +86,7 @@ class LoadAggregateService
         $this->expectedVersionMapping = $expectedVersionMapping;
         $this->dropMessageOnNotFound = $dropMessageOnNotFound;
         $this->loadForFactoryMethod = $loadForFactoryMethod;
+        $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
     }
 
     /**
@@ -124,6 +131,10 @@ class LoadAggregateService
                 : null;
 
             $aggregate = $this->aggregateRepository->findBy($this->aggregateClassName, $aggregateIdentifiers);
+            if ($this->aggregateRepository instanceof EventSourcedRepository) {
+                Assert::isIterable($aggregate, "Event Sourced Repository must return iterable events for findBy method");
+                $aggregate = call_user_func([$this->aggregateClassName, $this->eventSourcedFactoryMethod], $aggregate);
+            }
 
             if (!$aggregate && $this->dropMessageOnNotFound) {
                 return null;
@@ -153,6 +164,7 @@ class LoadAggregateService
             ->setHeader(AggregateMessage::AGGREGATE_ID, $aggregateIdentifiers)
             ->setHeader(AggregateMessage::IS_FACTORY_METHOD, $this->isFactoryMethod)
             ->setHeader(AggregateMessage::CALLING_MESSAGE, $message)
+            ->setHeader(AggregateMessage::IS_EVENT_SOURCED, $this->aggregateRepository instanceof EventSourcedRepository)
             ->build();
     }
 }

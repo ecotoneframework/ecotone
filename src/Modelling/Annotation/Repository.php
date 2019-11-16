@@ -13,7 +13,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"CLASS"})
  */
-class AggregateRepository
+class Repository
 {
     /**
      * If not configured it will take class name as reference

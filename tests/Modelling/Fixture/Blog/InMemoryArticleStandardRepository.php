@@ -2,14 +2,14 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Blog;
 use Ecotone\Modelling\AggregateNotFoundException;
-use Ecotone\Modelling\AggregateRepository;
+use Ecotone\Modelling\StandardRepository;
 
 /**
  * Class InMemoryArticleRepository
  * @package Test\Ecotone\Modelling\Fixture\Blog
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InMemoryArticleRepository implements AggregateRepository
+class InMemoryArticleStandardRepository implements StandardRepository
 {
     /**
      * @var Article[]
@@ -28,7 +28,7 @@ class InMemoryArticleRepository implements AggregateRepository
     }
 
     /**
-     * @return InMemoryArticleRepository
+     * @return InMemoryArticleStandardRepository
      */
     public static function createEmpty() : self
     {
@@ -37,7 +37,7 @@ class InMemoryArticleRepository implements AggregateRepository
 
     /**
      * @param array $articles
-     * @return InMemoryArticleRepository
+     * @return InMemoryArticleStandardRepository
      */
     public static function createWith(array $articles) : self
     {
@@ -47,7 +47,7 @@ class InMemoryArticleRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findBy(string $aggregateClassName, array $identifiers)
+    public function findBy(string $aggregateClassName, array $identifiers) : ?object
     {
         $identifier = $identifiers['author'] . $identifiers['title'];
 
@@ -72,7 +72,7 @@ class InMemoryArticleRepository implements AggregateRepository
      * @param array $metadata
      * @param int|null $expectedVersion
      */
-    public function save(array $identifiers, $aggregate, array $metadata, ?int $expectedVersion): void
+    public function save(array $identifiers, object $aggregate, array $metadata, ?int $expectedVersion): void
     {
         $this->articles[$this->getIdentifier($aggregate)] = $aggregate;
     }

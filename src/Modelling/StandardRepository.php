@@ -7,7 +7,7 @@ namespace Ecotone\Modelling;
  * @package Ecotone\Modelling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface AggregateRepository
+interface StandardRepository
 {
     /**
      * @param string $aggregateClassName
@@ -22,7 +22,7 @@ interface AggregateRepository
      *
      * @return object|null
      */
-    public function findBy(string $aggregateClassName, array $identifiers);
+    public function findBy(string $aggregateClassName, array $identifiers) : ?object;
 
     /**
      * @param array $identifiers
@@ -30,5 +30,5 @@ interface AggregateRepository
      * @param array $metadata
      * @param int|null $expectedVersion if optimistic locking in enabled current version + 1
      */
-    public function save(array $identifiers, $aggregate, array $metadata, ?int $expectedVersion): void;
+    public function save(array $identifiers, object $aggregate, array $metadata, ?int $expectedVersion): void;
 }

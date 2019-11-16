@@ -13,15 +13,19 @@ use Ecotone\Modelling\Annotation\AggregateEvents;
 trait WithAggregateEvents
 {
     /**
-     * @var object[]
+     * @var object[]|null
      */
-    private $recordedEvents = [];
+    private $recordedEvents = null;
 
     /**
      * @param object $event
      */
     public function record(object $event) : void
     {
+        if (!$this->recordedEvents) {
+            $this->recordedEvents = [];
+        }
+
         $this->recordedEvents[] = $event;
     }
 
@@ -31,9 +35,13 @@ trait WithAggregateEvents
      */
     public function getRecordedEvents() : array
     {
-        $recordedEvents = $this->recordedEvents;
+        if (!$this->recordedEvents) {
+            return [];
+        }
 
-        $this->recordedEvents = [];
+        $recordedEvents = $this->recordedEvents;
+        $this->recordedEvents = null;
+
         return $recordedEvents;
     }
 }

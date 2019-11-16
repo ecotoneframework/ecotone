@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\Renter;
 
-use Ecotone\Modelling\AggregateRepository;
+use Ecotone\Modelling\StandardRepository;
 
 /**
  * Class AppointmentCalendar
@@ -11,7 +11,7 @@ use Ecotone\Modelling\AggregateRepository;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @\Ecotone\Modelling\Annotation\AggregateRepository()
  */
-class AppointmentRepository implements AggregateRepository
+class AppointmentStandardRepository implements StandardRepository
 {
     /**
      * @var Appointment[]
@@ -38,7 +38,7 @@ class AppointmentRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findBy(string $aggregateClassName, array $identifiers)
+    public function findBy(string $aggregateClassName, array $identifiers) : ?object
     {
         foreach ($this->appointments as $appointment) {
             if ($appointment->getAppointmentId() === $identifiers['appointmentId']) {
@@ -52,7 +52,7 @@ class AppointmentRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function save(array $identifiers, $aggregate, array $metadata, ?int $expectedVersion): void
+    public function save(array $identifiers, object $aggregate, array $metadata, ?int $expectedVersion): void
     {
         $this->appointments[$identifiers['appointmentId']] = $aggregate;
     }

@@ -11,13 +11,14 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
  */
 interface AggregateMessage
 {
-    const AGGREGATE_OBJECT = "domain.aggregate";
-    const CLASS_NAME = "domain.aggregate.class_name";
-    const METHOD_NAME = "domain.aggregate.method";
-    const IS_FACTORY_METHOD = "domain.aggregate.is_factory_method";
-    const AGGREGATE_ID = "domain.aggregate.id";
-    const TARGET_VERSION = "domain.aggregate.target_version";
-    const CALLING_MESSAGE = "domain.aggregate.calling_message";
+    const AGGREGATE_OBJECT = "ecotone.modelling.aggregate";
+    const CLASS_NAME = "ecotone.modelling.aggregate.class_name";
+    const METHOD_NAME = "ecotone.modelling.aggregate.method";
+    const IS_FACTORY_METHOD = "ecotone.modelling.aggregate.is_factory_method";
+    const AGGREGATE_ID = "ecotone.modelling.aggregate.id";
+    const TARGET_VERSION = "ecotone.modelling.aggregate.target_version";
+    const CALLING_MESSAGE = "ecotone.modelling.aggregate.calling_message";
+    const IS_EVENT_SOURCED = "ecotone.modelling.aggregate.is_event_sourced";
 
     const BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE = MethodInterceptor::DEFAULT_PRECEDENCE + 10;
 }

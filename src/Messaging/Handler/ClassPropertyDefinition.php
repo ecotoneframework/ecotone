@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Messaging\Support\InvalidArgumentException;
+
 /**
  * Class PropertyDescriptor
  * @package Ecotone\Messaging\Handler
@@ -94,6 +96,45 @@ final class ClassPropertyDefinition
     public static function createPrivate(string $name, TypeDescriptor $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
     {
         return new self($name, $typeDescriptor, $isNullable, self::PRIVATE_VISIBILITY, $isStatic, $annotations);
+    }
+
+
+    public function hasAnnotation(TypeDescriptor $annotationClass) : bool
+    {
+        foreach ($this->annotations as $annotation) {
+            if (TypeDescriptor::createFromVariable($annotation)->equals($annotationClass)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getAnnotation(TypeDescriptor $annotationClass) : object
+    {
+        foreach ($this->annotations as $annotation) {
+            if (TypeDescriptor::createFromVariable($annotation)->equals($annotationClass)) {
+                return $annotation;
+            }
+        }
+
+        throw InvalidArgumentException::create("Annotation {$annotationClass} was not found for property {$this}");
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return TypeDescriptor
+     */
+    public function getType(): TypeDescriptor
+    {
+        return $this->type;
     }
 
     /**

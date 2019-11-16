@@ -1,7 +1,7 @@
 <?php
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
-use Ecotone\Modelling\AggregateRepository;
+use Ecotone\Modelling\StandardRepository;
 use Ecotone\Modelling\AggregateVersionMismatchException;
 
 /**
@@ -10,7 +10,7 @@ use Ecotone\Modelling\AggregateVersionMismatchException;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @\Ecotone\Modelling\Annotation\AggregateRepository()
  */
-class InMemoryAggregateRepository implements AggregateRepository
+class InMemoryStandardRepository implements StandardRepository
 {
     /**
      * @var array
@@ -39,7 +39,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     /**
      * @param array $aggregates
      *
-     * @return InMemoryAggregateRepository
+     * @return InMemoryStandardRepository
      */
     public static function createWith(array $aggregates) : self
     {
@@ -47,7 +47,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     }
 
     /**
-     * @return InMemoryAggregateRepository
+     * @return InMemoryStandardRepository
      */
     public static function createEmpty() : self
     {
@@ -57,7 +57,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function findBy(string $aggregateClassName, array $identifiers)
+    public function findBy(string $aggregateClassName, array $identifiers) : ?object
     {
         $aggregateId = $this->getAggregateId($identifiers);
         if (!$aggregateId || !array_key_exists($aggregateId, $this->aggregates)) {
@@ -70,7 +70,7 @@ class InMemoryAggregateRepository implements AggregateRepository
     /**
      * @inheritDoc
      */
-    public function save(array $identifiers, $aggregate, array $metadata, ?int $expectedVersion): void
+    public function save(array $identifiers, object $aggregate, array $metadata, ?int $expectedVersion): void
     {
         $this->aggregates[$aggregate->getId()] = $aggregate;
     }

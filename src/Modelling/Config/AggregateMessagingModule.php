@@ -31,7 +31,7 @@ use Ecotone\Modelling\AggregateMessageConversionService;
 use Ecotone\Modelling\AggregateMessageConversionServiceBuilder;
 use Ecotone\Modelling\AggregateMessageHandlerBuilder;
 use Ecotone\Modelling\Annotation\Aggregate;
-use Ecotone\Modelling\Annotation\AggregateRepository;
+use Ecotone\Modelling\Annotation\Repository;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
@@ -122,12 +122,12 @@ class AggregateMessagingModule implements AnnotationModule
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
-        $aggregateRepositoryClasses = $annotationRegistrationService->getAllClassesWithAnnotation(AggregateRepository::class);
+        $aggregateRepositoryClasses = $annotationRegistrationService->getAllClassesWithAnnotation(Repository::class);
 
         $aggregateRepositoryReferenceNames = [];
         foreach ($aggregateRepositoryClasses as $aggregateRepositoryClass) {
-            /** @var AggregateRepository $aggregateRepositoryAnnotation */
-            $aggregateRepositoryAnnotation = $annotationRegistrationService->getAnnotationForClass($aggregateRepositoryClass, AggregateRepository::class);
+            /** @var Repository $aggregateRepositoryAnnotation */
+            $aggregateRepositoryAnnotation = $annotationRegistrationService->getAnnotationForClass($aggregateRepositoryClass, Repository::class);
 
             $aggregateRepositoryReferenceNames[] = $aggregateRepositoryAnnotation->referenceName ? $aggregateRepositoryAnnotation->referenceName : $aggregateRepositoryClass;
         }

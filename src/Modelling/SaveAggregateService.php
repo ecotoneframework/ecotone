@@ -5,8 +5,11 @@ namespace Ecotone\Modelling;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 
@@ -18,7 +21,7 @@ use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 class SaveAggregateService
 {
     /**
-     * @var AggregateRepository
+     * @var StandardRepository|EventSourcedRepository
      */
     private $aggregateRepository;
     /**
@@ -41,17 +44,22 @@ class SaveAggregateService
      * @var array|null
      */
     private $versionMapping;
+    /**
+     * @var string
+     */
+    private $aggregateClassName;
 
     /**
      * SaveAggregateService constructor.
-     * @param AggregateRepository $aggregateRepository
+     * @param string $aggregateClassName
+     * @param object|StandardRepository|EventSourcedRepository $aggregateRepository
      * @param PropertyEditorAccessor $propertyEditorAccessor
      * @param PropertyReaderAccessor $propertyReaderAccessor
      * @param LazyEventBus $lazyEventBus
      * @param string|null $eventMethod
      * @param array|null $versionMapping
      */
-    public function __construct(AggregateRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, LazyEventBus $lazyEventBus, ?string $eventMethod, ?array $versionMapping)
+    public function __construct(string $aggregateClassName, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, LazyEventBus $lazyEventBus, ?string $eventMethod, ?array $versionMapping)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
@@ -59,6 +67,7 @@ class SaveAggregateService
         $this->eventMethod = $eventMethod;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
         $this->versionMapping = $versionMapping;
+        $this->aggregateClassName = $aggregateClassName;
     }
 
     /**
@@ -72,6 +81,20 @@ class SaveAggregateService
     public function save(Message $message) : ?Message
     {
         $aggregate = $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
+        $events = [];
+
+        if ($this->aggregateRepository instanceof EventSourcedRepository) {
+            $events = $message->getPayload();
+            Assert::isIterable($events, "Return value Event Sourced Aggregate {$this->aggregateClassName} must return iterable events");
+        }elseif ($this->eventMethod) {
+            $events = call_user_func([$aggregate, $this->eventMethod]);
+        }
+        foreach ($events as $event) {
+            if (!is_object($event)) {
+                $typeDescriptor = TypeDescriptor::createFromVariable($event);
+                throw InvalidArgumentException::create("Events return by after calling {$this->aggregateClassName}:{$message->getHeaders()->get(AggregateMessage::METHOD_NAME)} must all be objects, {$typeDescriptor->toString()} given");
+            }
+        }
 
         $nextVersion = null;
         if ($this->versionMapping) {
@@ -93,7 +116,13 @@ class SaveAggregateService
 
         $aggregateIds = [];
         foreach ($message->getHeaders()->get(AggregateMessage::AGGREGATE_ID) as $aggregateIdName => $aggregateIdValue) {
-            $aggregateIds[$aggregateIdName] = $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate);
+            $id = $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate);
+
+            if (!$id) {
+                throw NoCorrectIdentifierDefinedException::create("{$this->aggregateClassName} after calling {$message->getHeaders()->get(AggregateMessage::METHOD_NAME)} has no identifier assigned. Are you sure you have set the state correctly?");
+            }
+
+            $aggregateIds[$aggregateIdName] = $id;
         }
 
         if ($message->getHeaders()->get(AggregateMessage::IS_FACTORY_METHOD)) {
@@ -115,13 +144,10 @@ class SaveAggregateService
         $metadata = $callingMessage->getHeaders()->headers();
         unset($metadata[MessageHeaders::REPLY_CHANNEL]);
 
-        $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $nextVersion);
+        $this->aggregateRepository->save($aggregateIds, $this->aggregateRepository instanceof EventSourcedRepository ? $events : $aggregate, $metadata, $nextVersion);
 
-        if ($this->eventMethod) {
-            $events = call_user_func([$aggregate, $this->eventMethod]);
-            foreach ($events as $event) {
-                $this->lazyEventBus->sendWithMetadata($event, $metadata);
-            }
+        foreach ($events as $event) {
+            $this->lazyEventBus->sendWithMetadata($event, $metadata);
         }
 
         return $message;

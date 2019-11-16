@@ -44,6 +44,10 @@ class CallAggregateService
      * @var array|ParameterConverterBuilder[]
      */
     private $withFactoryRedirectOnFoundParameterConverters;
+    /**
+     * @var string|null
+     */
+    private $eventSourcedFactoryMethod;
 
     /**
      * ServiceCallToAggregateAdapter constructor.
@@ -54,10 +58,11 @@ class CallAggregateService
      * @param ReferenceSearchService $referenceSearchService
      * @param string $withFactoryRedirectOnFoundMethodName
      * @param ParameterConverterBuilder[] $withFactoryRedirectOnFoundParameterConverters
+     * @param string|null $eventSourcedFactoryMethod
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function __construct(ChannelResolver $channelResolver, array $messageToParameterConverters, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService,
-                                string $withFactoryRedirectOnFoundMethodName, array $withFactoryRedirectOnFoundParameterConverters
+                                string $withFactoryRedirectOnFoundMethodName, array $withFactoryRedirectOnFoundParameterConverters, ?string $eventSourcedFactoryMethod
     )
     {
         Assert::allInstanceOfType($messageToParameterConverters, ParameterConverter::class);
@@ -68,6 +73,7 @@ class CallAggregateService
         $this->aroundMethodInterceptors = $aroundMethodInterceptors;
         $this->withFactoryRedirectOnFoundMethodName = $withFactoryRedirectOnFoundMethodName;
         $this->withFactoryRedirectOnFoundParameterConverters = $withFactoryRedirectOnFoundParameterConverters;
+        $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
     }
 
     /**
@@ -114,8 +120,13 @@ class CallAggregateService
             $result = $methodInvoker->processMessage($message);
 
             if (!$aggregate) {
-                $resultMessage = $resultMessage
-                    ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $result);
+                if ($message->getHeaders()->get(AggregateMessage::IS_EVENT_SOURCED)) {
+                    $resultMessage = $resultMessage
+                        ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate = call_user_func([$message->getHeaders()->get(AggregateMessage::CLASS_NAME), $this->eventSourcedFactoryMethod], $result));
+                }else {
+                    $resultMessage = $resultMessage
+                        ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $result);
+                }
             }
         } catch (\Throwable $e) {
             throw MessageHandlingException::fromOtherException($e, $message);

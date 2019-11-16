@@ -21,11 +21,11 @@ use Ecotone\Modelling\QueryBus;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Assert;
 use Ramsey\Uuid\Uuid;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryAggregateRepository;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
 use Test\Ecotone\Modelling\Fixture\ProxyEventBusFromMessagingSystem;
 use Test\Ecotone\Modelling\Fixture\ProxyLazyEventBusFromMessagingSystem;
-use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepository;
+use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
 use Test\Ecotone\Modelling\Fixture\TestingLazyEventBus;
@@ -56,14 +56,14 @@ class AnnotationBasedMessagingContext implements Context
             case "Test\Ecotone\Modelling\Fixture\Renter": {
                 $objects = [
                       RentCalendar::class => new RentCalendar(),
-                      AppointmentRepository::class => AppointmentRepository::createEmpty()
+                      AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty()
                 ];
                 break;
             }
             case "Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate": {
                 $objects = [
                     OrderNotificator::class => new OrderNotificator(),
-                    InMemoryAggregateRepository::class => InMemoryAggregateRepository::createEmpty()
+                    InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()
                 ];
                 break;
             }

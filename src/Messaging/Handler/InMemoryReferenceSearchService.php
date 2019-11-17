@@ -35,6 +35,9 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     private function __construct(array $objectsToResolve, ?ReferenceSearchService $referenceSearchService, bool $withDefaults)
     {
         if ($withDefaults) {
+            if (!array_key_exists(ExpressionEvaluationService::REFERENCE, $objectsToResolve)) {
+                $objectsToResolve[ExpressionEvaluationService::REFERENCE] = SymfonyExpressionEvaluationAdapter::create();
+            }
             if (!array_key_exists(InterfaceToCallRegistry::REFERENCE_NAME, $objectsToResolve)) {
                 $objectsToResolve[InterfaceToCallRegistry::REFERENCE_NAME] = InterfaceToCallRegistry::createEmpty();
             }

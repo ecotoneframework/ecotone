@@ -26,6 +26,7 @@ use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Chain\ChainForwardPublisher;
 use Ecotone\Messaging\Handler\Enricher\EnrichGateway;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
@@ -77,6 +78,8 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
                 $configuration->registerGatewayBuilder($extensionObject);
             } else if ($extensionObject instanceof ChannelAdapterConsumerBuilder) {
                 $configuration->registerConsumer($extensionObject);
+            } else if ($extensionObject instanceof PollingMetadata) {
+                $configuration->registerPollingMetadata($extensionObject);
             }
         }
 
@@ -118,7 +121,9 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             ||
             $extensionObject instanceof GatewayBuilder
             ||
-            $extensionObject instanceof ChannelAdapterConsumerBuilder;
+            $extensionObject instanceof ChannelAdapterConsumerBuilder
+            ||
+            $extensionObject instanceof PollingMetadata;
     }
 
     /**

@@ -37,6 +37,7 @@ class PollerModuleTest extends AnnotationConfigurationTest
                     ->setMaxMessagePerPoll(5)
                     ->setHandledMessageLimit(10)
                     ->setMemoryLimitInMegaBytes(100)
+                    ->setExecutionTimeLimitInMilliseconds(200)
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([

@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Endpoint;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -90,6 +91,9 @@ class InterceptedConsumer implements ConsumerLifecycle
         }
         if ($pollingMetadata->getExecutionAmountLimit() > 0) {
             $interceptors[] = new LimitExecutionAmountInterceptor($pollingMetadata->getExecutionAmountLimit());
+        }
+        if ($pollingMetadata->getExecutionTimeLimitInMilliseconds() > 0) {
+            $interceptors[] = new TimeLimitInterceptor($pollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
 
         return $interceptors;

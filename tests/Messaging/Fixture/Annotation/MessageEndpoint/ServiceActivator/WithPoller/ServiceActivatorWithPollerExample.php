@@ -27,7 +27,8 @@ class ServiceActivatorWithPollerExample
      *          errorChannelName="errorChannel",
      *          maxMessagePerPoll=5,
      *          memoryLimitInMegabytes=100,
-     *          handledMessageLimit=10
+     *          handledMessageLimit=10,
+     *          executionTimeLimitInMilliseconds=200
      *     )
      * )
      */

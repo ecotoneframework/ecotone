@@ -19,14 +19,20 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
      * @var ContainerInterface
      */
     private $container;
+    /**
+     * @var array
+     */
+    private $defaults;
 
     /**
      * PsrContainerReferenceSearchService constructor.
      * @param ContainerInterface $container
+     * @param array $defaults
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, array $defaults = [])
     {
         $this->container = $container;
+        $this->defaults = $defaults;
     }
 
     /**
@@ -35,6 +41,10 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
     public function get(string $reference)
     {
         if (!$this->container->has($reference)) {
+            if (array_key_exists($reference, $this->defaults)) {
+                return $this->defaults[$reference];
+            }
+
             throw ReferenceNotFoundException::create("Reference {$reference} was not found");
         }
 

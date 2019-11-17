@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
+use Ecotone\Messaging\Handler\Logger\EchoLogger;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -27,7 +28,7 @@ class EcotoneLiteConfiguration
     public static function createNoCache(string $rootProjectDirectoryPath, ContainerInterface $container, array $namespaces) : ConfiguredMessagingSystem
     {
         $messagingSystemConfiguration = self::create($rootProjectDirectoryPath, null, $container, $namespaces, true, false, "prod");
-        return $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(new PsrContainerReferenceSearchService($container));
+        return $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(new PsrContainerReferenceSearchService($container, ["logger" => new EchoLogger()]));
     }
 
     /**
@@ -49,8 +50,8 @@ class EcotoneLiteConfiguration
     /**
      * @param string $rootProjectDirectoryPath path to root catalog, where composer.json is stored
      * @param string $cacheDirectoryPath where to store application cache
-     * @param array $namespaces namespaces which should be loaded, if all exists in src catalog, can be left for $loadSrc=true
      * @param ContainerInterface $container container containing all available services
+     * @param array $namespaces namespaces which should be loaded, if all exists in src catalog, can be left for $loadSrc=true
      * @param bool $loadSrc should load all namespaces from src folder
      * @param bool $failFastStrategy should build all endpoints at the start. Will
      * @param string $environment environment in which application does work
@@ -78,7 +79,7 @@ class EcotoneLiteConfiguration
             $messagingSystemConfiguration = unserialize(file_get_contents($messagingSystemCachePath));
         }
 
-        return $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(new PsrContainerReferenceSearchService($container));
+        return $messagingSystemConfiguration->buildMessagingSystemFromConfiguration(new PsrContainerReferenceSearchService($container, ["logger" => new EchoLogger()]));
     }
 
     /**

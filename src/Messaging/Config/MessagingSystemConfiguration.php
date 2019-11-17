@@ -282,7 +282,7 @@ final class MessagingSystemConfiguration implements Configuration
                     $messageHandlerBuilders[] = TransformerBuilder::createHeaderEnricher([
                         MessageHeaders::ROUTING_SLIP => $targetChannelName
                     ])
-                        ->withEndpointId(Uuid::uuid4()->toString())
+                        ->withEndpointId($targetChannelName)
                         ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
                         ->withOutputMessageChannel($asynchronousMessageChannel);
                     $messageHandlerBuilder->withInputChannelName($targetChannelName);

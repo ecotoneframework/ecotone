@@ -163,13 +163,13 @@ class AggregateMessagingModuleTest extends TestCase
                 PayloadBuilder::create("command")
             ])
             ->withInputChannelName("command-id")
-            ->withEndpointId('command-id');
+            ->withEndpointId(DoStuffCommand::class . '.command-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId(DoStuffCommand::class . ".command-id")
+                    ->withEndpointId("command-id")
                     ->withInputChannelName(DoStuffCommand::class)
                     ->withOutputMessageChannel("command-id")
             )
@@ -227,13 +227,13 @@ class AggregateMessagingModuleTest extends TestCase
                 ReferenceBuilder::create("class", \stdClass::class)
             ])
             ->withInputChannelName("command-id")
-            ->withEndpointId('command-id');
+            ->withEndpointId('doActionChannel.command-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("doActionChannel.command-id")
+                    ->withEndpointId("command-id")
                     ->withInputChannelName("doActionChannel")
                     ->withOutputMessageChannel("command-id")
             )
@@ -260,11 +260,11 @@ class AggregateMessagingModuleTest extends TestCase
                         ReferenceBuilder::create("service1", stdClass::class)
                     ])
                     ->withInputChannelName('command-id')
-                    ->withEndpointId('command-id')
+                    ->withEndpointId('input.command-id')
             )
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("input.command-id")
+                    ->withEndpointId("command-id")
                     ->withInputChannelName("input")
                     ->withOutputMessageChannel("command-id")
             )
@@ -290,11 +290,11 @@ class AggregateMessagingModuleTest extends TestCase
                         PayloadBuilder::create("data")
                     ])
                     ->withInputChannelName("1")
-                    ->withEndpointId("1")
+                    ->withEndpointId("register.1")
             )
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("register.1")
+                    ->withEndpointId("1")
                     ->withInputChannelName("register")
                     ->withOutputMessageChannel("1")
             )
@@ -304,11 +304,11 @@ class AggregateMessagingModuleTest extends TestCase
                         PayloadBuilder::create("data")
                     ])
                     ->withInputChannelName("2")
-                    ->withEndpointId("2")
+                    ->withEndpointId("register.2")
             )
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("register.2")
+                    ->withEndpointId("2")
                     ->withInputChannelName("register")
                     ->withOutputMessageChannel("2")
             )
@@ -342,7 +342,7 @@ class AggregateMessagingModuleTest extends TestCase
                         PayloadBuilder::create("data")
                     ])
                     ->withInputChannelName("1")
-                    ->withEndpointId('1')
+                    ->withEndpointId('register.1')
             )
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
@@ -355,7 +355,7 @@ class AggregateMessagingModuleTest extends TestCase
             )
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("register.1")
+                    ->withEndpointId("1")
                     ->withInputChannelName("register")
                     ->withOutputMessageChannel("1")
             )
@@ -365,7 +365,7 @@ class AggregateMessagingModuleTest extends TestCase
                         PayloadBuilder::create("data")
                     ])
                     ->withInputChannelName("2")
-                    ->withEndpointId('2')
+                    ->withEndpointId('register.2')
             )
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
@@ -378,7 +378,7 @@ class AggregateMessagingModuleTest extends TestCase
             )
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("register.2")
+                    ->withEndpointId("2")
                     ->withInputChannelName("register")
                     ->withOutputMessageChannel("2")
             )
@@ -401,11 +401,11 @@ class AggregateMessagingModuleTest extends TestCase
             ->registerMessageHandler(
                 ServiceActivatorBuilder::create(CommandHandlerWithClassNameInAnnotation::class, "execute")
                     ->withInputChannelName("command-id")
-                    ->withEndpointId('command-id')
+                    ->withEndpointId('input.command-id')
             )
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("input.command-id")
+                    ->withEndpointId("command-id")
                     ->withInputChannelName("input")
                     ->withOutputMessageChannel("command-id")
             )
@@ -432,11 +432,11 @@ class AggregateMessagingModuleTest extends TestCase
                         ReferenceBuilder::create("service", stdClass::class)
                     ])
                     ->withInputChannelName("command-id")
-                    ->withEndpointId('command-id')
+                    ->withEndpointId('input.command-id')
             )
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("input.command-id")
+                    ->withEndpointId("command-id")
                     ->withInputChannelName("input")
                     ->withOutputMessageChannel("command-id")
             )
@@ -467,11 +467,11 @@ class AggregateMessagingModuleTest extends TestCase
             ->registerMessageHandler(
                 AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateWithNoParametersAndInputChannelAndNoIgnoreMessage::class, "doCommand", null)
                     ->withInputChannelName("endpoint-command")
-                    ->withEndpointId('endpoint-command')
+                    ->withEndpointId('command.endpoint-command')
             )
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("command.endpoint-command")
+                    ->withEndpointId("endpoint-command")
                     ->withInputChannelName("command")
                     ->withOutputMessageChannel("endpoint-command")
             )
@@ -523,13 +523,13 @@ class AggregateMessagingModuleTest extends TestCase
                 PayloadBuilder::create("command"),
                 ReferenceBuilder::create("injectedService", stdClass::class)
             ])
-            ->withEndpointId('command-id-with-references');
+            ->withEndpointId('input.command-id-with-references');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler)
             ->registerMessageHandler(
                 BridgeBuilder::create()
-                    ->withEndpointId("input.command-id-with-references")
+                    ->withEndpointId("command-id-with-references")
                     ->withInputChannelName("input")
                     ->withOutputMessageChannel("command-id-with-references")
             )

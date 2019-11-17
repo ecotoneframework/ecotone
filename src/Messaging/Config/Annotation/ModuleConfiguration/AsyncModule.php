@@ -48,7 +48,7 @@ class AsyncModule extends NoExternalConfigurationModule implements AnnotationMod
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService) : self
     {
-        $asynchronousClass = $annotationRegistrationService->getAllClassesWithAnnotation(Async::class);
+        $asynchronousClasses = $annotationRegistrationService->getAllClassesWithAnnotation(Async::class);
 
         $asynchronousMethods = $annotationRegistrationService->findRegistrationsFor(
             MessageEndpoint::class,
@@ -89,7 +89,7 @@ class AsyncModule extends NoExternalConfigurationModule implements AnnotationMod
         }
         $endpoints = array_values($endpoints);
 
-        foreach ($asynchronousClass as $asynchronousClass) {
+        foreach ($asynchronousClasses as $asynchronousClass) {
             /** @var Async $asyncClass */
             $asyncClass = $annotationRegistrationService->getAnnotationForClass($asynchronousClass, Async::class);
             foreach ($endpoints as $endpoint) {

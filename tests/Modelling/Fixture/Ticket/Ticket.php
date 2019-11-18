@@ -3,13 +3,13 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Ticket;
 
+use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateFactory;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
-use Ecotone\Modelling\Annotation\EventSourcedAggregate;
 
 /**
- * @EventSourcedAggregate()
+ * @Aggregate()
  */
 class Ticket
 {
@@ -26,15 +26,45 @@ class Ticket
     /**
      * @CommandHandler()
      */
-    public static function start(StartTicketCommand $command) : array
+    public static function start(StartTicketCommand $command): array
     {
         return [new TicketWasStartedEvent($command->getTicketId())];
     }
 
     /**
+     * @AggregateFactory()
+     */
+    public static function createFrom(array $events): self
+    {
+        $self = new self();
+
+        foreach ($events as $event) {
+            switch (get_class($event)) {
+                case TicketWasStartedEvent::class:
+                    {
+                        $self->applyTicketWasStarted($event);
+                        break;
+                    }
+                case AssignWorkerCommand::class:
+                    {
+                        $self->applyWorkerWasAssigned($event);
+                        break;
+                    }
+            }
+        }
+
+        return $self;
+    }
+
+    private function applyTicketWasStarted(TicketWasStartedEvent $event): void
+    {
+        $this->ticketId = $event->getTicketId();
+    }
+
+    /**
      * @CommandHandler()
      */
-    public function assignWorker(AssignWorkerCommand $command) : array
+    public function assignWorker(AssignWorkerCommand $command): array
     {
         if ($this->workerId) {
             return [new WorkerAssignationFailedEvent($this->ticketId, $command->getWorkerId())];
@@ -46,36 +76,8 @@ class Ticket
         return [$event];
     }
 
-    private function applyTicketWasStarted(TicketWasStartedEvent $event) : void
-    {
-        $this->ticketId = $event->getTicketId();
-    }
-
-    private function applyWorkerWasAssigned(WorkerWasAssignedEvent $event) : void
+    private function applyWorkerWasAssigned(WorkerWasAssignedEvent $event): void
     {
         $this->workerId = $event->getAssignedWorkerId();
-    }
-
-    /**
-     * @AggregateFactory()
-     */
-    public static function createFrom(array $events) : self
-    {
-        $self = new self();
-
-        foreach ($events as $event) {
-            switch (get_class($event)) {
-                case TicketWasStartedEvent::class: {
-                    $self->applyTicketWasStarted($event);
-                    break;
-                }
-                case AssignWorkerCommand::class: {
-                    $self->applyWorkerWasAssigned($event);
-                    break;
-                }
-            }
-        }
-
-        return $self;
     }
 }

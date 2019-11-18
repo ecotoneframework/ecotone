@@ -27,12 +27,12 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
 
     public static function createEmpty() : self
     {
-        return new self([]);
+        return new static([]);
     }
 
     public static function createWithExistingAggregate(array $identifiers, array $events) : self
     {
-        $self = self::createEmpty();
+        $self = static::createEmpty();
 
         $self->save($identifiers, $events, [], null);
 

@@ -286,6 +286,11 @@ final class MessagingSystemConfiguration implements Configuration
                         ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
                         ->withOutputMessageChannel($asynchronousMessageChannel);
                     $messageHandlerBuilder->withInputChannelName($targetChannelName);
+
+                    if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->pollingMetadata)) {
+                        $this->pollingMetadata[$targetChannelName] = $this->pollingMetadata[$messageHandlerBuilder->getEndpointId()];
+                        unset($this->pollingMetadata[$messageHandlerBuilder->getEndpointId()]);
+                    }
                     break;
                 }
             }

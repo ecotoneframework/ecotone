@@ -8,8 +8,8 @@
             "email": "dgafka.mail@gmail.com"
         }
     ],
-    "keywords": ["cqrs","event","command","ecotone","query","ddd","messaging", "aggregate","asynchronous", "message", "spring", "enterprise integration patterns", "eip", "distributed architecture", "event driven architecture", "eda","domain driven design"],
-    "description": "Provides a clean, elegant API for writing DDD, CQRS applications on top off the well-known Enterprise Integration Patterns. It provides basic building blocks for aggregates, commands, queries, events, command handlers, event handlers, query handlers, communication buses and so on.",
+    "keywords": ["cqrs","event","command","ecotone","query","ddd","messaging", "aggregate","asynchronous", "message", "spring", "enterprise integration patterns", "eip", "distributed architecture", "event driven architecture", "eda","domain driven design", "event sourcing"],
+    "description": "Provides a clean, elegant API for writing DDD, CQRS, Event Sourcing applications on top off the well-known Enterprise Integration Patterns. It provides basic building blocks for aggregates, commands, queries, events, command handlers, event sourced aggregates, event handlers, query handlers, communication buses and so on.",
     "autoload": {
         "psr-4": {
             "Ecotone\\": "src"

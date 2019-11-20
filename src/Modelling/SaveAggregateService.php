@@ -150,6 +150,7 @@ class SaveAggregateService
             $this->lazyEventBus->sendWithMetadata($event, $metadata);
         }
 
-        return $message;
+        return MessageBuilder::fromMessage($message)
+                ->build();
     }
 }

@@ -19,6 +19,7 @@ interface AggregateMessage
     const TARGET_VERSION = "ecotone.modelling.aggregate.target_version";
     const CALLING_MESSAGE = "ecotone.modelling.aggregate.calling_message";
     const IS_EVENT_SOURCED = "ecotone.modelling.aggregate.is_event_sourced";
+    const CALL_RESULT = "ecotone.modelling.aggregate.result";
 
     const BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE = MethodInterceptor::DEFAULT_PRECEDENCE + 10;
 }

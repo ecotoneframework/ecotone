@@ -48,6 +48,10 @@ class CallAggregateService
      * @var string|null
      */
     private $eventSourcedFactoryMethod;
+    /**
+     * @var bool
+     */
+    private $isCommandHandler;
 
     /**
      * ServiceCallToAggregateAdapter constructor.
@@ -59,10 +63,11 @@ class CallAggregateService
      * @param string $withFactoryRedirectOnFoundMethodName
      * @param ParameterConverterBuilder[] $withFactoryRedirectOnFoundParameterConverters
      * @param string|null $eventSourcedFactoryMethod
+     * @param bool $isCommand
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function __construct(ChannelResolver $channelResolver, array $messageToParameterConverters, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService,
-                                string $withFactoryRedirectOnFoundMethodName, array $withFactoryRedirectOnFoundParameterConverters, ?string $eventSourcedFactoryMethod
+                                string $withFactoryRedirectOnFoundMethodName, array $withFactoryRedirectOnFoundParameterConverters, ?string $eventSourcedFactoryMethod, bool $isCommand
     )
     {
         Assert::allInstanceOfType($messageToParameterConverters, ParameterConverter::class);
@@ -74,20 +79,10 @@ class CallAggregateService
         $this->withFactoryRedirectOnFoundMethodName = $withFactoryRedirectOnFoundMethodName;
         $this->withFactoryRedirectOnFoundParameterConverters = $withFactoryRedirectOnFoundParameterConverters;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
+        $this->isCommandHandler = $isCommand;
     }
 
-    /**
-     * @param Message $message
-     *
-     * @return Message
-     * @throws MessageHandlingException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
-     */
-    public function call(Message $message) : Message
+    public function call(Message $message) : ?Message
     {
         $aggregate = $message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_OBJECT)
                             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
@@ -122,7 +117,7 @@ class CallAggregateService
             if (!$aggregate) {
                 if ($message->getHeaders()->get(AggregateMessage::IS_EVENT_SOURCED)) {
                     $resultMessage = $resultMessage
-                        ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate = call_user_func([$message->getHeaders()->get(AggregateMessage::CLASS_NAME), $this->eventSourcedFactoryMethod], $result));
+                        ->setHeader(AggregateMessage::AGGREGATE_OBJECT, call_user_func([$message->getHeaders()->get(AggregateMessage::CLASS_NAME), $this->eventSourcedFactoryMethod], $result));
                 }else {
                     $resultMessage = $resultMessage
                         ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $result);
@@ -137,7 +132,11 @@ class CallAggregateService
                 ->setPayload($result);
         }
 
-        return $resultMessage
+        if ($this->isCommandHandler || $result) {
+            return $resultMessage
                 ->build();
+        }
+
+        return null;
     }
 }

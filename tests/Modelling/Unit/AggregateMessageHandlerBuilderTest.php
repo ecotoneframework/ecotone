@@ -54,6 +54,7 @@ use Test\Ecotone\Modelling\Fixture\Ticket\AssignWorkerCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\StartTicketCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
 use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
+use Test\Ecotone\Modelling\Fixture\Ticket\WorkerAssignationFailedEvent;
 use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 
 /**
@@ -277,6 +278,44 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             $orderAmount,
             $replyChannel->receive()->getPayload()
         );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     * @throws \Exception
+     */
+    public function test_calling_aggregate_query_handler_returning_null_value()
+    {
+        $orderAmount = 5;
+        $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
+        $order->increaseAggregateVersion();
+
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
+            Order::class,
+            "getCustomerId",
+            null
+        )
+            ->withAggregateRepositoryFactories(["orderRepository"]);
+
+        $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "orderRepository" => InMemoryStandardRepository::createWith([$order]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateQueryHandler->handle(
+            MessageBuilder::withPayload(["orderId" => 1])
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertNull($replyChannel->receive());
     }
 
     /**
@@ -943,6 +982,46 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $expectedEvent = new WorkerWasAssignedEvent($ticketId, 100);
         $this->assertEquals(
             [new TicketWasStartedEvent($ticketId), $expectedEvent],
+            $inMemoryEventSourcedRepository->findBy(Ticket::class, ["ticketId" => $ticketId])
+        );
+        $this->assertEquals(
+            $expectedEvent,
+            $queueChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_calling_second_action_method_for_existing_event_sourced_aggregate()
+    {
+        $ticketId = 1;
+        $commandToRun = new AssignWorkerCommand($ticketId, 101);
+
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            Ticket::class,
+            "assignWorker",
+            AssignWorkerCommand::class
+        )
+            ->withAggregateRepositoryFactories(["repository"])
+            ->withInputChannelName("inputChannel");
+
+        $queueChannel = QueueChannel::create();
+        $currentEvents = [new TicketWasStartedEvent($ticketId), new WorkerWasAssignedEvent($ticketId, 100)];
+        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], $currentEvents);
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => $queueChannel
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => $inMemoryEventSourcedRepository,
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $aggregateCommandHandler->handle(MessageBuilder::withPayload($commandToRun)->setReplyChannel(NullableMessageChannel::create())->build());
+
+        $expectedEvent = new WorkerAssignationFailedEvent($ticketId, 101);
+        $this->assertEquals(
+            array_merge($currentEvents, [$expectedEvent]),
             $inMemoryEventSourcedRepository->findBy(Ticket::class, ["ticketId" => $ticketId])
         );
         $this->assertEquals(

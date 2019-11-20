@@ -45,7 +45,7 @@ class Ticket
                         $self->applyTicketWasStarted($event);
                         break;
                     }
-                case AssignWorkerCommand::class:
+                case WorkerWasAssignedEvent::class:
                     {
                         $self->applyWorkerWasAssigned($event);
                         break;
@@ -67,6 +67,10 @@ class Ticket
     public function assignWorker(AssignWorkerCommand $command): array
     {
         if ($this->workerId) {
+            if ($command->getWorkerId() === $this->workerId) {
+                return [];
+            }
+
             return [new WorkerAssignationFailedEvent($this->ticketId, $command->getWorkerId())];
         }
 

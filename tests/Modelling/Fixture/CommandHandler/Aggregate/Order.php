@@ -41,7 +41,7 @@ class Order implements VersionAggregate
      */
     private $version;
     /**
-     * @var string
+     * @var string|null
      */
     private $customerId;
 
@@ -113,9 +113,10 @@ class Order implements VersionAggregate
     }
 
     /**
-     * @return string
+     * @return string|null
+     * @QueryHandler()
      */
-    public function getCustomerId(): string
+    public function getCustomerId(): ?string
     {
         return $this->customerId;
     }

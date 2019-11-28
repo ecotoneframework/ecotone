@@ -7,6 +7,7 @@ use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Fixture\Conversion\Product;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
 use Test\Ecotone\Messaging\Fixture\Conversion\AbstractSuperAdmin;
 use Test\Ecotone\Messaging\Fixture\Conversion\Admin;

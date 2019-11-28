@@ -7,6 +7,8 @@ use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ClassPropertyDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Test\Ecotone\Messaging\Fixture\Conversion\Product;
+use Test\Ecotone\Messaging\Fixture\Conversion\User;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\OrderPropertyExample;
@@ -83,6 +85,48 @@ class ClassDefinitionTest extends TestCase
         $this->assertEquals(
             ClassPropertyDefinition::createPrivate("property", TypeDescriptor::create(ExtraObject::class), true, false, []),
             $classDefinition->getProperty("property")
+        );
+    }
+
+    public function test_retrieving_typed_property()
+    {
+        if (version_compare(phpversion(), '7.4.0', '<')) {
+            $this->assertTrue(true);return;
+        }
+
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("name", TypeDescriptor::createStringType(), false, false, []),
+            $classDefinition->getProperty("name")
+        );
+    }
+
+    public function test_retrieving_nullable_typed_property()
+    {
+        if (version_compare(phpversion(), '7.4.0', '<')) {
+            $this->assertTrue(true);return;
+        }
+
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("quantity", TypeDescriptor::createIntegerType(), true, false, []),
+            $classDefinition->getProperty("quantity")
+        );
+    }
+
+    public function test_override_typed_property_with_annotation_type()
+    {
+        if (version_compare(phpversion(), '7.4.0', '<')) {
+            $this->assertTrue(true);return;
+        }
+
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("owners", TypeDescriptor::create("array<Test\Ecotone\Messaging\Fixture\Conversion\Admin>"), false, false, []),
+            $classDefinition->getProperty("owners")
         );
     }
 }

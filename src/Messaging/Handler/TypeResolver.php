@@ -531,22 +531,30 @@ class TypeResolver
     /**
      * @param string $className
      * @param AnnotationParser $annotationParser
-     * @param $property
-     * @param TypeDescriptor|null $type
+     * @param \ReflectionProperty $property
+     * @param TypeDescriptor|null $docblockType
      * @return ClassPropertyDefinition|null
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function createClassProperty(string $className, AnnotationParser $annotationParser, $property, ?TypeDescriptor $type)
+    private function createClassProperty(string $className, AnnotationParser $annotationParser, \ReflectionProperty $property, ?TypeDescriptor $docblockType)
     {
         $classProperty = null;
-        $type = $type ? $type : TypeDescriptor::createUnknownType();
+        $type = $docblockType ? $docblockType : TypeDescriptor::createUnknownType();
+        $isNullable = true;
+        if (version_compare(phpversion(), '7.4.0', '>=')) {
+            if ($type->isUnknown()) {
+                $type = $property->hasType() ? TypeDescriptor::create($property->getType()->getName()) : $type;
+            }
+            $isNullable = $property->hasType() ? $property->getType()->allowsNull() : true;
+        }
+
         $annotations = $annotationParser->getAnnotationsForProperty($className, $property->getName());
         if ($property->isPrivate()) {
             $classProperty = ClassPropertyDefinition::createPrivate(
                 $property->getName(),
                 $type,
-                true,
+                $isNullable,
                 $property->isStatic(),
                 $annotations
             );
@@ -554,7 +562,7 @@ class TypeResolver
             $classProperty = ClassPropertyDefinition::createProtected(
                 $property->getName(),
                 $type,
-                true,
+                $isNullable,
                 $property->isStatic(),
                 $annotations
             );
@@ -562,7 +570,7 @@ class TypeResolver
             $classProperty = ClassPropertyDefinition::createPublic(
                 $property->getName(),
                 $type,
-                true,
+                $isNullable,
                 $property->isStatic(),
                 $annotations
             );

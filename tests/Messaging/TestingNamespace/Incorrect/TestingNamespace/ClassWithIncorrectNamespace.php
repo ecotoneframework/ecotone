@@ -12,7 +12,7 @@ use Ecotone\Messaging\Annotation\Extension;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ApplicationContext()
  */
-class ClassWithIncorrectNamespace
+class ClassWithIncorrectNamespaceAndClassName
 {
     /**
      * @return array

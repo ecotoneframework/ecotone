@@ -8,8 +8,8 @@
             "email": "dgafka.mail@gmail.com"
         }
     ],
-    "keywords": ["ddd","cqrs","messaging","eip", "distributed architecture","ecotone"],
-    "description": "Provides a clean, elegant API for writing DDD, CQRS, Event Sourcing applications on top off the well-known Enterprise Integration Patterns. It provides basic building blocks for aggregates, commands, queries, events, command handlers, event sourced aggregates, event handlers, query handlers, communication buses and so on.",
+    "keywords": ["ddd","cqrs","messaging","eip", "distributed architecture","ecotone", "ddd and cqrs on top of eip"],
+    "description": "Provides a clean, elegant API for writing DDD CQRS and Event Sourcing applications on top off the well-known Enterprise Integration Patterns in PHP. It affords basic DDD and CQRS building blocks for aggregates, commands, queries, events, command handlers, event sourced aggregates, event handlers, query handlers, interceptors.",
     "autoload": {
         "psr-4": {
             "Ecotone\\": "src"

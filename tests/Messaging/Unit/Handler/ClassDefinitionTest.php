@@ -88,12 +88,11 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
+    /**
+     * @requires PHP >= 7.4
+     */
     public function test_retrieving_typed_property()
     {
-        if (version_compare(phpversion(), '7.4.0', '<')) {
-            $this->assertTrue(true);return;
-        }
-
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
 
         $this->assertEquals(
@@ -102,12 +101,11 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
+    /**
+     * @requires PHP >= 7.4
+     */
     public function test_retrieving_nullable_typed_property()
     {
-        if (version_compare(phpversion(), '7.4.0', '<')) {
-            $this->assertTrue(true);return;
-        }
-
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
 
         $this->assertEquals(
@@ -116,12 +114,11 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
+    /**
+     * @requires PHP >= 7.4
+     */
     public function test_override_typed_property_with_annotation_type()
     {
-        if (version_compare(phpversion(), '7.4.0', '<')) {
-            $this->assertTrue(true);return;
-        }
-
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
 
         $this->assertEquals(

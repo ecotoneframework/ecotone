@@ -37,23 +37,21 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      */
     private static $annotationRegistrationService;
 
+    /**
+     * @requires PHP >= 7.4
+     */
     public function test_retrieving_all_classes_with_annotation()
     {
-        if (version_compare(phpversion(), '7.4.0', '<')) {
-            $this->assertTrue(true);return;
-        }
-
         $classes = $this->getAnnotationRegistrationService()->getAllClassesWithAnnotation(ApplicationContext::class);
 
         $this->assertNotEmpty($classes, "File system class locator didn't find application context");
     }
 
+    /**
+     * @requires PHP >= 7.4
+     */
     public function test_retrieving_annotation_for_class()
     {
-        if (version_compare(phpversion(), '7.4.0', '<')) {
-            $this->assertTrue(true);return;
-        }
-
         $this->assertEquals(
             new ApplicationContext(),
             $this->getAnnotationRegistrationService()->getAnnotationForClass(ApplicationContextExample::class, ApplicationContext::class)

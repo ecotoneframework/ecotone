@@ -106,6 +106,10 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private $requiredReferences = [];
     /**
+     * @var string[]
+     */
+    private $optionalReferences = [];
+    /**
      * @var ConverterBuilder[]
      */
     private $converterBuilders = [];
@@ -181,7 +185,7 @@ final class MessagingSystemConfiguration implements Configuration
         $moduleExtensions = [];
 
         foreach ($modules as $module) {
-            $this->requireReferences($module->getRequiredReferences());
+            $this->requireReferences($module->getRelatedReferences());
 
             $moduleExtensions[$module->getName()] = [];
             foreach ($extensionObjects as $extensionObject) {
@@ -216,17 +220,25 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function requireReferences(array $referenceNames): Configuration
     {
-        foreach ($referenceNames as $requiredReferenceName) {
-            if ($requiredReferenceName instanceof RequiredReference) {
-                $requiredReferenceName = $requiredReferenceName->getReferenceName();
+        foreach ($referenceNames as $referenceName) {
+            $isRequired = true;
+            if ($referenceName instanceof RequiredReference) {
+                $referenceName = $referenceName->getReferenceName();
+            }elseif ($referenceName instanceof OptionalReference) {
+                $isRequired = false;
+                $referenceName = $referenceName->getReferenceName();
             }
 
-            if (in_array($requiredReferenceName, [InterfaceToCallRegistry::REFERENCE_NAME, ConversionService::REFERENCE_NAME, ProxyFactory::REFERENCE_NAME])) {
+            if (in_array($referenceName, [InterfaceToCallRegistry::REFERENCE_NAME, ConversionService::REFERENCE_NAME, ProxyFactory::REFERENCE_NAME])) {
                 continue;
             }
 
-            if ($requiredReferenceName) {
-                $this->requiredReferences[] = $requiredReferenceName;
+            if ($referenceName) {
+                if ($isRequired) {
+                    $this->requiredReferences[] = $referenceName;
+                }else {
+                    $this->optionalReferences[] = $referenceName;
+                }
             }
         }
 
@@ -830,6 +842,14 @@ final class MessagingSystemConfiguration implements Configuration
     public function getRequiredReferences(): array
     {
         return $this->requiredReferences;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getOptionalReferences(): array
+    {
+        return $this->optionalReferences;
     }
 
     /**

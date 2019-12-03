@@ -119,6 +119,11 @@ interface Configuration
     public function getRequiredReferences() : array;
 
     /**
+     * @return string[]
+     */
+    public function getOptionalReferences(): array;
+
+    /**
      * @param InterfaceToCall[] $relatedInterfaces
      * @return Configuration
      */

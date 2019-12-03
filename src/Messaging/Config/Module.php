@@ -36,7 +36,7 @@ interface Module
     /**
      * Which will be available during build configure phase
      *
-     * @return RequiredReference[]
+     * @return RequiredReference[]|OptionalReference[]|string[]
      */
-    public function getRequiredReferences(): array;
+    public function getRelatedReferences(): array;
 }

@@ -85,7 +85,7 @@ class ExampleModuleConfiguration implements \Ecotone\Messaging\Config\Annotation
     /**
      * @inheritDoc
      */
-    public function getRequiredReferences(): array
+    public function getRelatedReferences(): array
     {
         return [];
     }

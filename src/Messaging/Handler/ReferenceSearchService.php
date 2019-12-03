@@ -13,9 +13,11 @@ interface ReferenceSearchService
     /**
      * Searching for service with passed reference name
      *
-     * @param string $reference
+     * @param string $referenceName
      * @return object
      * @throws ReferenceNotFoundException if service with passed reference was not found
      */
-    public function get(string $reference);
+    public function get(string $referenceName) : object;
+
+    public function has(string $referenceName) : bool;
 }

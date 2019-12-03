@@ -1,13 +1,10 @@
 <?php
 
+
 namespace Ecotone\Messaging\Config;
 
-/**
- * Class RequiredReference
- * @package Ecotone\Messaging\Config
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
-class RequiredReference
+
+class OptionalReference
 {
     /**
      * @var string

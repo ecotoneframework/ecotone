@@ -129,11 +129,11 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     /**
      * @inheritDoc
      */
-    public function getRequiredReferences(): array
+    public function getRelatedReferences(): array
     {
         return [
-            RequiredReference::create(ExpressionEvaluationService::REFERENCE, ExpressionEvaluationService::class, "Expression language evaluation service"),
-            RequiredReference::create(InterfaceToCallRegistry::REFERENCE_NAME, InterfaceToCallRegistry::class, "Registry for building interface descriptions")
+            RequiredReference::create(ExpressionEvaluationService::REFERENCE),
+            RequiredReference::create(InterfaceToCallRegistry::REFERENCE_NAME)
         ];
     }
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config;
 
+use Ecotone\Messaging\Config\OptionalReference;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Exception;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
@@ -169,6 +170,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $this->assertEquals([$gatewayBuilder], $messagingSystemConfiguration->getRegisteredGateways());
         $this->assertEquals([NoReturnMessageHandler::class, "some", "interceptor"], $messagingSystemConfiguration->getRequiredReferences());
+    }
+
+    public function test_adding_optional_references()
+    {
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+        $messagingSystemConfiguration->requireReferences([OptionalReference::create("reference")]);
+
+        $this->assertEquals(["reference"], $messagingSystemConfiguration->getOptionalReferences());
     }
 
     /**

@@ -74,7 +74,7 @@ class LazyEventBusConfiguration implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function getRequiredReferences(): array
+    public function getRelatedReferences(): array
     {
         return [];
     }

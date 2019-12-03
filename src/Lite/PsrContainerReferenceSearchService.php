@@ -38,7 +38,7 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
     /**
      * @inheritDoc
      */
-    public function get(string $reference)
+    public function get(string $reference) : object
     {
         if (!$this->container->has($reference)) {
             if (array_key_exists($reference, $this->defaults)) {
@@ -49,5 +49,18 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
         }
 
         return $this->container->get($reference);
+    }
+
+    public function has(string $referenceName): bool
+    {
+        if (!$this->container->has($referenceName)) {
+            if (array_key_exists($referenceName, $this->defaults)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }

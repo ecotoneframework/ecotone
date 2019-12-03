@@ -14,6 +14,8 @@ use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use ProxyManager\Factory\RemoteObjectFactory;
 use ProxyManager\FileLocator\FileLocator;
 use ProxyManager\GeneratorStrategy\FileWriterGeneratorStrategy;
+use ProxyManager\Signature\ClassSignatureGenerator;
+use ProxyManager\Signature\SignatureGenerator;
 use ProxyManager\Version;
 use stdClass;
 
@@ -60,6 +62,7 @@ class ProxyFactory implements \Serializable
         $configuration->setProxiesTargetDir($cacheDirectoryPath);
         $fileLocator = new FileLocator($configuration->getProxiesTargetDir());
         $configuration->setGeneratorStrategy(new FileWriterGeneratorStrategy($fileLocator));
+        $configuration->setClassSignatureGenerator(new ClassSignatureGenerator(new SignatureGenerator()));
 
         return new self($configuration, $cacheDirectoryPath);
     }

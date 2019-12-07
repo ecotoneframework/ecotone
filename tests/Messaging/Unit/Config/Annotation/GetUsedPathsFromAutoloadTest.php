@@ -101,6 +101,21 @@ class GetUsedPathsFromAutoloadTest extends TestCase
         );
     }
 
+    public function test_retrieving_when_more_than_one_target_directory()
+    {
+        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+
+        $this->assertEquals(
+            ["Ecotone\One", "Ecotone\Two"],
+            $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
+                [
+                    "psr-4" => ["Ecotone\One" => ["src", "tests"]],
+                    "psr-0" => ["Ecotone\Two" => ["src", "tests"]]
+                ]
+            )
+        );
+    }
+
     public function test_not_retrieving_when_not_in_src_catalog()
     {
         $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();

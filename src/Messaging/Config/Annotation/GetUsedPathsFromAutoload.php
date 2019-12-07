@@ -19,21 +19,33 @@ class GetUsedPathsFromAutoload
     {
         $namespaces = [];
         if (isset($autoloadData['psr-4'])) {
-            foreach ($autoloadData['psr-4'] as $autoloadNamespace => $path) {
-                if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
-                    $namespaces[] = $autoloadNamespace;
+            foreach ($autoloadData['psr-4'] as $autoloadNamespace => $paths) {
+                if (!is_array($paths)) {
+                    $paths = [$paths];
+                }
+
+                foreach ($paths as $path) {
+                    if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
+                        $namespaces[] = $autoloadNamespace;
+                    }
                 }
             }
         }
         if (isset($autoloadData['psr-0'])) {
-            foreach ($autoloadData['psr-0'] as $autoloadNamespace => $path) {
-                if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
-                    $namespaces[] = $autoloadNamespace;
+            foreach ($autoloadData['psr-0'] as $autoloadNamespace => $paths) {
+                if (!is_array($paths)) {
+                    $paths = [$paths];
+                }
+
+                foreach ($paths as $path) {
+                    if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
+                        $namespaces[] = $autoloadNamespace;
+                    }
                 }
             }
         }
 
-        return $namespaces;
+        return array_unique($namespaces);
     }
 
     /**
@@ -79,6 +91,6 @@ class GetUsedPathsFromAutoload
             }
         }
 
-        return $paths;
+        return array_unique($paths);
     }
 }

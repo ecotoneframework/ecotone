@@ -101,7 +101,7 @@ class AggregateMessagingModuleTest extends TestCase
      */
     protected function createMessagingSystemConfiguration(): Configuration
     {
-        return MessagingSystemConfiguration::prepare(InMemoryModuleMessaging::createEmpty());
+        return MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
     }
 
     /**

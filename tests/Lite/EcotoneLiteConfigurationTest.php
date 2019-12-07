@@ -5,6 +5,7 @@ namespace Test\Ecotone\Lite;
 
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
+use Ecotone\Messaging\Config\ApplicationConfiguration;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
@@ -17,9 +18,10 @@ class EcotoneLiteConfigurationTest extends TestCase
 {
     public function test_creating_with_cache()
     {
-        $cacheDirectory = "/tmp/" . Uuid::uuid4()->toString();
-        $configuration1 = EcotoneLiteConfiguration::createWithCache(__DIR__ . "/../../", $cacheDirectory, InMemoryPSRContainer::createEmpty(), [], true, true, "prod");
-        $configuration2 = EcotoneLiteConfiguration::createWithCache(__DIR__ . "/../../", $cacheDirectory, InMemoryPSRContainer::createEmpty(), [], true, true, "prod");
+        $applicationConfiguration = ApplicationConfiguration::createWithDefaults()
+                                        ->withCacheDirectoryPath("/tmp/" . Uuid::uuid4()->toString());
+        $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration);
+        $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration);
 
         $this->assertEquals($configuration1, $configuration2);
     }

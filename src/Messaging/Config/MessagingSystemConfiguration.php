@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Ecotone\Lite\TypeResolver;
 use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
@@ -150,19 +151,20 @@ final class MessagingSystemConfiguration implements Configuration
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param object[] $extensionObjects
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param bool $isLazyLoaded
-     * @param ProxyFactory $proxyFactory
+     * @param ApplicationConfiguration $applicationConfiguration
      * @throws AnnotationException
      * @throws ConfigurationException
      * @throws InvalidArgumentException
      * @throws MessagingException
      * @throws ReflectionException
      */
-    private function __construct(?string $rootPathToSearchConfigurationFor, ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded, ProxyFactory $proxyFactory)
+    private function __construct(?string $rootPathToSearchConfigurationFor, ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration)
     {
-        $this->isLazyConfiguration = $isLazyLoaded;
+        $this->isLazyConfiguration = !$applicationConfiguration->isFailingFast();
         $this->rootPathToSearchConfigurationFor = $rootPathToSearchConfigurationFor;
-        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $proxyFactory);
+
+        $extensionObjects[] = $applicationConfiguration;
+        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache());
     }
 
     /**
@@ -519,19 +521,15 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReflectionException
      */
-    public static function prepare(ModuleRetrievingService $moduleConfigurationRetrievingService): Configuration
+    public static function prepareWithDefaults(ModuleRetrievingService $moduleConfigurationRetrievingService): Configuration
     {
-        return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), false, ProxyFactory::createNoCache());
+        return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), ApplicationConfiguration::createWithDefaults());
     }
 
     /**
      * @param string $rootPathToSearchConfigurationFor
-     * @param array $namespaces
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param string $environment
-     * @param bool $isLazyLoaded
-     * @param bool $loadSrc
-     * @param ProxyFactory $proxyFactory
+     * @param ApplicationConfiguration $applicationConfiguration
      * @return Configuration
      * @throws AnnotationException
      * @throws ConfigurationException
@@ -539,24 +537,23 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReflectionException
      */
-    public static function createWithCachedReferenceObjectsForNamespaces(string $rootPathToSearchConfigurationFor, array $namespaces, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, string $environment, bool $isLazyLoaded, bool $loadSrc, ProxyFactory $proxyFactory): Configuration
+    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration): Configuration
     {
         self::registerAnnotationAutoloader($rootPathToSearchConfigurationFor);
 
-        return MessagingSystemConfiguration::prepareWithCachedReferenceObjects(
+        return self::prepareWithModuleRetrievingService(
             $rootPathToSearchConfigurationFor,
             new AnnotationModuleRetrievingService(
                 new FileSystemAnnotationRegistrationService(
                     new AnnotationReader(),
                     realpath($rootPathToSearchConfigurationFor),
-                    $namespaces,
-                    $environment,
-                    $loadSrc
+                    $applicationConfiguration->getNamespaces(),
+                    $applicationConfiguration->getEnvironment(),
+                    $applicationConfiguration->isLoadingSrc()
                 )
             ),
             $referenceTypeFromNameResolver,
-            $isLazyLoaded,
-            $proxyFactory
+            $applicationConfiguration
         );
     }
 
@@ -564,8 +561,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @param string|null $rootProjectDirectoryPath
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param bool $isLazyLoaded
-     * @param ProxyFactory $proxyFactory
+     * @param ApplicationConfiguration $applicationConfiguration
      * @return Configuration
      * @throws AnnotationException
      * @throws ConfigurationException
@@ -573,9 +569,45 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReflectionException
      */
-    public static function prepareWithCachedReferenceObjects(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLazyLoaded, ProxyFactory $proxyFactory): Configuration
+    public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration): Configuration
     {
-        return new self($rootProjectDirectoryPath, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $isLazyLoaded, $proxyFactory);
+        $cacheDirectoryPath = $applicationConfiguration->getCacheDirectoryPath();
+        $messagingSystemCachePath = $cacheDirectoryPath . DIRECTORY_SEPARATOR . "messaging_system";
+
+        if (!$cacheDirectoryPath || !file_exists($messagingSystemCachePath)) {
+            if ($cacheDirectoryPath) {
+                @mkdir($cacheDirectoryPath, 0777, true);
+                Assert::isTrue(is_writable($cacheDirectoryPath), "Not enough permissions to write into cache directory {$cacheDirectoryPath}");
+            }
+
+            $messagingSystemConfiguration = new self($rootProjectDirectoryPath, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $applicationConfiguration);
+
+            if ($cacheDirectoryPath) {
+                $serializedMessagingSystemConfiguration = serialize($messagingSystemConfiguration);
+                file_put_contents($messagingSystemCachePath, $serializedMessagingSystemConfiguration);
+            }
+        }else {
+            $messagingSystemConfiguration = unserialize(file_get_contents($messagingSystemCachePath));
+        }
+
+        return $messagingSystemConfiguration;
+    }
+
+    /**
+     * @param ApplicationConfiguration $applicationConfiguration
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    public static function cleanCache(ApplicationConfiguration $applicationConfiguration): void
+    {
+        if ($applicationConfiguration->getCacheDirectoryPath()) {
+            @mkdir($applicationConfiguration->getCacheDirectoryPath(), 0777, true);
+            Assert::isTrue(is_writable($applicationConfiguration->getCacheDirectoryPath()), "Not enough permissions to write into cache directory {$applicationConfiguration->getCacheDirectoryPath()}");
+
+            Assert::isFalse(is_file($applicationConfiguration->getCacheDirectoryPath()), "Cache directory is file, should be directory");
+
+            array_map( 'unlink', array_filter((array) glob("{$applicationConfiguration->getCacheDirectoryPath()}/*") ) );
+        }
     }
 
     /**

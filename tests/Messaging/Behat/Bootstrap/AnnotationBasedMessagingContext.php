@@ -6,6 +6,9 @@ namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
 use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Lite\EcotoneLiteConfiguration;
+use Ecotone\Lite\InMemoryPSRContainer;
+use Ecotone\Messaging\Config\ApplicationConfiguration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
@@ -77,20 +80,18 @@ class AnnotationBasedMessagingContext implements Context
             }
         }
 
-        $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString();
-        mkdir($cacheDirectoryPath);
-        $messagingConfiguration = MessagingSystemConfiguration::createWithCachedReferenceObjectsForNamespaces(
-            __DIR__ . "/../../../../",
-            [$namespace],
-            InMemoryReferenceTypeFromNameResolver::createFromObjects($objects),
-            "test",
-            true,
-            true,
-            ProxyFactory::createWithCache($cacheDirectoryPath)
-        );
+        $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "ecotone_testing_behat_cache";
 
-        $messagingConfiguration = unserialize(serialize($messagingConfiguration));
-        self::$messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith($objects));
+        $applicationConfiguration = ApplicationConfiguration::createWithDefaults()
+            ->withCacheDirectoryPath($cacheDirectoryPath)
+            ->withNamespaces([$namespace]);
+
+        MessagingSystemConfiguration::cleanCache($applicationConfiguration);
+        self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
+            __DIR__ . "/../../../../",
+            InMemoryPSRContainer::createFromObjects($objects),
+            $applicationConfiguration
+        );
     }
 
     /**

@@ -618,7 +618,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    private static function cleanCache(ApplicationConfiguration $applicationConfiguration): void
+    public static function cleanCache(ApplicationConfiguration $applicationConfiguration): void
     {
         if ($applicationConfiguration->getCacheDirectoryPath()) {
             @mkdir($applicationConfiguration->getCacheDirectoryPath(), 0777, true);

@@ -85,7 +85,8 @@ class AnnotationBasedMessagingContext implements Context
         $applicationConfiguration = ApplicationConfiguration::createWithDefaults()
             ->withCacheDirectoryPath($cacheDirectoryPath)
             ->withNamespaces([$namespace]);
-        
+
+        MessagingSystemConfiguration::cleanCache($applicationConfiguration);
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
             __DIR__ . "/../../../../",
             InMemoryPSRContainer::createFromObjects($objects),

@@ -541,6 +541,11 @@ final class MessagingSystemConfiguration implements Configuration
     {
         self::registerAnnotationAutoloader($rootPathToSearchConfigurationFor);
 
+        $cachedVersion = self::getCachedVersion($applicationConfiguration);
+        if ($cachedVersion) {
+            return $cachedVersion;
+        }
+
         return self::prepareWithModuleRetrievingService(
             $rootPathToSearchConfigurationFor,
             new AnnotationModuleRetrievingService(
@@ -572,25 +577,40 @@ final class MessagingSystemConfiguration implements Configuration
     public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration): Configuration
     {
         $cacheDirectoryPath = $applicationConfiguration->getCacheDirectoryPath();
-        $messagingSystemCachePath = $cacheDirectoryPath . DIRECTORY_SEPARATOR . "messaging_system";
 
-        if (!$cacheDirectoryPath || !file_exists($messagingSystemCachePath)) {
-            if ($cacheDirectoryPath) {
-                @mkdir($cacheDirectoryPath, 0777, true);
-                Assert::isTrue(is_writable($cacheDirectoryPath), "Not enough permissions to write into cache directory {$cacheDirectoryPath}");
-            }
+        $cachedVersion = self::getCachedVersion($applicationConfiguration);
+        if ($cachedVersion) {
+            return $cachedVersion;
+        }
 
-            $messagingSystemConfiguration = new self($rootProjectDirectoryPath, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $applicationConfiguration);
+        if ($cacheDirectoryPath) {
+            @mkdir($cacheDirectoryPath, 0777, true);
+            Assert::isTrue(is_writable($cacheDirectoryPath), "Not enough permissions to write into cache directory {$cacheDirectoryPath}");
+            self::cleanCache($applicationConfiguration);
+        }
 
-            if ($cacheDirectoryPath) {
-                $serializedMessagingSystemConfiguration = serialize($messagingSystemConfiguration);
-                file_put_contents($messagingSystemCachePath, $serializedMessagingSystemConfiguration);
-            }
-        }else {
-            $messagingSystemConfiguration = unserialize(file_get_contents($messagingSystemCachePath));
+        $messagingSystemConfiguration = new self($rootProjectDirectoryPath, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $applicationConfiguration);
+
+        if ($cacheDirectoryPath) {
+            $serializedMessagingSystemConfiguration = serialize($messagingSystemConfiguration);
+            file_put_contents($cacheDirectoryPath . DIRECTORY_SEPARATOR . "messaging_system", $serializedMessagingSystemConfiguration);
         }
 
         return $messagingSystemConfiguration;
+    }
+
+    private static function getCachedVersion(ApplicationConfiguration $applicationConfiguration) : ?MessagingSystemConfiguration
+    {
+        if (!$applicationConfiguration->getCacheDirectoryPath()) {
+            return null;
+        }
+
+        $messagingSystemCachePath = $applicationConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR . "messaging_system";
+        if (file_exists($messagingSystemCachePath)) {
+            return unserialize(file_get_contents($messagingSystemCachePath));
+        }
+
+        return null;
     }
 
     /**
@@ -598,7 +618,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public static function cleanCache(ApplicationConfiguration $applicationConfiguration): void
+    private static function cleanCache(ApplicationConfiguration $applicationConfiguration): void
     {
         if ($applicationConfiguration->getCacheDirectoryPath()) {
             @mkdir($applicationConfiguration->getCacheDirectoryPath(), 0777, true);

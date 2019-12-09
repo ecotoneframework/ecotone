@@ -67,10 +67,10 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
     {
         $object = $referenceSearchService->get($this->referenceName);
 
-        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($object, $this->methodName);
+        $reflectionMethod = new \ReflectionMethod($object, $this->methodName);
 
-        if ($interfaceToCall->hasMoreThanOneParameter()) {
-            throw InvalidArgumentException::create("Converter should have only single parameter: {$interfaceToCall}");
+        if (count($reflectionMethod->getParameters()) !== 1) {
+            throw InvalidArgumentException::create("Converter should have only single parameter: {$reflectionMethod}");
         }
 
         return ReferenceServiceConverter::create(

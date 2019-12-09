@@ -626,7 +626,23 @@ final class MessagingSystemConfiguration implements Configuration
 
             Assert::isFalse(is_file($applicationConfiguration->getCacheDirectoryPath()), "Cache directory is file, should be directory");
 
-            array_map( 'unlink', array_filter((array) glob("{$applicationConfiguration->getCacheDirectoryPath()}/*") ) );
+            self::deleteFiles($applicationConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR, false);
+        }
+    }
+
+    private static function deleteFiles(string $target, bool $deleteDirectory) {
+        if(is_dir($target)){
+            $files = glob( $target . '*', GLOB_MARK );
+
+            foreach($files as $file){
+                self::deleteFiles($file, true);
+            }
+
+            if ($deleteDirectory) {
+                rmdir($target);
+            }
+        } elseif(is_file($target)) {
+            unlink($target);
         }
     }
 

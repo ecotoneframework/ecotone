@@ -191,6 +191,7 @@ class AggregateMessagingModule implements AnnotationModule
      */
     public function prepare(Configuration $configuration, array $moduleExtensions, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
+        $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
         $configuration->requireReferences($this->aggregateRepositoryReferenceNames);
 
         $inputChannelNames = [];
@@ -224,7 +225,7 @@ class AggregateMessagingModule implements AnnotationModule
 
             $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
             $parameterConverterAnnotations = $annotation->parameterConverters;
-            $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations, $registration);
+            $parameterConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignoreMessage);
 
 
             $endpointId = $registration->getAnnotationForMethod()->endpointId;
@@ -354,19 +355,21 @@ class AggregateMessagingModule implements AnnotationModule
      */
     private function registerAggregateCommandHandler(Configuration $configuration, array $aggregateRepositoryReferenceNames, AnnotationRegistration $registration, string $inputChannelName, bool $dropMessageOnNotFound, string $endpointId): void
     {
+        $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
+
         /** @var CommandHandler $annotation */
         $annotation = $registration->getAnnotationForMethod();
 
         $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
         $parameterConverterAnnotations = $annotation->parameterConverters;
-        $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations, $registration);
+        $parameterConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignoreMessage);
 
         $handledMessageClassName = self::getMessageClassFor($registration);
 
         $redirectMethodConverters = [];
         $redirectOnFoundMethod = false;
         if ($annotation->redirectToOnAlreadyExists) {
-            $redirectMethodConverters = $this->getParameterConverters(InterfaceToCall::create($registration->getClassName(), $annotation->redirectToOnAlreadyExists), [], $registration);
+            $redirectMethodConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences(InterfaceToCall::create($registration->getClassName(), $annotation->redirectToOnAlreadyExists), [], $registration, $annotation->ignoreMessage);
             $redirectOnFoundMethod = $annotation->redirectToOnAlreadyExists;
         }
 
@@ -394,67 +397,6 @@ class AggregateMessagingModule implements AnnotationModule
                 )
             );
         }
-    }
-
-    /**
-     * @param InterfaceToCall $relatedClassInterface
-     * @param array $methodParameterConverterBuilders
-     * @param AnnotationRegistration $registration
-     *
-     * @return array
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     */
-    private function getParameterConverters(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotationRegistration $registration): array
-    {
-        $methodParameterConverterBuilders = $this->parameterConverterAnnotationFactory->createParameterConverters($relatedClassInterface, $methodParameterConverterBuilders);
-
-        if ($registration->getAnnotationForMethod()->ignoreMessage) {
-            if ($relatedClassInterface->hasNoParameters()) {
-                return [];
-            }
-
-            if ($relatedClassInterface->getFirstParameter()->getTypeDescriptor()->isNonCollectionArray() && !self::hasParameterConverterFor($methodParameterConverterBuilders, $relatedClassInterface->getFirstParameter())) {
-                $methodParameterConverterBuilders[] = AllHeadersBuilder::createWith($relatedClassInterface->getFirstParameterName());
-            }
-
-            foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
-                if (self::hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
-                    continue;
-                }
-
-                $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
-            }
-        }
-
-        if (!$methodParameterConverterBuilders) {
-            $methodParameterConverterBuilders = MethodInvoker::createDefaultMethodParameters($relatedClassInterface, $methodParameterConverterBuilders, false);
-        }
-
-        foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
-            if (self::hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
-                continue;
-            }
-
-            $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
-        }
-
-        return $methodParameterConverterBuilders;
-    }
-
-    /**
-     * @param $methodParameterConverterBuilders
-     * @param InterfaceParameter $interfaceParameter
-     * @return bool
-     */
-    private static function hasParameterConverterFor($methodParameterConverterBuilders, InterfaceParameter $interfaceParameter): bool
-    {
-        foreach ($methodParameterConverterBuilders as $methodParameterConverterBuilder) {
-            if ($methodParameterConverterBuilder->isHandling($interfaceParameter)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -488,11 +430,12 @@ class AggregateMessagingModule implements AnnotationModule
      */
     private function createServiceActivator(string $inputChannelName, AnnotationRegistration $registration, string $endpointId): ServiceActivatorBuilder
     {
+        $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
         $annotation = $registration->getAnnotationForMethod();
 
         $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
         $parameterConverterAnnotations = $annotation->parameterConverters;
-        $parameterConverters = $this->getParameterConverters($relatedClassInterface, $parameterConverterAnnotations, $registration);
+        $parameterConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignoreMessage);
 
         $messageHandlerBuilder = ServiceActivatorBuilder::create($registration->getReferenceName(), $registration->getMethodName())
             ->withInputChannelName($inputChannelName)

@@ -10,6 +10,8 @@ use Ecotone\Messaging\Annotation\Parameter\MessageParameter;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Annotation\Parameter\Reference;
 use Ecotone\Messaging\Annotation\Parameter\Value;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
@@ -20,6 +22,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressio
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class ParameterConverterAnnotationFactory
@@ -88,5 +93,67 @@ class ParameterConverterAnnotationFactory
         }
 
         return $parameterConverters;
+    }
+
+    /**
+     * @param InterfaceToCall $relatedClassInterface
+     * @param array $methodParameterConverterBuilders
+     * @param AnnotationRegistration $registration
+     *
+     * @param bool $ignoreMessage
+     * @return array
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotationRegistration $registration, bool $ignoreMessage): array
+    {
+        $methodParameterConverterBuilders = $this->createParameterConverters($relatedClassInterface, $methodParameterConverterBuilders);
+
+        if ($ignoreMessage) {
+            if ($relatedClassInterface->hasNoParameters()) {
+                return [];
+            }
+
+            if ($relatedClassInterface->getFirstParameter()->getTypeDescriptor()->isNonCollectionArray() && !self::hasParameterConverterFor($methodParameterConverterBuilders, $relatedClassInterface->getFirstParameter())) {
+                $methodParameterConverterBuilders[] = AllHeadersBuilder::createWith($relatedClassInterface->getFirstParameterName());
+            }
+
+            foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
+                if ($this->hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
+                    continue;
+                }
+
+                $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
+            }
+        }
+
+        if (!$methodParameterConverterBuilders) {
+            $methodParameterConverterBuilders = MethodInvoker::createDefaultMethodParameters($relatedClassInterface, $methodParameterConverterBuilders, false);
+        }
+
+        foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
+            if ($this->hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
+                continue;
+            }
+
+            $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
+        }
+
+        return $methodParameterConverterBuilders;
+    }
+
+    /**
+     * @param $methodParameterConverterBuilders
+     * @param InterfaceParameter $interfaceParameter
+     * @return bool
+     */
+    private function hasParameterConverterFor($methodParameterConverterBuilders, InterfaceParameter $interfaceParameter): bool
+    {
+        foreach ($methodParameterConverterBuilders as $methodParameterConverterBuilder) {
+            if ($methodParameterConverterBuilder->isHandling($interfaceParameter)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

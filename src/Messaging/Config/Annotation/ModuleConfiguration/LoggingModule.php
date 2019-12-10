@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
@@ -53,7 +54,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 "beforeLog",
                 InterfaceToCall::create(LoggingInterceptor::class, "logBefore"),
                 LoggingHandlerBuilder::createForBefore(),
-                -1,
+                ErrorChannelInterceptor::PRECEDENCE - 1,
                 "@(" .  LogBefore::class . ")"
             )
         );
@@ -62,7 +63,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 "afterLog",
                 InterfaceToCall::create(LoggingInterceptor::class, "logAfter"),
                 LoggingHandlerBuilder::createForAfter(),
-                -1,
+                ErrorChannelInterceptor::PRECEDENCE - 1,
                 "@(" . LogAfter::class . ")"
             )
         );
@@ -71,7 +72,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 "errorLog",
                 new ExceptionLoggingInterceptorBuilder(),
                 "logException",
-                -1,
+                ErrorChannelInterceptor::PRECEDENCE - 1,
                 "@(" . LogError::class . ")"
             )
         );

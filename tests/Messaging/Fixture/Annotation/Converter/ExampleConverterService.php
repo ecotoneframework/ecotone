@@ -14,8 +14,8 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 class ExampleConverterService
 {
    /**
-     * @param string[]|array $data
-     * @return \stdClass[]|iterable
+     * @param string[] $data
+     * @return \stdClass[]
      * @Converter()
      */
     public function convert(array $data) : iterable

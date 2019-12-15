@@ -20,7 +20,7 @@ final class ClassPropertyDefinition
      */
     private $name;
     /**
-     * @var TypeDescriptor
+     * @var Type
      */
     private $type;
     /**
@@ -43,13 +43,13 @@ final class ClassPropertyDefinition
     /**
      * PropertyDescriptor constructor.
      * @param string $name
-     * @param TypeDescriptor $type
+     * @param Type $type
      * @param bool $isNullable
      * @param string $visibility
      * @param bool $isStatic
      * @param object[] $annotations
      */
-    private function __construct(string $name, TypeDescriptor $type, bool $isNullable, string $visibility, bool $isStatic, iterable $annotations)
+    private function __construct(string $name, Type $type, bool $isNullable, string $visibility, bool $isStatic, iterable $annotations)
     {
         $this->name = $name;
         $this->type = $type;
@@ -61,45 +61,45 @@ final class ClassPropertyDefinition
 
     /**
      * @param string $name
-     * @param TypeDescriptor $typeDescriptor
+     * @param Type $typeDescriptor
      * @param bool $isNullable
      * @param bool $isStatic
      * @param iterable $annotations
      * @return ClassPropertyDefinition
      */
-    public static function createPublic(string $name, TypeDescriptor $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
+    public static function createPublic(string $name, Type $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
     {
         return new self($name, $typeDescriptor, $isNullable, self::PUBLIC_VISIBILITY, $isStatic, $annotations);
     }
 
     /**
      * @param string $name
-     * @param TypeDescriptor $typeDescriptor
+     * @param Type $typeDescriptor
      * @param bool $isNullable
      * @param bool $isStatic
      * @param iterable $annotations
      * @return ClassPropertyDefinition
      */
-    public static function createProtected(string $name, TypeDescriptor $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
+    public static function createProtected(string $name, Type $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
     {
         return new self($name, $typeDescriptor, $isNullable, self::PROTECTED_VISIBILITY, $isStatic, $annotations);
     }
 
     /**
      * @param string $name
-     * @param TypeDescriptor $typeDescriptor
+     * @param Type $typeDescriptor
      * @param bool $isNullable
      * @param bool $isStatic
      * @param iterable $annotations
      * @return ClassPropertyDefinition
      */
-    public static function createPrivate(string $name, TypeDescriptor $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
+    public static function createPrivate(string $name, Type $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
     {
         return new self($name, $typeDescriptor, $isNullable, self::PRIVATE_VISIBILITY, $isStatic, $annotations);
     }
 
 
-    public function hasAnnotation(TypeDescriptor $annotationClass) : bool
+    public function hasAnnotation(Type $annotationClass) : bool
     {
         foreach ($this->annotations as $annotation) {
             if (TypeDescriptor::createFromVariable($annotation)->equals($annotationClass)) {
@@ -110,7 +110,7 @@ final class ClassPropertyDefinition
         return false;
     }
 
-    public function getAnnotation(TypeDescriptor $annotationClass) : object
+    public function getAnnotation(Type $annotationClass) : object
     {
         foreach ($this->annotations as $annotation) {
             if (TypeDescriptor::createFromVariable($annotation)->equals($annotationClass)) {
@@ -130,9 +130,9 @@ final class ClassPropertyDefinition
     }
 
     /**
-     * @return TypeDescriptor
+     * @return Type
      */
-    public function getType(): TypeDescriptor
+    public function getType(): Type
     {
         return $this->type;
     }

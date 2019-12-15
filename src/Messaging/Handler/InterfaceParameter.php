@@ -19,7 +19,7 @@ final class InterfaceParameter
      */
     private $name;
     /**
-     * @var TypeDescriptor
+     * @var Type
      */
     private $typeDescriptor;
     /**
@@ -30,10 +30,10 @@ final class InterfaceParameter
     /**
      * TypeHint constructor.
      * @param string $name
-     * @param TypeDescriptor $typeDescriptor
+     * @param Type $typeDescriptor
      * @param bool $doesAllowNull
      */
-    private function __construct(string $name, TypeDescriptor $typeDescriptor, bool $doesAllowNull)
+    private function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull)
     {
         $this->name = $name;
         $this->typeDescriptor = $typeDescriptor;
@@ -42,43 +42,43 @@ final class InterfaceParameter
 
     /**
      * @param string $name
-     * @param TypeDescriptor $typeDescriptor
+     * @param Type $typeDescriptor
      * @return self
      */
-    public static function createNullable(string $name, TypeDescriptor $typeDescriptor) : self
+    public static function createNullable(string $name, Type $typeDescriptor) : self
     {
         return new self($name, $typeDescriptor, true);
     }
 
     /**
      * @param string $name
-     * @param TypeDescriptor $typeDescriptor
+     * @param Type $typeDescriptor
      * @return self
      */
-    public static function createNotNullable(string $name, TypeDescriptor $typeDescriptor) : self
+    public static function createNotNullable(string $name, Type $typeDescriptor) : self
     {
         return new self($name, $typeDescriptor, false);
     }
 
     /**
      * @param string $name
-     * @param TypeDescriptor $typeDescriptor
+     * @param Type $typeDescriptor
      * @param bool $doesAllowNull
      * @return self
      */
-    public static function create(string $name, TypeDescriptor $typeDescriptor, bool $doesAllowNull) : self
+    public static function create(string $name, Type $typeDescriptor, bool $doesAllowNull) : self
     {
         return new self($name, $typeDescriptor, $doesAllowNull);
     }
 
     /**
-     * @param TypeDescriptor $toCompare
+     * @param Type $toCompare
      * @return bool
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function canBePassedIn(TypeDescriptor $toCompare) : bool
+    public function canBePassedIn(Type $toCompare) : bool
     {
         return $toCompare->isCompatibleWith($this->typeDescriptor);
     }
@@ -87,7 +87,7 @@ final class InterfaceParameter
      * @param InterfaceParameter $interfaceParameter
      * @return bool
      */
-    public function hasSameTypeAs(InterfaceParameter $interfaceParameter) : bool
+    public function hasEqualTypeAs(InterfaceParameter $interfaceParameter) : bool
     {
         return $this->typeDescriptor->equals($interfaceParameter->typeDescriptor);
     }
@@ -117,9 +117,9 @@ final class InterfaceParameter
     }
 
     /**
-     * @return TypeDescriptor
+     * @return Type
      */
-    public function getTypeDescriptor() : TypeDescriptor
+    public function getTypeDescriptor() : Type
     {
         return $this->typeDescriptor;
     }

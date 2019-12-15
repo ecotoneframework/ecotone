@@ -44,6 +44,24 @@ class ServiceExpectingOneArgument
     }
 
     /**
+     * @param object $value
+     * @return \stdClass|string
+     */
+    public function withDifferentScalarOrObjectReturnType($value)
+    {
+        return $value;
+    }
+
+    /**
+     * @param $value
+     * @return \stdClass[]|array
+     */
+    public function withCollectionAndArrayReturnType($value)
+    {
+        return $value;
+    }
+
+    /**
      * @inheritDoc
      */
     public function wasCalled(): bool

@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Conversion\ArrayToJson;
 
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**

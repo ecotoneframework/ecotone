@@ -9,6 +9,7 @@ use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\AspectWithoutMethodInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\BaseInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample;
 
@@ -28,6 +29,14 @@ class PointcutTest extends TestCase
     {
         $this->itShouldCut(
             CallMultipleUnorderedArgumentsInvocationInterceptorExample::class,
+            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+        );
+    }
+
+    public function test_pointing_to_abstract_class()
+    {
+        $this->itShouldCut(
+            BaseInterceptorExample::class,
             InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
         );
     }

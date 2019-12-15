@@ -107,11 +107,13 @@ class Pointcut
      * @return bool
      * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws \ReflectionException
      */
     private function isRelatedClass(string $expression, InterfaceToCall $interfaceToCall) : bool
     {
         if (TypeDescriptor::isItTypeOfExistingClassOrInterface($expression)) {
-            return $interfaceToCall->getInterfaceType()->equals(TypeDescriptor::create($expression));
+            return $interfaceToCall->getInterfaceType()->isCompatibleWith(TypeDescriptor::create($expression));
         }
 
         return false;

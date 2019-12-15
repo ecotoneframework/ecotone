@@ -69,4 +69,28 @@ class ReferenceServiceConverterBuilderTest extends TestCase
             ])
         );
     }
+
+    public function test_throwing_exception_if_converter_containing_union_source_type()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ReferenceServiceConverterBuilder::create(
+            ServiceExpectingTwoArguments::class,
+            "withReturnValue",
+            TypeDescriptor::create("array|array<string>"),
+            TypeDescriptor::create("array<\stdClass>")
+        );
+    }
+
+    public function test_throwing_exception_if_converter_containing_union_target_type()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ReferenceServiceConverterBuilder::create(
+            ServiceExpectingTwoArguments::class,
+            "withReturnValue",
+            TypeDescriptor::create("array<string>"),
+            TypeDescriptor::create("array|array<\stdClass>")
+        );
+    }
 }

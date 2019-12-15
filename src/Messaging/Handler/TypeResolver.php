@@ -214,7 +214,7 @@ class TypeResolver
         $statements = $this->getClassUseStatements($analyzedClass);
 
         if (!$parameterTypeHint) {
-            return TypeDescriptor::UNKNOWN;
+            return TypeDescriptor::ANYTHING;
         }
 
         $fullNames = [];
@@ -441,11 +441,11 @@ class TypeResolver
      * @param \ReflectionClass $analyzedClass
      * @param \ReflectionClass $declaringClass
      * @param \ReflectionProperty $reflectionProperty
-     * @return TypeDescriptor|null
+     * @return Type|null
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function getPropertyDocblockTypeHint(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionClass $declaringClass, \ReflectionProperty $reflectionProperty): ?TypeDescriptor
+    private function getPropertyDocblockTypeHint(\ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionClass $declaringClass, \ReflectionProperty $reflectionProperty): ?Type
     {
         $docComment = $reflectionProperty->getDocComment();
         preg_match_all(self::CLASS_PROPERTY_TYPE_HINT_REGEX, $docComment, $matchedDocBlockParameterTypes);
@@ -468,12 +468,12 @@ class TypeResolver
     /**
      * @param string $interfaceName
      * @param string $methodName
-     * @return TypeDescriptor
+     * @return Type
      * @throws TypeDefinitionException
      * @throws \ReflectionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function getReturnType(string $interfaceName, string $methodName): TypeDescriptor
+    public function getReturnType(string $interfaceName, string $methodName): Type
     {
         $analyzedClass = new \ReflectionClass($interfaceName);
         $reflectionMethod = $analyzedClass->getMethod($methodName);
@@ -532,18 +532,18 @@ class TypeResolver
      * @param string $className
      * @param AnnotationParser $annotationParser
      * @param \ReflectionProperty $property
-     * @param TypeDescriptor|null $docblockType
+     * @param Type|null $docblockType
      * @return ClassPropertyDefinition|null
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function createClassProperty(string $className, AnnotationParser $annotationParser, \ReflectionProperty $property, ?TypeDescriptor $docblockType)
+    private function createClassProperty(string $className, AnnotationParser $annotationParser, \ReflectionProperty $property, ?Type $docblockType)
     {
         $classProperty = null;
-        $type = $docblockType ? $docblockType : TypeDescriptor::createUnknownType();
+        $type = $docblockType ? $docblockType : TypeDescriptor::createAnythingType();
         $isNullable = true;
         if (version_compare(phpversion(), '7.4.0', '>=')) {
-            if ($type->isUnknown()) {
+            if ($type->isAnything()) {
                 $type = $property->hasType() ? TypeDescriptor::create($property->getType()->getName()) : $type;
             }
             $isNullable = $property->hasType() ? $property->getType()->allowsNull() : true;

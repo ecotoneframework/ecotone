@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -59,6 +60,7 @@ class CollectionConverter implements Converter
     public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
     {
         return $sourceType->isCollection() && $targetType->isCollection()
+            && $sourceType->isSingleTypeCollection() && $targetType->isSingleTypeCollection()
             && $this->converterForSingleType->matches(
                 $sourceType->resolveGenericTypes()[0], $sourceMediaType, $targetType->resolveGenericTypes()[0], $targetMediaType
             );

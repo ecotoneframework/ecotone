@@ -107,7 +107,7 @@ class MethodInvokerTest extends MessagingTest
      * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function test_not_changing_content_type_of_message_if_message_is_return()
+    public function test_not_changing_content_type_of_message_if_message_is_return_type()
     {
         $serviceExpectingOneArgument = ServiceExpectingMessageAndReturningMessage::create("test");
 
@@ -262,6 +262,105 @@ class MethodInvokerTest extends MessagingTest
                 ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(OrderConfirmation::class))
                 ->build(),
               $replyMessage
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_throwing_exception_if_cannot_convert_to_php_media_type()
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createWith([
+            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([])
+        ]);
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                new OrderProcessor(), 'processOrder',
+                MethodInvoker::createWith(new OrderProcessor(), 'processOrder', [
+                    PayloadBuilder::create('order')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $methodInvocation->processMessage(
+            MessageBuilder::withPayload(serialize(Order::create('1', "correct")))
+                ->setContentType(MediaType::createApplicationXPHPSerializedObject())
+                ->build()
+        );
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_choosing_one_of_compatible_return_union_type_when_first_is_correct()
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                new ServiceExpectingOneArgument(), 'withDifferentScalarOrObjectReturnType',
+                MethodInvoker::createWith(new ServiceExpectingOneArgument(), 'withDifferentScalarOrObjectReturnType', [
+                    PayloadBuilder::create('value')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
+
+        $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload(new \stdClass())->build());
+
+        $this->assertMessages(
+            MessageBuilder::withPayload(new \stdClass())
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(\stdClass::class))
+                ->build(),
+            $replyMessage
+        );
+    }
+
+    public function test_choosing_one_of_compatible_return_union_type_when_first_is_incorrect()
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                new ServiceExpectingOneArgument(), 'withDifferentScalarOrObjectReturnType',
+                MethodInvoker::createWith(new ServiceExpectingOneArgument(), 'withDifferentScalarOrObjectReturnType', [
+                    PayloadBuilder::create('value')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
+
+        $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload("test")->build());
+
+        $this->assertMessages(
+            MessageBuilder::withPayload("test")
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("string"))
+                ->build(),
+            $replyMessage
+        );
+    }
+
+    public function test_if_can_not_decide_return_type_make_use_resolved_from_return_value()
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                new ServiceExpectingOneArgument(), 'withCollectionAndArrayReturnType',
+                MethodInvoker::createWith(new ServiceExpectingOneArgument(), 'withCollectionAndArrayReturnType', [
+                    PayloadBuilder::create('value')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
+
+        $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload("test")->build());
+
+        $this->assertMessages(
+            MessageBuilder::withPayload("test")
+                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("string"))
+                ->build(),
+            $replyMessage
         );
     }
 

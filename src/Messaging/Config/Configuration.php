@@ -16,6 +16,7 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 
@@ -135,10 +136,10 @@ interface Configuration
     public function getRegisteredGateways() : array;
 
     /**
-     * @param TypeDescriptor $interfaceName
+     * @param Type $interfaceName
      * @return Configuration
      */
-    public function registerInternalGateway(TypeDescriptor $interfaceName) : Configuration;
+    public function registerInternalGateway(Type $interfaceName) : Configuration;
 
     /**
      * @return bool

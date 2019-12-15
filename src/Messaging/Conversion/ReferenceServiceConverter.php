@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
 
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 
@@ -22,11 +23,11 @@ class ReferenceServiceConverter implements Converter
      */
     private $method;
     /**
-     * @var TypeDescriptor
+     * @var Type
      */
     private $sourceType;
     /**
-     * @var TypeDescriptor
+     * @var Type
      */
     private $targetType;
 
@@ -34,11 +35,11 @@ class ReferenceServiceConverter implements Converter
      * ReferenceConverter constructor.
      * @param object $object
      * @param string $method
-     * @param TypeDescriptor $sourceType
-     * @param TypeDescriptor $targetType
+     * @param Type $sourceType
+     * @param Type $targetType
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function __construct($object, string $method, TypeDescriptor $sourceType, TypeDescriptor $targetType)
+    private function __construct($object, string $method, Type $sourceType, Type $targetType)
     {
         Assert::isObject($object, "");
         $this->object = $object;

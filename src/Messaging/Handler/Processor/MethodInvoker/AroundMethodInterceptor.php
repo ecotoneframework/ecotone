@@ -161,7 +161,7 @@ class AroundMethodInterceptor
             }
 
             foreach ($methodCall->getMethodArguments() as $methodArgument) {
-                if ($methodArgument->hasSameTypeAs($parameter)) {
+                if ($methodArgument->hasEqualTypeAs($parameter)) {
                     $resolvedArgument = $methodArgument->value();
                 }
             }

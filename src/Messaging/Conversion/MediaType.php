@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -128,7 +129,7 @@ final class MediaType
      */
     public static function createApplicationXPHPObjectWithTypeParameter(string $type) : self
     {
-        if ($type === TypeDescriptor::UNKNOWN) {
+        if ($type === TypeDescriptor::ANYTHING) {
             return self::parseMediaType(self::APPLICATION_X_PHP);
         }
 
@@ -275,11 +276,11 @@ final class MediaType
     }
 
     /**
-     * @return TypeDescriptor
+     * @return Type
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function getTypeParameter() : TypeDescriptor
+    public function getTypeParameter() : Type
     {
         return TypeDescriptor::create($this->getParameter(self::TYPE_PARAMETER));
     }

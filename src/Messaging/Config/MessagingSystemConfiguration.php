@@ -38,6 +38,7 @@ use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
@@ -941,9 +942,9 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
-    public function registerInternalGateway(TypeDescriptor $interfaceName): Configuration
+    public function registerInternalGateway(Type $interfaceName): Configuration
     {
-        Assert::isTrue($interfaceName->isClass(), "Passed internal gateway must be class, passed: {$interfaceName->toString()}");
+        Assert::isTrue($interfaceName->isClassOrInterface(), "Passed internal gateway must be class, passed: {$interfaceName->toString()}");
 
         $this->gatewayClassesToGenerateProxies[] = $interfaceName->toString();
 

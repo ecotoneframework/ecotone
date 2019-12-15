@@ -21,6 +21,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
@@ -381,28 +382,39 @@ final class MethodInvoker implements MessageProcessor
 
             $currentParameterMediaType = $isPayloadConverter ? $sourceMediaType : MediaType::createApplicationXPHPObject();
             $parameterType = $this->interfaceToCall->getParameterAtIndex($index)->getTypeDescriptor();
-            if ($this->canConvertParameter(
-                $sourceTypeDescriptor,
-                $currentParameterMediaType,
-                $parameterType,
-                $parameterMediaType
-            )) {
-                $data = $this->doConversion($data, $sourceTypeDescriptor, $currentParameterMediaType, $parameterType, $parameterMediaType);
-            } else if ($message->getHeaders()->containsKey(MessageHeaders::TYPE_ID)) {
-                $typeDescriptor = TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID));
-                if ($parameterType->isCompatibleWith($typeDescriptor)
-                    &&
-                    $this->canConvertParameter(
-                        $sourceTypeDescriptor,
-                        $currentParameterMediaType,
-                        $typeDescriptor,
-                        $parameterMediaType
-                    )
-                ) {
-                    $data = $this->doConversion($data, $sourceTypeDescriptor, $currentParameterMediaType, $typeDescriptor, $parameterMediaType);
+
+            if (!($currentParameterMediaType->isCompatibleWith($parameterMediaType) && $sourceTypeDescriptor->isCompatibleWith($parameterType))) {
+                $convertedData = null;
+                if ($this->canConvertParameter(
+                    $sourceTypeDescriptor,
+                    $currentParameterMediaType,
+                    $parameterType,
+                    $parameterMediaType
+                )) {
+                    $convertedData = $this->doConversion($data, $sourceTypeDescriptor, $currentParameterMediaType, $parameterType, $parameterMediaType);
+                } else if ($message->getHeaders()->containsKey(MessageHeaders::TYPE_ID)) {
+                    $typeDescriptor = TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID));
+                    if ($parameterType->isCompatibleWith($typeDescriptor)
+                        &&
+                        $this->canConvertParameter(
+                            $sourceTypeDescriptor,
+                            $currentParameterMediaType,
+                            $typeDescriptor,
+                            $parameterMediaType
+                        )
+                    ) {
+                        $convertedData = $this->doConversion($data, $sourceTypeDescriptor, $currentParameterMediaType, $typeDescriptor, $parameterMediaType);
+                    }
+                }
+
+                if (!is_null($convertedData)) {
+                    $data = $convertedData;
+                }else {
+                    if (!$currentParameterMediaType->isCompatibleWith($parameterMediaType)) {
+                        throw InvalidArgumentException::create("Can not call {$this->interfaceToCall}. Lack of Media Type Converter for {$currentParameterMediaType}:{$sourceTypeDescriptor} to {$parameterMediaType}:{$parameterType}");
+                    }
                 }
             }
-
 
             $methodArguments[] = MethodArgument::createWith($interfaceParameter, $data);
         }
@@ -411,15 +423,13 @@ final class MethodInvoker implements MessageProcessor
     }
 
     /**
-     * @param TypeDescriptor $requestType
+     * @param Type $requestType
      * @param MediaType $requestMediaType
-     * @param TypeDescriptor $parameterType
+     * @param Type $parameterType
      * @param MediaType $parameterMediaType
      * @return bool
-     * @throws InvalidArgumentException
-     * @throws MessagingException
      */
-    private function canConvertParameter(TypeDescriptor $requestType, MediaType $requestMediaType, TypeDescriptor $parameterType, MediaType $parameterMediaType): bool
+    private function canConvertParameter(Type $requestType, MediaType $requestMediaType, Type $parameterType, MediaType $parameterMediaType): bool
     {
         return $this->conversionService->canConvert(
             $requestType,
@@ -431,15 +441,13 @@ final class MethodInvoker implements MessageProcessor
 
     /**
      * @param $data
-     * @param TypeDescriptor $requestType
+     * @param Type $requestType
      * @param MediaType $requestMediaType
-     * @param TypeDescriptor $parameterType
+     * @param Type $parameterType
      * @param MediaType $parameterMediaType
      * @return mixed
-     * @throws InvalidArgumentException
-     * @throws MessagingException
      */
-    private function doConversion($data, TypeDescriptor $requestType, MediaType $requestMediaType, TypeDescriptor $parameterType, MediaType $parameterMediaType)
+    private function doConversion($data, Type $requestType, MediaType $requestMediaType, Type $parameterType, MediaType $parameterMediaType)
     {
         $data = $this->conversionService->convert(
             $data,

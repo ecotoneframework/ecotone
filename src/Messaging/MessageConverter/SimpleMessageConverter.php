@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\MessageConverter;
 
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
@@ -34,7 +35,7 @@ class SimpleMessageConverter implements MessageConverter
     /**
      * @inheritDoc
      */
-    public function fromMessage(Message $message, TypeDescriptor $targetType)
+    public function fromMessage(Message $message, Type $targetType)
     {
 /**
 Object content = null;

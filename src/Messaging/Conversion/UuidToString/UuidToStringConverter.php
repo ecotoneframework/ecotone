@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion\UuidToString;
+use Ecotone\Messaging\Handler\Type;
 use Ramsey\Uuid\UuidInterface;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;

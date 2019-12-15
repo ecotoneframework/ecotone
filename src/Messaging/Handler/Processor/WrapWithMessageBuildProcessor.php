@@ -9,6 +9,8 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\UnionTypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -70,8 +72,31 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
             return $result;
         }
 
+        $returnValueType = TypeDescriptor::createFromVariable($result);
+        /** @var UnionTypeDescriptor $returnType */
+        $returnType = $this->interfaceToCall->getReturnType();
+        if ($returnType->isUnionType()) {
+            $foundUnionType = null;
+            foreach ($returnType->getUnionTypes() as $type) {
+                if ($type->equals($returnValueType)) {
+                    $foundUnionType = $type;
+                    break;
+                }
+            }
+            if (!$foundUnionType) {
+                foreach ($returnType->getUnionTypes() as $type) {
+                    if ($type->isCompatibleWith($returnValueType)) {
+                        $foundUnionType = $type;
+                        break;
+                    }
+                }
+            }
+
+            $returnType = $foundUnionType ?? $returnValueType;
+        }
+
         return MessageBuilder::fromMessage($message)
-            ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($this->interfaceToCall->getReturnType()->toString()))
+            ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($returnType->toString()))
             ->setPayload($result)
             ->build();
     }

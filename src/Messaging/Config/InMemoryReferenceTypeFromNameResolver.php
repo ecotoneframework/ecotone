@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config;
 
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -74,7 +75,7 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
     /**
      * @inheritDoc
      */
-    public function resolve(string $referenceName): TypeDescriptor
+    public function resolve(string $referenceName): Type
     {
         if ($this->referenceSearchService) {
             return TypeDescriptor::createFromVariable($this->referenceSearchService->get($referenceName));

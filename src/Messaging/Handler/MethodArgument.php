@@ -53,9 +53,9 @@ class MethodArgument
      * @param InterfaceParameter $interfaceParameterToCompare
      * @return bool
      */
-    public function hasSameTypeAs(InterfaceParameter $interfaceParameterToCompare) : bool
+    public function hasEqualTypeAs(InterfaceParameter $interfaceParameterToCompare) : bool
     {
-        return $this->getInterfaceParameter()->hasSameTypeAs($interfaceParameterToCompare);
+        return $this->getInterfaceParameter()->hasEqualTypeAs($interfaceParameterToCompare);
     }
 
     /**
@@ -64,15 +64,6 @@ class MethodArgument
     public function getInterfaceParameter(): InterfaceParameter
     {
         return $this->parameter;
-    }
-
-    /**
-     * @param TypeDescriptor $typeDescriptor
-     * @return bool
-     */
-    public function hasTypeHint(TypeDescriptor $typeDescriptor) : bool
-    {
-        return $this->parameter->getTypeDescriptor()->equals($typeDescriptor);
     }
 
     /**

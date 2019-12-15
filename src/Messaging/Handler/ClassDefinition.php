@@ -15,7 +15,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 class ClassDefinition
 {
     /**
-     * @var TypeDescriptor
+     * @var Type
      */
     private $classDescriptor;
     /**
@@ -33,16 +33,16 @@ class ClassDefinition
 
     /**
      * ClassDefinition constructor.
-     * @param TypeDescriptor $classDescriptor
+     * @param Type $classDescriptor
      * @param ClassPropertyDefinition[] $properties
      * @param object[] $annotations
      * @param string[] $publicMethodNames
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function __construct(TypeDescriptor $classDescriptor, iterable $properties, iterable $annotations, array $publicMethodNames)
+    private function __construct(Type $classDescriptor, iterable $properties, iterable $annotations, array $publicMethodNames)
     {
-        Assert::isTrue($classDescriptor->isClass(), "Cannot create class definition from non class " . $classDescriptor->toString());
+        Assert::isTrue($classDescriptor->isClassOrInterface(), "Cannot create class definition from non class " . $classDescriptor->toString());
 
         $this->classDescriptor = $classDescriptor;
         $this->properties = $properties;
@@ -51,14 +51,14 @@ class ClassDefinition
     }
 
     /**
-     * @param TypeDescriptor $classType
+     * @param Type $classType
      * @return ClassDefinition
      * @throws TypeDefinitionException
      * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws \ReflectionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createFor(TypeDescriptor $classType) : self
+    public static function createFor(Type $classType) : self
     {
         $annotationParser = InMemoryAnnotationRegistrationService::createFrom([$classType->toString()]);
         $typeResolver = TypeResolver::create();
@@ -74,7 +74,7 @@ class ClassDefinition
     }
 
     /**
-     * @param TypeDescriptor $classType
+     * @param Type $classType
      * @param AnnotationParser $annotationParser
      * @return ClassDefinition
      * @throws TypeDefinitionException
@@ -82,7 +82,7 @@ class ClassDefinition
      * @throws \ReflectionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationParser $annotationParser)
+    public static function createUsingAnnotationParser(Type $classType, AnnotationParser $annotationParser)
     {
         $typeResolver = TypeResolver::createWithAnnotationParser($annotationParser);
 
@@ -130,10 +130,10 @@ class ClassDefinition
     }
 
     /**
-     * @param TypeDescriptor $annotationClass
+     * @param Type $annotationClass
      * @return array
      */
-    public function getPropertiesWithAnnotation(TypeDescriptor $annotationClass)
+    public function getPropertiesWithAnnotation(Type $annotationClass)
     {
         $propertiesWithAnnotation = [];
         foreach ($this->properties as $property) {

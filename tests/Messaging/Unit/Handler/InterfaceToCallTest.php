@@ -207,7 +207,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("random",TypeDescriptor::create( TypeDescriptor::INTEGER)),
+            InterfaceParameter::createNullable("random",TypeDescriptor::create( TypeDescriptor::INTEGER . "|" . TypeDescriptor::ARRAY)),
             $interfaceToCall->getParameterWithName("random")
         );
     }
@@ -223,7 +223,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("phones", TypeDescriptor::create(TypeDescriptor::ARRAY)),
+            InterfaceParameter::createNullable("phones", TypeDescriptor::create( "array|array<string>")),
             $interfaceToCall->getParameterWithName("phones")
         );
     }
@@ -239,7 +239,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("email", TypeDescriptor::create(Email::class)),
+            InterfaceParameter::createNullable("email", TypeDescriptor::create(Email::class . "|" . Favourite::class)),
             $interfaceToCall->getParameterWithName("email")
         );
     }
@@ -256,7 +256,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("productId", TypeDescriptor::create(\stdClass::class)),
+            InterfaceParameter::createNullable("productId", TypeDescriptor::create(\stdClass::class . "|" . TypeDescriptor::OBJECT)),
             $interfaceToCall->getParameterWithName("productId")
         );
     }
@@ -423,7 +423,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("surname", TypeDescriptor::create(TypeDescriptor::UNKNOWN)),
+            InterfaceParameter::createNullable("surname", TypeDescriptor::create(TypeDescriptor::ANYTHING)),
             $interfaceToCall->getParameterWithName("surname")
         );
     }
@@ -440,7 +440,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("address", TypeDescriptor::create(TypeDescriptor::UNKNOWN)),
+            InterfaceParameter::createNullable("address", TypeDescriptor::create(TypeDescriptor::ANYTHING)),
             $interfaceToCall->getParameterWithName("address")
         );
     }

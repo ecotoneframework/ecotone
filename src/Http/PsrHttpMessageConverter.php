@@ -11,6 +11,7 @@ use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
@@ -61,7 +62,7 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
     /**
      * @inheritDoc
      */
-    public function fromMessage(Message $message, TypeDescriptor $targetType)
+    public function fromMessage(Message $message, Type $targetType)
     {
         return null;
         //http://www.jcombat.com/spring/understanding-http-message-converters-in-spring-framework

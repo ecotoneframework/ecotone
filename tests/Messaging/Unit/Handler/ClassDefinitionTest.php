@@ -63,7 +63,7 @@ class ClassDefinitionTest extends TestCase
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPublic("extendedName", TypeDescriptor::createUnknownType(), true, false, []),
+            ClassPropertyDefinition::createPublic("extendedName", TypeDescriptor::createAnythingType(), true, false, []),
             $classDefinition->getProperty("extendedName")
         );
     }

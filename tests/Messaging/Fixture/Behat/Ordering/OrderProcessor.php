@@ -22,7 +22,7 @@ class OrderProcessor
     }
 
     /**
-     * @param Uuid[]|array $ids
+     * @param Uuid[] $ids
      * @return OrderConfirmation[]|array
      * @throws \Ecotone\Messaging\MessagingException
      */

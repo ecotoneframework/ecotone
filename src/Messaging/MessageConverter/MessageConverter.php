@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\MessageConverter;
 
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -20,11 +21,11 @@ interface MessageConverter
      * If the converter does not support the specified media type or cannot perform the conversion, it should return null.
      *
      * @param Message $message
-     * @param TypeDescriptor $targetType
+     * @param Type $targetType
      *
      * @return mixed the result of the conversion, or null if the converter cannot perform the conversion
      */
-    public function fromMessage(Message $message, TypeDescriptor $targetType);
+    public function fromMessage(Message $message, Type $targetType);
 
     /**
      * Create a Message whose payload is the result of converting the given payload Object to serialized form. The optional MessageHeaders parameter may contain a MessageHeaders::CONTENT_TYPE header to specify the target media type for the conversion and it may contain additional headers to be added to the message.

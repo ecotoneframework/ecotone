@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\MessageConverter;
 
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
@@ -36,7 +37,7 @@ class GenericMessageConverter implements MessageConverter
     /**
      * @inheritDoc
      */
-    public function fromMessage(Message $message, TypeDescriptor $targetType)
+    public function fromMessage(Message $message, Type $targetType)
     {
 
     }

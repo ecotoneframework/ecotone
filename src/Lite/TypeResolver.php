@@ -4,6 +4,7 @@ namespace Ecotone\Lite;
 
 use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Container;
@@ -32,11 +33,11 @@ class TypeResolver implements ReferenceTypeFromNameResolver
 
     /**
      * @param string $referenceName
-     * @return TypeDescriptor
+     * @return Type
      * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function resolve(string $referenceName): TypeDescriptor
+    public function resolve(string $referenceName): Type
     {
         if (!$this->container->has($referenceName)) {
             throw ReferenceNotFoundException::create("Reference {$referenceName} was not found");

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\MessageConverter;
 
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
@@ -23,7 +24,7 @@ class FakeMessageConverter implements MessageConverter
     /**
      * @inheritDoc
      */
-    public function fromMessage(Message $message, TypeDescriptor $targetType)
+    public function fromMessage(Message $message, Type $targetType)
     {
         Assert::isTrue(is_string($message->getPayload()), "Wrong message payload conversion: {$message->getPayload()} " . TypeDescriptor::createFromVariable($message->getPayload()));
 

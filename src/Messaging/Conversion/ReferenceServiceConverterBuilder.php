@@ -6,7 +6,9 @@ namespace Ecotone\Messaging\Conversion;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
@@ -25,11 +27,11 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
      */
     private $methodName;
     /**
-     * @var TypeDescriptor
+     * @var Type
      */
     private $sourceType;
     /**
-     * @var TypeDescriptor
+     * @var Type
      */
     private $targetType;
 
@@ -37,11 +39,14 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
      * ReferenceConverter constructor.
      * @param string $referenceName
      * @param string $method
-     * @param TypeDescriptor $sourceType
-     * @param TypeDescriptor $targetType
+     * @param Type $sourceType
+     * @param Type $targetType
      */
-    private function __construct(string $referenceName, string $method, TypeDescriptor $sourceType, TypeDescriptor $targetType)
+    private function __construct(string $referenceName, string $method, Type $sourceType, Type $targetType)
     {
+        Assert::isFalse($sourceType->isUnionType(), "Source type for converter cannot be union type, {$sourceType} given for {$referenceName}:{$method}.");
+        Assert::isFalse($targetType->isUnionType(), "Source type for converter cannot be union type, {$targetType} given for {$referenceName}:{$method}.");
+
         $this->referenceName = $referenceName;
         $this->methodName = $method;
         $this->sourceType = $sourceType;
@@ -51,11 +56,11 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
     /**
      * @param string $referenceName
      * @param string $method
-     * @param TypeDescriptor $sourceType
-     * @param TypeDescriptor $targetType
+     * @param Type $sourceType
+     * @param Type $targetType
      * @return ReferenceServiceConverterBuilder
      */
-    public static function create(string $referenceName, string $method, TypeDescriptor $sourceType, TypeDescriptor $targetType) : self
+    public static function create(string $referenceName, string $method, Type $sourceType, Type $targetType) : self
     {
         return new self($referenceName, $method, $sourceType, $targetType);
     }

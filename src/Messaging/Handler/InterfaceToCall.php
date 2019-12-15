@@ -128,12 +128,12 @@ class InterfaceToCall
     }
 
     /**
-     * @param TypeDescriptor $className
+     * @param Type $className
      * @return bool
      * @throws TypeDefinitionException
      * @throws MessagingException
      */
-    public function hasMethodAnnotation(TypeDescriptor $className): bool
+    public function hasMethodAnnotation(Type $className): bool
     {
         foreach ($this->methodAnnotations as $methodAnnotation) {
             if (TypeDescriptor::createFromVariable($methodAnnotation)->equals($className)) {
@@ -145,12 +145,12 @@ class InterfaceToCall
     }
 
     /**
-     * @param TypeDescriptor $className
+     * @param Type $className
      * @return bool
      * @throws TypeDefinitionException
      * @throws MessagingException
      */
-    public function hasClassAnnotation(TypeDescriptor $className): bool
+    public function hasClassAnnotation(Type $className): bool
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {
             if (TypeDescriptor::createFromVariable($classAnnotation)->equals($className)) {
@@ -162,11 +162,11 @@ class InterfaceToCall
     }
 
     /**
-     * @param TypeDescriptor $className
+     * @param Type $className
      * @return object
      * @throws MessagingException
      */
-    public function getClassAnnotation(TypeDescriptor $className)
+    public function getClassAnnotation(Type $className)
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {
             if (TypeDescriptor::createFromVariable($classAnnotation)->equals($className)) {
@@ -178,11 +178,11 @@ class InterfaceToCall
     }
 
     /**
-     * @param TypeDescriptor $className
+     * @param Type $className
      * @return object
      * @throws MessagingException
      */
-    public function getMethodAnnotation(TypeDescriptor $className)
+    public function getMethodAnnotation(Type $className)
     {
         foreach ($this->methodAnnotations as $methodAnnotation) {
             if (TypeDescriptor::createFromVariable($methodAnnotation)->equals($className)) {
@@ -210,9 +210,9 @@ class InterfaceToCall
     }
 
     /**
-     * @return TypeDescriptor
+     * @return Type
      */
-    public function getReturnType(): TypeDescriptor
+    public function getReturnType(): Type
     {
         return $this->returnType;
     }
@@ -341,7 +341,7 @@ class InterfaceToCall
      */
     public function isReturnTypeUnknown(): bool
     {
-        return $this->getReturnType()->isUnknown();
+        return $this->getReturnType()->isAnything();
     }
 
     /**
@@ -353,9 +353,9 @@ class InterfaceToCall
     }
 
     /**
-     * @return TypeDescriptor
+     * @return Type
      */
-    public function getInterfaceType() : TypeDescriptor
+    public function getInterfaceType() : Type
     {
         return $this->interfaceType;
     }

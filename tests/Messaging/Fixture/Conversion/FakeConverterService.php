@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -29,10 +30,10 @@ class FakeConverterService implements Converter
     /**
      * FakeConverterService constructor.
      * @param mixed $data
-     * @param TypeDescriptor $typeDescriptor
+     * @param Type $typeDescriptor
      * @param MediaType $mediaType
      */
-    private function __construct($data, TypeDescriptor $typeDescriptor, MediaType $mediaType)
+    private function __construct($data, Type $typeDescriptor, MediaType $mediaType)
     {
         $this->data = $data;
         $this->typeDescriptor = $typeDescriptor;

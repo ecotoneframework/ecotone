@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -46,22 +47,6 @@ class MethodCall
     public static function createWith(array $methodArguments, bool $canReplaceArguments) : self
     {
         return new self($methodArguments, $canReplaceArguments);
-    }
-
-    /**
-     * @param TypeDescriptor $typeHint
-     * @return MethodArgument[]
-     */
-    public function getArgumentsWithTypeHint(TypeDescriptor $typeHint) : array
-    {
-        $methodArguments = [];
-        foreach ($this->methodArguments as $methodArgument) {
-            if ($methodArgument->hasTypeHint($typeHint)) {
-                $methodArguments[] = $methodArgument;
-            }
-        }
-
-        return $methodArguments;
     }
 
     /**

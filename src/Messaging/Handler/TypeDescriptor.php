@@ -555,6 +555,17 @@ final class TypeDescriptor implements Type
     {
         return interface_exists($this->type);
     }
+    
+    public function isAbstractClass() : bool
+    {
+        if (!$this->isClassOrInterface()) {
+            return false;
+        }
+
+        $reflectionClass = new \ReflectionClass($this->type);
+
+        return $reflectionClass->isAbstract();
+    }
 
     /**
      * @return bool

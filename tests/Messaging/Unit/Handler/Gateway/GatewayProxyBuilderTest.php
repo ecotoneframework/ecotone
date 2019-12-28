@@ -224,6 +224,19 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
+    public function test_throwing_exception_if_two_payload_converters_passed()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceSendOnlyWithTwoArguments::class, 'sendMail', "requestChannel");
+        $gatewayProxyBuilder->withParameterConverters(
+            [
+                GatewayPayloadBuilder::create('content'),
+                GatewayPayloadBuilder::create('personId')
+            ]
+        );
+    }
+
     public function test_executing_with_multiple_converters_for_single_parameter_interface()
     {
         $messageHandler     = StatefulHandler::create();

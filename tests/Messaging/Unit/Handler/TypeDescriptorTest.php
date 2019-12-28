@@ -7,6 +7,7 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\MessagingException;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -311,6 +312,12 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertTrue(TypeDescriptor::create(MessageHandler::class)->isInterface());
         $this->assertFalse(TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isInterface());
+    }
+
+    public function test_is_abstract_class()
+    {
+        $this->assertTrue(TypeDescriptor::create(MessagingException::class)->isAbstractClass());
+        $this->assertFalse(TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isAbstractClass());
     }
 
     /**

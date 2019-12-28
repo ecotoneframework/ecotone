@@ -6,6 +6,8 @@ namespace Ecotone\Messaging\Handler\Gateway;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -213,13 +215,18 @@ class GatewayProxyBuilder implements GatewayBuilder
     }
 
     /**
-     * @param array $methodArgumentConverters
+     * @param GatewayParameterConverterBuilder[] $methodArgumentConverters
      * @return GatewayProxyBuilder
      * @throws MessagingException
      */
     public function withParameterConverters(array $methodArgumentConverters): self
     {
         Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverterBuilder::class);
+        $amount = 0;
+        foreach ($methodArgumentConverters as $methodArgumentConverter) {
+            $amount += $methodArgumentConverter instanceof GatewayPayloadBuilder || $methodArgumentConverter instanceof GatewayPayloadExpressionBuilder;
+        }
+        Assert::isTrue($amount <= 1, "Can't create gateway {$this} with two Payload converters");
 
         $this->methodArgumentConverters = $methodArgumentConverters;
 

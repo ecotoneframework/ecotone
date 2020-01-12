@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -52,7 +53,11 @@ class GatewayPayloadConverter implements GatewayParameterConverter
      */
     public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
-        $messageBuilder->setContentTypeIfAbsent(MediaType::createApplicationXPHPObjectWithTypeParameter($methodArgument->getInterfaceParameter()->getTypeHint()));
+        $messageBuilder->setContentTypeIfAbsent(MediaType::createApplicationXPHPObjectWithTypeParameter(
+            $methodArgument->getInterfaceParameter()->getTypeDescriptor()->isUnionType()
+                ? TypeDescriptor::createFromVariable($methodArgument->value())->getTypeHint()
+                : $methodArgument->getInterfaceParameter()->getTypeHint()
+        ));
 
         return $messageBuilder->setPayload($methodArgument->value());
     }

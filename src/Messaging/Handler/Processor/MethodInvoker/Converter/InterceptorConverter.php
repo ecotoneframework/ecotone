@@ -65,7 +65,7 @@ class InterceptorConverter implements ParameterConverter
     public function isHandling(InterfaceParameter $parameter): bool
     {
         return
-            $parameter->canBePassedIn(TypeDescriptor::create(InterfaceToCall::class))
+            $parameter->getTypeDescriptor()->equals(TypeDescriptor::create(InterfaceToCall::class))
             || $this->interceptedInterface->hasMethodAnnotation($parameter->getTypeDescriptor())
             || $this->interceptedInterface->hasClassAnnotation($parameter->getTypeDescriptor());
     }

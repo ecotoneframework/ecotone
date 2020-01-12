@@ -3,10 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use Ecotone\Messaging\ContextualPollableChannel;
 use Ecotone\Messaging\Endpoint\EntrypointGateway;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
-use Ecotone\Messaging\Endpoint\StoppableConsumer;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Scheduling\TaskExecutor;
@@ -31,30 +29,30 @@ class PollerTaskExecutor implements TaskExecutor
      * @var EntrypointGateway
      */
     private $entrypointGateway;
-
     /**
-     * PollingConsumerTaskExecutor constructor.
-     * @param string $endpointId
-     * @param PollableChannel $pollableChannel
-     * @param EntrypointGateway $entrypointGateway
+     * @var string
      */
-    public function __construct(string $endpointId, PollableChannel $pollableChannel, EntrypointGateway $entrypointGateway)
+    private $pollableChannelName;
+
+
+    public function __construct(string $endpointId, string $pollableChannelName, PollableChannel $pollableChannel, EntrypointGateway $entrypointGateway)
     {
         $this->endpointId = $endpointId;
         $this->pollableChannel = $pollableChannel;
         $this->entrypointGateway = $entrypointGateway;
+        $this->pollableChannelName = $pollableChannelName;
     }
 
     public function execute(): void
     {
-        if ($this->pollableChannel instanceof ContextualPollableChannel) {
-            $message = $this->pollableChannel->receiveWithEndpointId($this->endpointId);
-        }else {
-            $message = $this->pollableChannel->receive();
-        }
-
+        $message = $this->pollableChannel->receive();
 
         if ($message) {
+            $message = MessageBuilder::fromMessage($message)
+                ->setHeader(MessageHeaders::POLLED_CHANNEL, $this->pollableChannel)
+                ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, $this->pollableChannelName)
+                ->build();
+
             $acknowledgementCallback = NullAcknowledgementCallback::create();
             if ($message->getHeaders()->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
                 $acknowledgementCallback = $message->getHeaders()->get(

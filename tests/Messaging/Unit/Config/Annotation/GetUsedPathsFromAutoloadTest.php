@@ -101,6 +101,20 @@ class GetUsedPathsFromAutoloadTest extends TestCase
         );
     }
 
+    public function test_ignoring_when_src_has_no_namespace_defined()
+    {
+        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+
+        $this->assertEquals(
+            [],
+            $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
+                [
+                    "psr-4" => ["" => "src"]
+                ]
+            )
+        );
+    }
+
     public function test_retrieving_when_more_than_one_target_directory()
     {
         $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();

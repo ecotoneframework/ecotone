@@ -45,7 +45,9 @@ class GetUsedPathsFromAutoload
             }
         }
 
-        return array_unique($namespaces);
+        return array_unique(array_filter($namespaces, function(string $namespace){
+            return trim($namespace) !== "";
+        }));
     }
 
     /**

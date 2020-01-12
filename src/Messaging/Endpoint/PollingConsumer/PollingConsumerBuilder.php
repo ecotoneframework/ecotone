@@ -151,7 +151,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             $messageHandlerBuilder->getEndpointId(),
             SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
             PeriodicTrigger::create(1, 0),
-            new PollerTaskExecutor($messageHandlerBuilder->getEndpointId(), $pollableChannel, $gateway)
+            new PollerTaskExecutor($messageHandlerBuilder->getEndpointId(), $messageHandlerBuilder->getInputMessageChannelName(), $pollableChannel, $gateway)
         );
 
         return $inboundChannelAdapter;

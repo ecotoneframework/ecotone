@@ -62,10 +62,6 @@ class MessageHeaders
      */
     const SEQUENCE_SIZE = 'sequenceSize';
     /**
-     * Indicates when a message is expired
-     */
-    const EXPIRATION_DATE = 'expirationDate';
-    /**
      * Message priority; for example within a PriorityChannel
      */
     const PRIORITY = 'priority';
@@ -74,6 +70,14 @@ class MessageHeaders
      */
     const DUPLICATE_MESSAGE = 'duplicateMessage';
     /**
+     * Time to live of message in milliseconds
+     */
+    const TIME_TO_LIVE = "timeToLive";
+    /**
+     * Delivery delay in milliseconds
+     */
+    const DELIVERY_DELAY = "deliveryDelay";
+    /**
      * Informs under which key acknowledge callback is stored for this consumer message
      */
     const CONSUMER_ACK_HEADER_LOCATION = "consumerAcknowledgeCallbackHeader";
@@ -81,6 +85,14 @@ class MessageHeaders
      * Consumer which started flow
      */
     const CONSUMER = "consumer";
+    /**
+     * Consumed channel
+     */
+    const POLLED_CHANNEL = "polledChannel";
+    /**
+     * Consumed channel name
+     */
+    const POLLED_CHANNEL_NAME = "polledChannelName";
 
     /**
      * @var array

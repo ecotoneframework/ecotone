@@ -135,3 +135,13 @@ Feature: Service activator
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\Calculating"
     When I calculate using inbound channel adapter
     Then result should be 15 in "resultChannel" channel
+
+  Scenario: Application exception handling
+    Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling"
+    When I order "coffee"
+    And I call pollable endpoint "orderService"
+    Then there should no error order
+    And I call pollable endpoint "orderService"
+    Then there should no error order
+    And I call pollable endpoint "orderService"
+    Then there should be error order "coffee"

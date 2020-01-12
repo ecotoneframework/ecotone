@@ -40,17 +40,7 @@ final class ErrorMessage implements Message
      */
     public static function create(MessagingException $messagingException) : self
     {
-        return new self($messagingException, MessageHeaders::createEmpty());
-    }
-
-    /**
-     * @param MessagingException $messagingException
-     * @param MessageHeaders $messageHeaders
-     * @return ErrorMessage
-     */
-    public static function createWithHeaders(MessagingException $messagingException, MessageHeaders $messageHeaders) : self
-    {
-        return new self($messagingException, $messageHeaders);
+        return new self($messagingException, $messagingException->getFailedMessage() ? $messagingException->getFailedMessage()->getHeaders() : MessageHeaders::createEmpty());
     }
 
     /**

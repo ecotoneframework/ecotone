@@ -6,14 +6,12 @@ namespace Ecotone\Messaging\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use Ecotone\Lite\TypeResolver;
 use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
 use Ecotone\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
-use Ecotone\Messaging\Config\Lazy\LazyMessagingSystem;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\ConverterBuilder;
@@ -39,7 +37,6 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
@@ -143,6 +140,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var string
      */
     private $rootPathToSearchConfigurationFor;
+    /**
+     * @var ApplicationConfiguration
+     */
+    private $applicationConfiguration;
 
     /**
      * Only one instance at time
@@ -163,6 +164,7 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->isLazyConfiguration = !$applicationConfiguration->isFailingFast();
         $this->rootPathToSearchConfigurationFor = $rootPathToSearchConfigurationFor;
+        $this->applicationConfiguration = $applicationConfiguration;
 
         $extensionObjects[] = $applicationConfiguration;
         $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache());
@@ -227,7 +229,7 @@ final class MessagingSystemConfiguration implements Configuration
             $isRequired = true;
             if ($referenceName instanceof RequiredReference) {
                 $referenceName = $referenceName->getReferenceName();
-            }elseif ($referenceName instanceof OptionalReference) {
+            } elseif ($referenceName instanceof OptionalReference) {
                 $isRequired = false;
                 $referenceName = $referenceName->getReferenceName();
             }
@@ -239,7 +241,7 @@ final class MessagingSystemConfiguration implements Configuration
             if ($referenceName) {
                 if ($isRequired) {
                     $this->requiredReferences[] = $referenceName;
-                }else {
+                } else {
                     $this->optionalReferences[] = $referenceName;
                 }
             }
@@ -279,6 +281,15 @@ final class MessagingSystemConfiguration implements Configuration
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->messageHandlerBuilders);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->gatewayBuilders);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->channelAdapters);
+
+        if ($this->applicationConfiguration->getDefaultErrorChannel()) {
+            foreach ($this->messageHandlerBuilders as $endpointId => $messageHandlerBuilder) {
+                if (!array_key_exists($endpointId, $this->pollingMetadata)) {
+                    $this->pollingMetadata[] = PollingMetadata::create($endpointId)
+                        ->setErrorChannelName($this->applicationConfiguration->getDefaultErrorChannel());
+                }
+            }
+        }
     }
 
     /**
@@ -333,6 +344,12 @@ final class MessagingSystemConfiguration implements Configuration
                 } else {
                     $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = SimpleMessageChannelBuilder::createDirectMessageChannel($messageHandlerBuilder->getInputMessageChannelName());
                 }
+            }
+        }
+
+        foreach ($this->defaultChannelBuilders as $name => $defaultChannelBuilder) {
+            if (!array_key_exists($name, $this->channelBuilders)) {
+                $this->channelBuilders[$name] = $defaultChannelBuilder;
             }
         }
     }
@@ -564,6 +581,35 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
+     * @param string|null $rootPathToSearchConfigurationFor
+     * @throws InvalidArgumentException
+     * @throws MessagingException
+     */
+    private static function registerAnnotationAutoloader(?string $rootPathToSearchConfigurationFor): void
+    {
+        if ($rootPathToSearchConfigurationFor) {
+            $path = $rootPathToSearchConfigurationFor . '/vendor/autoload.php';
+            Assert::isTrue(file_exists($path), "Can't find autoload file on {$path}. Is autoload generated correctly?");
+            $loader = require $path;
+            AnnotationRegistry::registerLoader(array($loader, "loadClass"));
+        }
+    }
+
+    private static function getCachedVersion(ApplicationConfiguration $applicationConfiguration): ?MessagingSystemConfiguration
+    {
+        if (!$applicationConfiguration->getCacheDirectoryPath()) {
+            return null;
+        }
+
+        $messagingSystemCachePath = $applicationConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR . "messaging_system";
+        if (file_exists($messagingSystemCachePath)) {
+            return unserialize(file_get_contents($messagingSystemCachePath));
+        }
+
+        return null;
+    }
+
+    /**
      * @param string|null $rootProjectDirectoryPath
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
@@ -600,20 +646,6 @@ final class MessagingSystemConfiguration implements Configuration
         return $messagingSystemConfiguration;
     }
 
-    private static function getCachedVersion(ApplicationConfiguration $applicationConfiguration) : ?MessagingSystemConfiguration
-    {
-        if (!$applicationConfiguration->getCacheDirectoryPath()) {
-            return null;
-        }
-
-        $messagingSystemCachePath = $applicationConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR . "messaging_system";
-        if (file_exists($messagingSystemCachePath)) {
-            return unserialize(file_get_contents($messagingSystemCachePath));
-        }
-
-        return null;
-    }
-
     /**
      * @param ApplicationConfiguration $applicationConfiguration
      * @throws InvalidArgumentException
@@ -631,18 +663,19 @@ final class MessagingSystemConfiguration implements Configuration
         }
     }
 
-    private static function deleteFiles(string $target, bool $deleteDirectory) {
-        if(is_dir($target)){
-            $files = glob( $target . '*', GLOB_MARK );
+    private static function deleteFiles(string $target, bool $deleteDirectory)
+    {
+        if (is_dir($target)) {
+            $files = glob($target . '*', GLOB_MARK);
 
-            foreach($files as $file){
+            foreach ($files as $file) {
                 self::deleteFiles($file, true);
             }
 
             if ($deleteDirectory) {
                 rmdir($target);
             }
-        } elseif(is_file($target)) {
+        } elseif (is_file($target)) {
             unlink($target);
         }
     }
@@ -972,7 +1005,6 @@ final class MessagingSystemConfiguration implements Configuration
         return $this;
     }
 
-
     /**
      * Initialize messaging system from current configuration
      *
@@ -1062,20 +1094,5 @@ final class MessagingSystemConfiguration implements Configuration
     private function __clone()
     {
 
-    }
-
-    /**
-     * @param string|null $rootPathToSearchConfigurationFor
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     */
-    private static function registerAnnotationAutoloader(?string $rootPathToSearchConfigurationFor): void
-    {
-        if ($rootPathToSearchConfigurationFor) {
-            $path = $rootPathToSearchConfigurationFor . '/vendor/autoload.php';
-            Assert::isTrue(file_exists($path), "Can't find autoload file on {$path}. Is autoload generated correctly?");
-            $loader = require $path;
-            AnnotationRegistry::registerLoader(array($loader, "loadClass"));
-        }
     }
 }

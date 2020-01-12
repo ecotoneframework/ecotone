@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
 
 use Behat\Behat\Context\Context;
+use Behat\Behat\Tester\Exception\PendingException;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
@@ -24,6 +25,9 @@ use Ecotone\Modelling\QueryBus;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Assert;
 use Ramsey\Uuid\Uuid;
+use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\ErrorReceiver;
+use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\OrderGateway;
+use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\OrderService;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
 use Test\Ecotone\Modelling\Fixture\ProxyEventBusFromMessagingSystem;
@@ -70,6 +74,13 @@ class AnnotationBasedMessagingContext implements Context
                 ];
                 break;
             }
+            case "Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling": {
+                $objects = [
+                    ErrorReceiver::class => new ErrorReceiver(),
+                    OrderService::class => new OrderService()
+                ];
+                break;
+            }
             default: {
                 $objects = [
                     InboundCalculation::class => new InboundCalculation(),
@@ -83,6 +94,7 @@ class AnnotationBasedMessagingContext implements Context
         $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "ecotone_testing_behat_cache";
 
         $applicationConfiguration = ApplicationConfiguration::createWithDefaults()
+            ->withEnvironment("test")
             ->withCacheDirectoryPath($cacheDirectoryPath)
             ->withNamespaces([$namespace]);
 
@@ -173,6 +185,50 @@ class AnnotationBasedMessagingContext implements Context
     public function calendarShouldContainEventWithAppointmentId(int $appointmentId)
     {
         Assert::assertTrue(self::getQueryBus()->convertAndSend("doesCalendarContainAppointments", MediaType::APPLICATION_X_PHP, $appointmentId));
+    }
+
+    /**
+     * @When I order :order
+     */
+    public function iOrder(string $order)
+    {
+        /** @var OrderGateway $orderGateway */
+        $orderGateway = self::$messagingSystem->getGatewayByName(OrderGateway::class);
+
+        $orderGateway->order($order);
+    }
+
+    /**
+     * @When I call pollable endpoint :endpointId
+     */
+    public function iCallPollableEndpoint(string $endpointId)
+    {
+        self::$messagingSystem->runSeparatelyRunningEndpointBy($endpointId);
+    }
+
+    /**
+     * @Then there should no error order
+     */
+    public function thereShouldNoErrorOrder()
+    {
+        /** @var OrderGateway $orderGateway */
+        $orderGateway = self::$messagingSystem->getGatewayByName(OrderGateway::class);
+
+        $errorOrder = $orderGateway->getIncorrectOrder();
+        Assert::assertNull($errorOrder, "There should no error order, but found one {$errorOrder}");
+    }
+
+    /**
+     * @Then there should be error order :order
+     */
+    public function thereShouldBeErrorOrder(string $order)
+    {
+        /** @var OrderGateway $orderGateway */
+        $orderGateway = self::$messagingSystem->getGatewayByName(OrderGateway::class);
+
+        $errorOrder = $orderGateway->getIncorrectOrder();
+        Assert::assertNotNull($errorOrder, "Expected error order {$order}, but found none");
+        Assert::assertEquals($order, $errorOrder, "Expected error order {$order} got {$errorOrder}");
     }
 
     /**

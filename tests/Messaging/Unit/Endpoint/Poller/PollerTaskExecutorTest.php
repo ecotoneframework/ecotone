@@ -46,8 +46,7 @@ class PollerTaskExecutorTest extends TestCase
      */
     private function createPoller(QueueChannel $pollableChannel, MockObject $gateway): PollerTaskExecutor
     {
-        $pollingExecutor = new PollerTaskExecutor("", $pollableChannel, $gateway);
-        return $pollingExecutor;
+        return new PollerTaskExecutor("", "", $pollableChannel, $gateway);
     }
 
     public function test_acking_message_when_ack_available_in_message_header()

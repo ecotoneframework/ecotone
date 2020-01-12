@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config;
 
 
+use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Conversion\MediaType;
 
 class ApplicationConfiguration
@@ -38,6 +39,10 @@ class ApplicationConfiguration
      * @var string
      */
     private $defaultSerializationMediaType = self::DEFAULT_SERIALIZATION_MEDIA_TYPE;
+    /**
+     * @var null|string
+     */
+    private $defaultErrorChannel = null;
 
     private function __construct()
     {
@@ -118,6 +123,22 @@ class ApplicationConfiguration
         $clone->defaultSerializationMediaType = $defaultSerializationMediaType;
 
         return $clone;
+    }
+
+    public function withDefaultErrorChannel(string $errorChannelName) : ApplicationConfiguration
+    {
+        $clone = clone $this;
+        $clone->defaultErrorChannel = $errorChannelName;
+
+        return $clone;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDefaultErrorChannel(): ?string
+    {
+        return $this->defaultErrorChannel;
     }
 
     /**

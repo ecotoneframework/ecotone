@@ -595,6 +595,6 @@ class InterfaceToCallTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall = InterfaceToCall::create(InCorrectInterfaceExample::class, "voidWithReturnValue");
+        InterfaceToCall::create(InCorrectInterfaceExample::class, "voidWithReturnValue");
     }
 }

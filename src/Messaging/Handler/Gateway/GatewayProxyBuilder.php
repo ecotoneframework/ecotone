@@ -371,7 +371,7 @@ class GatewayProxyBuilder implements GatewayBuilder
 
     public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
-        $this->validateInterceptorsCorrectness($referenceSearchService);
+        $this->validateInterceptorsCorrectness($channelResolver, $referenceSearchService);
         Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName} which is not correct interface");
 
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
@@ -451,18 +451,10 @@ class GatewayProxyBuilder implements GatewayBuilder
         );
     }
 
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws ReferenceNotFoundException
-     */
-    private function validateInterceptorsCorrectness(ReferenceSearchService $referenceSearchService): void
+    private function validateInterceptorsCorrectness(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): void
     {
         foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
-            $aroundInterceptorReference->buildAroundInterceptor($referenceSearchService);
+            $aroundInterceptorReference->buildAroundInterceptor($channelResolver, $referenceSearchService);
         }
     }
 

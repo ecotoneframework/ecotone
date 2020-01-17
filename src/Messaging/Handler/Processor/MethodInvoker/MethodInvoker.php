@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -268,28 +269,14 @@ final class MethodInvoker implements MessageProcessor
         return new self($objectToInvokeOn, $objectMethodName, $methodParameters, $interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $conversionService, $interceptorsReferences, $endpointAnnotations, $canInterceptorsReplaceMethodArguments);
     }
 
-    /**
-     * @param $objectToInvokeOn
-     * @param string $objectMethodName
-     * @param ParameterConverterBuilder[] $methodParameters
-     * @param ReferenceSearchService $referenceSearchService
-     * @param AroundInterceptorReference[] $orderedAroundMethodInterceptorReferences
-     * @param object[] $endpointAnnotations
-     * @return MethodInvoker
-     * @throws InvalidArgumentException
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws ReferenceNotFoundException
-     * @throws MessagingException
-     */
-    public static function createWithInterceptors($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $orderedAroundMethodInterceptorReferences, array $endpointAnnotations = []): self
+    public static function createWithInterceptorsWithChannel($objectToInvokeOn, string $objectMethodName, array $methodParameters, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $orderedAroundMethodInterceptorReferences, array $endpointAnnotations = []): self
     {
         $messageConverters = [];
         foreach ($methodParameters as $methodParameter) {
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $orderedAroundMethodInterceptorReferences), $endpointAnnotations, true);
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptorsWithChannel($channelResolver, $referenceSearchService, $orderedAroundMethodInterceptorReferences), $endpointAnnotations, true);
     }
 
     /**
@@ -307,28 +294,14 @@ final class MethodInvoker implements MessageProcessor
         return false;
     }
 
-    /**
-     * @param $objectToInvokeOn
-     * @param string $objectMethodName
-     * @param ParameterConverterBuilder[] $methodParameters
-     * @param ReferenceSearchService $referenceSearchService
-     * @param AroundInterceptorReference[] $orderedAroundMethodInterceptorReferences
-     * @param object[] $endpointAnnotations
-     * @return MethodInvoker
-     * @throws InvalidArgumentException
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws ReferenceNotFoundException
-     * @throws MessagingException
-     */
-    public static function createWithInterceptorsNotChangingCallArguments($objectToInvokeOn, string $objectMethodName, array $methodParameters, ReferenceSearchService $referenceSearchService, array $orderedAroundMethodInterceptorReferences, array $endpointAnnotations): self
+    public static function createWithInterceptorsNotChangingCallArgumentsWithChannel($objectToInvokeOn, string $objectMethodName, array $methodParameters, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $orderedAroundMethodInterceptorReferences, array $endpointAnnotations): self
     {
         $messageConverters = [];
         foreach ($methodParameters as $methodParameter) {
             $messageConverters[] = $methodParameter->build($referenceSearchService);
         }
 
-        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptors($referenceSearchService, $orderedAroundMethodInterceptorReferences), $endpointAnnotations, false);
+        return self::createWithBuiltParameterConverters($objectToInvokeOn, $objectMethodName, $messageConverters, $referenceSearchService, AroundInterceptorReference::createAroundInterceptorsWithChannel($channelResolver, $referenceSearchService, $orderedAroundMethodInterceptorReferences), $endpointAnnotations, false);
     }
 
     /**

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
@@ -18,11 +19,8 @@ interface AroundInterceptorObjectBuilder
      */
     public function getInterceptingInterfaceClassName(): string;
 
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @return object
-     */
-    public function build(ReferenceSearchService $referenceSearchService): object;
+
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): object;
 
     /**
      * @return string[]

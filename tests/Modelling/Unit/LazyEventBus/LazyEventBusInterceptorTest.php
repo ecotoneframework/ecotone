@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit\LazyEventBus;
 
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\LazyEventBus\InMemoryEventStore;
 use Ecotone\Modelling\LazyEventBus\LazyEventBusInterceptor;
@@ -32,7 +33,9 @@ class LazyEventBusInterceptorTest extends TestCase
         $inMemoryEventStore->enqueue($payload, $metadata);
         $lazyEventBus = new LazyEventBusInterceptor($eventBus, $inMemoryEventStore);
 
-        $lazyEventBus->publish();
-        $lazyEventBus->publish();
+        $methodInvocation = $this->createMock(MethodInvocation::class);
+
+        $lazyEventBus->publish($methodInvocation);
+        $lazyEventBus->publish($methodInvocation);
     }
 }

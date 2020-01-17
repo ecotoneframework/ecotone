@@ -9,7 +9,9 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
@@ -52,12 +54,12 @@ class LazyEventBusConfiguration implements AnnotationModule
                 ->withInputChannelName(LazyEventBus::CHANNEL_NAME)
         );
         $configuration
-            ->registerAfterMethodInterceptor(
-                MethodInterceptor::create(
-                    "ecotoneLazyEventBus",
-                    InterfaceToCall::create(LazyEventBusInterceptor::class, "publish"),
-                    new LazyEventBusInterceptorBuilder($inMemoryEventStore),
-                    5,
+            ->registerAroundMethodInterceptor(
+                AroundInterceptorReference::createWithObjectBuilder(
+                LazyEventBusInterceptor::class,
+                 new LazyEventBusAroundInterceptorBuilder($inMemoryEventStore),
+                    "publish",
+                    LazyEventBusInterceptor::PRECEDENCE,
                     "@(" . LazyEventPublishing::class . ")"
                 )
             );

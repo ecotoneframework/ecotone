@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor;
 
+use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorObjectBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -43,7 +44,7 @@ class AroundInterceptorObjectBuilderExample implements AroundInterceptorObjectBu
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): object
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): object
     {
         return $this->object;
     }

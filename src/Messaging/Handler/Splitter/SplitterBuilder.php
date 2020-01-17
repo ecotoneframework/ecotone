@@ -161,10 +161,11 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
         return new Splitter(
             RequestReplyProducer::createRequestAndSplit(
                 $this->outputMessageChannelName,
-                MethodInvoker::createWithInterceptors(
+                MethodInvoker::createWithInterceptorsWithChannel(
                     $objectToInvokeOn,
                     $this->methodName,
                     $this->methodParameterConverterBuilders,
+                    $channelResolver,
                     $referenceSearchService,
                     $this->orderedAroundInterceptors,
                     $this->getEndpointAnnotations()

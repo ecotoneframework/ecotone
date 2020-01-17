@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use ReflectionException;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -140,16 +141,14 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     }
 
     /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @param AroundInterceptorReference[] $interceptorsReferences
-     * @return MethodInterceptor[]
-     * @throws ReferenceNotFoundException
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws MessagingException
-     * @throws InvalidArgumentException
+     * @return int
      */
-    public static function createAroundInterceptors(ReferenceSearchService $referenceSearchService, array $interceptorsReferences): array
+    public function getPrecedence(): int
+    {
+        return $this->precedence;
+    }
+
+    public static function createAroundInterceptorsWithChannel(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $interceptorsReferences): array
     {
         $aroundMethodInterceptors = [];
         usort($interceptorsReferences, function (AroundInterceptorReference $element, AroundInterceptorReference $elementToCompare) {
@@ -161,7 +160,7 @@ class AroundInterceptorReference implements InterceptorWithPointCut
         });
         if ($interceptorsReferences) {
             foreach ($interceptorsReferences as $interceptorsReferenceName) {
-                $interceptingService = $interceptorsReferenceName->buildAroundInterceptor($referenceSearchService);
+                $interceptingService = $interceptorsReferenceName->buildAroundInterceptor($channelResolver, $referenceSearchService);
 
                 $aroundMethodInterceptors[] = $interceptingService;
             }
@@ -170,28 +169,11 @@ class AroundInterceptorReference implements InterceptorWithPointCut
         return $aroundMethodInterceptors;
     }
 
-    /**
-     * @return int
-     */
-    public function getPrecedence(): int
-    {
-        return $this->precedence;
-    }
-
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @return AroundMethodInterceptor
-     * @throws ReferenceNotFoundException
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws MessagingException
-     * @throws InvalidArgumentException
-     */
-    public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
+    public function buildAroundInterceptor(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
     {
         $referenceToCall = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
         if ($referenceToCall instanceof AroundInterceptorObjectBuilder) {
-            $referenceToCall = $referenceToCall->build($referenceSearchService);
+            $referenceToCall = $referenceToCall->build($channelResolver, $referenceSearchService);
         }
 
         return AroundMethodInterceptor::createWith(

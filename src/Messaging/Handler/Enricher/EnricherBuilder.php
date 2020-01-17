@@ -180,10 +180,11 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
         return new Enricher(
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
-                MethodInvoker::createWithInterceptors(
+                MethodInvoker::createWithInterceptorsWithChannel(
                     $internalEnrichingService,
                     "enrich",
                     [],
+                    $channelResolver,
                     $referenceSearchService,
                     $this->orderedAroundInterceptors,
                     $this->getEndpointAnnotations()

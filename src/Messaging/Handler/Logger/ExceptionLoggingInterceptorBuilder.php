@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Logger;
 
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorObjectBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -19,7 +20,7 @@ class ExceptionLoggingInterceptorBuilder implements AroundInterceptorObjectBuild
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): object
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): object
     {
         return new LoggingInterceptor(
                 new LoggingService(

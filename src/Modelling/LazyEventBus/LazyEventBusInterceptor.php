@@ -1,8 +1,8 @@
 <?php
 
-
 namespace Ecotone\Modelling\LazyEventBus;
 
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Modelling\EventBus;
 
 /**
@@ -12,6 +12,8 @@ use Ecotone\Modelling\EventBus;
  */
 class LazyEventBusInterceptor
 {
+    const PRECEDENCE = 10;
+
     /**
      * @var EventBus
      */
@@ -32,12 +34,16 @@ class LazyEventBusInterceptor
         $this->inMemoryEventStore = $inMemoryEventStore;
     }
 
-    public function publish(): void
+    public function publish(MethodInvocation $methodInvocation)
     {
+        $reply = $methodInvocation->proceed();
+
         while (!$this->inMemoryEventStore->isEmpty()) {
             $event = $this->inMemoryEventStore->dequeue();
 
             $this->eventBus->sendWithMetadata($event['data'], $event['metadata']);
         }
+
+        return $reply;
     }
 }

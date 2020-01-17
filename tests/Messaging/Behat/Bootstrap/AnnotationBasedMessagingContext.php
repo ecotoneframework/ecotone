@@ -17,8 +17,10 @@ use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\CommandBusWithEventPublishing;
 use Ecotone\Modelling\QueryBus;
@@ -28,6 +30,10 @@ use Ramsey\Uuid\Uuid;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\ErrorReceiver;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\OrderGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\OrderService;
+use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample;
+use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\InterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler;
+use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\CalculateGatewayExampleWithMessages;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
 use Test\Ecotone\Modelling\Fixture\ProxyEventBusFromMessagingSystem;
@@ -78,6 +84,20 @@ class AnnotationBasedMessagingContext implements Context
                 $objects = [
                     ErrorReceiver::class => new ErrorReceiver(),
                     OrderService::class => new OrderService()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway": {
+                $objects = [
+                    InterceptorExample::class => new InterceptorExample(),
+                    SomeQueryHandler::class => new SomeQueryHandler()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages": {
+                $objects = [
+                    \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample::class => new \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample(),
+                    \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::class => new \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler()
                 ];
                 break;
             }
@@ -245,5 +265,30 @@ class AnnotationBasedMessagingContext implements Context
     public static function getQueryBus(): QueryBus
     {
         return self::$messagingSystem->getGatewayByName(QueryBus::class);
+    }
+
+    public static function getGateway(string $name)
+    {
+        return self::$messagingSystem->getGatewayByName($name);
+    }
+
+    /**
+     * @When I call with :beginningValue I should receive :result
+     */
+    public function iCallWithIShouldReceive(int $beginningValue, int $result)
+    {
+        Assert::assertEquals($result, self::getGateway(CalculateGatewayExample::class)->calculate($beginningValue));
+    }
+
+    /**
+     * @When I call with :beginningValue I should receive :result with message
+     */
+    public function iCallWithIShouldReceiveWithMessage(int $beginningValue, int $result)
+    {
+        $requestMessage = MessageBuilder::withPayload($beginningValue)
+                            ->build();
+        /** @var Message $replyMessage */
+        $replyMessage = self::getGateway(CalculateGatewayExampleWithMessages::class)->calculate($requestMessage);
+        Assert::assertEquals($result, $replyMessage->getPayload());
     }
 }

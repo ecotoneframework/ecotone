@@ -15,5 +15,5 @@ interface InCorrectInterfaceExample
     /**
      * @return Message
      */
-    public function voidWithReturnValue() : void;
+    public function voidWithReturnValue() : array;
 }

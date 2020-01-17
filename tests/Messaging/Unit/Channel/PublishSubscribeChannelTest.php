@@ -18,7 +18,7 @@ class PublishSubscribeChannelTest extends TestCase
 {
     public function test_publishing_message()
     {
-        $directChannel = new PublishSubscribeChannel(BroadcastingDispatcher::create());
+        $directChannel = PublishSubscribeChannel::create();
 
         $messageHandler = NoReturnMessageHandler::create();
         $directChannel->subscribe($messageHandler);

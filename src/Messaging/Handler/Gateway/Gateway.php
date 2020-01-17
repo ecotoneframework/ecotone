@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\MessageHeaders;
 use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -141,21 +142,18 @@ class Gateway
                 $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
             }
 
-            $replyChannelComingFromPreviousGateway = null;
-            $errorChannelComingFromPreviousGateway = null;
             if (($this->interfaceToCall->hasSingleArgument() && ($this->interfaceToCall->hasFirstParameterMessageTypeHint() || $methodArguments[0]->value() instanceof Message))) {
                 /** @var Message $requestMessage */
                 $requestMessage = $methodArguments[0]->value();
 
                 $requestMessage = MessageBuilder::fromMessage($requestMessage);
             } else {
-                $payloadValue = $this->methodCallToMessageConverter->getPayloadArgument($methodArguments);
-                $requestMessage = MessageBuilder::withPayload($payloadValue);
+                $requestMessage = $this->methodCallToMessageConverter->getMessageBuilderUsingPayloadConverter($methodArguments);
                 $requestMessage = $this->methodCallToMessageConverter->convertFor($requestMessage, $methodArguments);
 
                 foreach ($this->messageConverters as $messageConverter) {
                     $convertedMessageBuilder = $messageConverter->toMessage(
-                        $payloadValue,
+                        $requestMessage->getPayload(),
                         $requestMessage->getCurrentHeaders()
                     );
 
@@ -165,12 +163,14 @@ class Gateway
                 }
             }
 
+
+            $previousReplyChannel = $requestMessage->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaderWithName(MessageHeaders::REPLY_CHANNEL) : null;
             $internalReplyBridge = QueueChannel::create();
             $requestMessage = $requestMessage
                 ->setReplyChannel($internalReplyBridge)
                 ->build();
 
-            $messageHandler = $this->buildHandler($internalReplyBridge);
+            $messageHandler = $this->buildHandler();
         } catch (Throwable $exception) {
             throw GatewayMessageConversionException::createFromPreviousException("Can't convert parameters to message in gateway. \n" . $exception->getMessage(), $exception);
         }
@@ -178,10 +178,16 @@ class Gateway
         $messageHandler->handle($requestMessage);
         $reply = $internalReplyBridge->receive();
 
-        if ($this->interfaceToCall->getReturnType()->isClassOfType(Message::class)) {
-            return $reply;
-        }
         if ($reply) {
+            if ($this->interfaceToCall->getReturnType()->isClassOfType(Message::class)) {
+                if ($previousReplyChannel) {
+                    return MessageBuilder::fromMessage($reply)
+                        ->setReplyChannel($previousReplyChannel)
+                        ->build();
+                }
+                return $reply;
+            }
+
             return $reply->getPayload();
         }
 
@@ -189,11 +195,10 @@ class Gateway
     }
 
     /**
-     * @param QueueChannel $internalReplyBridge
      * @return ServiceActivatorBuilder|MessageHandler
      * @throws MessagingException
      */
-    private function buildHandler(QueueChannel $internalReplyBridge)
+    private function buildHandler()
     {
         $gatewayInternalHandler = new GatewayInternalHandler(
             $this->interfaceToCall,
@@ -222,11 +227,9 @@ class Gateway
             $chainHandler = $chainHandler->chain($afterInterceptor);
         }
 
-        $internalReplyBridgeName = Uuid::uuid4()->toString();
         return $chainHandler
-            ->withOutputMessageChannel($internalReplyBridgeName)
             ->build(
-                InMemoryChannelResolver::createWithChannelResolver($this->channelResolver, [$internalReplyBridgeName => $internalReplyBridge]),
+                InMemoryChannelResolver::createWithChannelResolver($this->channelResolver, []),
                 $this->referenceSearchService
             );
     }

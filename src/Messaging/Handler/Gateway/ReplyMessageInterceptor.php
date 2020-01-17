@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -16,6 +19,21 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class ReplyMessageInterceptor
 {
+    /**
+     * @var PollableChannel|null
+     */
+    private $replyChannel;
+    /**
+     * @var MessageChannel|null
+     */
+    private $errorChannel;
+
+//    public function __construct(?PollableChannel $replyChannel, ?MessageChannel $errorChannel)
+//    {
+//        $this->replyChannel = $replyChannel;
+//        $this->errorChannel = $errorChannel;
+//    }
+
     /**
      * @param MethodInvocation $methodInvocation
      * @param Message $requestMessage

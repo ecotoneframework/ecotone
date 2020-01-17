@@ -145,3 +145,11 @@ Feature: Service activator
     Then there should no error order
     And I call pollable endpoint "orderService"
     Then there should be error order "coffee"
+
+  Scenario: Application handling gateways inside gateways
+    Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway"
+    When I call with 2 I should receive 76
+
+  Scenario: Application handling gateways inside gateways using only messages
+    Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages"
+    When I call with 2 I should receive 76 with message

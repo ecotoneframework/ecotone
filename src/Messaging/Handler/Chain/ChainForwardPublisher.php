@@ -33,8 +33,8 @@ class ChainForwardPublisher
     }
 
     /**
-     * @param Message $requestMessage
-     * @return Message|null
+     * Is responsible for forwarding message into the chain and receiving message from it
+     * after that pushes the the message to the output channel, which can be next chain
      */
     public function forward(Message $requestMessage): ?Message
     {

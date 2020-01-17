@@ -18,7 +18,7 @@ class DirectChannelTest extends TestCase
 {
     public function test_publishing_message()
     {
-        $directChannel = new DirectChannel(UnicastingDispatcher::create());
+        $directChannel = DirectChannel::create();
 
         $messageHandler = NoReturnMessageHandler::create();
         $directChannel->subscribe($messageHandler);
@@ -30,7 +30,7 @@ class DirectChannelTest extends TestCase
 
     public function test_throwing_exception_if_no_handler_exists_for_dispatch()
     {
-        $directChannel = new DirectChannel(UnicastingDispatcher::create());
+        $directChannel = DirectChannel::create();
 
         $messageHandler = NoReturnMessageHandler::create();
         $directChannel->subscribe($messageHandler);

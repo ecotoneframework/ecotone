@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionConverter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Support\Assert;
@@ -49,7 +50,7 @@ class MethodCallToMessageConverter
 
         foreach ($this->methodArgumentConverters as $methodParameterConverter) {
             foreach ($methodArguments as $methodArgument) {
-                if ($methodParameterConverter->isSupporting($methodArgument)) {
+                if ($methodParameterConverter->isSupporting($methodArgument) && !$this->isPayloadConverter($methodParameterConverter)) {
                     $messageBuilder = $methodParameterConverter->convertToMessage($methodArgument, $messageBuilder);
                     break;
                 }
@@ -61,19 +62,20 @@ class MethodCallToMessageConverter
 
     /**
      * @param MethodArgument[] $methodArguments
-     * @return mixed
+     * @return MessageBuilder
      */
-    public function getPayloadArgument(array $methodArguments)
+    public function getMessageBuilderUsingPayloadConverter(array $methodArguments) : MessageBuilder
     {
+        $defaultBuilder = MessageBuilder::withPayload("");
         foreach ($methodArguments as $methodArgument) {
             foreach ($this->methodArgumentConverters as $methodParameterConverter) {
-                if ($methodParameterConverter->isSupporting($methodArgument) && $methodParameterConverter instanceof GatewayPayloadConverter) {
-                    return $methodArgument->value();
+                if ($methodParameterConverter->isSupporting($methodArgument) && $this->isPayloadConverter($methodParameterConverter)) {
+                    return $methodParameterConverter->convertToMessage($methodArgument, $defaultBuilder);
                 }
             }
         }
 
-        return "";
+        return $defaultBuilder;
     }
 
     /**
@@ -97,5 +99,14 @@ class MethodCallToMessageConverter
         }
 
         $this->methodArgumentConverters = $methodArgumentConverters;
+    }
+
+    /**
+     * @param GatewayParameterConverter $methodParameterConverter
+     * @return bool
+     */
+    private function isPayloadConverter(GatewayParameterConverter $methodParameterConverter): bool
+    {
+        return ($methodParameterConverter instanceof GatewayPayloadConverter || $methodParameterConverter instanceof GatewayPayloadExpressionConverter);
     }
 }

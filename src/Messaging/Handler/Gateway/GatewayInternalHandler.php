@@ -2,22 +2,18 @@
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use foo\bar;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\MessageHandlingException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageConverter\MessageConverter;
-use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Messaging\Transaction\Transaction;
-use Ecotone\Messaging\Transaction\TransactionFactory;
 
 /**
  * Class GatewayInternalHandler
@@ -78,24 +74,21 @@ class GatewayInternalHandler
      */
     public function handle(Message $requestMessage)
     {
+//      Gateway can be called inside service activator. So it means, we need to preserve reply channel in order to reply with it
+        $previousReplyChannel = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
+
         $requestMessage = MessageBuilder::fromMessage($requestMessage);
         $replyChannel = $this->replyChannel ? $this->replyChannel : QueueChannel::create();
-        if ($this->interfaceToCall->hasReturnValue()) {
-            $requestMessage = $requestMessage
-                ->setReplyChannel($replyChannel);
-            if ($this->errorChannel) {
-                $requestMessage = $requestMessage
-                    ->setErrorChannel($this->errorChannel ? $this->errorChannel : $this->replyChannel);
-            }
-        }
-        $requestMessage = $requestMessage->build();
+        $requestMessage = $requestMessage
+            ->setReplyChannel($replyChannel);
 
+        $requestMessage = $requestMessage->build();
 
         $this->requestChannel->send($requestMessage);
 
         $replyMessage = null;
-        if ($this->interfaceToCall->hasReturnValue()) {
-            $replyCallable = $this->getReply($requestMessage, $replyChannel);
+        if ($this->interfaceToCall->canReturnValue() && $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
+            $replyCallable = $this->getReply($requestMessage, $requestMessage->getHeaders()->getReplyChannel());
 
             if ($this->interfaceToCall->doesItReturnFuture()) {
                 return FutureReplyReceiver::create($replyCallable);
@@ -106,6 +99,16 @@ class GatewayInternalHandler
 
         $reply = null;
         if ($replyMessage) {
+            if ($this->interfaceToCall->getReturnType()->equals(TypeDescriptor::create(Message::class))) {
+                if  ($previousReplyChannel) {
+                    return MessageBuilder::fromMessage($replyMessage)
+                            ->setReplyChannel($previousReplyChannel)
+                            ->build();
+                }
+
+                return $replyMessage;
+            }
+
             foreach ($this->messageConverters as $messageConverter) {
                 $reply = $messageConverter->fromMessage(
                     $replyMessage,
@@ -130,7 +133,7 @@ class GatewayInternalHandler
      * @param PollableChannel $replyChannel
      * @return callable
      */
-    private function getReply(Message $requestMessage, PollableChannel $replyChannel) : callable
+    private function getReply(Message $requestMessage, PollableChannel $replyChannel): callable
     {
         return function () use ($requestMessage, $replyChannel) {
 
@@ -140,7 +143,7 @@ class GatewayInternalHandler
                 throw InvalidArgumentException::create("{$this->interfaceToCall} expects value, but null was returned. Have you consider changing return value to nullable?");
             }
             if ($replyMessage instanceof ErrorMessage) {
-                throw $replyMessage->getPayload();
+                throw ($replyMessage->getPayload()->getCause() ? $replyMessage->getPayload()->getCause() : $replyMessage->getPayload());
             }
 
             return $replyMessage;

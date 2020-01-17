@@ -34,6 +34,10 @@ final class MessageBuilder
      */
     private function __construct($payload, HeaderAccessor $headerAccessor)
     {
+        Assert::notNull($payload, "Trying to configure message with null payload");
+        if ($payload instanceof Message) {
+            throw InvalidArgumentException::create("Payload for building message can not be another message for {$payload}");
+        }
         $this->payload = $payload;
         $this->headerAccessor = $headerAccessor;
 
@@ -139,9 +143,21 @@ final class MessageBuilder
     public function setPayload($payload) : self
     {
         Assert::notNull($payload, "Trying to configure message with null payload");
+        if ($payload instanceof Message) {
+            throw InvalidArgumentException::create("Payload for building message can not be another message for {$payload}");
+        }
+
         $this->payload = $payload;
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPayload()
+    {
+        return $this->payload;
     }
 
     /**
@@ -150,6 +166,11 @@ final class MessageBuilder
     public function getCurrentHeaders() : array
     {
         return $this->headerAccessor->headers();
+    }
+
+    public function containsKey(string $headerName) : bool
+    {
+        return array_key_exists($headerName, $this->getCurrentHeaders());
     }
 
     /**

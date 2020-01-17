@@ -199,7 +199,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         $interfaceCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
         $interfaceToCall = $interfaceCallRegistry->getFor($objectToInvokeOn, $this->methodName);
 
-        if (!$interfaceToCall->hasReturnValue()) {
+        if (!$interfaceToCall->canReturnValue()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 

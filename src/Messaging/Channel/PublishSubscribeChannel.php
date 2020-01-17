@@ -15,17 +15,12 @@ use Ecotone\Messaging\SubscribableChannel;
 class PublishSubscribeChannel implements SubscribableChannel
 {
     /**
-     * @var BroadcastingDispatcher
+     * @var MessageHandler[]
      */
-    private $messageDispatcher;
+    private $messageHandlers = [];
 
-    /**
-     * PublishSubscribeChannel constructor.
-     * @param BroadcastingDispatcher $messageDispatcher
-     */
-    public function __construct(BroadcastingDispatcher $messageDispatcher)
+    private function __construct()
     {
-        $this->messageDispatcher = $messageDispatcher;
     }
 
     /**
@@ -33,7 +28,7 @@ class PublishSubscribeChannel implements SubscribableChannel
      */
     public static function create() : self
     {
-        return new self(new BroadcastingDispatcher());
+        return new self();
     }
 
     /**
@@ -41,7 +36,9 @@ class PublishSubscribeChannel implements SubscribableChannel
      */
     public function send(Message $message): void
     {
-        $this->messageDispatcher->dispatch($message);
+        foreach ($this->messageHandlers as $messageHandler) {
+            $messageHandler->handle($message);
+        }
     }
 
     /**
@@ -49,7 +46,7 @@ class PublishSubscribeChannel implements SubscribableChannel
      */
     public function subscribe(MessageHandler $messageHandler): void
     {
-        $this->messageDispatcher->addHandler($messageHandler);
+        $this->messageHandlers[] = $messageHandler;
     }
 
     /**
@@ -57,7 +54,16 @@ class PublishSubscribeChannel implements SubscribableChannel
      */
     public function unsubscribe(MessageHandler $messageHandler): void
     {
-        $this->messageDispatcher->removeHandler($messageHandler);
+        $handlers = [];
+        foreach ($this->messageHandlers as $messageHandlerToCompare) {
+            if ($messageHandlerToCompare === $messageHandler) {
+                continue;
+            }
+
+            $handlers[] = $messageHandlerToCompare;
+        }
+
+        $this->messageHandlers = $handlers;
     }
 
     public function __toString()

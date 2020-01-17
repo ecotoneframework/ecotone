@@ -7,7 +7,6 @@ use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -92,6 +91,17 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     {
         if ($this->outputMessageHandler && $this->outputMessageChannelName) {
             throw InvalidArgumentException::create("Can't configure output message handler and output message channel for chain handler");
+        }
+
+        if (count($this->chainedMessageHandlerBuilders) === 1 && !$this->outputMessageHandler) {
+            $singleHandler = $this->chainedMessageHandlerBuilders[0]
+                ->withOutputMessageChannel($this->getOutputMessageChannelName())
+                ;
+
+            foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
+                $singleHandler->addAroundInterceptor($aroundInterceptorReference);
+            }
+            return $singleHandler->build($channelResolver, $referenceSearchService);
         }
 
         /** @var DirectChannel[] $bridgeChannels */

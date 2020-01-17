@@ -2,7 +2,6 @@
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Messaging\Channel\Dispatcher\UnicastingDispatcher;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\SubscribableChannel;
@@ -15,17 +14,15 @@ use Ecotone\Messaging\SubscribableChannel;
 class DirectChannel implements SubscribableChannel
 {
     /**
-     * @var UnicastingDispatcher
+     * @var MessageHandler
      */
-    private $messageDispatcher;
+    private $messageHandler;
 
     /**
      * DirectChannel constructor.
-     * @param UnicastingDispatcher $messageDispatcher
      */
-    public function __construct(UnicastingDispatcher $messageDispatcher)
+    private function __construct()
     {
-        $this->messageDispatcher = $messageDispatcher;
     }
 
     /**
@@ -33,7 +30,7 @@ class DirectChannel implements SubscribableChannel
      */
     public static function create() : self
     {
-        return new self(new UnicastingDispatcher());
+        return new self();
     }
 
     /**
@@ -41,7 +38,11 @@ class DirectChannel implements SubscribableChannel
      */
     public function send(Message $message): void
     {
-        $this->messageDispatcher->dispatch($message);
+        if (!$this->messageHandler) {
+            throw MessageDispatchingException::create("There is no message handler registered for dispatching Message {$message}");
+        }
+
+        $this->messageHandler->handle($message);
     }
 
     /**
@@ -49,7 +50,11 @@ class DirectChannel implements SubscribableChannel
      */
     public function subscribe(MessageHandler $messageHandler): void
     {
-        $this->messageDispatcher->addHandler($messageHandler);
+        if ($this->messageHandler) {
+            throw WrongHandlerAmountException::create("{$messageHandler} can't be registered as second handler for unicasting dispatcher. The first is {$this->messageHandler}");
+        }
+
+        $this->messageHandler = $messageHandler;
     }
 
     /**
@@ -57,7 +62,7 @@ class DirectChannel implements SubscribableChannel
      */
     public function unsubscribe(MessageHandler $messageHandler): void
     {
-        $this->messageDispatcher->removeHandler($messageHandler);
+        $this->messageHandler = null;
     }
 
     public function __toString()

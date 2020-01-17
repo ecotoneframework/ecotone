@@ -49,7 +49,7 @@ class AroundMethodInterceptor
     {
         Assert::isObject($referenceToCall, "Method Interceptor should point to instance not class name");
 
-        if ($interfaceToCall->hasReturnValue() && !$this->hasMethodInvocationParameter($interfaceToCall)) {
+        if ($interfaceToCall->canReturnValue() && !$this->hasMethodInvocationParameter($interfaceToCall)) {
             throw InvalidArgumentException::create("Trying to register {$interfaceToCall} as Around Advice which can return value, but doesn't control invocation using " . MethodInvocation::class . ". Have you wanted to register Before/After Advice or forgot to type hint MethodInvocation?");
         }
 

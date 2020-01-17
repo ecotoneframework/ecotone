@@ -204,7 +204,7 @@ class InterfaceToCall
     /**
      * @return bool
      */
-    public function hasReturnValue(): bool
+    public function canReturnValue(): bool
     {
         return !$this->getReturnType()->isVoid();
     }

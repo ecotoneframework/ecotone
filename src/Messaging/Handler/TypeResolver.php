@@ -478,12 +478,9 @@ class TypeResolver
         $analyzedClass = new \ReflectionClass($interfaceName);
         $reflectionMethod = $analyzedClass->getMethod($methodName);
 
-        $returnType = $this->getReturnTypeDocBlockParameterTypeHint($analyzedClass, $analyzedClass, $methodName);
-
-        $finalType = TypeDescriptor::create(
-            $returnType
-                ? $returnType
-                : $this->expandParameterTypeHint($reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->getName() : "", $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName))
+        $finalType = TypeDescriptor::createWithDocBlock(
+            $this->expandParameterTypeHint($reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->getName() : "", $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName)),
+            $this->getReturnTypeDocBlockParameterTypeHint($analyzedClass, $analyzedClass, $methodName)
         );
 
         if ($reflectionMethod->getReturnType() && $reflectionMethod->getReturnType()->getName() === TypeDescriptor::VOID && !$finalType->isVoid()) {

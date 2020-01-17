@@ -7,6 +7,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -59,6 +60,6 @@ class GatewayPayloadConverter implements GatewayParameterConverter
                 : $methodArgument->getInterfaceParameter()->getTypeHint()
         ));
 
-        return $messageBuilder->setPayload($methodArgument->value());
+        return $methodArgument->value() instanceof Message ? MessageBuilder::fromMessage($methodArgument->value()) : $messageBuilder->setPayload($methodArgument->value());
     }
 }

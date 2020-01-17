@@ -93,6 +93,10 @@ class MessageHeaders
      * Consumed channel name
      */
     const POLLED_CHANNEL_NAME = "polledChannelName";
+    /**
+     * Expected content type of reply
+     */
+    const REPLY_CONTENT_TYPE = "replyContentType";
 
     /**
      * @var array

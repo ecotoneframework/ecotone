@@ -49,7 +49,7 @@ class QueryBusRouter
     /**
      * @param object $object
      *
-     * @return string|null
+     * @return array
      * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */

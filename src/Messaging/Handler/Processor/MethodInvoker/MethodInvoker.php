@@ -338,6 +338,10 @@ final class MethodInvoker implements MessageProcessor
     {
         $methodCall = $this->getMethodCall($message);
 
+        if (!$this->aroundMethodInterceptors) {
+            return call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $methodCall->getMethodArgumentValues());
+        }
+
         $methodInvokerProcessor = new MethodInvokerChainProcessor(
             $methodCall,
             $this,

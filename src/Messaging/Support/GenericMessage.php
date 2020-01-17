@@ -33,6 +33,9 @@ class GenericMessage implements Message
      */
     private function __construct($payload, MessageHeaders $messageHeaders)
     {
+        if ($payload instanceof Message) {
+            throw InvalidArgumentException::create("Payload of Generic Message can not be another message for {$payload}");
+        }
         if (is_null($payload)) {
             throw InvalidArgumentException::create("Trying to create message with null payload. Message must always contain payload");
         }

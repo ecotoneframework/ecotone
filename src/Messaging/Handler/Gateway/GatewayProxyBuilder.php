@@ -15,6 +15,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
@@ -117,13 +118,13 @@ class GatewayProxyBuilder implements GatewayBuilder
         $this->requestChannelName = $requestChannelName;
         $this->requiredReferenceNames[] = ProxyFactory::REFERENCE_NAME;
 
-        $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
-            "",
-            new ReplyMessageInterceptor(),
-            "buildReply",
-            ErrorChannelInterceptor::PRECEDENCE + 1,
-            ""
-        );
+//        $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
+//            "",
+//            new ReplyMessageInterceptor(),
+//            "buildReply",
+//            ErrorChannelInterceptor::PRECEDENCE + 1,
+//            ""
+//        );
     }
 
     /**
@@ -297,7 +298,7 @@ class GatewayProxyBuilder implements GatewayBuilder
         $resolvedInterfaces = [
             $interfaceToCallRegistry->getFor(GatewayInternalHandler::class, "handle"),
             $interfaceToCallRegistry->getFor(ErrorChannelInterceptor::class, "handle"),
-            $interfaceToCallRegistry->getFor(ReplyMessageInterceptor::class, "buildReply")
+            $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName)
         ];
 
         foreach ($this->aroundInterceptors as $aroundInterceptor) {
@@ -371,7 +372,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
     {
         $this->validateInterceptorsCorrectness($referenceSearchService);
-        Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName}");
+        Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName} which is not correct interface");
 
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
         $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
@@ -394,15 +395,17 @@ class GatewayProxyBuilder implements GatewayBuilder
         }
         $errorChannel = $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null;
         $aroundInterceptors = $this->aroundInterceptors;
-        $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
-            "",
-            new ErrorChannelInterceptor($errorChannel),
-            "handle",
-            ErrorChannelInterceptor::PRECEDENCE,
-            ""
-        );
+        if ($errorChannel) {
+            $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
+                "",
+                new ErrorChannelInterceptor($errorChannel),
+                "handle",
+                ErrorChannelInterceptor::PRECEDENCE,
+                ""
+            );
+        }
 
-        if (!$interfaceToCall->hasReturnValue() && $this->replyChannelName) {
+        if (!$interfaceToCall->canReturnValue() && $this->replyChannelName) {
             throw InvalidArgumentException::create("Can't set reply channel for {$interfaceToCall}");
         }
 
@@ -428,6 +431,7 @@ class GatewayProxyBuilder implements GatewayBuilder
             }
         }
 
+        $beforeInterceptors = $this->beforeInterceptors;
         return new Gateway(
             $interfaceToCall,
             new MethodCallToMessageConverter(
@@ -441,7 +445,7 @@ class GatewayProxyBuilder implements GatewayBuilder
             $referenceSearchService,
             $channelResolver,
             $aroundInterceptors,
-            $this->getSortedInterceptors($this->beforeInterceptors),
+            $this->getSortedInterceptors($beforeInterceptors),
             $this->getSortedInterceptors($this->afterInterceptors),
             $registeredAnnotations
         );

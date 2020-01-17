@@ -16,15 +16,15 @@ class ErrorChannelInterceptor
 {
     public const PRECEDENCE = -1000000;
     /**
-     * @var MessageChannel|null
+     * @var MessageChannel
      */
     private $errorChannel;
 
     /**
      * ErrorChannelInterceptor constructor.
-     * @param MessageChannel|null $errorChannel
+     * @param MessageChannel $errorChannel
      */
-    public function __construct(?MessageChannel $errorChannel)
+    public function __construct(MessageChannel $errorChannel)
     {
         $this->errorChannel = $errorChannel;
     }
@@ -34,19 +34,7 @@ class ErrorChannelInterceptor
         try {
             return $methodInvocation->proceed();
         }catch (\Throwable $exception) {
-            if (!$this->errorChannel) {
-                if ($exception instanceof MessagingException && $exception->getCause()) {
-                    throw $exception->getCause();
-                }
-
-                throw $exception;
-            }
-
-            if (!($exception instanceof MessagingException)) {
-                $exception = MessageHandlingException::fromOtherException($exception, $requestMessage);
-            }
-
-            $this->errorChannel->send(ErrorMessage::create($exception));
+            $this->errorChannel->send(ErrorMessage::create(MessageHandlingException::fromOtherException($exception, $requestMessage)));
         }
     }
 }

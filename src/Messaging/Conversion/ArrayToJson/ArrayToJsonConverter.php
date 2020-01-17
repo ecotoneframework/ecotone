@@ -29,7 +29,7 @@ class ArrayToJsonConverter implements Converter
     public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
     {
         return
-            $sourceType->equals(TypeDescriptor::createArrayType())
+            $sourceType->isIterable() && !$sourceType->isCollection()
             && $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)
             && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_JSON);
     }

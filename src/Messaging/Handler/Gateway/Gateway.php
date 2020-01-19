@@ -216,17 +216,19 @@ class Gateway
             ->withPossibilityToReplaceArgumentsInAroundInterceptors(false)
             ->withEndpointAnnotations($this->endpointAnnotations);
         $aroundInterceptorReferences = $this->aroundInterceptors;
-        $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObject(
-            "",
-            new ConversionInterceptor(
-                $this->referenceSearchService->get(ConversionService::REFERENCE_NAME),
-                $this->interfaceToCall,
-                $replyContentType
-            ),
-            "convert",
-            ErrorChannelInterceptor::PRECEDENCE * (-1),
-            ""
-        );
+        if (($replyContentType || !$this->interfaceToCall->getReturnType()->isAnything()) && $this->interfaceToCall->canReturnValue()) {
+            $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObject(
+                "",
+                new ConversionInterceptor(
+                    $this->referenceSearchService->get(ConversionService::REFERENCE_NAME),
+                    $this->interfaceToCall,
+                    $replyContentType
+                ),
+                "convert",
+                ErrorChannelInterceptor::PRECEDENCE * (-1),
+                ""
+            );
+        }
         foreach ($aroundInterceptorReferences as $aroundInterceptorReference) {
             $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference);
         }

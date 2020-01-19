@@ -49,6 +49,11 @@ class MethodCallToMessageConverter
         Assert::allInstanceOfType($methodArguments, MethodArgument::class);
 
         foreach ($this->methodArgumentConverters as $methodParameterConverter) {
+            if (empty($methodArguments) && $methodParameterConverter->isSupporting(null) && !$this->isPayloadConverter($methodParameterConverter)) {
+                $messageBuilder = $methodParameterConverter->convertToMessage(null, $messageBuilder);
+                break;
+            }
+
             foreach ($methodArguments as $methodArgument) {
                 if ($methodParameterConverter->isSupporting($methodArgument) && !$this->isPayloadConverter($methodParameterConverter)) {
                     $messageBuilder = $methodParameterConverter->convertToMessage($methodArgument, $messageBuilder);

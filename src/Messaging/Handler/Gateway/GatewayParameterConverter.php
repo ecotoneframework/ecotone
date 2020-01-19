@@ -12,16 +12,8 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 interface GatewayParameterConverter
 {
-    /**
-     * @param MethodArgument $methodArgument
-     * @param MessageBuilder $messageBuilder
-     * @return MessageBuilder
-     */
-    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder) : MessageBuilder;
 
-    /**
-     * @param MethodArgument $methodArgument
-     * @return bool
-     */
-    public function isSupporting(MethodArgument $methodArgument) : bool;
+    public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder) : MessageBuilder;
+
+    public function isSupporting(?MethodArgument $methodArgument) : bool;
 }

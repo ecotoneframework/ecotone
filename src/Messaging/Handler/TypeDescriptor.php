@@ -149,22 +149,10 @@ final class TypeDescriptor implements Type
         }
 
         if ($this->isScalar() && !$toCompare->isScalar()) {
-            if ($toCompare->isClassOrInterface()) {
-                if ($toCompare->equals(TypeDescriptor::create(TypeDescriptor::OBJECT))) {
-                    return false;
-                }
-
-                $toCompareClass = new \ReflectionClass($toCompare->getTypeHint());
-
-                if ($this->isString() && $toCompareClass->hasMethod("__toString")) {
-                    return true;
-                }
-            }
-
             return false;
         }
 
-        if ($toCompare->isScalar() && !$this->isScalar()) {
+        if (!$this->isScalar() && $toCompare->isScalar()) {
             if ($this->isClassOrInterface()) {
                 if ($this->equals(TypeDescriptor::create(TypeDescriptor::OBJECT))) {
                     return false;

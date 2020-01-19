@@ -9,6 +9,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 class ConversionInterceptor
@@ -24,34 +25,71 @@ class ConversionInterceptor
      */
     private $conversionService;
     /**
-     * @var MediaType
+     * @var MediaType|null
      */
     private $replyContentType;
 
 
-    public function __construct(ConversionService $conversionService, InterfaceToCall $interfaceToCall, MediaType $replyContentType)
+    public function __construct(ConversionService $conversionService, InterfaceToCall $interfaceToCall, ?MediaType $replyContentType)
     {
         $this->interfaceToCall = $interfaceToCall;
         $this->conversionService = $conversionService;
         $this->replyContentType = $replyContentType;
     }
 
-    public function handle(MethodInvocation $methodInvocation)
+    public function convert(MethodInvocation $methodInvocation)
     {
+        /** @var Message $result */
         $result = $methodInvocation->proceed();
 
         if (is_null($result)) {
             return null;
         }
 
-        $data = $result instanceof Message ? $result->getPayload() : $result;
-        $data = $this->conversionService->convert(
-            $data,
-            TypeDescriptor::createFromVariable($data),
-            MediaType::createApplicationXPHPObject(),
-            TypeDescriptor::createAnythingType(),
-            $this->replyContentType
-        );
+        $isMessage = $result instanceof Message;
+        $data = $isMessage ? $result->getPayload() : $result;
+        $sourceMediaType = MediaType::createApplicationXPHPObject();
+        $sourceType = TypeDescriptor::createFromVariable($data);
+
+        if ($isMessage) {
+            if ($result->getHeaders()->hasContentType()) {
+                $sourceMediaType = $result->getHeaders()->getContentType();
+
+                if ($sourceMediaType->hasTypeParameter()) {
+                    $sourceType = $sourceMediaType->getTypeParameter();
+                }
+            }
+        }
+
+        if (!$this->replyContentType) {
+            if (!$sourceType->isCompatibleWith($this->interfaceToCall->getReturnType())) {
+                if ($this->conversionService->canConvert($sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHPObject())) {
+                    return $this->conversionService->convert($data, $sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHPObject());
+                }
+            }
+
+            return $result;
+        }
+
+        if (!$sourceMediaType->isCompatibleWith($this->replyContentType)) {
+            $targetType = $this->replyContentType->hasTypeParameter() ? $this->replyContentType->getTypeParameter() : TypeDescriptor::createAnythingType();
+            if (!$this->conversionService->canConvert(
+                $sourceType,
+                $sourceMediaType,
+                $targetType,
+                $this->replyContentType
+            )) {
+                throw InvalidArgumentException::create("Lack of converter for {$this->interfaceToCall} can't convert reply {$sourceMediaType}:{$sourceType} to {$this->replyContentType}:{$targetType}");
+            }
+
+            $data = $this->conversionService->convert(
+                $data,
+                $sourceType,
+                $sourceMediaType,
+                $targetType,
+                $this->replyContentType
+            );
+        }
 
         if ($result instanceof Message) {
             return MessageBuilder::fromMessage($result)

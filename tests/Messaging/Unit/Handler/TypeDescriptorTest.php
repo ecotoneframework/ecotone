@@ -474,13 +474,9 @@ class TypeDescriptorTest extends TestCase
      */
     public function test_compatibility_when_comparing_scalar_with_object_containing_to_string_method()
     {
-        $this->assertTrue(
-            TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::createStringType())
-        );
+        $this->assertTrue(TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::createStringType()));
 
-        $this->assertTrue(
-            TypeDescriptor::createStringType()->isCompatibleWith(TypeDescriptor::create(DumbMessageHandlerBuilder::class))
-        );
+        $this->assertFalse(TypeDescriptor::createStringType()->isCompatibleWith(TypeDescriptor::create(DumbMessageHandlerBuilder::class)));
     }
 
     /**

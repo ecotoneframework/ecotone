@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\MessageHeaders;
 use Ramsey\Uuid\Uuid;
@@ -165,12 +167,14 @@ class Gateway
 
 
             $previousReplyChannel = $requestMessage->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaderWithName(MessageHeaders::REPLY_CHANNEL) : null;
+            $replyContentType = $requestMessage->containsKey(MessageHeaders::REPLY_CONTENT_TYPE) ? MediaType::parseMediaType($requestMessage->getHeaderWithName(MessageHeaders::REPLY_CONTENT_TYPE)) : null;
             $internalReplyBridge = QueueChannel::create();
             $requestMessage = $requestMessage
                 ->setReplyChannel($internalReplyBridge)
+                ->removeHeader(MessageHeaders::REPLY_CONTENT_TYPE)
                 ->build();
 
-            $messageHandler = $this->buildHandler();
+            $messageHandler = $this->buildHandler($replyContentType);
         } catch (Throwable $exception) {
             throw GatewayMessageConversionException::createFromPreviousException("Can't convert parameters to message in gateway. \n" . $exception->getMessage(), $exception);
         }
@@ -185,6 +189,7 @@ class Gateway
                         ->setReplyChannel($previousReplyChannel)
                         ->build();
                 }
+
                 return $reply;
             }
 
@@ -194,11 +199,8 @@ class Gateway
         return null;
     }
 
-    /**
-     * @return ServiceActivatorBuilder|MessageHandler
-     * @throws MessagingException
-     */
-    private function buildHandler()
+
+    private function buildHandler(?MediaType $replyContentType) : MessageHandler
     {
         $gatewayInternalHandler = new GatewayInternalHandler(
             $this->interfaceToCall,
@@ -213,7 +215,19 @@ class Gateway
             ->withWrappingResultInMessage(false)
             ->withPossibilityToReplaceArgumentsInAroundInterceptors(false)
             ->withEndpointAnnotations($this->endpointAnnotations);
-        foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
+        $aroundInterceptorReferences = $this->aroundInterceptors;
+        $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObject(
+            "",
+            new ConversionInterceptor(
+                $this->referenceSearchService->get(ConversionService::REFERENCE_NAME),
+                $this->interfaceToCall,
+                $replyContentType
+            ),
+            "convert",
+            ErrorChannelInterceptor::PRECEDENCE * (-1),
+            ""
+        );
+        foreach ($aroundInterceptorReferences as $aroundInterceptorReference) {
             $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference);
         }
 

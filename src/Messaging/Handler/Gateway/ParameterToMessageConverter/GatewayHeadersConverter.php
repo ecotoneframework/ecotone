@@ -4,6 +4,7 @@ namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -40,8 +41,10 @@ class GatewayHeadersConverter implements GatewayParameterConverter
     /**
      * @inheritDoc
      */
-    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
+    public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
+        Assert::notNull($methodArgument, "Gateway header converter can only be called with method argument");
+
         $headers = $methodArgument->value();
 
         if (!is_iterable($headers)) {
@@ -60,9 +63,9 @@ class GatewayHeadersConverter implements GatewayParameterConverter
     /**
      * @inheritDoc
      */
-    public function isSupporting(MethodArgument $methodArgument): bool
+    public function isSupporting(?MethodArgument $methodArgument): bool
     {
-        return $this->parameterName == $methodArgument->getParameterName();
+        return $methodArgument && $this->parameterName == $methodArgument->getParameterName();
     }
 
 }

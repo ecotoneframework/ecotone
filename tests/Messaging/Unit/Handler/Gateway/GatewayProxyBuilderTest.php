@@ -9,7 +9,10 @@ use Ecotone\Messaging\Config\NamedMessageChannel;
 use Ecotone\Messaging\Conversion\ArrayToJson\ArrayToJsonConverter;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
+use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverter;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
@@ -22,6 +25,7 @@ use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
@@ -35,6 +39,7 @@ use Ecotone\Messaging\Transaction\Transactional;
 use Ecotone\Messaging\Transaction\TransactionInterceptor;
 use Exception;
 use ProxyManager\Proxy\RemoteObjectInterface;
+use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
@@ -42,6 +47,7 @@ use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MessageReturningGateway;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\StringReturningGateway;
+use Test\Ecotone\Messaging\Fixture\Handler\Gateway\UuidReturningGateway;
 use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayClassAndMethodExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayClassExample;
@@ -1162,7 +1168,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function __test_returning_in_specific_expected_format()
+    public function test_returning_in_specific_expected_format()
     {
         $requestChannelName = "request-channel";
         $requestChannel = DirectChannel::create();
@@ -1190,35 +1196,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
-    public function __test_requesting_with_original_message_and_returning_new_message_with_different_content_type()
-    {
-        $requestChannelName = "request-channel";
-        $requestChannel = DirectChannel::create();
-        $replyData = "[1,2,3]";
-        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage($replyData, [MessageHeaders::CONTENT_TYPE => MediaType::APPLICATION_JSON]));
-
-        /** @var ServiceReceivingMessageAndReturningMessage $gateway */
-        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
-            ->build(
-                InMemoryReferenceSearchService::createEmpty(),
-                InMemoryChannelResolver::createFromAssociativeArray([
-                    $requestChannelName => $requestChannel
-                ])
-            );
-
-        $replyMessage = $gateway->execute(MessageBuilder::withPayload("some")->setHeader("token", "123")->build());
-
-        $this->assertEquals(
-            $replyData,
-            $replyMessage->getPayload()
-        );
-        $this->assertEquals(
-            MediaType::APPLICATION_JSON,
-            $replyMessage->getHeaders()->get(MessageHeaders::CONTENT_TYPE)
-        );
-    }
-
-    public function __test_converting_reply_from_one_returned_media_type_to_another()
+    public function test_converting_reply_from_one_returned_media_type_to_another()
     {
         $requestChannelName = "request-channel";
         $requestChannel = DirectChannel::create();
@@ -1245,21 +1223,21 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals(MediaType::APPLICATION_JSON, $message->getHeaders()->getContentType()->toString());
     }
 
-    public function __test_returning_with_specific_content_type_if_defined_in_reply_message()
+    public function test_returning_with_specific_content_type_if_defined_in_reply_message()
     {
         $requestChannelName = "request-channel";
         $requestChannel = DirectChannel::create();
-        $replyData = MessageBuilder::withPayload("[1,2,3]")
-                        ->setContentType(MediaType::createApplicationJson())
-                        ->build();
-        $messageHandler = ReplyViaHeadersMessageHandler::create($replyData);
-        $requestChannel->subscribe($messageHandler);
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage("[1,2,3]", [MessageHeaders::CONTENT_TYPE => MediaType::APPLICATION_JSON]));
 
+        $expectedMediaType = MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY)->toString();
         /** @var MessageReturningGateway $gateway */
         $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $expectedMediaType)
+            ])
             ->build(
                 InMemoryReferenceSearchService::createWith([
-                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([new ArrayToJsonConverter()])
+                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([new JsonToArrayConverter()])
                 ]),
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $requestChannelName => $requestChannel
@@ -1267,12 +1245,112 @@ class GatewayProxyBuilderTest extends MessagingTest
             );
 
         $message = $gateway->executeNoParameter();
-        $this->assertEquals("[1,2,3]", $message->getPayload());
-        $this->assertEquals(MediaType::APPLICATION_JSON, $message->getHeaders()->getContentType()->toString());
+        $this->assertEquals([1,2,3], $message->getPayload());
+        $this->assertEquals($expectedMediaType, $message->getHeaders()->getContentType()->toString());
     }
 
-    public function __test_throwing_exception_if_converter_fro_reply_media_type_is_missing()
+    public function test_converting_from_reply_header_type_to_expected_one()
     {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage([
+            Uuid::fromString("e7019549-9733-45a3-b088-783de2b2357f"),
+            Uuid::fromString("30ae8690-c729-447c-b9f9-bafd668cb01e")
+        ], [MessageHeaders::CONTENT_TYPE => MediaType::createApplicationXPHPObjectWithTypeParameter("array<Ramsey\Uuid\Uuid>")->toString()]));
 
+        $expectedMediaType = MediaType::createApplicationXPHPObjectWithTypeParameter("array<string>")->toString();
+        /** @var MessageReturningGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $expectedMediaType)
+            ])
+            ->build(
+                InMemoryReferenceSearchService::createWith([
+                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([new UuidToStringConverter()])
+                ]),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $message = $gateway->executeNoParameter();
+        $this->assertEquals(["e7019549-9733-45a3-b088-783de2b2357f", "30ae8690-c729-447c-b9f9-bafd668cb01e"], $message->getPayload());
+        $this->assertEquals($expectedMediaType, $message->getHeaders()->getContentType()->toString());
+    }
+
+    public function test_converting_according_to_interface_to_call_return_type()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(DataReturningService::createServiceActivator("e7019549-9733-45a3-b088-783de2b2357f"));
+
+        /** @var MessageReturningGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', UuidReturningGateway::class, 'executeNoParameter', $requestChannelName)
+            ->build(
+                InMemoryReferenceSearchService::createWith([
+                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([new StringToUuidConverter()])
+                ]),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $this->assertEquals(Uuid::fromString("e7019549-9733-45a3-b088-783de2b2357f"), $gateway->executeNoParameter());
+    }
+
+    public function test_not_converting_if_reply_has_already_expected_type()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $replyData = "[1,2,3]";
+        $mediaType = MediaType::APPLICATION_JSON;
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage($replyData, [MessageHeaders::CONTENT_TYPE => $mediaType]));
+
+        /** @var MessageReturningGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $mediaType)
+            ])
+            ->build(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $replyMessage = $gateway->executeNoParameter(MessageBuilder::withPayload("some")->setHeader("token", "123")->build());
+
+        $this->assertEquals(
+            $replyData,
+            $replyMessage->getPayload()
+        );
+        $this->assertEquals(
+            $mediaType,
+            $replyMessage->getHeaders()->get(MessageHeaders::CONTENT_TYPE)
+        );
+    }
+
+    public function test_throwing_exception_if_converter_fro_reply_media_type_is_missing()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $replyData = 2;
+        $requestChannel->subscribe(DataReturningService::createServiceActivator($replyData));
+
+        /** @var MessageReturningGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, MediaType::APPLICATION_JSON)
+            ])
+            ->build(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $gateway->executeNoParameter(MessageBuilder::withPayload("some")->setHeader("token", "123")->build());
     }
 }

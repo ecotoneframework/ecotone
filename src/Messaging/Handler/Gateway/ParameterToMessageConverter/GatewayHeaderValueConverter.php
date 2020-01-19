@@ -48,7 +48,7 @@ class GatewayHeaderValueConverter implements GatewayParameterConverter
     /**
      * @inheritDoc
      */
-    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
+    public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
         return $messageBuilder
                 ->setHeader($this->headerName, $this->headerValue);
@@ -57,7 +57,7 @@ class GatewayHeaderValueConverter implements GatewayParameterConverter
     /**
      * @inheritDoc
      */
-    public function isSupporting(MethodArgument $methodArgument): bool
+    public function isSupporting(?MethodArgument $methodArgument): bool
     {
         return true;
     }

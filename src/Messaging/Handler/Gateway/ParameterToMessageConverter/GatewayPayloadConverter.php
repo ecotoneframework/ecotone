@@ -9,6 +9,7 @@ use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -44,16 +45,18 @@ class GatewayPayloadConverter implements GatewayParameterConverter
     /**
      * @inheritDoc
      */
-    public function isSupporting(MethodArgument $methodArgument): bool
+    public function isSupporting(?MethodArgument $methodArgument): bool
     {
-        return $this->parameterName == $methodArgument->getParameterName();
+        return $methodArgument && $this->parameterName == $methodArgument->getParameterName();
     }
 
     /**
      * @inheritDoc
      */
-    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
+    public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
+        Assert::notNull($methodArgument, "Gateway header converter can only be called with method argument");
+
         $messageBuilder->setContentTypeIfAbsent(MediaType::createApplicationXPHPObjectWithTypeParameter(
             $methodArgument->getInterfaceParameter()->getTypeDescriptor()->isUnionType()
                 ? TypeDescriptor::createFromVariable($methodArgument->value())->getTypeHint()

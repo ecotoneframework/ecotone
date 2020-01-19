@@ -7,6 +7,7 @@ use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -53,8 +54,10 @@ class GatewayPayloadExpressionConverter implements GatewayParameterConverter
     /**
      * @inheritDoc
      */
-    public function convertToMessage(MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
+    public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
+        Assert::notNull($methodArgument, "Gateway header converter can only be called with method argument");
+
         return $messageBuilder
                 ->setPayload(
                     $this->expressionEvaluationService->evaluate(
@@ -70,8 +73,8 @@ class GatewayPayloadExpressionConverter implements GatewayParameterConverter
     /**
      * @inheritDoc
      */
-    public function isSupporting(MethodArgument $methodArgument): bool
+    public function isSupporting(?MethodArgument $methodArgument): bool
     {
-        return $methodArgument->getParameterName() === $this->parameterName;
+        return $methodArgument && $methodArgument->getParameterName() === $this->parameterName;
     }
 }

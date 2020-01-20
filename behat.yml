@@ -5,5 +5,5 @@ default:
         pretty: true
     suites:
       default:
-          paths:    [ tests/Messaging/Behat/features, tests/DomainModel/Behat/features ]
+          paths:    [ tests/Messaging/Behat/features, tests/Modelling/Behat/features ]
           contexts: [ Test\Ecotone\Messaging\Behat\Bootstrap\DomainContext, Test\Ecotone\Modelling\Behat\Bootstrap\DomainContext, Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext ]

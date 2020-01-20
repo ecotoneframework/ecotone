@@ -25,6 +25,7 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateMessageConversionService;
@@ -159,7 +160,10 @@ class AggregateMessagingModule implements AnnotationModule
 
     public static function getMessageClassOrInputChannel(AnnotationRegistration $registration): string
     {
-        return self::getMessageClassFor($registration) ?? $registration->getAnnotationForMethod()->inputChannelName;
+        $inputChannelName = self::getMessageClassFor($registration) ?? $registration->getAnnotationForMethod()->inputChannelName;
+
+        Assert::notNull($inputChannelName, "Can't register {$registration}, lack of routing information. Have you forgot to type hint command/query/event or declare input channel name in annotation?");
+        return $inputChannelName;
     }
 
     /**

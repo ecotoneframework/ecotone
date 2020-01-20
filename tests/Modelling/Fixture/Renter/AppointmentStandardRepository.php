@@ -3,13 +3,15 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\Renter;
 
+use Ecotone\Modelling\Annotation\Aggregate;
+use Ecotone\Modelling\Annotation\Repository;
 use Ecotone\Modelling\StandardRepository;
 
 /**
  * Class AppointmentCalendar
  * @package Test\Ecotone\Modelling\Fixture\Renter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @\Ecotone\Modelling\Annotation\AggregateRepository()
+ * @Repository()
  */
 class AppointmentStandardRepository implements StandardRepository
 {

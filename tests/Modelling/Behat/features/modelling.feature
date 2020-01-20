@@ -23,3 +23,10 @@ Feature: activating as aggregate order entity
     Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\Renter"
     When I rent appointment with id 123 and duration 100
     Then calendar should contain event with appointment id 123
+
+  Scenario: I order product and I want to see it on the list of orders products
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\Order"
+    When I order product "milk"
+    Then there should be nothing on the order list
+    When I active receiver "orders"
+    Then on the order list I should see "milk"

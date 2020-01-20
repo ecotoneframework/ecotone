@@ -1,14 +1,15 @@
 <?php
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
+
+use Ecotone\Modelling\Annotation\Repository;
 use Ecotone\Modelling\StandardRepository;
-use Ecotone\Modelling\AggregateVersionMismatchException;
 
 /**
  * Class InMemoryAggregateRepository
  * @package Ecotone\Modelling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @\Ecotone\Modelling\Annotation\AggregateRepository()
+ * @Repository()
  */
 class InMemoryStandardRepository implements StandardRepository
 {
@@ -16,14 +17,6 @@ class InMemoryStandardRepository implements StandardRepository
      * @var array
      */
     private $aggregates = [];
-
-    /**
-     * @inheritDoc
-     */
-    public function canHandle(string $aggregateClassName): bool
-    {
-        return true;
-    }
 
     /**
      * InMemoryAggregateRepository constructor.
@@ -37,11 +30,19 @@ class InMemoryStandardRepository implements StandardRepository
     }
 
     /**
+     * @inheritDoc
+     */
+    public function save(array $identifiers, object $aggregate, array $metadata, ?int $expectedVersion): void
+    {
+        $this->aggregates[$aggregate->getId()] = $aggregate;
+    }
+
+    /**
      * @param array $aggregates
      *
      * @return InMemoryStandardRepository
      */
-    public static function createWith(array $aggregates) : self
+    public static function createWith(array $aggregates): self
     {
         return new self($aggregates);
     }
@@ -49,7 +50,7 @@ class InMemoryStandardRepository implements StandardRepository
     /**
      * @return InMemoryStandardRepository
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([]);
     }
@@ -57,7 +58,15 @@ class InMemoryStandardRepository implements StandardRepository
     /**
      * @inheritDoc
      */
-    public function findBy(string $aggregateClassName, array $identifiers) : ?object
+    public function canHandle(string $aggregateClassName): bool
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function findBy(string $aggregateClassName, array $identifiers): ?object
     {
         $aggregateId = $this->getAggregateId($identifiers);
         if (!$aggregateId || !array_key_exists($aggregateId, $this->aggregates)) {
@@ -65,14 +74,6 @@ class InMemoryStandardRepository implements StandardRepository
         }
 
         return $this->aggregates[$aggregateId];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function save(array $identifiers, object $aggregate, array $metadata, ?int $expectedVersion): void
-    {
-        $this->aggregates[$aggregate->getId()] = $aggregate;
     }
 
     /**

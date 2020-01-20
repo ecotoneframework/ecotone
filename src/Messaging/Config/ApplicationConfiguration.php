@@ -43,6 +43,10 @@ class ApplicationConfiguration
      * @var null|string
      */
     private $defaultErrorChannel = null;
+    /**
+     * @var object[]
+     */
+    private $pollableEndpointAnnotations = [];
 
     private function __construct()
     {
@@ -131,6 +135,24 @@ class ApplicationConfiguration
         $clone->defaultErrorChannel = $errorChannelName;
 
         return $clone;
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getPollableEndpointAnnotations(): array
+    {
+        return $this->pollableEndpointAnnotations;
+    }
+
+    /**
+     * @param object[] $pollableEndpointAnnotations
+     * @return ApplicationConfiguration
+     */
+    public function withPollableEndpointAnnotations(array $pollableEndpointAnnotations): ApplicationConfiguration
+    {
+        $this->pollableEndpointAnnotations = $pollableEndpointAnnotations;
+        return $this;
     }
 
     /**

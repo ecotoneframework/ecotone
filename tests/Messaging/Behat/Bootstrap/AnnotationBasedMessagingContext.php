@@ -12,21 +12,22 @@ use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ApplicationConfiguration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
-use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\CommandBusWithEventPublishing;
 use Ecotone\Modelling\QueryBus;
-use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\Assert;
-use Ramsey\Uuid\Uuid;
+use PHPUnit\Framework\TestCase;
+use ReflectionException;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\InboundCalculation;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\ResultService;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\ErrorReceiver;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\OrderGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\OrderService;
@@ -36,18 +37,12 @@ use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\CalculateGatewayExampleWithMessages;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
-use Test\Ecotone\Modelling\Fixture\ProxyEventBusFromMessagingSystem;
-use Test\Ecotone\Modelling\Fixture\ProxyLazyEventBusFromMessagingSystem;
+use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
-use Test\Ecotone\Modelling\Fixture\TestingLazyEventBus;
-use Test\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
-use Test\Ecotone\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
-use Test\Ecotone\Messaging\Fixture\Behat\Calculating\InboundCalculation;
-use Test\Ecotone\Messaging\Fixture\Behat\Calculating\ResultService;
 
-class AnnotationBasedMessagingContext implements Context
+class AnnotationBasedMessagingContext extends TestCase implements Context
 {
     /**
      * @var ConfiguredMessagingSystem
@@ -60,55 +55,68 @@ class AnnotationBasedMessagingContext implements Context
      * @throws AnnotationException
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function iActiveMessagingForNamespace(string $namespace)
     {
         switch ($namespace) {
-            case "Test\Ecotone\Modelling\Fixture\Renter": {
-                $objects = [
-                      RentCalendar::class => new RentCalendar(),
-                      AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty()
-                ];
-                break;
-            }
-            case "Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate": {
-                $objects = [
-                    OrderNotificator::class => new OrderNotificator(),
-                    InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()
-                ];
-                break;
-            }
-            case "Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling": {
-                $objects = [
-                    ErrorReceiver::class => new ErrorReceiver(),
-                    OrderService::class => new OrderService()
-                ];
-                break;
-            }
-            case "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway": {
-                $objects = [
-                    InterceptorExample::class => new InterceptorExample(),
-                    SomeQueryHandler::class => new SomeQueryHandler()
-                ];
-                break;
-            }
-            case "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages": {
-                $objects = [
-                    \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample::class => new \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample(),
-                    \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::class => new \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler()
-                ];
-                break;
-            }
-            default: {
-                $objects = [
-                    InboundCalculation::class => new InboundCalculation(),
-                    ResultService::class => new ResultService(),
-                    CalculatorInterceptor::class => new CalculatorInterceptor()
-                ];
-                break;
-            }
+            case "Test\Ecotone\Modelling\Fixture\Renter":
+                {
+                    $objects = [
+                        RentCalendar::class => new RentCalendar(),
+                        AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate":
+                {
+                    $objects = [
+                        OrderNotificator::class => new OrderNotificator(),
+                        InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling":
+                {
+                    $objects = [
+                        ErrorReceiver::class => new ErrorReceiver(),
+                        OrderService::class => new OrderService()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway":
+                {
+                    $objects = [
+                        InterceptorExample::class => new InterceptorExample(),
+                        SomeQueryHandler::class => new SomeQueryHandler()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages":
+                {
+                    $objects = [
+                        \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample::class => new \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample(),
+                        \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::class => new \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Modelling\Fixture\Order":
+                {
+                    $objects = [
+                        \Test\Ecotone\Modelling\Fixture\Order\OrderService::class => new \Test\Ecotone\Modelling\Fixture\Order\OrderService()
+                    ];
+                    break;
+                }
+            default:
+                {
+                    $objects = [
+                        InboundCalculation::class => new InboundCalculation(),
+                        ResultService::class => new ResultService(),
+                        CalculatorInterceptor::class => new CalculatorInterceptor()
+                    ];
+                    break;
+                }
         }
 
         $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "ecotone_testing_behat_cache";
@@ -199,12 +207,28 @@ class AnnotationBasedMessagingContext implements Context
     }
 
     /**
+     * @return CommandBus
+     */
+    public static function getCommandBus(): CommandBus
+    {
+        return self::$messagingSystem->getGatewayByName(CommandBus::class);
+    }
+
+    /**
      * @Then calendar should contain event with appointment id :appointmentId
      * @param int $appointmentId
      */
     public function calendarShouldContainEventWithAppointmentId(int $appointmentId)
     {
         Assert::assertTrue(self::getQueryBus()->convertAndSend("doesCalendarContainAppointments", MediaType::APPLICATION_X_PHP, $appointmentId));
+    }
+
+    /**
+     * @return QueryBus
+     */
+    public static function getQueryBus(): QueryBus
+    {
+        return self::$messagingSystem->getGatewayByName(QueryBus::class);
     }
 
     /**
@@ -252,19 +276,11 @@ class AnnotationBasedMessagingContext implements Context
     }
 
     /**
-     * @return CommandBus
+     * @When I call with :beginningValue I should receive :result
      */
-    public static function getCommandBus(): CommandBus
+    public function iCallWithIShouldReceive(int $beginningValue, int $result)
     {
-        return self::$messagingSystem->getGatewayByName(CommandBusWithEventPublishing::class);
-    }
-
-    /**
-     * @return QueryBus
-     */
-    public static function getQueryBus(): QueryBus
-    {
-        return self::$messagingSystem->getGatewayByName(QueryBus::class);
+        Assert::assertEquals($result, self::getGateway(CalculateGatewayExample::class)->calculate($beginningValue));
     }
 
     public static function getGateway(string $name)
@@ -273,22 +289,52 @@ class AnnotationBasedMessagingContext implements Context
     }
 
     /**
-     * @When I call with :beginningValue I should receive :result
-     */
-    public function iCallWithIShouldReceive(int $beginningValue, int $result)
-    {
-        Assert::assertEquals($result, self::getGateway(CalculateGatewayExample::class)->calculate($beginningValue));
-    }
-
-    /**
      * @When I call with :beginningValue I should receive :result with message
      */
     public function iCallWithIShouldReceiveWithMessage(int $beginningValue, int $result)
     {
         $requestMessage = MessageBuilder::withPayload($beginningValue)
-                            ->build();
+            ->build();
         /** @var Message $replyMessage */
         $replyMessage = self::getGateway(CalculateGatewayExampleWithMessages::class)->calculate($requestMessage);
         Assert::assertEquals($result, $replyMessage->getPayload());
+    }
+
+    /**
+     * @Then there should be nothing on the order list
+     */
+    public function thereShouldBeNothingOnTheOrderList()
+    {
+        $this->assertEquals(
+            [],
+            $this->getQueryBus()->convertAndSend("order.getOrders", MediaType::APPLICATION_X_PHP, [])
+        );
+    }
+
+    /**
+     * @When I active receiver :receiverName
+     */
+    public function iActiveReceiver($receiverName)
+    {
+        self::$messagingSystem->runSeparatelyRunningEndpointBy($receiverName);
+    }
+
+    /**
+     * @Then on the order list I should see :order
+     */
+    public function onTheOrderListIShouldSee(string $order)
+    {
+        $this->assertEquals(
+            [new PlaceOrder($order)],
+            $this->getQueryBus()->convertAndSend("order.getOrders", MediaType::APPLICATION_X_PHP, [])
+        );
+    }
+
+    /**
+     * @When I order product :order
+     */
+    public function iOrderProduct(string $order)
+    {
+        return $this->getCommandBus()->send(new PlaceOrder($order));
     }
 }

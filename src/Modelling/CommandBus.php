@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Ecotone\Modelling;
 
@@ -8,12 +9,14 @@ use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Modelling\LazyEventBus\LazyEventPublishing;
 
 /**
  * Interface CommandGateway
  * @package Ecotone\Modelling
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
+ * @LazyEventPublishing()
  */
 interface CommandBus
 {

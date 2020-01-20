@@ -35,6 +35,7 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\ChangeShippingAddres
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CommandWithoutAggregateIdentifier;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryOrderAggregateRepositoryConstructor;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryOrderRepositoryFactory;
@@ -111,7 +112,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $newShippingAddress = "Germany";
         $aggregateCommandHandler->handle(MessageBuilder::withPayload(ChangeShippingAddressCommand::create(1, 1, $newShippingAddress))->setReplyChannel(NullableMessageChannel::create())->build());
 
-        $this->assertEquals($newShippingAddress, $order->getShippingAddress());
+        $this->assertEquals($newShippingAddress, $order->getShippingAddress(GetShippingAddressQuery::create(1)));
     }
 
     /**

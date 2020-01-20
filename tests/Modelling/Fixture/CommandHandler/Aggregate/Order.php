@@ -2,12 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptors;
-use Ecotone\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
-use Ecotone\Modelling\Annotation\InitializeAggregateOnNotFound;
 use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\Annotation\Version;
 use Ecotone\Modelling\WithAggregateEvents;
@@ -114,7 +111,6 @@ class Order implements VersionAggregate
 
     /**
      * @return string|null
-     * @QueryHandler()
      */
     public function getCustomerId(): ?string
     {
@@ -155,9 +151,9 @@ class Order implements VersionAggregate
 
     /**
      * @return string
-     * @QueryHandler(endpointId="getShipping", inputChannelName="getShippingChannel", messageClassName=GetShippingAddressQuery::class)
+     * @QueryHandler(endpointId="getShipping")
      */
-    public function getShippingAddress(): string
+    public function getShippingAddress(GetShippingAddressQuery $query): string
     {
         return $this->shippingAddress;
     }

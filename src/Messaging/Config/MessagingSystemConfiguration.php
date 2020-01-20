@@ -41,6 +41,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\LazyEventBus\LazyEventPublishing;
 use Exception;
 use Ramsey\Uuid\Uuid;
 use ReflectionException;
@@ -167,21 +168,10 @@ final class MessagingSystemConfiguration implements Configuration
         $this->applicationConfiguration = $applicationConfiguration;
 
         $extensionObjects[] = $applicationConfiguration;
-        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache());
+        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $applicationConfiguration);
     }
 
-    /**
-     * @param ModuleRetrievingService $moduleConfigurationRetrievingService
-     * @param object[] $extensionObjects
-     * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param ProxyFactory $proxyFactory
-     * @throws AnnotationException
-     * @throws ConfigurationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ProxyFactory $proxyFactory): void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ProxyFactory $proxyFactory, ApplicationConfiguration $applicationConfiguration): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
         $moduleReferenceSearchService->store(ProxyFactory::REFERENCE_NAME, $proxyFactory);
@@ -209,7 +199,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
 
-        $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry);
+        $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry, $applicationConfiguration);
         if ($this->isLazyConfiguration) {
             $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);
             $this->gatewayClassesToGenerateProxies = [];
@@ -254,14 +244,19 @@ final class MessagingSystemConfiguration implements Configuration
 
     /**
      * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     * @param ApplicationConfiguration $applicationConfiguration
      * @throws AnnotationException
      * @throws ConfigurationException
-     * @throws MessagingException
      * @throws InvalidArgumentException
+     * @throws MessagingException
      * @throws ReflectionException
      */
-    private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry): void
+    private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry, ApplicationConfiguration $applicationConfiguration): void
     {
+        $pollableEndpointAnnotations = array_merge($applicationConfiguration->getPollableEndpointAnnotations(), [new LazyEventPublishing()]);
+        foreach ($this->channelAdapters as $channelAdapter) {
+            $channelAdapter->withEndpointAnnotations(array_merge($channelAdapter->getEndpointAnnotations(), $pollableEndpointAnnotations));
+        }
         $this->configureAsynchronousEndpoints();
         $this->configureDefaultMessageChannels();
         $this->resolveRequiredReferences($interfaceToCallRegistry,
@@ -277,6 +272,11 @@ final class MessagingSystemConfiguration implements Configuration
                 return $methodInterceptor->getInterceptingObject();
             }, $this->afterCallMethodInterceptors)
         );
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            if ($this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()]->isPollable() && $messageHandlerBuilder instanceof InterceptedEndpoint) {
+                $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), $pollableEndpointAnnotations));
+            }
+        }
         $this->configureInterceptors($interfaceToCallRegistry);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->messageHandlerBuilders);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->gatewayBuilders);
@@ -1021,7 +1021,7 @@ final class MessagingSystemConfiguration implements Configuration
         self::registerAnnotationAutoloader($this->rootPathToSearchConfigurationFor);
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall, $this->isLazyConfiguration, $referenceSearchService);
         if (!$this->isLazyConfiguration) {
-            $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry);
+            $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry, $this->applicationConfiguration);
         }
 
         $converters = [];

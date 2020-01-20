@@ -12,12 +12,11 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\LazyEventBus\LazyEventPublishing;
 
 /**
- * Interface CommandBusWithEventPublishing
+ * Command bus without event publishing. Can be used inside command handler
  * @package Ecotone\Modelling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
- * @LazyEventPublishing()
  */
-interface CommandBusWithEventPublishing extends CommandBus
+interface InternalCommandBus extends CommandBus
 {
 }

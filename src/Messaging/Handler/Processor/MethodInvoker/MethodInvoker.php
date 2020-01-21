@@ -387,7 +387,8 @@ final class MethodInvoker implements MessageProcessor
                 if (!is_null($convertedData)) {
                     $data = $convertedData;
                 }else {
-                    if (!$currentParameterMediaType->isCompatibleWith($parameterMediaType)) {
+                    if (!$currentParameterMediaType->isCompatibleWith($parameterMediaType) && !$sourceTypeDescriptor->isCompatibleWith($parameterType)) {
+//                    if (!$currentParameterMediaType->isCompatibleWith($parameterMediaType)) {
                         throw InvalidArgumentException::create("Can not call {$this->interfaceToCall}. Lack of Media Type Converter for {$currentParameterMediaType}:{$sourceTypeDescriptor} to {$parameterMediaType}:{$parameterType}");
                     }
                 }

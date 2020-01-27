@@ -22,7 +22,8 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayload
 class SerializerModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME = 'gatewaySerializerModule';
-    const ECOTONE_SERIALIZER_CONVERT_CHANNEL = "ecotone.serializer.convert";
+    const ECOTONE_FROM_PHP_CHANNEL = "ecotone.serializer.convert_from";
+    const ECOTONE_TO_PHP_CHANNEL = "ecotone.serializer.convert_to";
 
     /**
      * @inheritDoc
@@ -51,16 +52,32 @@ class SerializerModule extends NoExternalConfigurationModule implements Annotati
                     Serializer::class,
                     Serializer::class,
                     "convertFromPHP",
-                    self::ECOTONE_SERIALIZER_CONVERT_CHANNEL
+                    self::ECOTONE_FROM_PHP_CHANNEL
                 )->withParameterConverters([
                     GatewayPayloadBuilder::create("data"),
-                    GatewayHeaderBuilder::create("mediaType", SerializerHandler::TARGET_MEDIA_TYPE)
+                    GatewayHeaderBuilder::create("targetMediaType", SerializerHandler::MEDIA_TYPE)
+                ])
+            )
+            ->registerGatewayBuilder(
+                GatewayProxyBuilder::create(
+                    Serializer::class,
+                    Serializer::class,
+                    "convertToPHP",
+                    self::ECOTONE_TO_PHP_CHANNEL
+                )->withParameterConverters([
+                    GatewayPayloadBuilder::create("data"),
+                    GatewayHeaderBuilder::create("sourceMediaType", SerializerHandler::MEDIA_TYPE),
+                    GatewayHeaderBuilder::create("targetType", SerializerHandler::TARGET_TYPE)
                 ])
             )
             ->registerMessageHandler(
-                SerializerHandlerBuilder::create()
-                    ->withInputChannelName(self::ECOTONE_SERIALIZER_CONVERT_CHANNEL)
-            );
+                SerializerHandlerBuilder::createFromPHP()
+                    ->withInputChannelName(self::ECOTONE_FROM_PHP_CHANNEL)
+            )
+            ->registerMessageHandler(
+                SerializerHandlerBuilder::createToPHP()
+                    ->withInputChannelName(self::ECOTONE_TO_PHP_CHANNEL)
+            );;
     }
 
     /**

@@ -19,13 +19,24 @@ use Ecotone\Messaging\MessageHandler;
  */
 class SerializerHandlerBuilder extends InputOutputMessageHandlerBuilder
 {
-    private function __construct()
+    /**
+     * @var string
+     */
+    private $methodName;
+
+    private function __construct(string $methodName)
     {
+        $this->methodName = $methodName;
     }
 
-    public static function create() : self
+    public static function createFromPHP() : self
     {
-        return new self();
+        return new self("convertFromPHP");
+    }
+
+    public static function createToPHP() : self
+    {
+        return new self("convertToPHP");
     }
 
     /**
@@ -33,7 +44,7 @@ class SerializerHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(Serializer::class, "convertFromPHP");
+        return $interfaceToCallRegistry->getFor(Serializer::class, $this->methodName);
     }
 
     /**
@@ -46,7 +57,7 @@ class SerializerHandlerBuilder extends InputOutputMessageHandlerBuilder
 
         return ServiceActivatorBuilder::createWithDirectReference(
             new SerializerHandler($converter),
-            "convert"
+            $this->methodName
         )->build($channelResolver, $referenceSearchService);
     }
 
@@ -56,7 +67,7 @@ class SerializerHandlerBuilder extends InputOutputMessageHandlerBuilder
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [
-            $interfaceToCallRegistry->getFor(Serializer::class, "convertFromPHP")
+            $interfaceToCallRegistry->getFor(Serializer::class, $this->methodName)
         ];
     }
 

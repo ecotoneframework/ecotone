@@ -9,5 +9,7 @@ namespace Ecotone\Messaging\Gateway\Converter;
  */
 interface Serializer
 {
-    public function convertFromPHP($data, string $mediaType);
+    public function convertFromPHP($data, string $targetMediaType);
+
+    public function convertToPHP($data, string $sourceMediaType, string $targetType);
 }

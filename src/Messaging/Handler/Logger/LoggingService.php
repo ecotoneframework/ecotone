@@ -89,7 +89,7 @@ class LoggingService
     private function convertPayloadToScalarType(Message $message)
     {
         $data = $message->getPayload();
-        $sourceMediaType = $message->getHeaders()->hasContentType() ? $message->getHeaders()->getContentType() : MediaType::createApplicationXPHPObject();
+        $sourceMediaType = $message->getHeaders()->hasContentType() ? $message->getHeaders()->getContentType() : MediaType::createApplicationXPHP();
         $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($message->getPayload());
 
         if (is_object($data) && method_exists($data, "__toString")) {
@@ -98,7 +98,7 @@ class LoggingService
             if ($this->conversionService->canConvert($sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson())) {
                 $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson());
             } else {
-                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationXPHPSerializedObject());
+                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationXPHPSerialized());
             }
         }
 

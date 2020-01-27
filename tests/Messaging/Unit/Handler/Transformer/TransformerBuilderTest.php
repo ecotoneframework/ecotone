@@ -91,7 +91,7 @@ class TransformerBuilderTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload($payload)
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::STRING))
                 ->build(),
             $outputChannel->receive()
         );
@@ -168,14 +168,14 @@ class TransformerBuilderTest extends MessagingTest
 
         $transformer->handle(
             MessageBuilder::withPayload($payload)
-                ->setContentType(MediaType::createApplicationXPHPObject())
+                ->setContentType(MediaType::createApplicationXPHP())
                 ->build()
         );
 
         $this->assertMessages(
             MessageBuilder::withPayload($payload)
                 ->setHeader('0', $payload)
-                ->setContentType(MediaType::createApplicationXPHPObject())
+                ->setContentType(MediaType::createApplicationXPHP())
                 ->build(),
             $outputChannel->receive()
         );
@@ -249,7 +249,7 @@ class TransformerBuilderTest extends MessagingTest
         $this->assertMessages(
             MessageBuilder::withPayload($payload . $headerValue)
                 ->setHeader('token', $headerValue)
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::STRING))
                 ->build(),
             $outputChannel->receive()
         );
@@ -314,7 +314,7 @@ class TransformerBuilderTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload("johny")
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::STRING))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::STRING))
                 ->setReplyChannel($replyChannel)
                 ->build(),
             $replyChannel->receive()

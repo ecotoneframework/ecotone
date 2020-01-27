@@ -96,7 +96,7 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
         }
 
         return MessageBuilder::fromMessage($message)
-            ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($returnType->toString()))
+            ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($returnType->toString()))
             ->setPayload($result)
             ->build();
     }

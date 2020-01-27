@@ -254,13 +254,13 @@ class MethodInvokerTest extends MessagingTest
 
         $replyMessage = $methodInvocation->processMessage(
             MessageBuilder::withPayload(serialize(Order::create('1', "correct")))
-                ->setContentType(MediaType::createApplicationXPHPSerializedObject())
+                ->setContentType(MediaType::createApplicationXPHPSerialized())
                 ->build()
         );
 
         $this->assertMessages(
             MessageBuilder::withPayload(OrderConfirmation::fromOrder(Order::create('1', "correct")))
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(OrderConfirmation::class))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(OrderConfirmation::class))
                 ->build(),
             $replyMessage
         );
@@ -289,7 +289,7 @@ class MethodInvokerTest extends MessagingTest
 
         $methodInvocation->processMessage(
             MessageBuilder::withPayload(serialize(Order::create('1', "correct")))
-                ->setContentType(MediaType::createApplicationXPHPSerializedObject())
+                ->setContentType(MediaType::createApplicationXPHPSerialized())
                 ->build()
         );
     }
@@ -310,7 +310,7 @@ class MethodInvokerTest extends MessagingTest
 
         $result = $methodInvocation->processMessage(
             MessageBuilder::withPayload("some")
-                ->setContentType(MediaType::createApplicationXPHPSerializedObject())
+                ->setContentType(MediaType::createApplicationXPHPSerialized())
                 ->build()
         );
 
@@ -338,7 +338,7 @@ class MethodInvokerTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload(new stdClass())
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(stdClass::class))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(stdClass::class))
                 ->build(),
             $replyMessage
         );
@@ -360,7 +360,7 @@ class MethodInvokerTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload("test")
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("string"))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter("string"))
                 ->build(),
             $replyMessage
         );
@@ -382,7 +382,7 @@ class MethodInvokerTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload("test")
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("string"))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter("string"))
                 ->build(),
             $replyMessage
         );
@@ -434,7 +434,7 @@ class MethodInvokerTest extends MessagingTest
 
         $replyMessage = $methodInvocation->processMessage(
             MessageBuilder::withPayload(["fd825894-907c-4c6c-88a9-ae1ecdf3d307", "fd825894-907c-4c6c-88a9-ae1ecdf3d308"])
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter("array<string>"))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter("array<string>"))
                 ->build()
         );
 
@@ -835,7 +835,7 @@ class MethodInvokerTest extends MessagingTest
         );
 
         $requestMessage = MessageBuilder::withPayload(new stdClass())
-            ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(stdClass::class))
+            ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(stdClass::class))
             ->build();
         $this->assertNull($methodInvocation->processMessage($requestMessage));
     }
@@ -853,7 +853,7 @@ class MethodInvokerTest extends MessagingTest
             []
         );
 
-        $mediaType = MediaType::createApplicationXPHPObjectWithTypeParameter(stdClass::class);
+        $mediaType = MediaType::createApplicationXPHPWithTypeParameter(stdClass::class);
         $requestMessage = MessageBuilder::withPayload(new stdClass())
             ->setContentType($mediaType)
             ->setHeader("token", "123")

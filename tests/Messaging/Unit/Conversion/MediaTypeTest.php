@@ -154,7 +154,7 @@ class MediaTypeTest extends TestCase
     {
         $this->assertEquals(
             "array<string>",
-            MediaType::createApplicationXPHPObjectWithTypeParameter("array<string>")->getParameter("type")
+            MediaType::createApplicationXPHPWithTypeParameter("array<string>")->getParameter("type")
         );
     }
 }

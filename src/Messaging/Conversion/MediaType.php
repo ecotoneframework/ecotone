@@ -116,7 +116,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationXPHPObject() : self
+    public static function createApplicationXPHP() : self
     {
         return self::parseMediaType(self::APPLICATION_X_PHP);
     }
@@ -127,7 +127,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationXPHPObjectWithTypeParameter(string $type) : self
+    public static function createApplicationXPHPWithTypeParameter(string $type) : self
     {
         if ($type === TypeDescriptor::ANYTHING) {
             return self::parseMediaType(self::APPLICATION_X_PHP);
@@ -142,7 +142,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationXPHPSerializedObject() : self
+    public static function createApplicationXPHPSerialized() : self
     {
         return self::parseMediaType(self::APPLICATION_X_PHP_SERIALIZED);
     }

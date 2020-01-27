@@ -1229,7 +1229,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel = DirectChannel::create();
         $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage("[1,2,3]", [MessageHeaders::CONTENT_TYPE => MediaType::APPLICATION_JSON]));
 
-        $expectedMediaType = MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY)->toString();
+        $expectedMediaType = MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY)->toString();
         /** @var MessageReturningGateway $gateway */
         $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
             ->withParameterConverters([
@@ -1256,9 +1256,9 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage([
             Uuid::fromString("e7019549-9733-45a3-b088-783de2b2357f"),
             Uuid::fromString("30ae8690-c729-447c-b9f9-bafd668cb01e")
-        ], [MessageHeaders::CONTENT_TYPE => MediaType::createApplicationXPHPObjectWithTypeParameter("array<Ramsey\Uuid\Uuid>")->toString()]));
+        ], [MessageHeaders::CONTENT_TYPE => MediaType::createApplicationXPHPWithTypeParameter("array<Ramsey\Uuid\Uuid>")->toString()]));
 
-        $expectedMediaType = MediaType::createApplicationXPHPObjectWithTypeParameter("array<string>")->toString();
+        $expectedMediaType = MediaType::createApplicationXPHPWithTypeParameter("array<string>")->toString();
         /** @var MessageReturningGateway $gateway */
         $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
             ->withParameterConverters([

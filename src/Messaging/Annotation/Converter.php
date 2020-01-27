@@ -8,7 +8,7 @@ namespace Ecotone\Messaging\Annotation;
  * @package Ecotone\Messaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
- * @Target({"METHOD"})
+ * @Target({"METHOD", "CLASS"})
  */
 class Converter
 {

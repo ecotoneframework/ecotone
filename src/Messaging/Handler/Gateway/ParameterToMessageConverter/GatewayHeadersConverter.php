@@ -4,6 +4,7 @@ namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -47,8 +48,8 @@ class GatewayHeadersConverter implements GatewayParameterConverter
 
         $headers = $methodArgument->value();
 
-        if (!is_iterable($headers)) {
-            throw InvalidArgumentException::create("@GatewayHeaderArray expect parameter to be iterable. Given non iterable value for parameter with name {$this->parameterName}");
+        if (!TypeDescriptor::createFromVariable($headers)->isIterable()) {
+            throw InvalidArgumentException::create("Gateway @Headers expect parameter to be iterable. Given non iterable value for parameter with name {$this->parameterName}");
         }
 
         foreach ($headers as $headerName => $headerValue) {

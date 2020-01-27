@@ -43,7 +43,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     public static function create(AnnotationRegistrationService $annotationRegistrationService) : self
     {
         $registrations = $annotationRegistrationService->findRegistrationsFor(
-            MessageEndpoint::class,
+            Converter::class,
             Converter::class
         );
 

@@ -43,9 +43,9 @@ class ReferenceServiceConverterBuilderTest extends TestCase
             $referenceService->convert(
                 ["some"],
                 $sourceType,
-                MediaType::createApplicationXPHPObject(),
+                MediaType::createApplicationXPHP(),
                 $targetType,
-                MediaType::createApplicationXPHPObject()
+                MediaType::createApplicationXPHP()
             )
         );
     }

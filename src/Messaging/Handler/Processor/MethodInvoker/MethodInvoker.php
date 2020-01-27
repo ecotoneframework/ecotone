@@ -338,8 +338,8 @@ final class MethodInvoker implements MessageProcessor
     {
         $sourceMediaType = $message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE)
             ? MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE))
-            : MediaType::createApplicationXPHPObject();
-        $parameterMediaType = MediaType::createApplicationXPHPObject();
+            : MediaType::createApplicationXPHP();
+        $parameterMediaType = MediaType::createApplicationXPHP();
 
         $methodArguments = [];
         $count = count($this->orderedMethodArguments);
@@ -357,7 +357,7 @@ final class MethodInvoker implements MessageProcessor
                 ? TypeDescriptor::create($sourceMediaType->getParameter("type"))
                 : TypeDescriptor::createFromVariable($data);
 
-            $currentParameterMediaType = $isPayloadConverter ? $sourceMediaType : MediaType::createApplicationXPHPObject();
+            $currentParameterMediaType = $isPayloadConverter ? $sourceMediaType : MediaType::createApplicationXPHP();
             $parameterType = $this->interfaceToCall->getParameterAtIndex($index)->getTypeDescriptor();
 
             if (!($currentParameterMediaType->isCompatibleWith($parameterMediaType) && $sourceTypeDescriptor->isCompatibleWith($parameterType))) {

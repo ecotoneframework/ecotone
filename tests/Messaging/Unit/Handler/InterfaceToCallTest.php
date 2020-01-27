@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
+use Ecotone\Messaging\Annotation\Async;
 use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
@@ -548,7 +549,7 @@ class InterfaceToCallTest extends TestCase
             $interfaceToCall->getMethodAnnotations()
         );
         $this->assertEquals(
-            [new MessageEndpoint()],
+            [new Converter()],
             $interfaceToCall->getClassAnnotations()
         );
     }
@@ -560,12 +561,11 @@ class InterfaceToCallTest extends TestCase
         $this->assertTrue($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(Converter::class)));
         $this->assertFalse($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(MessageEndpoint::class)));
 
-        $this->assertTrue($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(MessageEndpoint::class)));
-        $this->assertFalse($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(Converter::class)));
+        $this->assertTrue($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(Converter::class)));
 
         $this->assertEquals(
-            new MessageEndpoint(),
-            $interfaceToCall->getClassAnnotation(TypeDescriptor::create(MessageEndpoint::class))
+            new Converter(),
+            $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Converter::class))
         );
         $this->assertEquals(
             new Converter(),
@@ -588,7 +588,7 @@ class InterfaceToCallTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Converter::class));
+        $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Async::class));
     }
 
     public function test_throwing_when_doc_block_has_return_value_and_declaration_has_void()

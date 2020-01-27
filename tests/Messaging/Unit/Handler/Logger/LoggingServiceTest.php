@@ -97,7 +97,7 @@ class LoggingServiceTest extends TestCase
 
         $payload = ["some"];
         $message = MessageBuilder::withPayload($payload)
-                    ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY))
+                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY))
                     ->build();
 
         $logger

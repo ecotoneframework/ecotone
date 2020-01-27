@@ -94,7 +94,7 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
         $headers = $headerMapper->mapToMessageHeaders($headersToMap);
         if ($contentType === MediaType::MULTIPART_FORM_DATA) {
             $data = [];
-            $contentType = MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY)->toString();
+            $contentType = MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY)->toString();
 
             foreach ($source->getParsedBody() as $name => $value) {
                 $data[$name] = $value;

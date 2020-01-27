@@ -90,7 +90,7 @@ class PsrHttpMessageConverterTest extends MessagingTest
 
         $this->assertEquals(
             MessageBuilder::withPayload([])
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY))
                 ->setMultipleHeaders([
                     HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_POST,
                     HttpHeaders::REQUEST_URL => "http://localhost",
@@ -122,7 +122,7 @@ class PsrHttpMessageConverterTest extends MessagingTest
 
         $this->assertEquals(
             MessageBuilder::withPayload([])
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY))
                 ->setMultipleHeaders([
                     HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_POST,
                     HttpHeaders::REQUEST_URL => "http://localhost",
@@ -162,7 +162,7 @@ class PsrHttpMessageConverterTest extends MessagingTest
 
         $this->assertEquals(
             MessageBuilder::withPayload([])
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::ARRAY))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY))
                 ->setMultipleHeaders([
                     HttpHeaders::REQUEST_METHOD => HttpHeaders::METHOD_TYPE_POST,
                     HttpHeaders::REQUEST_URL => "http://localhost",

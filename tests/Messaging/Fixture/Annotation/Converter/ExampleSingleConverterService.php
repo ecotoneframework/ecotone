@@ -11,20 +11,13 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Converter()
  */
-class ExampleConverterService
+class ExampleSingleConverterService
 {
    /**
-     * @param string[] $data
-     * @return \stdClass[]
      * @Converter()
      */
-    public function convert(array $data) : iterable
+    public function convert(string $data) : \stdClass
     {
-        $converted = [];
-        foreach ($data as $str) {
-            $converted[] = new \stdClass();
-        }
-
-        return $converted;
+        return new \stdClass();
     }
 }

@@ -53,7 +53,7 @@ class AggregateMessageConversionService
             TypeDescriptor::createFromVariable($message->getPayload()),
             $mediaType,
             TypeDescriptor::create($this->messageClassNameToConvertTo),
-            MediaType::createApplicationXPHPObjectWithTypeParameter($this->messageClassNameToConvertTo)
+            MediaType::createApplicationXPHPWithTypeParameter($this->messageClassNameToConvertTo)
         )) {
             return
                 MessageBuilder::fromMessage($message)
@@ -64,10 +64,10 @@ class AggregateMessageConversionService
                                 TypeDescriptor::createFromVariable($message->getPayload()),
                                 $mediaType,
                                 TypeDescriptor::create($this->messageClassNameToConvertTo),
-                                MediaType::createApplicationXPHPObjectWithTypeParameter($this->messageClassNameToConvertTo)
+                                MediaType::createApplicationXPHPWithTypeParameter($this->messageClassNameToConvertTo)
                     )
                 )
-                    ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter($this->messageClassNameToConvertTo))
+                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($this->messageClassNameToConvertTo))
                     ->build();
         }
 

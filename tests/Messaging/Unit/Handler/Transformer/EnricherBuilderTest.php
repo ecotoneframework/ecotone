@@ -182,7 +182,7 @@ class EnricherBuilderTest extends MessagingTest
 
         $this->createEnricherWithConvertersAndHandle(
             MessageBuilder::withPayload(["name" => "Franco"])
-                ->setContentType(MediaType::createApplicationXPHPObjectWithTypeParameter(TypeDescriptor::OBJECT)),
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::OBJECT)),
             $outputChannel,
             [
                 EnrichPayloadWithValueBuilder::createWith("token", "123")

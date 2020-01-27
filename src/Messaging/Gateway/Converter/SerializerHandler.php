@@ -1,0 +1,36 @@
+<?php
+declare(strict_types=1);
+
+namespace Ecotone\Messaging\Gateway\Converter;
+
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+
+class SerializerHandler
+{
+    const TARGET_MEDIA_TYPE = "ecotone.serializer.media_type";
+
+    /**
+     * @var ConversionService
+     */
+    private $conversionService;
+
+    public function __construct(ConversionService $conversionService)
+    {
+        $this->conversionService = $conversionService;
+    }
+
+    public function convert($data, array $metadata)
+    {
+        $targetMediaType = MediaType::parseMediaType($metadata[self::TARGET_MEDIA_TYPE]);
+
+        return $this->conversionService->convert(
+            $data,
+            TypeDescriptor::createFromVariable($data),
+            MediaType::createApplicationXPHP(),
+            $targetMediaType->hasTypeParameter() ? $targetMediaType->getTypeParameter() : TypeDescriptor::createAnythingType(),
+            $targetMediaType
+        );
+    }
+}

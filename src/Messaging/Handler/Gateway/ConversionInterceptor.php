@@ -48,7 +48,7 @@ class ConversionInterceptor
 
         $isMessage = $result instanceof Message;
         $data = $isMessage ? $result->getPayload() : $result;
-        $sourceMediaType = MediaType::createApplicationXPHPObject();
+        $sourceMediaType = MediaType::createApplicationXPHP();
         $sourceType = TypeDescriptor::createFromVariable($data);
 
         if ($isMessage) {
@@ -63,8 +63,8 @@ class ConversionInterceptor
 
         if (!$this->replyContentType) {
             if (!$sourceType->isCompatibleWith($this->interfaceToCall->getReturnType())) {
-                if ($this->conversionService->canConvert($sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHPObject())) {
-                    return $this->conversionService->convert($data, $sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHPObject());
+                if ($this->conversionService->canConvert($sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHP())) {
+                    return $this->conversionService->convert($data, $sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHP());
                 }
             }
 

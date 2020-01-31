@@ -37,10 +37,12 @@ class SerializerHandler
 
     public function convertToPHP($data, array $metadata)
     {
+        $sourceMediaType = MediaType::parseMediaType($metadata[self::MEDIA_TYPE]);
+
         return $this->conversionService->convert(
             $data,
-            TypeDescriptor::createFromVariable($data),
-            MediaType::parseMediaType($metadata[self::MEDIA_TYPE]),
+            $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($data),
+            $sourceMediaType,
             TypeDescriptor::create($metadata[self::TARGET_TYPE]),
             MediaType::createApplicationXPHP()
         );

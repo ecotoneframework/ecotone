@@ -90,11 +90,11 @@ class AggregateMessageRouterModule implements AnnotationModule
         $eventHandlersClassToChannelMapping = [];
         $eventHandlersRegexChannelToChannelMapping = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
-            $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannelForEventHandler($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
             $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
-            $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannelForEventHandler($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
             $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
         }
 

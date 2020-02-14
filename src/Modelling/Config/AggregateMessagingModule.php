@@ -158,6 +158,14 @@ class AggregateMessagingModule implements AnnotationModule
         return $methodAnnotation->endpointId;
     }
 
+    public static function getMessageClassOrInputChannelForEventHandler(AnnotationRegistration $registration): string
+    {
+        $inputChannelName = self::getMessageClassFor($registration) ?? $registration->getAnnotationForMethod()->endpointId;
+
+        Assert::notNull($inputChannelName, "Can't register {$registration}, lack of routing information. Have you forgot to type hint command/query/event or declare input channel name in annotation?");
+        return $inputChannelName;
+    }
+
     public static function getMessageClassOrInputChannel(AnnotationRegistration $registration): string
     {
         $inputChannelName = self::getMessageClassFor($registration) ?? $registration->getAnnotationForMethod()->inputChannelName;

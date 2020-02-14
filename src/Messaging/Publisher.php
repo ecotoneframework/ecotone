@@ -20,7 +20,7 @@ interface Publisher
     /**
      * @param object|array $data
      */
-    public function convertAndSend(object $data) : void;
+    public function convertAndSend($data) : void;
 
     /**
      * @param object|array $data

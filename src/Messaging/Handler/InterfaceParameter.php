@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\ErrorMessage;
 
 /**
  * Class InterfaceParameter
@@ -129,7 +130,7 @@ final class InterfaceParameter
      */
     public function isMessage() : bool
     {
-        return $this->getTypeHint() === Message::class || $this->getTypeHint() === ("\\" . Message::class) || is_subclass_of($this->getTypeHint(), Message::class);
+        return $this->typeDescriptor->equals(TypeDescriptor::create(Message::class)) || $this->typeDescriptor->equals(TypeDescriptor::create(ErrorMessage::class));
     }
 
     /**

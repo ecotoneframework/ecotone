@@ -17,7 +17,14 @@ interface Publisher
 
     public function sendWithMetadata(string $data, array $metadata, string $sourceMediaType = MediaType::TEXT_PLAIN) : void;
 
+    /**
+     * @param object|array $data
+     */
     public function convertAndSend(object $data) : void;
 
-    public function convertAndSendWithMetadata(object $data, array $metadata) : void;
+    /**
+     * @param object|array $data
+     * @param array  $metadata
+     */
+    public function convertAndSendWithMetadata($data, array $metadata) : void;
 }

@@ -360,7 +360,7 @@ final class MethodInvoker implements MessageProcessor
             $currentParameterMediaType = $isPayloadConverter ? $sourceMediaType : MediaType::createApplicationXPHP();
             $parameterType = $this->interfaceToCall->getParameterAtIndex($index)->getTypeDescriptor();
 
-            if (!($currentParameterMediaType->isCompatibleWith($parameterMediaType) && $sourceTypeDescriptor->isCompatibleWith($parameterType))) {
+            if (!($sourceTypeDescriptor->isCompatibleWith($parameterType))) {
                 $convertedData = null;
                 if ($this->canConvertParameter(
                     $sourceTypeDescriptor,

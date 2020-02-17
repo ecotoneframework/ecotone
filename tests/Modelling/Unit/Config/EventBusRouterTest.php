@@ -3,6 +3,7 @@
 
 namespace Test\Ecotone\Modelling\Unit\Config;
 
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Config\EventBusRouter;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Conversion\AbstractSuperAdmin;
@@ -17,9 +18,19 @@ use Test\Ecotone\Messaging\Fixture\Conversion\SuperAdmin;
  */
 class EventBusRouterTest extends TestCase
 {
-    public function test_routing_by_object()
+    public function test_routing_by_class()
     {
         $classNameToChannelNameMapping = [\stdClass::class => [\stdClass::class]];
+
+        $this->assertEquals(
+            [\stdClass::class],
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new \stdClass())
+        );
+    }
+
+    public function test_routing_by_object_type_hint()
+    {
+        $classNameToChannelNameMapping = [TypeDescriptor::OBJECT => [\stdClass::class]];
 
         $this->assertEquals(
             [\stdClass::class],

@@ -46,6 +46,9 @@ class EventBusRouter
         $resolvedChannels = [];
         $reflectionClass = new \ReflectionClass($object);
         $parent = $reflectionClass;
+        if (array_key_exists(TypeDescriptor::OBJECT, $this->listenNameToChannelNameMapping)) {
+            $resolvedChannels =  array_merge($resolvedChannels, $this->listenNameToChannelNameMapping[TypeDescriptor::OBJECT]);
+        }
         while ($parent = $parent->getParentClass()) {
             $resolvedChannels = array_merge($resolvedChannels, $this->getChannelsForClassName($parent));
         }

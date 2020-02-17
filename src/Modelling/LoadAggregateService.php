@@ -141,7 +141,7 @@ class LoadAggregateService
             }
 
             if (!$aggregate && !$this->loadForFactoryMethod) {
-                throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName} was not found for indentifiers " . \json_encode($aggregateIdentifiers));
+                throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} was not found for indentifiers " . \json_encode($aggregateIdentifiers));
             }
         }
 

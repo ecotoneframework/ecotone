@@ -29,6 +29,7 @@ final class MediaType
     const APPLICATION_XHTML_XML = "application/xhtml+xml";
     const APPLICATION_OCTET_STREAM = "application/octet-stream";
     const APPLICATION_X_PHP = "application/x-php";
+    const APPLICATION_X_PHP_ARRAY = "application/x-php;type=array";
     const APPLICATION_X_PHP_SERIALIZED = "application/x-php-serialized";
 
     private const TYPE_PARAMETER = "type";

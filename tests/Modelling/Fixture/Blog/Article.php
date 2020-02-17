@@ -28,6 +28,10 @@ class Article
      * @var string
      */
     private $content;
+    /**
+     * @var bool
+     */
+    private $isPublished;
 
     /**
      * Article constructor.

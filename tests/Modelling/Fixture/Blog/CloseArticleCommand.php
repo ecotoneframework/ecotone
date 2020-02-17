@@ -21,6 +21,20 @@ class CloseArticleCommand
      * @TargetAggregateIdentifier(identifierName="title")
      */
     private $titleName;
+    /**
+     * for testing purposes
+     *
+     * @var string
+     * @TargetAggregateIdentifier(identifierName="additionalUnusedIdentifier")
+     */
+    private $additionalUnusedIdentifier;
+    /**
+     * for testing purposes
+     *
+     * @var bool
+     * @TargetAggregateIdentifier(identifierName="isPublished")
+     */
+    private $isPublished;
 
     /**
      * PublishArticleCommand constructor.

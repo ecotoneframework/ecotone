@@ -129,6 +129,17 @@ class ClassDefinition
         throw InvalidArgumentException::create("There is no property with name {$name} in {$this->classDescriptor->toString()}");
     }
 
+    public function hasProperty(string $name) : bool
+    {
+        foreach ($this->properties as $property) {
+            if ($property->getName() === $name) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @param Type $annotationClass
      * @return array

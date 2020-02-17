@@ -199,7 +199,10 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                     /** @var TargetAggregateIdentifier $annotation */
                     $annotation = $property->getAnnotation($targetAggregateIdentifierAnnotation);
                     $mappingName = $annotation->identifierName ? $annotation->identifierName : $property->getName();
-                    $aggregateDefaultIdentifiers[$mappingName] = $property->getName();
+
+                    if ($classDefinition->hasProperty($mappingName) && $classDefinition->getProperty($mappingName)->hasAnnotation($aggregateIdentififerAnnotation)) {
+                        $aggregateDefaultIdentifiers[$mappingName] = $property->getName();
+                    }
                 }
                 if ($property->hasAnnotation($targetAggregateVersion)) {
                     $aggregateVersionMapping[$property->getName()] = $aggregateVersionPropertyName;

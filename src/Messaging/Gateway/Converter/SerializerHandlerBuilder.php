@@ -67,7 +67,8 @@ class SerializerHandlerBuilder extends InputOutputMessageHandlerBuilder
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [
-            $interfaceToCallRegistry->getFor(Serializer::class, $this->methodName)
+            $interfaceToCallRegistry->getFor(Serializer::class, $this->methodName),
+            $interfaceToCallRegistry->getFor(SerializerHandler::class, $this->methodName)
         ];
     }
 

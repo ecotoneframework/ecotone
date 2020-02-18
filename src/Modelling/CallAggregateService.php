@@ -132,7 +132,7 @@ class CallAggregateService
                 ->setPayload($result);
         }
 
-        if ($this->isCommandHandler || $result) {
+        if ($this->isCommandHandler || !is_null($result)) {
             return $resultMessage
                 ->build();
         }

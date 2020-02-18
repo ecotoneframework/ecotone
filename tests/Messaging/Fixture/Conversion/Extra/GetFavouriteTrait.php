@@ -3,6 +3,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Conversion\Extra;
 
+use Test\Ecotone\Messaging\Fixture\Conversion\Extra\PrivateDetails\GetPrivilegeTrait;
+
 /**
  * Class GetFavouriteTrait
  * @package Fixture\Conversion\Extra

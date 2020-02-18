@@ -7,7 +7,10 @@ use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ClassPropertyDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Test\Ecotone\Messaging\Fixture\Conversion\PrivateRocketDetails\PrivateDetails;
 use Test\Ecotone\Messaging\Fixture\Conversion\Product;
+use Test\Ecotone\Messaging\Fixture\Conversion\PublicRocketDetails\PublicDetails;
+use Test\Ecotone\Messaging\Fixture\Conversion\Rocket;
 use Test\Ecotone\Messaging\Fixture\Conversion\User;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
@@ -85,6 +88,20 @@ class ClassDefinitionTest extends TestCase
         $this->assertEquals(
             ClassPropertyDefinition::createPrivate("property", TypeDescriptor::create(ExtraObject::class), true, false, []),
             $classDefinition->getProperty("property")
+        );
+    }
+
+    public function test_retrieving_private_from_trait_inside_trait()
+    {
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Rocket::class));
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("publicDetails", TypeDescriptor::create(PublicDetails::class), true, false, []),
+            $classDefinition->getProperty("publicDetails")
+        );
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("privateDetails", TypeDescriptor::create(PrivateDetails::class), true, false, []),
+            $classDefinition->getProperty("privateDetails")
         );
     }
 

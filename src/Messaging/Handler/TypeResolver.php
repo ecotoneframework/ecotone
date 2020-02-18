@@ -589,11 +589,11 @@ class TypeResolver
         foreach ($reflectionClass->getTraits() as $trait) {
             foreach ($trait->getProperties() as $traitProperty) {
                 if ($traitProperty->getName() === $property->getName()) {
-                    return $this->createClassProperty(
-                        $className,
-                        $annotationParser,
+                    return $this->createClassPropertyUsingTraitsIfExists(
+                        $trait->getName(),
+                        $trait,
                         $traitProperty,
-                        $this->getPropertyDocblockTypeHint($reflectionClass, $trait, $property->getDeclaringClass(), $traitProperty)
+                        $annotationParser
                     );
                 }
             }

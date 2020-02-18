@@ -123,6 +123,16 @@ final class MediaType
     }
 
     /**
+     * @return MediaType
+     * @throws InvalidArgumentException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public static function createApplicationXPHPArray() : self
+    {
+        return self::parseMediaType(self::APPLICATION_X_PHP_ARRAY);
+    }
+
+    /**
      * @param string $type
      * @return MediaType
      * @throws InvalidArgumentException

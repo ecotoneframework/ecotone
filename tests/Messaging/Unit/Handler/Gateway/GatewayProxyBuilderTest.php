@@ -12,6 +12,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
+use Ecotone\Messaging\Conversion\UuidToString\GeneralUuidToStringConverter;
 use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverter;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -40,8 +41,10 @@ use Ecotone\Messaging\Transaction\TransactionInterceptor;
 use Exception;
 use ProxyManager\Proxy\RemoteObjectInterface;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use RuntimeException;
 use stdClass;
+use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleStdClassConverter;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
@@ -1274,8 +1277,38 @@ class GatewayProxyBuilderTest extends MessagingTest
             );
 
         $message = $gateway->executeNoParameter();
+        $this->assertNotInstanceOf(Uuid::class, $message->getPayload()[0]);
         $this->assertEquals(["e7019549-9733-45a3-b088-783de2b2357f", "30ae8690-c729-447c-b9f9-bafd668cb01e"], $message->getPayload());
         $this->assertEquals($expectedMediaType, $message->getHeaders()->getContentType()->toString());
+    }
+
+    public function test_forcing_conversion_when_target_type_is_array_and_source_is_also_array()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage([
+            Uuid::fromString("e7019549-9733-45a3-b088-783de2b2357f"),
+            Uuid::fromString("30ae8690-c729-447c-b9f9-bafd668cb01e")
+        ], [MessageHeaders::CONTENT_TYPE => MediaType::APPLICATION_X_PHP_ARRAY]));
+
+        $expectedMediaType = MediaType::APPLICATION_X_PHP_ARRAY;
+        /** @var MessageReturningGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $expectedMediaType)
+            ])
+            ->build(
+                InMemoryReferenceSearchService::createWith([
+                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([new ExampleStdClassConverter()])
+                ]),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $message = $gateway->executeNoParameter();
+        $this->assertIsNotArray($message->getPayload());
+        $this->assertNotInstanceOf(Uuid::class, $message->getPayload());
     }
 
     public function test_converting_according_to_interface_to_call_return_type()

@@ -71,7 +71,7 @@ class ConversionInterceptor
             return $result;
         }
 
-        if (!$sourceMediaType->isCompatibleWith($this->replyContentType)) {
+        if (!$sourceMediaType->isCompatibleWith($this->replyContentType) || ($this->replyContentType->hasTypeParameter() && $this->replyContentType->getTypeParameter()->isIterable())) {
             $targetType = $this->replyContentType->hasTypeParameter() ? $this->replyContentType->getTypeParameter() : TypeDescriptor::createAnythingType();
             if (!$this->conversionService->canConvert(
                 $sourceType,

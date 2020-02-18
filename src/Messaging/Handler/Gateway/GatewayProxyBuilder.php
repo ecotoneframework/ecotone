@@ -298,6 +298,7 @@ class GatewayProxyBuilder implements GatewayBuilder
         $resolvedInterfaces = [
             $interfaceToCallRegistry->getFor(GatewayInternalHandler::class, "handle"),
             $interfaceToCallRegistry->getFor(ErrorChannelInterceptor::class, "handle"),
+            $interfaceToCallRegistry->getFor(ConversionInterceptor::class, "convert"),
             $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName)
         ];
 

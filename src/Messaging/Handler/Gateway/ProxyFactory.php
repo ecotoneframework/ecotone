@@ -75,10 +75,12 @@ class ProxyFactory implements \Serializable
         return new self(new Configuration(), null);
     }
 
-    public function lockConfiguration() : void
+    /**
+     * @return Configuration
+     */
+    public function getConfiguration() : Configuration
     {
-        $this->isLocked = true;
-        spl_autoload_register($this->configuration->getProxyAutoloader());
+        return $this->configuration;
     }
 
     /**
@@ -110,6 +112,7 @@ class ProxyFactory implements \Serializable
 
             $factory->createProxy($className);
         }
+        $this->lockConfiguration();;
     }
 
     /**
@@ -165,21 +168,11 @@ class ProxyFactory implements \Serializable
     }
 
     /**
-     * @return Configuration
-     */
-    public function getConfiguration() : Configuration
-    {
-        return $this->configuration;
-    }
-
-    /**
      * @param string $interfaceName
      * @return bool
      */
     public function hasCachedVersion(string $interfaceName): bool
     {
-//        @TODO fix issues with not finding proxy
-        return true;
         $proxyClassName =
             $this->configuration
             ->getClassNameInflector()
@@ -198,7 +191,7 @@ class ProxyFactory implements \Serializable
      */
     public function serialize()
     {
-        return serialize(["path" => $this->cacheDirectoryPath]);
+        return serialize(["path" => $this->cacheDirectoryPath, "isLocked" => $this->isLocked]);
     }
 
     /**
@@ -206,15 +199,25 @@ class ProxyFactory implements \Serializable
      */
     public function unserialize($serialized)
     {
-        $serialized = unserialize($serialized)['path'];
-        if (is_null($serialized)) {
+        $serializedProxy = unserialize($serialized);
+        $path  = $serializedProxy['path'];
+        if (is_null($path)) {
             $cache = self::createNoCache();
         }else {
-            $cache = self::createWithCache($serialized);
+            $cache = self::createWithCache($path);
+            if ($serializedProxy['isLocked']) {
+                $cache->lockConfiguration();
+            }
         }
 
         $this->configuration = $cache->configuration;
         $this->isLocked = $cache->isLocked;
         $this->cacheDirectoryPath = $cache->cacheDirectoryPath;
+    }
+
+    private function lockConfiguration() : void
+    {
+        $this->isLocked = true;
+        spl_autoload_register($this->configuration->getProxyAutoloader());
     }
 }

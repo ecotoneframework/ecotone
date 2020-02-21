@@ -1029,12 +1029,6 @@ final class MessagingSystemConfiguration implements Configuration
             $converters[] = $converterBuilder->build($referenceSearchService);
         }
         $referenceSearchService = $this->prepareReferenceSearchServiceWithInternalReferences($referenceSearchService, $converters, $interfaceToCallRegistry);
-        if ($this->isLazyConfiguration) {
-            /** @var ProxyFactory $proxyFactory */
-            $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);
-            $proxyFactory->lockConfiguration();
-        }
-
 
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
         arsort($channelInterceptorsByImportance);

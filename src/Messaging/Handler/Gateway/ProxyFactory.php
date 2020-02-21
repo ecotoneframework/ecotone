@@ -88,6 +88,10 @@ class ProxyFactory implements \Serializable
      */
     public function warmUpCacheFor(array $classes): void
     {
+        if (!$classes) {
+            return;
+        }
+
         foreach ($classes as $className) {
             $factory = new LazyLoadingValueHolderFactory($this->configuration);
             $factory->createProxy(
@@ -182,6 +186,18 @@ class ProxyFactory implements \Serializable
                 'proxyManagerVersion' => Version::getVersion(),
                 'proxyOptions' => []
             ]);
+
+        if (!class_exists($proxyClassName)) {
+            $proxyClassName =
+                $this->configuration
+                    ->getClassNameInflector()
+                    ->getProxyClassName($interfaceName, [
+                        'className' => $interfaceName,
+                        'factory' => LazyLoadingValueHolderFactory::class,
+                        'proxyManagerVersion' => Version::getVersion(),
+                        'proxyOptions' => []
+                    ]);
+        }
 
         return class_exists($proxyClassName);
     }

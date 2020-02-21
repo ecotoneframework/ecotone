@@ -200,10 +200,8 @@ final class MessagingSystemConfiguration implements Configuration
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
 
         $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry, $applicationConfiguration);
-        if ($this->isLazyConfiguration) {
-            $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);
-            $this->gatewayClassesToGenerateProxies = [];
-        }
+        $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);
+        $this->gatewayClassesToGenerateProxies = [];
 
         $this->interfacesToCall = array_unique($this->interfacesToCall);
         $this->moduleReferenceSearchService = $moduleReferenceSearchService;
@@ -1029,6 +1027,9 @@ final class MessagingSystemConfiguration implements Configuration
             $converters[] = $converterBuilder->build($referenceSearchService);
         }
         $referenceSearchService = $this->prepareReferenceSearchServiceWithInternalReferences($referenceSearchService, $converters, $interfaceToCallRegistry);
+        /** @var ProxyFactory $proxyFactory */
+        $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);
+        $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);
 
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
         arsort($channelInterceptorsByImportance);

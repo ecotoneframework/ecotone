@@ -6,6 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Config;
 use Ecotone\Messaging\Config\ApplicationConfiguration;
 use Ecotone\Messaging\Config\OptionalReference;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
+use Ecotone\Messaging\PollableChannel;
 use Exception;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\DirectChannel;
@@ -286,6 +287,146 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertNull($calculatingService->getLastResult());
         $configuredMessagingSystem->runSeparatelyRunningEndpointBy("asyncChannel");
         $this->assertEquals(2, $calculatingService->getLastResult());
+    }
+
+    public function test_registering_presend_interceptor_wish_async_channel()
+    {
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result")
+                    ->withEndpointId("endpointId")
+                    ->withInputChannelName("inputChannel")
+            )
+            ->registerAsynchronousEndpoint("asyncChannel", "endpointId")
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("asyncChannel"))
+            ->registerBeforeSendInterceptor(MethodInterceptor::create(
+                "", InterfaceToCall::create(CalculatingService::class, "sum"),
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"),
+                1, CalculatingService::class
+            ))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $replyChannel = QueueChannel::create();
+        $requestMessage = MessageBuilder::withPayload(2)
+            ->setReplyChannel($replyChannel)
+            ->build();
+
+        /** @var PollableChannel $channel */
+        $channel = $configuredMessagingSystem->getMessageChannelByName("inputChannel");
+
+        $channel->send($requestMessage);
+
+        $this->assertEquals(3, $configuredMessagingSystem->getMessageChannelByName("asyncChannel")->receive()->getPayload());
+    }
+
+    public function test_registering_presend_interceptor_polling_channel()
+    {
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result")
+                    ->withEndpointId("endpointId")
+                    ->withInputChannelName("inputChannel")
+            )
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("inputChannel"))
+            ->registerBeforeSendInterceptor(MethodInterceptor::create(
+                "", InterfaceToCall::create(CalculatingService::class, "sum"),
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"),
+                1, CalculatingService::class
+            ))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $replyChannel = QueueChannel::create();
+        $requestMessage = MessageBuilder::withPayload(2)
+            ->setReplyChannel($replyChannel)
+            ->build();
+
+        /** @var PollableChannel $channel */
+        $channel = $configuredMessagingSystem->getMessageChannelByName("inputChannel");
+
+        $channel->send($requestMessage);
+
+        $this->assertEquals(3, $configuredMessagingSystem->getMessageChannelByName("inputChannel")->receive()->getPayload());
+    }
+
+    public function test_registering_multiple_before_send_interceptors()
+    {
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result")
+                    ->withEndpointId("endpointId1")
+                    ->withInputChannelName("inputChannel1")
+            )
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("inputChannel1"))
+            ->registerBeforeSendInterceptor(MethodInterceptor::create(
+                "1", InterfaceToCall::create(CalculatingService::class, "sum"),
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"),
+                1, CalculatingService::class
+            ))
+            ->registerBeforeSendInterceptor(MethodInterceptor::create(
+                "2", InterfaceToCall::create(CalculatingService::class, "sum"),
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"),
+                1, CalculatingService::class
+            ))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $replyChannel = QueueChannel::create();
+        $requestMessage = MessageBuilder::withPayload(2)
+            ->setReplyChannel($replyChannel)
+            ->build();
+
+        /** @var PollableChannel $channel */
+        $channel = $configuredMessagingSystem->getMessageChannelByName("inputChannel1");
+
+        $channel->send($requestMessage);
+
+        $this->assertEquals(4, $configuredMessagingSystem->getMessageChannelByName("inputChannel1")->receive()->getPayload());
+    }
+
+    public function test_not_duplicating_before_send_interceptors()
+    {
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result")
+                    ->withEndpointId("endpointId1")
+                    ->withInputChannelName("inputChannel1")
+            )
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result")
+                    ->withEndpointId("endpointId2")
+                    ->withInputChannelName("inputChannel1")
+            )
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("inputChannel1"))
+            ->registerBeforeSendInterceptor(MethodInterceptor::create(
+                "1", InterfaceToCall::create(CalculatingService::class, "sum"),
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"),
+                1, CalculatingService::class
+            ))
+            ->registerBeforeSendInterceptor(MethodInterceptor::create(
+                "2", InterfaceToCall::create(CalculatingService::class, "sum"),
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"),
+                1, CalculatingService::class
+            ))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $replyChannel = QueueChannel::create();
+        $requestMessage = MessageBuilder::withPayload(2)
+            ->setReplyChannel($replyChannel)
+            ->build();
+
+        /** @var PollableChannel $channel */
+        $channel = $configuredMessagingSystem->getMessageChannelByName("inputChannel1");
+
+        $channel->send($requestMessage);
+
+        $this->assertEquals(4, $configuredMessagingSystem->getMessageChannelByName("inputChannel1")->receive()->getPayload());
     }
 
     public function test_registering_asynchronous_endpoint_with_direct_channel()

@@ -12,6 +12,7 @@ use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
 use Ecotone\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
+use Ecotone\Messaging\Config\BeforeSend\BeforeSendChannelInterceptorBuilder;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\ConverterBuilder;
@@ -255,6 +256,24 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->channelAdapters as $channelAdapter) {
             $channelAdapter->withEndpointAnnotations(array_merge($channelAdapter->getEndpointAnnotations(), $pollableEndpointAnnotations));
         }
+        /** @var BeforeSendChannelInterceptorBuilder[] $beforeSendInterceptors */
+        $beforeSendInterceptors = [];
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
+                if ($this->beforeSendInterceptors) {
+                    $interceptorWithPointCuts = $this->getRelatedInterceptors($this->beforeSendInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceToCallRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames());
+                    foreach ($interceptorWithPointCuts as $interceptorReference) {
+                        $beforeSendInterceptors[] = new BeforeSendChannelInterceptorBuilder($messageHandlerBuilder->getInputMessageChannelName(), $interceptorReference);
+                    }
+                }
+            }
+        }
+
+        $beforeSendInterceptors = array_unique($beforeSendInterceptors);
+        foreach ($beforeSendInterceptors as $beforeSendInterceptor) {
+            $this->registerChannelInterceptor($beforeSendInterceptor);
+        }
+
         $this->configureAsynchronousEndpoints();
         $this->configureDefaultMessageChannels();
         $this->resolveRequiredReferences($interfaceToCallRegistry,
@@ -424,6 +443,7 @@ final class MessagingSystemConfiguration implements Configuration
                 }
             }
         }
+
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
             $aroundInterceptors = [];
             $beforeCallInterceptors = [];

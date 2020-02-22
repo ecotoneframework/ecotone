@@ -8,6 +8,7 @@ use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
+use Ecotone\Messaging\Config\BeforeSend\BeforeSendGateway;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\RequiredReference;
@@ -100,7 +101,8 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             InterfaceToCall::create(LimitExecutionAmountInterceptor::class, "postSend"),
             InterfaceToCall::create(LimitMemoryUsageInterceptor::class, "postSend"),
             InterfaceToCall::create(SignalInterceptor::class, "postSend"),
-            InterfaceToCall::create(ChainForwardPublisher::class, "forward")
+            InterfaceToCall::create(ChainForwardPublisher::class, "forward"),
+            InterfaceToCall::create(BeforeSendGateway::class, "execute")
         ]);
         $configuration
             ->registerInternalGateway(TypeDescriptor::create(EntrypointGateway::class))

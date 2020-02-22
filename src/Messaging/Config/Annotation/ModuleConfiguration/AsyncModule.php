@@ -17,6 +17,7 @@ use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
@@ -50,9 +51,9 @@ class AsyncModule extends NoExternalConfigurationModule implements AnnotationMod
     {
         $asynchronousClasses = $annotationRegistrationService->getAllClassesWithAnnotation(Async::class);
 
-        $asynchronousMethods = $annotationRegistrationService->findRegistrationsFor(
-            MessageEndpoint::class,
-            Async::class
+        $asynchronousMethods = array_merge(
+            $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Async::class),
+            $annotationRegistrationService->findRegistrationsFor(Aggregate::class, Async::class)
         );
         $endpoints = array_merge(
             $annotationRegistrationService->findRegistrationsFor(
@@ -60,10 +61,18 @@ class AsyncModule extends NoExternalConfigurationModule implements AnnotationMod
                 EndpointAnnotation::class
             ),
             $annotationRegistrationService->findRegistrationsFor(
+                Aggregate::class,
+                EndpointAnnotation::class
+            ),
+            $annotationRegistrationService->findRegistrationsFor(
                 MessageEndpoint::class,
                 EventHandler::class
-            )
-        );
+            ),
+            $annotationRegistrationService->findRegistrationsFor(
+                Aggregate::class,
+                EventHandler::class
+            ),
+            );
 
         $registeredAsyncEndpoints = [];
         foreach ($asynchronousMethods as $asynchronousMethod) {

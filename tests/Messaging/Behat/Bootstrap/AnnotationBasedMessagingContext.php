@@ -5,7 +5,6 @@ namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Tester\Exception\PendingException;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
@@ -19,6 +18,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use PHPUnit\Framework\Assert;
@@ -38,6 +38,8 @@ use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\CalculateG
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
+use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
+use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
@@ -105,6 +107,14 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         \Test\Ecotone\Modelling\Fixture\Order\OrderService::class => new \Test\Ecotone\Modelling\Fixture\Order\OrderService()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Modelling\Fixture\OrderAggregate":
+                {
+                    $objects = [
+                        OrderRepository::class => OrderRepository::createEmpty(),
+                        AddUserIdService::class => new AddUserIdService()
                     ];
                     break;
                 }
@@ -335,6 +345,30 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iOrderProduct(string $order)
     {
-        return $this->getCommandBus()->send(new PlaceOrder($order));
+        return $this->getCommandBus()->convertAndSend("order.register", MediaType::APPLICATION_X_PHP, new PlaceOrder($order));
+    }
+
+
+    /**
+     * @Then there should be :orderName order
+     */
+    public function thereShouldBeOrder(string $orderName)
+    {
+        Assert::assertNotNull($this->getQueryBus()->convertAndSend("order.getOrder", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
+    }
+
+    /**
+     * @Then there should be no :orderName order
+     */
+    public function thereShouldBeNoOrder(string $orderName)
+    {
+        $aggregateFound = true;
+        try {
+            $this->getQueryBus()->convertAndSend("order.getOrder", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]);
+        }catch (AggregateNotFoundException $exception) {
+            $aggregateFound = false;
+        }
+
+        Assert::assertFalse($aggregateFound, "Aggregate was found but should not");
     }
 }

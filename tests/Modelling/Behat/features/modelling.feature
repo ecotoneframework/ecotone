@@ -1,6 +1,5 @@
 Feature: activating as aggregate order entity
 
-
   Scenario: I order product and change shipping address
     Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate"
     And I have order with id 1 for 20 products registered to shipping address "London 12th street"
@@ -30,3 +29,10 @@ Feature: activating as aggregate order entity
     Then there should be nothing on the order list
     When I active receiver "orders"
     Then on the order list I should see "milk"
+
+  Scenario: I order product and I want to see it on the list of orders products
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\OrderAggregate"
+    When I order product "milk"
+    Then there should be no "milk" order
+    When I active receiver "orders"
+    Then there should be "milk" order

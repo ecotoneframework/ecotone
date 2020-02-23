@@ -47,6 +47,7 @@ use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
+use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\OrderService;
 use Test\Ecotone\Messaging\Fixture\Channel\DumbChannelInterceptor;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Handler\DumbGatewayBuilder;
@@ -257,6 +258,15 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ["reference1", "reference2", "reference3"],
             $messagingSystem->getRequiredReferences()
         );
+    }
+
+    public function test_throwing_exception_if_registered_asynchronous_for_not_existing_endpoint()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerAsynchronousEndpoint("asyncChannel", "endpointId")
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
     }
 
     public function test_registering_asynchronous_endpoint()
@@ -1423,6 +1433,44 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     MethodInterceptor::DEFAULT_PRECEDENCE,
                     CalculatingService::class
                 )
+            );
+    }
+
+    public function test_throwing_exception_if_registering_endpoint_with_id_same_as_message_channel_name()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(new OrderService(), "order")
+                    ->withInputChannelName("some")
+                    ->withEndpointId("order.register")
+            )
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("order.register"));
+    }
+
+    public function test_throwing_exception_if_registering_endpoint_with_id_same_as_default_message_channel()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createDirectMessageChannel("order.register"))
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(new OrderService(), "order")
+                    ->withInputChannelName("some")
+                    ->withEndpointId("order.register")
+            );
+    }
+
+    public function test_throwing_exception_if_message_handler_having_same_channel_and_endpoint_id()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(new OrderService(), "order")
+                    ->withInputChannelName("order.register")
+                    ->withEndpointId("order.register")
             );
     }
 

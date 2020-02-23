@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Annotation;
 
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -27,6 +28,10 @@ class IdentifiedAnnotation
      */
     public function __construct(array $values = [])
     {
+        if (isset($values["inputChannelName"]) && isset($values["endpointId"]) && $values["inputChannelName"] === $values["endpointId"]) {
+            throw ConfigurationException::create("endpointId should not equals inputChannelName for endpoint with id: `{$values["inputChannelName"]}`");
+        }
+
         foreach ($values as $propertyName => $value) {
             $this->{$propertyName} = $value;
         }

@@ -65,7 +65,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createEventBusByObject(array $channelNamesRouting) : self
     {
         return new self(
-            EventBus::CHANNEL_NAME_BY_OBJECT,
+            EventBus::CHANNEL_NAME_BY_OBJECT . ".endpoint",
             EventBus::CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
             "eventByObject"
@@ -81,7 +81,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createEventBusByName(array $channelNamesRouting) : self
     {
         return new self(
-            EventBus::CHANNEL_NAME_BY_NAME,
+            EventBus::CHANNEL_NAME_BY_NAME . ".endpoint",
             EventBus::CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
             "eventByName"
@@ -97,7 +97,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createCommandBusByObject(array $channelNamesRouting) : self
     {
         return new self(
-            CommandBus::CHANNEL_NAME_BY_OBJECT,
+            CommandBus::CHANNEL_NAME_BY_OBJECT . ".endpoint",
             CommandBus::CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
             "commandByObject"
@@ -113,7 +113,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createCommandBusByName(array $channelNamesRouting) : self
     {
         return new self(
-            CommandBus::CHANNEL_NAME_BY_NAME,
+            CommandBus::CHANNEL_NAME_BY_NAME . ".endpoint",
             CommandBus::CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
             "commandByName"
@@ -129,7 +129,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createQueryBusByObject(array $channelNamesRouting) : self
     {
         return new self(
-            QueryBus::CHANNEL_NAME_BY_OBJECT,
+            QueryBus::CHANNEL_NAME_BY_OBJECT . ".endpoint",
             QueryBus::CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
             "queryByObject"
@@ -145,7 +145,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createQueryBusByName(array $channelNamesRouting) : self
     {
         return new self(
-            QueryBus::CHANNEL_NAME_BY_NAME,
+            QueryBus::CHANNEL_NAME_BY_NAME . ".endpoint",
             QueryBus::CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
             "queryByName"

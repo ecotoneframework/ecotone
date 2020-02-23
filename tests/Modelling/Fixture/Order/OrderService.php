@@ -27,8 +27,7 @@ class OrderService
      * @param PlaceOrder $placeOrder
      * @CommandHandler(
      *     inputChannelName="order.register",
-     *     endpointId="orderReceiver",
-     *     poller=@Poller(handledMessageLimit=1, executionTimeLimitInMilliseconds=1)
+     *     endpointId="orderReceiver"
      * )
      */
     public function register(PlaceOrder $placeOrder) : void

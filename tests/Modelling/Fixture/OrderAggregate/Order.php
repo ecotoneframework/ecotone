@@ -34,9 +34,8 @@ class Order
     /**
      * @param PlaceOrder $placeOrder
      * @CommandHandler(
-     *     inputChannelName="order.register",
      *     endpointId="orderReceiver",
-     *     poller=@Poller(handledMessageLimit=1, executionTimeLimitInMilliseconds=1)
+     *     inputChannelName="order.register"
      * )
      * @Async(channelName="orders")
      * @return Order

@@ -276,6 +276,7 @@ final class MessagingSystemConfiguration implements Configuration
 
         $this->configureAsynchronousEndpoints();
         $this->configureDefaultMessageChannels();
+
         $this->resolveRequiredReferences($interfaceToCallRegistry,
             array_map(function (MethodInterceptor $methodInterceptor) {
                 return $methodInterceptor->getInterceptingObject();
@@ -318,6 +319,7 @@ final class MessagingSystemConfiguration implements Configuration
         $asynchronousChannels = [];
 
         foreach ($this->asynchronousEndpoints as $targetEndpointId => $asynchronousMessageChannel) {
+            $foundEndpoint = false;
             $asynchronousChannels[] = $asynchronousMessageChannel;
             foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
                 if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
@@ -334,8 +336,13 @@ final class MessagingSystemConfiguration implements Configuration
                         $this->pollingMetadata[$targetChannelName] = $this->pollingMetadata[$messageHandlerBuilder->getEndpointId()];
                         unset($this->pollingMetadata[$messageHandlerBuilder->getEndpointId()]);
                     }
+                    $foundEndpoint = true;
                     break;
                 }
+            }
+
+            if (!$foundEndpoint) {
+                throw ConfigurationException::create("Registered asynchronous endpoint for not existing id {$targetEndpointId}");
             }
         }
 
@@ -865,12 +872,14 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): Configuration
     {
         Assert::notNullAndEmpty($messageHandlerBuilder->getInputMessageChannelName(), "Lack information about input message channel for {$messageHandlerBuilder}");
-
         if (is_null($messageHandlerBuilder->getEndpointId()) || $messageHandlerBuilder->getEndpointId() === "") {
             $messageHandlerBuilder->withEndpointId(Uuid::uuid4()->toString());
         }
         if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->messageHandlerBuilders)) {
             throw ConfigurationException::create("Trying to register endpoints with same id {$messageHandlerBuilder->getEndpointId()}. {$messageHandlerBuilder} and {$this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()]}");
+        }
+        if ($messageHandlerBuilder->getInputMessageChannelName() === $messageHandlerBuilder->getEndpointId()) {
+            throw ConfigurationException::create("Can't register message handler {$messageHandlerBuilder} with same endpointId as inputChannelName.");
         }
 
         $this->requireReferences($messageHandlerBuilder->getRequiredReferenceNames());
@@ -889,6 +898,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()] = $messageHandlerBuilder;
+        $this->verifyEndpointAndChannelNameUniqueness();
 
         return $this;
     }
@@ -907,6 +917,7 @@ final class MessagingSystemConfiguration implements Configuration
 
         $this->channelBuilders[$messageChannelBuilder->getMessageChannelName()] = $messageChannelBuilder;
         $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
+        $this->verifyEndpointAndChannelNameUniqueness();
 
         return $this;
     }
@@ -918,6 +929,7 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->defaultChannelBuilders[$messageChannelBuilder->getMessageChannelName()] = $messageChannelBuilder;
         $this->requireReferences($messageChannelBuilder->getRequiredReferenceNames());
+        $this->verifyEndpointAndChannelNameUniqueness();
 
         return $this;
     }
@@ -1109,5 +1121,24 @@ final class MessagingSystemConfiguration implements Configuration
     private function __clone()
     {
 
+    }
+
+    /**
+     * @throws MessagingException
+     */
+    private function verifyEndpointAndChannelNameUniqueness(): void
+    {
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            foreach ($this->channelBuilders as $channelBuilder) {
+                if ($messageHandlerBuilder->getEndpointId() === $channelBuilder->getMessageChannelName()) {
+                    throw ConfigurationException::create("Endpoint id should not be the same as existing channel name. Got {$messageHandlerBuilder} which use endpoint id same as existing channel name {$channelBuilder->getMessageChannelName()}");
+                }
+            }
+            foreach ($this->defaultChannelBuilders as $channelBuilder) {
+                if ($messageHandlerBuilder->getEndpointId() === $channelBuilder->getMessageChannelName()) {
+                    throw ConfigurationException::create("Endpoint id should not be the same as existing channel name. Got {$messageHandlerBuilder} which use endpoint id same as existing channel name {$channelBuilder->getMessageChannelName()}");
+                }
+            }
+        }
     }
 }

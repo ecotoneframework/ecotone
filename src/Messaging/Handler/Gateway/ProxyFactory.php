@@ -123,14 +123,9 @@ class ProxyFactory implements \Serializable
      * @param string $interfaceName
      * @param Closure $buildCallback
      * @return object
-     * @throws MessagingException
      */
     public function createProxyClass(string $interfaceName, Closure $buildCallback): object
     {
-        if ($this->isLocked && !$this->hasCachedVersion($interfaceName)) {
-            throw ConfigurationException::create("There is problem with configuration. Proxy class for {$interfaceName} was not pregenerated. Can't use lazy loading configuration.");
-        }
-
         $factory = new LazyLoadingValueHolderFactory($this->configuration);
         return $factory->createProxy(
             $interfaceName,
@@ -169,37 +164,6 @@ class ProxyFactory implements \Serializable
                 return true;
             }
         );
-    }
-
-    /**
-     * @param string $interfaceName
-     * @return bool
-     */
-    public function hasCachedVersion(string $interfaceName): bool
-    {
-        $proxyClassName =
-            $this->configuration
-            ->getClassNameInflector()
-            ->getProxyClassName($interfaceName, [
-                'className' => $interfaceName,
-                'factory' => RemoteObjectFactory::class,
-                'proxyManagerVersion' => Version::getVersion(),
-                'proxyOptions' => []
-            ]);
-
-        if (!class_exists($proxyClassName)) {
-            $proxyClassName =
-                $this->configuration
-                    ->getClassNameInflector()
-                    ->getProxyClassName($interfaceName, [
-                        'className' => $interfaceName,
-                        'factory' => LazyLoadingValueHolderFactory::class,
-                        'proxyManagerVersion' => Version::getVersion(),
-                        'proxyOptions' => []
-                    ]);
-        }
-
-        return class_exists($proxyClassName);
     }
 
     /**

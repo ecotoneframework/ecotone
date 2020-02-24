@@ -227,13 +227,12 @@ class ProxyFactory implements \Serializable
         }
 
         $this->configuration = $cache->configuration;
-        $this->isLocked = $cache->isLocked;
         $this->cacheDirectoryPath = $cache->cacheDirectoryPath;
+        $this->isLocked = $cache->isLocked;
     }
 
     private function lockConfiguration() : void
     {
         $this->isLocked = true;
-        spl_autoload_register($this->configuration->getProxyAutoloader());
     }
 }

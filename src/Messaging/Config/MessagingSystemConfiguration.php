@@ -1062,6 +1062,7 @@ final class MessagingSystemConfiguration implements Configuration
         /** @var ProxyFactory $proxyFactory */
         $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);
         $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);
+        spl_autoload_register($proxyFactory->getConfiguration()->getProxyAutoloader());
 
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
         arsort($channelInterceptorsByImportance);

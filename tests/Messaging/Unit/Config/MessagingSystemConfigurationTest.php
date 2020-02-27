@@ -1472,17 +1472,21 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
     public function test_building_non_proxy_gateway_for_single_method()
     {
-        $buyGateway  = GatewayProxyBuilder::create("combinedGateway", SingleMethodGatewayExample::class, "buy", "buy");
+        $buyGateway  = GatewayProxyBuilder::create("combinedGateway", SingleMethodGatewayExample::class, "buy", "buy")
+                            ->withReplyChannel("replyChannel");
 
         $messagingSystem = $this->createMessagingSystemConfiguration()
             ->registerGatewayBuilder($buyGateway)
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("buy"))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("replyChannel"))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $messagingSystem->getMessageChannelByName("replyChannel")->send(MessageBuilder::withPayload("some")->build());
 
         $combinedGateway = $messagingSystem
             ->getNonProxyGatewayByName("combinedGateway");
 
-        $combinedGateway->executeMethod("buy", []);
+        $this->assertEquals("some", $combinedGateway->executeMethod("buy", []));
         $this->assertNotNull($messagingSystem->getMessageChannelByName("buy")->receive());
     }
 

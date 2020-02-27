@@ -17,5 +17,5 @@ interface SingleMethodGatewayExample
     /**
      * @Gateway(requestChannel="buy")
      */
-    public function buy() : void;
+    public function buy();
 }

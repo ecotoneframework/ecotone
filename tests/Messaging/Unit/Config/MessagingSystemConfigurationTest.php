@@ -45,6 +45,7 @@ use Exception;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\SingleMethodGatewayExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\OrderService;
 use Test\Ecotone\Messaging\Fixture\Channel\DumbChannelInterceptor;
@@ -1445,7 +1446,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertNotNull($messagingSystem->getMessageChannelByName("sell")->receive());
     }
 
-    public function test_building_non_proxy_gateway()
+    public function test_building_non_proxy_gateway_from_multiple_methods()
     {
         $buyGateway  = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "buy", "buy");
         $sellGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "sell", "sell");
@@ -1467,6 +1468,22 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $combinedGateway->executeMethod("sell", []);
         $this->assertNull($messagingSystem->getMessageChannelByName("buy")->receive());
         $this->assertNotNull($messagingSystem->getMessageChannelByName("sell")->receive());
+    }
+
+    public function test_building_non_proxy_gateway_for_single_method()
+    {
+        $buyGateway  = GatewayProxyBuilder::create("combinedGateway", SingleMethodGatewayExample::class, "buy", "buy");
+
+        $messagingSystem = $this->createMessagingSystemConfiguration()
+            ->registerGatewayBuilder($buyGateway)
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("buy"))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $combinedGateway = $messagingSystem
+            ->getNonProxyGatewayByName("combinedGateway");
+
+        $combinedGateway->executeMethod("buy", []);
+        $this->assertNotNull($messagingSystem->getMessageChannelByName("buy")->receive());
     }
 
     /**

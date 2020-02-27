@@ -175,8 +175,8 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             if (count($preparedGatewaysForReference) === 1) {
                 $gatewayProxyBuilder        = $preparedGatewaysForReference[0]
                     ->withLazyBuild($isLazyConfiguration);
-                $nonProxyCombinedGateways[$referenceName] = NonProxyCombinedGateway::createWith($referenceName, [$gatewayProxyBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver)]);
-                $gateways[]                 = GatewayReference::createWith(
+                $nonProxyCombinedGateways[$referenceName] = NonProxyCombinedGateway::createWith($referenceName, [$gatewayProxyBuilder->getRelatedMethodName() => $gatewayProxyBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver)]);
+                $gateways[$referenceName]                 = GatewayReference::createWith(
                     $referenceName,
                     $gatewayProxyBuilder->build($referenceSearchService, $channelResolver)
                 );

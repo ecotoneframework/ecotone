@@ -1470,14 +1470,33 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertNotNull($messagingSystem->getMessageChannelByName("sell")->receive());
     }
 
+    public function test_registering_multiple_gateways()
+    {
+        $buyGateway  = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "buy", "buy");
+        $sellGateway = GatewayProxyBuilder::create("combinedGateway", CombinedGatewayExample::class, "sell", "sell");
+        $buyGateway2  = GatewayProxyBuilder::create("gateway", SingleMethodGatewayExample::class, "buy", "buy");
+
+        $messagingSystem = $this->createMessagingSystemConfiguration()
+            ->registerGatewayBuilder($buyGateway)
+            ->registerGatewayBuilder($sellGateway)
+            ->registerGatewayBuilder($buyGateway2)
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("buy"))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("sell"))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $this->assertNotNull($messagingSystem->getNonProxyGatewayByName("combinedGateway"));
+        $this->assertNotNull($messagingSystem->getNonProxyGatewayByName("gateway"));
+    }
+
     public function test_building_non_proxy_gateway_for_single_method()
     {
         $buyGateway  = GatewayProxyBuilder::create("combinedGateway", SingleMethodGatewayExample::class, "buy", "buy")
-                            ->withReplyChannel("replyChannel");
+            ->withReplyChannel("replyChannel");
 
         $messagingSystem = $this->createMessagingSystemConfiguration()
             ->registerGatewayBuilder($buyGateway)
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("buy"))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("sell"))
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("replyChannel"))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 

@@ -126,44 +126,36 @@ class ProxyFactory implements \Serializable
      */
     public function createProxyClass(string $interfaceName, Closure $buildCallback): object
     {
-        $factory = new LazyLoadingValueHolderFactory($this->configuration);
-        return $factory->createProxy(
-            $interfaceName,
-            function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) use ($interfaceName, $buildCallback) {
-                $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
-                {
-                    /**
-                     * @var Closure
-                     */
-                    private $buildCallback;
+        $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
+        {
+            /**
+             * @var Closure
+             */
+            private $buildCallback;
 
-                    /**
-                     *  constructor.
-                     *
-                     * @param Closure $buildCallback
-                     */
-                    public function __construct(Closure $buildCallback)
-                    {
-                        $this->buildCallback = $buildCallback;
-                    }
-
-                    /**
-                     * @inheritDoc
-                     */
-                    public function call(string $wrappedClass, string $method, array $params = [])
-                    {
-                        $buildCallback = $this->buildCallback;
-                        $gateway = $buildCallback();
-
-                        return $gateway->execute($params);
-                    }
-                }, $this->configuration);
-
-                $wrappedObject = $factory->createProxy($interfaceName);
-
-                return true;
+            /**
+             *  constructor.
+             *
+             * @param Closure $buildCallback
+             */
+            public function __construct(Closure $buildCallback)
+            {
+                $this->buildCallback = $buildCallback;
             }
-        );
+
+            /**
+             * @inheritDoc
+             */
+            public function call(string $wrappedClass, string $method, array $params = [])
+            {
+                $buildCallback = $this->buildCallback;
+                $gateway = $buildCallback();
+
+                return $gateway->execute($params);
+            }
+        }, $this->configuration);
+
+        return $factory->createProxy($interfaceName);
     }
 
     /**

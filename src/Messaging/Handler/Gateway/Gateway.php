@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Gateway;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessageHeaders;
 use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -33,7 +34,7 @@ use Throwable;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class Gateway
+class Gateway implements NonProxyGateway
 {
     /**
      * @var MethodCallToMessageConverter
@@ -128,7 +129,7 @@ class Gateway
     }
 
     /**
-     * @param array|MethodArgument[] $methodArgumentValues
+     * @param array $methodArgumentValues
      * @return mixed
      * @throws MessagingException
      * @throws Throwable

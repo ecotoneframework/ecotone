@@ -174,6 +174,11 @@ class DumbGatewayBuilder implements GatewayBuilder
         return new \stdClass();
     }
 
+    public function buildWithoutProxyObject()
+    {
+        return new \stdClass();
+    }
+
     public function __toString()
     {
         return "dumb gateway";

@@ -34,16 +34,19 @@ class CombinedGatewayBuilderTest extends TestCase
         $requestChannelGatewayTwo = QueueChannel::create();
         $gatewayProxyBuilderTwo = GatewayProxyBuilder::create('ref-name', MultipleMethodsGatewayExample::class, 'execute2', $requestChannelNameGatewayTwo);
 
-        $multipleGatewayBuilder = CombinedGatewayBuilder::create(MultipleMethodsGatewayExample::class, [$gatewayProxyBuilderOne, $gatewayProxyBuilderTwo]);
+        $referenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $channelResolver        = InMemoryChannelResolver::createFromAssociativeArray(
+            [
+                $requestChannelNameGatewayOne => $requestChannelGatewayOne,
+                $requestChannelNameGatewayTwo => $requestChannelGatewayTwo
+            ]
+        );
+
+        $multipleGatewayBuilder = CombinedGatewayBuilder::create(MultipleMethodsGatewayExample::class, ["execute1" => $gatewayProxyBuilderOne->buildWithoutProxyObject($referenceSearchService, $channelResolver), "execute2" => $gatewayProxyBuilderTwo->buildWithoutProxyObject($referenceSearchService, $channelResolver)]);
         /** @var MultipleMethodsGatewayExample $gateway */
-        $gateway = $multipleGatewayBuilder->build(
-            InMemoryReferenceSearchService::createEmpty(),
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    $requestChannelNameGatewayOne => $requestChannelGatewayOne,
-                    $requestChannelNameGatewayTwo => $requestChannelGatewayTwo
-                ]
-            )
+        $gateway                = $multipleGatewayBuilder->build(
+            $referenceSearchService,
+            $channelResolver
         );
 
         $gateway->execute1('some1');

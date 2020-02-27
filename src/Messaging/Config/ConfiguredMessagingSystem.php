@@ -19,6 +19,13 @@ interface ConfiguredMessagingSystem
     public function getGatewayByName(string $gatewayReferenceName);
 
     /**
+     * @param string $gatewayReferenceName
+     * @return NonProxyCombinedGateway
+     * @throws \InvalidArgumentException if trying to find not existing gateway reference
+     */
+    public function getNonProxyGatewayByName(string $gatewayReferenceName);
+
+    /**
      * @return GatewayReference[]
      */
     public function getGatewayList() : iterable;

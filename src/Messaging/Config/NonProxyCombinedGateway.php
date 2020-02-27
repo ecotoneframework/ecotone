@@ -59,7 +59,7 @@ class NonProxyCombinedGateway
     {
         Assert::keyExists($this->methodGateways, $methodName, "Can't call gateway {$this->referenceName} with method {$methodName}. The method does not exists");
 
-        $this->methodGateways[$methodName]->execute($params);
+        return $this->methodGateways[$methodName]->execute($params);
     }
 
     /**

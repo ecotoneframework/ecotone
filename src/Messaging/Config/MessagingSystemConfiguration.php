@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Ecotone\Messaging\Annotation\PollableEndpoint;
 use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
@@ -252,7 +253,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry, ApplicationConfiguration $applicationConfiguration): void
     {
-        $pollableEndpointAnnotations = array_merge($applicationConfiguration->getPollableEndpointAnnotations(), [new LazyEventPublishing()]);
+        $pollableEndpointAnnotations = array_merge($applicationConfiguration->getPollableEndpointAnnotations(), [new PollableEndpoint()]);
         foreach ($this->channelAdapters as $channelAdapter) {
             $channelAdapter->withEndpointAnnotations(array_merge($channelAdapter->getEndpointAnnotations(), $pollableEndpointAnnotations));
         }

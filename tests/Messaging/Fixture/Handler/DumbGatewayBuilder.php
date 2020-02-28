@@ -6,6 +6,7 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -174,10 +175,16 @@ class DumbGatewayBuilder implements GatewayBuilder
         return new \stdClass();
     }
 
-    public function buildWithoutProxyObject()
+    public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): NonProxyGateway
     {
-        return new \stdClass();
+        return new class implements NonProxyGateway{
+            public function execute(array $methodArgumentValues)
+            {
+                // TODO: Implement execute() method.
+            }
+        };
     }
+
 
     public function __toString()
     {

@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodIntercep
 
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 
@@ -17,15 +18,15 @@ use Ecotone\Messaging\MessageChannel;
 class BeforeSendInterceptor implements ChannelInterceptor
 {
     /**
-     * @var EntrypointGateway
+     * @var NonProxyGateway
      */
     private $entrypointGateway;
 
     /**
      * BeforeSendInterceptor constructor.
-     * @param EntrypointGateway $entrypointGateway
+     * @param NonProxyGateway $entrypointGateway
      */
-    public function __construct(EntrypointGateway $entrypointGateway)
+    public function __construct(NonProxyGateway $entrypointGateway)
     {
         $this->entrypointGateway = $entrypointGateway;
     }
@@ -35,7 +36,7 @@ class BeforeSendInterceptor implements ChannelInterceptor
      */
     public function preSend(Message $message, MessageChannel $messageChannel): ?Message
     {
-        return $this->entrypointGateway->executeEntrypoint($message);
+        return $this->entrypointGateway->execute([$message]);
     }
 
     /**

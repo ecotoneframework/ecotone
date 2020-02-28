@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit\LazyEventBus;
 
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\LazyEventBus\InMemoryEventStore;
@@ -22,12 +23,12 @@ class LazyEventBusInterceptorTest extends TestCase
         $payload = new \stdClass();
         $metadata = ["token" => 123];
 
-        $eventBus = $this->createMock(EventBus::class);
+        $eventBus = $this->createMock(NonProxyGateway::class);
 
         $eventBus
             ->expects($this->once())
-            ->method("sendWithMetadata")
-            ->with($payload, $metadata);
+            ->method("execute")
+            ->with([$payload, $metadata]);
 
         $inMemoryEventStore = new InMemoryEventStore();
         $inMemoryEventStore->enqueue($payload, $metadata);

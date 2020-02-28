@@ -4,6 +4,7 @@
 namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
 
+use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Lite\EcotoneLiteConfiguration;
@@ -370,5 +371,40 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
         }
 
         Assert::assertFalse($aggregateFound, "Aggregate was found but should not");
+    }
+
+    /**
+     * @Then notification list should be empty
+     */
+    public function notificationListShouldBeEmpty()
+    {
+        Assert::assertEmpty($this->getQueryBus()->convertAndSend("order.getNotifiedOrders", MediaType::APPLICATION_X_PHP_ARRAY, []));
+    }
+
+    /**
+     * @Then on notification list I should see :orderName
+     */
+    public function onNotificationListIShouldSee(string $orderName)
+    {
+        $this->assertEquals(
+            [$orderName],
+            $this->getQueryBus()->convertAndSend("order.getNotifiedOrders", MediaType::APPLICATION_X_PHP_ARRAY, [])
+        );
+    }
+
+    /**
+     * @Then no notification for :orderName
+     */
+    public function noNotificationFor(string $orderName)
+    {
+        $this->assertFalse($this->getQueryBus()->convertAndSend("order.wasNotified", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
+    }
+
+    /**
+     * @Then there should be notification about :orderName
+     */
+    public function thereShouldBeNotificationAbout(string $orderName)
+    {
+        $this->assertTrue($this->getQueryBus()->convertAndSend("order.wasNotified", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
     }
 }

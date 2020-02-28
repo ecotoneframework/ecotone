@@ -382,7 +382,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                 GatewayPayloadBuilder::create("event"),
                 GatewayHeadersBuilder::create("metadata")
             ])
-            ->build($referenceSearchService, $channelResolver);
+            ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
         if ($this->isCommandHandler) {
             $chainCqrsMessageHandler
                 ->chain(

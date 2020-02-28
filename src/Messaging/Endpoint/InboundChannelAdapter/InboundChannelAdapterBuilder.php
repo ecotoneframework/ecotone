@@ -250,7 +250,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         }
 
         $gateway = $this->gatewayExecutor
-            ->build($referenceSearchService, $channelResolver);
+            ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
 
         $taskExecutor = new InboundChannelTaskExecutor(
             $gateway,

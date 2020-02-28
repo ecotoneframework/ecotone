@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
 use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Scheduling\TaskExecutor;
 
 /**
@@ -23,17 +24,17 @@ class InboundChannelTaskExecutor implements TaskExecutor
      */
     private $method;
     /**
-     * @var EntrypointGateway
+     * @var NonProxyGateway|EntrypointGateway
      */
     private $inboundChannelGateway;
 
     /**
      * InboundChannelGatewayExecutor constructor.
-     * @param EntrypointGateway $inboundChannelGateway
+     * @param NonProxyGateway $inboundChannelGateway
      * @param $serviceToCall
      * @param string $method
      */
-    public function __construct(EntrypointGateway $inboundChannelGateway, $serviceToCall, string $method)
+    public function __construct(NonProxyGateway $inboundChannelGateway, $serviceToCall, string $method)
     {
         $this->serviceToCall = $serviceToCall;
         $this->method = $method;
@@ -48,7 +49,7 @@ class InboundChannelTaskExecutor implements TaskExecutor
         $result = call_user_func_array([$this->serviceToCall, $this->method], []);
 
         if (!is_null($result)) {
-            $this->inboundChannelGateway->executeEntrypoint($result);
+            $this->inboundChannelGateway->execute([$result]);
         }
     }
 }

@@ -19,7 +19,18 @@ interface LazyEventBus
     const CHANNEL_NAME = "ecotone.modelling.bus.lazy_event";
 
     /**
-     * Send event for lazy publish
+     * Lazy send, it will be published after command handler is done
+     *
+     * @param object $event instance of command
+     *
+     * @return mixed
+     *
+     * @Gateway(requestChannel=LazyEventBus::CHANNEL_NAME)
+     */
+    public function send(object $event);
+
+    /**
+     * Lazy send, it will be published after command handler is done
      *
      * @param object $event instance of command
      * @param array  $metadata

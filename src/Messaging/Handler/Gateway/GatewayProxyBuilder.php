@@ -118,14 +118,6 @@ class GatewayProxyBuilder implements GatewayBuilder
         $this->methodName = $methodName;
         $this->requestChannelName = $requestChannelName;
         $this->requiredReferenceNames[] = ProxyFactory::REFERENCE_NAME;
-
-//        $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
-//            "",
-//            new ReplyMessageInterceptor(),
-//            "buildReply",
-//            ErrorChannelInterceptor::PRECEDENCE + 1,
-//            ""
-//        );
     }
 
     /**

@@ -41,6 +41,8 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
      */
     public function onStartup(): void
     {
+        $this->currentSentMessages = 0;
+        $this->shouldBeStopped = false;
         return;
     }
 

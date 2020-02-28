@@ -53,7 +53,7 @@ class LazyEventBusAroundInterceptorBuilder implements AroundInterceptorObjectBui
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): object
     {
         $eventBus = $this->eventBusGateway
-                        ->build($referenceSearchService, $channelResolver);
+                        ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
 
         return new LazyEventBusInterceptor($eventBus, $this->inMemoryEventStore);
     }

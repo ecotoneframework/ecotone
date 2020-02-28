@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Endpoint\Poller;
 
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -57,7 +58,7 @@ class PollerTaskExecutorTest extends TestCase
             ->setHeader("amqpAcker", $acknowledgementCallback)
             ->build();
 
-        $gateway = $this->createMock(EntrypointGateway::class);
+        $gateway = $this->createMock(NonProxyGateway::class);
 
         $pollableChannel = QueueChannel::create();
         $pollableChannel->send($message);

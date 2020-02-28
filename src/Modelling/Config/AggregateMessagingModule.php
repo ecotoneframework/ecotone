@@ -155,12 +155,12 @@ class AggregateMessagingModule implements AnnotationModule
         /** @var CommandHandler|QueryHandler $methodAnnotation */
         $methodAnnotation = $registration->getAnnotationForMethod();
 
-        return $methodAnnotation->endpointId;
+        return $methodAnnotation->endpointId . ".target";
     }
 
     public static function getMessageClassOrInputChannelForEventHandler(AnnotationRegistration $registration): string
     {
-        $inputChannelName = self::getMessageClassFor($registration) ?? $registration->getAnnotationForMethod()->endpointId;
+        $inputChannelName = self::getMessageClassFor($registration) ?? $registration->getAnnotationForMethod()->endpointId . ".target";
 
         Assert::notNull($inputChannelName, "Can't register {$registration}, lack of routing information. Have you forgot to type hint command/query/event or declare input channel name in annotation?");
         return $inputChannelName;
@@ -228,8 +228,8 @@ class AggregateMessagingModule implements AnnotationModule
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {
-            $inputChannelName = $registration->getAnnotationForMethod()->endpointId;
-            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->dropMessageOnNotFound, $registration->getAnnotationForMethod()->endpointId . ".endpoint");
+            $inputChannelName = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, $inputChannelName, $registration->getAnnotationForMethod()->dropMessageOnNotFound, $registration->getAnnotationForMethod()->endpointId);
         }
 
         foreach ($this->aggregateQueryHandlerRegistrations as $registration) {
@@ -294,7 +294,8 @@ class AggregateMessagingModule implements AnnotationModule
             $inputChannelNames = $this->addUniqueChannelName(self::getMessageChannelFor($registration), $inputChannelNames, true);
         }
         foreach ($this->serviceEventHandlers as $registration) {
-            $configuration->registerMessageHandler($this->createServiceActivator($registration->getAnnotationForMethod()->endpointId, $registration, $registration->getAnnotationForMethod()->endpointId . ".endpoint"));
+            $inputChannelName = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            $configuration->registerMessageHandler($this->createServiceActivator($inputChannelName, $registration, $registration->getAnnotationForMethod()->endpointId));
         }
     }
 

@@ -53,7 +53,9 @@ class EventBusRouter
             $resolvedChannels = array_merge($resolvedChannels, $this->getChannelsForClassName($parent));
         }
 
-        return array_values(array_unique(array_merge($resolvedChannels, $this->getChannelsForClassName($reflectionClass))));
+        $resolvedChannels = array_values(array_unique(array_merge($resolvedChannels, $this->getChannelsForClassName($reflectionClass))));
+
+        return $resolvedChannels;
     }
 
     /**

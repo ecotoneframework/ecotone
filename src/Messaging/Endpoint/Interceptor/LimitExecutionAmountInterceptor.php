@@ -42,6 +42,8 @@ class LimitExecutionAmountInterceptor implements ConsumerInterceptor
      */
     public function onStartup(): void
     {
+        $this->currentExecutionAmount = 0;
+        $this->shouldBeStopped = false;
         return;
     }
 

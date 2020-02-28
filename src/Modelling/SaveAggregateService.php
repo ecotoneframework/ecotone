@@ -5,6 +5,7 @@ namespace Ecotone\Modelling;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
@@ -29,7 +30,7 @@ class SaveAggregateService
      */
     private $propertyReaderAccessor;
     /**
-     * @var LazyEventBus
+     * @var NonProxyGateway|LazyEventBus
      */
     private $lazyEventBus;
     /**
@@ -55,11 +56,11 @@ class SaveAggregateService
      * @param object|StandardRepository|EventSourcedRepository $aggregateRepository
      * @param PropertyEditorAccessor $propertyEditorAccessor
      * @param PropertyReaderAccessor $propertyReaderAccessor
-     * @param LazyEventBus $lazyEventBus
+     * @param NonProxyGateway $lazyEventBus
      * @param string|null $eventMethod
      * @param array|null $versionMapping
      */
-    public function __construct(string $aggregateClassName, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, LazyEventBus $lazyEventBus, ?string $eventMethod, ?array $versionMapping)
+    public function __construct(string $aggregateClassName, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $lazyEventBus, ?string $eventMethod, ?array $versionMapping)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
@@ -147,7 +148,7 @@ class SaveAggregateService
         $this->aggregateRepository->save($aggregateIds, $this->aggregateRepository instanceof EventSourcedRepository ? $events : $aggregate, $metadata, $nextVersion);
 
         foreach ($events as $event) {
-            $this->lazyEventBus->sendWithMetadata($event, $metadata);
+            $this->lazyEventBus->execute([$event, $metadata]);
         }
 
         return MessageBuilder::fromMessage($message)

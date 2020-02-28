@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
 use Ecotone\Messaging\Endpoint\EntrypointGateway;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Scheduling\TaskExecutor;
@@ -26,7 +27,7 @@ class PollerTaskExecutor implements TaskExecutor
      */
     private $pollableChannel;
     /**
-     * @var EntrypointGateway
+     * @var NonProxyGateway|EntrypointGateway
      */
     private $entrypointGateway;
     /**
@@ -35,7 +36,7 @@ class PollerTaskExecutor implements TaskExecutor
     private $pollableChannelName;
 
 
-    public function __construct(string $endpointId, string $pollableChannelName, PollableChannel $pollableChannel, EntrypointGateway $entrypointGateway)
+    public function __construct(string $endpointId, string $pollableChannelName, PollableChannel $pollableChannel, NonProxyGateway $entrypointGateway)
     {
         $this->endpointId = $endpointId;
         $this->pollableChannel = $pollableChannel;
@@ -61,7 +62,7 @@ class PollerTaskExecutor implements TaskExecutor
             }
 
             try {
-                $this->entrypointGateway->executeEntrypoint($message);
+                $this->entrypointGateway->execute([$message]);
 
                 if ($acknowledgementCallback->isAutoAck()) {
                     $acknowledgementCallback->accept();

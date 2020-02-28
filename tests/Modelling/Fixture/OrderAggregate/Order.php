@@ -7,7 +7,10 @@ use Ecotone\Messaging\Annotation\Poller;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\WithAggregateEvents;
+use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserId;
 
@@ -17,18 +20,24 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserId;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  * @AddUserId()
+ * @Async(channelName="orders")
  */
 class Order
 {
+    use WithAggregateEvents;
+
     /**
      * @var string
      * @AggregateIdentifier()
      */
     private $orderId;
 
+    private $isNotified = false;
+
     private function __construct(string $orderId)
     {
         $this->orderId = $orderId;
+        $this->record(new OrderWasPlaced($orderId));
     }
 
     /**
@@ -37,12 +46,19 @@ class Order
      *     endpointId="orderReceiver",
      *     inputChannelName="order.register"
      * )
-     * @Async(channelName="orders")
      * @return Order
      */
     public static function register(PlaceOrder $placeOrder) : self
     {
-        return new self($placeOrder->getPersonId());
+        return new self($placeOrder->getOrderId());
+    }
+
+    /**
+     * @EventHandler(endpointId="orderPlaced")
+     */
+    public function notify(OrderWasPlaced $order) : void
+    {
+        $this->isNotified = true;
     }
 
     /**
@@ -51,5 +67,13 @@ class Order
     public function getRegisteredOrder() : string
     {
         return $this->orderId;
+    }
+
+    /**
+     * @QueryHandler(inputChannelName="order.wasNotified")
+     */
+    public function getIsNotified() : bool
+    {
+        return $this->isNotified;
     }
 }

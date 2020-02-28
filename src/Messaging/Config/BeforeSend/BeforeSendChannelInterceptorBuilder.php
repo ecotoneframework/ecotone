@@ -77,7 +77,7 @@ class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
         $directChannel = DirectChannel::create();
         $directChannel->subscribe($messageHandler);
         /** @var BeforeSendGateway $gateway */
-        $gateway = $this->gateway->build($referenceSearchService, InMemoryChannelResolver::createFromAssociativeArray([
+        $gateway = $this->gateway->buildWithoutProxyObject($referenceSearchService, InMemoryChannelResolver::createFromAssociativeArray([
             $this->internalRequestChannelName => $directChannel
         ]));
 

@@ -740,8 +740,8 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_service_event_handler()
     {
         $commandHandler = ServiceActivatorBuilder::create(ExampleEventEventHandler::class, "doSomething")
-            ->withInputChannelName('some-id')
-            ->withEndpointId('some-id.endpoint');
+            ->withInputChannelName('some-id.target')
+            ->withEndpointId('some-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler);
@@ -766,13 +766,13 @@ class AggregateMessagingModuleTest extends TestCase
     public function test_registering_service_event_handler_with_extra_services()
     {
         $commandHandler = ServiceActivatorBuilder::create(ExampleEventHandlerWithServices::class, "doSomething")
-            ->withInputChannelName('some-id')
+            ->withInputChannelName('some-id.target')
             ->withMethodParameterConverters([
                 PayloadBuilder::create("command"),
                 ReferenceBuilder::create("service1", stdClass::class),
                 ReferenceBuilder::create("service2", stdClass::class)
             ])
-            ->withEndpointId('some-id.endpoint');
+            ->withEndpointId('some-id');
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler($commandHandler);

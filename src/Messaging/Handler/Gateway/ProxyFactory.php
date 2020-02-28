@@ -33,22 +33,16 @@ class ProxyFactory implements \Serializable
      */
     private $configuration;
     /**
-     * @var bool
-     */
-    private $isLocked = false;
-    /**
      * @var string|null
      */
     private $cacheDirectoryPath;
 
     /**
      * ProxyConfiguration constructor.
-     * @param Configuration $configuration
      * @param string|null $cacheDirectoryPath
      */
-    private function __construct(Configuration $configuration, ?string $cacheDirectoryPath)
+    private function __construct(?string $cacheDirectoryPath)
     {
-        $this->configuration = $configuration;
         $this->cacheDirectoryPath = $cacheDirectoryPath;
     }
 
@@ -58,13 +52,7 @@ class ProxyFactory implements \Serializable
      */
     public static function createWithCache(string $cacheDirectoryPath) : self
     {
-        $configuration = new Configuration();
-        $configuration->setProxiesTargetDir($cacheDirectoryPath);
-        $fileLocator = new FileLocator($configuration->getProxiesTargetDir());
-        $configuration->setGeneratorStrategy(new FileWriterGeneratorStrategy($fileLocator));
-        $configuration->setClassSignatureGenerator(new ClassSignatureGenerator(new SignatureGenerator()));
-
-        return new self($configuration, $cacheDirectoryPath);
+        return new self($cacheDirectoryPath);
     }
 
     /**
@@ -72,7 +60,7 @@ class ProxyFactory implements \Serializable
      */
     public static function createNoCache() : self
     {
-        return new self(new Configuration(), null);
+        return new self(null);
     }
 
     /**
@@ -80,7 +68,16 @@ class ProxyFactory implements \Serializable
      */
     public function getConfiguration() : Configuration
     {
-        return $this->configuration;
+        $configuration = new Configuration();
+
+        if ($this->cacheDirectoryPath) {
+            $configuration->setProxiesTargetDir($this->cacheDirectoryPath);
+            $fileLocator = new FileLocator($configuration->getProxiesTargetDir());
+            $configuration->setGeneratorStrategy(new FileWriterGeneratorStrategy($fileLocator));
+            $configuration->setClassSignatureGenerator(new ClassSignatureGenerator(new SignatureGenerator()));
+        }
+
+        return $configuration;
     }
 
     /**
@@ -93,7 +90,7 @@ class ProxyFactory implements \Serializable
         }
 
         foreach ($classes as $className) {
-            $factory = new LazyLoadingValueHolderFactory($this->configuration);
+            $factory = new LazyLoadingValueHolderFactory($this->getConfiguration());
             $factory->createProxy(
                 $className,
                 function (& $wrappedObject, $proxy, $method, $parameters, & $initializer) {
@@ -112,11 +109,10 @@ class ProxyFactory implements \Serializable
                 {
                     return 0;
                 }
-            }, $this->configuration);
+            }, $this->getConfiguration());
 
             $factory->createProxy($className);
         }
-        $this->lockConfiguration();;
     }
 
     /**
@@ -153,7 +149,7 @@ class ProxyFactory implements \Serializable
 
                 return $gateway->execute($params);
             }
-        }, $this->configuration);
+        }, $this->getConfiguration());
 
         return $factory->createProxy($interfaceName);
     }
@@ -163,7 +159,7 @@ class ProxyFactory implements \Serializable
      */
     public function serialize()
     {
-        return serialize(["path" => $this->cacheDirectoryPath, "isLocked" => $this->isLocked]);
+        return serialize(["path" => $this->cacheDirectoryPath]);
     }
 
     /**
@@ -177,18 +173,8 @@ class ProxyFactory implements \Serializable
             $cache = self::createNoCache();
         }else {
             $cache = self::createWithCache($path);
-            if ($serializedProxy['isLocked']) {
-                $cache->lockConfiguration();
-            }
         }
 
-        $this->configuration = $cache->configuration;
         $this->cacheDirectoryPath = $cache->cacheDirectoryPath;
-        $this->isLocked = $cache->isLocked;
-    }
-
-    private function lockConfiguration() : void
-    {
-        $this->isLocked = true;
     }
 }

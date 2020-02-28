@@ -23,7 +23,7 @@ class PlaceOrder
     /**
      * @return string
      */
-    public function getPersonId(): string
+    public function getOrderId(): string
     {
         return $this->personId;
     }

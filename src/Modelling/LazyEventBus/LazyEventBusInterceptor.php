@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling\LazyEventBus;
 
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Modelling\EventBus;
 
@@ -15,7 +16,7 @@ class LazyEventBusInterceptor
     const PRECEDENCE = 10;
 
     /**
-     * @var EventBus
+     * @var NonProxyGateway|EventBus
      */
     private $eventBus;
     /**
@@ -25,10 +26,10 @@ class LazyEventBusInterceptor
 
     /**
      * LazyEventBusInterceptor constructor.
-     * @param EventBus $eventBus
+     * @param NonProxyGateway $eventBus
      * @param InMemoryEventStore $inMemoryEventStore
      */
-    public function __construct(EventBus $eventBus, InMemoryEventStore $inMemoryEventStore)
+    public function __construct(NonProxyGateway $eventBus, InMemoryEventStore $inMemoryEventStore)
     {
         $this->eventBus = $eventBus;
         $this->inMemoryEventStore = $inMemoryEventStore;
@@ -41,7 +42,7 @@ class LazyEventBusInterceptor
         while (!$this->inMemoryEventStore->isEmpty()) {
             $event = $this->inMemoryEventStore->dequeue();
 
-            $this->eventBus->sendWithMetadata($event['data'], $event['metadata']);
+            $this->eventBus->execute([$event['data'], $event['metadata']]);
         }
 
         return $reply;

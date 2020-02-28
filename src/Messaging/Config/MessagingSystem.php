@@ -193,7 +193,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
                 $gateways[$referenceName] =
                     GatewayReference::createWith(
                         $referenceName,
-                        CombinedGatewayBuilder::create($preparedGatewaysForReference[0]->getInterfaceName(), $nonProxyCombinedGateways)
+                        CombinedGatewayBuilder::create($preparedGatewaysForReference[0]->getInterfaceName(), $nonProxyCombinedGatewaysMethods)
                             ->build($referenceSearchService, $channelResolver)
                     );
             }

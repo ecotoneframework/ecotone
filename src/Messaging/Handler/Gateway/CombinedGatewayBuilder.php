@@ -74,6 +74,7 @@ class CombinedGatewayBuilder
             public function call(string $wrappedClass, string $method, array $params = [])
             {
                 if (!isset($this->gateways[$method])) {
+                    var_dump(array_keys($this->gateways));
                     throw new \InvalidArgumentException("{$wrappedClass}:{$method} has not registered gateway");
                 }
 

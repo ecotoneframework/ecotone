@@ -18,6 +18,7 @@ use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
 use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilder;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
 use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
+use Ecotone\Messaging\Endpoint\AcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
@@ -102,7 +103,8 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             InterfaceToCall::create(LimitMemoryUsageInterceptor::class, "postSend"),
             InterfaceToCall::create(SignalInterceptor::class, "postSend"),
             InterfaceToCall::create(ChainForwardPublisher::class, "forward"),
-            InterfaceToCall::create(BeforeSendGateway::class, "execute")
+            InterfaceToCall::create(BeforeSendGateway::class, "execute"),
+            InterfaceToCall::create(AcknowledgeConfirmationInterceptor::class, "ack")
         ]);
         $configuration
             ->registerInternalGateway(TypeDescriptor::create(InboundGatewayEntrypoint::class))

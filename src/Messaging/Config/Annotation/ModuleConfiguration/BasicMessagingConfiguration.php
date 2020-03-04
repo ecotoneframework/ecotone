@@ -90,6 +90,8 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
         }else {
             $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         }
+        $configuration->registerConsumerFactory(new PollingConsumerBuilder());
+
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
         $configuration->registerConverter(new UuidToStringConverterBuilder());

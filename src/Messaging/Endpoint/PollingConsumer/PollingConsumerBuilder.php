@@ -3,23 +3,26 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
+use Ecotone\Enqueue\EnqueueAcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Endpoint\AcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
-use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
+use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\InterceptedMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Logger\ExceptionLoggingInterceptorBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -55,6 +58,15 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             "executeEntrypoint",
             $this->requestChannelName
         );
+
+        $this->entrypointGateway->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptor(""));
+        $this->entrypointGateway->addAroundInterceptor(AroundInterceptorReference::createWithObjectBuilder(
+            "errorLog",
+            new ExceptionLoggingInterceptorBuilder(),
+            "logException",
+            ErrorChannelInterceptor::PRECEDENCE - 1,
+            ""
+        ));
     }
 
     /**
@@ -122,6 +134,14 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     /**
      * @inheritDoc
      */
+    public function isSupporting(MessageHandlerBuilder $messageHandlerBuilder, MessageChannelBuilder $relatedMessageChannel): bool
+    {
+        return $relatedMessageChannel->isPollable();
+    }
+
+    /**
+     * @inheritDoc
+     */
     protected function buildAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         Assert::notNullAndEmpty($messageHandlerBuilder->getEndpointId(), "Message Endpoint name can't be empty for {$messageHandlerBuilder}");
@@ -152,17 +172,9 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             $messageHandlerBuilder->getEndpointId(),
             SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
             PeriodicTrigger::create(1, 0),
-            new PollerTaskExecutor($messageHandlerBuilder->getEndpointId(), $messageHandlerBuilder->getInputMessageChannelName(), $pollableChannel, $gateway, (bool)$pollingMetadata->getErrorChannelName())
+            new PollerTaskExecutor($messageHandlerBuilder->getInputMessageChannelName(), $pollableChannel, $gateway)
         );
 
         return $inboundChannelAdapter;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function isSupporting(MessageHandlerBuilder $messageHandlerBuilder, MessageChannelBuilder $relatedMessageChannel): bool
-    {
-        return $relatedMessageChannel instanceof SimpleMessageChannelBuilder && $relatedMessageChannel->isPollable();
     }
 }

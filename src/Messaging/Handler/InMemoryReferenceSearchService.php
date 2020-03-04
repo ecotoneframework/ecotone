@@ -6,8 +6,11 @@ use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyConfiguration;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
+use Ecotone\Messaging\Handler\Logger\EchoLogger;
+use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\Support\Assert;
 use ProxyManager\Configuration;
+use Psr\Log\NullLogger;
 
 /**
  * Class InMemoryReferenceSearchService
@@ -46,6 +49,9 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
             }
             if (!array_key_exists(ProxyFactory::REFERENCE_NAME, $objectsToResolve)) {
                 $objectsToResolve[ProxyFactory::REFERENCE_NAME] = ProxyFactory::createNoCache();
+            }
+            if (!array_key_exists(LoggingHandlerBuilder::LOGGER_REFERENCE, $objectsToResolve)) {
+                $objectsToResolve[LoggingHandlerBuilder::LOGGER_REFERENCE] = new NullLogger();
             }
         }
         $this->referenceSearchService = $referenceSearchService;

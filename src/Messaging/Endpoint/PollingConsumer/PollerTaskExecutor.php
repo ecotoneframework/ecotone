@@ -19,10 +19,6 @@ use Ecotone\Messaging\Support\MessageBuilder;
 class PollerTaskExecutor implements TaskExecutor
 {
     /**
-     * @var string
-     */
-    private $endpointId;
-    /**
      * @var PollableChannel
      */
     private $pollableChannel;
@@ -34,19 +30,13 @@ class PollerTaskExecutor implements TaskExecutor
      * @var string
      */
     private $pollableChannelName;
-    /**
-     * @var bool
-     */
-    private $errorHandledInErrorChannel;
 
 
-    public function __construct(string $endpointId, string $pollableChannelName, PollableChannel $pollableChannel, NonProxyGateway $entrypointGateway, bool $errorHandledInErrorChannel)
+    public function __construct(string $pollableChannelName, PollableChannel $pollableChannel, NonProxyGateway $entrypointGateway)
     {
-        $this->endpointId = $endpointId;
         $this->pollableChannel = $pollableChannel;
         $this->entrypointGateway = $entrypointGateway;
         $this->pollableChannelName = $pollableChannelName;
-        $this->errorHandledInErrorChannel = $errorHandledInErrorChannel;
     }
 
     public function execute(): void
@@ -59,26 +49,7 @@ class PollerTaskExecutor implements TaskExecutor
                 ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, $this->pollableChannelName)
                 ->build();
 
-            $acknowledgementCallback = NullAcknowledgementCallback::create();
-            if ($message->getHeaders()->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
-                $acknowledgementCallback = $message->getHeaders()->get(
-                    $message->getHeaders()->get(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)
-                );
-            }
-
-            try {
-                $this->entrypointGateway->execute([$message]);
-
-                if ($acknowledgementCallback->isAutoAck()) {
-                    $acknowledgementCallback->accept();
-                }
-            }catch (\Throwable $exception) {
-                if ($this->errorHandledInErrorChannel) {
-                    throw $exception;
-                }
-
-                $acknowledgementCallback->requeue();
-            }
+            $this->entrypointGateway->execute([$message]);
         }
     }
 }

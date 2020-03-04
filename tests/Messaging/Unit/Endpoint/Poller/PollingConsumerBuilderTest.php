@@ -5,17 +5,25 @@ namespace Test\Ecotone\Messaging\Unit\Endpoint\Poller;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
+use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Messaging\Transaction\Null\NullTransaction;
 use Ecotone\Messaging\Transaction\Null\NullTransactionFactory;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerThrowingExceptionService;
+use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
+use Test\Ecotone\Messaging\Fixture\Handler\FakeReplyMessageProducer;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
@@ -61,38 +69,6 @@ class PollingConsumerBuilderTest extends MessagingTest
     /**
      * @throws MessagingException
      */
-    public function __test_calling_with_message_consumption_limit()
-    {
-        $pollingConsumerBuilder = new PollingConsumerBuilder();
-        $pollableChannelName = "pollableChannelName";
-        $pollableChannel = QueueChannel::create();
-
-        $directObjectReference = ConsumerContinuouslyWorkingService::create();
-        $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "executeReturn")
-            ->withEndpointId("test")
-            ->withInputChannelName($pollableChannelName);
-
-        $pollingConsumer = $pollingConsumerBuilder->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                $pollableChannelName => $pollableChannel
-            ]),
-            InMemoryReferenceSearchService::createEmpty(),
-            $replyViaHeadersMessageHandlerBuilder,
-            PollingMetadata::create("some")
-                ->setHandledMessageLimit(3)
-        );
-
-        $pollableChannel->send(MessageBuilder::withPayload("somePayload")->build());
-        $pollableChannel->send(MessageBuilder::withPayload("somePayload")->build());
-        $pollableChannel->send(MessageBuilder::withPayload("somePayload")->build());
-
-        $pollingConsumer->run();
-        $this->assertNull($pollableChannel->receive());
-    }
-
-    /**
-     * @throws MessagingException
-     */
     public function test_passing_message_to_error_channel_on_failure()
     {
         $pollingConsumerBuilder = new PollingConsumerBuilder();
@@ -123,5 +99,107 @@ class PollingConsumerBuilderTest extends MessagingTest
         $pollingConsumer->run();
 
         $this->assertNotNull($errorChannel->receive());
+    }
+
+    public function test_acking_message_when_ack_available_in_message_header()
+    {
+        $acknowledgementCallback = NullAcknowledgementCallback::create();
+        $message = MessageBuilder::withPayload("some")
+            ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, "amqpAcker")
+            ->setHeader("amqpAcker", $acknowledgementCallback)
+            ->build();
+        $inputChannelName = "inputChannel";
+        $inputChannel = QueueChannel::create();
+        $messageHandler = DataReturningService::createServiceActivatorBuilder("some")
+                            ->withEndpointId("some-id")
+                            ->withInputChannelName($inputChannelName);
+
+        $pollingConsumer = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
+
+        $inputChannel->send($message);
+
+        $pollingConsumer->run();
+
+        $this->assertTrue($acknowledgementCallback->isAcked());
+    }
+
+    public function test_requeing_message_on_gateway_failure()
+    {
+        $acknowledgementCallback = NullAcknowledgementCallback::create();
+        $message = MessageBuilder::withPayload("some")
+            ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, "amqpAcker")
+            ->setHeader("amqpAcker", $acknowledgementCallback)
+            ->build();
+
+        $inputChannelName = "inputChannel";
+        $inputChannel = QueueChannel::create();
+        $messageHandler = DataReturningService::createExceptionalServiceActivatorBuilder()
+            ->withEndpointId("some-id")
+            ->withInputChannelName($inputChannelName);
+
+        $pollingConsumer = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
+
+        $inputChannel->send($message);
+
+        $pollingConsumer->run();
+
+        $this->assertTrue($acknowledgementCallback->isRequeued());
+    }
+
+    public function test_acking_on_gateway_failure_when_error_channel_defined()
+    {
+        $acknowledgementCallback = NullAcknowledgementCallback::create();
+        $message = MessageBuilder::withPayload("some")
+            ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, "amqpAcker")
+            ->setHeader("amqpAcker", $acknowledgementCallback)
+            ->build();
+
+        $inputChannelName = "inputChannel";
+        $inputChannel = QueueChannel::create();
+        $errorChannel = QueueChannel::create();
+        $messageHandler = DataReturningService::createExceptionalServiceActivatorBuilder()
+            ->withEndpointId("some-id")
+            ->withInputChannelName($inputChannelName);
+
+        $pollingConsumer = $this->createPollingConsumerWithErrorChannel($inputChannelName, $inputChannel, $messageHandler, $errorChannel);
+
+        $inputChannel->send($message);
+
+        $pollingConsumer->run();
+
+        $this->assertNotNull($errorChannel);
+        $this->assertTrue($acknowledgementCallback->isAcked());
+    }
+
+    private function createPollingConsumer(string $inputChannelName, QueueChannel $inputChannel, $messageHandler): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
+    {
+        $pollingConsumer = (new PollingConsumerBuilder())->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                $inputChannelName => $inputChannel
+            ]),
+            InMemoryReferenceSearchService::createEmpty(),
+            $messageHandler,
+            PollingMetadata::create("some")
+                ->setExecutionAmountLimit(1)
+        );
+
+        return $pollingConsumer;
+    }
+
+    private function createPollingConsumerWithErrorChannel(string $inputChannelName, QueueChannel $inputChannel, $messageHandler, MessageChannel $errorChannel): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
+    {
+        $pollingConsumer = (new PollingConsumerBuilder())->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                $inputChannelName => $inputChannel,
+                "errorChannel" => $errorChannel
+            ]),
+            InMemoryReferenceSearchService::createEmpty(),
+            $messageHandler,
+            PollingMetadata::create("some")
+                ->setExecutionAmountLimit(1)
+                ->setErrorChannelName("errorChannel")
+        );
+
+        return $pollingConsumer;
     }
 }

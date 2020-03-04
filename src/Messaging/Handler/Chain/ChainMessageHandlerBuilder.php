@@ -142,7 +142,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             }
         }
 
-        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel), "forward")
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel,  (bool)$this->outputMessageChannelName), "forward")
             ->withOutputMessageChannel($this->outputMessageChannelName);
 
         foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {

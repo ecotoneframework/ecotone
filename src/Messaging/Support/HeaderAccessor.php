@@ -73,6 +73,12 @@ final class HeaderAccessor
      */
     public function setHeader(string $headerName, $headerValue) : void
     {
+        if (is_null($headerValue)) {
+            $this->removeHeader($headerName);
+
+            return;
+        }
+
         $this->headers[$headerName] = $headerValue;
     }
 

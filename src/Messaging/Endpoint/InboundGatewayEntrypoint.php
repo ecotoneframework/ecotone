@@ -11,7 +11,7 @@ use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
  * @package Ecotone\Messaging\Endpoint\PollingConsumer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface EntrypointGateway
+interface InboundGatewayEntrypoint
 {
     /**
      * @param mixed $data

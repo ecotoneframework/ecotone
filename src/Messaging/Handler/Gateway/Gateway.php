@@ -137,6 +137,7 @@ class Gateway implements NonProxyGateway
     public function execute(array $methodArgumentValues)
     {
         $methodArguments = [];
+        $internalReplyBridge = null;
 
         try {
             $parameters = $this->interfaceToCall->getInterfaceParameters();
@@ -169,9 +170,16 @@ class Gateway implements NonProxyGateway
 
             $previousReplyChannel = $requestMessage->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaderWithName(MessageHeaders::REPLY_CHANNEL) : null;
             $replyContentType = $requestMessage->containsKey(MessageHeaders::REPLY_CONTENT_TYPE) ? MediaType::parseMediaType($requestMessage->getHeaderWithName(MessageHeaders::REPLY_CONTENT_TYPE)) : null;
-            $internalReplyBridge = QueueChannel::create();
+
+            if ($this->interfaceToCall->canReturnValue()) {
+                $internalReplyBridge = QueueChannel::create();
+                $requestMessage = $requestMessage
+                    ->setReplyChannel($internalReplyBridge);
+            }else {
+                $requestMessage = $requestMessage
+                    ->removeHeader(MessageHeaders::REPLY_CHANNEL);
+            }
             $requestMessage = $requestMessage
-                ->setReplyChannel($internalReplyBridge)
                 ->removeHeader(MessageHeaders::REPLY_CONTENT_TYPE)
                 ->build();
 
@@ -181,7 +189,7 @@ class Gateway implements NonProxyGateway
         }
 
         $messageHandler->handle($requestMessage);
-        $reply = $internalReplyBridge->receive();
+        $reply = $internalReplyBridge ? $internalReplyBridge->receive() : null;
 
         if ($reply) {
             if ($this->interfaceToCall->getReturnType()->isClassOfType(Message::class)) {

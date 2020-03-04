@@ -32,7 +32,7 @@ class Order
      */
     private $orderId;
 
-    private $isNotified = false;
+    private $isNotifiedCount = 0;
 
     private function __construct(string $orderId)
     {
@@ -58,7 +58,8 @@ class Order
      */
     public function notify(OrderWasPlaced $order) : void
     {
-        $this->isNotified = true;
+        $this->isNotifiedCount++;
+        $this->record(new OrderWasNotified($this->orderId));
     }
 
     /**
@@ -72,8 +73,8 @@ class Order
     /**
      * @QueryHandler(inputChannelName="order.wasNotified")
      */
-    public function getIsNotified() : bool
+    public function getIsNotifiedCount() : int
     {
-        return $this->isNotified;
+        return $this->isNotifiedCount;
     }
 }

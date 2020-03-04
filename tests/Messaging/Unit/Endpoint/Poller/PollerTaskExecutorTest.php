@@ -7,7 +7,7 @@ use Ecotone\Messaging\Handler\NonProxyGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\NullConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollerTaskExecutor;
@@ -27,7 +27,7 @@ class PollerTaskExecutorTest extends TestCase
     {
         $message = MessageBuilder::withPayload("some")->build();
 
-        $gateway = $this->createMock(EntrypointGateway::class);
+        $gateway = $this->createMock(InboundGatewayEntrypoint::class);
         $gateway
             ->expects($this->once())
             ->method("execute")
@@ -45,9 +45,9 @@ class PollerTaskExecutorTest extends TestCase
      * @param MockObject $gateway
      * @return PollerTaskExecutor
      */
-    private function createPoller(QueueChannel $pollableChannel, MockObject $gateway): PollerTaskExecutor
+    private function createPoller(QueueChannel $pollableChannel, MockObject $gateway, bool $errorHandledInErrorChannnel = false): PollerTaskExecutor
     {
-        return new PollerTaskExecutor("", "", $pollableChannel, $gateway);
+        return new PollerTaskExecutor("", "", $pollableChannel, $gateway, $errorHandledInErrorChannnel);
     }
 
     public function test_acking_message_when_ack_available_in_message_header()
@@ -77,7 +77,7 @@ class PollerTaskExecutorTest extends TestCase
             ->setHeader("amqpAcker", $acknowledgementCallback)
             ->build();
 
-        $gateway = $this->createMock(EntrypointGateway::class);
+        $gateway = $this->createMock(InboundGatewayEntrypoint::class);
         $gateway
             ->expects($this->once())
             ->method("execute")
@@ -90,5 +90,29 @@ class PollerTaskExecutorTest extends TestCase
         $pollingExecutor->execute();
 
         $this->assertTrue($acknowledgementCallback->isRequeued());
+    }
+
+    public function test_rethrowing_exception_when_error_channel_defined()
+    {
+        $acknowledgementCallback = NullAcknowledgementCallback::create();
+        $message = MessageBuilder::withPayload("some")
+            ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, "amqpAcker")
+            ->setHeader("amqpAcker", $acknowledgementCallback)
+            ->build();
+
+        $gateway = $this->createMock(InboundGatewayEntrypoint::class);
+        $gateway
+            ->expects($this->once())
+            ->method("execute")
+            ->willThrowException(InvalidArgumentException::create("gateway test exception"));
+
+        $pollableChannel = QueueChannel::create();
+        $pollableChannel->send($message);
+
+        $pollingExecutor = $this->createPoller($pollableChannel, $gateway, true);
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $pollingExecutor->execute();
     }
 }

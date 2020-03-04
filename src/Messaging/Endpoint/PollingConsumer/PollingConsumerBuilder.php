@@ -9,8 +9,9 @@ use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
-use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\InterceptedMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
@@ -50,7 +51,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
         $this->requestChannelName = Uuid::uuid4()->toString();
         $this->entrypointGateway = GatewayProxyBuilder::create(
             "handler",
-            EntrypointGateway::class,
+            InboundChannelAdapterEntrypoint::class,
             "executeEntrypoint",
             $this->requestChannelName
         );
@@ -105,7 +106,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [$interfaceToCallRegistry->getFor(EntrypointGateway::class, "executeEntrypoint")];
+        return [$interfaceToCallRegistry->getFor(InboundGatewayEntrypoint::class, "executeEntrypoint")];
     }
 
     /**
@@ -151,7 +152,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             $messageHandlerBuilder->getEndpointId(),
             SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
             PeriodicTrigger::create(1, 0),
-            new PollerTaskExecutor($messageHandlerBuilder->getEndpointId(), $messageHandlerBuilder->getInputMessageChannelName(), $pollableChannel, $gateway)
+            new PollerTaskExecutor($messageHandlerBuilder->getEndpointId(), $messageHandlerBuilder->getInputMessageChannelName(), $pollableChannel, $gateway, (bool)$pollingMetadata->getErrorChannelName())
         );
 
         return $inboundChannelAdapter;

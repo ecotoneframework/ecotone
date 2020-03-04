@@ -117,10 +117,10 @@ class RequestReplyProducer
             if ($this->hasOutputChannel()) {
                 $replyChannel = $this->getOutputChannel();
             }else {
-                if ($routingSlip) {
-                    $replyChannel = $this->channelResolver->resolve(array_shift($routingSlipChannels));
-                }else if ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
+                if ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
                     $replyChannel = $this->channelResolver->resolve($message->getHeaders()->getReplyChannel());
+                }elseif ($routingSlip) {
+                    $replyChannel = $this->channelResolver->resolve(array_shift($routingSlipChannels));
                 }
             }
             $routingSlip = implode(",", $routingSlipChannels);

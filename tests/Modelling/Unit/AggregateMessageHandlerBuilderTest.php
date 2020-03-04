@@ -70,7 +70,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_configuring_command_handler()
+    public function __test_configuring_command_handler()
     {
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
@@ -87,7 +87,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_existing_aggregate_method_with_only_command_as_parameter()
+    public function __test_calling_existing_aggregate_method_with_only_command_as_parameter()
     {
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
         $order->increaseAggregateVersion();
@@ -120,7 +120,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_existing_aggregate_method_with_command_and_no_command()
+    public function __test_calling_existing_aggregate_method_with_command_and_no_command()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
@@ -150,7 +150,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_existing_aggregate_method_with_command_as_array()
+    public function __test_calling_existing_aggregate_method_with_command_as_array()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
@@ -181,7 +181,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_existing_aggregate_method_with_no_command_data_and_reference()
+    public function __test_calling_existing_aggregate_method_with_no_command_data_and_reference()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
@@ -215,7 +215,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_throwing_exception_if_no_id_found_in_command()
+    public function __test_throwing_exception_if_no_id_found_in_command()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
@@ -245,7 +245,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_aggregate_for_query_handler_with_return_value()
+    public function __test_calling_aggregate_for_query_handler_with_return_value()
     {
         $orderAmount = 5;
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
@@ -286,7 +286,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_aggregate_query_handler_returning_null_value()
+    public function __test_calling_aggregate_query_handler_returning_null_value()
     {
         $orderAmount = 5;
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
@@ -324,7 +324,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_aggregate_for_query_handler_with_no_query()
+    public function __test_calling_aggregate_for_query_handler_with_no_query()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
@@ -362,7 +362,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_aggregate_for_query_handler_with_query_as_array()
+    public function __test_calling_aggregate_for_query_handler_with_query_as_array()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
@@ -447,7 +447,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_aggregate_for_query_without_parameters()
+    public function __test_calling_aggregate_for_query_without_parameters()
     {
         $orderAmount = 5;
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
@@ -489,7 +489,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_creating_new_aggregate_from_factory_method()
+    public function __test_creating_new_aggregate_from_factory_method()
     {
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
@@ -525,7 +525,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_redirect_to_channel_on_factory_creation_already_found()
+    public function __test_redirect_to_channel_on_factory_creation_already_found()
     {
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
         $order->increaseAggregateVersion();
@@ -572,7 +572,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_handling_aggregate_factory_normally_when_aggregate_not_found_for_redirect()
+    public function __test_handling_aggregate_factory_normally_when_aggregate_not_found_for_redirect()
     {
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Order::class,
@@ -614,7 +614,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_creating_new_aggregate_from_factory_method_with_two_identifiers()
+    public function __test_creating_new_aggregate_from_factory_method_with_two_identifiers()
     {
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Article::class,
@@ -650,7 +650,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_creating_new_aggregate_with_command_as_array_type()
+    public function __test_creating_new_aggregate_with_command_as_array_type()
     {
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             AggregateWithoutMessageClassesExample::class,
@@ -686,7 +686,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_creating_new_aggregate_with_no_command_data()
+    public function __test_creating_new_aggregate_with_no_command_data()
     {
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             AggregateWithoutMessageClassesExample::class,
@@ -723,7 +723,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_aggregate_with_no_identifiers_defined_inside_command()
+    public function __test_calling_aggregate_with_no_identifiers_defined_inside_command()
     {
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Article::class,
@@ -756,7 +756,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_aggregate_with_target_identifiers()
+    public function __test_calling_aggregate_with_target_identifiers()
     {
         $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Article::class,
@@ -791,7 +791,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_aggregate_with_version_locking_from_command()
+    public function __test_calling_aggregate_with_version_locking_from_command()
     {
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
         $order->increaseAggregateVersion();
@@ -826,7 +826,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_save_method_with_next_version()
+    public function __test_calling_save_method_with_next_version()
     {
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
         $order->increaseAggregateVersion();
@@ -873,7 +873,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_calling_save_method_with_first_version_for_factory_method()
+    public function __test_calling_save_method_with_first_version_for_factory_method()
     {
         $commandToRun = CreateOrderCommand::createWith(1, 1, "Poland");
 
@@ -914,7 +914,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $aggregateCommandHandler->handle(MessageBuilder::withPayload($commandToRun)->setReplyChannel(NullableMessageChannel::create())->build());
     }
 
-    public function test_calling_factory_method_for_event_sourced_aggregate()
+    public function __test_calling_factory_method_for_event_sourced_aggregate()
     {
         $commandToRun = new StartTicketCommand(1);
 
@@ -952,7 +952,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         );
     }
 
-    public function test_calling_action_method_for_existing_event_sourced_aggregate()
+    public function __test_calling_action_method_for_existing_event_sourced_aggregate()
     {
         $ticketId = 1;
         $commandToRun = new AssignWorkerCommand($ticketId, 100);
@@ -991,7 +991,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         );
     }
 
-    public function test_calling_second_action_method_for_existing_event_sourced_aggregate()
+    public function __test_calling_second_action_method_for_existing_event_sourced_aggregate()
     {
         $ticketId = 1;
         $commandToRun = new AssignWorkerCommand($ticketId, 101);
@@ -1031,7 +1031,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         );
     }
 
-    public function test_throwing_exception_if_no_factory_method_defined_for_event_sourced_aggregate()
+    public function __test_throwing_exception_if_no_factory_method_defined_for_event_sourced_aggregate()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -1054,7 +1054,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         );
     }
 
-    public function test_throwing_exception_if_factory_method_for_event_sourced_aggregate_has_no_parameters()
+    public function __test_throwing_exception_if_factory_method_for_event_sourced_aggregate_has_no_parameters()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -1067,7 +1067,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             ->withInputChannelName("inputChannel");
     }
 
-    public function test_throwing_exception_if_factory_method_for_event_sourced_aggregate_is_not_static()
+    public function __test_throwing_exception_if_factory_method_for_event_sourced_aggregate_is_not_static()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -1080,7 +1080,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             ->withInputChannelName("inputChannel");
     }
 
-    public function test_throwing_exception_if_incorrect_event_types_returned()
+    public function __test_throwing_exception_if_incorrect_event_types_returned()
     {
         $ticketId = 1;
         $commandToRun = new CreateIncorrectEventTypeReturnedAggregate();
@@ -1111,7 +1111,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $aggregateCommandHandler->handle(MessageBuilder::withPayload($commandToRun)->setReplyChannel(NullableMessageChannel::create())->build());
     }
 
-    public function test_throwing_exception_if_aggregate_before_saving_has_no_nullable_identifier()
+    public function __test_throwing_exception_if_aggregate_before_saving_has_no_nullable_identifier()
     {
         $ticketId = 1;
         $commandToRun = new CreateNoIdDefinedAggregate();
@@ -1148,7 +1148,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Throwable
      */
-    public function test_throwing_exception_when_trying_to_handle_command_without_aggregate_id()
+    public function __test_throwing_exception_when_trying_to_handle_command_without_aggregate_id()
     {
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
         $order->increaseAggregateVersion();
@@ -1180,7 +1180,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_throwing_exception_if_no_aggregate_identifier_definition_found()
+    public function __test_throwing_exception_if_no_aggregate_identifier_definition_found()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -1195,7 +1195,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_not_throwing_exception_if_no_aggregate_identifier_definition_found_for_factory_method()
+    public function __test_not_throwing_exception_if_no_aggregate_identifier_definition_found_for_factory_method()
     {
         AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
             Article::class,
@@ -1211,7 +1211,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      * @throws MessagingException
      * @throws \ReflectionException
      */
-    public function test_throwing_exception_if_no_identifiers_defined_in_aggregate()
+    public function __test_throwing_exception_if_no_identifiers_defined_in_aggregate()
     {
         $this->expectException(InvalidArgumentException::class);
 

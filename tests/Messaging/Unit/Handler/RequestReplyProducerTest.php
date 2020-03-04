@@ -157,24 +157,22 @@ class RequestReplyProducerTest extends MessagingTest
      * @throws MessagingException
      * @throws \Ecotone\Messaging\Handler\DestinationResolutionException
      */
-    public function test_passing_message_to_reply_channel_when_routing_slip_is_finished()
+    public function test_passing_message_to_next_routing_slips()
     {
         $replyData = "some result";
-        $replyChannelName = "reply1";
         $replyChannel1 = QueueChannel::create();
         $replyChannel2 = QueueChannel::create();
         $requestReplyProducer = $this->createRequestReplyProducerWithChannels(
             FakeReplyMessageProducer::create($replyData),
             [
                 "reply1" => $replyChannel1,
-                "replyHeader" => $replyChannel2
+                "reply2" => $replyChannel2
             ],
             null
         );
 
         $message = MessageBuilder::withPayload('a')
-            ->setHeader(MessageHeaders::ROUTING_SLIP, $replyChannelName)
-            ->setReplyChannel($replyChannel2)
+            ->setHeader(MessageHeaders::ROUTING_SLIP, "reply1,reply2")
             ->build();
 
         $this->handleReplyWithMessage($message, $requestReplyProducer);

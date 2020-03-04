@@ -464,10 +464,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
             )
             ->registerAsynchronousEndpoint("fakeAsyncChannel", "endpointId")
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $replyChannel = QueueChannel::create();
+        
         $message      = MessageBuilder::withPayload(2)
-            ->setReplyChannel($replyChannel)
+            ->setReplyChannel(QueueChannel::create())
             ->build();
 
         /** @var MessageChannel $channel */

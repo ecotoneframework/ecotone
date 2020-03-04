@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessageHeaders;
@@ -27,21 +27,26 @@ class PollerTaskExecutor implements TaskExecutor
      */
     private $pollableChannel;
     /**
-     * @var NonProxyGateway|EntrypointGateway
+     * @var NonProxyGateway|InboundGatewayEntrypoint
      */
     private $entrypointGateway;
     /**
      * @var string
      */
     private $pollableChannelName;
+    /**
+     * @var bool
+     */
+    private $errorHandledInErrorChannel;
 
 
-    public function __construct(string $endpointId, string $pollableChannelName, PollableChannel $pollableChannel, NonProxyGateway $entrypointGateway)
+    public function __construct(string $endpointId, string $pollableChannelName, PollableChannel $pollableChannel, NonProxyGateway $entrypointGateway, bool $errorHandledInErrorChannel)
     {
         $this->endpointId = $endpointId;
         $this->pollableChannel = $pollableChannel;
         $this->entrypointGateway = $entrypointGateway;
         $this->pollableChannelName = $pollableChannelName;
+        $this->errorHandledInErrorChannel = $errorHandledInErrorChannel;
     }
 
     public function execute(): void
@@ -67,7 +72,11 @@ class PollerTaskExecutor implements TaskExecutor
                 if ($acknowledgementCallback->isAutoAck()) {
                     $acknowledgementCallback->accept();
                 }
-            }catch (\Throwable $e) {
+            }catch (\Throwable $exception) {
+                if ($this->errorHandledInErrorChannel) {
+                    throw $exception;
+                }
+
                 $acknowledgementCallback->requeue();
             }
         }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
 
 use Ecotone\Messaging\Channel\ChannelInterceptor;
-use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;

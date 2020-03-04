@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
+use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
-use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\InterceptedConsumer;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
@@ -73,7 +74,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      */
     private function __construct(string $requestChannelName, string $referenceName, string $methodName)
     {
-        $this->gatewayExecutor = GatewayProxyBuilder::create($referenceName, EntrypointGateway::class, "executeEntrypoint", $requestChannelName);
+        $this->gatewayExecutor = GatewayProxyBuilder::create($referenceName, InboundGatewayEntrypoint::class, "executeEntrypoint", $requestChannelName);
         $this->referenceName = $referenceName;
         $this->methodName = $methodName;
         $this->requestChannelName = $requestChannelName;
@@ -168,7 +169,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return array_merge([$interfaceToCallRegistry->getFor(EntrypointGateway::class, "executeEntrypoint")], $this->gatewayExecutor->resolveRelatedInterfaces($interfaceToCallRegistry));
+        return array_merge([$interfaceToCallRegistry->getFor(InboundChannelAdapterEntrypoint::class, "executeEntrypoint")], $this->gatewayExecutor->resolveRelatedInterfaces($interfaceToCallRegistry));
     }
 
     /**

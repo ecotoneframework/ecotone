@@ -19,7 +19,7 @@ use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilde
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
 use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
-use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;

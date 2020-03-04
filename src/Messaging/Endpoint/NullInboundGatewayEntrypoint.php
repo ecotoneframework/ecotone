@@ -8,7 +8,7 @@ namespace Ecotone\Messaging\Endpoint;
  * @package Ecotone\Messaging\Endpoint
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class NullEntrypointGateway implements EntrypointGateway
+class NullInboundGatewayEntrypoint implements InboundGatewayEntrypoint
 {
     private function __construct()
     {

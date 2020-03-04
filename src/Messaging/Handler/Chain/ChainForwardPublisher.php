@@ -22,14 +22,15 @@ class ChainForwardPublisher
      * @var MessageChannel
      */
     private $requestChannel;
-
     /**
-     * ChainForwardPublisher constructor.
-     * @param MessageChannel $requestChannel
+     * @var bool
      */
-    public function __construct(MessageChannel $requestChannel)
+    private $hasOutputChannel;
+
+    public function __construct(MessageChannel $requestChannel, bool $hasOutputChannel)
     {
         $this->requestChannel = $requestChannel;
+        $this->hasOutputChannel = $hasOutputChannel;
     }
 
     /**
@@ -40,12 +41,19 @@ class ChainForwardPublisher
     {
         $replyChannelComingFromCurrentMessage = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
 
-        $replyChannel = QueueChannel::create();
-        $requestMessageWithNewChainReply = MessageBuilder::fromMessage($requestMessage)
-                ->setReplyChannel($replyChannel)
-                ->build();
+        $replyChannel = null;
+        $requestMessageWithNewChainReply = MessageBuilder::fromMessage($requestMessage);
+        if ($replyChannelComingFromCurrentMessage || $this->hasOutputChannel) {
+            $replyChannel = QueueChannel::create();
+            $requestMessageWithNewChainReply->setReplyChannel($replyChannel);
+        }
+        $requestMessageWithNewChainReply = $requestMessageWithNewChainReply->build();
 
         $this->requestChannel->send($requestMessageWithNewChainReply);
+
+        if (!$replyChannel) {
+            return null;
+        }
 
         $replyMessage = $replyChannel->receive();
 

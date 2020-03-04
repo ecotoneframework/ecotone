@@ -20,6 +20,7 @@ use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
@@ -277,6 +278,11 @@ final class MessagingSystemConfiguration implements Configuration
 
         $this->configureAsynchronousEndpoints();
         $this->configureDefaultMessageChannels();
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            if ($this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()]->isPollable()) {
+                $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), [new PollableEndpoint()]));
+            }
+        }
 
         $this->resolveRequiredReferences($interfaceToCallRegistry,
             array_map(function (MethodInterceptor $methodInterceptor) {
@@ -326,6 +332,7 @@ final class MessagingSystemConfiguration implements Configuration
                 if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
                     $targetChannelName = $messageHandlerBuilder->getInputMessageChannelName() . ".target";
                     $messageHandlerBuilders[] = TransformerBuilder::createHeaderEnricher([
+                        MessageHeaders::REPLY_CHANNEL => null,
                         MessageHeaders::ROUTING_SLIP => $targetChannelName
                     ])
                         ->withEndpointId($targetChannelName)
@@ -347,10 +354,14 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
-        foreach (array_unique($asynchronousChannels) as $asychronousChannel) {
-            $messageHandlerBuilders[] = BridgeBuilder::create()
-                ->withEndpointId($asychronousChannel)
-                ->withInputChannelName($asychronousChannel);
+        foreach (array_unique($asynchronousChannels) as $asynchronousChannel) {
+            //        needed for correct around intercepting, otherwise requestReply is outside of around interceptor scope
+            $bridgeBuilder = ChainMessageHandlerBuilder::create()
+                ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), "handle"))
+                ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), "handle"));
+            $messageHandlerBuilders[] = $bridgeBuilder
+                ->withEndpointId($asynchronousChannel)
+                ->withInputChannelName($asynchronousChannel);
         }
 
         $this->messageHandlerBuilders = $messageHandlerBuilders;

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
-use Ecotone\Messaging\Endpoint\EntrypointGateway;
+use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Scheduling\TaskExecutor;
 
@@ -24,7 +24,7 @@ class InboundChannelTaskExecutor implements TaskExecutor
      */
     private $method;
     /**
-     * @var NonProxyGateway|EntrypointGateway
+     * @var NonProxyGateway|InboundGatewayEntrypoint
      */
     private $inboundChannelGateway;
 

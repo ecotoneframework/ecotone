@@ -40,6 +40,8 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepo
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
+use Test\Ecotone\Modelling\Fixture\OrderAggregate\LoggingService;
+use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderErrorHandler;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
@@ -115,7 +117,9 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         OrderRepository::class => OrderRepository::createEmpty(),
-                        AddUserIdService::class => new AddUserIdService()
+                        AddUserIdService::class => new AddUserIdService(),
+                        OrderErrorHandler::class => new OrderErrorHandler(),
+                        LoggingService::class => new LoggingService()
                     ];
                     break;
                 }
@@ -397,14 +401,22 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function noNotificationFor(string $orderName)
     {
-        $this->assertFalse($this->getQueryBus()->convertAndSend("order.wasNotified", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
+        $this->assertEquals(0, $this->getQueryBus()->convertAndSend("order.wasNotified", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
     }
 
     /**
-     * @Then there should be notification about :orderName
+     * @Then there should be notification about :orderName :number time
      */
-    public function thereShouldBeNotificationAbout(string $orderName)
+    public function thereShouldBeNotificationAboutTime(string $orderName, int $number)
     {
-        $this->assertTrue($this->getQueryBus()->convertAndSend("order.wasNotified", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
+        $this->assertEquals($number, $this->getQueryBus()->convertAndSend("order.wasNotified", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
+    }
+
+    /**
+     * @Then logs count be :count
+     */
+    public function logsCountBe(int $count)
+    {
+        $this->assertEquals($count, count($this->getQueryBus()->convertAndSend("getLogs", MediaType::APPLICATION_X_PHP_ARRAY, [])));
     }
 }

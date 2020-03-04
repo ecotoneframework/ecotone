@@ -4,7 +4,7 @@
 [![Latest Stable Version](https://poser.pugx.org/ecotone/ecotone/v/stable)](https://packagist.org/packages/ecotone/ecotone)
 [![Coverage Status](https://coveralls.io/repos/github/ecotoneframework/ecotone/badge.svg?branch=master)](https://coveralls.io/github/ecotoneframework/ecotone?branch=master)
 
-Ecotone provides support for well known Enterprise Integration Patterns (EIP), to enable message driven architecture in PHP. On top of that follow an architectural pattern which is based on the principles of Domain-Driven Design (DDD) and Command Query Responsibility Segregation (CQRS) and povides you with the necessary building blocks to follow these principles.
+Ecotone provides support for well known Enterprise Integration Patterns (EIP), to enable message driven architecture in PHP. On top of that follow an architectural pattern which is based on the principles of Domain-Driven Design (DDD) and Command Query Responsibility Segregation (CQRS) and provides you with the necessary building blocks to follow these principles.
 
 ## Getting started
 

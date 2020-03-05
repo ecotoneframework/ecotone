@@ -414,11 +414,11 @@ class TypeResolver
         $classProperties = [];
         $parent = $reflectionClass;
         foreach ($reflectionClass->getProperties() as $property) {
-            $classProperties[] = $this->createClassPropertyUsingTraitsIfExists($className, $reflectionClass, $property, $annotationParser);
+            $classProperties[] = $this->createClassPropertyUsingTraitsIfExists($reflectionClass, $property, $annotationParser, $reflectionClass);
         }
         while ($parent = $parent->getParentClass()) {
             foreach ($parent->getProperties() as $property) {
-                $classProperties[] = $this->createClassPropertyUsingTraitsIfExists($parent, $reflectionClass, $property, $annotationParser);
+                $classProperties[] = $this->createClassPropertyUsingTraitsIfExists($reflectionClass, $property, $annotationParser, $reflectionClass);
             }
         }
 
@@ -525,16 +525,7 @@ class TypeResolver
         return $methodReflection->getFileName() !== $trait->getMethod($methodReflection->getName())->getFileName();
     }
 
-    /**
-     * @param string $className
-     * @param AnnotationParser $annotationParser
-     * @param \ReflectionProperty $property
-     * @param Type|null $docblockType
-     * @return ClassPropertyDefinition|null
-     * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    private function createClassProperty(string $className, AnnotationParser $annotationParser, \ReflectionProperty $property, ?Type $docblockType)
+    private function createClassProperty(string $declaringClass, AnnotationParser $annotationParser, \ReflectionProperty $property, ?Type $docblockType)
     {
         $classProperty = null;
         $type = $docblockType ? $docblockType : TypeDescriptor::createAnythingType();
@@ -546,7 +537,7 @@ class TypeResolver
             $isNullable = $property->hasType() ? $property->getType()->allowsNull() : true;
         }
 
-        $annotations = $annotationParser->getAnnotationsForProperty($className, $property->getName());
+        $annotations = $annotationParser->getAnnotationsForProperty($declaringClass, $property->getName());
         if ($property->isPrivate()) {
             $classProperty = ClassPropertyDefinition::createPrivate(
                 $property->getName(),
@@ -576,34 +567,34 @@ class TypeResolver
     }
 
     /**
-     * @param string $className
-     * @param \ReflectionClass $reflectionClass
+     * @param \ReflectionClass $reflectionClassOrTrait
      * @param \ReflectionProperty $property
      * @param AnnotationParser $annotationParser
+     * @param \ReflectionClass $declaringClass
      * @return ClassPropertyDefinition|null
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function createClassPropertyUsingTraitsIfExists(string $className, \ReflectionClass $reflectionClass, \ReflectionProperty $property, AnnotationParser $annotationParser)
+    private function createClassPropertyUsingTraitsIfExists(\ReflectionClass $reflectionClassOrTrait, \ReflectionProperty $property, AnnotationParser $annotationParser, \ReflectionClass $declaringClass)
     {
-        foreach ($reflectionClass->getTraits() as $trait) {
+        foreach ($reflectionClassOrTrait->getTraits() as $trait) {
             foreach ($trait->getProperties() as $traitProperty) {
                 if ($traitProperty->getName() === $property->getName()) {
                     return $this->createClassPropertyUsingTraitsIfExists(
-                        $trait->getName(),
                         $trait,
                         $traitProperty,
-                        $annotationParser
+                        $annotationParser,
+                        $declaringClass
                     );
                 }
             }
         }
 
         return $this->createClassProperty(
-                $className,
+                $declaringClass->getName(),
                 $annotationParser,
                 $property,
-                $this->getPropertyDocblockTypeHint($reflectionClass, $property->getDeclaringClass(), $property->getDeclaringClass(), $property)
+                $this->getPropertyDocblockTypeHint($reflectionClassOrTrait, $property->getDeclaringClass(), $property->getDeclaringClass(), $property)
         );
     }
 }

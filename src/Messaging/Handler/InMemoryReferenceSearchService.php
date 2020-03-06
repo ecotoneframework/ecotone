@@ -50,7 +50,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
             if (!array_key_exists(ProxyFactory::REFERENCE_NAME, $objectsToResolve)) {
                 $objectsToResolve[ProxyFactory::REFERENCE_NAME] = ProxyFactory::createNoCache();
             }
-            if (!array_key_exists(LoggingHandlerBuilder::LOGGER_REFERENCE, $objectsToResolve)) {
+            if (!array_key_exists(LoggingHandlerBuilder::LOGGER_REFERENCE, $objectsToResolve) && (!$referenceSearchService || !$referenceSearchService->has(LoggingHandlerBuilder::LOGGER_REFERENCE))) {
                 $objectsToResolve[LoggingHandlerBuilder::LOGGER_REFERENCE] = new NullLogger();
             }
         }

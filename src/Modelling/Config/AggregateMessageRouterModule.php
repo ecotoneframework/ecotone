@@ -91,11 +91,15 @@ class AggregateMessageRouterModule implements AnnotationModule
         $eventHandlersRegexChannelToChannelMapping = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
             $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannelForEventHandler($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
-            $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            if ($registration->getAnnotationForMethod()->listenTo) {
+                $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            }
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
             $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannelForEventHandler($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
-            $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            if ($registration->getAnnotationForMethod()->listenTo) {
+                $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            }
         }
 
         return new self(
@@ -123,10 +127,10 @@ class AggregateMessageRouterModule implements AnnotationModule
     {
         $configuration
             ->registerMessageHandler($this->commandBusByObject)
-            ->registerMessageHandler($this->queryBusByObject)
-            ->registerMessageHandler($this->eventBusByObject)
             ->registerMessageHandler($this->commandBusByName)
+            ->registerMessageHandler($this->queryBusByObject)
             ->registerMessageHandler($this->queryBusByName)
+            ->registerMessageHandler($this->eventBusByObject)
             ->registerMessageHandler($this->eventBusByName);
     }
 

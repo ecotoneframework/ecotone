@@ -29,10 +29,6 @@ class ProxyFactory implements \Serializable
     const REFERENCE_NAME = "gatewayProxyConfiguration";
 
     /**
-     * @var Configuration
-     */
-    private $configuration;
-    /**
      * @var string|null
      */
     private $cacheDirectoryPath;

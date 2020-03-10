@@ -3,11 +3,16 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Conversion;
 
-use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
 use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverter;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+use stdClass;
 
 /**
  * Class ConversionServiceTest
@@ -17,19 +22,19 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 class ConversionServiceTest extends TestCase
 {
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_using_php_serializing_converters()
     {
         $conversionService = AutoCollectionConversionService::createWith([
             new DeserializingConverter(),
-            new \Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter()
+            new SerializingConverter()
         ]);
 
 
-        $serializedObject = new \stdClass();
+        $serializedObject = new stdClass();
         $serializedObject->name = "johny";
         $serializedObject->age = 15;
 
@@ -47,7 +52,7 @@ class ConversionServiceTest extends TestCase
                 $result,
                 TypeDescriptor::create(TypeDescriptor::STRING),
                 MediaType::createApplicationXPHPSerialized(),
-                TypeDescriptor::create(\stdClass::class),
+                TypeDescriptor::create(stdClass::class),
                 MediaType::createApplicationXPHP()
             )
         );
@@ -55,7 +60,7 @@ class ConversionServiceTest extends TestCase
 
     public function test_not_converting_when_source_is_null()
     {
-        $conversionService = AutoCollectionConversionService::createWith([new \Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter()]);
+        $conversionService = AutoCollectionConversionService::createWith([new SerializingConverter()]);
 
         $this->assertEquals(
             null,
@@ -67,5 +72,10 @@ class ConversionServiceTest extends TestCase
                 MediaType::createApplicationXPHPSerialized()
             )
         );
+    }
+
+    public function test_combing_converters_in_order_to_find_correct_converter_path()
+    {
+
     }
 }

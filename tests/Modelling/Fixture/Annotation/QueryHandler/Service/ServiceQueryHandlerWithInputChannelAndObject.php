@@ -9,10 +9,10 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 /**
  * @MessageEndpoint()
  */
-class QueryHandlerWithClass
+class ServiceQueryHandlerWithInputChannelAndObject
 {
     /**
-     * @QueryHandler()
+     * @QueryHandler(inputChannelName="execute", endpointId="queryHandler")
      */
     public function execute(\stdClass $class) : int
     {

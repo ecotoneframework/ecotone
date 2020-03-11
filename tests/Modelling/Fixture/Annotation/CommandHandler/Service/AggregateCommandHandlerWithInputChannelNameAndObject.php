@@ -1,25 +1,23 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate;
+namespace Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service;
 
 use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
 /**
  * Class CommandHandlerWithReturnValue
  * @package Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
+ * @MessageEndpoint()
  */
-class CommandHandlerWithClass
+class AggregateCommandHandlerWithInputChannelNameAndObject
 {
     /**
-     * @param \stdClass $command
      * @return int
-     * @CommandHandler()
+     * @CommandHandler(inputChannelName="execute", endpointId="commandHandler")
      */
-    public function execute(\stdClass $command) : int
+    public function execute(\stdClass $class) : int
     {
         return 1;
     }

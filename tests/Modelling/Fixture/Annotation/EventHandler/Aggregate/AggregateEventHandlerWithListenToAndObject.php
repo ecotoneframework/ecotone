@@ -10,12 +10,12 @@ use stdClass;
 /**
  * @Aggregate()
  */
-class EventHandlerWithClassAndEndpointId
+class AggregateEventHandlerWithListenToAndObject
 {
     /**
-     * @EventHandler(endpointId="endpointId")
+     * @EventHandler(listenTo="execute", endpointId="eventHandler")
      */
-    public function execute(stdClass $class): int
+    public function execute(\stdClass $class): void
     {
 
     }

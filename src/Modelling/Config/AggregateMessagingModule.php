@@ -299,24 +299,10 @@ class AggregateMessagingModule implements AnnotationModule
         }
     }
 
-    /***
-     * @param AnnotationRegistration $registration
-     *
-     * @return string
-     * @throws InvalidArgumentException
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
+
     public static function getMessageChannelFor(AnnotationRegistration $registration): string
     {
-        /** @var CommandHandler|QueryHandler $methodAnnotation */
-        $methodAnnotation = $registration->getAnnotationForMethod();
-
-        $inputChannel = property_exists($methodAnnotation, "inputChannelName") && $methodAnnotation->inputChannelName ? $methodAnnotation->inputChannelName : self::getMessageClassFor($registration);
-
-        return $inputChannel ?? "";
+        return self::getMessageChannelForEventHandler($registration);
     }
 
     /**

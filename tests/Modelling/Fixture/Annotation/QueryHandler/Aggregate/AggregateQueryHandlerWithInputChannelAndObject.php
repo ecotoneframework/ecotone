@@ -1,20 +1,19 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service;
+namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate;
 
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\Aggregate;
-use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
 /**
- * @MessageEndpoint()
+ * @Aggregate()
  */
-class EventHandlerWithClassAndEndpointId
+class AggregateQueryHandlerWithInputChannelAndObject
 {
     /**
-     * @EventHandler(endpointId="endpointId")
+     * @QueryHandler(inputChannelName="execute", endpointId="queryHandler")
      */
     public function execute(\stdClass $class) : int
     {

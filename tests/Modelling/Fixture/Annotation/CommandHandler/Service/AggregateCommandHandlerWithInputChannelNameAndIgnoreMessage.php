@@ -11,14 +11,13 @@ use Ecotone\Modelling\Annotation\CommandHandler;
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */
-class CommandHandlerWithClass
+class AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage
 {
     /**
-     * @param \stdClass $command
      * @return int
-     * @CommandHandler()
+     * @CommandHandler(inputChannelName="execute", endpointId="commandHandler", ignoreMessage=true)
      */
-    public function execute(\stdClass $command) : int
+    public function execute(\stdClass $class) : int
     {
         return 1;
     }

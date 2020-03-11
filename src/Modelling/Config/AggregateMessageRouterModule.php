@@ -8,6 +8,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
@@ -73,42 +74,86 @@ class AggregateMessageRouterModule implements AnnotationModule
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService)
     {
-        $commandHandlers = [];
+        $objectCommandHandlers = [];
+        $namedCommandHandlers = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, CommandHandler::class) as $registration) {
-            $commandHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            /** @var CommandHandler $annotationForMethod */
+            $annotationForMethod = $registration->getAnnotationForMethod();
+            $class = AggregateMessagingModule::getMessageClassFor($registration);
+            $targetMessageChannel = AggregateMessagingModule::getMessageChannelFor($registration);
+            if (!in_array($class, [null, TypeDescriptor::ARRAY])) {
+                $objectCommandHandlers[$class][] = $targetMessageChannel;
+            }
+            if ($annotationForMethod->inputChannelName) {
+                $namedCommandHandlers[$annotationForMethod->inputChannelName][] = $targetMessageChannel;
+            }
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, CommandHandler::class) as $registration) {
-            $commandHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            /** @var CommandHandler $annotationForMethod */
+            $annotationForMethod = $registration->getAnnotationForMethod();
+            $class = AggregateMessagingModule::getMessageClassFor($registration);
+            $targetMessageChannel = AggregateMessagingModule::getMessageChannelFor($registration);
+            if (!in_array($class, [null, TypeDescriptor::ARRAY])) {
+                $objectCommandHandlers[$class][] = $targetMessageChannel;
+            }
+            if ($annotationForMethod->inputChannelName) {
+                $namedCommandHandlers[$annotationForMethod->inputChannelName][] = $targetMessageChannel;
+            }
         }
-        $queryHandlers = [];
+        $objectQueryHandlers = [];
+        $namedQueryHandlers = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, QueryHandler::class) as $registration) {
-            $queryHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            /** @var QueryHandler $annotationForMethod */
+            $annotationForMethod = $registration->getAnnotationForMethod();
+            $class = AggregateMessagingModule::getMessageClassFor($registration);
+            $targetMessageChannel = AggregateMessagingModule::getMessageChannelFor($registration);
+            if (!in_array($class, [null, TypeDescriptor::ARRAY])) {
+                $objectQueryHandlers[$class][] = $targetMessageChannel;
+            }
+            if ($annotationForMethod->inputChannelName) {
+                $namedQueryHandlers[$annotationForMethod->inputChannelName][] = $targetMessageChannel;
+            }
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, QueryHandler::class) as $registration) {
-            $queryHandlers[AggregateMessagingModule::getMessageClassOrInputChannel($registration)][] = AggregateMessagingModule::getMessageChannelFor($registration);
+            /** @var QueryHandler $annotationForMethod */
+            $annotationForMethod = $registration->getAnnotationForMethod();
+            $class = AggregateMessagingModule::getMessageClassFor($registration);
+            $targetMessageChannel = AggregateMessagingModule::getMessageChannelFor($registration);
+            if (!in_array($class, [null, TypeDescriptor::ARRAY])) {
+                $objectQueryHandlers[$class][] = $targetMessageChannel;
+            }
+            if ($annotationForMethod->inputChannelName) {
+                $namedQueryHandlers[$annotationForMethod->inputChannelName][] = $targetMessageChannel;
+            }
         }
-        $eventHandlersClassToChannelMapping = [];
-        $eventHandlersRegexChannelToChannelMapping = [];
+        $objectEventHandlers = [];
+        $namedEventHandlers = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
-            $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannelForEventHandler($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            $class = AggregateMessagingModule::getMessageClassFor($registration);
+            if (!in_array($class, [null, TypeDescriptor::ARRAY])) {
+                $objectEventHandlers[$class][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            }
             if ($registration->getAnnotationForMethod()->listenTo) {
-                $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+                $namedEventHandlers[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
             }
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
-            $eventHandlersClassToChannelMapping[AggregateMessagingModule::getMessageClassOrInputChannelForEventHandler($registration)][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            $class = AggregateMessagingModule::getMessageClassFor($registration);
+            if (!in_array($class, [null, TypeDescriptor::ARRAY])) {
+                $objectEventHandlers[$class][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+            }
             if ($registration->getAnnotationForMethod()->listenTo) {
-                $eventHandlersRegexChannelToChannelMapping[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
+                $namedEventHandlers[$registration->getAnnotationForMethod()->listenTo][] = AggregateMessagingModule::getMessageChannelForEventHandler($registration);
             }
         }
 
         return new self(
-            BusRouterBuilder::createCommandBusByObject($commandHandlers),
-            BusRouterBuilder::createCommandBusByName($commandHandlers),
-            BusRouterBuilder::createQueryBusByObject($queryHandlers),
-            BusRouterBuilder::createQueryBusByName($queryHandlers),
-            BusRouterBuilder::createEventBusByObject($eventHandlersClassToChannelMapping),
-            BusRouterBuilder::createEventBusByName($eventHandlersRegexChannelToChannelMapping)
+            BusRouterBuilder::createCommandBusByObject($objectCommandHandlers),
+            BusRouterBuilder::createCommandBusByName($namedCommandHandlers),
+            BusRouterBuilder::createQueryBusByObject($objectQueryHandlers),
+            BusRouterBuilder::createQueryBusByName($namedQueryHandlers),
+            BusRouterBuilder::createEventBusByObject($objectEventHandlers),
+            BusRouterBuilder::createEventBusByName($namedEventHandlers)
         );
     }
 

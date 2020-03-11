@@ -10,12 +10,12 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 /**
  * @Aggregate()
  */
-class QueryHandlerWithClass
+class AggregateQueryHandlerWithInputChannel
 {
     /**
-     * @QueryHandler()
+     * @QueryHandler(inputChannelName="execute", endpointId="queryHandler")
      */
-    public function execute(\stdClass $class) : int
+    public function execute() : int
     {
 
     }

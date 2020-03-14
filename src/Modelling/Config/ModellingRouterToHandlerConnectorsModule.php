@@ -6,6 +6,7 @@ namespace Ecotone\Modelling\Config;
 
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
@@ -52,6 +53,7 @@ class ModellingRouterToHandlerConnectorsModule implements AnnotationModule
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         foreach ($this->mapping as $sourceChannel => $targetChannels) {
+            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($sourceChannel));
             foreach ($targetChannels as $targetChannel) {
                 $configuration->registerMessageHandler(
                     BridgeBuilder::create()

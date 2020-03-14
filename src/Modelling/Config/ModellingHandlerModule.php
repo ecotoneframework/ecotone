@@ -194,12 +194,8 @@ class ModellingHandlerModule implements AnnotationModule
         $configuration->requireReferences($this->aggregateRepositoryReferenceNames);
 
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
-            $inputChannelName = self::getNamedMessageChannelFor($registration);
             /** @var CommandHandler $annotationForMethod */
             $annotationForMethod = $registration->getAnnotationForMethod();
-            if ($inputChannelName) {
-                $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
-            }
 
             $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, self::getHandlerChannel($registration), $annotationForMethod->dropMessageOnNotFound, $annotationForMethod->endpointId);
         }
@@ -241,12 +237,8 @@ class ModellingHandlerModule implements AnnotationModule
         }
 
         foreach ($this->serviceCommandHandlersRegistrations as $registration) {
-            $inputChannelName = self::getNamedMessageChannelFor($registration);
             /** @var CommandHandler $annotationForMethod */
             $annotationForMethod = $registration->getAnnotationForMethod();
-            if ($inputChannelName) {
-                $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
-            }
 
             $configuration->registerMessageHandler($this->createServiceActivator(self::getHandlerChannel($registration), $registration, $annotationForMethod->endpointId));
         }

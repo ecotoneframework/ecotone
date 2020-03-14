@@ -18,31 +18,16 @@ class CommandBusRouter
     /**
      * @var array
      */
-    private $classNameToChannelNameMapping = [];
-    /**
-     * @var array
-     */
-    private $availableChannelNames = [];
-    /**
-     * @var ChannelResolver
-     */
-    private $channelResolver;
+    private $channelMapping = [];
 
     /**
      * CommandBusRouter constructor.
      *
-     * @param array           $classNameToChannelNameMapping
-     * @param ChannelResolver $channelResolver
+     * @param array           $channelMapping
      */
-    public function __construct(array $classNameToChannelNameMapping, ChannelResolver $channelResolver)
+    public function __construct(array $channelMapping)
     {
-        $this->classNameToChannelNameMapping = $classNameToChannelNameMapping;
-        foreach ($classNameToChannelNameMapping as $className => $channelNames) {
-            foreach ($channelNames as $channelName) {
-                $this->availableChannelNames[$channelName] = $className;
-            }
-        }
-        $this->channelResolver = $channelResolver;
+        $this->channelMapping = $channelMapping;
     }
 
     /**
@@ -57,29 +42,23 @@ class CommandBusRouter
         Assert::isObject($object, "Passed non object value to Commmand Bus: " . TypeDescriptor::createFromVariable($object)->toString() . ". Did you wanted to use convertAndSend?");
 
         $className = get_class($object);
-        if (!array_key_exists($className, $this->classNameToChannelNameMapping)) {
+        if (!array_key_exists($className, $this->channelMapping)) {
             throw ConfigurationException::create("Can't send command to {$className}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method or @MessageEndpoint to class?");
         }
 
-        return $this->classNameToChannelNameMapping[$className];
+        return $this->channelMapping[$className];
     }
 
-    /**
-     * @param string $name
-     *
-     * @return array
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function routeByName(?string $name) : string
+    public function routeByName(?string $name) : array
     {
         if (is_null($name)) {
             throw ConfigurationException::create("Can't send via name using CommandBus without " . CommandBus::CHANNEL_NAME_BY_NAME . " header defined");
         }
 
-        if (!array_key_exists($name, $this->availableChannelNames)) {
+        if (!array_key_exists($name, $this->channelMapping)) {
             throw ConfigurationException::create("Can't send command to {$name}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method or @MessageEndpoint to class?");
         }
 
-        return $name;
+        return $this->channelMapping[$name];
     }
 }

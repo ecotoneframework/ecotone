@@ -17,18 +17,16 @@ class EventBusRouter
     /**
      * @var array
      */
-    private $listenNameToChannelNameMapping = [];
+    private $channelMapping = [];
 
     /**
      * CommandBusRouter constructor.
      *
-     * @param array           $listenNameToTargetChannelsMapping
+     * @param array           $channelMapping
      */
-    public function __construct(array $listenNameToTargetChannelsMapping)
+    public function __construct(array $channelMapping)
     {
-        foreach ($listenNameToTargetChannelsMapping as $nameToListenFor => $channelNames) {
-            $this->listenNameToChannelNameMapping[$nameToListenFor] = array_unique($channelNames);
-        }
+        $this->channelMapping = $channelMapping;
     }
 
     /**
@@ -46,8 +44,8 @@ class EventBusRouter
         $resolvedChannels = [];
         $reflectionClass = new \ReflectionClass($object);
         $parent = $reflectionClass;
-        if (array_key_exists(TypeDescriptor::OBJECT, $this->listenNameToChannelNameMapping)) {
-            $resolvedChannels =  array_merge($resolvedChannels, $this->listenNameToChannelNameMapping[TypeDescriptor::OBJECT]);
+        if (array_key_exists(TypeDescriptor::OBJECT, $this->channelMapping)) {
+            $resolvedChannels =  array_merge($resolvedChannels, $this->channelMapping[TypeDescriptor::OBJECT]);
         }
         while ($parent = $parent->getParentClass()) {
             $resolvedChannels = array_merge($resolvedChannels, $this->getChannelsForClassName($parent));
@@ -72,8 +70,8 @@ class EventBusRouter
         }
 
         $className = $class->getName();
-        if (array_key_exists($className, $this->listenNameToChannelNameMapping)) {
-            $channelNames =  array_merge($channelNames, $this->listenNameToChannelNameMapping[$className]);
+        if (array_key_exists($className, $this->channelMapping)) {
+            $channelNames =  array_merge($channelNames, $this->channelMapping[$className]);
         }
 
         return $channelNames;
@@ -92,7 +90,7 @@ class EventBusRouter
         }
 
         $resultChannels = [];
-        foreach ($this->listenNameToChannelNameMapping as $listenFor => $destinationChannels) {
+        foreach ($this->channelMapping as $listenFor => $destinationChannels) {
             if (preg_match("#^" . str_replace("*", ".*", $listenFor) . "$#", $name)) {
                 $resultChannels = array_merge($resultChannels, $destinationChannels);
             }

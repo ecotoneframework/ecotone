@@ -50,7 +50,12 @@ class BusRouterBuilder implements MessageHandlerBuilder
      */
     private function __construct(string $endpointId, string $inputChannelName, array $channelNamesRouting, string $type)
     {
-        $this->channelNamesRouting = $channelNamesRouting;
+        $channelMapping = [];
+        foreach ($channelNamesRouting as $name => $targetChannels) {
+            $channelMapping[$name] = array_unique($targetChannels);
+        }
+
+        $this->channelNamesRouting = $channelMapping;
         $this->inputChannelName = $inputChannelName;
         $this->type = $type;
         $this->endpointId = $endpointId;
@@ -178,13 +183,13 @@ class BusRouterBuilder implements MessageHandlerBuilder
             }
             case "commandByObject": {
                 return RouterBuilder::createRouterFromObject(
-                    new CommandBusRouter($this->channelNamesRouting, $channelResolver),
+                    new CommandBusRouter($this->channelNamesRouting),
                     "routeByObject"
                 )->build($channelResolver, $referenceSearchService);
             }
             case "commandByName": {
                 return RouterBuilder::createRouterFromObject(
-                    new CommandBusRouter($this->channelNamesRouting, $channelResolver),
+                    new CommandBusRouter($this->channelNamesRouting),
                     "routeByName"
                 )
                     ->withMethodParameterConverters([
@@ -194,13 +199,13 @@ class BusRouterBuilder implements MessageHandlerBuilder
             }
             case "queryByObject": {
                 return RouterBuilder::createRouterFromObject(
-                    new QueryBusRouter($this->channelNamesRouting, $channelResolver),
+                    new QueryBusRouter($this->channelNamesRouting),
                     "routeByObject"
                 )->build($channelResolver, $referenceSearchService);
             }
             case "queryByName": {
                 return RouterBuilder::createRouterFromObject(
-                    new QueryBusRouter($this->channelNamesRouting, $channelResolver),
+                    new QueryBusRouter($this->channelNamesRouting),
                     "routeByName"
                 )
                     ->withMethodParameterConverters([

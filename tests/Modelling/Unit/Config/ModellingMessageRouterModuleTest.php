@@ -3,14 +3,17 @@
 namespace Test\Ecotone\Modelling\Unit\Config;
 
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\Config\AggregateMessageRouterModule;
+use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Config\ModellingMessageRouterModule;
 use Ecotone\Modelling\Config\BusRouterBuilder;
 use stdClass;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateNoInputChannelAndNoMessage;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\ServiceCommandHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\ServiceCommandHandlerWithInputChannelName;
@@ -20,6 +23,7 @@ use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCo
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelName;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelNameAndObject;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoInputChannelName;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithListenTo;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithListenToAndObject;
@@ -30,6 +34,7 @@ use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQu
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannel;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannelAndIgnoreMessage;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannelAndObject;
+use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlersWithNotUniqueClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannel;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndIgnoreMessage;
@@ -40,17 +45,8 @@ use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryH
  * @package Test\Ecotone\Modelling\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class AggregateMessageRouterModuleTest extends MessagingTest
+class ModellingMessageRouterModuleTest extends MessagingTest
 {
-    public function TODO_test_throwing_exception_if_no_command_class_and_input_channel_name_defined()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        AggregateMessageRouterModule::create(InMemoryAnnotationRegistrationService::createFrom([
-            AggregateNoInputChannelAndNoMessage::class
-        ]));
-    }
-
     public function test_registering_service_command_handler_with_endpoint_id()
     {
         $annotatedClasses = [
@@ -63,16 +59,46 @@ class AggregateMessageRouterModuleTest extends MessagingTest
         $this->assertRouting($annotatedClasses, $mapping, [], [], [], [], []);
     }
 
+    public function test_resulting_in_exception_when_registering_commands_handlers_for_same_input_channel()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $commandHandlerAnnotation = new CommandHandler();
+
+        $this->prepareModule(
+            InMemoryAnnotationRegistrationService::createFrom([
+                AggregateCommandHandlerExample::class
+            ])
+                ->addAnnotationToClassMethod(AggregateCommandHandlerExample::class, "doAnotherAction", $commandHandlerAnnotation)
+        );
+    }
+
+    public function test_throwing_configuration_exception_if_command_handler_has_no_information_about_channel()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $this->prepareModule(
+            InMemoryAnnotationRegistrationService::createFrom([
+                CommandHandlerWithNoInputChannelName::class
+            ])
+        );
+    }
+
+    public function test_throwing_exception_when_registering_non_unique_query_handlers()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $this->prepareModule(
+            InMemoryAnnotationRegistrationService::createFrom([
+                ServiceQueryHandlersWithNotUniqueClass::class
+            ])
+        );
+    }
+
     private function assertRouting(array $annotatedClasses, array $commandObjectMapping, array $commandMapping, array $queryObjectMapping, array $queryMapping, array $eventObjectMapping, array $eventNameMapping): void
     {
-        $module = AggregateMessageRouterModule::create(InMemoryAnnotationRegistrationService::createFrom($annotatedClasses));
-
-        $extendedConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
-        $module->prepare(
-            $extendedConfiguration,
-            [],
-            ModuleReferenceSearchService::createEmpty()
-        );
+        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom($annotatedClasses);
+        $extendedConfiguration = $this->prepareModule($annotationRegistrationService);
 
         $this->assertEquals(
             MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
@@ -361,5 +387,27 @@ class AggregateMessageRouterModuleTest extends MessagingTest
                 "execute" => ["eventHandler.target"]
             ]
         );
+    }
+
+    /**
+     * @param InMemoryAnnotationRegistrationService $annotationRegistrationService
+     * @return \Ecotone\Messaging\Config\Configuration
+     * @throws ConfigurationException
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws \Ecotone\Messaging\MessagingException
+     * @throws \ReflectionException
+     */
+    private function prepareModule(InMemoryAnnotationRegistrationService $annotationRegistrationService): \Ecotone\Messaging\Config\Configuration
+    {
+        $module = ModellingMessageRouterModule::create($annotationRegistrationService);
+
+        $extendedConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
+        $module->prepare(
+            $extendedConfiguration,
+            [],
+            ModuleReferenceSearchService::createEmpty()
+        );
+        return $extendedConfiguration;
     }
 }

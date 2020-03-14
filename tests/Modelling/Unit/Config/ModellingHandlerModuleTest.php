@@ -27,7 +27,7 @@ use Ecotone\Modelling\AggregateMessageConversionServiceBuilder;
 use Ecotone\Modelling\AggregateMessageHandlerBuilder;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
-use Ecotone\Modelling\Config\AggregateMessagingModule;
+use Ecotone\Modelling\Config\ModellingHandlerModule;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
@@ -41,7 +41,7 @@ use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\DoStuffCo
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithAnnotationClassNameWithMetadataAndService;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithAnnotationClassNameWithService;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithClassNameInAnnotation;
-use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoCommandInformationConfiguration;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoInputChannelName;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithReturnValue;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\SomeCommand;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\ExampleEventEventHandler;
@@ -58,24 +58,8 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod\MultiMethodService
  * @package Test\Ecotone\Modelling\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class AggregateMessagingModuleTest extends TestCase
+class ModellingHandlerModuleTest extends TestCase
 {
-    /**
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws MessagingException
-     */
-    public function test_throwing_configuration_exception_if_command_handler_has_no_information_about_command()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $this->prepareConfiguration(
-            InMemoryAnnotationRegistrationService::createFrom([
-                CommandHandlerWithNoCommandInformationConfiguration::class
-            ])
-        );
-    }
-
     /**
      * @param AnnotationRegistrationService $annotationRegistrationService
      * @return MessagingSystemConfiguration
@@ -83,7 +67,7 @@ class AggregateMessagingModuleTest extends TestCase
      */
     private function prepareConfiguration(AnnotationRegistrationService $annotationRegistrationService): MessagingSystemConfiguration
     {
-        $cqrsMessagingModule = AggregateMessagingModule::create($annotationRegistrationService);
+        $cqrsMessagingModule = ModellingHandlerModule::create($annotationRegistrationService);
 
         $extendedConfiguration = $this->createMessagingSystemConfiguration();
         $cqrsMessagingModule->prepare(
@@ -109,7 +93,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ReflectionException
      * @throws MessagingException
      */
-    public function test_throwing_exception_if_query_handler_has_no_return_value()
+    public function __test_throwing_exception_if_query_handler_has_no_return_value()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -120,21 +104,7 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
-    public function test_resulting_in_exception_when_registering_commands_handlers_for_same_input_channel()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        $commandHandlerAnnotation = new CommandHandler();
-
-        $this->prepareConfiguration(
-            InMemoryAnnotationRegistrationService::createFrom([
-                AggregateCommandHandlerExample::class
-            ])
-                ->addAnnotationToClassMethod(AggregateCommandHandlerExample::class, "doAnotherAction", $commandHandlerAnnotation)
-        );
-    }
-
-    public function test_resulting_in_exception_when_registering_query_handlers_for_same_input_channel()
+    public function __test_resulting_in_exception_when_registering_query_handlers_for_same_input_channel()
     {
         $this->expectException(ConfigurationException::class);
 
@@ -156,7 +126,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_aggregate_command_handler()
+    public function __test_registering_aggregate_command_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateCommandHandlerExample::class, "doAction", DoStuffCommand::class)
             ->withMethodParameterConverters([
@@ -220,7 +190,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_aggregate_command_handler_with_no_command_data()
+    public function __test_registering_aggregate_command_handler_with_no_command_data()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateCommandHandlerWithNoCommandDataExample::class, "doAction", null)
             ->withMethodParameterConverters([
@@ -250,7 +220,7 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
-    public function test_registering_service_command_handler_with_return_value()
+    public function __test_registering_service_command_handler_with_return_value()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler(
@@ -281,7 +251,7 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
-    public function test_registering_service_two_command_handler_under_same_channel()
+    public function __test_registering_service_two_command_handler_under_same_channel()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler(
@@ -333,7 +303,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_aggregate_two_command_handler_under_same_channel()
+    public function __test_registering_aggregate_two_command_handler_under_same_channel()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler(
@@ -395,7 +365,7 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
-    public function test_registering_handler_with_class_name_in_annotation()
+    public function __test_registering_handler_with_class_name_in_annotation()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler(
@@ -422,7 +392,7 @@ class AggregateMessagingModuleTest extends TestCase
         );
     }
 
-    public function test_registering_handler_with_ignore_message_in_annotation_and_metadata_and_service_injected()
+    public function __test_registering_handler_with_ignore_message_in_annotation_and_metadata_and_service_injected()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler(
@@ -461,7 +431,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_aggregate_command_handler_with_input_channel_and_no_parameters_but_no_ignore_message()
+    public function __test_registering_aggregate_command_handler_with_input_channel_and_no_parameters_but_no_ignore_message()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler(
@@ -495,7 +465,7 @@ class AggregateMessagingModuleTest extends TestCase
     }
 
 
-    public function test_throwing_exception_if_no_message_defined_and_no_input_channel_passed()
+    public function __test_throwing_exception_if_no_message_defined_and_no_input_channel_passed()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -514,7 +484,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_aggregate_command_handler_with_extra_services()
+    public function __test_registering_aggregate_command_handler_with_extra_services()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateCommandHandlerWithReferencesExample::class, "doAction", DoStuffCommand::class)
             ->withInputChannelName("command-id-with-references.target")
@@ -562,7 +532,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_aggregate_query_handler()
+    public function __test_registering_aggregate_query_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerExample::class, "doStuff", SomeQuery::class)
             ->withMethodParameterConverters([
@@ -602,7 +572,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_aggregate_query_handler_with_output_channel()
+    public function __test_registering_aggregate_query_handler_with_output_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", SomeQuery::class)
             ->withMethodParameterConverters([
@@ -641,7 +611,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_aggregate_with_custom_input_channel()
+    public function __test_registering_aggregate_with_custom_input_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", SomeQuery::class)
             ->withMethodParameterConverters([
@@ -696,13 +666,13 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_aggregate_without_query_class_with_only_input_channel()
+    public function __test_registering_aggregate_without_query_class_with_only_input_channel()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", SomeQuery::class)
             ->withMethodParameterConverters([
                 PayloadBuilder::create("query")
             ])
-            ->withInputChannelName("inputChannel")
+            ->withInputChannelName("some-id.target")
             ->withEndpointId("some-id");
 
         $customQueryHandler = new QueryHandler();
@@ -711,7 +681,7 @@ class AggregateMessagingModuleTest extends TestCase
 
         $this->createModuleWithCustomConfigAndAssertConfiguration(
             InMemoryAnnotationRegistrationService::createFrom([
-                AggregateQueryHandlerWithOutputChannelExample::class
+                AggregateQueryHandlerWithOutputChannelExam1ple::class
             ])
                 ->addAnnotationToClassMethod(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", $customQueryHandler),
             $this->createMessagingSystemConfiguration()
@@ -737,7 +707,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_service_event_handler()
+    public function __test_registering_service_event_handler()
     {
         $commandHandler = ServiceActivatorBuilder::create(ExampleEventEventHandler::class, "doSomething")
             ->withInputChannelName('some-id.target')
@@ -763,7 +733,7 @@ class AggregateMessagingModuleTest extends TestCase
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    public function test_registering_service_event_handler_with_extra_services()
+    public function __test_registering_service_event_handler_with_extra_services()
     {
         $commandHandler = ServiceActivatorBuilder::create(ExampleEventHandlerWithServices::class, "doSomething")
             ->withInputChannelName('some-id.target')

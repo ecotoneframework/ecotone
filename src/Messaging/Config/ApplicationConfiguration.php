@@ -38,7 +38,7 @@ class ApplicationConfiguration
     /**
      * @var string
      */
-    private $defaultSerializationMediaType = self::DEFAULT_SERIALIZATION_MEDIA_TYPE;
+    private $defaultSerializationMediaType;
     /**
      * @var null|string
      */
@@ -50,12 +50,56 @@ class ApplicationConfiguration
 
     private function __construct()
     {
+
     }
 
     public static function createWithDefaults() : self
     {
         return new self();
     }
+
+    /**
+     * @param self[] $applicationConfigurations
+     * @return ApplicationConfiguration
+     */
+    public function mergeWith(array $applicationConfigurations) : self
+    {
+        $self = $this;
+
+        if (!$this->defaultSerializationMediaType) {
+            $defaultSerializationMediaType = null;
+            foreach ($applicationConfigurations as $applicationConfiguration) {
+                if ($applicationConfiguration->defaultSerializationMediaType) {
+                    if ($defaultSerializationMediaType && $applicationConfiguration->defaultSerializationMediaType !== $defaultSerializationMediaType) {
+                        throw ConfigurationException::create("Ecotone can't resolve defaultSerializationMediaType. In order to continue you need to set it up.");
+                    }
+                    $defaultSerializationMediaType = $applicationConfiguration->defaultSerializationMediaType;
+                }
+            }
+
+            $self = $self->withDefaultSerializationMediaType($defaultSerializationMediaType ?? self::DEFAULT_SERIALIZATION_MEDIA_TYPE);
+        }
+
+        if (!$this->defaultErrorChannel) {
+            $defaultErrorChannel = null;
+            foreach ($applicationConfigurations as $applicationConfiguration) {
+                if ($applicationConfiguration->defaultErrorChannel) {
+                    if ($defaultErrorChannel && $applicationConfiguration->defaultErrorChannel !== $defaultErrorChannel) {
+                        throw ConfigurationException::create("Ecotone can't resolve defaultErrorChannel. In order to continue you need to set it up.");
+                    }
+                    $defaultErrorChannel = $applicationConfiguration->defaultErrorChannel;
+                }
+            }
+
+            if ($defaultErrorChannel) {
+                $self = $self->withDefaultErrorChannel($defaultErrorChannel);
+            }
+        }
+
+        return $self;
+    }
+
+
 
     /**
      * @param bool $failFast

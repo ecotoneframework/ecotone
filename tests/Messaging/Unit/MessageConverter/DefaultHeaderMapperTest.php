@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\MessageConverter;
 
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 /**
  * Class DefaultHeaderMapperTest
@@ -12,9 +14,9 @@ use PHPUnit\Framework\TestCase;
  */
 class DefaultHeaderMapperTest extends TestCase
 {
-    public function __test_mapping_simple_headers()
+    public function test_mapping_simple_headers()
     {
-        $defaultHeaderMapper = \Ecotone\Messaging\MessageConverter\DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["content-type"], ["set-cookie"]);
+        $defaultHeaderMapper = DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["content-type"], ["set-cookie"]);
 
         $this->assertEquals(
             ["content-type" => "application/json"],
@@ -27,9 +29,9 @@ class DefaultHeaderMapperTest extends TestCase
         );
     }
 
-    public function __test_mapping_associative_array()
+    public function test_mapping_associative_array()
     {
-        $defaultHeaderMapper = \Ecotone\Messaging\MessageConverter\DefaultHeaderMapper::createCaseInsensitiveHeadersWith([["content-type", "some"]], [["set-cookie", "some"]]);
+        $defaultHeaderMapper = DefaultHeaderMapper::createCaseInsensitiveHeadersWith([["content-type", "some"]], [["set-cookie", "some"]]);
 
         $this->assertEquals(
             ["content-type" => "application/json"],
@@ -42,9 +44,9 @@ class DefaultHeaderMapperTest extends TestCase
         );
     }
 
-    public function __test_not_mapping_if_missing_source_key()
+    public function test_not_mapping_if_missing_source_key()
     {
-        $defaultHeaderMapper = \Ecotone\Messaging\MessageConverter\DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["type" => "content-type"], []);
+        $defaultHeaderMapper = DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["type" => "content-type"], []);
 
         $this->assertEquals(
             [],
@@ -54,7 +56,7 @@ class DefaultHeaderMapperTest extends TestCase
 
     public function test_mapping_multiple_keys_at_once()
     {
-        $defaultHeaderMapper = \Ecotone\Messaging\MessageConverter\DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["*"], []);
+        $defaultHeaderMapper = DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["*"], []);
 
         $this->assertEquals(
             [
@@ -68,13 +70,13 @@ class DefaultHeaderMapperTest extends TestCase
         );
     }
 
-    public function __test_not_mapping_if_header_is_not_scalar_type()
+    public function test_not_mapping_if_header_is_not_scalar_type()
     {
-        $defaultHeaderMapper = \Ecotone\Messaging\MessageConverter\DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["*"], ["*"]);
+        $defaultHeaderMapper = DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["*"], ["*"]);
 
         $this->assertEquals(
             [],
-            $defaultHeaderMapper->mapToMessageHeaders(["object" => new \stdClass()])
+            $defaultHeaderMapper->mapToMessageHeaders(["object" => new stdClass()])
         );
 
         $this->assertEquals(
@@ -83,9 +85,9 @@ class DefaultHeaderMapperTest extends TestCase
         );
     }
 
-    public function __test_mapping_multiple_keys_at_once_with_prefix()
+    public function test_mapping_multiple_keys_at_once_with_prefix()
     {
-        $defaultHeaderMapper = \Ecotone\Messaging\MessageConverter\DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["x-*"], []);
+        $defaultHeaderMapper = DefaultHeaderMapper::createCaseInsensitiveHeadersWith(["x-*"], []);
 
         $this->assertEquals(
             [

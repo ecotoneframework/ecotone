@@ -24,22 +24,6 @@ use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSend
  */
 class MethodInterceptorTest extends TestCase
 {
-    public function __test_adding_parameter_converters_for_payload_headers_interface()
-    {
-        $methodInterceptor = MethodInterceptor::create(ServiceInterfaceSendOnly::class, InterfaceToCall::create(ServiceInterfaceSendOnly::class, "sendMailWithMetadata"), ServiceActivatorBuilder::create(ServiceInterfaceSendOnly::class, "sendMailWithMetadata"), 1, "");
-
-        $this->assertEquals(
-            [
-                InterceptorConverterBuilder::create(InterfaceToCall::create(CalculatingService::class, "sum"), []),
-                PayloadBuilder::create("content"),
-                AllHeadersBuilder::createWith("metadata")
-            ],
-            $methodInterceptor->addInterceptedInterfaceToCall(InterfaceToCall::create(CalculatingService::class, "sum"), [])
-                ->getInterceptingObject()
-                ->getParameterConverters()
-        );
-    }
-
     public function test_adding_parameters_when_type_hinting_for_annotation_class()
     {
         $methodInterceptor = MethodInterceptor::create(CalculatorInterceptor::class, InterfaceToCall::create(CalculatorInterceptor::class, "multiplyBefore"), ServiceActivatorBuilder::create(CalculatorInterceptor::class, "multiplyBefore"), 1, "");

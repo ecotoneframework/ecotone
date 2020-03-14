@@ -73,9 +73,4 @@ class ConversionServiceTest extends TestCase
             )
         );
     }
-
-    public function test_combing_converters_in_order_to_find_correct_converter_path()
-    {
-
-    }
 }

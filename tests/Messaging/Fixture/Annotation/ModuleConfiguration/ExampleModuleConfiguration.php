@@ -4,17 +4,20 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration;
 
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use stdClass;
 
 /**
  * Class ExampleModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
-class ExampleModuleConfiguration implements \Ecotone\Messaging\Config\Annotation\AnnotationModule
+class ExampleModuleConfiguration implements AnnotationModule
 {
     /**
      * @var array
@@ -30,11 +33,6 @@ class ExampleModuleConfiguration implements \Ecotone\Messaging\Config\Annotation
         $this->extensionObjects = $extensionObjects;
     }
 
-    public static function createEmpty(): self
-    {
-        return new self([]);
-    }
-
     /**
      * @param array $extensionObjects
      * @return ExampleModuleConfiguration
@@ -44,7 +42,7 @@ class ExampleModuleConfiguration implements \Ecotone\Messaging\Config\Annotation
         return new self($extensionObjects);
     }
 
-    public static function createWithHandlers(iterable $messageHandlerBuilders) : self
+    public static function createWithHandlers(iterable $messageHandlerBuilders): self
     {
         $self = self::createEmpty();
         $self->messageHandlers = $messageHandlerBuilders;
@@ -52,10 +50,15 @@ class ExampleModuleConfiguration implements \Ecotone\Messaging\Config\Annotation
         return $self;
     }
 
+    public static function createEmpty(): self
+    {
+        return new self([]);
+    }
+
     /**
      * @inheritDoc
      */
-    public static function create(\Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
+    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
         return new self([]);
     }
@@ -95,7 +98,7 @@ class ExampleModuleConfiguration implements \Ecotone\Messaging\Config\Annotation
      */
     public function canHandle($extensionObject): bool
     {
-        return $extensionObject instanceof \stdClass;
+        return $extensionObject instanceof stdClass;
     }
 
     /**

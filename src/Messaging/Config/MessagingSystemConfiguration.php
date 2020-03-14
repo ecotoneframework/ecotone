@@ -166,6 +166,14 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function __construct(?string $rootPathToSearchConfigurationFor, ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration)
     {
+        $extensionApplicationConfiguration = [];
+        foreach ($extensionObjects as $extensionObject) {
+            if ($extensionObject instanceof ApplicationConfiguration) {
+                $extensionApplicationConfiguration[] = $extensionObject;
+            }
+        }
+        $applicationConfiguration = $applicationConfiguration->mergeWith($extensionApplicationConfiguration);
+
         $this->isLazyConfiguration = !$applicationConfiguration->isFailingFast();
         $this->rootPathToSearchConfigurationFor = $rootPathToSearchConfigurationFor;
         $this->applicationConfiguration = $applicationConfiguration;
@@ -691,7 +699,9 @@ final class MessagingSystemConfiguration implements Configuration
     public static function cleanCache(ApplicationConfiguration $applicationConfiguration): void
     {
         if ($applicationConfiguration->getCacheDirectoryPath()) {
-            @mkdir($applicationConfiguration->getCacheDirectoryPath(), 0777, true);
+            if (!is_dir($applicationConfiguration->getCacheDirectoryPath())) {
+                @mkdir($applicationConfiguration->getCacheDirectoryPath(), 0777, true);
+            }
             Assert::isTrue(is_writable($applicationConfiguration->getCacheDirectoryPath()), "Not enough permissions to write into cache directory {$applicationConfiguration->getCacheDirectoryPath()}");
 
             Assert::isFalse(is_file($applicationConfiguration->getCacheDirectoryPath()), "Cache directory is file, should be directory");

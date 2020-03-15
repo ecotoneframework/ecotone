@@ -67,6 +67,15 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             ErrorChannelInterceptor::PRECEDENCE - 1,
             ""
         ));
+        $this->entrypointGateway->addAroundInterceptor(
+            AroundInterceptorReference::createWithObjectBuilder(
+                "",
+                new ExceptionLoggingInterceptorBuilder(),
+                "logBefore",
+                ErrorChannelInterceptor::PRECEDENCE - 100,
+                ""
+            )
+        );
     }
 
     /**

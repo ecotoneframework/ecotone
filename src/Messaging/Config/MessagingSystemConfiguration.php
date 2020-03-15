@@ -345,7 +345,7 @@ final class MessagingSystemConfiguration implements Configuration
             $asynchronousChannels[] = $asynchronousMessageChannel;
             foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
                 if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
-                    $targetChannelName = $messageHandlerBuilder->getInputMessageChannelName() . ".target";
+                    $targetChannelName = $messageHandlerBuilder->getInputMessageChannelName() . ".async";
                     $messageHandlerBuilders[] = TransformerBuilder::createHeaderEnricher([
                         MessageHeaders::REPLY_CHANNEL => null,
                         MessageHeaders::ROUTING_SLIP => $targetChannelName

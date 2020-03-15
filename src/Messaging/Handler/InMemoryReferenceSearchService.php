@@ -132,8 +132,8 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
 
     public function has(string $referenceName): bool
     {
-        foreach ($this->objectsToResolve as $referenceName => $object) {
-            if ($referenceName == $referenceName) {
+        foreach ($this->objectsToResolve as $objectReferenceName => $object) {
+            if ($objectReferenceName == $referenceName) {
                 return true;
             }
         }

@@ -44,6 +44,8 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\LazyEventBus\LazyEventPublishing;
 use Exception;
 use Ramsey\Uuid\Uuid;
@@ -347,6 +349,10 @@ final class MessagingSystemConfiguration implements Configuration
                 if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
                     $targetChannelName = $messageHandlerBuilder->getInputMessageChannelName() . ".async";
                     $messageHandlerBuilders[] = TransformerBuilder::createHeaderEnricher([
+                        CommandBus::CHANNEL_NAME_BY_NAME => null,
+                        CommandBus::CHANNEL_NAME_BY_OBJECT => null,
+                        EventBus::CHANNEL_NAME_BY_OBJECT => null,
+                        EventBus::CHANNEL_NAME_BY_NAME => null,
                         MessageHeaders::REPLY_CHANNEL => null,
                         MessageHeaders::ROUTING_SLIP => $targetChannelName
                     ])

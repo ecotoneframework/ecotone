@@ -178,6 +178,9 @@ final class MessagingSystemConfiguration implements Configuration
         $this->rootPathToSearchConfigurationFor = $rootPathToSearchConfigurationFor;
         $this->applicationConfiguration = $applicationConfiguration;
 
+        $extensionObjects = array_filter($extensionObjects, function(object $extensionObject){
+            return !($extensionObject instanceof ApplicationConfiguration);
+        });
         $extensionObjects[] = $applicationConfiguration;
         $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $applicationConfiguration);
     }
@@ -1130,7 +1133,8 @@ final class MessagingSystemConfiguration implements Configuration
                 $this->moduleReferenceSearchService->getAllRegisteredReferences(),
                 [
                     ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
-                    InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry
+                    InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry,
+                    ApplicationConfiguration::class => $this->applicationConfiguration
                 ]
             )
         );

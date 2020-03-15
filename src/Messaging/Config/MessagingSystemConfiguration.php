@@ -178,7 +178,11 @@ final class MessagingSystemConfiguration implements Configuration
         $this->rootPathToSearchConfigurationFor = $rootPathToSearchConfigurationFor;
         $this->applicationConfiguration = $applicationConfiguration;
 
-        $extensionObjects = array_filter($extensionObjects, function(object $extensionObject){
+        $extensionObjects = array_filter($extensionObjects, function($extensionObject){
+            if (is_null($extensionObject)) {
+                return false;
+            }
+
             return !($extensionObject instanceof ApplicationConfiguration);
         });
         $extensionObjects[] = $applicationConfiguration;

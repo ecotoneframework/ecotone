@@ -90,17 +90,6 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     }
 
     /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @param array $objects
-     * @return InMemoryReferenceSearchService
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public static function createWithNoDefaultsReferenceService(ReferenceSearchService $referenceSearchService, array $objects) : self
-    {
-        return new self($objects, $referenceSearchService, false);
-    }
-
-    /**
      * @param string $referenceName
      * @param $object
      * @throws \Ecotone\Messaging\MessagingException

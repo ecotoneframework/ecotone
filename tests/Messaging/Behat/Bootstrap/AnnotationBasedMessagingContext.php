@@ -24,6 +24,7 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use ReflectionException;
 use Test\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
 use Test\Ecotone\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
@@ -134,6 +135,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 }
         }
 
+        $objects["logger"] = new NullLogger();
         $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "ecotone_testing_behat_cache";
 
         $applicationConfiguration = ApplicationConfiguration::createWithDefaults()

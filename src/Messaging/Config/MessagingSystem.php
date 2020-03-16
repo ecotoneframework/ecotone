@@ -107,8 +107,8 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         $gatewayReferences = [];
         foreach ($gateways as $gateway) {
             $gatewayReferences[$gateway->getReferenceName()] = $gateway->getGateway();
+            $referenceSearchService->registerReferencedObject($gateway->getReferenceName(), $gatewayReferences[$gateway->getReferenceName()]);
         }
-        $referenceSearchService = InMemoryReferenceSearchService::createWithNoDefaultsReferenceService($referenceSearchService, $gatewayReferences);
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $consumerFactories, $pollingMetadataConfigurations);
         $consumers = [];
 

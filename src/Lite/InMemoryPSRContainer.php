@@ -43,8 +43,8 @@ class InMemoryPSRContainer implements ContainerInterface
     public static function createFromObjects(array $objects) : self
     {
         $map = [];
-        foreach ($objects as $object) {
-            $map[get_class($object)] = $object;
+        foreach ($objects as $key => $object) {
+            $map[is_numeric($key) ? get_class($object) : $key] = $object;
         }
 
         return new self($map);

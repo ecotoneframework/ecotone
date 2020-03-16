@@ -166,11 +166,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
         $gateway = $this->entrypointGateway
             ->withErrorChannel($pollingMetadata->getErrorChannelName())
             ->buildWithoutProxyObject(
-                InMemoryReferenceSearchService::createWithReferenceService(
-                    $referenceSearchService, [
-                        "handler" => $messageHandler
-                    ]
-                ),
+                $referenceSearchService,
                 InMemoryChannelResolver::createWithChannelResolver($channelResolver, [
                     $this->requestChannelName => $connectionChannel
                 ])

@@ -53,7 +53,7 @@ interface EventBus
     /**
      * @param string $name
      * @param string $sourceMediaType
-     * @param mixed  $commandData
+     * @param mixed  $data
      *
      * @return mixed
      *
@@ -62,16 +62,16 @@ interface EventBus
      *     parameterConverters={
      *          @Header(parameterName="name", headerName=EventBus::CHANNEL_NAME_BY_NAME),
      *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @Payload(parameterName="commandData")
+     *          @Payload(parameterName="data")
      *     }
      * )
      */
-    public function convertAndSend(string $name, string $sourceMediaType, $commandData);
+    public function convertAndSend(string $name, string $sourceMediaType, $data);
 
     /**
      * @param string $name
      * @param string $sourceMediaType
-     * @param mixed  $commandData
+     * @param mixed  $data
      * @param array  $metadata
      *
      * @return mixed
@@ -82,9 +82,9 @@ interface EventBus
      *          @Headers(parameterName="metadata"),
      *          @Header(parameterName="name", headerName=EventBus::CHANNEL_NAME_BY_NAME),
      *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @Payload(parameterName="commandData")
+     *          @Payload(parameterName="data")
      *     }
      * )
      */
-    public function convertAndSendWithMetadata(string $name, string $sourceMediaType, $commandData, array $metadata);
+    public function convertAndSendWithMetadata(string $name, string $sourceMediaType, $data, array $metadata);
 }

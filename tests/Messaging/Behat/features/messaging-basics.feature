@@ -13,7 +13,6 @@ Feature: Service activator
     When I book flat with id 3 using gateway "bookingGateway"
     Then flat with id 3 should be reserved when checked by "checkGateway"
 
-
   Scenario: Connection between gateway and service activator with transformer between
     Given I configure messaging system
     And I register "reserveRequest" as "Direct Channel"
@@ -24,7 +23,6 @@ Feature: Service activator
     And I activate transformer with name "reservationTransformer" for "Test\Ecotone\Messaging\Fixture\Behat\Shopping\ToReservationRequestTransformer" and "transform" with request channel "reserveRequest" and output channel "reserveRequestTransformer"
     And I run messaging system
     When I reserve book named "Harry Potter" using gateway "reserveGateway"
-
 
   Scenario: Application consist of order service. It receives and order and return confirmation.
       Gateway is entry point to the messaging system, it will receive the order and send it to request channel.
@@ -122,7 +120,6 @@ Feature: Service activator
     When I send order request with id 3 product name "INCORRECT" using gateway "orderingService"
     And "orderProcessor" handles message with exception
 
-
   Scenario: Application consist of calculator. It receives number and perform few calculations.
     Calculations are combined with interceptors.
     This will focus on synchronous scenario using gateway
@@ -153,3 +150,8 @@ Feature: Service activator
   Scenario: Application handling gateways inside gateways using only messages
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages"
     When I call with 2 I should receive 76 with message
+
+  Scenario: Handle presend interceptor
+    Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\Presend"
+    When I store 100 coins
+    Then result should be 200 in "shop" channel

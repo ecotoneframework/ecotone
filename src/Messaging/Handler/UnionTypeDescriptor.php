@@ -145,6 +145,17 @@ class UnionTypeDescriptor implements Type
         return false;
     }
 
+    public function isMessage(): bool
+    {
+        foreach ($this->typeDescriptors as $ownedTypeDescriptor) {
+            if ($ownedTypeDescriptor->isMessage()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @inheritDoc
      */

@@ -3,8 +3,6 @@
 
 namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
-
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Lite\EcotoneLiteConfiguration;
@@ -37,6 +35,9 @@ use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExampl
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\InterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\CalculateGatewayExampleWithMessages;
+use Test\Ecotone\Messaging\Fixture\Behat\Presend\CoinGateway;
+use Test\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
+use Test\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
@@ -120,6 +121,15 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                         OrderRepository::class => OrderRepository::createEmpty(),
                         AddUserIdService::class => new AddUserIdService(),
                         OrderErrorHandler::class => new OrderErrorHandler(),
+                        LoggingService::class => new LoggingService()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Messaging\Fixture\Behat\Presend":
+                {
+                    $objects = [
+                        MultiplyCoins::class => new MultiplyCoins(),
+                        Shop::class => new Shop(),
                         LoggingService::class => new LoggingService()
                     ];
                     break;
@@ -420,5 +430,16 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     public function logsCountBe(int $count)
     {
         $this->assertEquals($count, count($this->getQueryBus()->convertAndSend("getLogs", MediaType::APPLICATION_X_PHP_ARRAY, [])));
+    }
+
+    /**
+     * @When I store :amount coins
+     */
+    public function iStoreCoins(int $amount)
+    {
+        /** @var CoinGateway $coinGateway */
+        $coinGateway = self::$messagingSystem->getGatewayByName(CoinGateway::class);
+
+        $coinGateway->store($amount);
     }
 }

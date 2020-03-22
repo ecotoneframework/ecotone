@@ -48,6 +48,8 @@ interface Type
      */
     public function isIterable(): bool;
 
+    public function isMessage(): bool;
+
     /**
      * @return bool
      */

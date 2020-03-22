@@ -4,6 +4,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
 
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\BeforeSend\BeforeSendGateway;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Config\NamedMessageChannel;
 use Ecotone\Messaging\Conversion\ArrayToJson\ArrayToJsonConverter;
@@ -12,7 +13,6 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
-use Ecotone\Messaging\Conversion\UuidToString\GeneralUuidToStringConverter;
 use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverter;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -45,6 +45,7 @@ use Ramsey\Uuid\UuidInterface;
 use RuntimeException;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleStdClassConverter;
+use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExceptionalConverter;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
@@ -1329,6 +1330,28 @@ class GatewayProxyBuilderTest extends MessagingTest
             );
 
         $this->assertEquals(Uuid::fromString("e7019549-9733-45a3-b088-783de2b2357f"), $gateway->executeNoParameter());
+    }
+
+    public function test_not_converting_when_return_type_is_message()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage([1, 2, 3], [
+            MessageHeaders::CONTENT_TYPE => MediaType::createApplicationXPHPWithTypeParameter("array")->toString()
+        ]));
+
+        /** @var MessageReturningGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', BeforeSendGateway::class, 'execute', $requestChannelName)
+            ->build(
+                InMemoryReferenceSearchService::createWith([
+                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([new ExceptionalConverter()])
+                ]),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $this->assertInstanceOf(Message::class, $gateway->execute(MessageBuilder::withPayload("b")->build()));
     }
 
     public function test_not_converting_if_reply_has_already_expected_type()

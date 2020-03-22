@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
@@ -448,6 +449,11 @@ final class TypeDescriptor implements Type
     public function isIterable() : bool
     {
         return $this->type === self::ARRAY || $this->type === self::ITERABLE || $this->isCollection();
+    }
+
+    public function isMessage(): bool
+    {
+        return $this->type === Message::class;
     }
 
     /**

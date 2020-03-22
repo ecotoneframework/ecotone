@@ -9,7 +9,7 @@ namespace Ecotone\Messaging\Annotation\Interceptor;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class BeforeSend
+class Presend
 {
     /**
      * The aspect returning the lower value has the higher precedence.

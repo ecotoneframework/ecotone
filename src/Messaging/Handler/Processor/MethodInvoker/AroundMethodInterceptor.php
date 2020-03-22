@@ -165,7 +165,7 @@ class AroundMethodInterceptor
                     $resolvedArgument = $methodArgument->value();
                 }
             }
-
+    
             if (!$resolvedArgument && $parameter->getTypeDescriptor()->isNonCollectionArray()) {
                 $resolvedArgument = $requestMessage->getHeaders()->headers();
             }

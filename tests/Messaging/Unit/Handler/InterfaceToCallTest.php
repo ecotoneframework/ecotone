@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler;
 
 use Ecotone\Messaging\Annotation\Async;
 use Ecotone\Messaging\Annotation\Converter;
+use Ecotone\Messaging\Annotation\ConverterClass;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -549,7 +550,7 @@ class InterfaceToCallTest extends TestCase
             $interfaceToCall->getMethodAnnotations()
         );
         $this->assertEquals(
-            [new Converter()],
+            [new ConverterClass()],
             $interfaceToCall->getClassAnnotations()
         );
     }
@@ -561,11 +562,11 @@ class InterfaceToCallTest extends TestCase
         $this->assertTrue($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(Converter::class)));
         $this->assertFalse($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(MessageEndpoint::class)));
 
-        $this->assertTrue($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(Converter::class)));
+        $this->assertTrue($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(ConverterClass::class)));
 
         $this->assertEquals(
-            new Converter(),
-            $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Converter::class))
+            new ConverterClass(),
+            $interfaceToCall->getClassAnnotation(TypeDescriptor::create(ConverterClass::class))
         );
         $this->assertEquals(
             new Converter(),

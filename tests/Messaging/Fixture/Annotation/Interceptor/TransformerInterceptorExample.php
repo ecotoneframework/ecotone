@@ -4,7 +4,7 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
 
 use Ecotone\Messaging\Annotation\Interceptor\After;
 use Ecotone\Messaging\Annotation\Interceptor\Before;
-use Ecotone\Messaging\Annotation\Interceptor\BeforeSend;
+use Ecotone\Messaging\Annotation\Interceptor\Presend;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use Ecotone\Messaging\Annotation\Interceptor\TransformerInterceptor;
@@ -46,7 +46,7 @@ class TransformerInterceptorExample
     }
 
     /**
-     * @BeforeSend(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, parameterConverters={
+     * @Presend(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, parameterConverters={
      *      @Payload(parameterName="name"),
      *      @Header(parameterName="surname", headerName="surname")
      * }, changeHeaders=true)

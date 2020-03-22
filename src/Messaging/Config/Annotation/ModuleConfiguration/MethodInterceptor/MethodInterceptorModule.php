@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodIntercep
 use Ecotone\Messaging\Annotation\Interceptor\After;
 use Ecotone\Messaging\Annotation\Interceptor\Around;
 use Ecotone\Messaging\Annotation\Interceptor\Before;
-use Ecotone\Messaging\Annotation\Interceptor\BeforeSend;
+use Ecotone\Messaging\Annotation\Interceptor\Presend;
 use Ecotone\Messaging\Annotation\Interceptor\EnricherInterceptor;
 use Ecotone\Messaging\Annotation\Interceptor\EnrichHeader;
 use Ecotone\Messaging\Annotation\Interceptor\EnrichPayload;
@@ -87,13 +87,13 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
         /** @var AnnotationRegistration[] $methodsInterceptors */
         $methodsInterceptors = array_merge(
-            $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, BeforeSend::class),
+            $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, Presend::class),
             $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, Before::class),
             $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, Around::class),
             $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, After::class)
         );
 
-        $beforeSendAnnotation = TypeDescriptor::create(BeforeSend::class);
+        $beforeSendAnnotation = TypeDescriptor::create(Presend::class);
         $beforeAnnotation = TypeDescriptor::create(Before::class);
         $aroundAnnotation = TypeDescriptor::create(Around::class);
         $afterAnnotation = TypeDescriptor::create(After::class);

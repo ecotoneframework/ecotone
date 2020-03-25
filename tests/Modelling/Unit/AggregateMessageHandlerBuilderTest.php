@@ -3,6 +3,7 @@
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
@@ -27,7 +28,6 @@ use Test\Ecotone\Modelling\Fixture\Blog\Article;
 use Test\Ecotone\Modelling\Fixture\Blog\ChangeArticleContentCommand;
 use Test\Ecotone\Modelling\Fixture\Blog\CloseArticleCommand;
 use Test\Ecotone\Modelling\Fixture\Blog\InMemoryArticleStandardRepository;
-use Test\Ecotone\Modelling\Fixture\Blog\InMemoryArticleRepositoryFactory;
 use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleWithTitleOnlyCommand;
 use Test\Ecotone\Modelling\Fixture\Blog\RepublishArticleCommand;
@@ -37,8 +37,6 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryOrderAggregateRepositoryConstructor;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryOrderRepositoryFactory;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\MultiplyAmountCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
 use Test\Ecotone\Modelling\Fixture\Handler\ReplyViaHeadersMessageHandler;
@@ -49,8 +47,8 @@ use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoFactoryMetho
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\CreateNoIdDefinedAggregate;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\NoIdDefinedAfterCallingFactoryExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NonStaticFactoryMethodExample;
-use Test\Ecotone\Modelling\Fixture\TestingEventBus;
-use Test\Ecotone\Modelling\Fixture\TestingLazyEventBus;
+use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
+use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 use Test\Ecotone\Modelling\Fixture\Ticket\AssignWorkerCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\StartTicketCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
@@ -784,6 +782,53 @@ class AggregateMessageHandlerBuilderTest extends TestCase
 
 
         $this->assertEquals($command, $replyChannel->receive()->getPayload());
+    }
+
+    public function test_calling_aggregate_with_metadata_mapping()
+    {
+        $headerName                            = "paymentId";
+        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            OrderFulfilment::class,
+            "finishOrder",
+            PaymentWasDoneEvent::class,
+            ["orderId" => $headerName]
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $orderId                 = 1000;
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
+            ]),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryStandardRepository::createWith([
+                    OrderFulfilment::createWith($orderId)
+                ]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $command = PaymentWasDoneEvent::create();
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload($command)
+                ->setHeader($headerName, $orderId)
+                ->setReplyChannel($replyChannel)->build()
+        );
+
+        $this->assertEquals($command, $replyChannel->receive()->getPayload());
+    }
+
+    public function test_throwing_exception_if_metadata_identifier_mapping_points_to_non_existing_aggregate_id()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+            OrderFulfilment::class,
+            "finishOrder",
+            PaymentWasDoneEvent::class,
+            ["some" => "paymentId", "orderId" => "x"]
+        );
     }
 
     /**

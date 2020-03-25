@@ -43,4 +43,8 @@ class CommandHandler extends InputOutputEndpointAnnotation
      * @var bool
      */
     public $mustBeUnique = true;
+    /**
+     * @var array
+     */
+    public $identifierMetadataMapping = [];
 }

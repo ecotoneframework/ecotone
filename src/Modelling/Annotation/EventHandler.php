@@ -56,4 +56,8 @@ class EventHandler extends IdentifiedAnnotation
      * @var array
      */
     public $requiredInterceptorNames = [];
+    /**
+     * @var array
+     */
+    public $identifierMetadataMapping = [];
 }

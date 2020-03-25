@@ -21,5 +21,5 @@ interface AggregateMessage
     const IS_EVENT_SOURCED = "ecotone.modelling.aggregate.is_event_sourced";
     const CALL_RESULT = "ecotone.modelling.aggregate.result";
 
-    const BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE = MethodInterceptor::DEFAULT_PRECEDENCE + 10;
+    const BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE = MethodInterceptor::DEFAULT_PRECEDENCE + 1010;
 }

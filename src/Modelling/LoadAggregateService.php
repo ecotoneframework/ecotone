@@ -39,7 +39,7 @@ class LoadAggregateService
     /**
      * @var array
      */
-    private $aggregateIdentifierMapping;
+    private $payloadIdentifierMapping;
     /**
      * @var PropertyReaderAccessor
      */
@@ -60,28 +60,34 @@ class LoadAggregateService
      * @var string|null
      */
     private $eventSourcedFactoryMethod;
+    /**
+     * @var array
+     */
+    private $metadataIdentifierMapping;
 
     /**
      * ServiceCallToAggregateAdapter constructor.
      *
      * @param object|StandardRepository|EventSourcedRepository $aggregateRepository
-     * @param string $aggregateClassName
-     * @param string $aggregateMethod
-     * @param bool $isFactoryMethod
-     * @param array $aggregateIdentifierMapping
-     * @param null|array $expectedVersionMapping
-     * @param PropertyReaderAccessor $propertyReaderAccessor
-     * @param bool $dropMessageOnNotFound
-     * @param bool $loadForFactoryMethod
-     * @param string|null $eventSourcedFactoryMethod
+     * @param string                                           $aggregateClassName
+     * @param string                                           $aggregateMethod
+     * @param bool                                             $isFactoryMethod
+     * @param array                                            $payloadIdentifierMapping
+     * @param array                                            $metadataIdentifierMapping
+     * @param null|array                                       $expectedVersionMapping
+     * @param PropertyReaderAccessor                           $propertyReaderAccessor
+     * @param bool                                             $dropMessageOnNotFound
+     * @param bool                                             $loadForFactoryMethod
+     * @param string|null                                      $eventSourcedFactoryMethod
      */
-    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $aggregateIdentifierMapping, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, bool $dropMessageOnNotFound, bool $loadForFactoryMethod, ?string $eventSourcedFactoryMethod)
+    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, bool $isFactoryMethod, array $payloadIdentifierMapping, array $metadataIdentifierMapping, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, bool $dropMessageOnNotFound, bool $loadForFactoryMethod, ?string $eventSourcedFactoryMethod)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->isFactoryMethod = $isFactoryMethod;
         $this->aggregateClassName = $aggregateClassName;
         $this->aggregateMethod = $aggregateMethod;
-        $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
+        $this->payloadIdentifierMapping = $payloadIdentifierMapping;
+        $this->metadataIdentifierMapping = $metadataIdentifierMapping;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->expectedVersionMapping = $expectedVersionMapping;
         $this->dropMessageOnNotFound = $dropMessageOnNotFound;
@@ -102,14 +108,25 @@ class LoadAggregateService
         $aggregateIdentifiers = [];
         $expectedVersion = null;
 
-        foreach ($this->aggregateIdentifierMapping as $aggregateIdentifierName => $aggregateIdentifierMappingName) {
+        foreach ($this->payloadIdentifierMapping as $aggregateIdentifierName => $aggregateIdentifierMappingName) {
+            if (is_null($aggregateIdentifierMappingName)) {
+                $aggregateIdentifiers[$aggregateIdentifierName] = null;
+                continue;
+            }
+
             $aggregateIdentifiers[$aggregateIdentifierName] = ($this->isFactoryMethod && !$this->loadForFactoryMethod)
                 ? null
                 : (
-                    $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload())
+                $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload())
                     ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $message->getPayload())
                     : null
                 );
+        }
+        $metadata = $message->getHeaders()->headers();
+        foreach ($this->metadataIdentifierMapping as $identifierName => $headerName) {
+            if (array_key_exists($headerName, $metadata)) {
+                $aggregateIdentifiers[$identifierName] = $metadata[$headerName];
+            }
         }
 
         $aggregate = null;

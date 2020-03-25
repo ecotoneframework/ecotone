@@ -319,7 +319,7 @@ class ModellingHandlerModule implements AnnotationModule
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
 
-        /** @var CommandHandler $annotation */
+        /** @var CommandHandler|EventHandler $annotation */
         $annotation = $registration->getAnnotationForMethod();
 
         $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
@@ -337,7 +337,7 @@ class ModellingHandlerModule implements AnnotationModule
 
 
         $configuration->registerMessageHandler(
-            AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith($registration->getClassName(), $registration->getMethodName(), TypeDescriptor::create($handledMessageClassName)->isIterable()  ? null : $handledMessageClassName)
+            AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith($registration->getClassName(), $registration->getMethodName(), TypeDescriptor::create($handledMessageClassName)->isIterable()  ? null : $handledMessageClassName, $annotation->identifierMetadataMapping)
                 ->withInputChannelName($inputChannelName)
                 ->withOutputMessageChannel($annotation->outputChannelName)
                 ->withEndpointId($endpointId)

@@ -14,7 +14,9 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Annotation\Splitter;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
+use Ecotone\Messaging\Config\Annotation\AutoloadFileNamespaceParser;
 use Ecotone\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\InMemoryAutoloadNamespaceParser;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Environment\ApplicationContextWithClassEnvironment;
@@ -232,12 +234,13 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
 
         new FileSystemAnnotationRegistrationService(
             new AnnotationReader(),
+            new AutoloadFileNamespaceParser(),
             self::ROOT_DIR,
             [
                 "Incorrect"
             ],
             "test",
-            false
+            ""
         );
     }
 
@@ -245,12 +248,13 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     {
         new FileSystemAnnotationRegistrationService(
             new AnnotationReader(),
+            new AutoloadFileNamespaceParser(),
             self::ROOT_DIR,
             [
                 "TestingNamespace"
             ],
             "test",
-            false
+            ""
         );
 
         $this->assertTrue(true);
@@ -260,15 +264,44 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     {
         new FileSystemAnnotationRegistrationService(
             new AnnotationReader(),
+            new AutoloadFileNamespaceParser(),
             self::ROOT_DIR,
             [
                 "Incorrect\Testing"
             ],
             "test",
-            false
+            ""
         );
 
         $this->assertTrue(true);
+    }
+
+    public function test_throwing_exception_if_given_catalog_to_load_and_no_namespaces_to_load()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        new FileSystemAnnotationRegistrationService(
+            new AnnotationReader(),
+            InMemoryAutoloadNamespaceParser::createEmpty(),
+            self::ROOT_DIR,
+            [],
+            "test",
+            "src"
+        );
+    }
+
+    public function test_throwing_exception_if_given_catalog_to_load_and_only_ecotone_namespace_defined_to_load()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        new FileSystemAnnotationRegistrationService(
+            new AnnotationReader(),
+            InMemoryAutoloadNamespaceParser::createEmpty(),
+            self::ROOT_DIR,
+            [FileSystemAnnotationRegistrationService::FRAMEWORK_NAMESPACE],
+            "test",
+            "src"
+        );
     }
 
     /**
@@ -283,12 +316,13 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     {
         $fileSystemAnnotationRegistrationService = new FileSystemAnnotationRegistrationService(
             new AnnotationReader(),
+            new AutoloadFileNamespaceParser(),
             self::ROOT_DIR,
             [
                 $namespace
             ],
             $environmentName,
-            false
+            ""
         );
         return $fileSystemAnnotationRegistrationService;
     }

@@ -9,13 +9,14 @@ namespace Ecotone\Messaging\Config\Annotation;
  * @package Ecotone\Messaging\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class GetUsedPathsFromAutoload
+class AutoloadFileNamespaceParser implements AutoloadNamespaceParser
 {
     /**
      * @param array $autoloadData
+     * @param string $catalogToLoad
      * @return array
      */
-    public function getNamespacesForSrcCatalog(array $autoloadData) : array
+    public function getNamespacesForGivenCatalog(array $autoloadData, string $catalogToLoad) : array
     {
         $namespaces = [];
         if (isset($autoloadData['psr-4'])) {
@@ -25,7 +26,7 @@ class GetUsedPathsFromAutoload
                 }
 
                 foreach ($paths as $path) {
-                    if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
+                    if (substr($path, 0, 3) === $catalogToLoad && (in_array(substr($path, 4, 1), ["/", false]))) {
                         $namespaces[] = $autoloadNamespace;
                     }
                 }
@@ -38,7 +39,7 @@ class GetUsedPathsFromAutoload
                 }
 
                 foreach ($paths as $path) {
-                    if (substr($path, 0, 3) === "src" && (in_array(substr($path, 4, 1), ["/", false]))) {
+                    if (substr($path, 0, 3) === $catalogToLoad && (in_array(substr($path, 4, 1), ["/", false]))) {
                         $namespaces[] = $autoloadNamespace;
                     }
                 }
@@ -57,7 +58,7 @@ class GetUsedPathsFromAutoload
      * @param bool $autoloadPsr4
      * @return array
      */
-    public function getFor(array $requiredNamespaces, array $autoload, bool $autoloadPsr4)
+    public function getFor(array $requiredNamespaces, array $autoload, bool $autoloadPsr4) : array
     {
         $paths = [];
         foreach ($requiredNamespaces as $requiredNamespace) {

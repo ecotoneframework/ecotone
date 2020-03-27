@@ -4,14 +4,14 @@
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
 
 use PHPUnit\Framework\TestCase;
-use Ecotone\Messaging\Config\Annotation\GetUsedPathsFromAutoload;
+use Ecotone\Messaging\Config\Annotation\AutoloadFileNamespaceParser;
 
 /**
  * Class GetUsedPathsFromAutoloadTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class GetUsedPathsFromAutoloadTest extends TestCase
+class FileAutoloadParserTest extends TestCase
 {
     public function test_retrieve_when_psr_4_namespace_is_equal_to_required()
     {
@@ -88,59 +88,63 @@ class GetUsedPathsFromAutoloadTest extends TestCase
 
     public function test_retrieving_src_catalog()
     {
-        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+        $getUsedPathsFromAutoload = new AutoloadFileNamespaceParser();
 
         $this->assertEquals(
             ["Ecotone\One", "Ecotone\Two"],
-            $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
+            $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
                 [
                     "psr-4" => ["Ecotone\One" => "src"],
                     "psr-0" => ["Ecotone\Two" => "src"]
-                ]
+                ],
+                "src"
             )
         );
     }
 
     public function test_ignoring_when_src_has_no_namespace_defined()
     {
-        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+        $getUsedPathsFromAutoload = new AutoloadFileNamespaceParser();
 
         $this->assertEquals(
             [],
-            $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
+            $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
                 [
                     "psr-4" => ["" => "src"]
-                ]
+                ],
+                "src"
             )
         );
     }
 
     public function test_retrieving_when_more_than_one_target_directory()
     {
-        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+        $getUsedPathsFromAutoload = new AutoloadFileNamespaceParser();
 
         $this->assertEquals(
             ["Ecotone\One", "Ecotone\Two"],
-            $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
+            $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
                 [
                     "psr-4" => ["Ecotone\One" => ["src", "tests"]],
                     "psr-0" => ["Ecotone\Two" => ["src", "tests"]]
-                ]
+                ],
+                "src"
             )
         );
     }
 
     public function test_not_retrieving_when_not_in_src_catalog()
     {
-        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+        $getUsedPathsFromAutoload = new AutoloadFileNamespaceParser();
 
         $this->assertEquals(
             [],
-            $getUsedPathsFromAutoload->getNamespacesForSrcCatalog(
+            $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
                 [
                     "psr-4" => ["Ecotone\One" => "tests"],
                     "psr-0" => ["Ecotone\Two" => "tests"]
-                ]
+                ],
+                "src"
             )
         );
     }
@@ -153,7 +157,7 @@ class GetUsedPathsFromAutoloadTest extends TestCase
      */
     private function validateExpectedPaths(array $requiredNamepaces, array $autoload, bool $autoloadPsr4, array $expectedPaths): void
     {
-        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
+        $getUsedPathsFromAutoload = new AutoloadFileNamespaceParser();
         $resultsPaths = $getUsedPathsFromAutoload->getFor(
             $requiredNamepaces,
             $autoload,

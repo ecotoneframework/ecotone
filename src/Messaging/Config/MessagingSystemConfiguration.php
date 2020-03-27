@@ -13,6 +13,7 @@ use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
 use Ecotone\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
+use Ecotone\Messaging\Config\Annotation\AutoloadFileNamespaceParser;
 use Ecotone\Messaging\Config\BeforeSend\BeforeSendChannelInterceptorBuilder;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
@@ -627,10 +628,11 @@ final class MessagingSystemConfiguration implements Configuration
             new AnnotationModuleRetrievingService(
                 new FileSystemAnnotationRegistrationService(
                     new AnnotationReader(),
+                    new AutoloadFileNamespaceParser(),
                     realpath($rootPathToSearchConfigurationFor),
                     $applicationConfiguration->getNamespaces(),
                     $applicationConfiguration->getEnvironment(),
-                    $applicationConfiguration->isLoadingSrc()
+                    $applicationConfiguration->getLoadedCatalog()
                 )
             ),
             $referenceTypeFromNameResolver,

@@ -12,7 +12,6 @@ class ApplicationConfiguration
 {
     const DEFAULT_ENVIRONMENT = "dev";
     const DEFAULT_FAIL_FAST = true;
-    const DEFAULT_LOAD_SRC = true;
     const DEFAULT_SERIALIZATION_MEDIA_TYPE = MediaType::APPLICATION_X_PHP_SERIALIZED;
 
     /**
@@ -28,9 +27,9 @@ class ApplicationConfiguration
      */
     private $environment = self::DEFAULT_ENVIRONMENT;
     /**
-     * @var bool
+     * @var string
      */
-    private $loadSrc = self::DEFAULT_LOAD_SRC;
+    private $loadCatalog = "";
     /**
      * @var string[]
      */
@@ -138,13 +137,13 @@ class ApplicationConfiguration
     }
 
     /**
-     * @param bool $loadSrc
+     * @param string $catalog
      * @return ApplicationConfiguration
      */
-    public function withLoadSrc(bool $loadSrc): ApplicationConfiguration
+    public function withLoadCatalog(string $catalog): ApplicationConfiguration
     {
         $clone = clone $this;
-        $clone->loadSrc = $loadSrc;
+        $clone->loadCatalog = $catalog;
 
         return $clone;
     }
@@ -247,12 +246,9 @@ class ApplicationConfiguration
         return $this->failFast;
     }
 
-    /**
-     * @return bool
-     */
-    public function isLoadingSrc(): bool
+    public function getLoadedCatalog(): string
     {
-        return $this->loadSrc;
+        return $this->loadCatalog;
     }
 
     /**

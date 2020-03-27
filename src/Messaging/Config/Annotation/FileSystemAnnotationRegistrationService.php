@@ -54,17 +54,19 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     /**
      * FileSystemAnnotationRegistrationService constructor.
      * @param Reader $annotationReader
+     * @param AutoloadNamespaceParser $autoloadNamespaceParser
      * @param string $rootProjectDir
      * @param array $namespaces to autoload, if loadSrc is set then no need to provide src namespaces
      * @param string $environmentName
-     * @param bool $loadSrc
+     * @param string $catalogToLoad
      * @throws ConfigurationException
      * @throws MessagingException
+     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    public function __construct(Reader $annotationReader, string $rootProjectDir, array $namespaces, string $environmentName, bool $loadSrc)
+    public function __construct(Reader $annotationReader, AutoloadNamespaceParser $autoloadNamespaceParser, string $rootProjectDir, array $namespaces, string $environmentName, string $catalogToLoad)
     {
         $this->annotationReader = $annotationReader;
-        $this->init($rootProjectDir, array_unique($namespaces), $loadSrc);
+        $this->init($rootProjectDir, array_unique($namespaces), $catalogToLoad, $autoloadNamespaceParser);
 
         $classNamesWithEnvironment = $this->getAllClassesWithAnnotation(Environment::class);
         foreach ($classNamesWithEnvironment as $classNameWithEnvironment) {
@@ -114,33 +116,37 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     /**
      * @param string $rootProjectDir
      * @param array $namespacesToUse
-     * @param bool $loadSrc
+     * @param string $catalogToLoad
      * @throws ConfigurationException
      * @throws MessagingException
      */
-    private function init(string $rootProjectDir, array $namespacesToUse, bool $loadSrc)
+    private function init(string $rootProjectDir, array $namespacesToUse, string $catalogToLoad, AutoloadNamespaceParser $autoloadNamespaceParser)
     {
-        $getUsedPathsFromAutoload = new GetUsedPathsFromAutoload();
         $classes = [];
         $composerPath = $rootProjectDir . "/composer.json";
-        if ($loadSrc && !file_exists($composerPath)) {
+        if ($catalogToLoad && !file_exists($composerPath)) {
             throw new InvalidArgumentException("Can't load src, composer.json not found in {$composerPath}");
         }
-        if ($loadSrc) {
+        if ($catalogToLoad) {
             $composerJsonDecoded = json_decode(file_get_contents($composerPath), true);
 
             if (isset($composerJsonDecoded['autoload'])) {
-                $namespacesToUse = array_merge($namespacesToUse, $getUsedPathsFromAutoload->getNamespacesForSrcCatalog($composerJsonDecoded['autoload']));
+                $namespacesToUse = array_merge($namespacesToUse, $autoloadNamespaceParser->getNamespacesForGivenCatalog($composerJsonDecoded['autoload'], $catalogToLoad));
             }
             if (isset($composerJsonDecoded['autoload-dev'])) {
-                $namespacesToUse = array_merge($namespacesToUse, $getUsedPathsFromAutoload->getNamespacesForSrcCatalog($composerJsonDecoded['autoload-dev']));
+                $namespacesToUse = array_merge($namespacesToUse, $autoloadNamespaceParser->getNamespacesForGivenCatalog($composerJsonDecoded['autoload-dev'], $catalogToLoad));
             }
         }
 
         $namespacesToUse = array_map(function(string $namespace) {
             return trim($namespace, "\t\n\r\\");
         }, $namespacesToUse);
-        $paths = $this->getPathsToSearchIn($getUsedPathsFromAutoload, $rootProjectDir, $namespacesToUse);
+
+        if ((!$namespacesToUse || $namespacesToUse === [FileSystemAnnotationRegistrationService::FRAMEWORK_NAMESPACE]) && $catalogToLoad) {
+            throw ConfigurationException::create("Ecotone cannot resolve namespaces in {$rootProjectDir}/$catalogToLoad. Please provide namespaces manually via configuration. If you do not know how to do it, read Modules section related to your framework at https://docs.ecotone.tech");
+        }
+
+        $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
 
         foreach ($paths as $path) {
             if (!is_dir($path)) {
@@ -190,19 +196,19 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
     }
 
     /**
-     * @param GetUsedPathsFromAutoload $getUsedPathsFromAutoload
+     * @param AutoloadNamespaceParser $autoloadNamespaceParser
      * @param string $rootProjectDir
      * @param array $namespaces
      * @return array
      */
-    private function getPathsToSearchIn(GetUsedPathsFromAutoload $getUsedPathsFromAutoload, string $rootProjectDir, array $namespaces): array
+    private function getPathsToSearchIn(AutoloadNamespaceParser $autoloadNamespaceParser, string $rootProjectDir, array $namespaces): array
     {
         $paths = [];
 
         $autoloadPsr4 = require($rootProjectDir . '/vendor/composer/autoload_psr4.php');
         $autoloadPsr0 = require($rootProjectDir . '/vendor/composer/autoload_namespaces.php');
-        $paths = array_merge($paths, $getUsedPathsFromAutoload->getFor($namespaces, $autoloadPsr4, true));
-        $paths = array_merge($paths, $getUsedPathsFromAutoload->getFor($namespaces, $autoloadPsr0, false));
+        $paths = array_merge($paths, $autoloadNamespaceParser->getFor($namespaces, $autoloadPsr4, true));
+        $paths = array_merge($paths, $autoloadNamespaceParser->getFor($namespaces, $autoloadPsr0, false));
 
         return array_unique($paths);
     }

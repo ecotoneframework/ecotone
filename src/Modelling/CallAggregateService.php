@@ -111,20 +111,16 @@ class CallAggregateService
         }
 
         $resultMessage = MessageBuilder::fromMessage($message);
-        try {
-            $result = $methodInvoker->processMessage($message);
+        $result = $methodInvoker->processMessage($message);
 
-            if (!$aggregate) {
-                if ($message->getHeaders()->get(AggregateMessage::IS_EVENT_SOURCED)) {
-                    $resultMessage = $resultMessage
-                        ->setHeader(AggregateMessage::AGGREGATE_OBJECT, call_user_func([$message->getHeaders()->get(AggregateMessage::CLASS_NAME), $this->eventSourcedFactoryMethod], $result));
-                }else {
-                    $resultMessage = $resultMessage
-                        ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $result);
-                }
+        if (!$aggregate) {
+            if ($message->getHeaders()->get(AggregateMessage::IS_EVENT_SOURCED)) {
+                $resultMessage = $resultMessage
+                    ->setHeader(AggregateMessage::AGGREGATE_OBJECT, call_user_func([$message->getHeaders()->get(AggregateMessage::CLASS_NAME), $this->eventSourcedFactoryMethod], $result));
+            }else {
+                $resultMessage = $resultMessage
+                    ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $result);
             }
-        } catch (\Throwable $e) {
-            throw MessageHandlingException::fromOtherException($e, $message);
         }
 
         if (!is_null($result)) {

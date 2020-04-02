@@ -1,5 +1,5 @@
 <p align="left"><a href="https://ecotone.tech" target="_blank">
-    <img src="https://github.com/ecotoneframework/ecotone/blob/master/ecotone_small.jpg?raw=true">
+    <img src="https://github.com/ecotoneframework/ecotone/blob/master/ecotone_small.png?raw=true">
 </a></p>
 
 [![Build Status](https://travis-ci.org/ecotoneframework/ecotone.svg?branch=master)](https://travis-ci.org/ecotoneframework/ecotone)

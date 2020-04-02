@@ -1,3 +1,7 @@
+<p align="center"><a href="https://symfony.com" target="_blank">
+    <img src="https://github.com/ecotoneframework/ecotone/blob/master/ecotone_small.jpg?raw=true">
+</a></p>
+
 # Ecotone Framework
 [![Build Status](https://travis-ci.org/ecotoneframework/ecotone.svg?branch=master)](https://travis-ci.org/ecotoneframework/ecotone)
 [![License](https://poser.pugx.org/ecotone/ecotone/license)](https://packagist.org/packages/ecotone/ecotone)

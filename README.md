@@ -1,4 +1,4 @@
-<p align="center"><a href="https://symfony.com" target="_blank">
+<p align="left"><a href="https://symfony.com" target="_blank">
     <img src="https://github.com/ecotoneframework/ecotone/blob/master/ecotone_small.jpg?raw=true">
 </a></p>
 

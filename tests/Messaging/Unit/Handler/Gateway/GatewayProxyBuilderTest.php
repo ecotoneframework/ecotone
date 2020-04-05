@@ -23,6 +23,7 @@ use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlingException;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -31,6 +32,7 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Publisher;
 use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -1394,7 +1396,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $requestChannel->subscribe(DataReturningService::createServiceActivator($replyData));
 
         /** @var MessageReturningGateway $gateway */
-        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
+        $gateway = GatewayProxyBuilder::create('ref-name', UuidReturningGateway::class, 'executeNoParameter', $requestChannelName)
             ->withParameterConverters([
                 GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, MediaType::APPLICATION_JSON)
             ])
@@ -1407,6 +1409,34 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $this->expectException(InvalidArgumentException::class);
 
-        $gateway->executeNoParameter(MessageBuilder::withPayload("some")->setHeader("token", "123")->build());
+        $gateway->executeNoParameter();
+    }
+
+    public function test_executing_interface_with_parameters_and_instead_of_parameters_message_is_given()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $replyData = "[1,2,3]";
+        $mediaType = MediaType::APPLICATION_JSON;
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage($replyData, [MessageHeaders::CONTENT_TYPE => $mediaType]));
+
+        /** @var NonProxyGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeWithMetadata', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $mediaType)
+            ])
+            ->buildWithoutProxyObject(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $replyMessage = $gateway->execute([MessageBuilder::withPayload("some")->build()]);
+
+        $this->assertEquals(
+            $replyData,
+            $replyMessage->getPayload()
+        );
     }
 }

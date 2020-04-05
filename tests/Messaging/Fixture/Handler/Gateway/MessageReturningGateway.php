@@ -10,5 +10,7 @@ interface MessageReturningGateway
 {
     public function execute(string $replyMediaType) : Message;
 
+    public function executeWithMetadata(string $data, array $metadata) : Message;
+
     public function executeNoParameter() : Message;
 }

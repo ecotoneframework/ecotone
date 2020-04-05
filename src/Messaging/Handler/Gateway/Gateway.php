@@ -136,22 +136,20 @@ class Gateway implements NonProxyGateway
      */
     public function execute(array $methodArgumentValues)
     {
-        $methodArguments = [];
         $internalReplyBridge = null;
 
         try {
-            $parameters = $this->interfaceToCall->getInterfaceParameters();
-            $countArguments = count($parameters);
-            for ($index = 0; $index < $countArguments; $index++) {
-                $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
-            }
-
-            if (($this->interfaceToCall->hasSingleArgument() && ($this->interfaceToCall->hasFirstParameterMessageTypeHint() || $methodArguments[0]->value() instanceof Message))) {
-                /** @var Message $requestMessage */
-                $requestMessage = $methodArguments[0]->value();
-
-                $requestMessage = MessageBuilder::fromMessage($requestMessage);
+            if ((count($methodArgumentValues) === 1 && $methodArgumentValues[0] instanceof Message)) {
+                $requestMessage = MessageBuilder::fromMessage($methodArgumentValues[0]);
             } else {
+                $methodArguments = [];
+                $parameters = $this->interfaceToCall->getInterfaceParameters();
+                $countArguments = count($parameters);
+                for ($index = 0; $index < $countArguments; $index++) {
+                    $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
+                }
+
+
                 $requestMessage = $this->methodCallToMessageConverter->getMessageBuilderUsingPayloadConverter($methodArguments);
                 $requestMessage = $this->methodCallToMessageConverter->convertFor($requestMessage, $methodArguments);
 
@@ -185,6 +183,7 @@ class Gateway implements NonProxyGateway
 
             $messageHandler = $this->buildHandler($replyContentType);
         } catch (Throwable $exception) {
+            throw $exception;
             throw GatewayMessageConversionException::createFromPreviousException("Can't convert parameters to message in gateway. \n" . $exception->getMessage(), $exception);
         }
 

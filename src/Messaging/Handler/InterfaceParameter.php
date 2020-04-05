@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\ErrorMessage;
 
 /**
@@ -27,18 +28,22 @@ final class InterfaceParameter
      * @var bool
      */
     private $doesAllowNull;
-
     /**
-     * TypeHint constructor.
-     * @param string $name
-     * @param Type $typeDescriptor
-     * @param bool $doesAllowNull
+     * @var mixed
      */
-    private function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull)
+    private $defaultValue;
+    /**
+     * @var bool
+     */
+    private $hasDefaultValue;
+
+    private function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue)
     {
         $this->name = $name;
         $this->typeDescriptor = $typeDescriptor;
         $this->doesAllowNull = $doesAllowNull;
+        $this->hasDefaultValue = $hasDefaultValue;
+        $this->defaultValue = $defaultValue;
     }
 
     /**
@@ -48,7 +53,7 @@ final class InterfaceParameter
      */
     public static function createNullable(string $name, Type $typeDescriptor) : self
     {
-        return new self($name, $typeDescriptor, true);
+        return new self($name, $typeDescriptor, true, false,null);
     }
 
     /**
@@ -58,18 +63,20 @@ final class InterfaceParameter
      */
     public static function createNotNullable(string $name, Type $typeDescriptor) : self
     {
-        return new self($name, $typeDescriptor, false);
+        return new self($name, $typeDescriptor, false, false, null);
     }
 
     /**
      * @param string $name
      * @param Type $typeDescriptor
      * @param bool $doesAllowNull
+     * @param bool $hasDefaultValue
+     * @param mixed $defaultValue
      * @return self
      */
-    public static function create(string $name, Type $typeDescriptor, bool $doesAllowNull) : self
+    public static function create(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue) : self
     {
-        return new self($name, $typeDescriptor, $doesAllowNull);
+        return new self($name, $typeDescriptor, $doesAllowNull, $hasDefaultValue, $defaultValue);
     }
 
     /**
@@ -118,6 +125,21 @@ final class InterfaceParameter
     }
 
     /**
+     * @return mixed|null
+     */
+    public function getDefaultValue()
+    {
+        Assert::isTrue($this->hasDefaultValue(), "Cannot retrieve default value, as it does not exists {$this}");
+
+        return $this->defaultValue;
+    }
+
+    public function hasDefaultValue() : bool
+    {
+        return $this->hasDefaultValue;
+    }
+
+    /**
      * @return Type
      */
     public function getTypeDescriptor() : Type
@@ -139,5 +161,10 @@ final class InterfaceParameter
     public function isObjectTypeHint() : bool
     {
         return class_exists($this->getTypeHint());
+    }
+
+    public function __toString()
+    {
+        return $this->name . " " . $this->typeDescriptor->toString();
     }
 }

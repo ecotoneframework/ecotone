@@ -51,19 +51,6 @@ class ConversionInterceptor
         $sourceMediaType = MediaType::createApplicationXPHP();
         $sourceType = TypeDescriptor::createFromVariable($data);
 
-//        @TODO test
-//        if ($this->interfaceToCall->getReturnType()->isCompatibleWith(TypeDescriptor::create(Message::class))) {
-//            if (!$isMessage) {
-//                $result =  MessageBuilder::fromMessage($result)
-//                    ->setContentType($this->replyContentType)
-//                    ->setPayload($data)
-//                    ->build();
-//            }
-//
-//            return $result;
-//        }
-//        @TODO end
-
         if ($isMessage) {
             if ($result->getHeaders()->hasContentType()) {
                 $sourceMediaType = $result->getHeaders()->getContentType();

@@ -74,7 +74,9 @@ class TypeResolver
                     $parameter->getType() ? $this->expandParameterTypeHint($parameter->getType()->getName(), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName)) : null,
                     array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
                 ),
-                $parameter->getType() ? $parameter->getType()->allowsNull() : true
+                $parameter->getType() ? $parameter->getType()->allowsNull() : true,
+                $parameter->isDefaultValueAvailable(),
+                $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null
             );
         }
 

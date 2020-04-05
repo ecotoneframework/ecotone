@@ -8,6 +8,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -146,9 +147,18 @@ class Gateway implements NonProxyGateway
                 $parameters = $this->interfaceToCall->getInterfaceParameters();
                 $countArguments = count($parameters);
                 for ($index = 0; $index < $countArguments; $index++) {
-                    $methodArguments[] = MethodArgument::createWith($parameters[$index], $methodArgumentValues[$index]);
-                }
+                    $parameter = $parameters[$index];
+                    if (!isset($methodArgumentValues[$index]) && $parameter->hasDefaultValue()) {
+                        $methodValue = $parameter->getDefaultValue();
+                    }else {
+                        if (!isset($methodArgumentValues[$index])) {
+                            throw InvalidArgumentException::create("Missing argument {$parameter->getName()} for calling {$this->interfaceToCall}");
+                        }
+                        $methodValue = $methodArgumentValues[$index];
+                    }
 
+                    $methodArguments[] = MethodArgument::createWith($parameter, $methodValue);
+                }
 
                 $requestMessage = $this->methodCallToMessageConverter->getMessageBuilderUsingPayloadConverter($methodArguments);
                 $requestMessage = $this->methodCallToMessageConverter->convertFor($requestMessage, $methodArguments);
@@ -183,8 +193,8 @@ class Gateway implements NonProxyGateway
 
             $messageHandler = $this->buildHandler($replyContentType);
         } catch (Throwable $exception) {
+//            part before message is created and error handling enabled
             throw $exception;
-            throw GatewayMessageConversionException::createFromPreviousException("Can't convert parameters to message in gateway. \n" . $exception->getMessage(), $exception);
         }
 
         $messageHandler->handle($requestMessage);

@@ -1439,4 +1439,55 @@ class GatewayProxyBuilderTest extends MessagingTest
             $replyMessage->getPayload()
         );
     }
+
+    public function test_executing_with_default_parameters_auto_resolved()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $replyData = "[1,2,3]";
+        $mediaType = MediaType::APPLICATION_JSON;
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage($replyData, [MessageHeaders::CONTENT_TYPE => $mediaType]));
+
+        /** @var NonProxyGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeWithMetadataWithDefault', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $mediaType)
+            ])
+            ->buildWithoutProxyObject(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $replyMessage = $gateway->execute(["some"]);
+
+        $this->assertEquals(
+            $replyData,
+            $replyMessage->getPayload()
+        );
+    }
+
+    public function test_throwing_exception_when_there_is_not_enough_parameters_given()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $mediaType = MediaType::APPLICATION_JSON;
+
+        /** @var NonProxyGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeWithMetadata', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $mediaType)
+            ])
+            ->buildWithoutProxyObject(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $gateway->execute(["some"]);
+    }
 }

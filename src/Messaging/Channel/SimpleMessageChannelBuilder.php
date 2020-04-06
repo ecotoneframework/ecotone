@@ -7,6 +7,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\PollableChannel;
 
 /**
@@ -42,41 +43,29 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
         $this->isPollable = $isPollable;
     }
 
-    /**
-     * @param string $messageChannelName
-     * @param MessageChannel $messageChannel
-     * @return SimpleMessageChannelBuilder
-     */
     public static function create(string $messageChannelName, MessageChannel $messageChannel) : self
     {
         return new self($messageChannelName, $messageChannel, $messageChannel instanceof PollableChannel);
     }
 
-    /**
-     * @param string $messageChannelName
-     * @return SimpleMessageChannelBuilder
-     */
     public static function createDirectMessageChannel(string $messageChannelName) : self
     {
         return self::create($messageChannelName, DirectChannel::create());
     }
 
-    /**
-     * @param string $messageChannelName
-     * @return SimpleMessageChannelBuilder
-     */
     public static function createPublishSubscribeChannel(string $messageChannelName) : self
     {
         return self::create($messageChannelName, PublishSubscribeChannel::create());
     }
 
-    /**
-     * @param string $messageChannelName
-     * @return SimpleMessageChannelBuilder
-     */
     public static function createQueueChannel(string $messageChannelName) : self
     {
         return self::create($messageChannelName, QueueChannel::create());
+    }
+
+    public static function createNullableChannel(string $messageChannelName) : self
+    {
+        return self::create($messageChannelName, NullableMessageChannel::create());
     }
 
     /**

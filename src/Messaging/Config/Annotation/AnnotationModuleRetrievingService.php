@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Config\Annotation;
 use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Annotation\Extension;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Module;
 use Ecotone\Messaging\Config\ModuleRetrievingService;
 
@@ -77,6 +78,14 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
         foreach ($extensionObjectsRegistrations as $annotationRegistration) {
             if (!array_key_exists($annotationRegistration->getClassName(), $classes)) {
                 $classToInstantiate = $annotationRegistration->getClassName();
+                $reflectionClass = new \ReflectionClass($annotationRegistration->getClassName());
+                if ($reflectionClass->hasMethod("__construct")  && $reflectionClass->getMethod("__construct")->getParameters()) {
+                    throw ConfigurationException::create("{$annotationRegistration} should not contains any constructor parameters");
+                }
+                if ($reflectionClass->getMethod($annotationRegistration->getMethodName())->getParameters()) {
+                    throw ConfigurationException::create("{$annotationRegistration} should not contains any parameters");
+                }
+
                 $classes[$annotationRegistration->getClassName()] = new $classToInstantiate();
             }
 

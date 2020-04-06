@@ -2,6 +2,10 @@
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
 
+use Ecotone\Messaging\Config\ConfigurationException;
+use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithConstructorParameters;
+use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithMethodParameters;
+use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\StdClassExtensionApplicationContext;
 use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
 use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionObject;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
@@ -30,6 +34,52 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
                 ExampleModuleConfiguration::createEmpty()
             ],
             $annotationModuleRetrievingServie->findAllModuleConfigurations()
+        );
+    }
+
+    public function test_retrieving_application_context()
+    {
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+            StdClassExtensionApplicationContext::class
+        ]));
+
+        $this->assertEquals(
+            [
+                new \stdClass()
+            ],
+            $annotationModuleRetrievingServie->findAllExtensionObjects()
+        );
+    }
+
+    public function test_throwing_exception_if_application_context_has_constructor_parameters()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+            ApplicationContextWithConstructorParameters::class
+        ]));
+
+        $this->assertEquals(
+            [
+                new \stdClass()
+            ],
+            $annotationModuleRetrievingServie->findAllExtensionObjects()
+        );
+    }
+
+    public function test_throwing_exception_if_application_context_has_method_parameters()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+            ApplicationContextWithMethodParameters::class
+        ]));
+
+        $this->assertEquals(
+            [
+                new \stdClass()
+            ],
+            $annotationModuleRetrievingServie->findAllExtensionObjects()
         );
     }
 

@@ -16,6 +16,8 @@ class ConsumerThrowingExceptionService
      */
     private $consumerLifecycle;
 
+    private $called = 0;
+
     /**
      * InboundChannelAdapterStoppingService constructor.
      */
@@ -33,7 +35,10 @@ class ConsumerThrowingExceptionService
 
     public function execute() : void
     {
-        $this->consumerLifecycle->stop();
+        $this->called++;
+        if ($this->consumerLifecycle) {
+            $this->consumerLifecycle->stop();
+        }
 
         throw new \RuntimeException("Test error. This should be caught");
     }
@@ -44,5 +49,10 @@ class ConsumerThrowingExceptionService
     public function setConsumerLifecycle(ConsumerLifecycle $consumerLifecycle) : void
     {
         $this->consumerLifecycle = $consumerLifecycle;
+    }
+
+    public function getCalled(): int
+    {
+        return $this->called;
     }
 }

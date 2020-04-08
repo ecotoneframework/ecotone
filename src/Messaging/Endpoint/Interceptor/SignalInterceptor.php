@@ -69,6 +69,14 @@ class SignalInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
+    public function shouldBeThrown(\Throwable $exception) : bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function postSend(): void
     {
         return;

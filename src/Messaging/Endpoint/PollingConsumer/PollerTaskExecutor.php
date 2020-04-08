@@ -41,7 +41,11 @@ class PollerTaskExecutor implements TaskExecutor
 
     public function execute(): void
     {
-        $message = $this->pollableChannel->receive();
+        try {
+            $message = $this->pollableChannel->receive();
+        }catch (\Throwable $exception) {
+            throw new ChannelException("Can't pool message from {$this->pollableChannelName} error happen.", 0, $exception);
+        }
 
         if ($message) {
             $message = MessageBuilder::fromMessage($message)

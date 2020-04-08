@@ -7,6 +7,8 @@ namespace Ecotone\Messaging\Config;
 
 use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 
 class ApplicationConfiguration
 {
@@ -42,6 +44,15 @@ class ApplicationConfiguration
      * @var null|string
      */
     private $defaultErrorChannel = null;
+    /**
+     * @var null|int
+     */
+    private $defaultMemoryLimitInMegabytes = PollingMetadata::DEFAULT_MEMORY_LIMIT_MEGABYTES;
+    /**
+     * @var RetryTemplateBuilder|null
+     */
+    private $channelPollRetryTemplate;
+
     /**
      * @var object[]
      */
@@ -180,22 +191,34 @@ class ApplicationConfiguration
         return $clone;
     }
 
+    public function withChannelPollRetryTemplate(RetryTemplateBuilder $channelPollRetryTemplate): ApplicationConfiguration
+    {
+        $this->channelPollRetryTemplate = $channelPollRetryTemplate;
+        return $this;
+    }
+
+    public function getChannelPollRetryTemplate(): ?RetryTemplateBuilder
+    {
+        return $this->channelPollRetryTemplate;
+    }
+
+    public function withConsumerMemoryLimit(int $memoryLimitInMegabytes) : self
+    {
+        $this->defaultMemoryLimitInMegabytes = $memoryLimitInMegabytes;
+        return $this;
+    }
+
+    public function getDefaultMemoryLimitInMegabytes(): ?int
+    {
+        return $this->defaultMemoryLimitInMegabytes;
+    }
+
     /**
      * @return object[]
      */
     public function getPollableEndpointAnnotations(): array
     {
         return $this->pollableEndpointAnnotations;
-    }
-
-    /**
-     * @param object[] $pollableEndpointAnnotations
-     * @return ApplicationConfiguration
-     */
-    public function withPollableEndpointAnnotations(array $pollableEndpointAnnotations): ApplicationConfiguration
-    {
-        $this->pollableEndpointAnnotations = $pollableEndpointAnnotations;
-        return $this;
     }
 
     /**
@@ -258,4 +281,6 @@ class ApplicationConfiguration
     {
         return $this->namespaces;
     }
+
+
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 use ReflectionException;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
@@ -38,6 +39,7 @@ class PollerModuleTest extends AnnotationConfigurationTest
                     ->setHandledMessageLimit(10)
                     ->setMemoryLimitInMegaBytes(100)
                     ->setExecutionTimeLimitInMilliseconds(200)
+                    ->setChannelPollRetryTemplate(RetryTemplateBuilder::exponentialBackoffWithMaxDelay(100, 2, 3))
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([

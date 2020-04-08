@@ -272,7 +272,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry, ApplicationConfiguration $applicationConfiguration): void
     {
-        $pollableEndpointAnnotations = array_merge($applicationConfiguration->getPollableEndpointAnnotations(), [new PollableEndpoint()]);
+        $pollableEndpointAnnotations = [new PollableEndpoint()];
         foreach ($this->channelAdapters as $channelAdapter) {
             $channelAdapter->withEndpointAnnotations(array_merge($channelAdapter->getEndpointAnnotations(), $pollableEndpointAnnotations));
         }
@@ -325,13 +325,26 @@ final class MessagingSystemConfiguration implements Configuration
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->gatewayBuilders);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->channelAdapters);
 
-        if ($this->applicationConfiguration->getDefaultErrorChannel()) {
-            foreach ($this->messageHandlerBuilders as $endpointId => $messageHandlerBuilder) {
-                if (!array_key_exists($endpointId, $this->pollingMetadata)) {
-                    $this->pollingMetadata[] = PollingMetadata::create($endpointId)
-                        ->setErrorChannelName($this->applicationConfiguration->getDefaultErrorChannel());
-                }
+        foreach ($this->messageHandlerBuilders as $endpointId => $messageHandlerBuilder) {
+            $pollingMetadata = PollingMetadata::create((string)$endpointId);
+            if (array_key_exists($endpointId, $this->pollingMetadata)) {
+                $pollingMetadata = $this->pollingMetadata[$endpointId];
             }
+
+            if ($this->applicationConfiguration->getDefaultErrorChannel() && !$pollingMetadata->getErrorChannelName()) {
+                $pollingMetadata = $pollingMetadata
+                    ->setErrorChannelName($this->applicationConfiguration->getDefaultErrorChannel());
+            }
+            if ($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes() && !$pollingMetadata->getMemoryLimitInMegabytes()) {
+                $pollingMetadata = $pollingMetadata
+                    ->setMemoryLimitInMegaBytes($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes());
+            }
+            if ($this->applicationConfiguration->getChannelPollRetryTemplate() && !$pollingMetadata->getChannelPollRetryTemplate()) {
+                $pollingMetadata = $pollingMetadata
+                    ->setChannelPollRetryTemplate($pollingMetadata->getChannelPollRetryTemplate());
+            }
+
+            $this->pollingMetadata[$endpointId] = $pollingMetadata;
         }
     }
 

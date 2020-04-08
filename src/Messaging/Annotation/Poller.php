@@ -58,4 +58,11 @@ class Poller
      * @var int
      */
     public $executionTimeLimitInMilliseconds = PollingMetadata::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS;
+    /**
+     * Consumer will throw exception if there is a problem during polling from the channel
+     * However you change default mechanism and add retries, before consumer will fail
+     *
+     * @var \Ecotone\Messaging\Annotation\RetryTemplate
+     */
+    public $channelPollRetryTemplate = null;
 }

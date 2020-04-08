@@ -41,9 +41,9 @@ final class RetryTemplateBuilder
     /**
      * Perform each retry after fixed amount of time
      */
-    public static function fixedBackOff(int $delay) : self
+    public static function fixedBackOff(int $initialDelay) : self
     {
-        return new self($delay, 1, null, null);
+        return new self($initialDelay, 1, null, null);
     }
 
     public static function exponentialBackoff(int $initialDelay, int $multiplier) : self

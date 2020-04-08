@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
+use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplate;
+use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
+
 /**
  * Class PollingMetadata
  * @package Ecotone\Messaging\Endpoint\PollingConsumer
@@ -60,6 +63,10 @@ class PollingMetadata
      * @var int
      */
     private $executionTimeLimitInMilliseconds = self::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS;
+    /**
+     * @var RetryTemplateBuilder|null
+     */
+    private $channelPollRetryTemplate;
     /**
      * @var bool
      */
@@ -185,6 +192,19 @@ class PollingMetadata
         return $copy;
     }
 
+    public function setChannelPollRetryTemplate(RetryTemplateBuilder $retryTemplateBuilder) : PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->channelPollRetryTemplate = $retryTemplateBuilder;
+
+        return $copy;
+    }
+
+    public function getChannelPollRetryTemplate(): ?RetryTemplateBuilder
+    {
+        return $this->channelPollRetryTemplate;
+    }
+
     /**
      * @return int
      */
@@ -204,8 +224,6 @@ class PollingMetadata
 
         return $copy;
     }
-
-
 
     /**
      * @param int $handledMessageLimit

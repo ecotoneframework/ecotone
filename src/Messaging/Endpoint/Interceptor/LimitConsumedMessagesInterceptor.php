@@ -57,6 +57,14 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
+    public function shouldBeThrown(\Throwable $exception) : bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function shouldBeStopped(): bool
     {
         return $this->shouldBeStopped;

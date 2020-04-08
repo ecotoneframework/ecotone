@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Endpoint\Poller;
 
+use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -99,6 +101,66 @@ class PollingConsumerBuilderTest extends MessagingTest
         $pollingConsumer->run();
 
         $this->assertNotNull($errorChannel->receive());
+    }
+
+    public function test_retrying_template_should_not_handle_exception_thrown_during_handling_of_message()
+    {
+        $pollingConsumerBuilder = new PollingConsumerBuilder();
+        $inputChannelName = "inputChannelName";
+        $inputChannel = QueueChannel::create();
+
+        $directObjectReference = ConsumerThrowingExceptionService::create();
+        $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, "execute")
+            ->withEndpointId("test")
+            ->withInputChannelName($inputChannelName);
+
+        $pollingConsumer = $pollingConsumerBuilder->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                $inputChannelName => $inputChannel
+            ]),
+            InMemoryReferenceSearchService::createEmpty(),
+            $replyViaHeadersMessageHandlerBuilder,
+            PollingMetadata::create("some")
+                ->setChannelPollRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1))
+        );
+
+        $inputChannel->send(MessageBuilder::withPayload("somePayload")->build());
+        $inputChannel->send(MessageBuilder::withPayload("somePayload")->build());
+
+        $exceptionThrown = false;
+        try {
+            $pollingConsumer->run();
+        }catch (\RuntimeException $e) {
+            $exceptionThrown = true;
+        }
+
+        $this->assertTrue($exceptionThrown);
+        $this->assertEquals(1, $directObjectReference->getCalled());
+    }
+
+    public function test_retrying_template_should_handle_exceptions_thrown_before_handling_of_message()
+    {
+        $pollingConsumerBuilder = new PollingConsumerBuilder();
+        $inputChannelName = "inputChannelName";
+        $inputChannel = ExceptionalQueueChannel::create();
+
+        $serviceHandler = DataReturningService::createServiceActivatorBuilder("some")
+            ->withEndpointId("test")
+            ->withInputChannelName($inputChannelName);
+
+        $pollingConsumer = $pollingConsumerBuilder->build(
+            InMemoryChannelResolver::createFromAssociativeArray([
+                $inputChannelName => $inputChannel
+            ]),
+            InMemoryReferenceSearchService::createEmpty(),
+            $serviceHandler,
+            PollingMetadata::create("some")
+                ->setChannelPollRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(2))
+        );
+
+        try { $pollingConsumer->run(); }catch (\RuntimeException $e) {}
+
+        $this->assertEquals(3, $inputChannel->getExceptionCount());
     }
 
     public function test_acking_message_when_ack_available_in_message_header()

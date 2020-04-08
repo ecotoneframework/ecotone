@@ -22,6 +22,11 @@ interface ConsumerInterceptor
     public function shouldBeStopped(): bool;
 
     /**
+     * handle exception
+     */
+    public function shouldBeThrown(\Throwable $exception) : bool;
+
+    /**
      *  Called before each run
      */
     public function preRun(): void;

@@ -65,6 +65,14 @@ class TimeLimitInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
+    public function shouldBeThrown(\Throwable $exception) : bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function postRun(): void
     {
         return;

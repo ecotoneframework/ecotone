@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActiv
 
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Poller;
+use Ecotone\Messaging\Annotation\RetryTemplate;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
 /**
@@ -28,7 +29,8 @@ class ServiceActivatorWithPollerExample
      *          maxMessagePerPoll=5,
      *          memoryLimitInMegabytes=100,
      *          handledMessageLimit=10,
-     *          executionTimeLimitInMilliseconds=200
+     *          executionTimeLimitInMilliseconds=200,
+     *          channelPollRetryTemplate=@RetryTemplate(initialDelay=100, maxAttempts=3, multiplier=2)
      *     )
      * )
      */

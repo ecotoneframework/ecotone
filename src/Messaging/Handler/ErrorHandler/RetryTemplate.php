@@ -36,9 +36,12 @@ final class RetryTemplate
         $this->maxAttempts = $maxAttempts;
     }
 
+    /**
+     * @return int delay in milliseconds
+     */
     public function calculateNextDelay(int $retryNumber) : int
     {
-        Assert::isTrue($this->canBeCalledNextTime($retryNumber), "Retry template exceed number of possible tries. Should not be called anymore.");
+        Assert::isTrue($this->canBeCalledNextTime($retryNumber), "Retry template exceed number of possible tries {$retryNumber} of {$this->maxAttempts}. Should not be called anymore.");
 
         return $this->delayForRetryNumber($retryNumber);
     }
@@ -57,6 +60,9 @@ final class RetryTemplate
 
     private function delayForRetryNumber(int $retryNumber) : int
     {
+        if ($retryNumber === 0) {
+            return 0;
+        }
         if ($retryNumber === self::FIRST_RETRY) {
             return $this->initialDelay;
         }

@@ -12,6 +12,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 use Ecotone\Messaging\Transaction\Transactional;
 
 /**
@@ -54,7 +55,7 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
             $poller = $endpointAnnotation->poller;
 
             if ($poller) {
-                $multiplePollingMetadata[] = PollingMetadata::create($endpointAnnotation->endpointId)
+                $pollingMetadata = PollingMetadata::create($endpointAnnotation->endpointId)
                     ->setCron($poller->cron)
                     ->setInitialDelayInMilliseconds($poller->initialDelayInMilliseconds)
                     ->setFixedRateInMilliseconds($poller->fixedRateInMilliseconds)
@@ -63,6 +64,18 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
                     ->setMemoryLimitInMegaBytes($poller->memoryLimitInMegabytes)
                     ->setHandledMessageLimit($poller->handledMessageLimit)
                     ->setExecutionTimeLimitInMilliseconds($poller->executionTimeLimitInMilliseconds);
+
+                if ($poller->channelPollRetryTemplate) {
+                    $pollingMetadata = $pollingMetadata->setChannelPollRetryTemplate(
+                        RetryTemplateBuilder::exponentialBackoffWithMaxDelay(
+                            $poller->channelPollRetryTemplate->initialDelay,
+                            $poller->channelPollRetryTemplate->multiplier,
+                            $poller->channelPollRetryTemplate->maxAttempts
+                        )
+                    );
+                }
+
+                $multiplePollingMetadata[] = $pollingMetadata;
             }
         }
 

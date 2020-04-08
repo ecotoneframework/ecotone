@@ -998,19 +998,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertFalse($messageHandler->wasCalled(), "Queue channel was registered, so without explicit calling the consumer it should not be ever called");
     }
 
-    /**
-     * @throws ConfigurationException
-     * @throws Exception
-     * @throws NoConsumerFactoryForBuilderException
-     * @throws MessagingException
-     */
-    public function test_registering_polling_consumer_with_metadata()
+    public function test_registering_endpoint_with_error_channel()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
 
         $inputMessageChannelName = "inputChannelName";
         $messageHandler = ExceptionMessageHandler::create();
         $endpointName = "pollableName";
+        $errorChannel = QueueChannel::create();
         $messagingSystem = $messagingSystemConfiguration
             ->registerMessageHandler(
                 DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName)
@@ -1018,15 +1013,52 @@ class MessagingSystemConfigurationTest extends MessagingTest
             )
             ->registerConsumerFactory(new PollingConsumerBuilder())
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
-            ->registerPollingMetadata(PollingMetadata::create($endpointName))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::create("error", $errorChannel))
+            ->registerPollingMetadata(
+                PollingMetadata::create($endpointName)
+                    ->setHandledMessageLimit(1)
+                    ->setErrorChannelName("error")
+            )
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
         $messagingSystem->getMessageChannelByName($inputMessageChannelName)
             ->send(MessageBuilder::withPayload("some")->build());
 
-        $this->expectException(\InvalidArgumentException::class);
+        $messagingSystem->runSeparatelyRunningEndpointBy($endpointName);
+
+        $this->assertNotNull($errorChannel->receive());
+    }
+
+    public function test_registering_endpoint_with_default_error_channel()
+    {
+        $applicationConfiguration = ApplicationConfiguration::createWithDefaults()
+                                        ->withDefaultErrorChannel("error");
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithModuleRetrievingService(null, InMemoryModuleMessaging::createEmpty(), InMemoryReferenceTypeFromNameResolver::createEmpty(), $applicationConfiguration);
+
+        $inputMessageChannelName = "inputChannelName";
+        $messageHandler = ExceptionMessageHandler::create();
+        $endpointName = "pollableName";
+        $errorChannel = QueueChannel::create();
+        $messagingSystem = $messagingSystemConfiguration
+            ->registerMessageHandler(
+                DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName)
+                    ->withEndpointId($endpointName)
+            )
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::create("error", $errorChannel))
+            ->registerPollingMetadata(
+                PollingMetadata::create($endpointName)
+                    ->setHandledMessageLimit(1)
+            )
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
+            ->send(MessageBuilder::withPayload("some")->build());
 
         $messagingSystem->runSeparatelyRunningEndpointBy($endpointName);
+
+        $this->assertNotNull($errorChannel->receive());
     }
 
     /**
@@ -1096,116 +1128,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem->runSeparatelyRunningEndpointBy($endpointName);
 
         $this->assertEquals(42, $lastServiceFromChain->getLastResult());
-    }
-
-    public function test_intercepting_by_registering_pollable_endpoint_annotations_on_inbound_channel_adapter()
-    {
-        $endpointAnnotation = new stdClass();
-        $applicationConfiguration = ApplicationConfiguration::createWithDefaults()->withPollableEndpointAnnotations([$endpointAnnotation]);
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare("", InMemoryReferenceTypeFromNameResolver::createEmpty(), $applicationConfiguration);
-        $requestChannelName = "requestChannelName";
-        $endpointName = "pollableName";
-
-        $lastServiceFromChain = CalculatingService::create(0);
-        $messagingSystem = $messagingSystemConfiguration
-            ->registerConsumer(
-                InboundChannelAdapterBuilder::createWithDirectObject(
-                    $requestChannelName,
-                    ConsumerContinuouslyWorkingService::createWithReturn(5),
-                    "executeReturn"
-                )->withEndpointId($endpointName)
-            )
-            ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")->withInputChannelName($requestChannelName))
-            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->registerPollingMetadata(
-                PollingMetadata::create($endpointName)
-                    ->setHandledMessageLimit(1)
-            )
-            ->registerBeforeMethodInterceptor(
-                MethodInterceptor::create(
-                    "1",
-                    InterfaceToCall::create(CalculatingService::class, "multiply"),
-                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
-                    1,
-                    "@(\stdClass)"
-                )
-            )
-            ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::createWithDirectObject(
-                    "around",
-                    CalculatingServiceInterceptorExample::create(1), "sumAfterCalling",
-                    1,
-                    "@(\stdClass)"
-                )
-            )
-            ->registerAfterMethodInterceptor(
-                MethodInterceptor::create(
-                    "1",
-                    InterfaceToCall::create(CalculatingService::class, "result"),
-                    ServiceActivatorBuilder::createWithDirectReference($lastServiceFromChain, "result"),
-                    1,
-                    "@(\stdClass)"
-                )
-            )
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $messagingSystem->runSeparatelyRunningEndpointBy($endpointName);
-
-        $this->assertEquals(21, $lastServiceFromChain->getLastResult());
-    }
-
-    public function test_intercepting_by_registering_pollable_endpoint_annotations_on_pollable_message_handler()
-    {
-        $endpointAnnotation = new stdClass();
-        $applicationConfiguration = ApplicationConfiguration::createWithDefaults()->withPollableEndpointAnnotations([$endpointAnnotation]);
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepare("", InMemoryReferenceTypeFromNameResolver::createEmpty(), $applicationConfiguration);
-        $inputChannelName = "requestChannelName";
-        $endpointName = "pollableName";
-
-        $lastServiceFromChain = CalculatingService::create(0);
-        $inputChannel = QueueChannel::create();
-
-        $messagingSystem = $messagingSystemConfiguration
-            ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")->withInputChannelName($inputChannelName)->withEndpointId($endpointName))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::create($inputChannelName, $inputChannel))
-            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerPollingMetadata(
-                PollingMetadata::create($endpointName)
-                    ->setExecutionTimeLimitInMilliseconds(1)
-            )
-            ->registerBeforeMethodInterceptor(
-                MethodInterceptor::create(
-                    "1",
-                    InterfaceToCall::create(CalculatingService::class, "multiply"),
-                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"),
-                    1,
-                    "@(\stdClass)"
-                )
-            )
-            ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::createWithDirectObject(
-                    "around",
-                    CalculatingServiceInterceptorExample::create(1), "sumAfterCalling",
-                    1,
-                    "@(\stdClass)"
-                )
-            )
-            ->registerAfterMethodInterceptor(
-                MethodInterceptor::create(
-                    "1",
-                    InterfaceToCall::create(CalculatingService::class, "result"),
-                    ServiceActivatorBuilder::createWithDirectReference($lastServiceFromChain, "result"),
-                    1,
-                    "@(\stdClass)"
-                )
-            )
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $inputChannel->send(MessageBuilder::withPayload(5)->build());
-        $messagingSystem->runSeparatelyRunningEndpointBy($endpointName);
-
-        $this->assertEquals(21, $lastServiceFromChain->getLastResult());
     }
 
     public function test_intercepting_channel_adapter_with_void_services_by_passing_through_message()

@@ -14,6 +14,7 @@ class RetryTemplateTest extends TestCase
                             ->maxRetryAttempts(3)
                             ->build();
 
+        $this->assertEquals(0, $retryTemplate->calculateNextDelay(0));
         $this->assertEquals(100, $retryTemplate->calculateNextDelay(1));
         $this->assertEquals(100, $retryTemplate->calculateNextDelay(2));
 

@@ -341,7 +341,7 @@ final class MessagingSystemConfiguration implements Configuration
             }
             if ($this->applicationConfiguration->getChannelPollRetryTemplate() && !$pollingMetadata->getChannelPollRetryTemplate()) {
                 $pollingMetadata = $pollingMetadata
-                    ->setChannelPollRetryTemplate($pollingMetadata->getChannelPollRetryTemplate());
+                    ->setChannelPollRetryTemplate($this->applicationConfiguration->getChannelPollRetryTemplate());
             }
 
             $this->pollingMetadata[$endpointId] = $pollingMetadata;

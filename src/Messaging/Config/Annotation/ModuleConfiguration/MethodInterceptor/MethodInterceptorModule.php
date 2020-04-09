@@ -63,6 +63,10 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
      * @var array|MethodInterceptor[]
      */
     private $beforeSendInterceptors;
+    /**
+     * @var array
+     */
+    private $beforeSendRelatedInterfaces = [];
 
     /**
      * MethodInterceptorModule constructor.
@@ -70,13 +74,15 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
      * @param MethodInterceptor[] $preCallInterceptors
      * @param AroundInterceptorReference[] $aroundInterceptors
      * @param MethodInterceptor[] $postCallInterceptors
+     * @param array $relatedInterfaces
      */
-    private function __construct(array $beforeSendInterceptors, array $preCallInterceptors, array $aroundInterceptors, array $postCallInterceptors)
+    private function __construct(array $beforeSendInterceptors, array $preCallInterceptors, array $aroundInterceptors, array $postCallInterceptors, array $relatedInterfaces)
     {
         $this->preCallInterceptors = $preCallInterceptors;
         $this->postCallInterceptors = $postCallInterceptors;
         $this->aroundInterceptors = $aroundInterceptors;
         $this->beforeSendInterceptors = $beforeSendInterceptors;
+        $this->beforeSendRelatedInterfaces = $relatedInterfaces;
     }
 
     /**
@@ -99,6 +105,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $afterAnnotation = TypeDescriptor::create(After::class);
 
         $beforeSendInterceptors = [];
+        $relatedInterfaces = [];
         $preCallInterceptors = [];
         $aroundInterceptors = [];
         $postCallInterceptors = [];
@@ -127,6 +134,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                     $beforeSendInterceptor->precedence,
                     $beforeSendInterceptor->pointcut
                 );
+                $relatedInterfaces[] = InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName());
             }
 
             if ($interceptorInterface->hasMethodAnnotation($beforeAnnotation)) {
@@ -154,7 +162,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
             }
         }
 
-        return new self($beforeSendInterceptors, $preCallInterceptors, $aroundInterceptors, $postCallInterceptors);
+        return new self($beforeSendInterceptors, $preCallInterceptors, $aroundInterceptors, $postCallInterceptors, $relatedInterfaces);
     }
 
     /**
@@ -193,6 +201,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         foreach ($this->beforeSendInterceptors as $interceptor) {
             $configuration->registerBeforeSendInterceptor($interceptor);
         }
+        $configuration->registerRelatedInterfaces($this->beforeSendRelatedInterfaces);
         foreach ($this->preCallInterceptors as $preCallInterceptor) {
             $configuration->registerBeforeMethodInterceptor($preCallInterceptor);
         }

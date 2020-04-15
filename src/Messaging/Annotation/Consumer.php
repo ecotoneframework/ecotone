@@ -17,4 +17,8 @@ class Consumer
      * @Required()
      */
     public $endpointId;
+    /**
+     * @var array
+     */
+    public $parameterConverters = [];
 }

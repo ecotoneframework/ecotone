@@ -151,6 +151,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var ApplicationConfiguration
      */
     private $applicationConfiguration;
+    /**
+     * @var string[]
+     */
+    private $requiredConsumerEndpointIds = [];
 
     /**
      * Only one instance at time
@@ -346,6 +350,12 @@ final class MessagingSystemConfiguration implements Configuration
 
             $this->pollingMetadata[$endpointId] = $pollingMetadata;
         }
+
+        foreach ($this->requiredConsumerEndpointIds as $requiredConsumerEndpointId) {
+            if (!array_key_exists($requiredConsumerEndpointId, $this->messageHandlerBuilders) && !array_key_exists($requiredConsumerEndpointId, $this->channelAdapters)) {
+                throw ConfigurationException::create("Consumer with id {$requiredConsumerEndpointId} has no configuration defined. Define consumer configuration and retry.");
+            }
+        }
     }
 
     /**
@@ -402,6 +412,14 @@ final class MessagingSystemConfiguration implements Configuration
         $this->messageHandlerBuilders = $messageHandlerBuilders;
         $this->asynchronousEndpoints = [];
     }
+
+    public function requireConsumer(string $endpointId): Configuration
+    {
+        $this->requiredConsumerEndpointIds[] = $endpointId;
+
+        return $this;
+    }
+
 
     /**
      * @return void
@@ -989,7 +1007,11 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder): Configuration
     {
-        $this->channelAdapters[] = $consumerBuilder;
+        if (array_key_exists($consumerBuilder->getEndpointId(), $this->channelAdapters)) {
+            throw ConfigurationException::create("Trying to register consumers under same endpoint id {$consumerBuilder->getEndpointId()}. Change the name of one of them.");
+        }
+
+        $this->channelAdapters[$consumerBuilder->getEndpointId()] = $consumerBuilder;
         $this->requireReferences($consumerBuilder->getRequiredReferences());
 
         return $this;

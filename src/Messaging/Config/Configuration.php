@@ -95,6 +95,8 @@ interface Configuration
      */
     public function requireReferences(array $referenceNames): Configuration;
 
+    public function requireConsumer(string $endpointId) : Configuration;
+
     /**
      * @param ChannelAdapterConsumerBuilder $consumerBuilder
      *

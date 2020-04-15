@@ -1061,6 +1061,31 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertNotNull($errorChannel->receive());
     }
 
+    public function test_throwing_exception_if_registering_inbound_channel_adapter_with_same_names()
+    {
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
+        $requestChannelName = "requestChannelName";
+        $endpointName = "pollableName";
+
+        $this->expectException(ConfigurationException::class);
+
+        $messagingSystemConfiguration
+            ->registerConsumer(
+                InboundChannelAdapterBuilder::createWithDirectObject(
+                    $requestChannelName,
+                    ConsumerContinuouslyWorkingService::createWithReturn(5),
+                    "executeReturn"
+                )->withEndpointId($endpointName)
+            )
+            ->registerConsumer(
+                InboundChannelAdapterBuilder::createWithDirectObject(
+                    $requestChannelName,
+                    ConsumerContinuouslyWorkingService::createWithReturn(5),
+                    "executeReturn"
+                )->withEndpointId($endpointName)
+            );
+    }
+
     /**
      * @throws ConfigurationException
      * @throws Exception

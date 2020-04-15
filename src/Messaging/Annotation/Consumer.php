@@ -17,8 +17,4 @@ class Consumer
      * @Required()
      */
     public $endpointId;
-    /**
-     * @var Poller|null
-     */
-    public $poller;
 }

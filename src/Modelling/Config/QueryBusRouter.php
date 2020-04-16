@@ -53,11 +53,11 @@ class QueryBusRouter
     public function routeByName(?string $name) : array
     {
         if (is_null($name)) {
-            throw ConfigurationException::create("Can't send via name using QueryBus without " . QueryBus::CHANNEL_NAME_BY_NAME . " header defined");
+            throw DestinationResolutionException::create("Can't send via name using QueryBus without " . QueryBus::CHANNEL_NAME_BY_NAME . " header defined");
         }
 
         if (!array_key_exists($name, $this->channelMapping)) {
-            throw ConfigurationException::create("Can't send query to {$name}. No Query Handler defined for it. Have you forgot to add @QueryHandler to method or @MessageEndpoint to class?");
+            throw DestinationResolutionException::create("Can't send query to {$name}. No Query Handler defined for it. Have you forgot to add @QueryHandler to method or @MessageEndpoint to class?");
         }
 
         return $this->channelMapping[$name];

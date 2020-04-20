@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Messaging\Endpoint\Interceptor\ExponentialRetryInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\ChannelPollRetryInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
@@ -105,7 +105,7 @@ class InterceptedConsumer implements ConsumerLifecycle
         if ($pollingMetadata->getExecutionTimeLimitInMilliseconds() > 0) {
             $interceptors[] = new TimeLimitInterceptor($pollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
-        $interceptors[] = new ExponentialRetryInterceptor($pollingMetadata->getChannelPollRetryTemplate());
+        $interceptors[] = new ChannelPollRetryInterceptor($pollingMetadata->getChannelPollRetryTemplate());
 
         return $interceptors;
     }

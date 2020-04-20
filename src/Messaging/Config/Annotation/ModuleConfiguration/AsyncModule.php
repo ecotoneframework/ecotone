@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
-use Ecotone\Messaging\Annotation\Async;
+use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
 use Ecotone\Messaging\Annotation\MediaTypeConverter;
@@ -49,11 +49,11 @@ class AsyncModule extends NoExternalConfigurationModule implements AnnotationMod
      */
     public static function create(AnnotationRegistrationService $annotationRegistrationService) : self
     {
-        $asynchronousClasses = $annotationRegistrationService->getAllClassesWithAnnotation(Async::class);
+        $asynchronousClasses = $annotationRegistrationService->getAllClassesWithAnnotation(Asynchronous::class);
 
         $asynchronousMethods = array_merge(
-            $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Async::class),
-            $annotationRegistrationService->findRegistrationsFor(Aggregate::class, Async::class)
+            $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Asynchronous::class),
+            $annotationRegistrationService->findRegistrationsFor(Aggregate::class, Asynchronous::class)
         );
         $endpoints = array_merge(
             $annotationRegistrationService->findRegistrationsFor(
@@ -99,8 +99,8 @@ class AsyncModule extends NoExternalConfigurationModule implements AnnotationMod
         $endpoints = array_values($endpoints);
 
         foreach ($asynchronousClasses as $asynchronousClass) {
-            /** @var Async $asyncClass */
-            $asyncClass = $annotationRegistrationService->getAnnotationForClass($asynchronousClass, Async::class);
+            /** @var Asynchronous $asyncClass */
+            $asyncClass = $annotationRegistrationService->getAnnotationForClass($asynchronousClass, Asynchronous::class);
             foreach ($endpoints as $endpoint) {
                 if ($asynchronousClass === $endpoint->getClassName()) {
                     /** @var EndpointAnnotation $annotationForMethod */

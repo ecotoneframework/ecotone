@@ -3,7 +3,7 @@
 
 namespace Ecotone\Modelling\LazyEventBus;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
@@ -25,7 +25,7 @@ interface LazyEventBus
      *
      * @return mixed
      *
-     * @Gateway(requestChannel=LazyEventBus::CHANNEL_NAME)
+     * @MessageGateway(requestChannel=LazyEventBus::CHANNEL_NAME)
      */
     public function send(object $event);
 
@@ -37,7 +37,7 @@ interface LazyEventBus
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=LazyEventBus::CHANNEL_NAME,
      *     parameterConverters={
      *         @Payload(parameterName="event"),

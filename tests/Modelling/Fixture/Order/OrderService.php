@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Order;
 
-use Ecotone\Messaging\Annotation\Async;
+use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Poller;
 use Ecotone\Modelling\Annotation\CommandHandler;
@@ -17,7 +17,7 @@ use Ecotone\Modelling\LazyEventBus\LazyEventBus;
  * @package Test\Ecotone\Amqp\Fixture\Order
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
- * @Async(channelName="orders")
+ * @Asynchronous(channelName="orders")
  */
 class OrderService
 {

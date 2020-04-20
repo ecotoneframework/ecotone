@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
@@ -16,7 +16,7 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 interface Calculator
 {
     /**
-     * @Gateway(requestChannel="calculateChannel")
+     * @MessageGateway(requestChannel="calculateChannel")
      * @param int $amount
      * @return int
      * @BeforeMultiplyCalculation(amount=2)

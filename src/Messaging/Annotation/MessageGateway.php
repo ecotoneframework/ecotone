@@ -14,7 +14,7 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
  * @Annotation
  * @Target({"METHOD"})
  */
-class Gateway
+class MessageGateway
 {
     /**
      * @var string

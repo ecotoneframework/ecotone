@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Message;
 
@@ -12,12 +12,12 @@ use Ecotone\Messaging\Message;
 interface OrderGateway
 {
     /**
-     * @Gateway(requestChannel=ErrorConfigurationContext::INPUT_CHANNEL)
+     * @MessageGateway(requestChannel=ErrorConfigurationContext::INPUT_CHANNEL)
      */
     public function order(string $type) : void;
 
     /**
-     * @Gateway(requestChannel="getErrorMessage")
+     * @MessageGateway(requestChannel="getErrorMessage")
      */
     public function getIncorrectOrder() : ?string;
 }

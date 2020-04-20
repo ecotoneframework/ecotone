@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\Gateway\GatewayHeaderValue;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Header;
@@ -28,7 +28,7 @@ interface BookStoreGatewayExample
      *
      * @return bool
      *
-     * @Gateway(
+     * @MessageGateway(
      *      requestChannel="requestChannel",
      *      errorChannel="errorChannel",
      *      parameterConverters={

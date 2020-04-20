@@ -8,7 +8,7 @@ use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplate;
 use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 
-class ExponentialRetryInterceptor implements ConsumerInterceptor
+class ChannelPollRetryInterceptor implements ConsumerInterceptor
 {
     /**
      * @var int

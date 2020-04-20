@@ -2,7 +2,7 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
@@ -27,7 +27,7 @@ interface EventBus
      *
      * @return mixed
      *
-     * @Gateway(requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT)
+     * @MessageGateway(requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT)
      */
     public function send(object $event);
 
@@ -39,7 +39,7 @@ interface EventBus
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT,
      *     parameterConverters={
      *         @Payload(parameterName="event"),
@@ -57,7 +57,7 @@ interface EventBus
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=EventBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
      *          @Header(parameterName="name", headerName=EventBus::CHANNEL_NAME_BY_NAME),
@@ -76,7 +76,7 @@ interface EventBus
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=EventBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
      *          @Headers(parameterName="metadata"),

@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Async;
 
-use Ecotone\Messaging\Annotation\Async;
+use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
@@ -17,7 +17,7 @@ class AsyncMethodExample
 {
     /**
      * @ServiceActivator(endpointId="asyncServiceActivator", inputChannelName="inputChannel")
-     * @Async(channelName="asyncChannel")
+     * @Asynchronous(channelName="asyncChannel")
      */
     public function doSomething() : void
     {

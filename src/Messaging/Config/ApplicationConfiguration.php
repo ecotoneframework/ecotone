@@ -143,6 +143,10 @@ class ApplicationConfiguration
     {
         $clone = clone $this;
         $clone->environment = $environment;
+        if (!$clone->channelPollRetryTemplate && in_array($environment, ["production", "prod"])) {
+            $this->channelPollRetryTemplate = RetryTemplateBuilder::exponentialBackoff(1000, 3)
+                                                ->maxRetryAttempts(5);
+        }
 
         return $clone;
     }

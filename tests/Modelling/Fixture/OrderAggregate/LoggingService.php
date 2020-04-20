@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
 
-use Ecotone\Messaging\Annotation\Async;
+use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
@@ -17,7 +17,7 @@ class LoggingService
 
     /**
      * @EventHandler(endpointId="loggingService")
-     * @Async("orders")
+     * @Asynchronous("orders")
      */
     public function log(OrderWasNotified $event) : void
     {

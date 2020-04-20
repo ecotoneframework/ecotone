@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
 
-use Ecotone\Messaging\Annotation\Async;
+use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\Poller;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
@@ -20,7 +20,7 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserId;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  * @AddUserId()
- * @Async(channelName="orders")
+ * @Asynchronous(channelName="orders")
  */
 class Order
 {

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\FileSystem;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 
@@ -19,7 +19,7 @@ interface GatewayWithReplyChannelExample
      * @param string $orderId
      * @return bool
      *
-     * @Gateway(
+     * @MessageGateway(
      *      requestChannel="requestChannel",
      *      parameterConverters={
      *          @Payload(parameterName="orderId")

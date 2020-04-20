@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext {
 
-    use Ecotone\Messaging\Annotation\Gateway;
+    use Ecotone\Messaging\Annotation\MessageGateway;
     use Ecotone\Messaging\Annotation\MessageEndpoint;
 
     /**
@@ -16,7 +16,7 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext {
     {
         /**
          * @return string
-         * @Gateway()
+         * @MessageGateway()
          */
         public function doSomething(): string;
     }

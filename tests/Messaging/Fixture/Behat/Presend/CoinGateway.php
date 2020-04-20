@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Presend;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
@@ -12,7 +12,7 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 interface CoinGateway
 {
     /**
-     * @Gateway(requestChannel="storeCoins")
+     * @MessageGateway(requestChannel="storeCoins")
      */
     public function store(int $coins);
 }

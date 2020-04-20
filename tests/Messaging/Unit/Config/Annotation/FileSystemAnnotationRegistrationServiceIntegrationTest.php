@@ -7,7 +7,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
 use Ecotone\Messaging\Annotation\Extension;
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\Gateway\GatewayPayload;
 use Ecotone\Messaging\Annotation\InputOutputEndpointAnnotation;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
@@ -67,7 +67,7 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      */
     public function test_retrieving_annotation_registration_for_application_context()
     {
-        $gatewayAnnotation = new Gateway();
+        $gatewayAnnotation = new MessageGateway();
         $gatewayAnnotation->requestChannel = "requestChannel";
         $messageToPayloadParameter = new Payload();
         $messageToPayloadParameter->parameterName = "orderId";
@@ -83,13 +83,13 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
                     "buy"
                 )
             ],
-            $this->createAnnotationRegistrationService("Test\\Ecotone\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")->findRegistrationsFor(MessageEndpoint::class, Gateway::class)
+            $this->createAnnotationRegistrationService("Test\\Ecotone\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")->findRegistrationsFor(MessageEndpoint::class, MessageGateway::class)
         );
     }
 
     public function test_retrieving_method_and_class_annotations()
     {
-        $gatewayAnnotation = new Gateway();
+        $gatewayAnnotation = new MessageGateway();
         $gatewayAnnotation->requestChannel = "requestChannel";
         $messageToPayloadParameter = new Payload();
         $messageToPayloadParameter->parameterName = "orderId";

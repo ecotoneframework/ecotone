@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Annotation\Parameter\Header;
@@ -55,8 +55,8 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
     {
         $gatewayBuilders = [];
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Gateway::class) as $annotationRegistration) {
-            /** @var \Ecotone\Messaging\Annotation\Gateway $annotation */
+        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, MessageGateway::class) as $annotationRegistration) {
+            /** @var \Ecotone\Messaging\Annotation\MessageGateway $annotation */
             $annotation = $annotationRegistration->getAnnotationForMethod();
 
             $parameterConverters = [];
@@ -79,7 +79,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
                 }else {
                     $converterClass = get_class($parameterToMessage);
-                    throw new \InvalidArgumentException("Not known converters for gateway {$converterClass} for {$annotationRegistration->getClassName()}::{$annotationRegistration->getMethodName()}. Have you registered converter starting with name @Gateway(...) e.g. @GatewayHeader?");
+                    throw new \InvalidArgumentException("Not known converters for gateway {$converterClass} for {$annotationRegistration->getClassName()}::{$annotationRegistration->getMethodName()}. Have you registered converter starting with name @MessageGateway(...) e.g. @MessageGatewayHeader?");
                 }
             }
 

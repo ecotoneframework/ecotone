@@ -12,7 +12,7 @@ use Doctrine\Common\Annotations\Annotation\Required;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
  */
-class Async
+class Asynchronous
 {
     /**
      * @var string

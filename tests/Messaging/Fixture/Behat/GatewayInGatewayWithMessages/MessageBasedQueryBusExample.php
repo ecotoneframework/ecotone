@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
@@ -22,7 +22,7 @@ interface MessageBasedQueryBusExample
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=QueryBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
      *          @Header(parameterName="name", headerName=QueryBus::CHANNEL_NAME_BY_NAME),

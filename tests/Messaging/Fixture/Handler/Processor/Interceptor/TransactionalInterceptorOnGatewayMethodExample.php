@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Transaction\Transactional;
 
@@ -16,7 +16,7 @@ use Ecotone\Messaging\Transaction\Transactional;
 interface TransactionalInterceptorOnGatewayMethodExample
 {
     /**
-     * @Gateway(requestChannel="requestChannel")
+     * @MessageGateway(requestChannel="requestChannel")
      * @Transactional({"transactionFactory"})
      */
     public function invoke() : void;

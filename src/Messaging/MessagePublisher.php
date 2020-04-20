@@ -10,7 +10,7 @@ use Ecotone\Messaging\Conversion\MediaType;
  * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface Publisher
+interface MessagePublisher
 {
 
     public function send(string $data, string $sourceMediaType = MediaType::TEXT_PLAIN) : void;

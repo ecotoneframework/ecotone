@@ -2,7 +2,7 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
@@ -27,7 +27,7 @@ interface QueryBus
      *
      * @return mixed
      *
-     * @Gateway(requestChannel=QueryBus::CHANNEL_NAME_BY_OBJECT)
+     * @MessageGateway(requestChannel=QueryBus::CHANNEL_NAME_BY_OBJECT)
      */
     public function send(object $query);
 
@@ -39,7 +39,7 @@ interface QueryBus
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=QueryBus::CHANNEL_NAME_BY_OBJECT,
      *     parameterConverters={
      *          @Payload(parameterName="query"),
@@ -56,7 +56,7 @@ interface QueryBus
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=QueryBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
      *          @Header(parameterName="name", headerName=QueryBus::CHANNEL_NAME_BY_NAME),
@@ -75,7 +75,7 @@ interface QueryBus
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=QueryBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
      *          @Headers(parameterName="metadata"),

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
-use Ecotone\Messaging\Annotation\Async;
+use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\ConverterClass;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
@@ -589,7 +589,7 @@ class InterfaceToCallTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Async::class));
+        $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Asynchronous::class));
     }
 
     public function test_throwing_when_doc_block_has_return_value_and_declaration_has_void()

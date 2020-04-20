@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
@@ -15,7 +15,7 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 interface SingleMethodGatewayExample
 {
     /**
-     * @Gateway(requestChannel="buy")
+     * @MessageGateway(requestChannel="buy")
      */
     public function buy();
 }

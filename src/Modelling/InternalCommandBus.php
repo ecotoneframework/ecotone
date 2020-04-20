@@ -3,7 +3,7 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Annotation\Gateway;
+use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
@@ -25,7 +25,7 @@ interface InternalCommandBus
      *
      * @return mixed
      *
-     * @Gateway(requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT)
+     * @MessageGateway(requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT)
      */
     public function send(object $command);
 
@@ -37,7 +37,7 @@ interface InternalCommandBus
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT,
      *     parameterConverters={
      *          @Payload(parameterName="command"),
@@ -53,7 +53,7 @@ interface InternalCommandBus
      * @param mixed  $commandData
      *
      * @return mixed
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=CommandBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
      *          @Header(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
@@ -72,7 +72,7 @@ interface InternalCommandBus
      *
      * @return mixed
      *
-     * @Gateway(
+     * @MessageGateway(
      *     requestChannel=CommandBus::CHANNEL_NAME_BY_NAME,
      *     parameterConverters={
      *          @Headers(parameterName="metadata"),

@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Async;
 
-use Ecotone\Messaging\Annotation\Async;
+use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
@@ -12,7 +12,7 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
  * @package Test\Ecotone\Messaging\Fixture\Annotation\Async
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
- * @Async(channelName="asyncChannel2")
+ * @Asynchronous(channelName="asyncChannel2")
  */
 class AsyncClassExample
 {
@@ -26,7 +26,7 @@ class AsyncClassExample
 
     /**
      * @ServiceActivator(endpointId="asyncServiceActivator1", inputChannelName="inputChannel")
-     * @Async(channelName="asyncChannel1")
+     * @Asynchronous(channelName="asyncChannel1")
      */
     public function doSomething1() : void
     {

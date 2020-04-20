@@ -4,6 +4,7 @@ namespace Ecotone\Modelling\Config;
 
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\DestinationResolutionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\CommandBus;
@@ -43,7 +44,7 @@ class CommandBusRouter
 
         $className = get_class($object);
         if (!array_key_exists($className, $this->channelMapping)) {
-            throw ConfigurationException::create("Can't send command to {$className}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method or @MessageEndpoint to class?");
+            throw DestinationResolutionException::create("Can't send command to {$className}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method or @MessageEndpoint to class?");
         }
 
         return $this->channelMapping[$className];
@@ -52,11 +53,11 @@ class CommandBusRouter
     public function routeByName(?string $name) : array
     {
         if (is_null($name)) {
-            throw ConfigurationException::create("Can't send via name using CommandBus without " . CommandBus::CHANNEL_NAME_BY_NAME . " header defined");
+            throw DestinationResolutionException::create("Can't send via name using CommandBus without " . CommandBus::CHANNEL_NAME_BY_NAME . " header defined");
         }
 
         if (!array_key_exists($name, $this->channelMapping)) {
-            throw ConfigurationException::create("Can't send command to {$name}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method or @MessageEndpoint to class?");
+            throw DestinationResolutionException::create("Can't send command to {$name}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method or @MessageEndpoint to class?");
         }
 
         return $this->channelMapping[$name];

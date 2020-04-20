@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter;
 
-use Ecotone\Messaging\Annotation\InboundChannelAdapter;
+use Ecotone\Messaging\Annotation\Scheduled;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 /**
@@ -16,7 +16,7 @@ class InboundChannelAdapterExample
 {
     /**
      * @return array
-     * @InboundChannelAdapter(
+     * @Scheduled(
      *     endpointId="run",
      *     requestChannelName="requestChannel",
      *     requiredInterceptorNames={"some"}

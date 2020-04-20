@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 
-use Ecotone\Messaging\Annotation\InboundChannelAdapter;
+use Ecotone\Messaging\Annotation\Scheduled;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
@@ -24,7 +24,7 @@ class InboundChannelAdapterModule extends ConsumerRegisterConfiguration
      */
     public static function getConsumerAnnotation(): string
     {
-        return InboundChannelAdapter::class;
+        return Scheduled::class;
     }
 
     /**
@@ -32,7 +32,7 @@ class InboundChannelAdapterModule extends ConsumerRegisterConfiguration
      */
     public static function createConsumerFrom(AnnotationRegistration $annotationRegistration): ConsumerLifecycleBuilder
     {
-        /** @var InboundChannelAdapter $annotation */
+        /** @var Scheduled $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return InboundChannelAdapterBuilder::create($annotation->requestChannelName, $annotationRegistration->getReferenceName(), $annotationRegistration->getMethodName())

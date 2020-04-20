@@ -60,7 +60,8 @@ class ApplicationConfiguration
 
     private function __construct()
     {
-
+        $this->channelPollRetryTemplate = RetryTemplateBuilder::exponentialBackoff(100, 3)
+                                            ->maxRetryAttempts(3);
     }
 
     public static function createWithDefaults() : self

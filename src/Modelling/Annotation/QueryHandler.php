@@ -25,4 +25,10 @@ class QueryHandler extends InputOutputEndpointAnnotation
      * @var string
      */
     public $ignoreMessage = false;
+    /**
+     * Does the handler allow for same command class name
+     *
+     * @var bool
+     */
+    public $mustBeUnique = true;
 }

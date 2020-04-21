@@ -299,9 +299,7 @@ class ModellingMessageRouterModule implements AnnotationModule
                 $method = $registration->getAnnotationForMethod();
                 $combinedRegistrationNames .= " {$registration->getClassName()}:{$registration->getMethodName()}";
 
-                if ($method instanceof QueryHandler) {
-                    $isUnique = false;
-                } else if ($method->mustBeUnique) {
+                if ($method->mustBeUnique) {
                     $isUnique = false;
                 }
             }

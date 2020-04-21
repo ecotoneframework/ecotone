@@ -84,7 +84,7 @@ class MessageHeaders
     /**
      * Consumer which started flow
      */
-    const CONSUMER = "consumer";
+    const CONSUMER_ENDPOINT_ID = "consumerEndpointId";
     /**
      * Consumed channel
      */

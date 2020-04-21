@@ -24,6 +24,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
@@ -180,6 +181,19 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
         $applicationConfiguration = $applicationConfiguration->mergeWith($extensionApplicationConfiguration);
+        if (!$applicationConfiguration->getChannelPollRetryTemplate()) {
+            if ($applicationConfiguration->isProductionConfiguration()) {
+                $applicationConfiguration->withChannelPollRetryTemplate(
+                    RetryTemplateBuilder::exponentialBackoff(1000, 3)
+                        ->maxRetryAttempts(5)
+                );
+            }else {
+                $applicationConfiguration->withChannelPollRetryTemplate(
+                    RetryTemplateBuilder::exponentialBackoff(100, 3)
+                        ->maxRetryAttempts(3)
+                );
+            }
+        }
 
         $this->isLazyConfiguration = !$applicationConfiguration->isFailingFast();
         $this->rootPathToSearchConfigurationFor = $rootPathToSearchConfigurationFor;

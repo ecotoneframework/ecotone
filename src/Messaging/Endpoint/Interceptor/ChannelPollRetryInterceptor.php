@@ -71,6 +71,7 @@ class ChannelPollRetryInterceptor implements ConsumerInterceptor
      */
     public function postRun(): void
     {
+        $this->currentNumberOfRetries = 0;
         return;
     }
 

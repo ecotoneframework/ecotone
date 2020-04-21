@@ -51,7 +51,7 @@ class ApplicationConfiguration
     /**
      * @var RetryTemplateBuilder|null
      */
-    private $channelPollRetryTemplate;
+    private $channelPollRetryTemplate = null;
 
     /**
      * @var object[]
@@ -60,8 +60,6 @@ class ApplicationConfiguration
 
     private function __construct()
     {
-        $this->channelPollRetryTemplate = RetryTemplateBuilder::exponentialBackoff(100, 3)
-                                            ->maxRetryAttempts(3);
     }
 
     public static function createWithDefaults() : self
@@ -144,10 +142,6 @@ class ApplicationConfiguration
     {
         $clone = clone $this;
         $clone->environment = $environment;
-        if (!$clone->channelPollRetryTemplate && in_array($environment, ["production", "prod"])) {
-            $this->channelPollRetryTemplate = RetryTemplateBuilder::exponentialBackoff(1000, 3)
-                                                ->maxRetryAttempts(5);
-        }
 
         return $clone;
     }
@@ -287,5 +281,8 @@ class ApplicationConfiguration
         return $this->namespaces;
     }
 
-
+    public function isProductionConfiguration() : bool
+    {
+        return in_array($this->getEnvironment(), ["prod", "production"]);
+    }
 }

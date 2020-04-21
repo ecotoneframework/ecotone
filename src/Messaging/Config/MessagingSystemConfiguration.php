@@ -329,26 +329,11 @@ final class MessagingSystemConfiguration implements Configuration
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->gatewayBuilders);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->channelAdapters);
 
-        foreach ($this->messageHandlerBuilders as $endpointId => $messageHandlerBuilder) {
-            $pollingMetadata = PollingMetadata::create((string)$endpointId);
-            if (array_key_exists($endpointId, $this->pollingMetadata)) {
-                $pollingMetadata = $this->pollingMetadata[$endpointId];
-            }
-
-            if ($this->applicationConfiguration->getDefaultErrorChannel() && !$pollingMetadata->getErrorChannelName()) {
-                $pollingMetadata = $pollingMetadata
-                    ->setErrorChannelName($this->applicationConfiguration->getDefaultErrorChannel());
-            }
-            if ($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes() && !$pollingMetadata->getMemoryLimitInMegabytes()) {
-                $pollingMetadata = $pollingMetadata
-                    ->setMemoryLimitInMegaBytes($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes());
-            }
-            if ($this->applicationConfiguration->getChannelPollRetryTemplate() && !$pollingMetadata->getChannelPollRetryTemplate()) {
-                $pollingMetadata = $pollingMetadata
-                    ->setChannelPollRetryTemplate($this->applicationConfiguration->getChannelPollRetryTemplate());
-            }
-
-            $this->pollingMetadata[$endpointId] = $pollingMetadata;
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            $this->addDefaultPollingConfiguration($messageHandlerBuilder->getEndpointId());
+        }
+        foreach ($this->channelAdapters as $channelAdapter) {
+            $this->addDefaultPollingConfiguration($channelAdapter->getEndpointId());
         }
 
         foreach ($this->requiredConsumerEndpointIds as $requiredConsumerEndpointId) {
@@ -1214,5 +1199,28 @@ final class MessagingSystemConfiguration implements Configuration
                 }
             }
         }
+    }
+
+    private function addDefaultPollingConfiguration($endpointId): void
+    {
+        $pollingMetadata = PollingMetadata::create((string)$endpointId);
+        if (array_key_exists($endpointId, $this->pollingMetadata)) {
+            $pollingMetadata = $this->pollingMetadata[$endpointId];
+        }
+
+        if ($this->applicationConfiguration->getDefaultErrorChannel() && !$pollingMetadata->getErrorChannelName()) {
+            $pollingMetadata = $pollingMetadata
+                ->setErrorChannelName($this->applicationConfiguration->getDefaultErrorChannel());
+        }
+        if ($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes() && !$pollingMetadata->getMemoryLimitInMegabytes()) {
+            $pollingMetadata = $pollingMetadata
+                ->setMemoryLimitInMegaBytes($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes());
+        }
+        if ($this->applicationConfiguration->getChannelPollRetryTemplate() && !$pollingMetadata->getChannelPollRetryTemplate()) {
+            $pollingMetadata = $pollingMetadata
+                ->setChannelPollRetryTemplate($this->applicationConfiguration->getChannelPollRetryTemplate());
+        }
+
+        $this->pollingMetadata[$endpointId] = $pollingMetadata;
     }
 }

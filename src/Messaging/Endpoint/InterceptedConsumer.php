@@ -2,13 +2,13 @@
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Messaging\Endpoint\Interceptor\ChannelPollRetryInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\ConnectionExceptionRetryInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
-use Ecotone\Messaging\Endpoint\PollingConsumer\ChannelException;
+use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 
@@ -64,7 +64,7 @@ class InterceptedConsumer implements ConsumerLifecycle
             try {
                 $this->interceptedConsumer->run();
                 $runResultedInConnectionException = false;
-            }catch (ChannelException $exception) {
+            }catch (ConnectionException $exception) {
                 $runResultedInConnectionException = true;
                 foreach ($this->consumerInterceptors as $consumerInterceptor) {
                     if($consumerInterceptor->shouldBeThrown($exception)) {
@@ -112,7 +112,7 @@ class InterceptedConsumer implements ConsumerLifecycle
         if ($pollingMetadata->getExecutionTimeLimitInMilliseconds() > 0) {
             $interceptors[] = new TimeLimitInterceptor($pollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
-        $interceptors[] = new ChannelPollRetryInterceptor($pollingMetadata->getChannelPollRetryTemplate());
+        $interceptors[] = new ConnectionExceptionRetryInterceptor($pollingMetadata->getConnectionRetryTemplate());
 
         return $interceptors;
     }

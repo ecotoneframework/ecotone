@@ -66,7 +66,7 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
                     ->setExecutionTimeLimitInMilliseconds($poller->executionTimeLimitInMilliseconds);
 
                 if ($poller->channelPollRetryTemplate) {
-                    $pollingMetadata = $pollingMetadata->setChannelPollRetryTemplate(
+                    $pollingMetadata = $pollingMetadata->setConnectionRetryTemplate(
                         RetryTemplateBuilder::exponentialBackoffWithMaxDelay(
                             $poller->channelPollRetryTemplate->initialDelay,
                             $poller->channelPollRetryTemplate->multiplier,

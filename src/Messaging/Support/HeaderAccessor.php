@@ -26,6 +26,8 @@ final class HeaderAccessor
     private function __construct(array $headers)
     {
         $this->headers = $headers;
+        $this->removeHeader(MessageHeaders::MESSAGE_ID);
+        $this->removeHeader(MessageHeaders::TIMESTAMP);
     }
 
     /**

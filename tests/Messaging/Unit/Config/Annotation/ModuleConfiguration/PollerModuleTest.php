@@ -39,7 +39,7 @@ class PollerModuleTest extends AnnotationConfigurationTest
                     ->setHandledMessageLimit(10)
                     ->setMemoryLimitInMegaBytes(100)
                     ->setExecutionTimeLimitInMilliseconds(200)
-                    ->setChannelPollRetryTemplate(RetryTemplateBuilder::exponentialBackoffWithMaxDelay(100, 2, 3))
+                    ->setConnectionRetryTemplate(RetryTemplateBuilder::exponentialBackoffWithMaxDelay(100, 2, 3))
             );
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([

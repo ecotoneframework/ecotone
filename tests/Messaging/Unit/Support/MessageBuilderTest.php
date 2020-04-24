@@ -105,6 +105,7 @@ class MessageBuilderTest extends MessagingTest
         $message = MessageBuilder::withPayload('somePayload')
             ->setHeader('some', new \stdClass())
             ->setHeader('token', 'johny')
+            ->setHeader(MessageHeaders::TIMESTAMP, 1587658787863)
             ->setReplyChannel(QueueChannel::create())
             ->build();
 
@@ -114,9 +115,14 @@ class MessageBuilderTest extends MessagingTest
             $message,
             $messageToCompare
         );
+
         $this->assertNotEquals(
             $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
             $messageToCompare->getHeaders()->get(MessageHeaders::MESSAGE_ID)
+        );
+        $this->assertNotEquals(
+            $message->getHeaders()->get(MessageHeaders::TIMESTAMP),
+            $messageToCompare->getHeaders()->get(MessageHeaders::TIMESTAMP)
         );
     }
 
@@ -137,6 +143,22 @@ class MessageBuilderTest extends MessagingTest
                     ->build(),
                 true
             )['payload']
+        );
+    }
+
+    public function test_allow_to_manually_set_message_header_id_and_timestamp()
+    {
+        $this->assertEquals(
+            MessageBuilder::withPayload("some")
+                ->setHeader(MessageHeaders::MESSAGE_ID, 123)
+                ->setHeader(MessageHeaders::TIMESTAMP, 1587658787863)
+                ->build(),
+            MessageBuilder::withPayload("some")
+                ->setMultipleHeaders([
+                    MessageHeaders::MESSAGE_ID => 123,
+                    MessageHeaders::TIMESTAMP => 1587658787863
+                ])
+                ->build()
         );
     }
 }

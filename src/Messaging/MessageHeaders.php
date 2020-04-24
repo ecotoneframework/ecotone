@@ -299,10 +299,13 @@ class MessageHeaders
      */
     final private static function createMessageHeadersWith(array $headers): MessageHeaders
     {
-        return new static(array_merge($headers, [
-            self::MESSAGE_ID => Uuid::uuid4()->toString(),
-            self::TIMESTAMP => (int)round(microtime(true))
-        ]));
+        return new static(array_merge(
+            [
+                self::MESSAGE_ID => Uuid::uuid4()->toString(),
+                self::TIMESTAMP => (int)round(microtime(true))
+            ],
+            $headers
+        ));
     }
 
     /**

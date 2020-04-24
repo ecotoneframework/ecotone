@@ -121,7 +121,7 @@ class PollingConsumerBuilderTest extends MessagingTest
             InMemoryReferenceSearchService::createEmpty(),
             $replyViaHeadersMessageHandlerBuilder,
             PollingMetadata::create("some")
-                ->setChannelPollRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1))
+                ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1))
         );
 
         $inputChannel->send(MessageBuilder::withPayload("somePayload")->build());
@@ -155,7 +155,7 @@ class PollingConsumerBuilderTest extends MessagingTest
             InMemoryReferenceSearchService::createEmpty(),
             $serviceHandler,
             PollingMetadata::create("some")
-                ->setChannelPollRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(2))
+                ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(2))
         );
 
         try { $pollingConsumer->run(); }catch (\RuntimeException $e) {}

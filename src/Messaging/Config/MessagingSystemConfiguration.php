@@ -1230,9 +1230,9 @@ final class MessagingSystemConfiguration implements Configuration
             $pollingMetadata = $pollingMetadata
                 ->setMemoryLimitInMegaBytes($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes());
         }
-        if ($this->applicationConfiguration->getChannelPollRetryTemplate() && !$pollingMetadata->getChannelPollRetryTemplate()) {
+        if ($this->applicationConfiguration->getChannelPollRetryTemplate() && !$pollingMetadata->getConnectionRetryTemplate()) {
             $pollingMetadata = $pollingMetadata
-                ->setChannelPollRetryTemplate($this->applicationConfiguration->getChannelPollRetryTemplate());
+                ->setConnectionRetryTemplate($this->applicationConfiguration->getChannelPollRetryTemplate());
         }
 
         $this->pollingMetadata[$endpointId] = $pollingMetadata;

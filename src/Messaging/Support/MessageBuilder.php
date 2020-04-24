@@ -217,7 +217,10 @@ final class MessageBuilder
      */
     public static function fromMessage(Message $message) : self
     {
-        return new self($message->getPayload(), HeaderAccessor::createFrom($message->getHeaders()));
+        return new self(
+            $message->getPayload(),
+            HeaderAccessor::createFrom($message->getHeaders())
+        );
     }
 
     /**

@@ -19,6 +19,10 @@ use Ecotone\Messaging\Support\MessageBuilder;
 class PollerTaskExecutor implements TaskExecutor
 {
     /**
+     * @var string
+     */
+    private $endpointId;
+    /**
      * @var PollableChannel
      */
     private $pollableChannel;
@@ -32,8 +36,9 @@ class PollerTaskExecutor implements TaskExecutor
     private $pollableChannelName;
 
 
-    public function __construct(string $pollableChannelName, PollableChannel $pollableChannel, NonProxyGateway $entrypointGateway)
+    public function __construct(string $endpointId, string $pollableChannelName, PollableChannel $pollableChannel, NonProxyGateway $entrypointGateway)
     {
+        $this->endpointId = $endpointId;
         $this->pollableChannel = $pollableChannel;
         $this->entrypointGateway = $entrypointGateway;
         $this->pollableChannelName = $pollableChannelName;
@@ -44,11 +49,12 @@ class PollerTaskExecutor implements TaskExecutor
         try {
             $message = $this->pollableChannel->receive();
         }catch (\Throwable $exception) {
-            throw new ChannelException("Can't pool message from {$this->pollableChannelName} error happen.", 0, $exception);
+            throw new ConnectionException("Can't pool message from {$this->pollableChannelName} error happened.", 0, $exception);
         }
 
         if ($message) {
             $message = MessageBuilder::fromMessage($message)
+                ->setHeader(MessageHeaders::CONSUMER_ENDPOINT_ID, $this->endpointId)
                 ->setHeader(MessageHeaders::POLLED_CHANNEL, $this->pollableChannel)
                 ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, $this->pollableChannelName)
                 ->build();

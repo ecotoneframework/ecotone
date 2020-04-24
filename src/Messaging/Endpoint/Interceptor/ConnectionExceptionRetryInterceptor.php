@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
+use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
 use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplate;
 use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 
-class ChannelPollRetryInterceptor implements ConsumerInterceptor
+class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
 {
     /**
      * @var int
@@ -45,6 +46,10 @@ class ChannelPollRetryInterceptor implements ConsumerInterceptor
      */
     public function shouldBeThrown(\Throwable $exception): bool
     {
+        if (!($exception instanceof ConnectionException)) {
+            return true;
+        }
+
         $this->currentNumberOfRetries++;
         if (!$this->retryTemplate || !$this->retryTemplate->canBeCalledNextTime($this->currentNumberOfRetries)) {
             return true;

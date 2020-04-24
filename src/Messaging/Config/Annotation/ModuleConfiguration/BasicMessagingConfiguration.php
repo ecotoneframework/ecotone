@@ -23,7 +23,7 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
-use Ecotone\Messaging\Endpoint\Interceptor\ChannelPollRetryInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\ConnectionExceptionRetryInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
@@ -102,7 +102,7 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
 
         $configuration->registerRelatedInterfaces([
             InterfaceToCall::create(LimitConsumedMessagesInterceptor::class, "postSend"),
-            InterfaceToCall::create(ChannelPollRetryInterceptor::class, "postSend"),
+            InterfaceToCall::create(ConnectionExceptionRetryInterceptor::class, "postSend"),
             InterfaceToCall::create(LimitExecutionAmountInterceptor::class, "postSend"),
             InterfaceToCall::create(LimitMemoryUsageInterceptor::class, "postSend"),
             InterfaceToCall::create(SignalInterceptor::class, "postSend"),

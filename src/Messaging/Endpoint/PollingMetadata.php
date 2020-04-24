@@ -66,7 +66,7 @@ class PollingMetadata
     /**
      * @var RetryTemplateBuilder|null
      */
-    private $channelPollRetryTemplate;
+    private $connectionRetryTemplate;
     /**
      * @var bool
      */
@@ -192,17 +192,17 @@ class PollingMetadata
         return $copy;
     }
 
-    public function setChannelPollRetryTemplate(RetryTemplateBuilder $retryTemplateBuilder) : PollingMetadata
+    public function setConnectionRetryTemplate(RetryTemplateBuilder $retryTemplateBuilder) : PollingMetadata
     {
         $copy = $this->createCopy();
-        $copy->channelPollRetryTemplate = $retryTemplateBuilder;
+        $copy->connectionRetryTemplate = $retryTemplateBuilder;
 
         return $copy;
     }
 
-    public function getChannelPollRetryTemplate(): ?RetryTemplateBuilder
+    public function getConnectionRetryTemplate(): ?RetryTemplateBuilder
     {
-        return $this->channelPollRetryTemplate;
+        return $this->connectionRetryTemplate;
     }
 
     /**

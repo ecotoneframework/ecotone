@@ -183,12 +183,12 @@ final class MessagingSystemConfiguration implements Configuration
         $applicationConfiguration = $applicationConfiguration->mergeWith($extensionApplicationConfiguration);
         if (!$applicationConfiguration->getConnectionRetryTemplate()) {
             if ($applicationConfiguration->isProductionConfiguration()) {
-                $applicationConfiguration->withChannelPollRetryTemplate(
+                $applicationConfiguration->withConnectionRetryTemplate(
                     RetryTemplateBuilder::exponentialBackoff(1000, 3)
                         ->maxRetryAttempts(5)
                 );
             }else {
-                $applicationConfiguration->withChannelPollRetryTemplate(
+                $applicationConfiguration->withConnectionRetryTemplate(
                     RetryTemplateBuilder::exponentialBackoff(100, 3)
                         ->maxRetryAttempts(3)
                 );

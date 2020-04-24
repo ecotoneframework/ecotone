@@ -190,7 +190,7 @@ class ApplicationConfiguration
         return $clone;
     }
 
-    public function withChannelPollRetryTemplate(RetryTemplateBuilder $channelPollRetryTemplate): ApplicationConfiguration
+    public function withConnectionRetryTemplate(RetryTemplateBuilder $channelPollRetryTemplate): ApplicationConfiguration
     {
         $this->connectionRetryTemplate = $channelPollRetryTemplate;
         return $this;

@@ -51,7 +51,7 @@ class ApplicationConfiguration
     /**
      * @var RetryTemplateBuilder|null
      */
-    private $channelPollRetryTemplate = null;
+    private $connectionRetryTemplate = null;
 
     /**
      * @var object[]
@@ -192,13 +192,13 @@ class ApplicationConfiguration
 
     public function withChannelPollRetryTemplate(RetryTemplateBuilder $channelPollRetryTemplate): ApplicationConfiguration
     {
-        $this->channelPollRetryTemplate = $channelPollRetryTemplate;
+        $this->connectionRetryTemplate = $channelPollRetryTemplate;
         return $this;
     }
 
-    public function getChannelPollRetryTemplate(): ?RetryTemplateBuilder
+    public function getConnectionRetryTemplate(): ?RetryTemplateBuilder
     {
-        return $this->channelPollRetryTemplate;
+        return $this->connectionRetryTemplate;
     }
 
     public function withConsumerMemoryLimit(int $memoryLimitInMegabytes) : self

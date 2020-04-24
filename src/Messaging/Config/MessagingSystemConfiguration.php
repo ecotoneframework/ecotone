@@ -181,7 +181,7 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
         $applicationConfiguration = $applicationConfiguration->mergeWith($extensionApplicationConfiguration);
-        if (!$applicationConfiguration->getChannelPollRetryTemplate()) {
+        if (!$applicationConfiguration->getConnectionRetryTemplate()) {
             if ($applicationConfiguration->isProductionConfiguration()) {
                 $applicationConfiguration->withChannelPollRetryTemplate(
                     RetryTemplateBuilder::exponentialBackoff(1000, 3)
@@ -1230,9 +1230,9 @@ final class MessagingSystemConfiguration implements Configuration
             $pollingMetadata = $pollingMetadata
                 ->setMemoryLimitInMegaBytes($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes());
         }
-        if ($this->applicationConfiguration->getChannelPollRetryTemplate() && !$pollingMetadata->getConnectionRetryTemplate()) {
+        if ($this->applicationConfiguration->getConnectionRetryTemplate() && !$pollingMetadata->getConnectionRetryTemplate()) {
             $pollingMetadata = $pollingMetadata
-                ->setConnectionRetryTemplate($this->applicationConfiguration->getChannelPollRetryTemplate());
+                ->setConnectionRetryTemplate($this->applicationConfiguration->getConnectionRetryTemplate());
         }
 
         $this->pollingMetadata[$endpointId] = $pollingMetadata;

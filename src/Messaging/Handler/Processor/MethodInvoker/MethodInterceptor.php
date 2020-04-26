@@ -19,8 +19,6 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class MethodInterceptor implements InterceptorWithPointCut
 {
-    const DEFAULT_PRECEDENCE = 1;
-
     /**
      * @var string
      */

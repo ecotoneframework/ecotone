@@ -14,8 +14,6 @@ use Ecotone\Messaging\Support\MessageBuilder;
 
 class ConversionInterceptor
 {
-    public const PRECEDENCE = 1000000;
-
     /**
      * @var InterfaceToCall
      */

@@ -14,7 +14,6 @@ use Ecotone\Messaging\Support\ErrorMessage;
 
 class ErrorChannelInterceptor
 {
-    public const PRECEDENCE = -1000000;
     /**
      * @var MessageChannel
      */

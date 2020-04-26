@@ -9,6 +9,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Precedence;
 use Throwable;
 
 /**
@@ -18,11 +19,9 @@ use Throwable;
  */
 class AcknowledgeConfirmationInterceptor
 {
-    const PRECEDENCE = ErrorChannelInterceptor::PRECEDENCE - 99;
-
     public static function createAroundInterceptor(string $interceptorName) : AroundInterceptorReference
     {
-        return AroundInterceptorReference::createWithDirectObject($interceptorName, new self(), "ack", self::PRECEDENCE, "");
+        return AroundInterceptorReference::createWithDirectObject($interceptorName, new self(), "ack", Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, "");
     }
 
     /**

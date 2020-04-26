@@ -13,8 +13,6 @@ use Ecotone\Modelling\EventBus;
  */
 class LazyEventBusInterceptor
 {
-    const PRECEDENCE = 10;
-
     /**
      * @var NonProxyGateway|EventBus
      */

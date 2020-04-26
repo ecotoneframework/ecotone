@@ -7,6 +7,7 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Precedence;
 
 /**
  * Class InterceptedConsumerBuilder
@@ -28,7 +29,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
                     "",
                     $interceptor,
                     "postSend",
-                    InterceptedConsumer::CONSUMER_INTERCEPTOR_PRECEDENCE,
+                    Precedence::ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE,
                     ""
                 )
             );

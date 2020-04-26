@@ -8,6 +8,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -243,7 +244,7 @@ class Gateway implements NonProxyGateway
                     $replyContentType
                 ),
                 "convert",
-                ErrorChannelInterceptor::PRECEDENCE * (-1),
+                Precedence::GATEWAY_REPLY_CONVERSION_PRECEDENCE,
                 ""
             );
         }

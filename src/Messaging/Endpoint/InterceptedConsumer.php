@@ -11,6 +11,7 @@ use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Precedence;
 
 /**
  * Class ContinuouslyRunningConsumer
@@ -19,8 +20,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference
  */
 class InterceptedConsumer implements ConsumerLifecycle
 {
-    const CONSUMER_INTERCEPTOR_PRECEDENCE = ErrorChannelInterceptor::PRECEDENCE - 100;
-
     /**
      * @var ConsumerLifecycle
      */

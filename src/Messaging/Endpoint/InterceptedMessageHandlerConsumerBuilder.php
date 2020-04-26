@@ -10,6 +10,7 @@ use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Precedence;
 
 /**
  * Class InterceptedMessageHandlerConsumerBuilder
@@ -31,7 +32,7 @@ abstract class InterceptedMessageHandlerConsumerBuilder implements MessageHandle
                     "",
                     $interceptor,
                     "postSend",
-                    InterceptedConsumer::CONSUMER_INTERCEPTOR_PRECEDENCE,
+                    Precedence::ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE,
                     ""
                 )
             );

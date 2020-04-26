@@ -28,6 +28,7 @@ use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateMessage;
@@ -229,7 +230,7 @@ class ModellingHandlerModule implements AnnotationModule
                         "",
                         InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                         AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
-                        AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                        Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                         $registration->getClassName() . "::" . $registration->getMethodName()
                     )
                 );
@@ -354,7 +355,7 @@ class ModellingHandlerModule implements AnnotationModule
                     "",
                     InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith($handledMessageClassName),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     $registration->getClassName() . "::" . $registration->getMethodName()
                 )
             );

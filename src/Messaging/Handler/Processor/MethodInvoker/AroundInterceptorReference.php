@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Precedence;
 use ReflectionException;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
@@ -72,7 +73,7 @@ class AroundInterceptorReference implements InterceptorWithPointCut
      */
     public static function createWithNoPointcut(string $interceptorName, string $referenceName, string $methodName): self
     {
-        return new self(MethodInterceptor::DEFAULT_PRECEDENCE, $interceptorName, $referenceName, $methodName, Pointcut::createEmpty());
+        return new self(Precedence::DEFAULT_PRECEDENCE, $interceptorName, $referenceName, $methodName, Pointcut::createEmpty());
     }
 
     /**

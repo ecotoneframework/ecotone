@@ -34,6 +34,7 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Messaging\Transaction\Transactional;
@@ -232,7 +233,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     "some",
                     InterfaceToCall::create(CalculatingService::class, "sum"),
                     ServiceActivatorBuilder::create("reference1", "sum"),
-                    MethodInterceptor::DEFAULT_PRECEDENCE,
+                    Precedence::DEFAULT_PRECEDENCE,
                     CalculatingService::class
                 )
             )
@@ -246,7 +247,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     "some",
                     InterfaceToCall::create(CalculatingService::class, "multiply"),
                     ServiceActivatorBuilder::create("reference3", "multiply"),
-                    MethodInterceptor::DEFAULT_PRECEDENCE,
+                    Precedence::DEFAULT_PRECEDENCE,
                     CalculatingService::class
                 )
             );
@@ -1228,7 +1229,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                         "some",
                         InterfaceToCall::create(CalculatingService::class, "sum"),
                         ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum"),
-                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        Precedence::DEFAULT_PRECEDENCE,
                         CalculatingService::class
                     )
                 )
@@ -1244,7 +1245,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                         "some",
                         InterfaceToCall::create(CalculatingService::class, "multiply"),
                         ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply"),
-                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        Precedence::DEFAULT_PRECEDENCE,
                         CalculatingService::class
                     )
                 )
@@ -1285,7 +1286,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                         "some",
                         InterfaceToCall::create(CallWithAnnotationFromMethodInterceptorExample::class, "callWithMethodAnnotation"),
                         ServiceActivatorBuilder::createWithDirectReference(CallWithAnnotationFromMethodInterceptorExample::create(), "callWithMethodAnnotation"),
-                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        Precedence::DEFAULT_PRECEDENCE,
                         StubCallSavingService::class
                     )
                 )
@@ -1294,7 +1295,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                         "some",
                         InterfaceToCall::create(CallWithAnnotationFromMethodInterceptorExample::class, "callWithMethodAnnotation"),
                         ServiceActivatorBuilder::createWithDirectReference(CallWithAnnotationFromMethodInterceptorExample::create(), "callWithMethodAnnotation"),
-                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        Precedence::DEFAULT_PRECEDENCE,
                         StubCallSavingService::class
                     )
                 )
@@ -1346,7 +1347,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                         $calculatorWithOne,
                         InterfaceToCall::create(CalculatingService::class, "sum"),
                         ServiceActivatorBuilder::create($calculatorWithOne, "sum"),
-                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        Precedence::DEFAULT_PRECEDENCE,
                         ""
                     )
                 )
@@ -1355,7 +1356,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                         $calculatorWithTwo,
                         InterfaceToCall::create(CalculatingService::class, "sum"),
                         ServiceActivatorBuilder::create($calculatorWithTwo, "sum"),
-                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        Precedence::DEFAULT_PRECEDENCE,
                         ""
                     )
                 )
@@ -1378,7 +1379,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                         $calculatorWithOne,
                         InterfaceToCall::create(CalculatingService::class, "multiply"),
                         ServiceActivatorBuilder::create($calculatorWithOne, "multiply"),
-                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        Precedence::DEFAULT_PRECEDENCE,
                         ""
                     )
                 )
@@ -1387,7 +1388,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                         $calculatorWithTwo,
                         InterfaceToCall::create(CalculatingService::class, "multiply"),
                         ServiceActivatorBuilder::create($calculatorWithTwo, "multiply"),
-                        MethodInterceptor::DEFAULT_PRECEDENCE,
+                        Precedence::DEFAULT_PRECEDENCE,
                         ""
                     )
                 )
@@ -1511,7 +1512,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     InterfaceToCall::create(CalculatingService::class, "multiply"),
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
                         ->withInputChannelName("some"),
-                    MethodInterceptor::DEFAULT_PRECEDENCE,
+                    Precedence::DEFAULT_PRECEDENCE,
                     CalculatingService::class
                 )
             );
@@ -1531,7 +1532,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     InterfaceToCall::create(CalculatingService::class, "multiply"),
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), "multiply")
                         ->withOutputMessageChannel("some"),
-                    MethodInterceptor::DEFAULT_PRECEDENCE,
+                    Precedence::DEFAULT_PRECEDENCE,
                     CalculatingService::class
                 )
             );

@@ -21,6 +21,7 @@ use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\SubscribableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -394,7 +395,7 @@ class GatewayProxyBuilder implements GatewayBuilder
                 "",
                 new ErrorChannelInterceptor($errorChannel),
                 "handle",
-                ErrorChannelInterceptor::PRECEDENCE,
+                Precedence::ERROR_CHANNEL_PRECEDENCE,
                 ""
             );
         }

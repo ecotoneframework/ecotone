@@ -20,6 +20,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateMessageConversionService;
@@ -128,7 +129,7 @@ class ModellingHandlerModuleTest extends TestCase
                     "",
                     InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith(DoStuffCommand::class),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     AggregateCommandHandlerExample::class . "::doAction"
                 )
             );
@@ -258,7 +259,7 @@ class ModellingHandlerModuleTest extends TestCase
                     "",
                     InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith(TypeDescriptor::ARRAY),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     MultiMethodAggregateCommandHandlerExample::class . "::doAction1"
                 )
             )
@@ -275,7 +276,7 @@ class ModellingHandlerModuleTest extends TestCase
                     "",
                     InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith(TypeDescriptor::ARRAY),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     MultiMethodAggregateCommandHandlerExample::class . "::doAction2"
                 )
             );
@@ -330,7 +331,7 @@ class ModellingHandlerModuleTest extends TestCase
                     "",
                     InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith(DoStuffCommand::class),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     AggregateCommandHandlerWithReferencesExample::class . "::doAction"
                 )
             );
@@ -367,7 +368,7 @@ class ModellingHandlerModuleTest extends TestCase
                     "",
                     InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith(SomeQuery::class),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     AggregateQueryHandlerExample::class . "::doStuff"
                 )
             );
@@ -404,7 +405,7 @@ class ModellingHandlerModuleTest extends TestCase
                 "",
                 InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                 AggregateMessageConversionServiceBuilder::createWith(SomeQuery::class),
-                AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                 AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
             ));
 
@@ -448,7 +449,7 @@ class ModellingHandlerModuleTest extends TestCase
                     "",
                     InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
                     AggregateMessageConversionServiceBuilder::createWith(SomeQuery::class),
-                    AggregateMessage::BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE,
+                    Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
                 ))
         );

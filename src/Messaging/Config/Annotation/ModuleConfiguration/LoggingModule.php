@@ -19,6 +19,7 @@ use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Precedence;
 
 /**
  * Class LoggingModule
@@ -54,7 +55,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 "beforeLog",
                 InterfaceToCall::create(LoggingInterceptor::class, "logBefore"),
                 LoggingHandlerBuilder::createForBefore(),
-                ErrorChannelInterceptor::PRECEDENCE - 1,
+                Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
                 "@(" .  LogBefore::class . ")"
             )
         );
@@ -63,7 +64,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 "afterLog",
                 InterfaceToCall::create(LoggingInterceptor::class, "logAfter"),
                 LoggingHandlerBuilder::createForAfter(),
-                ErrorChannelInterceptor::PRECEDENCE - 1,
+                Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
                 "@(" . LogAfter::class . ")"
             )
         );
@@ -72,7 +73,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 "errorLog",
                 new ExceptionLoggingInterceptorBuilder(),
                 "logException",
-                ErrorChannelInterceptor::PRECEDENCE - 1,
+                Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
                 "@(" . LogError::class . ")"
             )
         );

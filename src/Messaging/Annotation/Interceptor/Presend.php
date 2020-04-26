@@ -3,6 +3,8 @@
 
 namespace Ecotone\Messaging\Annotation\Interceptor;
 
+use Ecotone\Messaging\Precedence;
+
 /**
  * Class BeforeSend
  * @package Ecotone\Messaging\Annotation\Interceptor
@@ -19,7 +21,7 @@ class Presend
      *
      * @var int
      */
-    public $precedence = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::DEFAULT_PRECEDENCE;
+    public $precedence = Precedence::DEFAULT_PRECEDENCE;
 
     /**
      * Advice is associated with a pointcut expression and runs at any join point matched by the pointcut (for example, the execution of a method with a certain name)

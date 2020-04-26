@@ -2,8 +2,6 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-
 /**
  * Interface CQRS
  * @package Ecotone\Modelling
@@ -20,6 +18,4 @@ interface AggregateMessage
     const CALLING_MESSAGE = "ecotone.modelling.aggregate.calling_message";
     const IS_EVENT_SOURCED = "ecotone.modelling.aggregate.is_event_sourced";
     const CALL_RESULT = "ecotone.modelling.aggregate.result";
-
-    const BEFORE_CONVERTER_INTERCEPTOR_PRECEDENCE = MethodInterceptor::DEFAULT_PRECEDENCE + 1010;
 }

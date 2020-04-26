@@ -15,6 +15,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Precedence;
 
 /**
  * Class LazyEventBusConfiguration
@@ -60,7 +61,7 @@ class LazyEventBusConfiguration implements AnnotationModule
                 LazyEventBusInterceptor::class,
                  new LazyEventBusAroundInterceptorBuilder($inMemoryEventStore),
                     "publish",
-                    LazyEventBusInterceptor::PRECEDENCE,
+                    Precedence::LAZY_EVENT_PUBLICATION_PRECEDENCE,
                     "@(" . LazyEventPublishing::class . ")" . "||" . "@(" . PollableEndpoint::class . ")"
                 )
             );

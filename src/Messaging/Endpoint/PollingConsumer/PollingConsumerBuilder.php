@@ -27,6 +27,7 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Scheduling\EpochBasedClock;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
@@ -64,7 +65,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             "errorLog",
             new ExceptionLoggingInterceptorBuilder(),
             "logException",
-            ErrorChannelInterceptor::PRECEDENCE - 1,
+            Precedence::EXCEPTION_LOGGING_PRECEDENCE,
             ""
         ));
         $this->entrypointGateway->addAroundInterceptor(
@@ -72,7 +73,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
                 "",
                 new ExceptionLoggingInterceptorBuilder(),
                 "logBefore",
-                ErrorChannelInterceptor::PRECEDENCE - 100,
+                Precedence::ERROR_CHANNEL_PRECEDENCE - 100,
                 ""
             )
         );

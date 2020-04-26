@@ -6,6 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use Ecotone\Messaging\Precedence;
 use ReflectionException;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\MethodInterceptorModule;
@@ -42,7 +43,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "sum", 2, CalculatingServiceInterceptorExample::class))
-            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "subtract", MethodInterceptor::DEFAULT_PRECEDENCE, ""))
+            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "subtract", Precedence::DEFAULT_PRECEDENCE, ""))
             ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "multiply", 2, CalculatingServiceInterceptorExample::class));
 
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([

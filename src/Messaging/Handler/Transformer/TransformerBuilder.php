@@ -207,12 +207,12 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
                 TransformerMessageProcessor::createFrom(
-                    MethodInvoker::createWithInterceptorsWithChannel(
+                    MethodInvoker::createWith(
                         $objectToInvokeOn,
                         $this->methodName,
                         $this->methodParameterConverterBuilders,
-                        $channelResolver,
                         $referenceSearchService,
+                        $channelResolver,
                         $this->orderedAroundInterceptors,
                         $this->getEndpointAnnotations()
                     )

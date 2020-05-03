@@ -448,11 +448,11 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithProceedingInterceptorExample::create();
         $interceptedService = StubCallSavingService::create();
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
+        $methodInvocation = MethodInvoker::createWith(
             $interceptedService, 'callNoArgumentsAndReturnType', [],
-            InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+            InMemoryReferenceSearchService::createWith([
             CallWithProceedingInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [
                 AroundInterceptorReference::createWithNoPointcut("someId", CallWithProceedingInterceptorExample::class, "callWithProceeding")
             ]
@@ -467,9 +467,9 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = StubCallSavingService::create();
         $interceptedService = StubCallSavingService::create();
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
+        $methodInvocation = MethodInvoker::createWith(
             $interceptedService, 'callNoArgumentsAndReturnType', [],
-            InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty(),
+            InMemoryReferenceSearchService::createEmpty(), InMemoryChannelResolver::createEmpty(),
             [
                 AroundInterceptorReference::createWithObjectBuilder("someId", AroundInterceptorObjectBuilderExample::create($interceptingService1), "callWithProceed", 0, "")
             ]
@@ -486,12 +486,12 @@ class MethodInvokerTest extends MessagingTest
         $interceptingService2 = CallWithProceedingInterceptorExample::create();
         $interceptingService3 = CallWithProceedingInterceptorExample::create();
         $interceptedService = StubCallSavingService::create();
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callNoArgumentsAndReturnType', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callNoArgumentsAndReturnType', [], InMemoryReferenceSearchService::createWith([
             "interceptor1" => $interceptingService1,
             "interceptor2" => $interceptingService2,
             "interceptor3" => $interceptingService3
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [
                 AroundInterceptorReference::createWithNoPointcut("someId", "interceptor1", "callWithProceeding"),
                 AroundInterceptorReference::createWithNoPointcut("someId", "interceptor2", "callWithProceeding"),
@@ -510,10 +510,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithEndingChainAndReturningInterceptorExample::createWithReturnType("changed");
         $interceptedService = StubCallSavingService::createWithReturnType("original");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callNoArgumentsAndReturnType', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callNoArgumentsAndReturnType', [], InMemoryReferenceSearchService::createWith([
             CallWithEndingChainAndReturningInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithEndingChainAndReturningInterceptorExample::class, "callWithEndingChainAndReturning")]
         );
 
@@ -524,33 +524,16 @@ class MethodInvokerTest extends MessagingTest
         );
     }
 
-    public function test_throwing_exception_when_replacing_arguments_when_blocked()
-    {
-        $methodInvocation = MethodInvoker::createWithInterceptorsNotChangingCallArgumentsWithChannel(
-            CalculatingService::create(3), 'result', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty(),
-            [AroundInterceptorReference::createWithDirectObject("",
-                CalculatingServiceInterceptorExample::create(1), "sum",
-                0,
-                ""
-            )],
-            []
-        );
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $methodInvocation->processMessage(MessageBuilder::withPayload(5)->build());
-    }
-
     public function test_calling_with_method_interceptor_changing_return_value_at_second_call()
     {
         $interceptingService1 = CallWithProceedingAndReturningInterceptorExample::create();
         $interceptingService2 = CallWithEndingChainAndReturningInterceptorExample::createWithReturnType("changed");
         $interceptedService = StubCallSavingService::createWithReturnType("original");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callWithReturn', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createWith([
             CallWithProceedingAndReturningInterceptorExample::class => $interceptingService1,
             CallWithEndingChainAndReturningInterceptorExample::class => $interceptingService2
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [
                 AroundInterceptorReference::createWithNoPointcut("someId", CallWithProceedingAndReturningInterceptorExample::class, "callWithProceedingAndReturning"),
                 AroundInterceptorReference::createWithNoPointcut("someId", CallWithEndingChainAndReturningInterceptorExample::class, "callWithEndingChainAndReturning")
@@ -567,10 +550,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithEndingChainNoReturningInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("original");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callWithReturn', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createWith([
             CallWithEndingChainNoReturningInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [
                 AroundInterceptorReference::createWithNoPointcut("someId", CallWithEndingChainNoReturningInterceptorExample::class, "callWithEndingChainNoReturning")
             ]
@@ -583,10 +566,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithReplacingArgumentsInterceptorExample::createWithArgumentsToReplace(["stdClass" => new stdClass()]);
         $interceptedService = StubCallSavingService::create();
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callWithStdClassArgument', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithStdClassArgument', [], InMemoryReferenceSearchService::createWith([
             CallWithReplacingArgumentsInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithReplacingArgumentsInterceptorExample::class, "callWithReplacingArguments")]
         );
 
@@ -598,13 +581,13 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithUnorderedClassInvocationInterceptorExample::create();
         $interceptedService = StubCallSavingService::create();
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
+        $methodInvocation = MethodInvoker::createWith(
             $interceptedService, 'callWithStdClassAndIntArgument', [
             PayloadBuilder::create("some"),
             HeaderBuilder::create("number", "number")
-        ], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        ], InMemoryReferenceSearchService::createWith([
             CallWithUnorderedClassInvocationInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [
                 AroundInterceptorReference::createWithNoPointcut("someId", CallWithUnorderedClassInvocationInterceptorExample::class, "callWithUnorderedClassInvocation")
             ]
@@ -622,14 +605,14 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallMultipleUnorderedArgumentsInvocationInterceptorExample::create();
         $interceptedService = StubCallSavingService::create();
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
+        $methodInvocation = MethodInvoker::createWith(
             $interceptedService, 'callWithMultipleArguments', [
             PayloadBuilder::create("some"),
             HeaderBuilder::create("numbers", "numbers"),
             HeaderBuilder::create("strings", "strings")
-        ], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        ], InMemoryReferenceSearchService::createWith([
             CallMultipleUnorderedArgumentsInvocationInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [
                 AroundInterceptorReference::createWithNoPointcut("someId", CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
             ]
@@ -648,10 +631,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithPassThroughInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callWithReturn', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createWith([
             CallWithPassThroughInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithPassThroughInterceptorExample::class, "callWithPassThrough")]
         );
 
@@ -665,10 +648,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithInterceptedObjectInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callWithReturn', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createWith([
             CallWithInterceptedObjectInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithInterceptedObjectInterceptorExample::class, "callWithInterceptedObject")]
         );
 
@@ -682,10 +665,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithRequestMessageInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callWithReturn', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createWith([
             CallWithRequestMessageInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithRequestMessageInterceptorExample::class, "callWithRequestMessage")]
         );
 
@@ -700,10 +683,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithNullableStdClassInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callWithReturn', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createWith([
             CallWithNullableStdClassInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithNullableStdClassInterceptorExample::class, "callWithNullableStdClass")]
         );
 
@@ -715,10 +698,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallMultipleUnorderedArgumentsInvocationInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callWithReturn', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createWith([
             CallMultipleUnorderedArgumentsInvocationInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")]
         );
 
@@ -734,10 +717,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithAnnotationFromMethodInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'methodWithAnnotation', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'methodWithAnnotation', [], InMemoryReferenceSearchService::createWith([
             CallWithAnnotationFromMethodInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithAnnotationFromMethodInterceptorExample::class, "callWithMethodAnnotation")]
         );
 
@@ -749,10 +732,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithAnnotationFromClassInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'methodWithAnnotation', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'methodWithAnnotation', [], InMemoryReferenceSearchService::createWith([
             CallWithAnnotationFromClassInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithAnnotationFromClassInterceptorExample::class, "callWithMethodAnnotation")]
         );
 
@@ -763,8 +746,8 @@ class MethodInvokerTest extends MessagingTest
     public function test_calling_interceptor_with_endpoint_annotation()
     {
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'methodWithAnnotation', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty(),
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'methodWithAnnotation', [], InMemoryReferenceSearchService::createEmpty(), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithDirectObject("someId", CallWithStdClassInterceptorExample::create(), "callWithStdClass", 0, "")],
             [
                 new stdClass()
@@ -779,10 +762,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithReferenceSearchServiceExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'methodWithAnnotation', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'methodWithAnnotation', [], InMemoryReferenceSearchService::createWith([
             CallWithReferenceSearchServiceExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithReferenceSearchServiceExample::class, "call")]
         );
 
@@ -797,10 +780,10 @@ class MethodInvokerTest extends MessagingTest
 
         $this->expectException(InvalidArgumentException::class);
 
-        MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'callWithReturn', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        MethodInvoker::createWith(
+            $interceptedService, 'callWithReturn', [], InMemoryReferenceSearchService::createWith([
             CalculatingService::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CalculatingService::class, "sum")]
         );
     }
@@ -809,10 +792,10 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithStdClassInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
-            $interceptedService, 'methodWithAnnotation', [], InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+        $methodInvocation = MethodInvoker::createWith(
+            $interceptedService, 'methodWithAnnotation', [], InMemoryReferenceSearchService::createWith([
             CallWithStdClassInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithStdClassInterceptorExample::class, "callWithStdClass")],
             [new stdClass()]
         );
@@ -825,11 +808,11 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithStdClassInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
+        $methodInvocation = MethodInvoker::createWith(
             $interceptedService, 'callWithMessage', [],
-            InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+            InMemoryReferenceSearchService::createWith([
             CallWithStdClassInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithStdClassInterceptorExample::class, "callWithStdClass")],
             []
         );
@@ -844,11 +827,11 @@ class MethodInvokerTest extends MessagingTest
     {
         $interceptingService1 = CallWithStdClassInterceptorExample::create();
         $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWithInterceptorsWithChannel(
+        $methodInvocation = MethodInvoker::createWith(
             $interceptedService, 'callWithMessage', [],
-            InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+            InMemoryReferenceSearchService::createWith([
             CallWithStdClassInterceptorExample::class => $interceptingService1
-        ]),
+        ]), InMemoryChannelResolver::createEmpty(),
             [AroundInterceptorReference::createWithNoPointcut("someId", CallWithStdClassInterceptorExample::class, "callWithStdClassAndHeaders")],
             []
         );

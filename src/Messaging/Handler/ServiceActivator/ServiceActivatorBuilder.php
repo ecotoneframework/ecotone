@@ -213,27 +213,16 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         }
         $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($objectToInvoke, $this->methodName);
 
-        if ($this->canAroundInterceptorsReplaceArguments) {
-            $messageProcessor = MethodInvoker::createWithInterceptorsWithChannel(
-                $objectToInvoke,
-                $this->methodName,
-                $this->methodParameterConverterBuilders,
-                $channelResolver,
-                $referenceSearchService,
-                $this->orderedAroundInterceptors,
-                $this->getEndpointAnnotations()
-            );
-        }else {
-            $messageProcessor = MethodInvoker::createWithInterceptorsNotChangingCallArgumentsWithChannel(
-                $objectToInvoke,
-                $this->methodName,
-                $this->methodParameterConverterBuilders,
-                $channelResolver,
-                $referenceSearchService,
-                $this->orderedAroundInterceptors,
-                $this->getEndpointAnnotations()
-            );
-        }
+
+        $messageProcessor = MethodInvoker::createWith(
+            $objectToInvoke,
+            $this->methodName,
+            $this->methodParameterConverterBuilders,
+            $referenceSearchService,
+            $channelResolver,
+            $this->orderedAroundInterceptors,
+            $this->getEndpointAnnotations()
+        );
         if ($this->shouldWrapResultInMessage) {
             $messageProcessor = WrapWithMessageBuildProcessor::createWith(
                 $objectToInvoke,

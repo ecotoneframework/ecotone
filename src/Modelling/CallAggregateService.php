@@ -71,6 +71,7 @@ class CallAggregateService
     )
     {
         Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
+        Assert::allInstanceOfType($withFactoryRedirectOnFoundParameterConverters, ParameterConverterBuilder::class);
 
         $this->parameterConverterBuilders = $parameterConverterBuilders;
         $this->channelResolver = $channelResolver;
@@ -89,21 +90,23 @@ class CallAggregateService
                             : null;
 
         if ($aggregate && $this->withFactoryRedirectOnFoundMethodName) {
-            $methodInvoker = MethodInvoker::createWithBuiltParameterConverters(
+            $methodInvoker = MethodInvoker::createWith(
                 $aggregate,
                 $this->withFactoryRedirectOnFoundMethodName,
                 $this->withFactoryRedirectOnFoundParameterConverters,
                 $this->referenceSearchService,
+                $this->channelResolver,
                 $this->aroundMethodInterceptors,
                 [],
                 true
             );
         }else {
-            $methodInvoker = MethodInvoker::createWithBuiltParameterConverters(
+            $methodInvoker = MethodInvoker::createWith(
                 $aggregate ? $aggregate : $message->getHeaders()->get(AggregateMessage::CLASS_NAME),
                 $message->getHeaders()->get(AggregateMessage::METHOD_NAME),
                 $this->parameterConverterBuilders,
                 $this->referenceSearchService,
+                $this->channelResolver,
                 $this->aroundMethodInterceptors,
                 [],
                 true

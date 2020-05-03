@@ -156,12 +156,12 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::createWithDirectReference(
             new MessageFilter(
-                MethodInvoker::createWithInterceptorsWithChannel(
+                MethodInvoker::createWith(
                     $messageSelector,
                     $this->methodName,
                     $this->parameterConverters,
-                    $channelResolver,
                     $referenceSearchService,
+                    $channelResolver,
                     $this->orderedAroundInterceptors,
                     $this->getEndpointAnnotations()
                 ),

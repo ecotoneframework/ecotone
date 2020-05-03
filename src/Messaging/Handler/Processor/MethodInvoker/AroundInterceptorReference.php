@@ -150,6 +150,7 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     }
 
     /**
+     * @param self[] $interceptorsReferences
      * @return AroundMethodInterceptor[]
      */
     public static function createAroundInterceptorsWithChannel(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $interceptorsReferences): array

@@ -377,11 +377,6 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                 )
             );
 
-        $methodParameterConverters = [];
-        foreach ($this->methodParameterConverterBuilders as $parameterConverterBuilder) {
-            $methodParameterConverters[] = $parameterConverterBuilder->build($referenceSearchService);
-        }
-
         $withFactoryRedirectOnFoundParameterConverters = [];
         foreach ($this->withFactoryRedirectOnFoundParameterConverters as $redirectOnFoundParameterConverter) {
             $withFactoryRedirectOnFoundParameterConverters[] = $redirectOnFoundParameterConverter->build($referenceSearchService);
@@ -390,7 +385,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         $chainCqrsMessageHandler
             ->chain(
                 ServiceActivatorBuilder::createWithDirectReference(
-                    new CallAggregateService($channelResolver, $methodParameterConverters, AroundInterceptorReference::createAroundInterceptorsWithChannel($channelResolver, $referenceSearchService, $this->orderedAroundInterceptors), $referenceSearchService, $this->withFactoryRedirectOnFoundMethodName, $withFactoryRedirectOnFoundParameterConverters, $this->eventSourcedFactoryMethod, $this->isCommandHandler),
+                    new CallAggregateService($channelResolver, $this->methodParameterConverterBuilders, AroundInterceptorReference::createAroundInterceptorsWithChannel($channelResolver, $referenceSearchService, $this->orderedAroundInterceptors), $referenceSearchService, $this->withFactoryRedirectOnFoundMethodName, $withFactoryRedirectOnFoundParameterConverters, $this->eventSourcedFactoryMethod, $this->isCommandHandler),
                     "call"
                 )->withPassThroughMessageOnVoidInterface($this->isVoidMethod)
             );

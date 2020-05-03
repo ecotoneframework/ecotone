@@ -30,6 +30,10 @@ class ClassDefinition
      * @var string[]
      */
     private $publicMethodNames;
+    /**
+     * @var bool
+     */
+    private $isAnnotation;
 
     /**
      * ClassDefinition constructor.
@@ -37,10 +41,11 @@ class ClassDefinition
      * @param ClassPropertyDefinition[] $properties
      * @param object[] $annotations
      * @param string[] $publicMethodNames
+     * @param bool $isAnnotation
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function __construct(Type $classDescriptor, iterable $properties, iterable $annotations, array $publicMethodNames)
+    private function __construct(Type $classDescriptor, iterable $properties, iterable $annotations, array $publicMethodNames, bool $isAnnotation)
     {
         Assert::isTrue($classDescriptor->isClassOrInterface(), "Cannot create class definition from non class " . $classDescriptor->toString());
 
@@ -48,6 +53,7 @@ class ClassDefinition
         $this->properties = $properties;
         $this->classAnnotations = $annotations;
         $this->publicMethodNames = $publicMethodNames;
+        $this->isAnnotation = $isAnnotation;
     }
 
     /**
@@ -69,7 +75,8 @@ class ClassDefinition
             $classType,
             $typeResolver->getClassProperties($classType->toString()),
             $annotationParser->getAnnotationsForClass($classType->toString()),
-            array_map(function(\ReflectionMethod $method){return $method->getName();},$reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC))
+            array_map(function(\ReflectionMethod $method){return $method->getName();},$reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC)),
+            (bool)preg_match("/@Annotation$/m", $reflectionClass->getDocComment() ? $reflectionClass->getDocComment() : "")
         );
     }
 
@@ -92,7 +99,8 @@ class ClassDefinition
             $classType,
             $typeResolver->getClassProperties($classType->toString()),
             $annotationParser->getAnnotationsForClass($classType->toString()),
-            array_map(function(\ReflectionMethod $method){return $method->getName();},$reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC))
+            array_map(function(\ReflectionMethod $method){return $method->getName();},$reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC)),
+            (bool)preg_match("/@Annotation$/m", $reflectionClass->getDocComment() ? $reflectionClass->getDocComment() : "")
         );
     }
 
@@ -162,5 +170,21 @@ class ClassDefinition
     public function getClassAnnotations(): array
     {
         return $this->classAnnotations;
+    }
+
+    public function isAnnotation() : bool
+    {
+        return $this->isAnnotation;
+    }
+
+    public function hasClassAnnotation(Type $type) : bool
+    {
+        foreach ($this->getClassAnnotations() as $classAnnotation) {
+            if (TypeDescriptor::createFromVariable($classAnnotation)->equals($type)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -32,7 +32,7 @@ class LoggingHandlerBuilderTest extends MessagingTest
                             ->withOutputMessageChannel("outputChannel")
                             ->withMethodParameterConverters([
                                 MessageConverterBuilder::create("message"),
-                                InterceptorConverterBuilder::create(InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, "sendMessage"), [])
+                                InterceptorConverterBuilder::create("log", InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, "sendMessage"), [])
                             ])
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -64,7 +64,7 @@ class LoggingHandlerBuilderTest extends MessagingTest
             ->withOutputMessageChannel("outputChannel")
             ->withMethodParameterConverters([
                 MessageConverterBuilder::create("message"),
-                InterceptorConverterBuilder::create(InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, "sendMessage"), [])
+                InterceptorConverterBuilder::create("log", InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, "sendMessage"), [])
             ])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([

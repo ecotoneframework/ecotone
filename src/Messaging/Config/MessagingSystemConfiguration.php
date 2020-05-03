@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use Ecotone\Messaging\Annotation\PollableEndpoint;
+use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
@@ -290,7 +290,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry, ApplicationConfiguration $applicationConfiguration): void
     {
-        $pollableEndpointAnnotations = [new PollableEndpoint()];
+        $pollableEndpointAnnotations = [new AsynchronousRunningEndpoint()];
         foreach ($this->channelAdapters as $channelAdapter) {
             $channelAdapter->withEndpointAnnotations(array_merge($channelAdapter->getEndpointAnnotations(), $pollableEndpointAnnotations));
         }
@@ -316,7 +316,7 @@ final class MessagingSystemConfiguration implements Configuration
         $this->configureDefaultMessageChannels();
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             if ($this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()]->isPollable()) {
-                $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), [new PollableEndpoint()]));
+                $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), [new AsynchronousRunningEndpoint()]));
             }
         }
 

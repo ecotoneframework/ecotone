@@ -127,18 +127,6 @@ class ParameterConverterAnnotationFactory
             }
         }
 
-        if (!$methodParameterConverterBuilders) {
-            $methodParameterConverterBuilders = MethodInvoker::createDefaultMethodParameters($relatedClassInterface, $methodParameterConverterBuilders, false);
-        }
-
-        foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
-            if ($this->hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
-                continue;
-            }
-
-            $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
-        }
-
         return $methodParameterConverterBuilders;
     }
 

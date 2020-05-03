@@ -14,8 +14,6 @@ use Ecotone\Messaging\Support\ErrorMessage;
  */
 final class InterfaceParameter
 {
-    /** http://php.net/manual/en/language.types.intro.php */
-
     /**
      * @var string
      */
@@ -36,14 +34,19 @@ final class InterfaceParameter
      * @var bool
      */
     private $hasDefaultValue;
+    /**
+     * @var bool
+     */
+    private $isAnnotation;
 
-    private function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue)
+    private function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation)
     {
         $this->name = $name;
         $this->typeDescriptor = $typeDescriptor;
         $this->doesAllowNull = $doesAllowNull;
         $this->hasDefaultValue = $hasDefaultValue;
         $this->defaultValue = $defaultValue;
+        $this->isAnnotation = $isAnnotation;
     }
 
     /**
@@ -53,7 +56,7 @@ final class InterfaceParameter
      */
     public static function createNullable(string $name, Type $typeDescriptor) : self
     {
-        return new self($name, $typeDescriptor, true, false,null);
+        return new self($name, $typeDescriptor, true, false,null, false);
     }
 
     /**
@@ -63,20 +66,12 @@ final class InterfaceParameter
      */
     public static function createNotNullable(string $name, Type $typeDescriptor) : self
     {
-        return new self($name, $typeDescriptor, false, false, null);
+        return new self($name, $typeDescriptor, false, false, null, false);
     }
 
-    /**
-     * @param string $name
-     * @param Type $typeDescriptor
-     * @param bool $doesAllowNull
-     * @param bool $hasDefaultValue
-     * @param mixed $defaultValue
-     * @return self
-     */
-    public static function create(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue) : self
+    public static function create(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation) : self
     {
-        return new self($name, $typeDescriptor, $doesAllowNull, $hasDefaultValue, $defaultValue);
+        return new self($name, $typeDescriptor, $doesAllowNull, $hasDefaultValue, $defaultValue, $isAnnotation);
     }
 
     /**
@@ -153,6 +148,14 @@ final class InterfaceParameter
     public function isMessage() : bool
     {
         return $this->typeDescriptor->equals(TypeDescriptor::create(Message::class)) || $this->typeDescriptor->equals(TypeDescriptor::create(ErrorMessage::class));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAnnotation(): bool
+    {
+        return $this->isAnnotation;
     }
 
     /**

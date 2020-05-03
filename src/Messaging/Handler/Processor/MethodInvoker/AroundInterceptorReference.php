@@ -149,6 +149,9 @@ class AroundInterceptorReference implements InterceptorWithPointCut
         return $this->precedence;
     }
 
+    /**
+     * @return AroundMethodInterceptor[]
+     */
     public static function createAroundInterceptorsWithChannel(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $interceptorsReferences): array
     {
         $aroundMethodInterceptors = [];

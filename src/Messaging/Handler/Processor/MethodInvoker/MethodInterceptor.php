@@ -103,27 +103,15 @@ class MethodInterceptor implements InterceptorWithPointCut
         $interceptedMessageHandler = clone $clone->messageHandler;
 
         if ($interceptedMessageHandler instanceof MessageHandlerBuilderWithParameterConverters) {
-            $methodParameterConverterBuilders = $interceptedMessageHandler->getParameterConverters();
-            $methodParameterConverterBuilders = MethodInvoker::createDefaultMethodParameters($this->interceptorInterfaceToCall, $methodParameterConverterBuilders, false);
-            $methodParameterConverterBuilders =
-                array_merge(
-                    [InterceptorConverterBuilder::create($interceptedInterface, $endpointAnnotations)],
-                    MethodInvoker::createDefaultMethodParameters(
-                        $this->interceptorInterfaceToCall,
-                        $methodParameterConverterBuilders,
-                        false
-                    )
-                );
-
-            foreach ($this->interceptorInterfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-                if (MethodInvoker::hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
-                    continue;
-                }
-
-                $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
-            }
-
-            $interceptedMessageHandler->withMethodParameterConverters($methodParameterConverterBuilders);
+            $interceptedMessageHandler->withMethodParameterConverters(
+                MethodInvoker::createDefaultMethodParameters(
+                    $this->interceptorInterfaceToCall,
+                    $interceptedMessageHandler->getParameterConverters(),
+                    false,
+                    $endpointAnnotations,
+                    $interceptedInterface
+                )
+            );
         }
         $clone->messageHandler = $interceptedMessageHandler;
 

@@ -23,7 +23,7 @@ class CallAggregateService
     /**
      * @var array|ParameterConverterBuilder[]
      */
-    private $messageToParameterConverters;
+    private $parameterConverterBuilders;
     /**
      * @var ChannelResolver
      */
@@ -57,7 +57,7 @@ class CallAggregateService
      * ServiceCallToAggregateAdapter constructor.
      *
      * @param ChannelResolver $channelResolver
-     * @param array|ParameterConverterBuilder[] $messageToParameterConverters
+     * @param array|ParameterConverterBuilder[] $parameterConverterBuilders
      * @param AroundMethodInterceptor[] $aroundMethodInterceptors
      * @param ReferenceSearchService $referenceSearchService
      * @param string $withFactoryRedirectOnFoundMethodName
@@ -66,13 +66,13 @@ class CallAggregateService
      * @param bool $isCommand
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __construct(ChannelResolver $channelResolver, array $messageToParameterConverters, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService,
+    public function __construct(ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService,
                                 string $withFactoryRedirectOnFoundMethodName, array $withFactoryRedirectOnFoundParameterConverters, ?string $eventSourcedFactoryMethod, bool $isCommand
     )
     {
-        Assert::allInstanceOfType($messageToParameterConverters, ParameterConverter::class);
+        Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
 
-        $this->messageToParameterConverters = $messageToParameterConverters;
+        $this->parameterConverterBuilders = $parameterConverterBuilders;
         $this->channelResolver = $channelResolver;
         $this->referenceSearchService = $referenceSearchService;
         $this->aroundMethodInterceptors = $aroundMethodInterceptors;
@@ -102,7 +102,7 @@ class CallAggregateService
             $methodInvoker = MethodInvoker::createWithBuiltParameterConverters(
                 $aggregate ? $aggregate : $message->getHeaders()->get(AggregateMessage::CLASS_NAME),
                 $message->getHeaders()->get(AggregateMessage::METHOD_NAME),
-                $this->messageToParameterConverters,
+                $this->parameterConverterBuilders,
                 $this->referenceSearchService,
                 $this->aroundMethodInterceptors,
                 [],

@@ -24,15 +24,21 @@ class InterceptorConverter implements ParameterConverter
      * @var object[]
      */
     private $endpointAnnotations;
+    /**
+     * @var string
+     */
+    private $parameterName;
 
     /**
      * AnnotationInterceptorConverter constructor.
      *
+     * @param string $parameterName
      * @param InterfaceToCall $interceptedInterface
      * @param object[] $endpointAnnotations
      */
-    public function __construct(InterfaceToCall $interceptedInterface, array $endpointAnnotations)
+    public function __construct(string $parameterName, InterfaceToCall $interceptedInterface, array $endpointAnnotations)
     {
+        $this->parameterName = $parameterName;
         $this->interceptedInterface = $interceptedInterface;
         $this->endpointAnnotations = $endpointAnnotations;
     }
@@ -64,9 +70,6 @@ class InterceptorConverter implements ParameterConverter
      */
     public function isHandling(InterfaceParameter $parameter): bool
     {
-        return
-            $parameter->getTypeDescriptor()->equals(TypeDescriptor::create(InterfaceToCall::class))
-            || $this->interceptedInterface->hasMethodAnnotation($parameter->getTypeDescriptor())
-            || $this->interceptedInterface->hasClassAnnotation($parameter->getTypeDescriptor());
+        return $this->parameterName === $parameter->getName();
     }
 }

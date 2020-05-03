@@ -2,6 +2,7 @@
 
 namespace Ecotone\Messaging\Handler;
 
+use Doctrine\Common\Annotations\Annotation;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -14,7 +15,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 class TypeResolver
 {
     private const COLLECTION_TYPE_REGEX = "/[a-zA-Z0-9]*<([^<]*)>/";
-    private const CODE_USE_STATEMENTS_REGEX = '/use[\s]*([^;]*)[\s]*;/';
+    private const CODE_USE_STATEMENTS_REGEX = '/^[^\S\r\na-zA-Z0-9]*use[\s]*([^;\n]*)[\s]*;$/m';
 
     private const METHOD_DOC_BLOCK_TYPE_HINT_REGEX = '~@param[\s]*([^\n\$\s]*)[\s]*\$([a-zA-Z0-9]*)~';
     private const METHOD_RETURN_TYPE_HINT_REGEX = '~@return[\s]*([^\n\s]*)~';
@@ -68,15 +69,23 @@ class TypeResolver
         $reflectionMethod = $analyzedClass->getMethod($methodName);
         $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($analyzedClass, $analyzedClass, $methodName);
         foreach ($reflectionMethod->getParameters() as $parameter) {
+            $parameterType = TypeDescriptor::createWithDocBlock(
+                $parameter->getType() ? $this->expandParameterTypeHint($parameter->getType()->getName(), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName)) : null,
+                array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
+            );
+            $isAnnotation = false;
+            if ($parameterType->isClassOrInterface() && !$parameterType->isCompoundObjectType() && !$parameterType->isUnionType()) {
+                $classDefinition = ClassDefinition::createUsingAnnotationParser($parameterType, $this->getAnnotationParser($parameterType));
+                $isAnnotation = $classDefinition->isAnnotation();
+            }
+
             $parameters[] = InterfaceParameter::create(
                 $parameter->getName(),
-                TypeDescriptor::createWithDocBlock(
-                    $parameter->getType() ? $this->expandParameterTypeHint($parameter->getType()->getName(), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName)) : null,
-                    array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
-                ),
+                $parameterType,
                 $parameter->getType() ? $parameter->getType()->allowsNull() : true,
                 $parameter->isDefaultValueAvailable(),
-                $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null
+                $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null,
+                $isAnnotation
             );
         }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Modelling\LazyEventBus;
 
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
-use Ecotone\Messaging\Annotation\PollableEndpoint;
+use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
@@ -62,7 +62,7 @@ class LazyEventBusConfiguration implements AnnotationModule
                  new LazyEventBusAroundInterceptorBuilder($inMemoryEventStore),
                     "publish",
                     Precedence::LAZY_EVENT_PUBLICATION_PRECEDENCE,
-                    "@(" . LazyEventPublishing::class . ")" . "||" . "@(" . PollableEndpoint::class . ")"
+                    "@(" . LazyEventPublishing::class . ")" . "||" . "@(" . AsynchronousRunningEndpoint::class . ")"
                 )
             );
     }

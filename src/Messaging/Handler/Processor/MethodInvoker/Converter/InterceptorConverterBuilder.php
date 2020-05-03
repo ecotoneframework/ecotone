@@ -24,27 +24,34 @@ class InterceptorConverterBuilder implements ParameterConverterBuilder
      * @var array|object[]
      */
     private $endpointAnnotations;
+    /**
+     * @var string
+     */
+    private $parameterName;
 
     /**
      * AnnotationInterceptorConverterBuilder constructor.
      *
+     * @param string $parameterName
      * @param InterfaceToCall $interceptedInterface
      * @param object[] $endpointAnnotations
      */
-    private function __construct(InterfaceToCall $interceptedInterface, array $endpointAnnotations)
+    private function __construct(string $parameterName, InterfaceToCall $interceptedInterface, array $endpointAnnotations)
     {
+        $this->parameterName = $parameterName;
         $this->interceptedInterface = $interceptedInterface;
         $this->endpointAnnotations = $endpointAnnotations;
     }
 
     /**
+     * @param string $parameterName
      * @param InterfaceToCall $interfaceToCall
      * @param object[] $endpointAnnotations
      * @return InterceptorConverterBuilder
      */
-    public static function create(InterfaceToCall $interfaceToCall, array $endpointAnnotations) : self
+    public static function create(string $parameterName, InterfaceToCall $interfaceToCall, array $endpointAnnotations) : self
     {
-        return new self($interfaceToCall, $endpointAnnotations);
+        return new self($parameterName, $interfaceToCall, $endpointAnnotations);
     }
 
     /**
@@ -52,10 +59,7 @@ class InterceptorConverterBuilder implements ParameterConverterBuilder
      */
     public function isHandling(InterfaceParameter $parameter): bool
     {
-        return
-            $parameter->canBePassedIn(TypeDescriptor::create(InterfaceToCall::class))
-            || $this->interceptedInterface->hasMethodAnnotation($parameter->getTypeDescriptor())
-            || $this->interceptedInterface->hasClassAnnotation($parameter->getTypeDescriptor());
+        return $this->parameterName = $parameter->getName();
     }
 
     /**
@@ -71,6 +75,6 @@ class InterceptorConverterBuilder implements ParameterConverterBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
     {
-        return new InterceptorConverter($this->interceptedInterface, $this->endpointAnnotations);
+        return new InterceptorConverter($this->parameterName, $this->interceptedInterface, $this->endpointAnnotations);
     }
 }

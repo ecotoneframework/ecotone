@@ -37,37 +37,10 @@ class InterceptorConverterBuilderTest extends TestCase
      * @throws MessagingException
      * @throws InvalidArgumentException
      */
-    public function test_retrieving_intercepted_interface_to_call()
-    {
-        $interfaceToCall = InterfaceToCall::create(ServiceWithoutReturnValue::class, "callWithInterfaceToCall");
-        $converter = InterceptorConverterBuilder::create($interfaceToCall, []);
-        $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
-
-        $interfaceParameter = InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock(InterfaceToCall::class, ""));
-
-        $this->assertTrue($converter->isHandling($interfaceParameter));
-        $this->assertEquals(
-            $interfaceToCall,
-            $converter->getArgumentFrom(
-                InterfaceToCall::create(CallableService::class, "wasCalled"),
-                $interfaceParameter,
-                MessageBuilder::withPayload("a")->setHeader("token", 123)->build(),
-                []
-            )
-        );
-    }
-
-    /**
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     * @throws InvalidArgumentException
-     */
     public function test_retrieving_intercepted_method_annotation()
     {
         $interfaceToCall = InterfaceToCall::create(TransactionalInterceptorExample::class, "doAction");
-        $converter = InterceptorConverterBuilder::create($interfaceToCall, []);
+        $converter = InterceptorConverterBuilder::create("some", $interfaceToCall, []);
         $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
 
         $parameter = InterfaceParameter::createNotNullable("some", TypeDescriptor::create(Transactional::class));
@@ -95,7 +68,7 @@ class InterceptorConverterBuilderTest extends TestCase
     public function test_retrieving_intercepted_class_annotation()
     {
         $interfaceToCall = InterfaceToCall::create(CallWithUnorderedClassInvocationInterceptorExample::class, "callWithUnorderedClassInvocation");
-        $converter = InterceptorConverterBuilder::create($interfaceToCall, []);
+        $converter = InterceptorConverterBuilder::create("some", $interfaceToCall, []);
         $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
 
         $parameter = InterfaceParameter::createNotNullable("some", TypeDescriptor::create(MethodInterceptor::class));
@@ -125,7 +98,7 @@ class InterceptorConverterBuilderTest extends TestCase
         $interfaceToCall = InterfaceToCall::create(TransactionalInterceptorExample::class, "doAction");
 
         $endpointAnnotation = Transactional::createWith(["reference10000"]);
-        $converter = InterceptorConverterBuilder::create($interfaceToCall, [
+        $converter = InterceptorConverterBuilder::create("some", $interfaceToCall, [
             $endpointAnnotation
         ]);
         $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
@@ -154,7 +127,7 @@ class InterceptorConverterBuilderTest extends TestCase
     public function test_throwing_exception_if_no_annotation_found()
     {
         $interfaceToCall = InterfaceToCall::create(ServiceWithoutReturnValue::class, "callWithInterfaceToCall");
-        $converter = InterceptorConverterBuilder::create($interfaceToCall, []);
+        $converter = InterceptorConverterBuilder::create("some", $interfaceToCall, []);
         $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
 
         $interfaceParameter = InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock(Transactional::class, ""));

@@ -6,7 +6,6 @@ namespace Ecotone\Messaging\Annotation;
 /**
  * @Annotation
  */
-class PollableEndpoint
+class AsynchronousRunningEndpoint
 {
-
 }

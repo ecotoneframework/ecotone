@@ -159,7 +159,7 @@ class Order implements VersionAggregate
     }
 
     /**
-     * @QueryHandler(inputChannelName="getVersion", ignoreMessage=true)
+     * @QueryHandler(inputChannelName="getVersion", ignorePayload=true)
      */
     public function getVersion(): ?int
     {

@@ -13,7 +13,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 class AggregateQueryHandlerWithInputChannelAndIgnoreMessage
 {
     /**
-     * @QueryHandler(inputChannelName="execute", endpointId="queryHandler", ignoreMessage=true)
+     * @QueryHandler(inputChannelName="execute", endpointId="queryHandler", ignorePayload=true)
      */
     public function execute(\stdClass $class) : int
     {

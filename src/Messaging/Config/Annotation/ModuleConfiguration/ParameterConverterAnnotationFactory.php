@@ -100,48 +100,21 @@ class ParameterConverterAnnotationFactory
      * @param array $methodParameterConverterBuilders
      * @param AnnotationRegistration $registration
      *
-     * @param bool $ignoreMessage
+     * @param bool $ignorePayload
      * @return array
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotationRegistration $registration, bool $ignoreMessage): array
+    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotationRegistration $registration, bool $ignorePayload): array
     {
-        $methodParameterConverterBuilders = $this->createParameterConverters($relatedClassInterface, $methodParameterConverterBuilders);
-
-        if ($ignoreMessage) {
-            if ($relatedClassInterface->hasNoParameters()) {
-                return [];
-            }
-
-            if ($relatedClassInterface->getFirstParameter()->getTypeDescriptor()->isNonCollectionArray() && !self::hasParameterConverterFor($methodParameterConverterBuilders, $relatedClassInterface->getFirstParameter())) {
-                $methodParameterConverterBuilders[] = AllHeadersBuilder::createWith($relatedClassInterface->getFirstParameterName());
-            }
-
-            foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
-                if ($this->hasParameterConverterFor($methodParameterConverterBuilders, $interfaceParameter)) {
-                    continue;
-                }
-
-                $methodParameterConverterBuilders[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
-            }
-        }
-
-        return $methodParameterConverterBuilders;
-    }
-
-    /**
-     * @param $methodParameterConverterBuilders
-     * @param InterfaceParameter $interfaceParameter
-     * @return bool
-     */
-    private function hasParameterConverterFor($methodParameterConverterBuilders, InterfaceParameter $interfaceParameter): bool
-    {
-        foreach ($methodParameterConverterBuilders as $methodParameterConverterBuilder) {
-            if ($methodParameterConverterBuilder->isHandling($interfaceParameter)) {
-                return true;
-            }
-        }
-        return false;
+        return
+            MethodInvoker::createDefaultMethodParameters(
+                $relatedClassInterface,
+                $this->createParameterConverters($relatedClassInterface, $methodParameterConverterBuilders),
+                false,
+                [],
+                null,
+                $ignorePayload
+            );
     }
 }

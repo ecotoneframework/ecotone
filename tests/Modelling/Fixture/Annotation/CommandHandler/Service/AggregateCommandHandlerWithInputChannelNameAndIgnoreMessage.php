@@ -15,7 +15,7 @@ class AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage
 {
     /**
      * @return int
-     * @CommandHandler(inputChannelName="execute", endpointId="commandHandler", ignoreMessage=true)
+     * @CommandHandler(inputChannelName="execute", endpointId="commandHandler", ignorePayload=true)
      */
     public function execute(\stdClass $class) : int
     {

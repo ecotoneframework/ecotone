@@ -211,7 +211,7 @@ class ModellingHandlerModule implements AnnotationModule
 
             $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
             $parameterConverterAnnotations = $annotation->parameterConverters;
-            $parameterConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignoreMessage);
+            $parameterConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignorePayload);
 
             $handledMessageClassName = self::getClassChannelFor($registration);
             $configuration->registerMessageHandler(
@@ -304,7 +304,7 @@ class ModellingHandlerModule implements AnnotationModule
             }
         }
 
-        if ($registration->getAnnotationForMethod()->ignoreMessage || $interfaceToCall->hasNoParameters()) {
+        if ($registration->getAnnotationForMethod()->ignorePayload || $interfaceToCall->hasNoParameters()) {
             return null;
         }
 
@@ -325,14 +325,14 @@ class ModellingHandlerModule implements AnnotationModule
 
         $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
         $parameterConverterAnnotations = $annotation->parameterConverters;
-        $parameterConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignoreMessage);
+        $parameterConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignorePayload);
 
         $handledMessageClassName = self::getMessageClassFor($registration);
 
         $redirectMethodConverters = [];
         $redirectOnFoundMethod = false;
         if ($annotation->redirectToOnAlreadyExists) {
-            $redirectMethodConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences(InterfaceToCall::create($registration->getClassName(), $annotation->redirectToOnAlreadyExists), [], $registration, $annotation->ignoreMessage);
+            $redirectMethodConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences(InterfaceToCall::create($registration->getClassName(), $annotation->redirectToOnAlreadyExists), [], $registration, $annotation->ignorePayload);
             $redirectOnFoundMethod = $annotation->redirectToOnAlreadyExists;
         }
 
@@ -380,7 +380,7 @@ class ModellingHandlerModule implements AnnotationModule
 
         $relatedClassInterface = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
         $parameterConverterAnnotations = $annotation->parameterConverters;
-        $parameterConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignoreMessage);
+        $parameterConverters = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignorePayload);
 
         $messageHandlerBuilder = ServiceActivatorBuilder::create($registration->getReferenceName(), $registration->getMethodName())
             ->withInputChannelName($inputChannelName)

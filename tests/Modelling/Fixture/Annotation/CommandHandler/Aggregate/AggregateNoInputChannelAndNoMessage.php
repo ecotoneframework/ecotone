@@ -24,7 +24,7 @@ class AggregateNoInputChannelAndNoMessage
 
     /**
      * @CommandHandler(
-     *     ignoreMessage=true
+     *     ignorePayload=true
      * )
      */
     public function doAction() : void

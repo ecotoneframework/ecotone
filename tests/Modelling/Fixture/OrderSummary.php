@@ -11,7 +11,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 class OrderSummary
 {
     /**
-     * @QueryHandler(ignoreMessage=true)
+     * @QueryHandler(ignorePayload=true)
      */
     public function getOrders(GetOrdersQuery $query) : array
     {

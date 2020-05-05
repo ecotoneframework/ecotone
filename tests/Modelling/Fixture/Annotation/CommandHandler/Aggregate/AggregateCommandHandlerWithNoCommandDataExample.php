@@ -26,7 +26,7 @@ class AggregateCommandHandlerWithNoCommandDataExample
      * @CommandHandler(
      *     endpointId="command-id",
      *     inputChannelName="doActionChannel",
-     *     ignoreMessage=true
+     *     ignorePayload=true
      * )
      * @param \stdClass $class
      */

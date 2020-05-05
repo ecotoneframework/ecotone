@@ -19,12 +19,12 @@ class QueryHandler extends InputOutputEndpointAnnotation
      */
     public $parameterConverters = [];
     /**
-     * if endpoint is not interested in message, set to true.
+     * if endpoint is not interested in message's payload, set to true.
      * inputChannelName must be defined to connect with external channels
      *
      * @var string
      */
-    public $ignoreMessage = false;
+    public $ignorePayload = false;
     /**
      * Does the handler allow for same command class name
      *

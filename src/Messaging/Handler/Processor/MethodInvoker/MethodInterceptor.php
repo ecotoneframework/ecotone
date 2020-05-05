@@ -109,7 +109,8 @@ class MethodInterceptor implements InterceptorWithPointCut
                     $interceptedMessageHandler->getParameterConverters(),
                     false,
                     $endpointAnnotations,
-                    $interceptedInterface
+                    $interceptedInterface,
+                    false
                 )
             );
         }

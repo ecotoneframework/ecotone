@@ -116,10 +116,8 @@ class ModellingHandlerModuleTest extends TestCase
     public function test_registering_aggregate_command_handler()
     {
         $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateCommandHandlerExample::class, "doAction", DoStuffCommand::class)
+            ->withMethodParameterConverters([PayloadBuilder::create("command")])
             ->withEndpointId('command-id')
-            ->withMethodParameterConverters([
-                PayloadBuilder::create("command")
-            ])
             ->withInputChannelName("command-id.target");
 
         $expectedConfiguration = $this->createMessagingSystemConfiguration()

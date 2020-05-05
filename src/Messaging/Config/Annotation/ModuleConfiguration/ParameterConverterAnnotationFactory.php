@@ -111,7 +111,6 @@ class ParameterConverterAnnotationFactory
             MethodInvoker::createDefaultMethodParameters(
                 $relatedClassInterface,
                 $this->createParameterConverters($relatedClassInterface, $methodParameterConverterBuilders),
-                false,
                 [],
                 null,
                 $ignorePayload

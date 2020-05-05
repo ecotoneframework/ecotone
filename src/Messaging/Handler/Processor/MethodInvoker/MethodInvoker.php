@@ -124,7 +124,7 @@ final class MethodInvoker implements MessageProcessor
     {
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
         $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
-        $methodParametersConverterBuilders = self::createDefaultMethodParameters($interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $methodParametersConverterBuilders, false, $endpointAnnotations, null, false);
+        $methodParametersConverterBuilders = self::createDefaultMethodParameters($interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $methodParametersConverterBuilders, $endpointAnnotations, null, false);
         $methodParameterConverters = [];
         foreach ($methodParametersConverterBuilders as $methodParameter) {
             $methodParameterConverters[] = $methodParameter->build($referenceSearchService);
@@ -152,7 +152,7 @@ final class MethodInvoker implements MessageProcessor
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public static function createDefaultMethodParameters(InterfaceToCall $interfaceToCall, array $passedMethodParameterConverters, bool $shouldBeBuild, array $endpointAnnotations, ?InterfaceToCall $interceptedInterface, bool $ignorePayload): array
+    public static function createDefaultMethodParameters(InterfaceToCall $interfaceToCall, array $passedMethodParameterConverters, array $endpointAnnotations, ?InterfaceToCall $interceptedInterface, bool $ignorePayload): array
     {
         $passedArgumentsCount = count($passedMethodParameterConverters);
         $requiredArgumentsCount = count($interfaceToCall->getInterfaceParameters());
@@ -169,11 +169,11 @@ final class MethodInvoker implements MessageProcessor
 
             if ($missingParametersAmount >= 2 && $interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()) {
                 if (!$ignorePayload && !self::hasPayloadConverter($passedMethodParameterConverters)) {
-                    $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild);
+                    $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter());
                 }
-                $passedMethodParameterConverters[] = $shouldBeBuild ? new AllHeadersConverter($interfaceToCall->getSecondParameter()->getName()) : AllHeadersBuilder::createWith($interfaceToCall->getSecondParameter()->getName());
+                $passedMethodParameterConverters[] = AllHeadersBuilder::createWith($interfaceToCall->getSecondParameter()->getName());
             } elseif (!$ignorePayload && !self::hasPayloadConverter($passedMethodParameterConverters)) {
-                $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter(), $shouldBeBuild);
+                $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter());
             }
 
             foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
@@ -203,17 +203,11 @@ final class MethodInvoker implements MessageProcessor
 
     /**
      * @param InterfaceParameter $parameter
-     *
-     * @param bool $shouldBeBuild
      * @return ParameterConverter|ParameterConverterBuilder
      */
-    private static function createPayloadOrMessageParameter(InterfaceParameter $parameter, bool $shouldBeBuild)
+    private static function createPayloadOrMessageParameter(InterfaceParameter $parameter)
     {
-        if ($parameter->isMessage()) {
-            return $shouldBeBuild ? MessageConverter::create($parameter->getName()) : MessageConverterBuilder::create($parameter->getName());
-        } else {
-            return $shouldBeBuild ? PayloadConverter::create($parameter->getName()) : PayloadBuilder::create($parameter->getName());
-        }
+        return $parameter->isMessage() ? MessageConverterBuilder::create($parameter->getName()) : PayloadBuilder::create($parameter->getName());
     }
 
     /**
@@ -443,8 +437,6 @@ final class MethodInvoker implements MessageProcessor
         }
 
         $parametersForObjectToInvoke = $interfaceToCall->getInterfaceParameters();
-
-        $methodParameterConverters = self::createDefaultMethodParameters($interfaceToCall, $methodParameterConverters, true, [], null, false);
 
         $orderedMethodArguments = [];
         foreach ($parametersForObjectToInvoke as $invokeParameter) {

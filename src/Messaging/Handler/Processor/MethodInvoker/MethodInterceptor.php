@@ -107,7 +107,6 @@ class MethodInterceptor implements InterceptorWithPointCut
                 MethodInvoker::createDefaultMethodParameters(
                     $this->interceptorInterfaceToCall,
                     $interceptedMessageHandler->getParameterConverters(),
-                    false,
                     $endpointAnnotations,
                     $interceptedInterface,
                     false

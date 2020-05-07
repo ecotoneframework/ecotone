@@ -3,9 +3,9 @@
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders;
 
-use Ecotone\Messaging\Annotation\Endpoint\DeliveryDelay;
-use Ecotone\Messaging\Annotation\Endpoint\Priority;
-use Ecotone\Messaging\Annotation\Endpoint\TimeToLive;
+use Ecotone\Messaging\Annotation\Endpoint\WithDelay;
+use Ecotone\Messaging\Annotation\Endpoint\WithPriority;
+use Ecotone\Messaging\Annotation\Endpoint\WithTimeToLive;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
@@ -50,7 +50,7 @@ class EndpointHeadersInterceptorConfiguration extends NoExternalConfigurationMod
                 $interfaceToCall,
                 ServiceActivatorBuilder::createWithDirectReference(new EndpointHeadersInterceptor(), "addMetadata"),
                 Precedence::ENDPOINT_HEADERS_PRECEDENCE,
-                "@(" . TimeToLive::class . ")||(@" . Priority::class . ")||@(" . DeliveryDelay::class . ")"
+                "@(" . WithTimeToLive::class . ")||(@" . WithPriority::class . ")||@(" . WithDelay::class . ")"
             )
         );
         $configuration->registerRelatedInterfaces([$interfaceToCall]);

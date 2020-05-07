@@ -6,20 +6,20 @@ namespace Ecotone\Messaging\Annotation\Endpoint;
 /**
  * @Annotation
  */
-class DeliveryDelay
+class WithPriority
 {
     /**
      * @var int
      */
-    private $time;
+    private $number;
 
     public function __construct(array $values)
     {
-        $this->time = $values['value'];
+        $this->number = $values['value'];
     }
 
-    public function getTime(): int
+    public function getNumber(): int
     {
-        return $this->time;
+        return $this->number;
     }
 }

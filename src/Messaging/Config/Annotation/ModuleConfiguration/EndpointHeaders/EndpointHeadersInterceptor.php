@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders;
 
-use Ecotone\Messaging\Annotation\Endpoint\DeliveryDelay;
-use Ecotone\Messaging\Annotation\Endpoint\Priority;
-use Ecotone\Messaging\Annotation\Endpoint\TimeToLive;
+use Ecotone\Messaging\Annotation\Endpoint\WithDelay;
+use Ecotone\Messaging\Annotation\Endpoint\WithPriority;
+use Ecotone\Messaging\Annotation\Endpoint\WithTimeToLive;
 use Ecotone\Messaging\MessageHeaders;
 
 /**
@@ -15,7 +15,7 @@ use Ecotone\Messaging\MessageHeaders;
  */
 class EndpointHeadersInterceptor
 {
-    public function addMetadata(?DeliveryDelay $deliveryDelay, ?TimeToLive $timeToLive, ?Priority $priority) : array
+    public function addMetadata(?WithDelay $deliveryDelay, ?WithTimeToLive $timeToLive, ?WithPriority $priority) : array
     {
         $metadata = [];
 

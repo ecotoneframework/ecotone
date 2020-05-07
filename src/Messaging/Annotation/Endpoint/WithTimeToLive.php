@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Annotation\Endpoint;
 /**
  * @Annotation
  */
-class TimeToLive
+class WithTimeToLive
 {
     /**
      * @var int

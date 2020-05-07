@@ -14,8 +14,7 @@ class OrderService
     /**
      * @ServiceActivator(
      *     endpointId="orderService",
-     *     inputChannelName=ErrorConfigurationContext::INPUT_CHANNEL,
-     *     poller=@Poller(errorChannelName=ErrorConfigurationContext::ERROR_CHANNEL, executionTimeLimitInMilliseconds=1)
+     *     inputChannelName=ErrorConfigurationContext::INPUT_CHANNEL
      * )
      */
     public function order(string $orderName) : void

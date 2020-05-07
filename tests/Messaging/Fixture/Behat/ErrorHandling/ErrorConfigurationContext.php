@@ -7,6 +7,7 @@ use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Annotation\Extension;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\ErrorHandler\ErrorHandlerConfiguration;
 use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 
@@ -38,5 +39,15 @@ class ErrorConfigurationContext
                 ->maxRetryAttempts(2),
             self::DEAD_LETTER_CHANNEL
         );
+    }
+
+    /**
+     * @Extension()
+     */
+    public function pollingConfiguration()
+    {
+        return PollingMetadata::create("orderService")
+                ->setExecutionTimeLimitInMilliseconds(1)
+                ->setErrorChannelName(ErrorConfigurationContext::ERROR_CHANNEL);
     }
 }

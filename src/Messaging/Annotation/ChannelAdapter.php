@@ -10,8 +10,4 @@ namespace Ecotone\Messaging\Annotation;
  */
 abstract class ChannelAdapter extends IdentifiedAnnotation
 {
-    /**
-     * @var Poller|null
-     */
-    public $poller;
 }

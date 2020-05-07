@@ -22,6 +22,10 @@ interface Precedence
      */
     const ERROR_CHANNEL_PRECEDENCE = -1000000;
     /**
+     * Endpoint headers like delivery delay, priority, time to live
+     */
+    const ENDPOINT_HEADERS_PRECEDENCE = -3000;
+    /**
      * Database transactions are started at this precedence
      */
     const DATABASE_TRANSACTION_PRECEDENCE = -2000;

@@ -355,6 +355,11 @@ final class MessagingSystemConfiguration implements Configuration
                 throw ConfigurationException::create("Consumer with id {$requiredConsumerEndpointId} has no configuration defined. Define consumer configuration and retry.");
             }
         }
+        foreach ($this->pollingMetadata as $pollingMetadata) {
+            if (!$this->hasMessageHandlerWithName($pollingMetadata) && !$this->hasChannelAdapterWithName($pollingMetadata)) {
+                throw ConfigurationException::create("Trying to register polling meta data for non existing endpoint {$pollingMetadata->getEndpointId()}. Verify if there is any asynchronous endpoint with such name.");
+            }
+        }
     }
 
     /**
@@ -1236,5 +1241,27 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $this->pollingMetadata[$endpointId] = $pollingMetadata;
+    }
+
+    private function hasChannelAdapterWithName(PollingMetadata $pollingMetadata) : bool
+    {
+        foreach ($this->channelAdapters as $channelAdapter) {
+            if ($channelAdapter->getEndpointId() == $pollingMetadata->getEndpointId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasMessageHandlerWithName(PollingMetadata $pollingMetadata): bool
+    {
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            if ($messageHandlerBuilder->getEndpointId() == $pollingMetadata->getEndpointId()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

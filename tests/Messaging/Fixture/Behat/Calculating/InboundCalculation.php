@@ -20,10 +20,7 @@ class InboundCalculation
      * @return int
      * @Scheduled(
      *     endpointId="inboundCalculator",
-     *     requestChannelName="calculateForInbound",
-     *     poller=@Poller(
-     *          handledMessageLimit=1
-     *     )
+     *     requestChannelName="calculateForInbound"
      * )
      * @BeforeMultiplyCalculation(amount=3)
      * @AroundSumCalculation(amount=2)

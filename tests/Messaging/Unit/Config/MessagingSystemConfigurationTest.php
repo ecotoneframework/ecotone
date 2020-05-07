@@ -297,6 +297,15 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertEquals(2, $calculatingService->getLastResult());
     }
 
+    public function test_throwing_exception_if_register_polling_metadata_for_non_existing_endpoint()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerPollingMetadata(PollingMetadata::create("some"))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+    }
+
     public function test_registering_presend_interceptor_wish_async_channel()
     {
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())

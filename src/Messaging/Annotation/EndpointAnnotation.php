@@ -15,8 +15,4 @@ abstract class EndpointAnnotation extends IdentifiedAnnotation
      * @Required()
      */
     public $inputChannelName;
-    /**
-     * @var Poller|null
-     */
-    public $poller;
 }

@@ -53,6 +53,7 @@ class EndpointHeadersInterceptorConfiguration extends NoExternalConfigurationMod
                 "@(" . TimeToLive::class . ")||(@" . Priority::class . ")||@(" . DeliveryDelay::class . ")"
             )
         );
+        $configuration->registerRelatedInterfaces([$interfaceToCall]);
     }
 
     /**

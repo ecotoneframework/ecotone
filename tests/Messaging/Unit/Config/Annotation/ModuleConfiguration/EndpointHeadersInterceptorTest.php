@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\Messaging\Annotation\Endpoint\WithDelay;
-use Ecotone\Messaging\Annotation\Endpoint\WithPriority;
+use Ecotone\Messaging\Annotation\Endpoint\Delayed;
+use Ecotone\Messaging\Annotation\Endpoint\Prioritized;
 use Ecotone\Messaging\Annotation\Endpoint\WithTimeToLive;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders\EndpointHeadersInterceptor;
 use Ecotone\Messaging\MessageHeaders;
@@ -20,7 +20,7 @@ class EndpointHeadersInterceptorTest extends TestCase
     public function test_adding_delivery_delay()
     {
         $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new WithDelay(["value" => 1]);
+        $annotation = new Delayed(["value" => 1]);
 
         $this->assertEquals(
             [MessageHeaders::DELIVERY_DELAY => 1],
@@ -42,7 +42,7 @@ class EndpointHeadersInterceptorTest extends TestCase
     public function test_adding_priority()
     {
         $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new WithPriority(["value" => 1]);
+        $annotation = new Prioritized(["value" => 1]);
 
         $this->assertEquals(
             [MessageHeaders::PRIORITY => 1],

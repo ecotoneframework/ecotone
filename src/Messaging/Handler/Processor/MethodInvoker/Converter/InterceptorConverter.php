@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
@@ -62,7 +63,15 @@ class InterceptorConverter implements ParameterConverter
             return $this->interceptedInterface->getMethodAnnotation($relatedParameter->getTypeDescriptor());
         }
 
-        return $this->interceptedInterface->getClassAnnotation($relatedParameter->getTypeDescriptor());
+        if ($this->interceptedInterface->hasClassAnnotation($relatedParameter->getTypeDescriptor())) {
+            return $this->interceptedInterface->getClassAnnotation($relatedParameter->getTypeDescriptor());
+        }
+
+        if (!$relatedParameter->doesAllowNulls()) {
+            throw MessageHandlingException::create("Can find annotation in intercepted {$this->interceptedInterface} to resolve argument {$relatedParameter->getName()} for {$interfaceToCall}. Should not parameter be nullable?");
+        }
+
+        return null;
     }
 
     /**

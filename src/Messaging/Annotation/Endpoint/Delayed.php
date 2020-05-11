@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Annotation\Endpoint;
 /**
  * @Annotation
  */
-class WithDelay
+class Delayed
 {
     /**
      * @var int

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
@@ -45,13 +46,13 @@ class InterceptorConverterBuilder implements ParameterConverterBuilder
 
     /**
      * @param string $parameterName
-     * @param InterfaceToCall $interfaceToCall
+     * @param InterfaceToCall $interceptedInterface
      * @param object[] $endpointAnnotations
      * @return InterceptorConverterBuilder
      */
-    public static function create(string $parameterName, InterfaceToCall $interfaceToCall, array $endpointAnnotations) : self
+    public static function create(string $parameterName, InterfaceToCall $interceptedInterface, array $endpointAnnotations) : self
     {
-        return new self($parameterName, $interfaceToCall, $endpointAnnotations);
+        return new self($parameterName, $interceptedInterface, $endpointAnnotations);
     }
 
     /**
@@ -59,7 +60,7 @@ class InterceptorConverterBuilder implements ParameterConverterBuilder
      */
     public function isHandling(InterfaceParameter $parameter): bool
     {
-        return $this->parameterName = $parameter->getName();
+        return $this->parameterName === $parameter->getName();
     }
 
     /**

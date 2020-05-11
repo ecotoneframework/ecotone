@@ -124,6 +124,9 @@ final class MethodInvoker implements MessageProcessor
     {
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
         $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
+        if ($objectMethodName === "addMetadata") {
+            $tmp = 0;
+        }
         $methodParametersConverterBuilders = self::createDefaultMethodParameters($interfaceToCallRegistry->getFor($objectToInvokeOn, $objectMethodName), $methodParametersConverterBuilders, $endpointAnnotations, null, false);
         $methodParameterConverters = [];
         foreach ($methodParametersConverterBuilders as $methodParameter) {
@@ -163,6 +166,7 @@ final class MethodInvoker implements MessageProcessor
                 if (!self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
                     if ($interceptedInterface && $interfaceParameter->isAnnotation()) {
                         $passedMethodParameterConverters[] = InterceptorConverterBuilder::create($interfaceParameter->getName(), $interceptedInterface, $endpointAnnotations);
+                        $missingParametersAmount--;
                     }
                 }
             }

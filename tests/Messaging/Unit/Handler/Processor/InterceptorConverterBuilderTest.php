@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Messaging\Handler\MessageHandlingException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
@@ -124,24 +125,33 @@ class InterceptorConverterBuilderTest extends TestCase
      * @throws MessagingException
      * @throws InvalidArgumentException
      */
-    public function test_throwing_exception_if_no_annotation_found()
+    public function test_returning_null_if_no_annotation_found()
     {
-        $interfaceToCall = InterfaceToCall::create(ServiceWithoutReturnValue::class, "callWithInterfaceToCall");
-        $converter = InterceptorConverterBuilder::create("some", $interfaceToCall, []);
-        $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
+        $converter = InterceptorConverterBuilder::create("transactional", InterfaceToCall::create(ServiceWithoutReturnValue::class, "wasCalled"), [])
+                        ->build(InMemoryReferenceSearchService::createEmpty());
 
-        $interfaceParameter = InterfaceParameter::createNullable("x", TypeDescriptor::createWithDocBlock(Transactional::class, ""));
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $this->assertEquals(
-            $interfaceToCall,
+        $this->assertNull(
             $converter->getArgumentFrom(
-                InterfaceToCall::create(CallableService::class, "wasCalled"),
-                $interfaceParameter,
+                InterfaceToCall::create(ServiceWithoutReturnValue::class, "callWithNullableAnnotation"),
+                InterfaceParameter::createNullable("transactional", TypeDescriptor::createWithDocBlock(Transactional::class, "")),
                 MessageBuilder::withPayload("a")->setHeader("token", 123)->build(),
                 []
             )
+        );
+    }
+
+    public function test_throwing_exception_if_require_missing_annotation()
+    {
+        $converter = InterceptorConverterBuilder::create("transactional", InterfaceToCall::create(ServiceWithoutReturnValue::class, "wasCalled"), [])
+            ->build(InMemoryReferenceSearchService::createEmpty());
+
+        $this->expectException(MessageHandlingException::class);
+
+        $converter->getArgumentFrom(
+            InterfaceToCall::create(ServiceWithoutReturnValue::class, "callWithAnnotation"),
+            InterfaceParameter::createNotNullable("transactional", TypeDescriptor::createWithDocBlock(Transactional::class, "")),
+            MessageBuilder::withPayload("a")->setHeader("token", 123)->build(),
+            []
         );
     }
 }

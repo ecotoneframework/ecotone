@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Annotation\Endpoint;
 /**
  * @Annotation
  */
-class WithPriority
+class Prioritized
 {
     /**
      * @var int

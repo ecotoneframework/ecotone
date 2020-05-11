@@ -48,4 +48,9 @@ class ServiceWithoutReturnValue implements CallableService
     {
 
     }
+
+    public function callWithNullableAnnotation(?Transactional $transactional) : void
+    {
+
+    }
 }

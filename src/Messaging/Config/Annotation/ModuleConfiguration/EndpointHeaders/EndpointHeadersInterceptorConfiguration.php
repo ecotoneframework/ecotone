@@ -15,6 +15,7 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Precedence;
 
 /**
@@ -48,7 +49,7 @@ class EndpointHeadersInterceptorConfiguration extends NoExternalConfigurationMod
             MethodInterceptor::create(
                 EndpointHeadersInterceptor::class,
                 $interfaceToCall,
-                ServiceActivatorBuilder::createWithDirectReference(new EndpointHeadersInterceptor(), "addMetadata"),
+                TransformerBuilder::createWithDirectObject(new EndpointHeadersInterceptor(), "addMetadata"),
                 Precedence::ENDPOINT_HEADERS_PRECEDENCE,
                 "@(" . WithTimeToLive::class . ")||(@" . Prioritized::class . ")||@(" . Delayed::class . ")"
             )

@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\Messaging\Annotation\Endpoint\Delayed;
-use Ecotone\Messaging\Annotation\Endpoint\Prioritized;
-use Ecotone\Messaging\Annotation\Endpoint\WithTimeToLive;
+use Ecotone\Messaging\Annotation\Endpoint\Priority;
+use Ecotone\Messaging\Annotation\Endpoint\ExpireAfter;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders\EndpointHeadersInterceptor;
 use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
@@ -31,7 +31,7 @@ class EndpointHeadersInterceptorTest extends TestCase
     public function test_adding_time_to_live()
     {
         $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new WithTimeToLive(["value" => 1]);
+        $annotation = new ExpireAfter(["value" => 1]);
 
         $this->assertEquals(
             [MessageHeaders::TIME_TO_LIVE => 1],
@@ -42,7 +42,7 @@ class EndpointHeadersInterceptorTest extends TestCase
     public function test_adding_priority()
     {
         $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new Prioritized(["value" => 1]);
+        $annotation = new Priority(["value" => 1]);
 
         $this->assertEquals(
             [MessageHeaders::PRIORITY => 1],

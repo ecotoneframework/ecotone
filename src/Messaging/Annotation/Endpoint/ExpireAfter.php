@@ -6,20 +6,20 @@ namespace Ecotone\Messaging\Annotation\Endpoint;
 /**
  * @Annotation
  */
-class Prioritized
+class ExpireAfter
 {
     /**
      * @var int
      */
-    private $number;
+    private $time;
 
     public function __construct(array $values)
     {
-        $this->number = $values['value'];
+        $this->time = $values['value'];
     }
 
-    public function getNumber(): int
+    public function getTime(): int
     {
-        return $this->number;
+        return $this->time;
     }
 }

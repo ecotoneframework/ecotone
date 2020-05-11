@@ -6,6 +6,7 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -72,6 +73,7 @@ class CallAggregateService
     {
         Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
         Assert::allInstanceOfType($withFactoryRedirectOnFoundParameterConverters, ParameterConverterBuilder::class);
+        Assert::allInstanceOfType($aroundMethodInterceptors, AroundInterceptorReference::class);
 
         $this->parameterConverterBuilders = $parameterConverterBuilders;
         $this->channelResolver = $channelResolver;

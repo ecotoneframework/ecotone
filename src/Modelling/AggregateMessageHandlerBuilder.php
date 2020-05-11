@@ -380,7 +380,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         $chainCqrsMessageHandler
             ->chain(
                 ServiceActivatorBuilder::createWithDirectReference(
-                    new CallAggregateService($channelResolver, $this->methodParameterConverterBuilders, AroundInterceptorReference::createAroundInterceptorsWithChannel($channelResolver, $referenceSearchService, $this->orderedAroundInterceptors), $referenceSearchService, $this->withFactoryRedirectOnFoundMethodName, $this->withFactoryRedirectOnFoundParameterConverters, $this->eventSourcedFactoryMethod, $this->isCommandHandler),
+                    new CallAggregateService($channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, $this->withFactoryRedirectOnFoundMethodName, $this->withFactoryRedirectOnFoundParameterConverters, $this->eventSourcedFactoryMethod, $this->isCommandHandler),
                     "call"
                 )->withPassThroughMessageOnVoidInterface($this->isVoidMethod)
             );

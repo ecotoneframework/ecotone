@@ -556,6 +556,10 @@ final class TypeDescriptor implements Type
             return false;
         }
 
+        if ($this->isCompoundObjectType()) {
+            return false;
+        }
+
         $reflectionClass = new \ReflectionClass($this->type);
 
         return $reflectionClass->isAbstract();

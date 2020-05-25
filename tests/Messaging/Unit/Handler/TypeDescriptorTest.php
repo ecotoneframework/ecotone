@@ -318,6 +318,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertTrue(TypeDescriptor::create(MessagingException::class)->isAbstractClass());
         $this->assertFalse(TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isAbstractClass());
+        $this->assertFalse(TypeDescriptor::create(TypeDescriptor::OBJECT)->isAbstractClass());
     }
 
     /**

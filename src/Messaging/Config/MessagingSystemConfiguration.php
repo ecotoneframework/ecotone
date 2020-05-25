@@ -314,11 +314,6 @@ final class MessagingSystemConfiguration implements Configuration
 
         $this->configureAsynchronousEndpoints();
         $this->configureDefaultMessageChannels();
-        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            if ($this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()]->isPollable()) {
-                $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), [new AsynchronousRunningEndpoint()]));
-            }
-        }
 
         $this->resolveRequiredReferences($interfaceToCallRegistry,
             array_map(function (MethodInterceptor $methodInterceptor) {

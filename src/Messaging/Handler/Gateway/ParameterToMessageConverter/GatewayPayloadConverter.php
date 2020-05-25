@@ -57,11 +57,13 @@ class GatewayPayloadConverter implements GatewayParameterConverter
     {
         Assert::notNull($methodArgument, "Gateway header converter can only be called with method argument");
 
-        $messageBuilder->setContentTypeIfAbsent(MediaType::createApplicationXPHPWithTypeParameter(
-            $methodArgument->getInterfaceParameter()->getTypeDescriptor()->isUnionType()
-                ? TypeDescriptor::createFromVariable($methodArgument->value())->getTypeHint()
-                : $methodArgument->getInterfaceParameter()->getTypeHint()
-        ));
+        if ($methodArgument->getInterfaceParameter()->getTypeDescriptor()->isUnionType() || $methodArgument->getInterfaceParameter()->getTypeDescriptor()->isCompoundObjectType() || $methodArgument->getInterfaceParameter()->getTypeDescriptor()->isAnything()) {
+            $type = TypeDescriptor::createFromVariable($methodArgument->value())->getTypeHint();
+        }else {
+            $type = $methodArgument->getInterfaceParameter()->getTypeHint();
+        }
+
+        $messageBuilder->setContentTypeIfAbsent(MediaType::createApplicationXPHPWithTypeParameter($type));
 
         return $methodArgument->value() instanceof Message ? MessageBuilder::fromMessage($methodArgument->value()) : $messageBuilder->setPayload($methodArgument->value());
     }

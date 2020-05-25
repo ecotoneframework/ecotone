@@ -28,7 +28,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
-class AsyncModule extends NoExternalConfigurationModule implements AnnotationModule
+class AsynchronousModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @var array

@@ -20,8 +20,8 @@ class AsyncCommandHandlerWithoutIdExample
     /**
      * @param \stdClass $event
      *
-     * @CommandHandler()
      * @Asynchronous(channelName="asyncChannel")
+     * @CommandHandler()
      */
     public function doSomething(\stdClass $event) : void
     {

@@ -5,7 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsyncModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
@@ -23,7 +23,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncQueryHandlerExample;
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class AsyncModuleTest extends AnnotationConfigurationTest
+class AsynchronousModuleTest extends AnnotationConfigurationTest
 {
     /**
      * @throws AnnotationException
@@ -33,7 +33,7 @@ class AsyncModuleTest extends AnnotationConfigurationTest
      */
     public function test_registering_async_channel_for_method()
     {
-        $annotationConfiguration = AsyncModule::create(
+        $annotationConfiguration = AsynchronousModule::create(
             InMemoryAnnotationRegistrationService::createEmpty()
                 ->registerClassWithAnnotations(AsyncMethodExample::class)
         );
@@ -55,7 +55,7 @@ class AsyncModuleTest extends AnnotationConfigurationTest
      */
     public function test_registering_async_channel_for_whole_class()
     {
-        $annotationConfiguration = AsyncModule::create(
+        $annotationConfiguration = AsynchronousModule::create(
             InMemoryAnnotationRegistrationService::createEmpty()
                 ->registerClassWithAnnotations(AsyncClassExample::class)
         );
@@ -78,7 +78,7 @@ class AsyncModuleTest extends AnnotationConfigurationTest
      */
     public function test_registering_event_handler()
     {
-        $annotationConfiguration = AsyncModule::create(
+        $annotationConfiguration = AsynchronousModule::create(
             InMemoryAnnotationRegistrationService::createEmpty()
                 ->registerClassWithAnnotations(AsyncEventHandlerExample::class)
         );
@@ -100,7 +100,7 @@ class AsyncModuleTest extends AnnotationConfigurationTest
      */
     public function test_ignoring_query_handler_as_async()
     {
-        $annotationConfiguration = AsyncModule::create(
+        $annotationConfiguration = AsynchronousModule::create(
             InMemoryAnnotationRegistrationService::createEmpty()
                 ->registerClassWithAnnotations(AsyncQueryHandlerExample::class)
         );
@@ -123,7 +123,7 @@ class AsyncModuleTest extends AnnotationConfigurationTest
     {
         $this->expectException(ConfigurationException::class);
 
-        AsyncModule::create(
+        AsynchronousModule::create(
             InMemoryAnnotationRegistrationService::createEmpty()
                 ->registerClassWithAnnotations(AsyncEventHandlerWithoutIdExample::class)
         );
@@ -139,7 +139,7 @@ class AsyncModuleTest extends AnnotationConfigurationTest
     {
         $this->expectException(ConfigurationException::class);
 
-        AsyncModule::create(
+        AsynchronousModule::create(
             InMemoryAnnotationRegistrationService::createEmpty()
                 ->registerClassWithAnnotations(AsyncCommandHandlerWithoutIdExample::class)
         );

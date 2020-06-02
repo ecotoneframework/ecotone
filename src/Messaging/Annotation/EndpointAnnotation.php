@@ -15,4 +15,13 @@ abstract class EndpointAnnotation extends IdentifiedAnnotation
      * @Required()
      */
     public $inputChannelName;
+
+    public function __construct(array $values = [])
+    {
+        if (isset($values['value'])) {
+            $this->inputChannelName = $values['value'];
+        }
+
+        parent::__construct($values);
+    }
 }

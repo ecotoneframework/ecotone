@@ -33,6 +33,10 @@ class IdentifiedAnnotation
         }
 
         foreach ($values as $propertyName => $value) {
+            if ($propertyName === "value") {
+                continue;
+            }
+
             $this->{$propertyName} = $value;
         }
 

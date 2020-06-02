@@ -30,7 +30,7 @@ class RentCalendar
     /**
      * @param string $appointmentIdToCheck
      * @return bool
-     * @QueryHandler(inputChannelName="doesCalendarContainAppointments")
+     * @QueryHandler("doesCalendarContainAppointments")
      */
     public function getCalendarEvents(string $appointmentIdToCheck): bool
     {

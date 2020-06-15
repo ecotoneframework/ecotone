@@ -16,11 +16,7 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
      */
     private $eventsPerAggregate;
 
-    /**
-     * InMemoryEventSourcedRepository constructor.
-     * @param array $eventsPerAggregate
-     */
-    private function __construct(array $eventsPerAggregate)
+    public function __construct(array $eventsPerAggregate = [])
     {
         $this->eventsPerAggregate = $eventsPerAggregate;
     }

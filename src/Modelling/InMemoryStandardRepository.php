@@ -12,11 +12,7 @@ class InMemoryStandardRepository implements StandardRepository
      */
     private $aggregates;
 
-    /**
-     * InMemoryStandardRepository constructor.
-     * @param object[] $aggregates
-     */
-    private function __construct(array $aggregates)
+    public function __construct(array $aggregates = [])
     {
         $this->aggregates = $aggregates;
     }

@@ -15,15 +15,17 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
      * @var array
      */
     private $eventsPerAggregate;
+    private $aggregateTypes;
 
-    public function __construct(array $eventsPerAggregate = [])
+    public function __construct(array $eventsPerAggregate = [], array $aggregateTypes = [])
     {
         $this->eventsPerAggregate = $eventsPerAggregate;
+        $this->aggregateTypes = $aggregateTypes;
     }
 
     public static function createEmpty() : self
     {
-        return new static([]);
+        return new static([], []);
     }
 
     public static function createWithExistingAggregate(array $identifiers, array $events) : self
@@ -40,7 +42,7 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
      */
     public function canHandle(string $aggregateClassName): bool
     {
-        return true;
+        return empty($this->aggregateTypes) ? true : in_array($aggregateClassName, $this->aggregateTypes);
     }
 
     /**

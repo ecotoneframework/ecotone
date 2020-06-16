@@ -51,6 +51,9 @@ final class TypeDescriptor implements Type
         $collectionTypes = array_map(function (string $type) {
             return self::removeSlashPrefix($type);
         }, $collectionTypes);
+        $collectionTypes = array_filter($collectionTypes, function (string $type) {
+            return $type !== self::MIXED;
+        });
 
         return $collectionTypes;
     }
@@ -656,13 +659,17 @@ final class TypeDescriptor implements Type
                 $foundCollectionTypes = $match[1];
                 $collectionTypes = self::resolveCollectionTypes($foundCollectionTypes);
 
-                foreach ($collectionTypes as $collectionType) {
-                    if (!self::isResolvableType($collectionType)) {
-                        throw TypeDefinitionException::create("Unknown collection type in {$type}. Passed type in collection is not resolvable: {$collectionType}.");
+                if (empty($collectionTypes)) {
+                    $type = self::ARRAY;
+                }else {
+                    foreach ($collectionTypes as $collectionType) {
+                        if (!self::isResolvableType($collectionType)) {
+                            throw TypeDefinitionException::create("Unknown collection type in {$type}. Passed type in collection is not resolvable: {$collectionType}.");
+                        }
                     }
-                }
 
-                $type = str_replace($foundCollectionTypes, implode(",", $collectionTypes), $match[0]);
+                    $type = str_replace($foundCollectionTypes, implode(",", $collectionTypes), $match[0]);
+                }
             }
 
             $finalTypes[] = new self(self::removeSlashPrefix($type));

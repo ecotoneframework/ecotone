@@ -117,4 +117,10 @@ interface User
      * @IgnoreDocblockTypeHint()
      */
     public function ignoreDocblockTypeHint(array $data) : array;
+
+    /**
+     * @var mixed[] $data
+     * @return mixed[]
+     */
+    public function mixedArrayCollection(array $data) : array;
 }

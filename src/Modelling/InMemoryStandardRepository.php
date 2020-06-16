@@ -11,16 +11,18 @@ class InMemoryStandardRepository implements StandardRepository
      * @var object[]
      */
     private $aggregates;
+    private $aggregateTypes;
 
-    public function __construct(array $aggregates = [])
+    public function __construct(array $aggregates = [], array $aggregateTypes = [])
     {
         $this->aggregates = $aggregates;
+        $this->aggregateTypes = $aggregateTypes;
     }
 
 
     public static function createEmpty() : self
     {
-        return new static([]);
+        return new static([], []);
     }
 
     public static function createWith(array $aggregates) : self
@@ -33,7 +35,7 @@ class InMemoryStandardRepository implements StandardRepository
      */
     public function canHandle(string $aggregateClassName): bool
     {
-        return true;
+        return empty($this->aggregateTypes) ? true : in_array($aggregateClassName, $this->aggregateTypes);
     }
 
     /**

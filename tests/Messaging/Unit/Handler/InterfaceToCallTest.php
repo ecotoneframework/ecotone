@@ -102,6 +102,23 @@ class InterfaceToCallTest extends TestCase
         );
     }
 
+    public function test_retrieving_mixed_array_collection()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            User::class, "mixedArrayCollection"
+        );
+
+        $this->assertEquals(
+            InterfaceParameter::createNotNullable("data", TypeDescriptor::create("array")),
+            $interfaceToCall->getParameterWithName("data")
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create("array"),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
     /**
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException

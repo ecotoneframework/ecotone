@@ -65,15 +65,6 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
         $annotationReader = new AnnotationReader();
 
         $reflectionClass = new \ReflectionClass($className);
-        foreach ($annotationReader->getClassAnnotations($reflectionClass) as $classAnnotation) {
-            $this->addAnnotationToClass($className, $classAnnotation);
-        }
-        foreach ($reflectionClass->getProperties() as $property) {
-            foreach ($annotationReader->getPropertyAnnotations($property) as $annotation) {
-                $this->addAnnotationToProperty($className, $property->getName(), $annotation);
-            }
-        }
-
         foreach (get_class_methods($className) as $method) {
             $methodOwnerClass = TypeResolver::getMethodOwnerClass($reflectionClass, $method)->getName();
             $methodReflection = new \ReflectionMethod($methodOwnerClass, $method);
@@ -81,6 +72,30 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
                 $this->addAnnotationToClassMethod($className, $method, $methodAnnotation);
             }
         }
+
+        foreach ($annotationReader->getClassAnnotations($reflectionClass) as $classAnnotation) {
+            $this->addAnnotationToClass($className, $classAnnotation);
+        }
+        foreach ($reflectionClass->getProperties() as $property) {
+            foreach ($annotationReader->getPropertyAnnotations($property) as $annotation) {
+                if (!$this->hasRegisteredAnnotationForProperty($reflectionClass->getName(), $property->getName(), $annotation)) {
+                    $this->addAnnotationToProperty($reflectionClass->getName(), $property->getName(), $annotation);
+                }
+            }
+        }
+        $parentClass = $reflectionClass;
+        do {
+            foreach ($parentClass->getProperties() as $property) {
+                foreach ($annotationReader->getPropertyAnnotations($property) as $annotation) {
+                    if (!$this->hasRegisteredAnnotationForProperty($reflectionClass->getName(), $property->getName(), $annotation)) {
+                        $this->addAnnotationToProperty($reflectionClass->getName(), $property->getName(), $annotation);
+                    }
+                    if (!$this->hasRegisteredAnnotationForProperty($parentClass->getName(), $property->getName(), $annotation)) {
+                        $this->addAnnotationToProperty($parentClass->getName(), $property->getName(), $annotation);
+                    }
+                }
+            }
+        }while($parentClass = $parentClass->getParentClass());
 
         return $this;
     }
@@ -219,16 +234,14 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
         return $this;
     }
 
-    /**
-     * @param string $className
-     * @param string $methodName
-     * @param string $annotationClassName
-     * @return InMemoryAnnotationRegistrationService
-     */
-    public function resetClassMethodAnnotation(string $className, string $methodName, string $annotationClassName) : self
+    private function hasRegisteredAnnotationForProperty(string $className, string $propertyName, $annotation): bool
     {
-        unset($this->annotationsForClass[$className][$methodName][$annotationClassName]);
+        foreach ($this->getAnnotationsForProperty($className, $propertyName) as $registeredAnnotation) {
+            if ($registeredAnnotation == $annotation) {
+                return true;
+            }
+        }
 
-        return $this;
+        return false;
     }
 }

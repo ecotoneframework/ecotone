@@ -14,26 +14,20 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class ClassDefinition
 {
-    /**
-     * @var Type
-     */
-    private $classDescriptor;
+    private Type $classDescriptor;
     /**
      * @var ClassPropertyDefinition[]
      */
-    private $properties;
+    private array $properties;
     /**
      * @var object[]
      */
-    private $classAnnotations;
+    private array $classAnnotations;
     /**
      * @var string[]
      */
-    private $publicMethodNames;
-    /**
-     * @var bool
-     */
-    private $isAnnotation;
+    private array $publicMethodNames;
+    private bool $isAnnotation;
 
     /**
      * ClassDefinition constructor.
@@ -149,10 +143,9 @@ class ClassDefinition
     }
 
     /**
-     * @param Type $annotationClass
-     * @return array
+     * @return ClassPropertyDefinition[]
      */
-    public function getPropertiesWithAnnotation(Type $annotationClass)
+    public function getPropertiesWithAnnotation(Type $annotationClass) : array
     {
         $propertiesWithAnnotation = [];
         foreach ($this->properties as $property) {

@@ -40,9 +40,6 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
      */
     private static $annotationRegistrationService;
 
-    /**
-     * @requires PHP >= 7.4
-     */
     public function test_retrieving_all_classes_with_annotation()
     {
         $classes = $this->getAnnotationRegistrationService()->getAllClassesWithAnnotation(ApplicationContext::class);
@@ -50,9 +47,6 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $this->assertNotEmpty($classes, "File system class locator didn't find application context");
     }
 
-    /**
-     * @requires PHP >= 7.4
-     */
     public function test_retrieving_annotation_for_class()
     {
         $this->assertEquals(

@@ -13,24 +13,18 @@ use stdClass as SomeClass;
  */
 class OrderPropertyExample
 {
-    /**
-     * This is example integer
-     *
-     * @var int
-     */
-    private $id;
+    private ?int $id;
 
     public $extendedName;
 
     /**
-     * @var string
      * @PropertyAnnotationExample()
      */
-    protected static $reference;
+    protected static ?string $reference;
     /**
-     * @var SomeClass
+     * @PropertyAnnotationExample()
      */
-    private $someClass;
+    private ?SomeClass $someClass;
 
     public function doSomething() : void
     {

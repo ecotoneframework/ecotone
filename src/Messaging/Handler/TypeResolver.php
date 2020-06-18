@@ -429,7 +429,7 @@ class TypeResolver
         }
         while ($parent = $parent->getParentClass()) {
             foreach ($parent->getProperties() as $property) {
-                $classProperties[] = $this->createClassPropertyUsingTraitsIfExists($reflectionClass, $property, $annotationParser, $reflectionClass);
+                $classProperties[] = $this->createClassPropertyUsingTraitsIfExists($reflectionClass, $property, $annotationParser, $parent);
             }
         }
 
@@ -540,13 +540,11 @@ class TypeResolver
     {
         $classProperty = null;
         $type = $docblockType ? $docblockType : TypeDescriptor::createAnythingType();
-        $isNullable = true;
-        if (version_compare(phpversion(), '7.4.0', '>=')) {
-            if ($type->isAnything()) {
-                $type = $property->hasType() ? TypeDescriptor::create($property->getType()->getName()) : $type;
-            }
-            $isNullable = $property->hasType() ? $property->getType()->allowsNull() : true;
+        if ($type->isAnything()) {
+            $type = $property->hasType() ? TypeDescriptor::create($property->getType()->getName()) : $type;
         }
+        $isNullable = $property->hasType() ? $property->getType()->allowsNull() : true;
+
 
         $annotations = $annotationParser->getAnnotationsForProperty($declaringClass, $property->getName());
         if ($property->isPrivate()) {
@@ -605,7 +603,7 @@ class TypeResolver
                 $declaringClass->getName(),
                 $annotationParser,
                 $property,
-                $this->getPropertyDocblockTypeHint($reflectionClassOrTrait, $property->getDeclaringClass(), $property->getDeclaringClass(), $property)
+            (string)$property->getType() === TypeDescriptor::ARRAY ? $this->getPropertyDocblockTypeHint($reflectionClassOrTrait, $property->getDeclaringClass(), $property->getDeclaringClass(), $property) : null
         );
     }
 }

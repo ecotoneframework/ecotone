@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
+use Doctrine\Common\Annotations\AnnotationReader;
+use Ecotone\Messaging\Config\Annotation\AutoloadFileNamespaceParser;
+use Ecotone\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\ClassDefinition;
@@ -13,6 +16,7 @@ use Test\Ecotone\Messaging\Fixture\Conversion\Product;
 use Test\Ecotone\Messaging\Fixture\Conversion\PublicRocketDetails\PublicDetails;
 use Test\Ecotone\Messaging\Fixture\Conversion\Rocket;
 use Test\Ecotone\Messaging\Fixture\Conversion\User;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\DifferentTypeAndDocblockProperty;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\OrderPropertyExample;
@@ -41,9 +45,7 @@ class ClassDefinitionTest extends TestCase
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createProtected("reference", TypeDescriptor::createStringType(), true, true, [
-                new PropertyAnnotationExample()
-            ]),
+            ClassPropertyDefinition::createProtected("reference", TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()]),
             $classDefinition->getProperty("reference")
         );
     }
@@ -54,9 +56,8 @@ class ClassDefinitionTest extends TestCase
 
         $this->assertEquals(
             [
-                ClassPropertyDefinition::createProtected("reference", TypeDescriptor::createStringType(), true, true, [
-                    new PropertyAnnotationExample()
-                ])
+                ClassPropertyDefinition::createProtected("reference", TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()]),
+                ClassPropertyDefinition::createPrivate("someClass", TypeDescriptor::create(\stdClass::class), true, false, [new PropertyAnnotationExample()])
             ],
             $classDefinition->getPropertiesWithAnnotation(TypeDescriptor::create(PropertyAnnotationExample::class))
         );
@@ -72,12 +73,39 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function test_retrieving_private_property_from_parent_class()
+    public function test_retrieving_type_property_if_not_array()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(ExtendedOrderPropertyExample::class));
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(DifferentTypeAndDocblockProperty::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate("someClass", TypeDescriptor::create(\stdClass::class), true, false, []),
+            ClassPropertyDefinition::createPrivate("integer", TypeDescriptor::createIntegerType(), false, false, []),
+            $classDefinition->getProperty("integer")
+        );
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("unknown", TypeDescriptor::createAnythingType(), true, false, []),
+            $classDefinition->getProperty("unknown")
+        );
+    }
+
+    public function test_retrieving_private_property_from_parent_class()
+    {
+//        @TODO replace with in memory in PHP 8.0. As there are problems with retrieving annotations from abstract classes
+        $classDefinition = ClassDefinition::createUsingAnnotationParser(
+            TypeDescriptor::create(ExtendedOrderPropertyExample::class),
+            new FileSystemAnnotationRegistrationService(
+                new AnnotationReader(),
+                new AutoloadFileNamespaceParser(),
+                __DIR__. "/../../../../",
+                [
+                    "Test\Ecotone\Messaging\Fixture\Handler\Property"
+                ],
+                "dev",
+                ""
+            )
+        );
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("someClass", TypeDescriptor::create(\stdClass::class), true, false, [new PropertyAnnotationExample()]),
             $classDefinition->getProperty("someClass")
         );
     }
@@ -106,9 +134,6 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    /**
-     * @requires PHP >= 7.4
-     */
     public function test_retrieving_typed_property()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
@@ -119,9 +144,6 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    /**
-     * @requires PHP >= 7.4
-     */
     public function test_retrieving_nullable_typed_property()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
@@ -132,9 +154,6 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    /**
-     * @requires PHP >= 7.4
-     */
     public function test_override_typed_property_with_annotation_type()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));

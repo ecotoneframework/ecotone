@@ -10,8 +10,5 @@ trait PrivateRocketDetailsTrait
 {
     use PublicRocketDetailsTrait;
 
-    /**
-     * @var PrivateDetails
-     */
-    private $privateDetails;
+    private ?PrivateDetails $privateDetails;
 }

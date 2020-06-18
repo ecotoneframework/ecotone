@@ -14,6 +14,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
+use Ecotone\Modelling\Annotation\NotUniqueHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
 /**
@@ -84,6 +85,12 @@ class ModellingMessageRouterModule implements AnnotationModule
             BusRouterBuilder::createEventBusByObject(self::getEventBusByObjectsMapping($annotationRegistrationService)),
             BusRouterBuilder::createEventBusByName(self::getEventBusByNamesMapping($annotationRegistrationService))
         );
+    }
+
+    private static function isForTheSameAggregate(array $aggregateMethodUsage, $uniqueChannelName, string $oppositeMethodType, AnnotationRegistration $registration): bool
+    {
+        return !isset($aggregateMethodUsage[$uniqueChannelName][$oppositeMethodType])
+            || $aggregateMethodUsage[$uniqueChannelName][$oppositeMethodType]->getClassName() === $registration->getClassName();
     }
 
     /**
@@ -281,32 +288,48 @@ class ModellingMessageRouterModule implements AnnotationModule
     }
 
     /**
-     * @param array $uniqueChannels
+     * @param AnnotationRegistration[][] $uniqueChannels
      * @throws \Ecotone\Messaging\MessagingException
      */
     private static function verifyUniqueness(array $uniqueChannels): void
     {
+        $notUniqueHandlerAnnotation = TypeDescriptor::create(NotUniqueHandler::class);
+        $aggregateAnnotation = TypeDescriptor::create(Aggregate::class);
         foreach ($uniqueChannels as $uniqueChannelName => $registrations) {
-            $isUnique = true;
             $combinedRegistrationNames = "";
-            if (count($registrations) === 1) {
+            $registrationsToVerify = [];
+            $aggregateMethodUsage = [];
+            foreach ($registrations as $registration) {
+                if ($registration->hasMethodAnnotation($notUniqueHandlerAnnotation)) {
+                    continue;
+                }
+
+                if ($registration->hasClassAnnotation($aggregateAnnotation)) {
+                    $isStatic   = (new \ReflectionMethod($registration->getClassName(), $registration->getMethodName()))->isStatic();
+                    $methodType = $isStatic ? "factory" : "action";
+                    $oppositeMethodType = $isStatic ? "action" : "factory";
+                    if (!isset($aggregateMethodUsage[$uniqueChannelName][$methodType])) {
+                        $aggregateMethodUsage[$uniqueChannelName][$methodType] = $registration;
+                        if (self::isForTheSameAggregate($aggregateMethodUsage, $uniqueChannelName, $oppositeMethodType, $registration)) {
+                            continue;
+                        }
+                    }
+
+                    $registrationsToVerify[] = $aggregateMethodUsage[$uniqueChannelName][$methodType];
+                }
+
+                $registrationsToVerify[] = $registration;
+            }
+
+            if (count($registrationsToVerify) <= 1) {
                 continue;
             }
 
-            /** @var AnnotationRegistration $registration */
-            foreach ($registrations as $registration) {
-                /** @var CommandHandler|QueryHandler $method */
-                $method = $registration->getAnnotationForMethod();
+            foreach ($registrationsToVerify as $registration) {
                 $combinedRegistrationNames .= " {$registration->getClassName()}:{$registration->getMethodName()}";
-
-                if ($method->mustBeUnique) {
-                    $isUnique = false;
-                }
             }
 
-            if (!$isUnique) {
-                throw ConfigurationException::create("Channel name `{$uniqueChannelName}` should be unique, but is used in multiple handlers:{$combinedRegistrationNames}");
-            }
+            throw ConfigurationException::create("Channel name `{$uniqueChannelName}` should be unique, but is used in multiple handlers:{$combinedRegistrationNames}");
         }
     }
 }

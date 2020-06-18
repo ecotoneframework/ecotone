@@ -6,6 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
+use Ecotone\Messaging\Annotation\Environment;
 use Ecotone\Messaging\Annotation\Extension;
 use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\Gateway\GatewayPayload;
@@ -74,13 +75,16 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $gatewayAnnotation->parameterConverters = [$messageToPayloadParameter];
         $gatewayAnnotation->requiredInterceptorNames = ["dbalTransaction"];
 
+        $messageEndpoint = new MessageEndpoint();
         $this->assertEquals(
             [
                 AnnotationRegistration::create(
-                    new MessageEndpoint(),
+                    $messageEndpoint,
                     $gatewayAnnotation,
                     GatewayWithReplyChannelExample::class,
-                    "buy"
+                    "buy",
+                    [$messageEndpoint],
+                    [$gatewayAnnotation]
                 )
             ],
             $this->createAnnotationRegistrationService("Test\\Ecotone\\Messaging\\Fixture\\Annotation\\MessageEndpoint\Gateway\FileSystem", "prod")->findRegistrationsFor(MessageEndpoint::class, MessageGateway::class)
@@ -125,10 +129,21 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
     public function test_retrieving_for_specific_environment()
     {
         $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\Environment", "dev");
+        $devEnvironment                             = new Environment();
+        $devEnvironment->names = ["dev"];
+        $prodDevEnvironment = new Environment();
+        $prodDevEnvironment->names = ["prod", "dev"];
+        $prodEnvironment = new Environment();
+        $prodEnvironment->names = ["prod"];
+        $allEnvironment = new Environment();
+        $allEnvironment->names = ["dev", "prod", "test"];
+        $methodAnnotation = new Extension();
+        $applicationContext = new ApplicationContext();
+
         $this->assertEquals(
             [
-                $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodEnvironmentExample::class, "configSingleEnvironment"),
-                $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodMultipleEnvironmentsExample::class, "configMultipleEnvironments")
+                $this->createAnnotationRegistration($applicationContext, $methodAnnotation, ApplicationContextWithMethodEnvironmentExample::class, "configSingleEnvironment", [$applicationContext, $prodDevEnvironment],[$methodAnnotation, $devEnvironment]),
+                $this->createAnnotationRegistration($applicationContext, $methodAnnotation, ApplicationContextWithMethodMultipleEnvironmentsExample::class, "configMultipleEnvironments", [$applicationContext],[$methodAnnotation, $allEnvironment])
             ],
             $fileSystemAnnotationRegistrationService->findRegistrationsFor(ApplicationContext::class, Extension::class)
         );
@@ -137,36 +152,29 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
         $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\Environment", "test");
         $this->assertEquals(
             [
-                $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodMultipleEnvironmentsExample::class, "configMultipleEnvironments")
-            ],
+                $this->createAnnotationRegistration($applicationContext, $methodAnnotation, ApplicationContextWithMethodMultipleEnvironmentsExample::class, "configMultipleEnvironments", [$applicationContext], [$methodAnnotation, $allEnvironment])],
             $fileSystemAnnotationRegistrationService->findRegistrationsFor(ApplicationContext::class, Extension::class)
         );
 
         $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\Environment", "prod");
         $this->assertEquals(
             [
-                $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithClassEnvironment::class, "someAction"),
-                $this->createAnnotationRegistration(new ApplicationContext(), new Extension(), ApplicationContextWithMethodMultipleEnvironmentsExample::class, "configMultipleEnvironments")
+                $this->createAnnotationRegistration($applicationContext, $methodAnnotation, ApplicationContextWithClassEnvironment::class, "someAction", [$applicationContext, $prodEnvironment], [$methodAnnotation]),
+                $this->createAnnotationRegistration($applicationContext, $methodAnnotation, ApplicationContextWithMethodMultipleEnvironmentsExample::class, "configMultipleEnvironments", [$applicationContext], [$methodAnnotation, $allEnvironment])
             ],
             $fileSystemAnnotationRegistrationService->findRegistrationsFor(ApplicationContext::class, Extension::class)
         );
     }
 
-    /**
-     * @param $classAnnotation
-     * @param $methodAnnotation
-     * @param string $className
-     * @param string $methodName
-     * @return AnnotationRegistration
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    private function createAnnotationRegistration($classAnnotation, $methodAnnotation, string $className, string $methodName) : AnnotationRegistration
+    private function createAnnotationRegistration(object $classAnnotation, object $methodAnnotation, string $className, string $methodName, array $classAnnotations, array $methodAnnotations) : AnnotationRegistration
     {
         return AnnotationRegistration::create(
             $classAnnotation,
             $methodAnnotation,
             $className,
-            $methodName
+            $methodName,
+            $classAnnotations,
+            $methodAnnotations
         );
     }
 
@@ -188,13 +196,16 @@ class FileSystemAnnotationRegistrationServiceIntegrationTest extends MessagingTe
 
         $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService("Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Splitter", "prod");
 
+        $annotationForClass = new MessageEndpoint();
         $this->assertEquals(
             [
                 AnnotationRegistration::create(
-                    new MessageEndpoint(),
+                    $annotationForClass,
                     $annotation,
                     SplitterExample::class,
-                    "split"
+                    "split",
+                    [$annotationForClass],
+                    [$annotation]
                 )
             ],
             $fileSystemAnnotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EndpointAnnotation::class)

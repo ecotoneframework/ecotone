@@ -8,12 +8,9 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\ReferenceCallInterceptorAnnotation;
 
 /**
- * Class AggregateCommandHandlerExample
- * @package Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  */
-class AggregateCommandHandlerExample
+class AggregateCommandHandlerWithRedirectionByClass
 {
     /**
      * @var string
@@ -23,9 +20,17 @@ class AggregateCommandHandlerExample
 
     /**
      * @param DoStuffCommand $command
-     * @CommandHandler(endpointId="command-id")
+     * @CommandHandler(endpointId="factory")
      */
-    public function doAction(DoStuffCommand $command) : void
+    public static function factory(DoStuffCommand $command) : void
+    {
+
+    }
+
+    /**
+     * @CommandHandler(endpointId="action")
+     */
+    public function action(DoStuffCommand $command) : void
     {
 
     }

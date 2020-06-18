@@ -14,7 +14,13 @@ use Ecotone\Modelling\Config\BusRouterBuilder;
 use stdClass;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithDoubledActionMethod;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithDoubledFactoryMethod;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithFactoryMethod;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithRedirectionByChannelName;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithRedirectionByClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateNoInputChannelAndNoMessage;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\DoStuffCommand;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\ServiceCommandHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\ServiceCommandHandlerWithInputChannelName;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\ServiceCommandHandlerWithInputChannelNameAndIgnoreMessage;
@@ -34,6 +40,7 @@ use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQu
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannel;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannelAndIgnoreMessage;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannelAndObject;
+use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlersWithAllowedNotUniqueClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlersWithNotUniqueClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannel;
@@ -59,20 +66,6 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         $this->assertRouting($annotatedClasses, $mapping, [], [], [], [], []);
     }
 
-    public function test_resulting_in_exception_when_registering_commands_handlers_for_same_input_channel()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        $commandHandlerAnnotation = new CommandHandler();
-
-        $this->prepareModule(
-            InMemoryAnnotationRegistrationService::createFrom([
-                AggregateCommandHandlerExample::class
-            ])
-                ->addAnnotationToClassMethod(AggregateCommandHandlerExample::class, "doAnotherAction", $commandHandlerAnnotation)
-        );
-    }
-
     public function test_throwing_configuration_exception_if_command_handler_has_no_information_about_channel()
     {
         $this->expectException(ConfigurationException::class);
@@ -95,6 +88,40 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         );
     }
 
+    public function test_throwing_exception_when_not_unique_aggregate_factory_methods()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $this->prepareModule(
+            InMemoryAnnotationRegistrationService::createFrom([
+                AggregateCommandHandlerWithDoubledFactoryMethod::class
+            ])
+        );
+    }
+
+    public function test_throwing_exception_when_not_unique_aggregate_action_methods()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $this->prepareModule(
+            InMemoryAnnotationRegistrationService::createFrom([
+                AggregateCommandHandlerWithDoubledActionMethod::class
+            ])
+        );
+    }
+
+    public function test_throwing_when_factory_and_action_channels_are_same_between_different_aggregates()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $this->prepareModule(
+            InMemoryAnnotationRegistrationService::createFrom([
+                AggregateCommandHandlerExample::class,
+                AggregateCommandHandlerWithFactoryMethod::class
+            ])
+        );
+    }
+
     private function assertRouting(array $annotatedClasses, array $commandObjectMapping, array $commandMapping, array $queryObjectMapping, array $queryMapping, array $eventObjectMapping, array $eventNameMapping): void
     {
         $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom($annotatedClasses);
@@ -112,6 +139,16 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         );
     }
 
+    public function test_registering_not_unique_handlers_if_allowed()
+    {
+        $annotatedClasses = [ServiceQueryHandlersWithAllowedNotUniqueClass::class];
+        $mapping = [
+            stdClass::class => ["execute1.target", "execute2.target"]
+        ];
+
+        $this->assertRouting($annotatedClasses, [], [], $mapping, [], [], []);
+    }
+
     public function test_registering_aggregate_command_handler_with_endpoint_id()
     {
         $annotatedClasses = [
@@ -122,6 +159,26 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         ];
 
         $this->assertRouting($annotatedClasses, $mapping, [], [], [], [], []);
+    }
+
+    public function test_registering_aggregate_command_handler_with_redirection_by_class()
+    {
+        $annotatedClasses = [AggregateCommandHandlerWithRedirectionByClass::class];
+        $mapping = [
+            DoStuffCommand::class => ["factory.target", "action.target"]
+        ];
+
+        $this->assertRouting($annotatedClasses, $mapping, [], [], [], [], []);
+    }
+
+    public function test_registering_aggregate_command_handler_with_redirection_by_channel_name()
+    {
+        $annotatedClasses = [AggregateCommandHandlerWithRedirectionByChannelName::class];
+        $mapping = [
+            "sameChannel" => ["factory.target", "action.target"]
+        ];
+
+        $this->assertRouting($annotatedClasses, [], $mapping, [], [], [], []);
     }
 
     public function test_registering_service_command_handler_with_input_channel()

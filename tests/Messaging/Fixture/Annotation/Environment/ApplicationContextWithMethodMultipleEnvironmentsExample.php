@@ -7,9 +7,6 @@ use Ecotone\Messaging\Annotation\Environment;
 use Ecotone\Messaging\Annotation\Extension;
 
 /**
- * Class ApplicationContextWithMethodEnvironments
- * @package Test\Ecotone\Messaging\Fixture\Annotation\Environment
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @ApplicationContext()
  */
 class ApplicationContextWithMethodMultipleEnvironmentsExample

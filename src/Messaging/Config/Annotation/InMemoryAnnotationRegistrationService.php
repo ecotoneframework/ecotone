@@ -141,7 +141,9 @@ class InMemoryAnnotationRegistrationService implements AnnotationRegistrationSer
                             $this->annotationsForClass[self::CLASS_ANNOTATIONS][$class][$classAnnotationName],
                             $methodAnnotation,
                             $class,
-                            $methodName
+                            $methodName,
+                            $this->getAnnotationsForClass($class),
+                            $methodAnnotations
                         );
                     }
                 }

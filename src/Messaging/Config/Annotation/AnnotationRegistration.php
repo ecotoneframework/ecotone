@@ -3,51 +3,37 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation;
 
+use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 
-/**
- * Class AnnotationRegistration
- * @package Ecotone\Messaging\Config\Annotation\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
 class AnnotationRegistration
 {
-    /**
-     * @var object
-     */
-    private $annotationForClass;
+    private object $annotationForClass;
     /**
      * Annotation to register
-     *
-     * @var object
      */
-    private $annotationForMethod;
+    private object $annotationForMethod;
     /**
      * Message endpoint class containing the annotation
-     *
-     * @var string
      */
-    private $className;
+    private string $className;
     /**
      * Reference name to object
-     *
-     * @var string
      */
-    private $referenceName;
-    /**
-     * @var string
-     */
-    private $methodName;
+    private string $referenceName;
 
+    private string $methodName;
     /**
-     * AnnotationRegistration constructor.
-     * @param object $annotationForClass
-     * @param object $annotationForMethod
-     * @param string $className
-     * @param string $methodName
-     * @throws \Ecotone\Messaging\MessagingException
+     * @var object[]
      */
-    public function __construct($annotationForClass, $annotationForMethod, string $className, string $methodName)
+    private array $methodAnnotations;
+    /**
+     * @var object[]
+     */
+    private array $classAnnotations;
+
+    private function __construct(object $annotationForClass, object $annotationForMethod, string $className, string $methodName, array $classAnnotations, array $methodAnnotations)
     {
         Assert::isObject($annotationForClass, "Annotation for class should be object");
         Assert::isObject($annotationForMethod, "Found annotation should be object");
@@ -56,21 +42,19 @@ class AnnotationRegistration
         $this->annotationForMethod = $annotationForMethod;
         $this->className = $className;
         $this->methodName = $methodName;
+        $this->methodAnnotations = $methodAnnotations;
 
         $this->initialize($annotationForClass, $className);
+        $this->classAnnotations = $classAnnotations;
     }
 
     /**
-     * @param $annotationForClass
-     * @param $annotationForMethod
-     * @param string $className
-     * @param string $methodName
-     * @return AnnotationRegistration
-     * @throws \Ecotone\Messaging\MessagingException
+     * @param object[] $classAnnotations
+     * @param object[] $methodAnnotations
      */
-    public static function create($annotationForClass, $annotationForMethod, string $className, string $methodName) : self
+    public static function create(object $annotationForClass, object $annotationForMethod, string $className, string $methodName, array $classAnnotations, array $methodAnnotations) : self
     {
-        return new self($annotationForClass, $annotationForMethod, $className, $methodName);
+        return new self($annotationForClass, $annotationForMethod, $className, $methodName, $classAnnotations, $methodAnnotations);
     }
 
     /**
@@ -111,6 +95,33 @@ class AnnotationRegistration
     public function getMethodName(): string
     {
         return $this->methodName;
+    }
+
+    public function getMethodAnnotations(): array
+    {
+        return $this->methodAnnotations;
+    }
+
+    public function hasMethodAnnotation(Type $typeDescriptor) : bool
+    {
+        foreach ($this->methodAnnotations as $methodAnnotation) {
+            if (TypeDescriptor::createFromVariable($methodAnnotation)->equals($typeDescriptor)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasClassAnnotation(Type $typeDescriptor) : bool
+    {
+        foreach ($this->classAnnotations as $classAnnotation) {
+            if (TypeDescriptor::createFromVariable($classAnnotation)->equals($typeDescriptor)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

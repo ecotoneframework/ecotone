@@ -361,7 +361,9 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
                             $this->getAnnotationForClass($className, $classAnnotationName),
                             $methodAnnotation,
                             $className,
-                            $method
+                            $method,
+                            $this->getCachedAnnotationsForClass($className),
+                            $methodAnnotations
                         );
 
                         $registrations[] = $annotationRegistration;

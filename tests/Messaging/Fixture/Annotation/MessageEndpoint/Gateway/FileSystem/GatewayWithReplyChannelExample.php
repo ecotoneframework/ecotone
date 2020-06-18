@@ -8,9 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 
 /**
- * Class GatewayWithReplyChannelExample
- * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @MessageEndpoint()
  */
 interface GatewayWithReplyChannelExample

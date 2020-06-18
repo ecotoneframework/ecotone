@@ -26,7 +26,7 @@
         }
     },
     "require": {
-        "php": ">=7.3.0",
+        "php": ">=7.4",
         "ramsey/uuid": "^3.0|^4.0",
         "ocramius/proxy-manager": "^2.1.1",
         "doctrine/annotations": "^1.6.0",

@@ -294,6 +294,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->channelAdapters as $channelAdapter) {
             $channelAdapter->withEndpointAnnotations(array_merge($channelAdapter->getEndpointAnnotations(), $pollableEndpointAnnotations));
         }
+
         /** @var BeforeSendChannelInterceptorBuilder[] $beforeSendInterceptors */
         $beforeSendInterceptors = [];
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
@@ -370,19 +371,23 @@ final class MessagingSystemConfiguration implements Configuration
             $asynchronousChannels[] = $asynchronousMessageChannel;
             foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
                 if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
-                    $targetChannelName = $messageHandlerBuilder->getInputMessageChannelName() . ".async";
-                    $messageHandlerBuilders[] = TransformerBuilder::createHeaderEnricher([
-                        CommandBus::CHANNEL_NAME_BY_NAME => null,
-                        CommandBus::CHANNEL_NAME_BY_OBJECT => null,
-                        EventBus::CHANNEL_NAME_BY_OBJECT => null,
-                        EventBus::CHANNEL_NAME_BY_NAME => null,
-                        MessageHeaders::REPLY_CHANNEL => null,
-                        MessageHeaders::ROUTING_SLIP => $targetChannelName
-                    ])
-                        ->withEndpointId($targetChannelName)
-                        ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
-                        ->withOutputMessageChannel($asynchronousMessageChannel);
+                    $originalInputChannelName = $messageHandlerBuilder->getInputMessageChannelName();
+                    $targetChannelName = $originalInputChannelName . ".async";
                     $messageHandlerBuilder->withInputChannelName($targetChannelName);
+
+                    $messageHandlerBuilders[$targetChannelName] = (
+                        TransformerBuilder::createHeaderEnricher([
+                            CommandBus::CHANNEL_NAME_BY_NAME => null,
+                            CommandBus::CHANNEL_NAME_BY_OBJECT => null,
+                            EventBus::CHANNEL_NAME_BY_OBJECT => null,
+                            EventBus::CHANNEL_NAME_BY_NAME => null,
+                            MessageHeaders::REPLY_CHANNEL => null,
+                            MessageHeaders::ROUTING_SLIP => $targetChannelName
+                        ])
+                            ->withEndpointId($targetChannelName)
+                            ->withInputChannelName($originalInputChannelName)
+                            ->withOutputMessageChannel($asynchronousMessageChannel)
+                    );
 
                     if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->pollingMetadata)) {
                         $this->pollingMetadata[$targetChannelName] = $this->pollingMetadata[$messageHandlerBuilder->getEndpointId()];
@@ -403,9 +408,9 @@ final class MessagingSystemConfiguration implements Configuration
             $bridgeBuilder = ChainMessageHandlerBuilder::create()
                 ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), "handle"))
                 ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), "handle"));
-            $messageHandlerBuilders[] = $bridgeBuilder
-                ->withEndpointId($asynchronousChannel)
-                ->withInputChannelName($asynchronousChannel);
+            $messageHandlerBuilders[$asynchronousChannel] = $bridgeBuilder
+                ->withInputChannelName($asynchronousChannel)
+                ->withEndpointId($asynchronousChannel);
         }
 
         $this->messageHandlerBuilders = $messageHandlerBuilders;

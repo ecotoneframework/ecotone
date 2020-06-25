@@ -603,7 +603,7 @@ class TypeResolver
                 $declaringClass->getName(),
                 $annotationParser,
                 $property,
-            (string)$property->getType() === TypeDescriptor::ARRAY ? $this->getPropertyDocblockTypeHint($reflectionClassOrTrait, $property->getDeclaringClass(), $property->getDeclaringClass(), $property) : null
+            ($property->getType() && $property->getType()->getName() === TypeDescriptor::ARRAY) ? $this->getPropertyDocblockTypeHint($reflectionClassOrTrait, $property->getDeclaringClass(), $property->getDeclaringClass(), $property) : null
         );
     }
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config;
 
+use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
@@ -283,9 +284,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("asyncChannel"))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $replyChannel = QueueChannel::create();
         $message = MessageBuilder::withPayload(2)
-            ->setReplyChannel($replyChannel)
             ->build();
 
         /** @var MessageChannel $channel */
@@ -295,6 +294,41 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertNull($calculatingService->getLastResult());
         $configuredMessagingSystem->runSeparatelyRunningEndpointBy("asyncChannel");
         $this->assertEquals(2, $calculatingService->getLastResult());
+    }
+
+    public function test_registering_before_call_intercepted_asynchronous_endpoint()
+    {
+        $calculatingService = CalculatingService::create(1);
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference($calculatingService, "result")
+                    ->withEndpointId("endpointId")
+                    ->withInputChannelName("inputChannel")
+            )
+            ->registerAsynchronousEndpoint("asyncChannel", "endpointId")
+            ->registerBeforeMethodInterceptor(MethodInterceptor::create(
+                "",
+                InterfaceToCall::create(CalculatingService::class, "sum"),
+                ServiceActivatorBuilder::createWithDirectReference($calculatingService, "sum"),
+                1,
+                "@(" . AsynchronousRunningEndpoint::class . ")"
+            ))
+            ->registerPollingMetadata(PollingMetadata::create("asyncChannel")->setExecutionAmountLimit(1))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("asyncChannel"))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $message = MessageBuilder::withPayload(2)
+            ->build();
+
+        /** @var MessageChannel $channel */
+        $channel = $configuredMessagingSystem->getMessageChannelByName("inputChannel");
+
+        $channel->send($message);
+        $this->assertNull($calculatingService->getLastResult());
+        $configuredMessagingSystem->runSeparatelyRunningEndpointBy("asyncChannel");
+        $this->assertEquals(3, $calculatingService->getLastResult());
     }
 
     public function test_throwing_exception_if_register_polling_metadata_for_non_existing_endpoint()

@@ -20,7 +20,7 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserId;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
  * @AddUserId()
- * @Asynchronous(channelName="orders")
+ * @Asynchronous("orders")
  */
 class Order
 {

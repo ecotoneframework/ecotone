@@ -7,7 +7,7 @@ namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
  * @package Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class CreateOrderCommand implements IncreaseAmountCommand
+class CreateOrderCommand
 {
     /**
      * @var string

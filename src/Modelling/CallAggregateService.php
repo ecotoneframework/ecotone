@@ -38,14 +38,6 @@ class CallAggregateService
      */
     private $aroundMethodInterceptors;
     /**
-     * @var bool
-     */
-    private $withFactoryRedirectOnFoundMethodName;
-    /**
-     * @var array|ParameterConverterBuilder[]
-     */
-    private $withFactoryRedirectOnFoundParameterConverters;
-    /**
      * @var string|null
      */
     private $eventSourcedFactoryMethod;
@@ -53,36 +45,24 @@ class CallAggregateService
      * @var bool
      */
     private $isCommandHandler;
+    private string $aggregateClassName;
+    private string $aggregateMethodName;
+    private bool $isEventSourced;
 
-    /**
-     * ServiceCallToAggregateAdapter constructor.
-     *
-     * @param ChannelResolver $channelResolver
-     * @param array|ParameterConverterBuilder[] $parameterConverterBuilders
-     * @param AroundMethodInterceptor[] $aroundMethodInterceptors
-     * @param ReferenceSearchService $referenceSearchService
-     * @param string $withFactoryRedirectOnFoundMethodName
-     * @param ParameterConverterBuilder[] $withFactoryRedirectOnFoundParameterConverters
-     * @param string|null $eventSourcedFactoryMethod
-     * @param bool $isCommand
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function __construct(ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService,
-                                string $withFactoryRedirectOnFoundMethodName, array $withFactoryRedirectOnFoundParameterConverters, ?string $eventSourcedFactoryMethod, bool $isCommand
-    )
+    public function __construct(string $aggregateClassName, string $methodName, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, ?string $eventSourcedFactoryMethod, bool $isCommand)
     {
         Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
-        Assert::allInstanceOfType($withFactoryRedirectOnFoundParameterConverters, ParameterConverterBuilder::class);
         Assert::allInstanceOfType($aroundMethodInterceptors, AroundInterceptorReference::class);
 
         $this->parameterConverterBuilders = $parameterConverterBuilders;
         $this->channelResolver = $channelResolver;
         $this->referenceSearchService = $referenceSearchService;
         $this->aroundMethodInterceptors = $aroundMethodInterceptors;
-        $this->withFactoryRedirectOnFoundMethodName = $withFactoryRedirectOnFoundMethodName;
-        $this->withFactoryRedirectOnFoundParameterConverters = $withFactoryRedirectOnFoundParameterConverters;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
         $this->isCommandHandler = $isCommand;
+        $this->aggregateClassName = $aggregateClassName;
+        $this->aggregateMethodName = $methodName;
+        $this->isEventSourced = $isEventSourced;
     }
 
     public function call(Message $message) : ?Message
@@ -91,37 +71,24 @@ class CallAggregateService
                             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
                             : null;
 
-        if ($aggregate && $this->withFactoryRedirectOnFoundMethodName) {
-            $methodInvoker = MethodInvoker::createWith(
-                $aggregate,
-                $this->withFactoryRedirectOnFoundMethodName,
-                $this->withFactoryRedirectOnFoundParameterConverters,
-                $this->referenceSearchService,
-                $this->channelResolver,
-                $this->aroundMethodInterceptors,
-                [],
-                true
-            );
-        }else {
-            $methodInvoker = MethodInvoker::createWith(
-                $aggregate ? $aggregate : $message->getHeaders()->get(AggregateMessage::CLASS_NAME),
-                $message->getHeaders()->get(AggregateMessage::METHOD_NAME),
-                $this->parameterConverterBuilders,
-                $this->referenceSearchService,
-                $this->channelResolver,
-                $this->aroundMethodInterceptors,
-                [],
-                true
-            );
-        }
+
+        $methodInvoker = MethodInvoker::createWith(
+            $aggregate ? $aggregate : $this->aggregateClassName,
+            $this->aggregateMethodName,
+            $this->parameterConverterBuilders,
+            $this->referenceSearchService,
+            $this->channelResolver,
+            $this->aroundMethodInterceptors,
+            []
+        );
 
         $resultMessage = MessageBuilder::fromMessage($message);
         $result = $methodInvoker->processMessage($message);
 
         if (!$aggregate) {
-            if ($message->getHeaders()->get(AggregateMessage::IS_EVENT_SOURCED)) {
+            if ($this->isEventSourced) {
                 $resultMessage = $resultMessage
-                    ->setHeader(AggregateMessage::AGGREGATE_OBJECT, call_user_func([$message->getHeaders()->get(AggregateMessage::CLASS_NAME), $this->eventSourcedFactoryMethod], $result));
+                    ->setHeader(AggregateMessage::AGGREGATE_OBJECT, call_user_func([$this->aggregateClassName, $this->eventSourcedFactoryMethod], $result));
             }else {
                 $resultMessage = $resultMessage
                     ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $result);

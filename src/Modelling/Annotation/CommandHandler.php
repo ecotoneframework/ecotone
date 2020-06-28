@@ -38,12 +38,6 @@ class CommandHandler extends InputOutputEndpointAnnotation
      */
     public $redirectToOnAlreadyExists = "";
     /**
-     * Does the handler allow for same command class name / channel name handler
-     *
-     * @var bool
-     */
-    public $mustBeUnique = true;
-    /**
      * @var array
      */
     public $identifierMetadataMapping = [];

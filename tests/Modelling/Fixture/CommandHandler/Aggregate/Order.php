@@ -64,12 +64,15 @@ class Order implements VersionAggregate
      */
     public static function createWith(CreateOrderCommand $command) : self
     {
-        $order = new self($command);
-
-        return $order;
+        return new self($command);
     }
 
     public function increaseAmount(CreateOrderCommand $command) : void
+    {
+        $this->amount += $command->getAmount();
+    }
+    
+    public function increaseAmountUsingDifferentClass(IncreaseAmountCommand $command) : void
     {
         $this->amount += $command->getAmount();
     }

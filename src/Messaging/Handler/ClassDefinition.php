@@ -14,7 +14,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class ClassDefinition
 {
-    private Type $classDescriptor;
+    private TypeDescriptor $classDescriptor;
     /**
      * @var ClassPropertyDefinition[]
      */
@@ -29,17 +29,7 @@ class ClassDefinition
     private array $publicMethodNames;
     private bool $isAnnotation;
 
-    /**
-     * ClassDefinition constructor.
-     * @param Type $classDescriptor
-     * @param ClassPropertyDefinition[] $properties
-     * @param object[] $annotations
-     * @param string[] $publicMethodNames
-     * @param bool $isAnnotation
-     * @throws InvalidArgumentException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    private function __construct(Type $classDescriptor, iterable $properties, iterable $annotations, array $publicMethodNames, bool $isAnnotation)
+    private function __construct(TypeDescriptor $classDescriptor, array $properties, array $annotations, array $publicMethodNames, bool $isAnnotation)
     {
         Assert::isTrue($classDescriptor->isClassOrInterface(), "Cannot create class definition from non class " . $classDescriptor->toString());
 
@@ -50,15 +40,7 @@ class ClassDefinition
         $this->isAnnotation = $isAnnotation;
     }
 
-    /**
-     * @param Type $classType
-     * @return ClassDefinition
-     * @throws TypeDefinitionException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public static function createFor(Type $classType) : self
+    public static function createFor(TypeDescriptor $classType) : self
     {
         $annotationParser = InMemoryAnnotationRegistrationService::createFrom([$classType->toString()]);
         $typeResolver = TypeResolver::create();
@@ -74,16 +56,7 @@ class ClassDefinition
         );
     }
 
-    /**
-     * @param Type $classType
-     * @param AnnotationParser $annotationParser
-     * @return ClassDefinition
-     * @throws TypeDefinitionException
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public static function createUsingAnnotationParser(Type $classType, AnnotationParser $annotationParser)
+    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationParser $annotationParser)
     {
         $typeResolver = TypeResolver::createWithAnnotationParser($annotationParser);
 
@@ -129,6 +102,11 @@ class ClassDefinition
         }
 
         throw InvalidArgumentException::create("There is no property with name {$name} in {$this->classDescriptor->toString()}");
+    }
+
+    public function getClassType() : TypeDescriptor
+    {
+        return $this->classDescriptor;
     }
 
     public function hasProperty(string $name) : bool
@@ -179,5 +157,10 @@ class ClassDefinition
         }
 
         return false;
+    }
+
+    public function __toString()
+    {
+        return $this->getClassType()->toString();
     }
 }

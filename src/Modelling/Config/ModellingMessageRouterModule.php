@@ -112,14 +112,14 @@ class ModellingMessageRouterModule implements AnnotationModule
         $uniqueChannels = [];
         $objectCommandHandlers = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, CommandHandler::class) as $registration) {
-            $classChannel = ModellingHandlerModule::getClassChannelFor($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getHandlerChannel($registration);
                 $uniqueChannels[$classChannel][] = $registration;
             }
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, CommandHandler::class) as $registration) {
-            $classChannel = ModellingHandlerModule::getClassChannelFor($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getHandlerChannel($registration);
                 $uniqueChannels[$classChannel][] = $registration;
@@ -168,7 +168,7 @@ class ModellingMessageRouterModule implements AnnotationModule
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, QueryHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
-            $classChannel = ModellingHandlerModule::getClassChannelFor($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getHandlerChannel($registration);
                 $uniqueChannels[$classChannel][] = $registration;
@@ -177,7 +177,7 @@ class ModellingMessageRouterModule implements AnnotationModule
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, QueryHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
-            $classChannel = ModellingHandlerModule::getClassChannelFor($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getHandlerChannel($registration);
                 $uniqueChannels[$classChannel][] = $registration;
@@ -223,7 +223,7 @@ class ModellingMessageRouterModule implements AnnotationModule
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
-            $classChannel = ModellingHandlerModule::getClassChannelFor($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectEventHandlers[$classChannel][] = ModellingHandlerModule::getHandlerChannel($registration);
             }
@@ -231,7 +231,7 @@ class ModellingMessageRouterModule implements AnnotationModule
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
-            $classChannel = ModellingHandlerModule::getClassChannelFor($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectEventHandlers[$classChannel][] = ModellingHandlerModule::getHandlerChannel($registration);
             }
@@ -282,7 +282,7 @@ class ModellingMessageRouterModule implements AnnotationModule
 
     private static function verifyInputChannel(AnnotationRegistration $annotationRegistration) : void
     {
-        if (!ModellingHandlerModule::getNamedMessageChannelFor($annotationRegistration) && !ModellingHandlerModule::getClassChannelFor($annotationRegistration)) {
+        if (!ModellingHandlerModule::getNamedMessageChannelFor($annotationRegistration) && !ModellingHandlerModule::getPayloadClassIfAny($annotationRegistration)) {
             throw ConfigurationException::create("Handler {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()} has no input channel information. Configure inputChannelName or type hint first argument as class");
         }
     }

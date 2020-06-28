@@ -114,6 +114,8 @@ class GatewayProxyBuilder implements GatewayBuilder
      */
     private function __construct(string $referenceName, string $interfaceName, string $methodName, string $requestChannelName)
     {
+        Assert::notNullAndEmpty($requestChannelName, "Request channel for {$interfaceName}:{$methodName} can not be empty.");
+
         $this->referenceName = $referenceName;
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;

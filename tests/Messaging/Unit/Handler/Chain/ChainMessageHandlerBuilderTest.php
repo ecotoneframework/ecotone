@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Chain;
 
+use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -210,7 +211,37 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function test_setting_output_channel()
+    public function test_passing_through_internal_output_channel_if_exists()
+    {
+        $internalOutputChannelName = "internalOutputChannelName";
+        $externalOutputChannelName = "externalOutputChannelName";
+        $internalOutputChannel = DirectChannel::create();
+        $internalOutputChannel->subscribe(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty()));
+        $externalOutputChannel = QueueChannel::create();
+
+        $chainHandler = ChainMessageHandlerBuilder::create()
+            ->withOutputMessageChannel($internalOutputChannelName)
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"));
+
+        $chainHandler = ChainMessageHandlerBuilder::create()
+                ->withOutputMessageChannel($externalOutputChannelName)
+                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                ->chain($chainHandler)
+                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+                ->build(InMemoryChannelResolver::createFromAssociativeArray([
+                    $internalOutputChannelName => $internalOutputChannel,
+                    $externalOutputChannelName => $externalOutputChannel
+                ]), InMemoryReferenceSearchService::createEmpty());
+
+
+        $chainHandler->handle(MessageBuilder::withPayload(0)->build());
+
+        $this->assertEquals(10, $externalOutputChannel->receive()->getPayload());
+    }
+
+    public function test_chaining_multiple_handlers_with_output_channel()
     {
         $outputChannelName = "outputChannelName";
         $outputChannel = QueueChannel::create();

@@ -27,15 +27,15 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     /**
      * @var MessageHandlerBuilderWithOutputChannel[]
      */
-    private $chainedMessageHandlerBuilders;
+    private array $chainedMessageHandlerBuilders;
     /**
      * @var string[]
      */
-    private $requiredReferences = [];
+    private array $requiredReferences = [];
     /**
      * @var MessageHandlerBuilder|null
      */
-    private $outputMessageHandler;
+    private ?MessageHandlerBuilder $outputMessageHandler = null;
 
     /**
      * ChainMessageHandlerBuilder constructor.
@@ -44,23 +44,23 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     {
     }
 
-    /**
-     * @return ChainMessageHandlerBuilder
-     */
     public static function create(): self
     {
         return new self();
     }
 
-    /**
-     * @param MessageHandlerBuilderWithOutputChannel $messageHandler
-     * @return ChainMessageHandlerBuilder
-     */
     public function chain(MessageHandlerBuilderWithOutputChannel $messageHandler): self
     {
+        $outputChannelToKeep = $messageHandler->getOutputMessageChannelName();
         $messageHandler
             ->withInputChannelName("")
             ->withOutputMessageChannel("");
+
+        if ($outputChannelToKeep) {
+            $messageHandler = ChainMessageHandlerBuilder::create()
+                ->chain($messageHandler)
+                ->chain(new OutputChannelKeeperBuilder($outputChannelToKeep));
+        }
 
         $this->chainedMessageHandlerBuilders[] = $messageHandler;
         foreach ($messageHandler->getRequiredReferenceNames() as $referenceName) {
@@ -95,8 +95,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
         if (count($this->chainedMessageHandlerBuilders) === 1 && !$this->outputMessageHandler) {
             $singleHandler = $this->chainedMessageHandlerBuilders[0]
-                ->withOutputMessageChannel($this->getOutputMessageChannelName())
-                ;
+                ->withOutputMessageChannel($this->getOutputMessageChannelName());
 
             foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
                 $singleHandler->addAroundInterceptor($aroundInterceptorReference);

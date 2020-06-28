@@ -90,14 +90,7 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         return new self($objectToInvokeOnReferenceName, $methodName);
     }
 
-    /**
-     * @param object $directObjectReference
-     * @param string $methodName
-     *
-     * @return ServiceActivatorBuilder
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public static function createWithDirectReference($directObjectReference, string $methodName) : self
+    public static function createWithDirectReference(object $directObjectReference, string $methodName) : self
     {
         return self::create("", $methodName)
                         ->withDirectObjectReference($directObjectReference);

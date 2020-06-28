@@ -43,135 +43,55 @@ use ReflectionException;
  */
 class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
-    const DEFAULT_FILTER_OUT_ON_NOT_FOUND = false;
-
-    /**
-     * @var string
-     */
-    private $aggregateClassName;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var InterfaceToCall
-     */
-    private $interfaceToCall;
-    /**
-     * @var array|ParameterConverterBuilder[]
-     */
-    private $methodParameterConverterBuilders = [];
-    /**
-     * @var string[]
-     */
-    private $requiredReferences = [];
-    /**
-     * @var bool
-     */
-    private $isCommandHandler;
-    /**
-     * @var string[]
-     */
-    private $aggregateRepositoryReferenceNames = [];
-    /**
-     * @var bool
-     */
-    private $isFactoryMethod;
-    /**
-     * @var bool
-     */
-    private $isVoidMethod;
-    /**
-     * @var string[]
-     */
-    private $payloadIdentifierMapping;
-    /**
-     * @var string[]
-     */
-    private $metadataIdentifierMapping;
-    /**
-     * @var ?array
-     */
-    private $versionMapping;
-    /**
-     * @var bool
-     */
-    private $dropMessageOnNotFound = self::DEFAULT_FILTER_OUT_ON_NOT_FOUND;
-    /**
-     * @var string
-     */
-    private $withFactoryRedirectOnFoundMethodName = "";
+    private string $aggregateClassName;
+    private string $methodName;
+    private InterfaceToCall $interfaceToCall;
     /**
      * @var ParameterConverterBuilder[]
      */
-    private $withFactoryRedirectOnFoundParameterConverters = [];
+    private array $methodParameterConverterBuilders = [];
     /**
-     * @var string|null
+     * @var string[]
      */
-    private $aggregateMethodWithEvents;
+    private array $requiredReferences = [];
     /**
-     * @var string|null
+     * @var bool
      */
-    private $eventSourcedFactoryMethod;
+    private bool $isCommandHandler;
+    /**
+     * @var string[]
+     */
+    private array $aggregateRepositoryReferenceNames = [];
+    private bool $isVoidMethod;
+    private ?array $versionMapping;
+    private array $aggregateIdentifierMapping;
+    private ?string $aggregateMethodWithEvents;
+    private ?string $eventSourcedFactoryMethod;
 
-    /**
-     * AggregateCallingCommandHandlerBuilder constructor.
-     *
-     * @param string      $aggregateClassName
-     * @param string      $methodName
-     * @param bool        $isCommandHandler
-     * @param string|null $handledMessageClassName
-     * @param array       $metadataIdentifierMapping
-     *
-     * @throws AnnotationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
-    private function __construct(string $aggregateClassName, string $methodName, bool $isCommandHandler, ?string $handledMessageClassName, array $metadataIdentifierMapping)
+    private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName, bool $isCommandHandler)
     {
-        $this->aggregateClassName = $aggregateClassName;
+        $this->aggregateClassName = $aggregateClassDefinition->getClassType()->toString();
         $this->methodName = $methodName;
         $this->isCommandHandler = $isCommandHandler;
 
-        $this->initialize($aggregateClassName, $handledMessageClassName, $metadataIdentifierMapping);
+        $this->initialize($aggregateClassDefinition);
     }
 
-    /**
-     * @param string $aggregateClassName
-     * @param string|null $handledMessageClassName
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     * @throws AnnotationException
-     */
-    private function initialize(string $aggregateClassName, ?string $handledMessageClassName, array $metadataIdentifierMapping): void
+    private function initialize(ClassDefinition $aggregateClassDefinition): void
     {
         $interfaceToCall = InterfaceToCall::create($this->aggregateClassName, $this->methodName);
-        $this->isFactoryMethod = $interfaceToCall->isStaticallyCalled();
         $this->isVoidMethod = $interfaceToCall->getReturnType()->isVoid();
-        $this->metadataIdentifierMapping = $metadataIdentifierMapping;
 
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create($aggregateClassName));
-        $aggregatePayloadIdentifiersMapping = [];
         $aggregateMethodWithEvents = null;
         $aggregateVersionPropertyName = null;
         $eventSourcedFactoryMethod = null;
 
         $aggregateFactoryAnnotation = TypeDescriptor::create(AggregateFactory::class);
         $aggregateEventsAnnotation = TypeDescriptor::create(AggregateEvents::class);
-        foreach ($classDefinition->getPublicMethodNames() as $method) {
-            $methodToCheck = InterfaceToCall::create($aggregateClassName, $method);
+        foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
+            $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
 
             if ($methodToCheck->hasMethodAnnotation($aggregateFactoryAnnotation)) {
-                $factoryMethodInterface = InterfaceToCall::create($aggregateClassName, $method);
-                if (!$factoryMethodInterface->hasSingleArgument()) {
-                    throw InvalidArgumentException::create("Event sourced factory method {$aggregateClassName}:{$method} should contain only one iterable parameter");
-                }
-                if (!$factoryMethodInterface->isStaticallyCalled()) {
-                    throw InvalidArgumentException::create("Event sourced factory method {$aggregateClassName}:{$method} should be static");
-                }
-
                 $eventSourcedFactoryMethod = $method;
                 break;
             }
@@ -181,115 +101,38 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             }
         }
 
-        $aggregateIdentififerAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
+        $aggregateIdentifierAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
         $versionAnnotation = TypeDescriptor::create(Version::class);
-        foreach ($classDefinition->getProperties() as $property) {
-            if ($property->hasAnnotation($aggregateIdentififerAnnotation)) {
-                $aggregatePayloadIdentifiersMapping[$property->getName()] = null;
-            }
+        $aggregateIdentifiers = [];
+        foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($versionAnnotation)) {
                 $aggregateVersionPropertyName = $property->getName();
             }
-        }
-
-        if (empty($aggregatePayloadIdentifiersMapping)) {
-            throw InvalidArgumentException::create("Aggregate {$aggregateClassName} has no identifiers defined. How you forgot to mark @AggregateIdentifier?");
-        }
-
-        $messageProperties = [];
-        $aggregateVersionMapping = null;
-        if ($handledMessageClassName) {
-            $handledMessageClassNameDefinition = ClassDefinition::createFor(TypeDescriptor::create($handledMessageClassName));
-            $targetAggregateIdentifierAnnotation = TypeDescriptor::create(TargetAggregateIdentifier::class);
-            $targetAggregateVersion = TypeDescriptor::create(TargetAggregateVersion::class);
-            foreach ($handledMessageClassNameDefinition->getProperties() as $property) {
-                if ($property->hasAnnotation($targetAggregateIdentifierAnnotation)) {
-                    /** @var TargetAggregateIdentifier $annotation */
-                    $annotation = $property->getAnnotation($targetAggregateIdentifierAnnotation);
-                    $mappingName = $annotation->identifierName ? $annotation->identifierName : $property->getName();
-
-                    if ($classDefinition->hasProperty($mappingName) && $classDefinition->getProperty($mappingName)->hasAnnotation($aggregateIdentififerAnnotation)) {
-                        $aggregatePayloadIdentifiersMapping[$mappingName] = $property->getName();
-                    }
-                }
-                if ($property->hasAnnotation($targetAggregateVersion)) {
-                    $aggregateVersionMapping[$property->getName()] = $aggregateVersionPropertyName;
-                }
+            if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
+                $aggregateIdentifiers[$property->getName()] = null;
             }
-
-            $messageProperties = $handledMessageClassNameDefinition->getProperties();
         }
 
+        $aggregateVersionMapping = null;
         if (!$aggregateVersionMapping && $aggregateVersionPropertyName) {
             $aggregateVersionMapping[$aggregateVersionPropertyName] = $aggregateVersionPropertyName;
         }
 
-        foreach ($this->metadataIdentifierMapping as $identifierName => $mapping) {
-            if (!in_array($identifierName, array_keys($aggregatePayloadIdentifiersMapping))) {
-                throw ConfigurationException::create("Aggregate {$aggregateClassName} for {$handledMessageClassName} has metadata mapping for non existing identifier key {$identifierName}. It should be {\"aggregateId\":\"metadataIdKey\"}?");
-            }
-        }
-
-        foreach ($aggregatePayloadIdentifiersMapping as $aggregateIdentifierName => $aggregateIdentifierMappingKey) {
-            if (is_null($aggregateIdentifierMappingKey)) {
-                $mappingKey = null;
-                foreach ($messageProperties as $property) {
-                    if ($aggregateIdentifierName === $property->getName()) {
-                        $mappingKey = $property->getName();
-                    }
-                }
-
-                if (is_null($handledMessageClassName) && is_null($mappingKey)) {
-                    $aggregatePayloadIdentifiersMapping[$aggregateIdentifierName] = $aggregateIdentifierName;
-                } else if (is_null($mappingKey) && !$this->isFactoryMethod) {
-                    if (!$this->hasIdentifierMappingInMetadata($metadataIdentifierMapping, $aggregateIdentifierName)) {
-                        throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` in {$handledMessageClassName} for {$aggregateClassName}. How you forgot to mark @TargetAggregateIdentifier?");
-                    }
-                } else {
-                    $aggregatePayloadIdentifiersMapping[$aggregateIdentifierName] = $mappingKey;
-                }
-            }
-        }
-
-        $this->payloadIdentifierMapping = $aggregatePayloadIdentifiersMapping;
         $this->versionMapping           = $aggregateVersionMapping;
         $this->interfaceToCall = $interfaceToCall;
         $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
+        $this->aggregateIdentifierMapping = $aggregateIdentifiers;
     }
 
-    /**
-     * @param string      $aggregateClassName
-     * @param string      $methodName
-     * @param string|null $handledMessageClassName
-     *
-     * @param array       $metadataIdentifierMapping
-     *
-     * @return AggregateMessageHandlerBuilder
-     * @throws AnnotationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
-    public static function createAggregateCommandHandlerWith(string $aggregateClassName, string $methodName, ?string $handledMessageClassName, array $metadataIdentifierMapping = []): self
+    public static function createAggregateCommandHandlerWith(ClassDefinition $aggregateClassDefinition, string $methodName): self
     {
-        return new self($aggregateClassName, $methodName, true, $handledMessageClassName, $metadataIdentifierMapping);
+        return new self($aggregateClassDefinition, $methodName, true);
     }
 
-    /**
-     * @param string $aggregateClassName
-     * @param string|null $methodName
-     *
-     * @param string $handledMessageClassName
-     * @return AggregateMessageHandlerBuilder
-     * @throws AnnotationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
-    public static function createAggregateQueryHandlerWith(string $aggregateClassName, string $methodName, ?string $handledMessageClassName): self
+    public static function createAggregateQueryHandlerWith(ClassDefinition $aggregateClassDefinition, string $methodName): self
     {
-        return new self($aggregateClassName, $methodName, false, $handledMessageClassName, []);
+        return new self($aggregateClassDefinition, $methodName, false);
     }
 
     /**
@@ -320,18 +163,6 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     }
 
     /**
-     * @param bool $dropMessageOnNotFound
-     *
-     * @return AggregateMessageHandlerBuilder
-     */
-    public function withFilterOutOnNotFound(bool $dropMessageOnNotFound): self
-    {
-        $this->dropMessageOnNotFound = $dropMessageOnNotFound;
-
-        return $this;
-    }
-
-    /**
      * @inheritDoc
      */
     public function withMethodParameterConverters(array $methodParameterConverterBuilders): self
@@ -344,27 +175,15 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
     }
 
     /**
-     * @param string $redirectOnFoundMethod
-     * @param ParameterConverterBuilder[] $methodConverters
-     * @return AggregateMessageHandlerBuilder
-     */
-    public function withRedirectToOnAlreadyExists(string $redirectOnFoundMethod, array $methodConverters): self
-    {
-        $this->withFactoryRedirectOnFoundMethodName = $redirectOnFoundMethod;
-        $this->withFactoryRedirectOnFoundParameterConverters = $methodConverters;
-
-        return $this;
-    }
-
-    /**
      * @inheritDoc
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         $chainCqrsMessageHandler = ChainMessageHandlerBuilder::create();
         $aggregateRepository = $this->getAggregateRepository($referenceSearchService);
+        $isEventSourced = $aggregateRepository instanceof EventSourcedRepository;
 
-        if ($aggregateRepository instanceof EventSourcedRepository && !$this->eventSourcedFactoryMethod) {
+        if ($isEventSourced && !$this->eventSourcedFactoryMethod) {
             $repositoryClass = get_class($aggregateRepository);
             throw InvalidArgumentException::create("Based on your repository {$repositoryClass}, you want to create Event Sourced Aggregate. You must define static method marked with @AggregateFactory for aggregate recreation from events");
         }
@@ -372,15 +191,7 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         $chainCqrsMessageHandler
             ->chain(
                 ServiceActivatorBuilder::createWithDirectReference(
-                    $this->createLoadAggregateService($aggregateRepository),
-                    "load"
-                )
-            );
-
-        $chainCqrsMessageHandler
-            ->chain(
-                ServiceActivatorBuilder::createWithDirectReference(
-                    new CallAggregateService($channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, $this->withFactoryRedirectOnFoundMethodName, $this->withFactoryRedirectOnFoundParameterConverters, $this->eventSourcedFactoryMethod, $this->isCommandHandler),
+                    new CallAggregateService($this->interfaceToCall->getInterfaceName(), $this->interfaceToCall->getMethodName(), $isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, $this->eventSourcedFactoryMethod, $this->isCommandHandler),
                     "call"
                 )->withPassThroughMessageOnVoidInterface($this->isVoidMethod)
             );
@@ -397,12 +208,15 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
                     ServiceActivatorBuilder::createWithDirectReference(
                         new SaveAggregateService(
                             $this->aggregateClassName,
+                            $this->methodName,
+                            $this->interfaceToCall->isStaticallyCalled(),
                             $aggregateRepository,
                             PropertyEditorAccessor::create($referenceSearchService),
                             $this->getPropertyReaderAccessor(),
                             $lazyEventBus,
                             $this->aggregateMethodWithEvents,
-                            $this->versionMapping
+                            $this->versionMapping,
+                            $this->aggregateIdentifierMapping
                         ),
                         "save"
                     )
@@ -414,13 +228,6 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
             ->build($channelResolver, $referenceSearchService);
     }
 
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @return object|StandardRepository|EventSourcedRepository
-     * @throws InvalidArgumentException
-     * @throws ReferenceNotFoundException
-     * @throws MessagingException
-     */
     private function getAggregateRepository(ReferenceSearchService $referenceSearchService): object
     {
         $aggregateRepository = null;
@@ -436,34 +243,9 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         return $aggregateRepository;
     }
 
-    /**
-     * @param object $aggregateRepository
-     * @return LoadAggregateService
-     */
-    public function createLoadAggregateService(object $aggregateRepository): LoadAggregateService
-    {
-        return new LoadAggregateService(
-            $aggregateRepository,
-            $this->aggregateClassName,
-            $this->methodName,
-            $this->isFactoryMethod,
-            $this->payloadIdentifierMapping,
-            $this->metadataIdentifierMapping,
-            $this->versionMapping,
-            $this->getPropertyReaderAccessor(),
-            $this->dropMessageOnNotFound,
-            (bool)$this->withFactoryRedirectOnFoundMethodName,
-            $this->eventSourcedFactoryMethod,
-            );
-    }
-
-    /**
-     * @return PropertyReaderAccessor
-     */
     private function getPropertyReaderAccessor(): PropertyReaderAccessor
     {
-        $propertyReader = new PropertyReaderAccessor();
-        return $propertyReader;
+        return new PropertyReaderAccessor();
     }
 
     /**
@@ -471,18 +253,11 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        $interfaces = [
+        return [
             $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->methodName),
-            $interfaceToCallRegistry->getFor(LoadAggregateService::class, "load"),
             $interfaceToCallRegistry->getFor(CallAggregateService::class, "call"),
             $interfaceToCallRegistry->getFor(SaveAggregateService::class, "save")
         ];
-
-        if ($this->withFactoryRedirectOnFoundMethodName) {
-            $interfaces[] = $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->withFactoryRedirectOnFoundMethodName);
-        }
-
-        return $interfaces;
     }
 
     /**
@@ -498,12 +273,6 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         return sprintf("Aggregate Handler - %s:%s with name `%s` for input channel `%s`", $this->aggregateClassName, $this->methodName, $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 
-    /**
-     * @param array $metadataIdentifierMapping
-     * @param       $aggregateIdentifierName
-     *
-     * @return bool
-     */
     private function hasIdentifierMappingInMetadata(array $metadataIdentifierMapping, $aggregateIdentifierName): bool
     {
         foreach ($metadataIdentifierMapping as $identifierNameHeaderMapping => $headerName) {
@@ -513,5 +282,5 @@ class AggregateMessageHandlerBuilder extends InputOutputMessageHandlerBuilder im
         }
 
         return false;
-}
+    }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
 
 /**
  * Class InputOutputMessageHandlerBuilder
@@ -30,7 +31,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      */
     private $requiredInterceptorReferenceNames = [];
     /**
-     * @var AroundInterceptorReference[]
+     * @var AroundMethodInterceptor[]
      */
     protected $orderedAroundInterceptors = [];
     /**

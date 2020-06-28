@@ -23,8 +23,8 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateMessage;
-use Ecotone\Modelling\AggregateMessageConversionService;
-use Ecotone\Modelling\AggregateMessageConversionServiceBuilder;
+use Ecotone\Modelling\AggregateIdentifierRetrevingService;
+use Ecotone\Modelling\AggregateIdentifierRetrevingServiceBuilder;
 use Ecotone\Modelling\AggregateMessageHandlerBuilder;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
@@ -125,8 +125,8 @@ class ModellingHandlerModuleTest extends TestCase
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
-                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                    AggregateMessageConversionServiceBuilder::createWith(DoStuffCommand::class),
+                    InterfaceToCall::create(AggregateIdentifierRetrevingService::class, "convert"),
+                    AggregateIdentifierRetrevingServiceBuilder::createWith(DoStuffCommand::class),
                     Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     AggregateCommandHandlerExample::class . "::doAction"
                 )
@@ -255,8 +255,8 @@ class ModellingHandlerModuleTest extends TestCase
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
-                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                    AggregateMessageConversionServiceBuilder::createWith(TypeDescriptor::ARRAY),
+                    InterfaceToCall::create(AggregateIdentifierRetrevingService::class, "convert"),
+                    AggregateIdentifierRetrevingServiceBuilder::createWith(TypeDescriptor::ARRAY),
                     Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     MultiMethodAggregateCommandHandlerExample::class . "::doAction1"
                 )
@@ -272,8 +272,8 @@ class ModellingHandlerModuleTest extends TestCase
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
-                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                    AggregateMessageConversionServiceBuilder::createWith(TypeDescriptor::ARRAY),
+                    InterfaceToCall::create(AggregateIdentifierRetrevingService::class, "convert"),
+                    AggregateIdentifierRetrevingServiceBuilder::createWith(TypeDescriptor::ARRAY),
                     Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     MultiMethodAggregateCommandHandlerExample::class . "::doAction2"
                 )
@@ -327,8 +327,8 @@ class ModellingHandlerModuleTest extends TestCase
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
-                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                    AggregateMessageConversionServiceBuilder::createWith(DoStuffCommand::class),
+                    InterfaceToCall::create(AggregateIdentifierRetrevingService::class, "convert"),
+                    AggregateIdentifierRetrevingServiceBuilder::createWith(DoStuffCommand::class),
                     Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     AggregateCommandHandlerWithReferencesExample::class . "::doAction"
                 )
@@ -364,8 +364,8 @@ class ModellingHandlerModuleTest extends TestCase
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     "",
-                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                    AggregateMessageConversionServiceBuilder::createWith(SomeQuery::class),
+                    InterfaceToCall::create(AggregateIdentifierRetrevingService::class, "convert"),
+                    AggregateIdentifierRetrevingServiceBuilder::createWith(SomeQuery::class),
                     Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     AggregateQueryHandlerExample::class . "::doStuff"
                 )
@@ -401,8 +401,8 @@ class ModellingHandlerModuleTest extends TestCase
             ->registerMessageHandler($commandHandler)
             ->registerBeforeMethodInterceptor(MethodInterceptor::create(
                 "",
-                InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                AggregateMessageConversionServiceBuilder::createWith(SomeQuery::class),
+                InterfaceToCall::create(AggregateIdentifierRetrevingService::class, "convert"),
+                AggregateIdentifierRetrevingServiceBuilder::createWith(SomeQuery::class),
                 Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                 AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
             ));
@@ -445,8 +445,8 @@ class ModellingHandlerModuleTest extends TestCase
                 ->registerMessageHandler($commandHandler)
                 ->registerBeforeMethodInterceptor(MethodInterceptor::create(
                     "",
-                    InterfaceToCall::create(AggregateMessageConversionService::class, "convert"),
-                    AggregateMessageConversionServiceBuilder::createWith(SomeQuery::class),
+                    InterfaceToCall::create(AggregateIdentifierRetrevingService::class, "convert"),
+                    AggregateIdentifierRetrevingServiceBuilder::createWith(SomeQuery::class),
                     Precedence::AGGREGATE_MESSAGE_PAYLOAD_CONVERTER,
                     AggregateQueryHandlerWithOutputChannelExample::class . "::doStuff"
                 ))

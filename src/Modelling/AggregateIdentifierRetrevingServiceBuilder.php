@@ -4,6 +4,8 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -18,29 +20,22 @@ use Ecotone\Messaging\Support\Assert;
  * @package Ecotone\Modelling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class AggregateMessageConversionServiceBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
+class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
 {
-    /**
-     * @var string
-     */
-    private $messageClassNameToConvertTo;
+    private ?ClassDefinition $messageClassNameToConvertTo;
+    private ClassDefinition $aggregateClassName;
+    private array $metadataIdentifierMapping;
 
-    /**
-     * AggregateMessageConversionServiceBuilder constructor.
-     * @param string $messageClassNameToConvertTo
-     */
-    private function __construct(string $messageClassNameToConvertTo)
+    private function __construct(ClassDefinition $aggregateClassName, array $metadataIdentifierMapping, ?ClassDefinition $messageClassNameToConvertTo)
     {
         $this->messageClassNameToConvertTo = $messageClassNameToConvertTo;
+        $this->aggregateClassName = $aggregateClassName;
+        $this->metadataIdentifierMapping = $metadataIdentifierMapping;
     }
 
-    /**
-     * @param string $messageClassNameToConvertTo
-     * @return AggregateMessageConversionServiceBuilder
-     */
-    public static function createWith(string $messageClassNameToConvertTo) : self
+    public static function createWith(ClassDefinition $aggregateClassName, array $metadataIdentifierMapping, ?ClassDefinition $messageClassNameToConvertTo) : self
     {
-        return new self($messageClassNameToConvertTo);
+        return new self($aggregateClassName, $metadataIdentifierMapping, $messageClassNameToConvertTo);
     }
 
     /**
@@ -53,7 +48,7 @@ class AggregateMessageConversionServiceBuilder extends InputOutputMessageHandler
 
         Assert::isSubclassOf($conversionService, ConversionService::class, "Have you forgot to register " . ConversionService::REFERENCE_NAME . "?");
 
-        return ServiceActivatorBuilder::createWithDirectReference(new AggregateMessageConversionService($conversionService, $this->messageClassNameToConvertTo), "convert")
+        return ServiceActivatorBuilder::createWithDirectReference(new AggregateIdentifierRetrevingService($conversionService, new PropertyReaderAccessor(), $this->aggregateClassName, $this->metadataIdentifierMapping, $this->messageClassNameToConvertTo), "convert")
                     ->withOutputMessageChannel($this->getOutputMessageChannelName())
                     ->build($channelResolver, $referenceSearchService);
     }
@@ -63,7 +58,7 @@ class AggregateMessageConversionServiceBuilder extends InputOutputMessageHandler
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [$interfaceToCallRegistry->getFor(AggregateMessageConversionService::class, "convert")];
+        return [$interfaceToCallRegistry->getFor(AggregateIdentifierRetrevingService::class, "convert")];
     }
 
     /**
@@ -71,7 +66,7 @@ class AggregateMessageConversionServiceBuilder extends InputOutputMessageHandler
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(AggregateMessageConversionService::class, "convert");
+        return $interfaceToCallRegistry->getFor(AggregateIdentifierRetrevingService::class, "convert");
     }
 
     /**

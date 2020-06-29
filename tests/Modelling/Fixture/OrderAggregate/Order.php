@@ -19,7 +19,6 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserId;
  * @package Test\Ecotone\Amqp\Fixture\Order
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
- * @AddUserId()
  * @Asynchronous("orders")
  */
 class Order

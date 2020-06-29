@@ -28,11 +28,11 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
         return new static([], []);
     }
 
-    public static function createWithExistingAggregate(array $identifiers, array $events) : self
+    public static function createWithExistingAggregate(array $identifiers, string $aggregateClassName, array $events) : self
     {
         $self = static::createEmpty();
 
-        $self->save($identifiers, $events, [], null);
+        $self->save($identifiers, $aggregateClassName, $events, [], null);
 
         return $self;
     }
@@ -52,8 +52,8 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     {
         $key = $this->getKey($identifiers);
 
-        if (isset($this->eventsPerAggregate[$key])) {
-            return $this->eventsPerAggregate[$key];
+        if (isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
+            return $this->eventsPerAggregate[$aggregateClassName][$key];
         }
 
         return null;
@@ -62,17 +62,17 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     /**
      * @inheritDoc
      */
-    public function save(array $identifiers, array $events, array $metadata, ?int $expectedVersion): void
+    public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, ?int $expectedVersion): void
     {
         $key = $this->getKey($identifiers);
 
-        if (!isset($this->eventsPerAggregate[$key])) {
-            $this->eventsPerAggregate[$key] = $events;
+        if (!isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
+            $this->eventsPerAggregate[$aggregateClassName][$key] = $events;
 
             return;
         }
 
-        $this->eventsPerAggregate[$key] = array_merge($this->eventsPerAggregate[$key], $events);
+        $this->eventsPerAggregate[$aggregateClassName][$key] = array_merge($this->eventsPerAggregate[$aggregateClassName][$key], $events);
     }
 
     private function getKey(array $identifiers) : string

@@ -2,14 +2,16 @@
 
 namespace Test\Ecotone\Modelling\Behat\Bootstrap;
 
+use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Ecotone\Messaging\Conversion\MediaType;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
-use Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext;
 
 /**
  * Defines application features from the specific context.
@@ -81,5 +83,89 @@ class DomainContext extends TestCase implements Context
             MediaType::APPLICATION_X_PHP,
             []
         ));
+    }
+
+    /**
+     * @When I register shop with margin :margin
+     */
+    public function iRegisterShopWithMargin(int $margin)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+            "shop.register",
+            MediaType::APPLICATION_X_PHP_ARRAY,
+            ["shopId" => 1, "margin" => $margin]
+        );
+    }
+
+    /**
+     * @Then for :productType product there should be price of :expectedPrice
+     */
+    public function forProductThereShouldBePriceOf(string $productType, int $expectedPrice)
+    {
+        $this->assertEquals(
+            $expectedPrice,
+            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend(
+                "shop.calculatePrice",
+                MediaType::APPLICATION_X_PHP_ARRAY,
+                ["shopId" => 1, "productType" => $productType]
+            )
+        );
+    }
+
+    /**
+     * @When current time is :currentTime
+     */
+    public function currentTimeIs(string $currentTime)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+            "changeCurrentTime",
+            MediaType::APPLICATION_X_PHP,
+            $currentTime
+        );
+    }
+
+    /**
+     * @When I send log with information :logData
+     */
+    public function iSendLogWithInformation(string $logData)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+            "log",
+            MediaType::APPLICATION_X_PHP_ARRAY,
+            [
+                "loggerId" => 1,
+                "data" => $logData
+            ]
+        );
+    }
+
+    /**
+     * @When current user is :currentUser
+     */
+    public function currentUserIs(string $currentUser)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+            "changeExecutorId",
+            MediaType::APPLICATION_X_PHP,
+            $currentUser
+        );
+    }
+
+    /**
+     * @Then there should be log for :expectedLogData at time :expectedTime and user :userId
+     */
+    public function thereShouldBeLogForAtTimeAndUser(string $expectedLogData, string $expectedTime, string $userId)
+    {
+        Assert::assertEquals(
+            [
+                "event" => ["data" => $expectedLogData, "executorId" => $userId],
+                "happenedAt" => $expectedTime
+            ],
+            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend(
+                "getLastLog",
+                MediaType::APPLICATION_X_PHP_ARRAY,
+                []
+            )
+        );
     }
 }

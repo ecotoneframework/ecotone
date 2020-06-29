@@ -135,7 +135,11 @@ class SaveAggregateService
         unset($metadata[AggregateMessage::AGGREGATE_OBJECT]);
         unset($metadata[AggregateMessage::TARGET_VERSION]);
 
-        $this->aggregateRepository->save($aggregateIds, $this->aggregateRepository instanceof EventSourcedRepository ? $events : $aggregate, $metadata, $nextVersion);
+        if ($this->aggregateRepository instanceof EventSourcedRepository) {
+            $this->aggregateRepository->save($aggregateIds, $this->aggregateClassName, $events, $metadata, $nextVersion);
+        }else {
+            $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $nextVersion);
+        }
 
         foreach ($events as $event) {
             $this->lazyEventBus->execute([$event, $metadata]);

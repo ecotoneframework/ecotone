@@ -40,6 +40,15 @@ use Test\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
+use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\AddExecutorId\AddExecutorId;
+use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\AddNotificationTimestamp\AddNotificationTimestamp;
+use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\LoggerRepository;
+use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\NotificationService;
+use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions;
+use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin\AddFranchiseMargin;
+use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddVat\AddVatService;
+use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ProductExchanger;
+use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ShopRepository;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\LoggingService;
@@ -131,6 +140,27 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                         MultiplyCoins::class => new MultiplyCoins(),
                         Shop::class => new Shop(),
                         LoggingService::class => new LoggingService()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate":
+                {
+                    $objects = [
+                        ProductExchanger::class => new ProductExchanger(),
+                        AddVatService::class => new AddVatService(),
+                        AddFranchiseMargin::class => new AddFranchiseMargin(),
+                        ShopRepository::class => new ShopRepository()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate":
+                {
+                    $objects = [
+                        LoggerRepository::class => new LoggerRepository(),
+                        NotificationService::class => new NotificationService(),
+                        HasEnoughPermissions::class => new HasEnoughPermissions(),
+                        AddNotificationTimestamp::class => new AddNotificationTimestamp(),
+                        AddExecutorId::class => new AddExecutorId()
                     ];
                     break;
                 }

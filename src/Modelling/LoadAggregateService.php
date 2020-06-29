@@ -117,6 +117,7 @@ class LoadAggregateService
         }
 
         return $messageBuilder
+            ->setHeader(AggregateMessage::AGGREGATE_OBJECT_EXISTS, !is_null($aggregate))
             ->build();
     }
 }

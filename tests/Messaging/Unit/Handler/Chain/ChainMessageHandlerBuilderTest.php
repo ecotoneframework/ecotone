@@ -211,7 +211,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function test_passing_through_internal_output_channel_if_exists()
+    public function test_passing_through_internal_output_channel_at_the_end_of_the_stack()
     {
         $internalOutputChannelName = "internalOutputChannelName";
         $externalOutputChannelName = "externalOutputChannelName";

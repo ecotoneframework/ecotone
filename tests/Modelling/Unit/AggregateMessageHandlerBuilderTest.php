@@ -1011,7 +1011,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             ->withInputChannelName("inputChannel");
 
         $queueChannel = QueueChannel::create();
-        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], [new TicketWasStartedEvent($ticketId)]);
+        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], Ticket::class, [new TicketWasStartedEvent($ticketId)]);
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray([
@@ -1051,7 +1051,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
 
         $queueChannel = QueueChannel::create();
         $currentEvents = [new TicketWasStartedEvent($ticketId), new WorkerWasAssignedEvent($ticketId, 100)];
-        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], $currentEvents);
+        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], Ticket::class, $currentEvents);
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray([
@@ -1139,7 +1139,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             ->withInputChannelName("inputChannel");
 
         $queueChannel = QueueChannel::create();
-        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], [new TicketWasStartedEvent($ticketId)]);
+        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], Ticket::class, [new TicketWasStartedEvent($ticketId)]);
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray([
@@ -1170,7 +1170,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             ->withInputChannelName("inputChannel");
 
         $queueChannel = QueueChannel::create();
-        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], [new TicketWasStartedEvent($ticketId)]);
+        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], Ticket::class, [new TicketWasStartedEvent($ticketId)]);
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray([

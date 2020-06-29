@@ -25,11 +25,6 @@ class InMemoryStandardRepository implements StandardRepository
         return new static([], []);
     }
 
-    public static function createWith(array $aggregates) : self
-    {
-        return new static($aggregates);
-    }
-
     /**
      * @inheritDoc
      */
@@ -45,8 +40,8 @@ class InMemoryStandardRepository implements StandardRepository
     {
         $key = $this->getKey($identifiers);
 
-        if (isset($this->aggregates[$key])) {
-            return $this->aggregates[$key];
+        if (isset($this->aggregates[$aggregateClassName][$key])) {
+            return $this->aggregates[$aggregateClassName][$key];
         }
 
         return null;
@@ -59,7 +54,7 @@ class InMemoryStandardRepository implements StandardRepository
     {
         $key = $this->getKey($identifiers);
 
-        $this->aggregates[$key] = $aggregate;
+        $this->aggregates[get_class($aggregate)][$key] = $aggregate;
     }
 
     private function getKey(array $identifiers) : string

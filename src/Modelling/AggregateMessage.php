@@ -10,6 +10,7 @@ namespace Ecotone\Modelling;
 interface AggregateMessage
 {
     const AGGREGATE_OBJECT = "ecotone.modelling.aggregate";
-    const AGGREGATE_ID = "ecotone.modelling.aggregate.id";
-    const TARGET_VERSION           = "ecotone.modelling.aggregate.target_version";
+    const AGGREGATE_OBJECT_EXISTS = "ecotone.modelling.aggregate_exists";
+    const AGGREGATE_ID     = "ecotone.modelling.aggregate.id";
+    const TARGET_VERSION   = "ecotone.modelling.aggregate.target_version";
 }

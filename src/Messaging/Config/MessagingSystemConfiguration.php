@@ -502,10 +502,12 @@ final class MessagingSystemConfiguration implements Configuration
                     $messageHandlerBuilder->addAroundInterceptor($aroundInterceptorReference);
                 }
                 if ($beforeCallInterceptors || $afterCallInterceptors) {
+                    $outputChannel         = $messageHandlerBuilder->getOutputMessageChannelName();
+                    $messageHandlerBuilder->withOutputMessageChannel("");
                     $messageHandlerBuilderToUse = ChainMessageHandlerBuilder::create()
                         ->withEndpointId($messageHandlerBuilder->getEndpointId())
                         ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
-                        ->withOutputMessageChannel($messageHandlerBuilder->getOutputMessageChannelName());
+                        ->withOutputMessageChannel($outputChannel);
 
                     foreach ($beforeCallInterceptors as $beforeCallInterceptor) {
                         $messageHandlerBuilderToUse->chain($beforeCallInterceptor->getInterceptingObject());

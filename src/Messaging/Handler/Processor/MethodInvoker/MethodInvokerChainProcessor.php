@@ -70,7 +70,6 @@ class MethodInvokerChainProcessor implements MethodInvocation
      */
     public function proceed()
     {
-        $aroundInteceptors = $this->aroundMethodInterceptors->getArrayCopy();
         /** @var AroundMethodInterceptor $aroundMethodInterceptor */
         $aroundMethodInterceptor = $this->aroundMethodInterceptors->current();
         $this->aroundMethodInterceptors->next();

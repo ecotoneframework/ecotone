@@ -26,8 +26,9 @@ use SplFileInfo;
  */
 class FileSystemAnnotationRegistrationService implements AnnotationRegistrationService, AnnotationParser
 {
-    const FRAMEWORK_NAMESPACE = 'Ecotone';
+    const FRAMEWORK_NAMESPACE    = 'Ecotone';
     private const FILE_EXTENSION = '.php';
+    const CLASS_NAMESPACE_REGEX  = "#namespace[\s]*([^\n\s\(\)\[\]\{\}\$]*);#";
 
     /**
      * @var Reader
@@ -169,25 +170,14 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
                     continue;
                 }
 
-                $file = $file->openFile();
-                while (!$file->eof()) {
-                    $line = $file->current();
-                    if ($line == false) {
-                        break;
-                    }
-
-                    if (preg_match_all("#namespace[\s]*([^\n\s\(\)\[\]\{\}\$]*);#", $line, $results)) {
-                        $namespace = isset($results[1][0]) ? trim($results[1][0]) : "";
-                        $namespace = trim($namespace, "\t\n\r\\");
+                if (preg_match_all(self::CLASS_NAMESPACE_REGEX, file_get_contents((string)$file), $results)) {
+                    $namespace = isset($results[1][0]) ? trim($results[1][0]) : "";
+                    $namespace = trim($namespace, "\t\n\r\\");
 
 //                        Add all in resolved paths
-                        if ($this->isInAvailableNamespaces($namespacesToUse, $namespace)) {
-                            $classes[] = $namespace . '\\' . $fileName;
-                            break;
-                        }
+                    if ($this->isInAvailableNamespaces($namespacesToUse, $namespace)) {
+                        $classes[] = $namespace . '\\' . $fileName;
                     }
-
-                    $file->next();
                 }
             }
         }

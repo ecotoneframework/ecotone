@@ -15,6 +15,8 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\Annotation\AggregateEvents;
 use Ecotone\Modelling\Annotation\AggregateFactory;
 use Ecotone\Modelling\Annotation\TargetAggregateVersion;
 
@@ -26,6 +28,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
     private bool $dropMessageOnNotFound;
     private array $aggregateRepositoryReferenceNames;
     private ?string $handledMessageClassName;
+    private ?string $eventSourcedFactoryMethod;
 
     private function __construct(ClassDefinition $aggregateClassName, string $methodName, ?ClassDefinition $handledMessageClass, bool $dropMessageOnNotFound)
     {
@@ -49,13 +52,20 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
 
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
+        $aggregateRepository = $this->getAggregateRepository($referenceSearchService);
+        if ($aggregateRepository instanceof EventSourcedRepository && !$this->eventSourcedFactoryMethod) {
+            $repositoryClass = get_class($aggregateRepository);
+            throw InvalidArgumentException::create("Based on your repository {$repositoryClass}, you want to create Event Sourced Aggregate. You must define static method marked with @AggregateFactory for aggregate recreation from events");
+        }
+
         return ServiceActivatorBuilder::createWithDirectReference(
             new LoadAggregateService(
-                $this->getAggregateRepository($referenceSearchService),
+                $aggregateRepository,
                 $this->aggregateClassName,
                 $this->methodName,
                 $this->versionMapping,
                 new PropertyReaderAccessor(),
+                $this->eventSourcedFactoryMethod,
                 $this->dropMessageOnNotFound
             ),
             "load"
@@ -112,12 +122,23 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
                 }
             }
         }
+        $eventSourcedFactoryMethod = null;
+        $aggregateFactoryAnnotation = TypeDescriptor::create(AggregateFactory::class);
+        foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
+            $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
+
+            if ($methodToCheck->hasMethodAnnotation($aggregateFactoryAnnotation)) {
+                $eventSourcedFactoryMethod = $method;
+                break;
+            }
+        }
 
         if (!$aggregateVersionMapping && $aggregateVersionPropertyName) {
             $aggregateVersionMapping[$aggregateVersionPropertyName] = $aggregateVersionPropertyName;
         }
 
         $this->versionMapping = $aggregateVersionMapping;
+        $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
     }
 
     private function getAggregateRepository(ReferenceSearchService $referenceSearchService): object

@@ -75,6 +75,13 @@ class Assert
         }
     }
 
+    public static function null($valueToCheck, string $exceptionMessage) : void
+    {
+        if (!is_null($valueToCheck)) {
+            throw InvalidArgumentException::create($exceptionMessage);
+        }
+    }
+
     /**
      * @param array $arrayToCheck
      * @param string $className

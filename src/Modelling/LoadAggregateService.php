@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Ecotone\Modelling;
 
@@ -24,32 +24,14 @@ class LoadAggregateService
      * @var StandardRepository|EventSourcedRepository
      */
     private $aggregateRepository;
-    /**
-     * @var string
-     */
-    private $aggregateClassName;
-    /**
-     * @var string
-     */
-    private $aggregateMethod;
-    /**
-     * @var PropertyReaderAccessor
-     */
-    private $propertyReaderAccessor;
-    /**
-     * @var null|array
-     */
-    private $expectedVersionMapping;
-    /**
-     * @var bool
-     */
-    private $dropMessageOnNotFound;
-    /**
-     * @var string|null
-     */
-    private $eventSourcedFactoryMethod;
+    private string $aggregateClassName;
+    private string $aggregateMethod;
+    private PropertyReaderAccessor $propertyReaderAccessor;
+    private ?array $expectedVersionMapping;
+    private bool $dropMessageOnNotFound;
+    private ?string $eventSourcedFactoryMethod;
 
-    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, bool $dropMessageOnNotFound)
+    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, ?string $eventSourcedFactoryMethod, bool $dropMessageOnNotFound)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->aggregateClassName = $aggregateClassName;
@@ -57,7 +39,7 @@ class LoadAggregateService
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->expectedVersionMapping = $expectedVersionMapping;
         $this->dropMessageOnNotFound = $dropMessageOnNotFound;
-        $this->eventSourcedFactoryMethod = $aggregateClassName instanceof EventSourcedRepository;
+        $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
     }
 
     /**

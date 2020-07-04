@@ -26,7 +26,7 @@ class AddExecutorId
     }
 
     /**
-     * @Before(pointcut="Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\Logger")
+     * @Before(pointcut="Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\Logger", changeHeaders=true)
      */
     public function add(array $payload) : array
     {

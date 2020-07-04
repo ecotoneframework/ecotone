@@ -25,7 +25,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateIdentifierRetrevingService;
 use Ecotone\Modelling\AggregateIdentifierRetrevingServiceBuilder;
-use Ecotone\Modelling\AggregateMessageHandlerBuilder;
+use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\Config\ModellingHandlerModule;
@@ -115,7 +115,7 @@ class ModellingHandlerModuleTest extends TestCase
      */
     public function test_registering_aggregate_command_handler()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateCommandHandlerExample::class, "doAction", DoStuffCommand::class)
+        $commandHandler = SaveAggregateServiceBuilder::create(AggregateCommandHandlerExample::class, "doAction", DoStuffCommand::class)
             ->withMethodParameterConverters([PayloadBuilder::create("command")])
             ->withEndpointId('command-id')
             ->withInputChannelName("command-id.target");
@@ -168,7 +168,7 @@ class ModellingHandlerModuleTest extends TestCase
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler(
-                AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateCommandHandlerWithNoCommandDataExample::class, "doAction", null)
+                SaveAggregateServiceBuilder::create(AggregateCommandHandlerWithNoCommandDataExample::class, "doAction", null)
                     ->withEndpointId('command-id')
                     ->withMethodParameterConverters([
                         ReferenceBuilder::create("class", \stdClass::class)
@@ -245,7 +245,7 @@ class ModellingHandlerModuleTest extends TestCase
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerMessageHandler(
-                AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(MultiMethodAggregateCommandHandlerExample::class, "doAction1", null)
+                SaveAggregateServiceBuilder::create(MultiMethodAggregateCommandHandlerExample::class, "doAction1", null)
                     ->withEndpointId('1')
                     ->withMethodParameterConverters([
                         PayloadBuilder::create("data")
@@ -262,7 +262,7 @@ class ModellingHandlerModuleTest extends TestCase
                 )
             )
             ->registerMessageHandler(
-                AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(MultiMethodAggregateCommandHandlerExample::class, "doAction2", null)
+                SaveAggregateServiceBuilder::create(MultiMethodAggregateCommandHandlerExample::class, "doAction2", null)
                     ->withEndpointId('2')
                     ->withMethodParameterConverters([
                         PayloadBuilder::create("data")
@@ -314,7 +314,7 @@ class ModellingHandlerModuleTest extends TestCase
      */
     public function test_registering_aggregate_command_handler_with_extra_services()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(AggregateCommandHandlerWithReferencesExample::class, "doAction", DoStuffCommand::class)
+        $commandHandler = SaveAggregateServiceBuilder::create(AggregateCommandHandlerWithReferencesExample::class, "doAction", DoStuffCommand::class)
             ->withEndpointId('command-id-with-references')
             ->withInputChannelName("command-id-with-references.target")
             ->withMethodParameterConverters([
@@ -352,7 +352,7 @@ class ModellingHandlerModuleTest extends TestCase
      */
     public function test_registering_aggregate_query_handler()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerExample::class, "doStuff", SomeQuery::class)
+        $commandHandler = SaveAggregateServiceBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerExample::class, "doStuff", SomeQuery::class)
             ->withEndpointId('some-id')
             ->withMethodParameterConverters([
                 PayloadBuilder::create("query")
@@ -389,7 +389,7 @@ class ModellingHandlerModuleTest extends TestCase
      */
     public function test_registering_aggregate_query_handler_with_output_channel()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", SomeQuery::class)
+        $commandHandler = SaveAggregateServiceBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", SomeQuery::class)
             ->withMethodParameterConverters([
                 PayloadBuilder::create("query")
             ])
@@ -425,7 +425,7 @@ class ModellingHandlerModuleTest extends TestCase
      */
     public function test_registering_aggregate_with_custom_input_channel()
     {
-        $commandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", SomeQuery::class)
+        $commandHandler = SaveAggregateServiceBuilder::createAggregateQueryHandlerWith(AggregateQueryHandlerWithOutputChannelExample::class, "doStuff", SomeQuery::class)
             ->withMethodParameterConverters([
                 PayloadBuilder::create("query")
             ])

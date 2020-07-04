@@ -15,7 +15,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Modelling\AggregateMessageHandlerBuilder;
+use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
@@ -70,7 +70,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_configuring_command_handler()
     {
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Order::class,
             "changeShippingAddress",
             ChangeShippingAddressCommand::class
@@ -90,7 +90,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Order::class,
             "changeShippingAddress",
             ChangeShippingAddressCommand::class
@@ -121,7 +121,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_calling_existing_aggregate_method_with_command_and_no_command()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             AggregateWithoutMessageClassesExample::class,
             "doSomething",
             null
@@ -151,7 +151,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_calling_existing_aggregate_method_with_command_as_array()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             AggregateWithoutMessageClassesExample::class,
             "doSomethingWithData",
             null
@@ -182,7 +182,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_calling_existing_aggregate_method_with_no_command_data_and_reference()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             AggregateWithoutMessageClassesExample::class,
             "doSomethingWithReference",
             null
@@ -216,7 +216,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_throwing_exception_if_no_id_found_in_command()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             AggregateWithoutMessageClassesExample::class,
             "doSomething",
             null
@@ -249,7 +249,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getAmountWithQuery",
             GetOrderAmountQuery::class
@@ -290,7 +290,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getCustomerId",
             null
@@ -325,7 +325,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_calling_aggregate_for_query_handler_with_no_query()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::createAggregateQueryHandlerWith(
             AggregateWithoutMessageClassesExample::class,
             "querySomething",
             null
@@ -363,7 +363,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_calling_aggregate_for_query_handler_with_query_as_array()
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::createAggregateQueryHandlerWith(
             AggregateWithoutMessageClassesExample::class,
             "querySomethingWithData",
             null
@@ -406,7 +406,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getAmountWithQuery",
             GetOrderAmountQuery::class
@@ -451,7 +451,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::createAggregateQueryHandlerWith(
             Order::class,
             "getAmount",
             GetOrderAmountQuery::class
@@ -489,7 +489,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_creating_new_aggregate_from_factory_method()
     {
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Order::class,
             "createWith",
             CreateOrderCommand::class
@@ -528,7 +528,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Order::class,
             "createWith",
             CreateOrderCommand::class
@@ -572,7 +572,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_handling_aggregate_factory_normally_when_aggregate_not_found_for_redirect()
     {
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Order::class,
             "createWith",
             CreateOrderCommand::class
@@ -614,7 +614,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_creating_new_aggregate_from_factory_method_with_two_identifiers()
     {
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Article::class,
             "createWith",
             PublishArticleCommand::class
@@ -650,7 +650,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_creating_new_aggregate_with_command_as_array_type()
     {
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             AggregateWithoutMessageClassesExample::class,
             "createWithData",
             null
@@ -686,7 +686,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_creating_new_aggregate_with_no_command_data()
     {
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             AggregateWithoutMessageClassesExample::class,
             "create",
             null
@@ -723,7 +723,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_calling_aggregate_with_no_identifiers_defined_inside_command()
     {
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Article::class,
             "changeContent",
             ChangeArticleContentCommand::class
@@ -756,7 +756,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_calling_aggregate_with_target_identifiers()
     {
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Article::class,
             "close",
             CloseArticleCommand::class
@@ -787,7 +787,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     public function test_calling_aggregate_with_metadata_mapping()
     {
         $headerName                            = "paymentId";
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             OrderFulfilment::class,
             "finishOrder",
             PaymentWasDoneEvent::class,
@@ -823,7 +823,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        SaveAggregateServiceBuilder::create(
             OrderFulfilment::class,
             "finishOrder",
             PaymentWasDoneEvent::class,
@@ -841,7 +841,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Order::class,
             "multiplyOrder",
             MultiplyAmountCommand::class
@@ -891,7 +891,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
                         ->method("save")
                         ->with(["orderId" => 1], $order, $this->callback(function(){return true;}), 2);
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Order::class,
             "multiplyOrder",
             MultiplyAmountCommand::class
@@ -938,7 +938,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
             ->method("save")
             ->with(["orderId" => 1], $order, $this->callback(function(){return true;}), 1);
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Order::class,
             "createWith",
             CreateOrderCommand::class
@@ -963,7 +963,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $commandToRun = new StartTicketCommand(1);
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Ticket::class,
             "start",
             StartTicketCommand::class
@@ -1002,7 +1002,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $ticketId = 1;
         $commandToRun = new AssignWorkerCommand($ticketId, 100);
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Ticket::class,
             "assignWorker",
             AssignWorkerCommand::class
@@ -1041,7 +1041,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $ticketId = 1;
         $commandToRun = new AssignWorkerCommand($ticketId, 101);
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Ticket::class,
             "assignWorker",
             AssignWorkerCommand::class
@@ -1080,7 +1080,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             NoFactoryMethodAggregateExample::class,
             "doSomething",
             null
@@ -1103,7 +1103,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        SaveAggregateServiceBuilder::create(
             FactoryMethodWithWrongParameterCountExample::class,
             "doSomething",
             null
@@ -1116,7 +1116,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        SaveAggregateServiceBuilder::create(
             NonStaticFactoryMethodExample::class,
             "doSomething",
             null
@@ -1130,7 +1130,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $ticketId = 1;
         $commandToRun = new CreateIncorrectEventTypeReturnedAggregate();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             IncorrectEventTypeReturnedExample::class,
             "create",
             CreateIncorrectEventTypeReturnedAggregate::class
@@ -1161,7 +1161,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $ticketId = 1;
         $commandToRun = new CreateNoIdDefinedAggregate();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             NoIdDefinedAfterCallingFactoryExample::class,
             "create",
             CreateNoIdDefinedAggregate::class
@@ -1198,7 +1198,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             Order::class,
             "finish",
             CommandWithoutAggregateIdentifier::class
@@ -1229,7 +1229,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        SaveAggregateServiceBuilder::create(
             Article::class,
             "changeContent",
             RepublishArticleCommand::class
@@ -1242,7 +1242,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
      */
     public function test_not_throwing_exception_if_no_aggregate_identifier_definition_found_for_factory_method()
     {
-        AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        SaveAggregateServiceBuilder::create(
             Article::class,
             "createWithoutContent",
             PublishArticleWithTitleOnlyCommand::class
@@ -1260,7 +1260,7 @@ class AggregateMessageHandlerBuilderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith(
+        SaveAggregateServiceBuilder::create(
             ReplyViaHeadersMessageHandler::class,
             "handle",
             PublishArticleCommand::class

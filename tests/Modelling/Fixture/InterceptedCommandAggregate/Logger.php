@@ -28,7 +28,7 @@ class Logger
     }
 
     /**
-     * @CommandHandler("log", outputChannelName="notify")
+     * @CommandHandler("log")
      */
     public static function register(array $data): array
     {

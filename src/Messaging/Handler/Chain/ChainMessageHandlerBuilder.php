@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Chain;
 
+use Ecotone\Messaging\Support\Assert;
 use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -37,6 +38,8 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     private ?MessageHandlerBuilder $outputMessageHandler = null;
 
+    private ?MessageHandlerBuilderWithOutputChannel $interceptedHandler = null;
+
     /**
      * ChainMessageHandlerBuilder constructor.
      */
@@ -47,6 +50,16 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     public static function create(): self
     {
         return new self();
+    }
+
+    public function chainInterceptedHandler(MessageHandlerBuilderWithOutputChannel $messageHandler): self
+    {
+        Assert::null($this->interceptedHandler, "Cannot register two intercepted handlers {$messageHandler}. Already have {$this->interceptedHandler}");
+
+        $this->chain($messageHandler);
+        $this->interceptedHandler = $messageHandler;
+
+        return $this;
     }
 
     public function chain(MessageHandlerBuilderWithOutputChannel $messageHandler): self
@@ -145,7 +158,11 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             ->withOutputMessageChannel($this->outputMessageChannelName);
 
         foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
-            $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
+            if ($this->interceptedHandler) {
+                $this->interceptedHandler->addAroundInterceptor($aroundInterceptorReference);
+            }else {
+                $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
+            }
         }
 
         return $serviceActivator->build($channelResolver, $referenceSearchService);
@@ -176,6 +193,10 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
+        if ($this->interceptedHandler) {
+            return $this->interceptedHandler->getInterceptedInterface($interfaceToCallRegistry);
+        }
+
         return $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, "forward");
     }
 

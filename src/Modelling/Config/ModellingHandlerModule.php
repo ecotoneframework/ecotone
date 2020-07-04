@@ -25,12 +25,14 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateIdentifierRetrevingServiceBuilder;
 use Ecotone\Modelling\AggregateMessage;
-use Ecotone\Modelling\AggregateMessageHandlerBuilder;
+use Ecotone\Modelling\CallAggregateServiceBuilder;
+use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\Annotation\Repository;
+use Ecotone\Modelling\CallAggregateService;
 use Ecotone\Modelling\LoadAggregateServiceBuilder;
 use Ramsey\Uuid\Uuid;
 use ReflectionException;
@@ -326,12 +328,15 @@ class ModellingHandlerModule implements AnnotationModule
             $parameterConverterAnnotations = $annotation->parameterConverters;
             $parameterConverters           = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignorePayload);
             $connectionChannel = $hasFactoryAndActionRedirect
-                                    ? ($isFactoryMethod ? "factory." : "action.") . $inputChannelName
+                                    ? ($isFactoryMethod ? ($inputChannelName . ".factory") : ($inputChannelName . ".action"))
                                     : $inputChannelName;
 
+
+            $saveChannel = $connectionChannel . "save";
             $chainHandler = ChainMessageHandlerBuilder::create()
                                 ->withEndpointId($endpointId)
-                                ->withInputChannelName($connectionChannel);
+                                ->withInputChannelName($connectionChannel)
+                                ->withOutputMessageChannel($saveChannel);
 
             if (!$isFactoryMethod) {
                 $chainHandler = $chainHandler
@@ -342,19 +347,22 @@ class ModellingHandlerModule implements AnnotationModule
                     );
             }
 
-            $chainHandler = $chainHandler->chain(
-                AggregateMessageHandlerBuilder::createAggregateCommandHandlerWith($aggregateClassDefinition, $registration->getMethodName())
-                    ->withOutputMessageChannel($annotation->outputChannelName)
-                    ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
-                    ->withMethodParameterConverters($parameterConverters)
-                    ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
-            );
+            $chainHandler = $chainHandler
+                ->chainInterceptedHandler(
+                    CallAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), true)
+                        ->withMethodParameterConverters($parameterConverters)
+                        ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
+                );
 
             $configuration->registerMessageHandler($chainHandler);
+            $configuration->registerMessageHandler(
+                SaveAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName())
+                    ->withInputChannelName($saveChannel)
+                    ->withOutputMessageChannel($annotation->outputChannelName)
+                    ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
+                    ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
+            );
         }
-
-//        @TODO next handler for outputchannel, so after works after handler is done, not after output is done
-//        write a test for it
     }
 
     private function registerAggregateQueryHandler(AnnotationRegistration $registration, ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory, Configuration $configuration): void
@@ -385,7 +393,7 @@ class ModellingHandlerModule implements AnnotationModule
         );
 
         $configuration->registerMessageHandler(
-            AggregateMessageHandlerBuilder::createAggregateQueryHandlerWith($aggregateClassDefinition, $registration->getMethodName())
+            CallAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), false)
                 ->withInputChannelName($connectionChannel)
                 ->withOutputMessageChannel($registration->getAnnotationForMethod()->outputChannelName)
                 ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)

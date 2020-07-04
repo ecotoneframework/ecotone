@@ -5,6 +5,7 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate;
 
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
+use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
 /**
@@ -12,7 +13,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
  */
 class NotificationService
 {
-    private array $lastLog;
+    private object $lastLog;
 
     private string $happenedAt;
 
@@ -23,6 +24,15 @@ class NotificationService
     {
         $this->lastLog[]  = $logs[0];
         $this->happenedAt = $metadata["notificationTimestamp"];
+    }
+
+    /**
+     * @EventHandler()
+     */
+    public function store(EventWasLogged $event, array $metadata) : void
+    {
+        $this->lastLog = $event;
+        $this->happenedAt  = $metadata["notificationTimestamp"];
     }
 
     /**

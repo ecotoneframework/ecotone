@@ -46,11 +46,11 @@ Feature: activating as aggregate order entity
 #    When I active receiver "orders"
 #    Then logs count be 1
 
-  Scenario: Calculating price in specific shop. Make use of before, after interceptors and output channel for aggregate query handlers
-    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate"
-    When I register shop with margin 20
-#    (milk price (100) + shop margin (20) + franchise margin (10)) * vat (2.0)
-    Then for "milk" product there should be price of 260
+#  Scenario: Calculating price in specific shop. Make use of before, after interceptors and output channel for aggregate query handlers
+#    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate"
+#    When I register shop with margin 20
+##    (milk price (100) + shop margin (20) + franchise margin (10)) * vat (2.0)
+#    Then for "milk" product there should be price of 260
 
   Scenario: Storing logs. Make use of before, after interceptors and output channel for aggregate command handlers
     Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate"

@@ -150,39 +150,39 @@ class FileSystemAnnotationRegistrationService implements AnnotationRegistrationS
         $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
 
         foreach ($paths as $path) {
-            if (!is_dir($path)) {
-                continue;
-            }
+            $files = $this->getDirContents($path);
 
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($path),
-                RecursiveIteratorIterator::LEAVES_ONLY
-            );
-
-            /** @var SplFileInfo $file */
-            foreach ($iterator as $file) {
-                $fileName = $file->getBasename(self::FILE_EXTENSION);
-
-                if ($this->isDirectory($fileName, $file)) {
-                    continue;
-                }
-                if ($this->isPHPFile($file)) {
-                    continue;
-                }
-
-                if (preg_match_all(self::CLASS_NAMESPACE_REGEX, file_get_contents((string)$file), $results)) {
+            foreach ($files as $file) {
+                if (preg_match_all(self::CLASS_NAMESPACE_REGEX, file_get_contents($file), $results)) {
                     $namespace = isset($results[1][0]) ? trim($results[1][0]) : "";
                     $namespace = trim($namespace, "\t\n\r\\");
-
-//                        Add all in resolved paths
+                    
                     if ($this->isInAvailableNamespaces($namespacesToUse, $namespace)) {
-                        $classes[] = $namespace . '\\' . $fileName;
+                        $classes[] = $namespace . '\\' . basename($file, ".php");
                     }
                 }
             }
         }
 
         $this->registeredClasses = array_unique($classes);
+    }
+
+    function getDirContents(string $dir, array &$results = [])
+    {
+        $files = scandir($dir);
+
+        foreach($files as $key => $value){
+            $fullPath = realpath($dir . DIRECTORY_SEPARATOR . $value);;
+            if(!is_dir($fullPath)){
+                if (pathinfo($fullPath, PATHINFO_EXTENSION) === "php") {
+                    $results[] = $fullPath;
+                }
+            } else if ($value != "." && $value != "..") {
+                $this->getDirContents($fullPath, $results);
+            }
+        }
+
+        return $results;
     }
 
     /**

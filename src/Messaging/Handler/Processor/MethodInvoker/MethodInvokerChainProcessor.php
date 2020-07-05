@@ -14,43 +14,24 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class MethodInvokerChainProcessor implements MethodInvocation
 {
-    /**
-     * @var MethodCall
-     */
-    private $methodCall;
-    /**
-     * @var MethodInvoker
-     */
-    private $methodInvoker;
+    private MethodCall $methodCall;
+    private MethodInvoker $methodInvoker;
     /**
      * @var \ArrayIterator|AroundMethodInterceptor[]
      */
-    private $aroundMethodInterceptors;
+    private iterable $aroundMethodInterceptors;
     /**
-     * @var object
+     * @var object|string
      */
     private $objectToInvokeOn;
-    /**
-     * @var InterfaceToCall
-     */
-    private $interceptedInterfaceToCall;
-    /**
-     * @var Message
-     */
-    private $requestMessage;
+    private InterfaceToCall $interceptedInterfaceToCall;
+    private Message $requestMessage;
     /**
      * @var object[]
      */
-    private $endpointAnnotations;
+    private array $endpointAnnotations;
 
     /**
-     * MethodInvokerProcessor constructor.
-     * @param MethodCall $methodCall
-     * @param MethodInvoker $methodInvoker
-     * @param AroundMethodInterceptor[]|array $aroundMethodInterceptors
-     * @param object $objectToInvokeOn
-     * @param InterfaceToCall $interceptedInterfaceToCall
-     * @param Message $requestMessage
      * @param object[] $endpointAnnotations
      */
     public function __construct(MethodCall $methodCall, MethodInvoker $methodInvoker, array $aroundMethodInterceptors, $objectToInvokeOn, InterfaceToCall $interceptedInterfaceToCall, Message $requestMessage, iterable $endpointAnnotations)
@@ -108,7 +89,7 @@ class MethodInvokerChainProcessor implements MethodInvocation
     }
 
     /**
-     * @inheritDoc
+     * @var string|object
      */
     public function getObjectToInvokeOn()
     {

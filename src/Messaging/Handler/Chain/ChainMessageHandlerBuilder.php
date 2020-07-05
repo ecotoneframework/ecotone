@@ -207,7 +207,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     {
         $relatedReferences = [];
         if ($this->outputMessageHandler) {
-            $relatedReferences[] = $this->outputMessageHandler->resolveRelatedInterfaces($interfaceToCallRegistry);
+            $relatedReferences = array_merge($relatedReferences, $this->outputMessageHandler->resolveRelatedInterfaces($interfaceToCallRegistry));
         }
 
         foreach ($this->chainedMessageHandlerBuilders as $chainedMessageHandlerBuilder) {

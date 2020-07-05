@@ -20,7 +20,7 @@ interface MethodInvocation
     public function proceed();
 
     /**
-     * @return object
+     * @var string|object
      */
     public function getObjectToInvokeOn();
 

@@ -28,18 +28,18 @@ class LoadAggregateService
     private string $aggregateMethod;
     private PropertyReaderAccessor $propertyReaderAccessor;
     private ?array $expectedVersionMapping;
-    private bool $dropMessageOnNotFound;
     private ?string $eventSourcedFactoryMethod;
+    private LoadAggregateMode $loadAggregateMode;
 
-    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, ?string $eventSourcedFactoryMethod, bool $dropMessageOnNotFound)
+    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, ?string $eventSourcedFactoryMethod, LoadAggregateMode $loadAggregateMode)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->aggregateClassName = $aggregateClassName;
         $this->aggregateMethod = $aggregateMethod;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->expectedVersionMapping = $expectedVersionMapping;
-        $this->dropMessageOnNotFound = $dropMessageOnNotFound;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
+        $this->loadAggregateMode = $loadAggregateMode;
     }
 
     /**
@@ -72,16 +72,16 @@ class LoadAggregateService
             : null;
 
         $aggregate = $this->aggregateRepository->findBy($this->aggregateClassName, $aggregateIdentifiers);
-        if ($this->aggregateRepository instanceof EventSourcedRepository) {
+        if ($this->aggregateRepository instanceof EventSourcedRepository && !is_null($aggregate)) {
             Assert::isIterable($aggregate, "Event Sourced Repository must return iterable events for findBy method");
             $aggregate = call_user_func([$this->aggregateClassName, $this->eventSourcedFactoryMethod], $aggregate);
         }
 
-        if (!$aggregate && $this->dropMessageOnNotFound) {
+        if (!$aggregate && $this->loadAggregateMode->isDroppingMessageOnNotFound()) {
             return null;
         }
 
-        if (!$aggregate) {
+        if (!$aggregate && $this->loadAggregateMode->isThrowingOnNotFound()) {
             throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} was not found for indentifiers " . \json_encode($aggregateIdentifiers));
         }
 

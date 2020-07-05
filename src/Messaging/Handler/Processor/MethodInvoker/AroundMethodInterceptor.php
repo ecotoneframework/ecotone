@@ -113,7 +113,7 @@ class AroundMethodInterceptor
 
         $hasMethodInvocation = false;
         $argumentsToCallInterceptor = [];
-        $interceptedInstanceType = TypeDescriptor::createFromVariable($methodInvocation->getObjectToInvokeOn());
+        $interceptedInstanceType = is_string($methodInvocation->getObjectToInvokeOn()) ? TypeDescriptor::create($methodInvocation->getObjectToInvokeOn()) : TypeDescriptor::createFromVariable($methodInvocation->getObjectToInvokeOn());
         $referenceSearchServiceTypeDescriptor = TypeDescriptor::create(ReferenceSearchService::class);
         $messageType = TypeDescriptor::create(Message::class);
         $messagePayloadType = $requestMessage->getHeaders()->hasContentType() && $requestMessage->getHeaders()->getContentType()->hasTypeParameter()
@@ -133,7 +133,7 @@ class AroundMethodInterceptor
             }
 
             if (!$resolvedArgument && $parameter->canBePassedIn($interceptedInstanceType)) {
-                $resolvedArgument = $methodInvocation->getObjectToInvokeOn();
+                $resolvedArgument = is_string($methodInvocation->getObjectToInvokeOn()) ? null : $methodInvocation->getObjectToInvokeOn();
             }
 
             if (!$resolvedArgument && $parameter->canBePassedIn($messageType)) {
@@ -171,7 +171,7 @@ class AroundMethodInterceptor
             }
 
             if (!$resolvedArgument && !$parameter->doesAllowNulls()) {
-                throw MethodInvocationException::create("{$this->interceptorInterfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`. Maybe your docblock type hint is not correct?");
+                throw MethodInvocationException::create("{$this->interceptorInterfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`. It can be that the value is null in this scenario (for example type hinting for Aggregate, when calling Aggregate Factory Method), however the interface does not allow for nulls.");
             }
 
             $argumentsToCallInterceptor[] = $resolvedArgument;

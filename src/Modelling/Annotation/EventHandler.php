@@ -5,6 +5,8 @@ namespace Ecotone\Modelling\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
 use Ecotone\Messaging\Annotation\IdentifiedAnnotation;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class EventHandler
@@ -41,12 +43,6 @@ class EventHandler extends IdentifiedAnnotation
      */
     public $dropMessageOnNotFound = false;
     /**
-     * If @Aggregate was found, redirect to aggregate's method
-     *
-     * @var string
-     */
-    public $redirectToOnAlreadyExists = "";
-    /**
      * @var string
      */
     public $outputChannelName = '';
@@ -60,4 +56,13 @@ class EventHandler extends IdentifiedAnnotation
      * @var array
      */
     public $identifierMetadataMapping = [];
+
+    public function __construct(array $values = [])
+    {
+        if (!isset($values["listenTo"])) {
+            $this->listenTo = Uuid::uuid4()->toString();
+        }
+
+        parent::__construct($values);
+    }
 }

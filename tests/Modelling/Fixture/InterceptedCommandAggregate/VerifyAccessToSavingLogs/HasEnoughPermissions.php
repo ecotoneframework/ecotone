@@ -17,8 +17,12 @@ class HasEnoughPermissions
      *     pointcut="@(Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSavingLogs\ValidateExecutor)"
      * )
      */
-    public function validate(MethodInvocation $methodInvocation, Logger $logger)
+    public function validate(MethodInvocation $methodInvocation, ?Logger $logger)
     {
+        if (is_null($logger)) {
+            return $methodInvocation->proceed();
+        }
+
         $data = $methodInvocation->getArguments()[0];
 
         if (!$logger->hasAccess($data["executorId"])) {

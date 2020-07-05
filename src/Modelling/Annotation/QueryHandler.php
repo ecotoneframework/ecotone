@@ -4,6 +4,7 @@ namespace Ecotone\Modelling\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use Ecotone\Messaging\Annotation\InputOutputEndpointAnnotation;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class QueryHandler
@@ -25,10 +26,13 @@ class QueryHandler extends InputOutputEndpointAnnotation
      * @var string
      */
     public $ignorePayload = false;
-    /**
-     * Does the handler allow for same command class name
-     *
-     * @var bool
-     */
-    public $mustBeUnique = true;
+
+    public function __construct(array $values = [])
+    {
+        if (!isset($values["inputChannelName"])) {
+            $this->inputChannelName = Uuid::uuid4()->toString();
+        }
+
+        parent::__construct($values);
+    }
 }

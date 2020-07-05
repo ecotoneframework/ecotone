@@ -7,6 +7,7 @@ use Ecotone\Messaging\Annotation\EndpointAnnotation;
 use Ecotone\Messaging\Annotation\InputOutputEndpointAnnotation;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
@@ -22,10 +23,12 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateIdentifierRetrevingServiceBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CallAggregateServiceBuilder;
+use Ecotone\Modelling\LoadAggregateMode;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
@@ -144,19 +147,6 @@ class ModellingHandlerModule implements AnnotationModule
         );
     }
 
-    /***
-     * @param AnnotationRegistration $registration
-     *
-     * @return string
-     */
-    public static function getMessageChannelForEventHandler(AnnotationRegistration $registration): string
-    {
-        /** @var CommandHandler|QueryHandler $methodAnnotation */
-        $methodAnnotation = $registration->getAnnotationForMethod();
-
-        return $methodAnnotation->endpointId . ".target";
-    }
-
     /**
      * @param AnnotationRegistration $registration
      *
@@ -201,7 +191,7 @@ class ModellingHandlerModule implements AnnotationModule
         return null;
     }
 
-    public static function getNamedMessageChannelFor(AnnotationRegistration $registration): ?string
+    public static function getNamedMessageChannelFor(AnnotationRegistration $registration): string
     {
         /** @var InputOutputEndpointAnnotation $annotationForMethod */
         $annotationForMethod = $registration->getAnnotationForMethod();
@@ -210,7 +200,7 @@ class ModellingHandlerModule implements AnnotationModule
             return $registration->getAnnotationForMethod()->listenTo;
         }
 
-        return $annotationForMethod->inputChannelName ?? null;
+        return $annotationForMethod->inputChannelName;
     }
 
     /**
@@ -247,19 +237,11 @@ class ModellingHandlerModule implements AnnotationModule
 
         $aggregateCommandOrEventHandlers = [];
         foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
-//            /** @var CommandHandler $annotationForMethod */
-//            $annotationForMethod = $registration->getAnnotationForMethod();
-//
-//            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, self::getHandlerChannel($registration), $annotationForMethod->dropMessageOnNotFound, $annotationForMethod->endpointId);
-            $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getHandlerChannel($registration)][] = $registration;
+            $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getNamedMessageChannelFor($registration)][] = $registration;
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {
-//            /** @var EventHandler $annotationForMethod */
-//            $annotationForMethod = $registration->getAnnotationForMethod();
-//
-//            $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registration, self::getHandlerChannel($registration), $annotationForMethod->dropMessageOnNotFound, $annotationForMethod->endpointId);
-            $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getHandlerChannel($registration)][] = $registration;
+            $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getNamedMessageChannelFor($registration)][] = $registration;
         }
 
         foreach ($aggregateCommandOrEventHandlers as $className => $channelNameRegistrations) {
@@ -273,16 +255,13 @@ class ModellingHandlerModule implements AnnotationModule
         }
 
         foreach ($this->serviceCommandHandlersRegistrations as $registration) {
-            /** @var CommandHandler $annotationForMethod */
-            $annotationForMethod = $registration->getAnnotationForMethod();
-
-            $configuration->registerMessageHandler($this->createServiceActivator(self::getHandlerChannel($registration), $registration, $annotationForMethod->endpointId));
+            $this->registerServiceHandler($configuration, $registration);
         }
         foreach ($this->serviceQueryHandlerRegistrations as $registration) {
-            $configuration->registerMessageHandler($this->createServiceActivator(self::getHandlerChannel($registration), $registration, $registration->getAnnotationForMethod()->endpointId));
+            $this->registerServiceHandler($configuration, $registration);
         }
         foreach ($this->serviceEventHandlers as $registration) {
-            $configuration->registerMessageHandler($this->createServiceActivator(self::getHandlerChannel($registration), $registration, $registration->getAnnotationForMethod()->endpointId));
+            $this->registerServiceHandler($configuration, $registration);
         }
     }
 
@@ -296,11 +275,26 @@ class ModellingHandlerModule implements AnnotationModule
         $registration = $registrations[0];
 
         $aggregateClassDefinition = ClassDefinition::createFor(TypeDescriptor::create($registration->getClassName()));
-        $handledPayloadType       = self::getPayloadClassIfAny($registration);
-        $handledPayloadType       = $handledPayloadType ? ClassDefinition::createFor(TypeDescriptor::create($handledPayloadType)) : null;
-
         if (count($registrations) > 2) {
             throw new \InvalidArgumentException("Can't handle");
+        }
+
+        $actionChannel = null;
+        $factoryChannel = null;
+        $factoryHandledPayloadType = null;
+        $factoryIdentifierMetadataMapping = [];
+        foreach ($registrations as $registration) {
+            $channel = self::getHandlerChannel($registration);
+            if ((new \ReflectionMethod($registration->getClassName(), $registration->getMethodName()))->isStatic()) {
+                Assert::null($factoryChannel, "Trying to register factory method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$inputChannelName}");
+                $factoryChannel = $channel;
+                $factoryHandledPayloadType       = self::getPayloadClassIfAny($registration);
+                $factoryHandledPayloadType       = $factoryHandledPayloadType ? ClassDefinition::createFor(TypeDescriptor::create($factoryHandledPayloadType)) : null;
+                $factoryIdentifierMetadataMapping = $registration->getAnnotationForMethod()->identifierMetadataMapping;
+            }else {
+                Assert::null($actionChannel, "Trying to register action method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$inputChannelName}");
+                $actionChannel = $channel;
+            }
         }
 
         $hasFactoryAndActionRedirect = count($registrations) === 2;
@@ -308,11 +302,12 @@ class ModellingHandlerModule implements AnnotationModule
             $configuration->registerMessageHandler(
                 ChainMessageHandlerBuilder::create()
                     ->withInputChannelName($inputChannelName)
+                    ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $factoryIdentifierMetadataMapping, $factoryHandledPayloadType))
                     ->chain(
-                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, false)
+                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $factoryHandledPayloadType, LoadAggregateMode::createContinueOnNotFound())
                             ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
                     )
-                    ->withOutputMessageHandler(RouterBuilder::createHeaderValueRouter(AggregateMessage::AGGREGATE_OBJECT_EXISTS, [true => "action." . $inputChannelName, false => "factory." . $inputChannelName]))
+                    ->withOutputMessageHandler(RouterBuilder::createHeaderValueRouter(AggregateMessage::AGGREGATE_OBJECT_EXISTS, [true => $actionChannel, false => $factoryChannel]))
             );
         }
 
@@ -328,9 +323,8 @@ class ModellingHandlerModule implements AnnotationModule
             $parameterConverterAnnotations = $annotation->parameterConverters;
             $parameterConverters           = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignorePayload);
             $connectionChannel = $hasFactoryAndActionRedirect
-                                    ? ($isFactoryMethod ? ($inputChannelName . ".factory") : ($inputChannelName . ".action"))
+                                    ? ($isFactoryMethod ? $factoryChannel : $actionChannel)
                                     : $inputChannelName;
-
 
             $saveChannel = $connectionChannel . "save";
             $chainHandler = ChainMessageHandlerBuilder::create()
@@ -339,10 +333,12 @@ class ModellingHandlerModule implements AnnotationModule
                                 ->withOutputMessageChannel($saveChannel);
 
             if (!$isFactoryMethod) {
+                $handledPayloadType       = self::getPayloadClassIfAny($registration);
+                $handledPayloadType       = $handledPayloadType ? ClassDefinition::createFor(TypeDescriptor::create($handledPayloadType)) : null;
                 $chainHandler = $chainHandler
                     ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->identifierMetadataMapping, $handledPayloadType))
                     ->chain(
-                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, $dropMessageOnNotFound)
+                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, $dropMessageOnNotFound ? LoadAggregateMode::createDropMessageOnNotFound() : LoadAggregateMode::createThrowOnNotFound())
                             ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
                     );
             }
@@ -382,18 +378,18 @@ class ModellingHandlerModule implements AnnotationModule
         $connectionChannel = Uuid::uuid4()->toString();
         $configuration->registerMessageHandler(
             ChainMessageHandlerBuilder::create()
-                ->withEndpointId($registration->getAnnotationForMethod()->endpointId)
                 ->withInputChannelName($inputChannelName)
                 ->withOutputMessageChannel($connectionChannel)
                 ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], $handledPayloadType))
                 ->chain(
-                    LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, false)
+                    LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, LoadAggregateMode::createThrowOnNotFound())
                         ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
                 )
         );
 
         $configuration->registerMessageHandler(
             CallAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), false)
+                ->withEndpointId($registration->getAnnotationForMethod()->endpointId)
                 ->withInputChannelName($connectionChannel)
                 ->withOutputMessageChannel($registration->getAnnotationForMethod()->outputChannelName)
                 ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
@@ -402,8 +398,12 @@ class ModellingHandlerModule implements AnnotationModule
         );
     }
 
-    private function createServiceActivator(string $inputChannelName, AnnotationRegistration $registration, string $endpointId): ServiceActivatorBuilder
+    private function registerServiceHandler(Configuration $configuration, AnnotationRegistration $registration): void
     {
+        /** @var QueryHandler|CommandHandler|EventHandler $methodAnnotation */
+        $methodAnnotation = $registration->getAnnotationForMethod();
+        $inputChannelName = self::getNamedMessageChannelFor($registration);
+        $endpointInputChannel = self::getHandlerChannel($registration);
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
         $annotation                          = $registration->getAnnotationForMethod();
 
@@ -411,11 +411,19 @@ class ModellingHandlerModule implements AnnotationModule
         $parameterConverterAnnotations = $annotation->parameterConverters;
         $parameterConverters           = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignorePayload);
 
-        return ServiceActivatorBuilder::create($registration->getReferenceName(), $registration->getMethodName())
-            ->withInputChannelName($inputChannelName)
-            ->withOutputMessageChannel($annotation->outputChannelName)
-            ->withEndpointId($endpointId)
-            ->withMethodParameterConverters($parameterConverters)
-            ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
+        $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
+        $configuration->registerMessageHandler(
+            BridgeBuilder::create()
+                ->withInputChannelName($inputChannelName)
+                ->withOutputMessageChannel($endpointInputChannel)
+        );
+        $configuration->registerMessageHandler(
+            ServiceActivatorBuilder::create($registration->getReferenceName(), $registration->getMethodName())
+                ->withInputChannelName($endpointInputChannel)
+                ->withOutputMessageChannel($annotation->outputChannelName)
+                ->withEndpointId($methodAnnotation->endpointId)
+                ->withMethodParameterConverters($parameterConverters)
+                ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
+        );
     }
 }

@@ -4,6 +4,7 @@ namespace Ecotone\Modelling\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use Ecotone\Messaging\Annotation\InputOutputEndpointAnnotation;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class CommandHandler
@@ -32,13 +33,16 @@ class CommandHandler extends InputOutputEndpointAnnotation
      */
     public $dropMessageOnNotFound = false;
     /**
-     * If @Aggregate was found, redirect to aggregate's method
-     *
-     * @var string
-     */
-    public $redirectToOnAlreadyExists = "";
-    /**
      * @var array
      */
     public $identifierMetadataMapping = [];
+
+    public function __construct(array $values = [])
+    {
+        if (!isset($values["inputChannelName"])) {
+            $this->inputChannelName = Uuid::uuid4()->toString();
+        }
+
+        parent::__construct($values);
+    }
 }

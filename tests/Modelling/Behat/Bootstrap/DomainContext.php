@@ -12,6 +12,7 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\ChangeShippingAddres
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
+use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 
 /**
  * Defines application features from the specific context.
@@ -158,7 +159,7 @@ class DomainContext extends TestCase implements Context
     {
         Assert::assertEquals(
             [
-                "event" => ["data" => $expectedLogData, "executorId" => $userId],
+                "event" => new EventWasLogged(["data" => $expectedLogData, "executorId" => $userId, "loggerId" => 1]),
                 "happenedAt" => $expectedTime
             ],
             AnnotationBasedMessagingContext::getQueryBus()->convertAndSend(

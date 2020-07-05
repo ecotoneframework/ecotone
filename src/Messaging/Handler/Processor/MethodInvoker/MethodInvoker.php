@@ -42,41 +42,23 @@ use ReflectionException;
 final class MethodInvoker implements MessageProcessor
 {
     /**
-     * @var object
+     * @var object|string
      */
     private $objectToInvokeOn;
-    /**
-     * @var string
-     */
-    private $objectMethodName;
+    private string $objectMethodName;
     /**
      * @var ParameterConverter[]
      */
-    private $orderedMethodArguments;
-    /**
-     * @var bool
-     */
-    private $isCalledStatically;
-    /**
-     * @var ConversionService
-     */
-    private $conversionService;
-    /**
-     * @var InterfaceToCall
-     */
-    private $interfaceToCall;
-    /**
-     * @var AroundMethodInterceptor[]
-     */
-    private $aroundMethodInterceptors = [];
+    private array $orderedMethodArguments;
+    private bool $isCalledStatically;
+    private ConversionService $conversionService;
+    private InterfaceToCall $interfaceToCall;
+    private array $aroundMethodInterceptors = [];
     /**
      * @var object[]
      */
-    private $endpointAnnotations;
-    /**
-     * @var bool
-     */
-    private $canInterceptorReplaceArguments;
+    private array $endpointAnnotations;
+    private bool $canInterceptorReplaceArguments;
 
     /**
      * MethodInvocation constructor.

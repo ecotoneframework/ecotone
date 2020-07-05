@@ -50,12 +50,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
      */
     private function __construct(string $endpointId, string $inputChannelName, array $channelNamesRouting, string $type)
     {
-        $channelMapping = [];
-        foreach ($channelNamesRouting as $name => $targetChannels) {
-            $channelMapping[$name] = array_unique($targetChannels);
-        }
-
-        $this->channelNamesRouting = $channelMapping;
+        $this->channelNamesRouting = $channelNamesRouting;
         $this->inputChannelName = $inputChannelName;
         $this->type = $type;
         $this->endpointId = $endpointId;

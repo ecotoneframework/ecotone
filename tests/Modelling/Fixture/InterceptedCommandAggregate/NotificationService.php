@@ -13,9 +13,9 @@ use Ecotone\Modelling\Annotation\QueryHandler;
  */
 class NotificationService
 {
-    private object $lastLog;
+    private ?object $lastLog = null;
 
-    private string $happenedAt;
+    private ?string $happenedAt = null;
 
     /**
      * @ServiceActivator(inputChannelName="notify")

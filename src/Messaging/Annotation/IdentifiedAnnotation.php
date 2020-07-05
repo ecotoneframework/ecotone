@@ -22,10 +22,6 @@ class IdentifiedAnnotation
      */
     private $isGenerated = false;
 
-    /**
-     * @param array $values
-     * @throws \Exception
-     */
     public function __construct(array $values = [])
     {
         if (isset($values["inputChannelName"]) && isset($values["endpointId"]) && $values["inputChannelName"] === $values["endpointId"]) {

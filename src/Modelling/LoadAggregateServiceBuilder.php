@@ -25,24 +25,24 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
     private string $aggregateClassName;
     private string $methodName;
     private ?array $versionMapping;
-    private bool $dropMessageOnNotFound;
     private array $aggregateRepositoryReferenceNames;
     private ?string $handledMessageClassName;
     private ?string $eventSourcedFactoryMethod;
+    private LoadAggregateMode $loadAggregateMode;
 
-    private function __construct(ClassDefinition $aggregateClassName, string $methodName, ?ClassDefinition $handledMessageClass, bool $dropMessageOnNotFound)
+    private function __construct(ClassDefinition $aggregateClassName, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode)
     {
         $this->aggregateClassName      = $aggregateClassName;
         $this->methodName              = $methodName;
         $this->handledMessageClassName = $handledMessageClass;
-        $this->dropMessageOnNotFound   = $dropMessageOnNotFound;
+        $this->loadAggregateMode = $loadAggregateMode;
 
         $this->initialize($aggregateClassName, $handledMessageClass);
     }
 
-    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, ?ClassDefinition $handledMessageClass, bool $dropMessageOnNotFound): self
+    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode): self
     {
-        return new self($aggregateClassDefinition, $methodName, $handledMessageClass, $dropMessageOnNotFound);
+        return new self($aggregateClassDefinition, $methodName, $handledMessageClass, $loadAggregateMode);
     }
 
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
@@ -66,10 +66,12 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
                 $this->versionMapping,
                 new PropertyReaderAccessor(),
                 $this->eventSourcedFactoryMethod,
-                $this->dropMessageOnNotFound
+                $this->loadAggregateMode
             ),
             "load"
-        )->build($channelResolver, $referenceSearchService);
+        )
+            ->withOutputMessageChannel($this->getOutputMessageChannelName())
+            ->build($channelResolver, $referenceSearchService);
     }
 
     /**

@@ -51,9 +51,7 @@ class EventBusRouter
             $resolvedChannels = array_merge($resolvedChannels, $this->getChannelsForClassName($parent));
         }
 
-        $resolvedChannels = array_values(array_unique(array_merge($resolvedChannels, $this->getChannelsForClassName($reflectionClass))));
-
-        return $resolvedChannels;
+        return array_values(array_unique(array_merge($resolvedChannels, $this->getChannelsForClassName($reflectionClass))));
     }
 
     /**
@@ -71,7 +69,7 @@ class EventBusRouter
 
         $className = $class->getName();
         if (array_key_exists($className, $this->channelMapping)) {
-            $channelNames =  array_merge($channelNames, $this->channelMapping[$className]);
+            $channelNames[] =  $this->channelMapping[$className];
         }
 
         return $channelNames;

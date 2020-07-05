@@ -382,6 +382,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $outputChannel = QueueChannel::create();
         $chainBuilder = ChainMessageHandlerBuilder::create()
             ->chain(TransformerBuilder::createWithExpression( "1 + 1"))
+            ->chain(TransformerBuilder::createWithExpression( "payload + 1"))
             ->withOutputMessageHandler(RouterBuilder::createRecipientListRouter([$outputChannelName]))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -393,7 +394,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $chainBuilder->handle(MessageBuilder::withPayload("some1")->build());
 
         $this->assertEquals(
-            2,
+            3,
             $outputChannel->receive()->getPayload()
         );
     }

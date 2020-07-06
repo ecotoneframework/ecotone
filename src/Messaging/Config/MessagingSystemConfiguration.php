@@ -488,6 +488,8 @@ final class MessagingSystemConfiguration implements Configuration
                 $aroundInterceptors = [];
                 $beforeCallInterceptors = [];
                 $afterCallInterceptors = [];
+
+                $intercepted = $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry);
                 if ($this->beforeCallMethodInterceptors) {
                     $beforeCallInterceptors = $this->getRelatedInterceptors($this->beforeCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames());
                 }

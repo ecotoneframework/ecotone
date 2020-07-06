@@ -52,9 +52,20 @@ Feature: activating as aggregate order entity
 ##    (milk price (100) + shop margin (20) + franchise margin (10)) * vat (2.0)
 #    Then for "milk" product there should be price of 260
 
-  Scenario: Storing logs. Make use of before, after interceptors and output channel for aggregate command handlers
+#  Scenario: Storing logs. Make use of before, after interceptors and output channel for aggregate command handlers
+#    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate"
+#    When current time is "2020-02-02 12:00:00"
+#    And current user is "Johny"
+#    And I send log with information "User logged in"
+#    Then there should be log for "User logged in" at time "2020-02-02 12:00:00" and user "Johny"
+#    When current time is "2020-02-02 12:10:00"
+#    And I send log with information "Another User logged in"
+#    Then there should be log for "Another User logged in" at time "2020-02-02 12:10:00" and user "Johny"
+
+  Scenario: Storing logs. Make use of around interceptor for aggregate
     Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate"
-    When current time is "2020-02-02 12:00:00"
+    And current time is "2020-02-02 12:00:00"
     And current user is "Johny"
     And I send log with information "User logged in"
-    Then there should be log for "User logged in" at time "2020-02-02 12:00:00" and user "Johny"
+    Then current user is "Franco"
+    When I send log with information "Another User logged in" I should be disallowed

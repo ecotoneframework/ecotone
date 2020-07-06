@@ -22,7 +22,7 @@ class NotificationService
      */
     public function notify(array $logs, array $metadata) : void
     {
-        $this->lastLog[]  = $logs[0];
+        $this->lastLog  = $logs[0];
         $this->happenedAt = $metadata["notificationTimestamp"];
     }
 

@@ -169,4 +169,19 @@ class DomainContext extends TestCase implements Context
             )
         );
     }
+
+    /**
+     * @When I send log with information :logInfo I should be disallowed
+     */
+    public function iSendLogWithInformationIShouldBeDisallowed(string $logInfo)
+    {
+        $exception = false;
+        try {
+            $this->iSendLogWithInformation($logInfo);
+        }catch (\InvalidArgumentException $exception) {
+            $exception = true;
+        }
+
+        Assert::assertTrue($exception, "User was allowed to store logs on someones else stream");
+    }
 }

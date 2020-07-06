@@ -20,11 +20,13 @@ class Logger
     private string $loggerId;
 
     private array $logs;
+    private string $ownerId;
 
-    private function __construct(string $loggerId, array $logs)
+    private function __construct(string $loggerId, string $ownerId, array $logs)
     {
         $this->loggerId      = $loggerId;
         $this->logs = $logs;
+        $this->ownerId = $ownerId;
     }
 
     /**
@@ -49,11 +51,11 @@ class Logger
      */
     public static function restore(array $events) : self
     {
-        return new self($events[0]->getLoggerId(), $events);
+        return new self($events[0]->getLoggerId(), $events[0]->getData()['executorId'], $events);
     }
 
     public function hasAccess(string $executorId) : bool
     {
-        return $executorId !== "";
+        return $executorId === $this->ownerId;
     }
 }

@@ -2,39 +2,20 @@
 
 namespace Ecotone\Modelling;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
-use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
-use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\Annotation\AggregateEvents;
 use Ecotone\Modelling\Annotation\AggregateFactory;
-use Ecotone\Modelling\Annotation\AggregateIdentifier;
-use Ecotone\Modelling\Annotation\TargetAggregateIdentifier;
-use Ecotone\Modelling\Annotation\TargetAggregateVersion;
-use Ecotone\Modelling\Annotation\Version;
-use Ecotone\Modelling\LazyEventBus\LazyEventBus;
-use ReflectionException;
 
 class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
@@ -127,23 +108,14 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $isEventSourced = $aggregateRepository instanceof EventSourcedRepository;
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
 
-        return ServiceActivatorBuilder::createWithDirectReference(
-                        new CallAggregateService($this->interfaceToCall->getInterfaceName(), $this->interfaceToCall->getMethodName(), $isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod),
+        $handler = ServiceActivatorBuilder::createWithDirectReference(
+            new CallAggregateService($this->interfaceToCall->getInterfaceName(), $this->interfaceToCall->getMethodName(), $isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod),
             "call"
-                )
+        )
             ->withPassThroughMessageOnVoidInterface($this->isVoidMethod)
-            ->withOutputMessageChannel($this->outputMessageChannelName)
-            ->build($channelResolver, $referenceSearchService);
-    }
+            ->withOutputMessageChannel($this->outputMessageChannelName);
 
-    /**
-     * @param string[] $aggregateRepositoryReferenceNames
-     */
-    public function withAggregateRepositoryFactories(array $aggregateRepositoryReferenceNames): self
-    {
-        $this->aggregateRepositoryReferenceNames = $aggregateRepositoryReferenceNames;
-
-        return $this;
+        return $handler->build($channelResolver, $referenceSearchService);
     }
 
     private function getAggregateRepository(ReferenceSearchService $referenceSearchService): object
@@ -159,6 +131,16 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         }
         Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$this->interfaceToCall}");
         return $aggregateRepository;
+    }
+
+    /**
+     * @param string[] $aggregateRepositoryReferenceNames
+     */
+    public function withAggregateRepositoryFactories(array $aggregateRepositoryReferenceNames): self
+    {
+        $this->aggregateRepositoryReferenceNames = $aggregateRepositoryReferenceNames;
+
+        return $this;
     }
 
     /**

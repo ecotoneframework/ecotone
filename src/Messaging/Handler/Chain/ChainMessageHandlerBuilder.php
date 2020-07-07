@@ -69,6 +69,11 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             ->withInputChannelName("")
             ->withOutputMessageChannel("");
 
+        if (($messageHandler instanceof ChainMessageHandlerBuilder) && $messageHandler->interceptedHandler) {
+            Assert::null($this->interceptedHandler, "Cannot register two intercepted handlers {$messageHandler}. Already have {$this->interceptedHandler}");
+            $this->interceptedHandler = $messageHandler;
+        }
+
         if ($outputChannelToKeep) {
             $messageHandler = ChainMessageHandlerBuilder::create()
                 ->chain($messageHandler)
@@ -81,6 +86,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         }
 
         $this->requiredReferences = array_unique($this->requiredReferences);
+
         return $this;
     }
 
@@ -133,6 +139,17 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
         $customChannelResolver = InMemoryChannelResolver::createWithChannelResolver($channelResolver, $bridgeChannels);
 
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel,  (bool)$this->outputMessageChannelName), "forward")
+            ->withOutputMessageChannel($this->outputMessageChannelName);
+
+        foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
+            if ($this->interceptedHandler) {
+                $this->interceptedHandler->addAroundInterceptor($aroundInterceptorReference);
+            }else {
+                $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
+            }
+        }
+
         for ($key = 0; $key < count($messageHandlersToChain); $key++) {
             $currentKey = $baseKey . $key;
             $messageHandlerBuilder = $messageHandlersToChain[$key];
@@ -151,17 +168,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
             if ($key === 0) {
                 $requestChannel->subscribe($messageHandler);
-            }
-        }
-
-        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel,  (bool)$this->outputMessageChannelName), "forward")
-            ->withOutputMessageChannel($this->outputMessageChannelName);
-
-        foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
-            if ($this->interceptedHandler) {
-                $this->interceptedHandler->addAroundInterceptor($aroundInterceptorReference);
-            }else {
-                $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
             }
         }
 

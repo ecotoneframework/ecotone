@@ -31,7 +31,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      */
     private $requiredInterceptorReferenceNames = [];
     /**
-     * @var AroundMethodInterceptor[]
+     * @var AroundInterceptorReference[]
      */
     protected $orderedAroundInterceptors = [];
     /**

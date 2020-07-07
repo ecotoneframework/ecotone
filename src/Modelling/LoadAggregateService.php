@@ -82,7 +82,7 @@ class LoadAggregateService
         }
 
         if (!$aggregate && $this->loadAggregateMode->isThrowingOnNotFound()) {
-            throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} was not found for indentifiers " . \json_encode($aggregateIdentifiers));
+            throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName} for calling {$this->aggregateMethod} was not found using identifiers " . \json_encode($aggregateIdentifiers));
         }
 
         $messageBuilder = MessageBuilder::fromMessage($message);

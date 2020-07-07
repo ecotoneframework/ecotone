@@ -59,7 +59,6 @@ class CallAggregateService
             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
             : null;
 
-
         $methodInvoker = MethodInvoker::createWith(
             $aggregate ? $aggregate : $this->aggregateClassName,
             $this->aggregateMethodName,

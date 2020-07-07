@@ -8,7 +8,7 @@ class LoadAggregateMode
     private const DROP_ON_NOT_FOUND = 2;
     private const CONTINUE_ON_NOT_FOUND = 3;
 
-    private string $type;
+    private int $type;
 
     private function __construct(string $type)
     {

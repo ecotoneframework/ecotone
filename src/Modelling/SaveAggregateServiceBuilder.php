@@ -155,7 +155,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     {
         $aggregateRepository = $this->getAggregateRepository($referenceSearchService);
 
-        $lazyEventBus = GatewayProxyBuilder::create("", LazyEventBus::class, "sendWithMetadata", LazyEventBus::CHANNEL_NAME)
+        $lazyEventBus = GatewayProxyBuilder::create("", EventBus::class, "sendWithMetadata", EventBus::CHANNEL_NAME_BY_OBJECT)
             ->withParameterConverters([
                 GatewayPayloadBuilder::create("event"),
                 GatewayHeadersBuilder::create("metadata")
@@ -222,16 +222,5 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     public function __toString()
     {
         return sprintf("Aggregate Handler - %s with name `%s` for input channel `%s`", (string)$this->interfaceToCall, $this->getEndpointId(), $this->getInputMessageChannelName());
-    }
-
-    private function hasIdentifierMappingInMetadata(array $metadataIdentifierMapping, $aggregateIdentifierName): bool
-    {
-        foreach ($metadataIdentifierMapping as $identifierNameHeaderMapping => $headerName) {
-            if ($aggregateIdentifierName == $identifierNameHeaderMapping) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

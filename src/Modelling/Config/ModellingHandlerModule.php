@@ -297,6 +297,7 @@ class ModellingHandlerModule implements AnnotationModule
             }
         }
 
+        $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
         $hasFactoryAndActionRedirect = count($registrations) === 2;
         if ($hasFactoryAndActionRedirect) {
             $configuration->registerMessageHandler(

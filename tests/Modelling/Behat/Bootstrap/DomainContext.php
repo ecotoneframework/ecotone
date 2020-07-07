@@ -184,4 +184,34 @@ class DomainContext extends TestCase implements Context
 
         Assert::assertTrue($exception, "User was allowed to store logs on someones else stream");
     }
+
+    /**
+     * @When I notify about order with information :logData
+     */
+    public function iNotifyAboutOrderWithInformation(string $logData)
+    {
+        AnnotationBasedMessagingContext::getEventBus()->convertAndSend(
+            "order.was_created",
+            MediaType::APPLICATION_X_PHP_ARRAY,
+            [
+                "loggerId" => 1,
+                "data" => $logData
+            ]
+        );
+    }
+
+    /**
+     * @When I notify about order with information :logData I should be disallowed
+     */
+    public function iNotifyAboutOrderWithInformationIShouldBeDisallowed(string $logData)
+    {
+        $exception = false;
+        try {
+            $this->iNotifyAboutOrderWithInformation($logData);
+        }catch (\InvalidArgumentException $exception) {
+            $exception = true;
+        }
+
+        Assert::assertTrue($exception, "User was allowed to store logs on someones else stream");
+    }
 }

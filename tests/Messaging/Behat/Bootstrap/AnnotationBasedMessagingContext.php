@@ -19,6 +19,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -164,6 +165,17 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
+            case "Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate":
+                {
+                    $objects = [
+                        \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\LoggerRepository::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\LoggerRepository(),
+                        \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\NotificationService::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\NotificationService(),
+                        \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions(),
+                        \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp\AddNotificationTimestamp::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp\AddNotificationTimestamp(),
+                        \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId()
+                    ];
+                    break;
+                }
             default:
                 {
                     $objects = [
@@ -269,6 +281,11 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     public static function getCommandBus(): CommandBus
     {
         return self::$messagingSystem->getGatewayByName(CommandBus::class);
+    }
+
+    public static function getEventBus(): EventBus
+    {
+        return self::$messagingSystem->getGatewayByName(EventBus::class);
     }
 
     /**

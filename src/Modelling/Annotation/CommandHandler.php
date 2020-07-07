@@ -36,13 +36,4 @@ class CommandHandler extends InputOutputEndpointAnnotation
      * @var array
      */
     public $identifierMetadataMapping = [];
-
-    public function __construct(array $values = [])
-    {
-        if (!isset($values["inputChannelName"])) {
-            $this->inputChannelName = Uuid::uuid4()->toString();
-        }
-
-        parent::__construct($values);
-    }
 }

@@ -26,13 +26,4 @@ class QueryHandler extends InputOutputEndpointAnnotation
      * @var string
      */
     public $ignorePayload = false;
-
-    public function __construct(array $values = [])
-    {
-        if (!isset($values["inputChannelName"])) {
-            $this->inputChannelName = Uuid::uuid4()->toString();
-        }
-
-        parent::__construct($values);
-    }
 }

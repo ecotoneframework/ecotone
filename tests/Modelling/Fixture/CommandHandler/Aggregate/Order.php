@@ -57,16 +57,16 @@ class Order implements VersionAggregate
     }
 
     /**
-     * @param CreateOrderCommand $command
-     *
-     * @return Order
-     * @CommandHandler(redirectToOnAlreadyExists="increaseAmount")
+     * @CommandHandler()
      */
     public static function createWith(CreateOrderCommand $command) : self
     {
         return new self($command);
     }
 
+    /**
+     * @CommandHandler()
+     */
     public function increaseAmount(CreateOrderCommand $command) : void
     {
         $this->amount += $command->getAmount();

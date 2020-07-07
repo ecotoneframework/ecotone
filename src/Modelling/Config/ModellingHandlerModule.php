@@ -197,10 +197,17 @@ class ModellingHandlerModule implements AnnotationModule
         $annotationForMethod = $registration->getAnnotationForMethod();
 
         if ($annotationForMethod instanceof EventHandler) {
-            return $registration->getAnnotationForMethod()->listenTo;
+            $inputChannelName = $registration->getAnnotationForMethod()->listenTo;
+        }else {
+            $inputChannelName = $annotationForMethod->inputChannelName;
         }
 
-        return $annotationForMethod->inputChannelName;
+        if (!$inputChannelName) {
+            $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
+            $inputChannelName = $interfaceToCall->getFirstParameterTypeHint();
+        }
+
+        return $inputChannelName;
     }
 
     /**
@@ -370,16 +377,24 @@ class ModellingHandlerModule implements AnnotationModule
         $relatedClassInterface         = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
         $parameterConverterAnnotations = $annotation->parameterConverters;
         $parameterConverters           = $parameterConverterAnnotationFactory->createParameterConvertersWithReferences($relatedClassInterface, $parameterConverterAnnotations, $registration, $annotation->ignorePayload);
-
-        $inputChannelName         = self::getHandlerChannel($registration);
+        $endpointChannelName         = self::getHandlerChannel($registration);
         $aggregateClassDefinition = ClassDefinition::createFor(TypeDescriptor::create($registration->getClassName()));
         $handledPayloadType       = self::getPayloadClassIfAny($registration);
         $handledPayloadType       = $handledPayloadType ? ClassDefinition::createFor(TypeDescriptor::create($handledPayloadType)) : null;
 
+
+        $inputChannelName = self::getNamedMessageChannelFor($registration);
+        $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
+        $configuration->registerMessageHandler(
+            BridgeBuilder::create()
+                ->withInputChannelName($inputChannelName)
+                ->withOutputMessageChannel($endpointChannelName)
+        );
+
         $connectionChannel = Uuid::uuid4()->toString();
         $configuration->registerMessageHandler(
             ChainMessageHandlerBuilder::create()
-                ->withInputChannelName($inputChannelName)
+                ->withInputChannelName($endpointChannelName)
                 ->withOutputMessageChannel($connectionChannel)
                 ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], $handledPayloadType))
                 ->chain(

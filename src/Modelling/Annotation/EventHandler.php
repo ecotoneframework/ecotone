@@ -56,13 +56,4 @@ class EventHandler extends IdentifiedAnnotation
      * @var array
      */
     public $identifierMetadataMapping = [];
-
-    public function __construct(array $values = [])
-    {
-        if (!isset($values["listenTo"])) {
-            $this->listenTo = Uuid::uuid4()->toString();
-        }
-
-        parent::__construct($values);
-    }
 }

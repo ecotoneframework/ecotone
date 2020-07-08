@@ -5,6 +5,7 @@ namespace Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Annotation\IgnorePayload;
 
 /**
  * Class CommandHandlerWithReturnValue
@@ -16,7 +17,8 @@ class ServiceCommandHandlerWithInputChannelNameAndIgnoreMessage
 {
     /**
      * @return int
-     * @CommandHandler(inputChannelName="execute", endpointId="commandHandler", ignorePayload=true)
+     * @CommandHandler(inputChannelName="execute", endpointId="commandHandler")
+     * @IgnorePayload()
      */
     public function execute(\stdClass $class) : int
     {

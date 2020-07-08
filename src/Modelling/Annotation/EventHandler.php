@@ -30,13 +30,6 @@ class EventHandler extends IdentifiedAnnotation
      */
     public $parameterConverters = [];
     /**
-     * if endpoint is not interested in message's payload, set to true.
-     * ListenTo must be defined to connect endpoint with external channels
-     *
-     * @var string
-     */
-    public $ignorePayload = false;
-    /**
      * If @Aggregate was not found, message can be dropped instead of throwing exception
      *
      * @var bool

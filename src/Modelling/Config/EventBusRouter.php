@@ -96,4 +96,9 @@ class EventBusRouter
 
         return array_unique($resultChannels);
     }
+
+    public static function isRegexBasedRoute(string $channelName) : bool
+    {
+        return preg_match("#\.#", $channelName);
+    }
 }

@@ -218,16 +218,23 @@ class ModellingMessageRouterModule implements AnnotationModule
             self::verifyInputChannel($registration);
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
+            $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+
+            if (EventBusRouter::isRegexBasedRoute($namedMessageChannelFor)) {
+                throw ConfigurationException::create("Can not registered regex listen to channel for aggregates in {$registration}");
+            }
+
             if ($classChannel) {
-                $objectEventHandlers[$classChannel] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectEventHandlers[$classChannel] = $namedMessageChannelFor;
             }
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
-            if ($classChannel) {
-                $objectEventHandlers[$classChannel] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            if ($classChannel && !EventBusRouter::isRegexBasedRoute($namedMessageChannelFor)) {
+                $objectEventHandlers[$classChannel] = $namedMessageChannelFor;
             }
         }
 

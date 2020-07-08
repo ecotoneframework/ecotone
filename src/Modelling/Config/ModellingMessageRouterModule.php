@@ -114,14 +114,16 @@ class ModellingMessageRouterModule implements AnnotationModule
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, CommandHandler::class) as $registration) {
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
-                $objectCommandHandlers[$classChannel] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectCommandHandlers[$classChannel] = array_unique($objectCommandHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][] = $registration;
             }
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, CommandHandler::class) as $registration) {
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
-                $objectCommandHandlers[$classChannel] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectCommandHandlers[$classChannel] = array_unique($objectCommandHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][] = $registration;
             }
         }
@@ -139,7 +141,8 @@ class ModellingMessageRouterModule implements AnnotationModule
             self::verifyInputChannel($registration);
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
             if ($namedChannel) {
-                $namedCommandHandlers[$namedChannel] = $namedChannel;
+                $namedCommandHandlers[$namedChannel][] = $namedChannel;
+                $namedCommandHandlers[$namedChannel] = array_unique($namedCommandHandlers[$namedChannel]);
                 $uniqueChannels[$namedChannel][] = $registration;
             }
         }
@@ -147,9 +150,8 @@ class ModellingMessageRouterModule implements AnnotationModule
             self::verifyInputChannel($registration);
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
             if ($namedChannel) {
-                if (!array_key_exists($namedChannel, $namedCommandHandlers)) {
-                    $namedCommandHandlers[$namedChannel] = $namedChannel;
-                }
+                $namedCommandHandlers[$namedChannel][] = $namedChannel;
+                $namedCommandHandlers[$namedChannel] = array_unique($namedCommandHandlers[$namedChannel]);
                 $uniqueChannels[$namedChannel][] = $registration;
             }
         }
@@ -168,7 +170,8 @@ class ModellingMessageRouterModule implements AnnotationModule
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
-                $objectQueryHandlers[$classChannel] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectQueryHandlers[$classChannel] = array_unique($objectQueryHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][] = $registration;
             }
         }
@@ -177,7 +180,8 @@ class ModellingMessageRouterModule implements AnnotationModule
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
-                $objectQueryHandlers[$classChannel] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectQueryHandlers[$classChannel] = array_unique($objectQueryHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][] = $registration;
             }
         }
@@ -195,14 +199,16 @@ class ModellingMessageRouterModule implements AnnotationModule
             self::verifyInputChannel($registration);
 
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
-            $namedQueryHandlers[$namedChannel] = $namedChannel;
+            $namedQueryHandlers[$namedChannel][] = $namedChannel;
+            $namedQueryHandlers[$namedChannel] = array_unique($namedQueryHandlers[$namedChannel]);
             $uniqueChannels[$namedChannel][] = $registration;
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, QueryHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
-            $namedQueryHandlers[$namedChannel] = $namedChannel;
+            $namedQueryHandlers[$namedChannel][] = $namedChannel;
+            $namedQueryHandlers[$namedChannel] = array_unique($namedQueryHandlers[$namedChannel]);
             $uniqueChannels[$namedChannel][] = $registration;
         }
 
@@ -225,7 +231,8 @@ class ModellingMessageRouterModule implements AnnotationModule
             }
 
             if ($classChannel) {
-                $objectEventHandlers[$classChannel] = $namedMessageChannelFor;
+                $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
+                $objectEventHandlers[$classChannel] = array_unique($objectEventHandlers[$classChannel]);
             }
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
@@ -234,7 +241,8 @@ class ModellingMessageRouterModule implements AnnotationModule
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelFor($registration);
             if ($classChannel && !EventBusRouter::isRegexBasedRoute($namedMessageChannelFor)) {
-                $objectEventHandlers[$classChannel] = $namedMessageChannelFor;
+                $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
+                $objectEventHandlers[$classChannel] = array_unique($objectEventHandlers[$classChannel]);
             }
         }
 
@@ -245,10 +253,14 @@ class ModellingMessageRouterModule implements AnnotationModule
     {
         $namedEventHandlers = [];
         foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
-            $namedEventHandlers[ModellingHandlerModule::getNamedMessageChannelFor($registration)] = $targetMessageChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            $chanelName = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            $namedEventHandlers[$chanelName][] = $chanelName;
+            $namedEventHandlers[$chanelName] = array_unique($namedEventHandlers[$chanelName]);
         }
         foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
-            $namedEventHandlers[ModellingHandlerModule::getNamedMessageChannelFor($registration)] = $targetMessageChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            $channelName = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            $namedEventHandlers[$channelName][] = $channelName;
+            $namedEventHandlers[$channelName] = array_unique($namedEventHandlers[$channelName]);
         }
         return $namedEventHandlers;
     }

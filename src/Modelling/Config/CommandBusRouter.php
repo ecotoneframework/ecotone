@@ -31,7 +31,7 @@ class CommandBusRouter
         $this->channelMapping = $channelMapping;
     }
 
-    public function routeByObject(object $object) : string
+    public function routeByObject(object $object) : array
     {
         Assert::isObject($object, "Passed non object value to Commmand Bus: " . TypeDescriptor::createFromVariable($object)->toString() . ". Did you wanted to use convertAndSend?");
 
@@ -43,7 +43,7 @@ class CommandBusRouter
         return $this->channelMapping[$className];
     }
 
-    public function routeByName(?string $name) : string
+    public function routeByName(?string $name) : array
     {
         if (is_null($name)) {
             throw DestinationResolutionException::create("Can't send via name using CommandBus without " . CommandBus::CHANNEL_NAME_BY_NAME . " header defined");

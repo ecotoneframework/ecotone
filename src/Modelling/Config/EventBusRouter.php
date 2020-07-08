@@ -29,18 +29,8 @@ class EventBusRouter
         $this->channelMapping = $channelMapping;
     }
 
-    /**
-     * @param object $object
-     *
-     * @return array
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function routeByObject($object) : array
+    public function routeByObject(object $object) : array
     {
-        Assert::isObject($object, "Passed non object value to Event Bus: " . TypeDescriptor::createFromVariable($object)->toString() . ". Did you wanted to use convertAndSend?");
-
         $resolvedChannels = [];
         $reflectionClass = new \ReflectionClass($object);
         $parent = $reflectionClass;
@@ -69,7 +59,7 @@ class EventBusRouter
 
         $className = $class->getName();
         if (array_key_exists($className, $this->channelMapping)) {
-            $channelNames[] =  $this->channelMapping[$className];
+            $channelNames =  array_merge($channelNames, $this->channelMapping[$className]);
         }
 
         return $channelNames;
@@ -90,7 +80,7 @@ class EventBusRouter
         $resultChannels = [];
         foreach ($this->channelMapping as $listenFor => $destinationChannels) {
             if (preg_match("#^" . str_replace("*", ".*", $listenFor) . "$#", $name)) {
-                $resultChannels[] = $destinationChannels;
+                $resultChannels = array_merge($resultChannels, $destinationChannels);
             }
         }
 
@@ -99,6 +89,6 @@ class EventBusRouter
 
     public static function isRegexBasedRoute(string $channelName) : bool
     {
-        return preg_match("#\.#", $channelName);
+        return preg_match("#\*#", $channelName);
     }
 }

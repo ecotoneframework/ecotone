@@ -236,7 +236,7 @@ class TypeResolver
             }
 
             if (strpos($typeHint, "[]") !== false) {
-                $typeHint = "array<" . str_replace("[]", "", $typeHint) . ">";
+                $typeHint = "array<" . str_rueplace("[]", "", $typeHint) . ">";
             }
 
             $fullNames[] = $this->isInGlobalNamespace($typeHint)

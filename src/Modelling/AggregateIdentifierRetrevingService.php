@@ -29,12 +29,13 @@ class AggregateIdentifierRetrevingService
     private array $metadataIdentifierMapping;
     private PropertyReaderAccessor $propertyReaderAccessor;
 
-    public function __construct(ConversionService $conversionService, PropertyReaderAccessor $propertyReaderAccessor, ClassDefinition $aggregateClassDefinition, array $metadataIdentifierMapping, ?ClassDefinition $messageClassNameToConvertTo)
+    public function __construct(ConversionService $conversionService, PropertyReaderAccessor $propertyReaderAccessor, TypeDescriptor $typeToConvertTo, array $metadataIdentifierMapping, array $payloadIdentifierMapping)
     {
         $this->conversionService         = $conversionService;
         $this->propertyReaderAccessor    = $propertyReaderAccessor;
         $this->metadataIdentifierMapping = $metadataIdentifierMapping;
-        $this->initialize($aggregateClassDefinition, $messageClassNameToConvertTo, $metadataIdentifierMapping);
+        $this->payloadIdentifierMapping = $payloadIdentifierMapping;
+        $this->typeToConvertTo = $typeToConvertTo;
     }
 
     public function convert(Message $message): Message
@@ -83,78 +84,5 @@ class AggregateIdentifierRetrevingService
         return MessageBuilder::fromMessage($message)
             ->setHeader(AggregateMessage::AGGREGATE_ID, $aggregateIdentifiers)
             ->build();
-    }
-
-    private function initialize(ClassDefinition $aggregateClassDefinition, ?ClassDefinition $handledMessageClassNameDefinition, array $metadataIdentifierMapping): void
-    {
-        $aggregatePayloadIdentifiersMapping = [];
-
-        $aggregateIdentififerAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
-        foreach ($aggregateClassDefinition->getProperties() as $property) {
-            if ($property->hasAnnotation($aggregateIdentififerAnnotation)) {
-                $aggregatePayloadIdentifiersMapping[$property->getName()] = null;
-            }
-        }
-
-        if (empty($aggregatePayloadIdentifiersMapping)) {
-            throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifiers defined. How you forgot to mark @AggregateIdentifier?");
-        }
-
-        $messageProperties = [];
-        if ($handledMessageClassNameDefinition) {
-            $targetAggregateIdentifierAnnotation = TypeDescriptor::create(TargetAggregateIdentifier::class);
-            foreach ($handledMessageClassNameDefinition->getProperties() as $property) {
-                if ($property->hasAnnotation($targetAggregateIdentifierAnnotation)) {
-                    /** @var TargetAggregateIdentifier $annotation */
-                    $annotation  = $property->getAnnotation($targetAggregateIdentifierAnnotation);
-                    $mappingName = $annotation->identifierName ? $annotation->identifierName : $property->getName();
-
-                    if ($aggregateClassDefinition->hasProperty($mappingName) && $aggregateClassDefinition->getProperty($mappingName)->hasAnnotation($aggregateIdentififerAnnotation)) {
-                        $aggregatePayloadIdentifiersMapping[$mappingName] = $property->getName();
-                    }
-                }
-            }
-
-            $messageProperties = $handledMessageClassNameDefinition->getProperties();
-        }
-
-        foreach ($this->metadataIdentifierMapping as $identifierName => $mapping) {
-            if (!in_array($identifierName, array_keys($aggregatePayloadIdentifiersMapping))) {
-                throw ConfigurationException::create("Aggregate {$aggregateClassDefinition} for {$handledMessageClassNameDefinition} has metadata mapping for non existing identifier key {$identifierName}. It should be {\"aggregateId\":\"metadataIdKey\"}?");
-            }
-        }
-
-        foreach ($aggregatePayloadIdentifiersMapping as $aggregateIdentifierName => $aggregateIdentifierMappingKey) {
-            if (is_null($aggregateIdentifierMappingKey)) {
-                $mappingKey = null;
-                foreach ($messageProperties as $property) {
-                    if ($aggregateIdentifierName === $property->getName()) {
-                        $mappingKey = $property->getName();
-                    }
-                }
-
-                if (is_null($handledMessageClassNameDefinition) && is_null($mappingKey)) {
-                    $aggregatePayloadIdentifiersMapping[$aggregateIdentifierName] = $aggregateIdentifierName;
-                } else if (is_null($mappingKey) && !$this->hasIdentifierMappingInMetadata($metadataIdentifierMapping, $aggregateIdentifierName)) {
-                    throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` in {$handledMessageClassNameDefinition} for {$aggregateClassDefinition}. How you forgot to mark @TargetAggregateIdentifier?");
-                } else {
-                    $aggregatePayloadIdentifiersMapping[$aggregateIdentifierName] = $mappingKey;
-                }
-            }
-        }
-
-        $this->payloadIdentifierMapping = $aggregatePayloadIdentifiersMapping;
-        $this->typeToConvertTo          = $handledMessageClassNameDefinition ? $handledMessageClassNameDefinition->getClassType() : TypeDescriptor::createArrayType();
-    }
-
-    private function hasIdentifierMappingInMetadata(array $metadataIdentifierMapping, $aggregateIdentifierName): bool
-    {
-        foreach ($metadataIdentifierMapping as $identifierNameHeaderMapping => $headerName) {
-            if ($aggregateIdentifierName == $identifierNameHeaderMapping) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

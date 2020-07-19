@@ -3,6 +3,8 @@
 namespace Test\Ecotone\Modelling\Unit\Config;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -65,7 +67,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
 
     private function assertRouting(array $annotatedClasses, array $commandObjectMapping, array $commandMapping, array $queryObjectMapping, array $queryMapping, array $eventObjectMapping, array $eventNameMapping): void
     {
-        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom($annotatedClasses);
+        $annotationRegistrationService = InMemoryAnnotationFinder::createFrom($annotatedClasses);
         $extendedConfiguration = $this->prepareModule($annotationRegistrationService);
 
         $this->assertEquals(
@@ -80,16 +82,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         );
     }
 
-    /**
-     * @param InMemoryAnnotationRegistrationService $annotationRegistrationService
-     * @return Configuration
-     * @throws ConfigurationException
-     * @throws InvalidArgumentException
-     * @throws AnnotationException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
-    private function prepareModule(InMemoryAnnotationRegistrationService $annotationRegistrationService): Configuration
+    private function prepareModule(AnnotationFinder $annotationRegistrationService): Configuration
     {
         $module = ModellingMessageRouterModule::create($annotationRegistrationService);
 
@@ -107,7 +100,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         $this->expectException(ConfigurationException::class);
 
         $this->prepareModule(
-            InMemoryAnnotationRegistrationService::createFrom([
+            InMemoryAnnotationFinder::createFrom([
                 CommandHandlerWithNoInputChannelName::class
             ])
         );
@@ -118,7 +111,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         $this->expectException(ConfigurationException::class);
 
         $this->prepareModule(
-            InMemoryAnnotationRegistrationService::createFrom([
+            InMemoryAnnotationFinder::createFrom([
                 ServiceQueryHandlersWithNotUniqueClass::class
             ])
         );
@@ -129,7 +122,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         $this->expectException(ConfigurationException::class);
 
         $this->prepareModule(
-            InMemoryAnnotationRegistrationService::createFrom([
+            InMemoryAnnotationFinder::createFrom([
                 AggregateCommandHandlerWithDoubledFactoryMethod::class
             ])
         );
@@ -140,7 +133,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         $this->expectException(ConfigurationException::class);
 
         $this->prepareModule(
-            InMemoryAnnotationRegistrationService::createFrom([
+            InMemoryAnnotationFinder::createFrom([
                 AggregateCommandHandlerWithDoubledActionMethod::class
             ])
         );
@@ -151,7 +144,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         $this->expectException(ConfigurationException::class);
 
         $this->prepareModule(
-            InMemoryAnnotationRegistrationService::createFrom([
+            InMemoryAnnotationFinder::createFrom([
                 AggregateCommandHandlerExample::class,
                 AggregateCommandHandlerWithFactoryMethod::class
             ])
@@ -402,7 +395,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         $this->expectException(ConfigurationException::class);
 
         $this->prepareModule(
-            InMemoryAnnotationRegistrationService::createFrom([
+            InMemoryAnnotationFinder::createFrom([
                 AggregateEventHandlerWithListenToRegex::class
             ])
         );

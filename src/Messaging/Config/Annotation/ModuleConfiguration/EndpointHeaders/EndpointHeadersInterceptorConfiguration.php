@@ -3,6 +3,7 @@
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders;
 
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\Endpoint\Delayed;
 use Ecotone\Messaging\Annotation\Endpoint\Priority;
 use Ecotone\Messaging\Annotation\Endpoint\ExpireAfter;
@@ -26,7 +27,7 @@ class EndpointHeadersInterceptorConfiguration extends NoExternalConfigurationMod
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService)
+    public static function create(AnnotationFinder $annotationRegistrationService)
     {
         return new self();
     }

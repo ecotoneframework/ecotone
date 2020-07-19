@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -24,7 +25,7 @@ class TransformerModuleTest extends AnnotationConfigurationTest
     public function test_creating_transformer_builder()
     {
         $annotationConfiguration = TransformerModule::create(
-            InMemoryAnnotationRegistrationService::createFrom([TransformerWithMethodParameterExample::class])
+            InMemoryAnnotationFinder::createFrom([TransformerWithMethodParameterExample::class])
         );
 
         $configuration = $this->createMessagingSystemConfiguration();

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
@@ -10,6 +11,7 @@ use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\HeaderValue;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
@@ -52,12 +54,13 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
         $gatewayBuilders = [];
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, MessageGateway::class) as $annotationRegistration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, MessageGateway::class) as $annotationRegistration) {
             /** @var \Ecotone\Messaging\Annotation\MessageGateway $annotation */
             $annotation = $annotationRegistration->getAnnotationForMethod();
+            $referenceName = AnnotatedDefinitionReference::getReferenceFor($annotationRegistration);
 
             $parameterConverters = [];
             foreach ($annotation->parameterConverters as $parameterToMessage) {
@@ -69,7 +72,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     }
                 } else if ($parameterToMessage instanceof Header) {
                     if ($parameterToMessage->expression) {
-                        throw ConfigurationException::create("@Header annotation for Gateway ({$annotationRegistration->getReferenceName()}) cannot be used with expression");
+                        throw ConfigurationException::create("@Header annotation for Gateway ({$referenceName}) cannot be used with expression");
                     }else {
                         $parameterConverters[] = GatewayHeaderBuilder::create($parameterToMessage->parameterName, $parameterToMessage->headerName);
                     }
@@ -83,7 +86,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                 }
             }
 
-            $gatewayBuilders[] = GatewayProxyBuilder::create($annotationRegistration->getReferenceName(), $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
+            $gatewayBuilders[] = GatewayProxyBuilder::create($referenceName, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
                 ->withErrorChannel($annotation->errorChannel)
                 ->withParameterConverters($parameterConverters)
                 ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)

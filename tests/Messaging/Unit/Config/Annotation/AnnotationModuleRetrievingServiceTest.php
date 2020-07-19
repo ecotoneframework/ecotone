@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
 
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithConstructorParameters;
 use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithMethodParameters;
@@ -25,7 +26,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
      */
     public function test_creating_module()
     {
-        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             ExampleModuleConfiguration::class
         ]));
 
@@ -39,7 +40,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
 
     public function test_retrieving_application_context()
     {
-        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             StdClassExtensionApplicationContext::class
         ]));
 
@@ -55,7 +56,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
     {
         $this->expectException(ConfigurationException::class);
 
-        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             ApplicationContextWithConstructorParameters::class
         ]));
 
@@ -71,7 +72,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
     {
         $this->expectException(ConfigurationException::class);
 
-        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             ApplicationContextWithMethodParameters::class
         ]));
 
@@ -89,7 +90,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
      */
     public function test_creating_module_extension()
     {
-        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             ExampleModuleExtensionObject::class
         ]));
 
@@ -107,7 +108,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
      */
     public function test_registering_separately()
     {
-        $annotationModuleRetrievingService = new AnnotationModuleRetrievingService(InMemoryAnnotationRegistrationService::createFrom([
+        $annotationModuleRetrievingService = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             ExampleModuleExtensionObject::class, ExampleModuleConfiguration::class
         ]));
 

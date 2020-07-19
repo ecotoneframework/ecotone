@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
@@ -40,10 +42,10 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
         $consumerBuilders = [];
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, static::getConsumerAnnotation()) as $annotationRegistration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, static::getConsumerAnnotation()) as $annotationRegistration) {
             $consumerBuilders[] = static::createConsumerFrom($annotationRegistration);
         }
 
@@ -55,11 +57,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
      */
     public static abstract function getConsumerAnnotation(): string;
 
-    /**
-     * @param AnnotationRegistration $annotationRegistration
-     * @return ConsumerLifecycleBuilder
-     */
-    public static abstract function createConsumerFrom(AnnotationRegistration $annotationRegistration): ConsumerLifecycleBuilder;
+    public static abstract function createConsumerFrom(AnnotatedDefinition $annotationRegistration): ConsumerLifecycleBuilder;
 
     /**
      * @inheritDoc

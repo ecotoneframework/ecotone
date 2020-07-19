@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\MessageConsumer;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
@@ -36,11 +38,11 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
-        $annotationRegistrations = $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, MessageConsumer::class);
+        $annotationRegistrations = $annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, MessageConsumer::class);
 
-        return new self(array_map(function (AnnotationRegistration $annotationRegistration) {
+        return new self(array_map(function (AnnotatedDefinition $annotationRegistration) {
             /** @var MessageConsumer $annotationForMethod */
             $annotationForMethod = $annotationRegistration->getAnnotationForMethod();
 

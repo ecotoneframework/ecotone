@@ -2,9 +2,11 @@
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Annotation\Splitter;
 use Ecotone\Messaging\Annotation\Transformer;
+use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
@@ -30,14 +32,14 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public static function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotatedDefinition $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
         /** @var Transformer $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return
             SplitterBuilder::create(
-                $annotationRegistration->getReferenceName(),
+                AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
                 $annotationRegistration->getMethodName()
             )
             ->withEndpointId($annotation->endpointId)

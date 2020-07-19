@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation;
 
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Annotation\Extension;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
@@ -17,20 +18,13 @@ use Ecotone\Messaging\Config\ModuleRetrievingService;
  */
 class AnnotationModuleRetrievingService implements ModuleRetrievingService
 {
-    /**
-     * @var AnnotationRegistrationService
-     */
-    private $annotationRegistrationService;
+    private AnnotationFinder $annotationRegistrationService;
     /**
      * @var Module[]
      */
-    private $registeredModules = [];
+    private array $registeredModules = [];
 
-    /**
-     * AnnotationModuleConfigurationRetrievingService constructor.
-     * @param AnnotationRegistrationService $annotationRegistrationService
-     */
-    public function __construct(AnnotationRegistrationService $annotationRegistrationService)
+    public function __construct(AnnotationFinder $annotationRegistrationService)
     {
         $this->annotationRegistrationService = $annotationRegistrationService;
     }
@@ -49,7 +43,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
      */
     private function createAnnotationClasses($annotationClassName): array
     {
-        $moduleClassNames = $this->annotationRegistrationService->getAllClassesWithAnnotation($annotationClassName);
+        $moduleClassNames = $this->annotationRegistrationService->findAnnotatedClasses($annotationClassName);
 
         $modules = [];
         /** @var AnnotationModule|string $moduleClassName */
@@ -71,7 +65,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
      */
     public function findAllExtensionObjects(): array
     {
-        $extensionObjectsRegistrations = $this->annotationRegistrationService->findRegistrationsFor(ApplicationContext::class, Extension::class);
+        $extensionObjectsRegistrations = $this->annotationRegistrationService->findAnnotatedMethods(ApplicationContext::class, Extension::class);
         $extensionObjects = [];
 
         $classes = [];

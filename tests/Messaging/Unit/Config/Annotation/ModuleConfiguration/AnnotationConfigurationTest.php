@@ -2,6 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Test\Ecotone\Messaging\Fixture\Configuration\DumbModuleRetrievingService;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
@@ -16,16 +18,9 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  */
 abstract class AnnotationConfigurationTest extends MessagingTest
 {
-    /**
-     * @param string $className
-     * @param string $methodName
-     * @param $classAnnotationObject
-     * @param $methodAnnotationObject
-     * @return AnnotationRegistrationService
-     */
-    protected function createAnnotationRegistrationService(string $className, string $methodName, $classAnnotationObject, $methodAnnotationObject): AnnotationRegistrationService
+    protected function createAnnotationRegistrationService(string $className, string $methodName, $classAnnotationObject, $methodAnnotationObject): AnnotationFinder
     {
-        return InMemoryAnnotationRegistrationService::createEmpty()
+        return InMemoryAnnotationFinder::createEmpty()
             ->addAnnotationToClass(
                 $className,
                 $classAnnotationObject
@@ -37,16 +32,9 @@ abstract class AnnotationConfigurationTest extends MessagingTest
             );
     }
 
-    /**
-     * @param string $className
-     * @param string $methodName
-     * @param array $classAnnotations
-     * @param array $methodAnnotations
-     * @return AnnotationRegistrationService
-     */
-    protected function createMultipleAnnotationRegistrationService(string $className, string $methodName, array $classAnnotations, array $methodAnnotations): AnnotationRegistrationService
+    protected function createMultipleAnnotationRegistrationService(string $className, string $methodName, array $classAnnotations, array $methodAnnotations): AnnotationFinder
     {
-        $inMemoryAnnotationRegistrationService = InMemoryAnnotationRegistrationService::createEmpty();
+        $inMemoryAnnotationRegistrationService = InMemoryAnnotationFinder::createEmpty();
 
         foreach ($classAnnotations as $classAnnotation) {
             $inMemoryAnnotationRegistrationService

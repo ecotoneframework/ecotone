@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Annotation\Scheduled;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
@@ -27,7 +28,7 @@ class RequiredConsumersModuleTest extends AnnotationConfigurationTest
     public function test_throwing_exception_if_consumer_was_not_registered()
     {
         $annotationConfiguration = RequiredConsumersModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(ExampleConsumer::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
@@ -41,7 +42,7 @@ class RequiredConsumersModuleTest extends AnnotationConfigurationTest
     public function test_not_throwing_exception_if_consumer_was_registered_as_message_handler()
     {
         $annotationConfiguration = RequiredConsumersModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(ExampleConsumer::class)
         );
         $configuration = $this->createMessagingSystemConfiguration()
@@ -62,7 +63,7 @@ class RequiredConsumersModuleTest extends AnnotationConfigurationTest
     public function test_not_throwing_exception_if_consumer_was_registered_as_inbound_channel()
     {
         $annotationConfiguration = RequiredConsumersModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(ExampleConsumer::class)
         );
         $configuration = $this->createMessagingSystemConfiguration()

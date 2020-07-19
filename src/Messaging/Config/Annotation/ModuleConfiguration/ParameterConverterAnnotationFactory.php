@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\Messaging\Annotation\Parameter\Expression;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
@@ -95,17 +96,7 @@ class ParameterConverterAnnotationFactory
         return $parameterConverters;
     }
 
-    /**
-     * @param InterfaceToCall $relatedClassInterface
-     * @param array $methodParameterConverterBuilders
-     * @param AnnotationRegistration $registration
-     *
-     * @param bool $ignorePayload
-     * @return array
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     */
-    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotationRegistration $registration, bool $ignorePayload): array
+    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotatedDefinition $registration, bool $ignorePayload): array
     {
         return
             MethodInvoker::createDefaultMethodParameters(

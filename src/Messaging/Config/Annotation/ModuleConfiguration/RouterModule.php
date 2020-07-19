@@ -2,8 +2,10 @@
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Annotation\Router;
+use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
@@ -29,12 +31,12 @@ class RouterModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public static function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotatedDefinition $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
         /** @var Router $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
-        return RouterBuilder::create($annotationRegistration->getReferenceName(), $annotationRegistration->getMethodName())
+        return RouterBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotationRegistration), $annotationRegistration->getMethodName())
                 ->withEndpointId($annotation->endpointId)
                 ->withInputChannelName($annotation->inputChannelName)
                 ->setResolutionRequired($annotation->isResolutionRequired);

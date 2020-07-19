@@ -2,11 +2,14 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
+use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\ConverterClass;
 use Ecotone\Messaging\Annotation\MediaTypeConverter;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
@@ -41,9 +44,9 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService) : self
+    public static function create(AnnotationFinder $annotationRegistrationService) : self
     {
-        $registrations = $annotationRegistrationService->findRegistrationsFor(
+        $registrations = $annotationRegistrationService->findAnnotatedMethods(
             ConverterClass::class,
             Converter::class
         );
@@ -53,18 +56,18 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
         foreach ($registrations as $registration) {
             $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
             $converterBuilders[] = ReferenceServiceConverterBuilder::create(
-                  $registration->getReferenceName(),
+                  AnnotatedDefinitionReference::getReferenceFor($registration),
                   $registration->getMethodName(),
                   $interfaceToCall->getFirstParameter()->getTypeDescriptor(),
                   $interfaceToCall->getReturnType()
             );
         }
 
-        $registrations = $annotationRegistrationService->getAllClassesWithAnnotation(MediaTypeConverter::class);
+        $registrations = $annotationRegistrationService->findAnnotatedClasses(MediaTypeConverter::class);
 
         foreach ($registrations as $registration) {
             /** @var MediaTypeConverter $mediaTypeConverter */
-            $mediaTypeConverter = $annotationRegistrationService->getAnnotationForClass($registration, MediaTypeConverter::class);
+            $mediaTypeConverter = AnnotatedDefinitionReference::getSingleAnnotationForClass($annotationRegistrationService, $registration, MediaTypeConverter::class);
 
             $converterBuilders[] = ConverterReferenceBuilder::create($mediaTypeConverter->referenceName ? $mediaTypeConverter->referenceName : $registration);
         }

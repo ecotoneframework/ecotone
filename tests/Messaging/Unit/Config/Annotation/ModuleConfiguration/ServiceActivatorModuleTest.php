@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -27,7 +28,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
     public function test_creating_service_activator_builder_from_annotation()
     {
         $annotationConfiguration = ServiceActivatorModule::create(
-            InMemoryAnnotationRegistrationService::createFrom([
+            InMemoryAnnotationFinder::createFrom([
                 ServiceActivatorWithAllConfigurationDefined::class
             ])
         );

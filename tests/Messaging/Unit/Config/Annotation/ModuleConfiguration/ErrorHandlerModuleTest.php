@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ErrorHandlerModule;
 use Ecotone\Messaging\Handler\ErrorHandler\ErrorHandler;
@@ -41,7 +42,7 @@ class ErrorHandlerModuleTest extends AnnotationConfigurationTest
             )
             ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("errorChannel"));
 
-        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createEmpty();
+        $annotationRegistrationService = InMemoryAnnotationFinder::createEmpty();
         $annotationConfiguration = ErrorHandlerModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
         $annotationConfiguration->prepare($configuration, [
@@ -75,7 +76,7 @@ class ErrorHandlerModuleTest extends AnnotationConfigurationTest
                                     ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("errorChannel"))
                                     ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel("deadLetterChannel"));
 
-        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createEmpty();
+        $annotationRegistrationService = InMemoryAnnotationFinder::createEmpty();
         $annotationConfiguration = ErrorHandlerModule::create($annotationRegistrationService);
         $configuration = $this->createMessagingSystemConfiguration();
         $annotationConfiguration->prepare($configuration, [

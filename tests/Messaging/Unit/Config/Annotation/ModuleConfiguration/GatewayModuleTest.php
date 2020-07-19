@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -32,7 +33,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
     public function test_registering_gateway()
     {
         $annotationGatewayConfiguration = GatewayModule::create(
-            InMemoryAnnotationRegistrationService::createFrom([BookStoreGatewayExample::class])
+            InMemoryAnnotationFinder::createFrom([BookStoreGatewayExample::class])
         );
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
@@ -67,7 +68,7 @@ class GatewayModuleTest extends AnnotationConfigurationTest
      */
     public function test_registering_gateway_with_multiple_methods()
     {
-        $annotationGatewayConfiguration = GatewayModule::create(InMemoryAnnotationRegistrationService::createFrom([MultipleMethodsGatewayExample::class]));
+        $annotationGatewayConfiguration = GatewayModule::create(InMemoryAnnotationFinder::createFrom([MultipleMethodsGatewayExample::class]));
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
         $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], ModuleReferenceSearchService::createEmpty());

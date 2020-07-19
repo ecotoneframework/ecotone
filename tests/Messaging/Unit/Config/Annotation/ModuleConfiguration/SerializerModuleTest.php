@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\SerializerModule;
@@ -35,7 +36,7 @@ class SerializerModuleTest extends AnnotationConfigurationTest
      */
     public function test_converting_from_php()
     {
-        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createEmpty()
+        $annotationRegistrationService = InMemoryAnnotationFinder::createEmpty()
             ->registerClassWithAnnotations(ExampleSingleConverterService::class);
         $configuration = $this->createMessagingSystemConfiguration();
 
@@ -60,7 +61,7 @@ class SerializerModuleTest extends AnnotationConfigurationTest
 
     public function test_converting_to_php()
     {
-        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createEmpty()
+        $annotationRegistrationService = InMemoryAnnotationFinder::createEmpty()
             ->registerClassWithAnnotations(ExampleSingleConverterService::class);
         $configuration = $this->createMessagingSystemConfiguration();
 

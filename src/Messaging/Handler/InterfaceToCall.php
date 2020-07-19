@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -98,7 +99,7 @@ class InterfaceToCall
             $interface = get_class($interfaceOrObjectName);
         }
 
-        $annotationParser = InMemoryAnnotationRegistrationService::createFrom([$interface]);
+        $annotationParser = InMemoryAnnotationFinder::createFrom([$interface]);
 
         return new self($interface, $methodName, ClassDefinition::createUsingAnnotationParser(TypeDescriptor::create($interface), $annotationParser), $annotationParser->getAnnotationsForMethod($interface, $methodName));
     }

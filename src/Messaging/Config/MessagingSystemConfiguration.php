@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Ecotone\AnnotationFinder\AnnotationFinderFactory;
 use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
@@ -664,9 +665,7 @@ final class MessagingSystemConfiguration implements Configuration
         return self::prepareWithModuleRetrievingService(
             $rootPathToSearchConfigurationFor,
             new AnnotationModuleRetrievingService(
-                new FileSystemAnnotationRegistrationService(
-                    new AnnotationReader(),
-                    new AutoloadFileNamespaceParser(),
+                AnnotationFinderFactory::createFromWhatIsAvailable(
                     realpath($rootPathToSearchConfigurationFor),
                     $applicationConfiguration->getNamespaces(),
                     $applicationConfiguration->getEnvironment(),

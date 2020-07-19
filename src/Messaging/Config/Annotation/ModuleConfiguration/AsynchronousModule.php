@@ -2,12 +2,14 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
 use Ecotone\Messaging\Annotation\MediaTypeConverter;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
@@ -47,28 +49,28 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService) : self
+    public static function create(AnnotationFinder $annotationRegistrationService) : self
     {
-        $asynchronousClasses = $annotationRegistrationService->getAllClassesWithAnnotation(Asynchronous::class);
+        $asynchronousClasses = $annotationRegistrationService->findAnnotatedClasses(Asynchronous::class);
 
         $asynchronousMethods = array_merge(
-            $annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, Asynchronous::class),
-            $annotationRegistrationService->findRegistrationsFor(Aggregate::class, Asynchronous::class)
+            $annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, Asynchronous::class),
+            $annotationRegistrationService->findAnnotatedMethods(Aggregate::class, Asynchronous::class)
         );
         $endpoints = array_merge(
-            $annotationRegistrationService->findRegistrationsFor(
+            $annotationRegistrationService->findAnnotatedMethods(
                 MessageEndpoint::class,
                 EndpointAnnotation::class
             ),
-            $annotationRegistrationService->findRegistrationsFor(
+            $annotationRegistrationService->findAnnotatedMethods(
                 Aggregate::class,
                 EndpointAnnotation::class
             ),
-            $annotationRegistrationService->findRegistrationsFor(
+            $annotationRegistrationService->findAnnotatedMethods(
                 MessageEndpoint::class,
                 EventHandler::class
             ),
-            $annotationRegistrationService->findRegistrationsFor(
+            $annotationRegistrationService->findAnnotatedMethods(
                 Aggregate::class,
                 EventHandler::class
             ),
@@ -100,7 +102,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
 
         foreach ($asynchronousClasses as $asynchronousClass) {
             /** @var Asynchronous $asyncClass */
-            $asyncClass = $annotationRegistrationService->getAnnotationForClass($asynchronousClass, Asynchronous::class);
+            $asyncClass = AnnotatedDefinitionReference::getSingleAnnotationForClass($annotationRegistrationService, $asynchronousClass, Asynchronous::class);
             foreach ($endpoints as $endpoint) {
                 if ($asynchronousClass === $endpoint->getClassName()) {
                     /** @var EndpointAnnotation $annotationForMethod */

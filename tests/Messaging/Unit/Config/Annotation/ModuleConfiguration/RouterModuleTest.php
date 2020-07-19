@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\RouterModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -26,7 +27,7 @@ class RouterModuleTest extends AnnotationConfigurationTest
     public function test_creating_router_builder_from_annotation()
     {
         $annotationConfiguration = RouterModule::create(
-            InMemoryAnnotationRegistrationService::createFrom([RouterWithNoResolutionRequiredExample::class])
+            InMemoryAnnotationFinder::createFrom([RouterWithNoResolutionRequiredExample::class])
         );
         $configuration = $this->createMessagingSystemConfiguration();
         $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());

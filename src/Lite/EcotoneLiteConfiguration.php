@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Lite;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
 use Ecotone\Messaging\Config\ApplicationConfiguration;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -46,7 +47,7 @@ class EcotoneLiteConfiguration
     {
         $applicationConfiguration = $applicationConfiguration->withNamespaces(array_merge(
             $applicationConfiguration->getNamespaces(),
-            [FileSystemAnnotationRegistrationService::FRAMEWORK_NAMESPACE]
+            [FileSystemAnnotationFinder::FRAMEWORK_NAMESPACE]
         ));
 
         return MessagingSystemConfiguration::prepare(

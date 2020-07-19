@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -34,7 +35,7 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
     public function test_registering_async_channel_for_method()
     {
         $annotationConfiguration = AsynchronousModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(AsyncMethodExample::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
@@ -56,7 +57,7 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
     public function test_registering_async_channel_for_whole_class()
     {
         $annotationConfiguration = AsynchronousModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(AsyncClassExample::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
@@ -70,16 +71,10 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
         );
     }
 
-    /**
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
     public function test_registering_event_handler()
     {
         $annotationConfiguration = AsynchronousModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(AsyncEventHandlerExample::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
@@ -92,16 +87,10 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
         );
     }
 
-    /**
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
     public function test_ignoring_query_handler_as_async()
     {
         $annotationConfiguration = AsynchronousModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(AsyncQueryHandlerExample::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
@@ -124,23 +113,17 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
         $this->expectException(ConfigurationException::class);
 
         AsynchronousModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(AsyncEventHandlerWithoutIdExample::class)
         );
     }
 
-    /**
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
     public function test_throwing_exception_if_using_generated_id_for_command_handler()
     {
         $this->expectException(ConfigurationException::class);
 
         AsynchronousModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(AsyncCommandHandlerWithoutIdExample::class)
         );
     }

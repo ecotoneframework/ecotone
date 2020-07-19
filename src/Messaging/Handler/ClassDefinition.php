@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\AnnotationFinder\AnnotationResolver;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -42,7 +44,7 @@ class ClassDefinition
 
     public static function createFor(TypeDescriptor $classType) : self
     {
-        $annotationParser = InMemoryAnnotationRegistrationService::createFrom([$classType->toString()]);
+        $annotationParser = InMemoryAnnotationFinder::createFrom([$classType->toString()]);
         $typeResolver = TypeResolver::create();
 
         $reflectionClass = new \ReflectionClass($classType->toString());
@@ -56,7 +58,7 @@ class ClassDefinition
         );
     }
 
-    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationParser $annotationParser)
+    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationResolver $annotationParser)
     {
         $typeResolver = TypeResolver::createWithAnnotationParser($annotationParser);
 

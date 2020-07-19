@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Annotation\MediaTypeConverter;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
@@ -19,16 +20,10 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleMediaTypeConverte
  */
 class ConverterModuleTest extends AnnotationConfigurationTest
 {
-    /**
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
     public function test_registering_converters()
     {
         $annotationConfiguration = ConverterModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(ExampleConverterService::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();
@@ -49,14 +44,10 @@ class ConverterModuleTest extends AnnotationConfigurationTest
         );
     }
 
-    /**
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     */
     public function test_registering_media_type_converter()
     {
         $annotationConfiguration = ConverterModule::create(
-            InMemoryAnnotationRegistrationService::createEmpty()
+            InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(ExampleMediaTypeConverter::class)
         );
         $configuration = $this->createMessagingSystemConfiguration();

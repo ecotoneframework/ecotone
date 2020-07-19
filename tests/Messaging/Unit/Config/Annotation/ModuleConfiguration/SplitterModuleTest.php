@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\SplitterModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -26,7 +27,7 @@ class SplitterModuleTest extends AnnotationConfigurationTest
     public function test_creating_transformer_builder()
     {
         $annotationConfiguration = SplitterModule::create(
-            InMemoryAnnotationRegistrationService::createFrom([SplitterExample::class])
+            InMemoryAnnotationFinder::createFrom([SplitterExample::class])
         );
 
         $configuration = $this->createMessagingSystemConfiguration();

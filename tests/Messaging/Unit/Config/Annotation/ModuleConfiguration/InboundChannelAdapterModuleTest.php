@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\InboundChannelAdapterModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
@@ -22,7 +23,7 @@ class InboundChannelAdapterModuleTest extends AnnotationConfigurationTest
     public function test_creating_inbound_channel_adapter_builder_from_annotation()
     {
         $annotationConfiguration = InboundChannelAdapterModule::create(
-            InMemoryAnnotationRegistrationService::createFrom([
+            InMemoryAnnotationFinder::createFrom([
                 InboundChannelAdapterExample::class
             ])
         );

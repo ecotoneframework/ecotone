@@ -2,6 +2,8 @@
 
 namespace Ecotone\Modelling\Config;
 
+use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -75,7 +77,7 @@ class ModellingMessageRouterModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService)
+    public static function create(AnnotationFinder $annotationRegistrationService)
     {
         return new self(
             BusRouterBuilder::createCommandBusByObject(self::getCommandBusByObjectMapping($annotationRegistrationService)),
@@ -87,7 +89,7 @@ class ModellingMessageRouterModule implements AnnotationModule
         );
     }
 
-    private static function isForTheSameAggregate(array $aggregateMethodUsage, $uniqueChannelName, string $oppositeMethodType, AnnotationRegistration $registration): bool
+    private static function isForTheSameAggregate(array $aggregateMethodUsage, $uniqueChannelName, string $oppositeMethodType, AnnotatedDefinition $registration): bool
     {
         return !isset($aggregateMethodUsage[$uniqueChannelName][$oppositeMethodType])
             || $aggregateMethodUsage[$uniqueChannelName][$oppositeMethodType]->getClassName() === $registration->getClassName();
@@ -107,11 +109,11 @@ class ModellingMessageRouterModule implements AnnotationModule
             ->registerMessageHandler($this->eventBusByName);
     }
 
-    public static function getCommandBusByObjectMapping(AnnotationRegistrationService $annotationRegistrationService): array
+    public static function getCommandBusByObjectMapping(AnnotationFinder $annotationRegistrationService): array
     {
         $uniqueChannels = [];
         $objectCommandHandlers = [];
-        foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, CommandHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, CommandHandler::class) as $registration) {
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
@@ -119,7 +121,7 @@ class ModellingMessageRouterModule implements AnnotationModule
                 $uniqueChannels[$classChannel][] = $registration;
             }
         }
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, CommandHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, CommandHandler::class) as $registration) {
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
@@ -133,11 +135,11 @@ class ModellingMessageRouterModule implements AnnotationModule
         return $objectCommandHandlers;
     }
 
-    public static function getCommandBusByNamesMapping(AnnotationRegistrationService $annotationRegistrationService): array
+    public static function getCommandBusByNamesMapping(AnnotationFinder $annotationRegistrationService): array
     {
         $uniqueChannels = [];
         $namedCommandHandlers = [];
-        foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, CommandHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, CommandHandler::class) as $registration) {
             self::verifyInputChannel($registration);
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
             if ($namedChannel) {
@@ -146,7 +148,7 @@ class ModellingMessageRouterModule implements AnnotationModule
                 $uniqueChannels[$namedChannel][] = $registration;
             }
         }
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, CommandHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, CommandHandler::class) as $registration) {
             self::verifyInputChannel($registration);
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
             if ($namedChannel) {
@@ -161,11 +163,11 @@ class ModellingMessageRouterModule implements AnnotationModule
         return $namedCommandHandlers;
     }
 
-    public static function getQueryBusByObjectsMapping(AnnotationRegistrationService $annotationRegistrationService): array
+    public static function getQueryBusByObjectsMapping(AnnotationFinder $annotationRegistrationService): array
     {
         $uniqueChannels = [];
         $objectQueryHandlers = [];
-        foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, QueryHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, QueryHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
@@ -175,7 +177,7 @@ class ModellingMessageRouterModule implements AnnotationModule
                 $uniqueChannels[$classChannel][] = $registration;
             }
         }
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, QueryHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, QueryHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
@@ -191,11 +193,11 @@ class ModellingMessageRouterModule implements AnnotationModule
         return $objectQueryHandlers;
     }
 
-    public static function getQueryBusByNamesMapping(AnnotationRegistrationService $annotationRegistrationService): array
+    public static function getQueryBusByNamesMapping(AnnotationFinder $annotationRegistrationService): array
     {
         $uniqueChannels = [];
         $namedQueryHandlers = [];
-        foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, QueryHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, QueryHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
@@ -203,7 +205,7 @@ class ModellingMessageRouterModule implements AnnotationModule
             $namedQueryHandlers[$namedChannel] = array_unique($namedQueryHandlers[$namedChannel]);
             $uniqueChannels[$namedChannel][] = $registration;
         }
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, QueryHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, QueryHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
@@ -217,10 +219,10 @@ class ModellingMessageRouterModule implements AnnotationModule
         return $namedQueryHandlers;
     }
 
-    public static function getEventBusByObjectsMapping(AnnotationRegistrationService $annotationRegistrationService): array
+    public static function getEventBusByObjectsMapping(AnnotationFinder $annotationRegistrationService): array
     {
         $objectEventHandlers = [];
-        foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, EventHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
@@ -235,7 +237,7 @@ class ModellingMessageRouterModule implements AnnotationModule
                 $objectEventHandlers[$classChannel] = array_unique($objectEventHandlers[$classChannel]);
             }
         }
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, EventHandler::class) as $registration) {
             self::verifyInputChannel($registration);
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
@@ -249,15 +251,15 @@ class ModellingMessageRouterModule implements AnnotationModule
         return $objectEventHandlers;
     }
 
-    public static function getEventBusByNamesMapping(AnnotationRegistrationService $annotationRegistrationService): array
+    public static function getEventBusByNamesMapping(AnnotationFinder $annotationRegistrationService): array
     {
         $namedEventHandlers = [];
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, EventHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, EventHandler::class) as $registration) {
             $chanelName = ModellingHandlerModule::getNamedMessageChannelFor($registration);
             $namedEventHandlers[$chanelName][] = $chanelName;
             $namedEventHandlers[$chanelName] = array_unique($namedEventHandlers[$chanelName]);
         }
-        foreach ($annotationRegistrationService->findRegistrationsFor(Aggregate::class, EventHandler::class) as $registration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, EventHandler::class) as $registration) {
             $channelName = ModellingHandlerModule::getNamedMessageChannelFor($registration);
             $namedEventHandlers[$channelName][] = $channelName;
             $namedEventHandlers[$channelName] = array_unique($namedEventHandlers[$channelName]);
@@ -289,7 +291,7 @@ class ModellingMessageRouterModule implements AnnotationModule
         return [];
     }
 
-    private static function verifyInputChannel(AnnotationRegistration $annotationRegistration) : void
+    private static function verifyInputChannel(AnnotatedDefinition $annotationRegistration) : void
     {
         if (!ModellingHandlerModule::getNamedMessageChannelFor($annotationRegistration) && !ModellingHandlerModule::getPayloadClassIfAny($annotationRegistration)) {
             throw ConfigurationException::create("Handler {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()} has no input channel information. Configure inputChannelName or type hint first argument as class");
@@ -297,7 +299,7 @@ class ModellingMessageRouterModule implements AnnotationModule
     }
 
     /**
-     * @param AnnotationRegistration[][] $uniqueChannels
+     * @param AnnotatedDefinition[][] $uniqueChannels
      * @throws \Ecotone\Messaging\MessagingException
      */
     private static function verifyUniqueness(array $uniqueChannels): void

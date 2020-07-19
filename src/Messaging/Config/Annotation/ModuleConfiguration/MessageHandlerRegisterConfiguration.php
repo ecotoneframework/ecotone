@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
@@ -39,11 +41,11 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
         $messageHandlerBuilders = [];
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
-        foreach ($annotationRegistrationService->findRegistrationsFor(MessageEndpoint::class, static::getMessageHandlerAnnotation()) as $annotationRegistration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, static::getMessageHandlerAnnotation()) as $annotationRegistration) {
             $annotation = $annotationRegistration->getAnnotationForMethod();
             $messageHandlerBuilders[] = static::createMessageHandlerFrom($annotationRegistration)
                 ->withMethodParameterConverters(
@@ -59,11 +61,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
      */
     public static abstract function getMessageHandlerAnnotation(): string;
 
-    /**
-     * @param AnnotationRegistration $annotationRegistration
-     * @return MessageHandlerBuilderWithParameterConverters
-     */
-    public static abstract function createMessageHandlerFrom(AnnotationRegistration $annotationRegistration): MessageHandlerBuilderWithParameterConverters;
+    public static abstract function createMessageHandlerFrom(AnnotatedDefinition $annotationRegistration): MessageHandlerBuilderWithParameterConverters;
 
     /**
      * @inheritDoc

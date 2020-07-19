@@ -3,6 +3,8 @@
 namespace Ecotone\Messaging\Handler;
 
 use Doctrine\Common\Annotations\Annotation;
+use Ecotone\AnnotationFinder\AnnotationResolver;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -25,16 +27,9 @@ class TypeResolver
     private const STATIC_TYPE_HINT = "static";
     private const THIS_TYPE_HINT = '$this';
 
-    /**
-     * @var AnnotationParser|null
-     */
-    private $annotationParser;
+    private ?AnnotationResolver $annotationParser;
 
-    /**
-     * TypeResolver constructor.
-     * @param AnnotationParser|null $annotationParser
-     */
-    private function __construct(?AnnotationParser $annotationParser)
+    private function __construct(?AnnotationResolver $annotationParser)
     {
         $this->annotationParser = $annotationParser;
     }
@@ -44,11 +39,7 @@ class TypeResolver
         return new self(null);
     }
 
-    /**
-     * @param AnnotationParser $annotationParser
-     * @return TypeResolver
-     */
-    public static function createWithAnnotationParser(AnnotationParser $annotationParser): self
+    public static function createWithAnnotationParser(AnnotationResolver $annotationParser): self
     {
         return new self($annotationParser);
     }
@@ -436,15 +427,9 @@ class TypeResolver
         return array_unique($classProperties);
     }
 
-    /**
-     * @param string $className
-     * @return AnnotationParser
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     */
-    private function getAnnotationParser(string $className): AnnotationParser
+    private function getAnnotationParser(string $className): AnnotationResolver
     {
-        return $this->annotationParser ? $this->annotationParser : InMemoryAnnotationRegistrationService::createFrom([$className]);
+        return $this->annotationParser ? $this->annotationParser : InMemoryAnnotationFinder::createFrom([$className]);
     }
 
     /**
@@ -536,7 +521,7 @@ class TypeResolver
         return $methodReflection->getFileName() !== $trait->getMethod($methodReflection->getName())->getFileName();
     }
 
-    private function createClassProperty(string $declaringClass, AnnotationParser $annotationParser, \ReflectionProperty $property, ?Type $docblockType)
+    private function createClassProperty(string $declaringClass, AnnotationResolver $annotationParser, \ReflectionProperty $property, ?Type $docblockType)
     {
         $classProperty = null;
         $type = $docblockType ? $docblockType : TypeDescriptor::createAnythingType();
@@ -575,16 +560,7 @@ class TypeResolver
         return $classProperty;
     }
 
-    /**
-     * @param \ReflectionClass $reflectionClassOrTrait
-     * @param \ReflectionProperty $property
-     * @param AnnotationParser $annotationParser
-     * @param \ReflectionClass $declaringClass
-     * @return ClassPropertyDefinition|null
-     * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    private function createClassPropertyUsingTraitsIfExists(\ReflectionClass $reflectionClassOrTrait, \ReflectionProperty $property, AnnotationParser $annotationParser, \ReflectionClass $declaringClass)
+    private function createClassPropertyUsingTraitsIfExists(\ReflectionClass $reflectionClassOrTrait, \ReflectionProperty $property, AnnotationResolver $annotationParser, \ReflectionClass $declaringClass)
     {
         foreach ($reflectionClassOrTrait->getTraits() as $trait) {
             foreach ($trait->getProperties() as $traitProperty) {

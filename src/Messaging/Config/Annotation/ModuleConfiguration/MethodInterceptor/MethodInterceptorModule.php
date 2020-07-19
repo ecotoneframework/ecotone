@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
 
+use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\Interceptor\After;
 use Ecotone\Messaging\Annotation\Interceptor\Around;
 use Ecotone\Messaging\Annotation\Interceptor\Before;
@@ -88,15 +90,15 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationRegistrationService $annotationRegistrationService): MethodInterceptorModule
+    public static function create(AnnotationFinder $annotationRegistrationService): MethodInterceptorModule
     {
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
-        /** @var AnnotationRegistration[] $methodsInterceptors */
+        /** @var AnnotatedDefinition[] $methodsInterceptors */
         $methodsInterceptors = array_merge(
-            $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, Presend::class),
-            $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, Before::class),
-            $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, Around::class),
-            $annotationRegistrationService->findRegistrationsFor(MethodInterceptor::class, After::class)
+            $annotationRegistrationService->findAnnotatedMethods(MethodInterceptor::class, Presend::class),
+            $annotationRegistrationService->findAnnotatedMethods(MethodInterceptor::class, Before::class),
+            $annotationRegistrationService->findAnnotatedMethods(MethodInterceptor::class, Around::class),
+            $annotationRegistrationService->findAnnotatedMethods(MethodInterceptor::class, After::class)
         );
 
         $beforeSendAnnotation = TypeDescriptor::create(Presend::class);
@@ -165,15 +167,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         return new self($beforeSendInterceptors, $preCallInterceptors, $aroundInterceptors, $postCallInterceptors, $relatedInterfaces);
     }
 
-    /**
-     * @param AnnotationRegistration $methodInterceptor
-     * @param ParameterConverterAnnotationFactory $parameterConverterFactory
-     * @param InterfaceToCall $interfaceToCall
-     * @return MessageHandlerBuilderWithOutputChannel
-     * @throws MessagingException
-     * @throws InvalidArgumentException
-     */
-    private static function createMessageHandler(AnnotationRegistration $methodInterceptor, ParameterConverterAnnotationFactory $parameterConverterFactory, InterfaceToCall $interfaceToCall): MessageHandlerBuilderWithOutputChannel
+    private static function createMessageHandler(AnnotatedDefinition $methodInterceptor, ParameterConverterAnnotationFactory $parameterConverterFactory, InterfaceToCall $interfaceToCall): MessageHandlerBuilderWithOutputChannel
     {
         /** @var After|Before $annotationForMethod */
         $annotationForMethod = $methodInterceptor->getAnnotationForMethod();

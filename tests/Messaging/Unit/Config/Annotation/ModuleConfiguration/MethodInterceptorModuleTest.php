@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Precedence;
@@ -46,7 +47,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
             ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "subtract", Precedence::DEFAULT_PRECEDENCE, ""))
             ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "multiply", 2, CalculatingServiceInterceptorExample::class));
 
-        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
+        $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
             CalculatingServiceInterceptorExample::class
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
@@ -98,7 +99,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
                 )
             );
 
-        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
+        $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
             ServiceActivatorInterceptorExample::class
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
@@ -162,7 +163,7 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
                 )
             );
 
-        $annotationRegistrationService = InMemoryAnnotationRegistrationService::createFrom([
+        $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
             TransformerInterceptorExample::class
         ]);
         $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);

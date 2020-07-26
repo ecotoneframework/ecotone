@@ -2,9 +2,11 @@
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -53,6 +55,13 @@ class GatewayHeadersConverter implements GatewayParameterConverter
         }
 
         foreach ($headers as $headerName => $headerValue) {
+//            @TODO passed $metadata to gateway contain MediaType with type from before conversion. Which results in errors on later stage
+            if ($headerName === MessageHeaders::CONTENT_TYPE) {
+                $mediaType = MediaType::parseMediaType($headerValue);
+                if ($mediaType->hasTypeParameter() && !TypeDescriptor::createFromVariable($messageBuilder->getPayload())->isCompatibleWith($mediaType->getTypeParameter())) {
+                    continue;
+                }
+            }
             if (!is_null($headerValue)) {
                 $messageBuilder = $messageBuilder->setHeader($headerName, $headerValue);
             }

@@ -54,9 +54,7 @@ use ReflectionException;
  */
 class ModellingHandlerModule implements AnnotationModule
 {
-    const INTEGRATION_MESSAGING_CQRS_MESSAGE_EXECUTING_CHANNEL = "cqrs.execute_message";
     const CQRS_MODULE                                          = "cqrsModule";
-    const CQRS_MESSAGE_ROUTER_ENDPOINT_ID                      = "cqrsMessageRouter";
 
     /**
      * @var ParameterConverterAnnotationFactory
@@ -153,15 +151,6 @@ class ModellingHandlerModule implements AnnotationModule
         );
     }
 
-    /**
-     * @param AnnotationRegistration $registration
-     *
-     * @return string|null
-     * @throws AnnotationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
     public static function getMessagePayloadTypeFor(AnnotatedDefinition $registration): string
     {
         $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
@@ -195,6 +184,20 @@ class ModellingHandlerModule implements AnnotationModule
         }
 
         return null;
+    }
+
+    public static function hasMessageNameDefined(AnnotatedDefinition $registration) : bool
+    {
+        /** @var InputOutputEndpointAnnotation $annotationForMethod */
+        $annotationForMethod = $registration->getAnnotationForMethod();
+
+        if ($annotationForMethod instanceof EventHandler) {
+            $inputChannelName = $registration->getAnnotationForMethod()->listenTo;
+        }else {
+            $inputChannelName = $annotationForMethod->inputChannelName;
+        }
+
+        return $inputChannelName ? true : false;
     }
 
     public static function getNamedMessageChannelFor(AnnotatedDefinition $registration): string
@@ -282,7 +285,7 @@ class ModellingHandlerModule implements AnnotationModule
     }
 
     /**
-     * @var AnnotationRegistration[] $registrations
+     * @var AnnotatedDefinition[] $registrations
      */
     private function registerAggregateCommandHandler(Configuration $configuration, array $aggregateRepositoryReferenceNames, array $registrations, string $inputChannelName): void
     {

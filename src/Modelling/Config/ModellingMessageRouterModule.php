@@ -114,6 +114,10 @@ class ModellingMessageRouterModule implements AnnotationModule
         $uniqueChannels = [];
         $objectCommandHandlers = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, CommandHandler::class) as $registration) {
+            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
+
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
@@ -122,6 +126,10 @@ class ModellingMessageRouterModule implements AnnotationModule
             }
         }
         foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, CommandHandler::class) as $registration) {
+            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
+
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
                 $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
@@ -169,6 +177,9 @@ class ModellingMessageRouterModule implements AnnotationModule
         $objectQueryHandlers = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, QueryHandler::class) as $registration) {
             self::verifyInputChannel($registration);
+            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
@@ -179,6 +190,9 @@ class ModellingMessageRouterModule implements AnnotationModule
         }
         foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, QueryHandler::class) as $registration) {
             self::verifyInputChannel($registration);
+            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             if ($classChannel) {
@@ -224,13 +238,12 @@ class ModellingMessageRouterModule implements AnnotationModule
         $objectEventHandlers = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, EventHandler::class) as $registration) {
             self::verifyInputChannel($registration);
+            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelFor($registration);
-
-            if (EventBusRouter::isRegexBasedRoute($namedMessageChannelFor)) {
-                throw ConfigurationException::create("Can not registered regex listen to channel for aggregates in {$registration}");
-            }
 
             if ($classChannel) {
                 $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
@@ -256,11 +269,16 @@ class ModellingMessageRouterModule implements AnnotationModule
         $namedEventHandlers = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, EventHandler::class) as $registration) {
             $chanelName = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+
             $namedEventHandlers[$chanelName][] = $chanelName;
             $namedEventHandlers[$chanelName] = array_unique($namedEventHandlers[$chanelName]);
         }
         foreach ($annotationRegistrationService->findAnnotatedMethods(Aggregate::class, EventHandler::class) as $registration) {
             $channelName = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            if (EventBusRouter::isRegexBasedRoute($channelName)) {
+                throw ConfigurationException::create("Can not registered regex listen to channel for aggregates in {$registration}");
+            }
+
             $namedEventHandlers[$channelName][] = $channelName;
             $namedEventHandlers[$channelName] = array_unique($namedEventHandlers[$channelName]);
         }

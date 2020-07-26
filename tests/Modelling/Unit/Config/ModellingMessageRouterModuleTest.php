@@ -166,9 +166,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         $annotatedClasses = [ServiceQueryHandlersWithAllowedNotUniqueClassAndInputChannels::class];
 
         $this->assertRouting($annotatedClasses,
-            [
-                stdClass::class => ["some1", "some2"]
-            ],
+            [],
             [
                 "some1" => ["some1"],
                 "some2" => ["some2"]
@@ -201,7 +199,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         ];
 
         $this->assertRouting($annotatedClasses,
-            [stdClass::class => ["execute"]], ["execute" => ["execute"]], [], [], [], []);
+            [], ["execute" => ["execute"]], [], [], [], []);
     }
 
     public function test_registering_service_command_handler_with_input_channel_and_ignore_class()
@@ -271,9 +269,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         ];
 
         $this->assertRouting($annotatedClasses, [], [],
-            [
-                stdClass::class => ["execute"]
-            ],
+            [],
             [
                 "execute" => ["execute"]
             ],

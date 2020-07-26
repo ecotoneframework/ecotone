@@ -39,7 +39,7 @@ class Appointment
     /**
      * @param CreateAppointmentCommand $command
      * @return Appointment
-     * @CommandHandler(inputChannelName="createAppointmentCommand")
+     * @CommandHandler()
      */
     public static function create(CreateAppointmentCommand $command) : self
     {

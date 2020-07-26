@@ -18,11 +18,6 @@
     "autoload-dev": {
         "psr-4": {
             "Test\\Ecotone\\": "tests"
-        },
-        "psr-0": {
-            "FixtureAutoloadTest\\": "tests\\Messaging",
-            "TestingNamespace\\": "tests\\Messaging",
-            "Incorrect\\": "tests\\Messaging\\TestingNamespace"
         }
     },
     "require": {

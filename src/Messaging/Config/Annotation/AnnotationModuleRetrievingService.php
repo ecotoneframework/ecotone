@@ -65,7 +65,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
      */
     public function findAllExtensionObjects(): array
     {
-        $extensionObjectsRegistrations = $this->annotationRegistrationService->findAnnotatedMethods(ApplicationContext::class, Extension::class);
+        $extensionObjectsRegistrations = $this->annotationRegistrationService->findCombined(ApplicationContext::class, Extension::class);
         $extensionObjects = [];
 
         $classes = [];

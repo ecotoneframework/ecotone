@@ -46,7 +46,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
      */
     public static function create(AnnotationFinder $annotationRegistrationService) : self
     {
-        $registrations = $annotationRegistrationService->findAnnotatedMethods(
+        $registrations = $annotationRegistrationService->findCombined(
             ConverterClass::class,
             Converter::class
         );

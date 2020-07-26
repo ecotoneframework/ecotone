@@ -141,12 +141,12 @@ class ModellingHandlerModule implements AnnotationModule
 
         return new self(
             ParameterConverterAnnotationFactory::create(),
-            $annotationRegistrationService->findAnnotatedMethods(Aggregate::class, CommandHandler::class),
-            $annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, CommandHandler::class),
-            $annotationRegistrationService->findAnnotatedMethods(Aggregate::class, QueryHandler::class),
-            $annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, QueryHandler::class),
-            $annotationRegistrationService->findAnnotatedMethods(Aggregate::class, EventHandler::class),
-            $annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, EventHandler::class),
+            $annotationRegistrationService->findCombined(Aggregate::class, CommandHandler::class),
+            $annotationRegistrationService->findCombined(MessageEndpoint::class, CommandHandler::class),
+            $annotationRegistrationService->findCombined(Aggregate::class, QueryHandler::class),
+            $annotationRegistrationService->findCombined(MessageEndpoint::class, QueryHandler::class),
+            $annotationRegistrationService->findCombined(Aggregate::class, EventHandler::class),
+            $annotationRegistrationService->findCombined(MessageEndpoint::class, EventHandler::class),
             $aggregateRepositoryReferenceNames
         );
     }

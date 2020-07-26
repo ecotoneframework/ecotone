@@ -9,7 +9,6 @@ use Ecotone\Messaging\Annotation\Endpoint\Priority;
 use Ecotone\Messaging\Annotation\Endpoint\ExpireAfter;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;

@@ -45,7 +45,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
     public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
         $consumerBuilders = [];
-        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, static::getConsumerAnnotation()) as $annotationRegistration) {
+        foreach ($annotationRegistrationService->findCombined(MessageEndpoint::class, static::getConsumerAnnotation()) as $annotationRegistration) {
             $consumerBuilders[] = static::createConsumerFrom($annotationRegistration);
         }
 

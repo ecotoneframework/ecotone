@@ -40,7 +40,7 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
      */
     public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
-        $annotationRegistrations = $annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, MessageConsumer::class);
+        $annotationRegistrations = $annotationRegistrationService->findCombined(MessageEndpoint::class, MessageConsumer::class);
 
         return new self(array_map(function (AnnotatedDefinition $annotationRegistration) {
             /** @var MessageConsumer $annotationForMethod */

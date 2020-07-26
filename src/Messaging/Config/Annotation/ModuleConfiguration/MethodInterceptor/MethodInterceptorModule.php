@@ -96,10 +96,10 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
         /** @var AnnotatedDefinition[] $methodsInterceptors */
         $methodsInterceptors = array_merge(
-            $annotationRegistrationService->findAnnotatedMethods(MethodInterceptor::class, Presend::class),
-            $annotationRegistrationService->findAnnotatedMethods(MethodInterceptor::class, Before::class),
-            $annotationRegistrationService->findAnnotatedMethods(MethodInterceptor::class, Around::class),
-            $annotationRegistrationService->findAnnotatedMethods(MethodInterceptor::class, After::class)
+            $annotationRegistrationService->findCombined(MethodInterceptor::class, Presend::class),
+            $annotationRegistrationService->findCombined(MethodInterceptor::class, Before::class),
+            $annotationRegistrationService->findCombined(MethodInterceptor::class, Around::class),
+            $annotationRegistrationService->findCombined(MethodInterceptor::class, After::class)
         );
 
         $beforeSendAnnotation = TypeDescriptor::create(Presend::class);

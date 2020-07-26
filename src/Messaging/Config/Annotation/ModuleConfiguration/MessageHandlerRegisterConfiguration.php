@@ -45,7 +45,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
     {
         $messageHandlerBuilders = [];
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
-        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, static::getMessageHandlerAnnotation()) as $annotationRegistration) {
+        foreach ($annotationRegistrationService->findCombined(MessageEndpoint::class, static::getMessageHandlerAnnotation()) as $annotationRegistration) {
             $annotation = $annotationRegistration->getAnnotationForMethod();
             $messageHandlerBuilders[] = static::createMessageHandlerFrom($annotationRegistration)
                 ->withMethodParameterConverters(

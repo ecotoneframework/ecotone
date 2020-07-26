@@ -57,7 +57,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
         $gatewayBuilders = [];
-        foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, MessageGateway::class) as $annotationRegistration) {
+        foreach ($annotationRegistrationService->findCombined(MessageEndpoint::class, MessageGateway::class) as $annotationRegistration) {
             /** @var \Ecotone\Messaging\Annotation\MessageGateway $annotation */
             $annotation = $annotationRegistration->getAnnotationForMethod();
             $referenceName = AnnotatedDefinitionReference::getReferenceFor($annotationRegistration);

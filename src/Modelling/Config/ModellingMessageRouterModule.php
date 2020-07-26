@@ -252,6 +252,9 @@ class ModellingMessageRouterModule implements AnnotationModule
         }
         foreach ($annotationRegistrationService->findAnnotatedMethods(MessageEndpoint::class, EventHandler::class) as $registration) {
             self::verifyInputChannel($registration);
+            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
 
             $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
             $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelFor($registration);

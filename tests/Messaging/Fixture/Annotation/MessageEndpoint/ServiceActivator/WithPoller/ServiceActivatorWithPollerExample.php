@@ -8,12 +8,6 @@ use Ecotone\Messaging\Annotation\Poller;
 use Ecotone\Messaging\Annotation\RetryTemplate;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
-/**
- * Class ServiceActivatorWithAllConfigurationDefined
- * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class ServiceActivatorWithPollerExample
 {
     /**

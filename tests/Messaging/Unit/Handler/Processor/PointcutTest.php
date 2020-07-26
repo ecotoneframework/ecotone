@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
+use Ecotone\Messaging\Annotation\ClassReference;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Annotation\Interceptor\Around;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
@@ -73,7 +74,7 @@ class PointcutTest extends TestCase
         );
 
         $this->itShouldNotCut(
-            "@(" . MethodInterceptor::class . ")",
+            "@(" . ClassReference::class . ")",
             InterfaceToCall::create(AspectWithoutMethodInterceptorExample::class, "doSomething")
         );
     }
@@ -86,7 +87,7 @@ class PointcutTest extends TestCase
         );
 
         $this->itShouldCut(
-            "@(" . MethodInterceptor::class . ")",
+            "@(" . ClassReference::class . ")",
             InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
     }

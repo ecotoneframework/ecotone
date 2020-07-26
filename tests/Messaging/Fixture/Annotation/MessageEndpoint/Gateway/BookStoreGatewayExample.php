@@ -12,12 +12,6 @@ use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\HeaderValue;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 
-/**
- * Interface GatewayWithAllConvertersExample
- * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 interface BookStoreGatewayExample
 {
     /**

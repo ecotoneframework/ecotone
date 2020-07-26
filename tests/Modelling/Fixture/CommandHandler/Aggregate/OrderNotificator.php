@@ -6,12 +6,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * Class OrderNotificator
- * @package Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class OrderNotificator
 {
     /** @var Notification[] */

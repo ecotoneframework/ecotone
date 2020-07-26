@@ -6,12 +6,6 @@ namespace Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
-/**
- * Class MultiMethod
- * @package Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class MultiMethodServiceCommandHandlerExample
 {
     /**

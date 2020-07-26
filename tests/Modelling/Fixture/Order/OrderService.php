@@ -13,10 +13,6 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 
 /**
- * Class OrderService
- * @package Test\Ecotone\Amqp\Fixture\Order
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
  * @Asynchronous(channelName="orders")
  */
 class OrderService

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 
-use Ecotone\AnnotationFinder\AnnotatedDefinition;
-use Ecotone\Messaging\Annotation\Scheduled;
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Annotation\Scheduled;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
@@ -16,7 +16,7 @@ use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilde
 /**
  * Class InboundChannelAdapterModule
  * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
 class InboundChannelAdapterModule extends ConsumerRegisterConfiguration
@@ -32,14 +32,14 @@ class InboundChannelAdapterModule extends ConsumerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public static function createConsumerFrom(AnnotatedDefinition $annotationRegistration): ConsumerLifecycleBuilder
+    public static function createConsumerFrom(AnnotatedFinding $annotationRegistration): ConsumerLifecycleBuilder
     {
         /** @var Scheduled $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return InboundChannelAdapterBuilder::create($annotation->requestChannelName, AnnotatedDefinitionReference::getReferenceFor($annotationRegistration), $annotationRegistration->getMethodName())
-                    ->withEndpointId($annotation->endpointId)
-                    ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
+            ->withEndpointId($annotation->endpointId)
+            ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
     }
 
     /**

@@ -10,12 +10,6 @@ use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
 use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 
-/**
- * Class ServiceActivatorWithLoggerExample
- * @package Fixture\Annotation\MessageEndpoint\ServiceActivator\WithLogger
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class ServiceActivatorWithLoggerExample
 {
     /**

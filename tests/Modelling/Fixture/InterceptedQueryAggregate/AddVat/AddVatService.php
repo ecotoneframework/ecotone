@@ -5,9 +5,6 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddVat;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
-/**
- * @MessageEndpoint()
- */
 class AddVatService
 {
     /**

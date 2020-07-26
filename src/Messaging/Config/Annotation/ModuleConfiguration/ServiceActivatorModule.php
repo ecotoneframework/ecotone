@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
-use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -15,7 +14,7 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 /**
  * Class AnnotationServiceActivatorConfiguration
  * @package Ecotone\Messaging\Config\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
 class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
@@ -25,15 +24,7 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function createMessageHandlerFrom(AnnotatedDefinition $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
         /** @var ServiceActivator $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
@@ -52,5 +43,13 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
     public static function getMessageHandlerAnnotation(): string
     {
         return ServiceActivator::class;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getName(): string
+    {
+        return self::MODULE_NAME;
     }
 }

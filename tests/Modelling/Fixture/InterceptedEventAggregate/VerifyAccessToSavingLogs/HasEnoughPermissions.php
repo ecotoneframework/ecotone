@@ -7,9 +7,6 @@ use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 
-/**
- * @MethodInterceptor()
- */
 class HasEnoughPermissions
 {
     /**

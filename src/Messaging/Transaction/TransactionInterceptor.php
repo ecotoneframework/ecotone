@@ -16,16 +16,6 @@ use Ecotone\Messaging\Message;
  */
 class TransactionInterceptor
 {
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @param ReferenceSearchService $referenceSearchService
-     * @param Transactional $transactional
-     * @param Message $message
-     * @return mixed
-     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
-     * @throws \Throwable
-     * @Around(precedence=-10, pointcut="@(Ecotone\Messaging\Transaction\Transactional)")
-     */
     public function transactional(MethodInvocation $methodInvocation, ReferenceSearchService $referenceSearchService, Transactional $transactional, Message $message)
     {
         /** @var TransactionFactory[] $factories */

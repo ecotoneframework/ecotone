@@ -10,9 +10,6 @@ use Ecotone\Messaging\Message;
 use Ecotone\Modelling\QueryBus;
 use Ecotone\Messaging\MessageHeaders;
 
-/**
- * @MessageEndpoint()
- */
 interface MessageBasedQueryBusExample
 {
     /**

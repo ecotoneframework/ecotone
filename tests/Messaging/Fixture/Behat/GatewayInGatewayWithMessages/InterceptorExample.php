@@ -11,9 +11,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
-/**
- * @MethodInterceptor()
- */
 class InterceptorExample
 {
     /**

@@ -6,12 +6,6 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
 use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
-/**
- * Interface MultipleMethodsGatewayExample
- * @package Test\Ecotone\Messaging\Fixture\Handler\Gateway
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 interface MultipleMethodsGatewayExample
 {
     /**

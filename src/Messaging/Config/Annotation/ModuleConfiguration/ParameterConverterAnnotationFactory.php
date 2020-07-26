@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\AnnotationFinder\AnnotatedDefinition;
-use Ecotone\Messaging\Annotation\Parameter\Expression;
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\MessageParameter;
@@ -12,16 +11,14 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Annotation\Parameter\Reference;
 use Ecotone\Messaging\Annotation\Parameter\Value;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
-use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\MessagingException;
@@ -30,7 +27,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 /**
  * Class ParameterConverterAnnotationFactory
  * @package Ecotone\Messaging\Config\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ParameterConverterAnnotationFactory
 {
@@ -48,11 +45,11 @@ class ParameterConverterAnnotationFactory
 
     /**
      * @param InterfaceToCall|null $relatedClassInterface
-     * @param array $parameterConverterAnnotations
+     * @param array                $parameterConverterAnnotations
      *
      * @return array
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function createParameterConverters(?InterfaceToCall $relatedClassInterface, array $parameterConverterAnnotations): array
     {
@@ -67,7 +64,7 @@ class ParameterConverterAnnotationFactory
                         $parameterConverterAnnotation->expression,
                         $parameterConverterAnnotation->isRequired
                     );
-                }else if ($parameterConverterAnnotation->isRequired) {
+                } else if ($parameterConverterAnnotation->isRequired) {
                     $parameterConverters[] = HeaderBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->headerName);
                 } else {
                     $parameterConverters[] = HeaderBuilder::createOptional($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->headerName);
@@ -75,7 +72,7 @@ class ParameterConverterAnnotationFactory
             } else if ($parameterConverterAnnotation instanceof Payload) {
                 if ($parameterConverterAnnotation->expression) {
                     $parameterConverters[] = PayloadExpressionBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->expression);
-                }else {
+                } else {
                     $parameterConverters[] = PayloadBuilder::create($parameterConverterAnnotation->parameterName);
                 }
             } else if ($parameterConverterAnnotation instanceof MessageParameter) {
@@ -83,9 +80,9 @@ class ParameterConverterAnnotationFactory
             } else if ($parameterConverterAnnotation instanceof Reference) {
                 if ($parameterConverterAnnotation->referenceName) {
                     $parameterConverters[] = ReferenceBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->referenceName);
-                }elseif ($relatedClassInterface) {
+                } elseif ($relatedClassInterface) {
                     $parameterConverters[] = ReferenceBuilder::createFromParameterTypeHint($parameterConverterAnnotation->parameterName, $relatedClassInterface);
-                }else {
+                } else {
                     $parameterConverters[] = ReferenceBuilder::createWithDynamicResolve($parameterConverterAnnotation->parameterName);
                 }
             } else if ($parameterConverterAnnotation instanceof Headers) {
@@ -96,7 +93,7 @@ class ParameterConverterAnnotationFactory
         return $parameterConverters;
     }
 
-    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotatedDefinition $registration, bool $ignorePayload): array
+    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotatedFinding $registration, bool $ignorePayload): array
     {
         return
             MethodInvoker::createDefaultMethodParameters(

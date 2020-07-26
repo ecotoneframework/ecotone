@@ -8,9 +8,6 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * @MessageEndpoint()
- */
 class NotificationService
 {
     private ?object $lastLog = null;

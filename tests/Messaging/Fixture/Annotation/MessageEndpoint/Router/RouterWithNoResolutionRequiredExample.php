@@ -6,12 +6,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Annotation\Router;
 
-/**
- * Class RouterWithNoResolutionRequiredExample
- * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Router
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class RouterWithNoResolutionRequiredExample
 {
     /**

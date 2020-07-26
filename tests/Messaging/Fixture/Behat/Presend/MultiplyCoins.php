@@ -6,9 +6,6 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Presend;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Annotation\Interceptor\Presend;
 
-/**
- * @MethodInterceptor()
- */
 class MultiplyCoins
 {
     /**

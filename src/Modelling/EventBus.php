@@ -9,12 +9,6 @@ use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\MessageHeaders;
 
-/**
- * Interface EventBus
- * @package Ecotone\Modelling
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 interface EventBus
 {
     const CHANNEL_NAME_BY_OBJECT = "ecotone.modelling.bus.event_by_object";

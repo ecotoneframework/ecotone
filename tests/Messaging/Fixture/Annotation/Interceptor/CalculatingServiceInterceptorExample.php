@@ -3,15 +3,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
 
+use Ecotone\Messaging\Annotation\ClassReference;
 use Ecotone\Messaging\Annotation\Interceptor\Around;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Annotation\Parameter\Reference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 /**
- * Class CalculatingService
- * @package Test\Ecotone\Messaging\Fixture\Service
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MethodInterceptor(referenceName="calculatingService")
+ * @ClassReference("calculatingService")
  */
 class CalculatingServiceInterceptorExample
 {

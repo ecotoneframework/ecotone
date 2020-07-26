@@ -7,12 +7,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Annotation\Splitter;
 
-/**
- * Class SplitterExample
- * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Splitter
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class SplitterExample
 {
     /**

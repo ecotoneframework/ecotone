@@ -9,9 +9,6 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\QueryBus;
 
-/**
- * @MessageEndpoint()
- */
 class SomeQueryHandler
 {
     const SUM = "sum";

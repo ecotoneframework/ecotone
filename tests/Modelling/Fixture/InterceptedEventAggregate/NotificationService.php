@@ -9,9 +9,6 @@ use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 
-/**
- * @MessageEndpoint()
- */
 class NotificationService
 {
     private ?object $lastLog = null;

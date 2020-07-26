@@ -6,9 +6,6 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPric
 use Ecotone\Messaging\Annotation\Interceptor\Before;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 
-/**
- * @MethodInterceptor()
- */
 class ProductExchanger
 {
     const MILK = "milk";

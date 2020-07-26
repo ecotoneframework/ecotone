@@ -12,10 +12,6 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\LazyEventBus\LazyEventPublishing;
 
 /**
- * Interface CommandGateway
- * @package Ecotone\Modelling
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
  * @LazyEventPublishing()
  */
 interface CommandBus

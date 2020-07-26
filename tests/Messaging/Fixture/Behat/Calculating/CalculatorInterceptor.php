@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
+use Ecotone\Messaging\Annotation\ClassReference;
 use Ecotone\Messaging\Annotation\Interceptor\After;
 use Ecotone\Messaging\Annotation\Interceptor\Around;
 use Ecotone\Messaging\Annotation\Interceptor\Before;
@@ -10,12 +11,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
-/**
- * Class PreCallAdd
- * @package Fixture\Behat\Calculating
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MethodInterceptor()
- */
 class CalculatorInterceptor
 {
     /**

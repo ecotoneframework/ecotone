@@ -9,10 +9,6 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
 
 /**
- * Class AsyncEventHandlerExample
- * @package Test\Ecotone\Messaging\Fixture\Annotation\Async
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
  * @Asynchronous(channelName="asyncChannel")
  */
 class AsyncCommandHandlerWithoutIdExample

@@ -7,9 +7,6 @@ use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Message;
 
-/**
- * @MessageEndpoint()
- */
 interface CalculateGatewayExampleWithMessages
 {
     /**

@@ -5,9 +5,6 @@ namespace Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId;
 use Ecotone\Messaging\Annotation\Interceptor\Before;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 
-/**
- * @MethodInterceptor()
- */
 class AddUserIdService
 {
     /**

@@ -6,9 +6,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 use Ecotone\Messaging\MessagingException;
 
-/**
- * @MessageEndpoint()
- */
 class OrderErrorHandler
 {
     /**

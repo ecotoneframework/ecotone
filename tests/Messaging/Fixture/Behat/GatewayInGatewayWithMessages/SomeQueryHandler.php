@@ -11,9 +11,6 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\QueryBus;
 
-/**
- * @MessageEndpoint()
- */
 class SomeQueryHandler
 {
     const SUM = "sum";

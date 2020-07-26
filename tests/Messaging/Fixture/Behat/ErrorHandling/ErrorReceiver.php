@@ -8,9 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 use Ecotone\Messaging\Message;
 
-/**
- * @MessageEndpoint()
- */
 class ErrorReceiver
 {
     /**

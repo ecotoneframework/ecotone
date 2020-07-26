@@ -8,10 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
 /**
- * Class AsyncMethodExample
- * @package Test\Ecotone\Messaging\Fixture\Annotation\Async
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
  * @Asynchronous(channelName="asyncChannel2")
  */
 class AsyncClassExample

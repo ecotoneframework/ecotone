@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Annotation\Transformer;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
@@ -14,7 +14,7 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 /**
  * Class AnnotationTransformerConfiguration
  * @package Ecotone\Messaging\Config\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
 class TransformerModule extends MessageHandlerRegisterConfiguration
@@ -24,15 +24,7 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function createMessageHandlerFrom(AnnotatedDefinition $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
         /** @var Transformer $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
@@ -53,5 +45,13 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
     public static function getMessageHandlerAnnotation(): string
     {
         return Transformer::class;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getName(): string
+    {
+        return self::MODULE_NAME;
     }
 }

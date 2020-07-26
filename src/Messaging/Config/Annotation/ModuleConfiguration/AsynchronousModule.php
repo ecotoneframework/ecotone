@@ -53,28 +53,11 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
     {
         $asynchronousClasses = $annotationRegistrationService->findAnnotatedClasses(Asynchronous::class);
 
-        $asynchronousMethods = array_merge(
-            $annotationRegistrationService->findCombined(MessageEndpoint::class, Asynchronous::class),
-            $annotationRegistrationService->findCombined(Aggregate::class, Asynchronous::class)
-        );
+        $asynchronousMethods = $annotationRegistrationService->findAnnotatedMethods(Asynchronous::class);
         $endpoints = array_merge(
-            $annotationRegistrationService->findCombined(
-                MessageEndpoint::class,
-                EndpointAnnotation::class
-            ),
-            $annotationRegistrationService->findCombined(
-                Aggregate::class,
-                EndpointAnnotation::class
-            ),
-            $annotationRegistrationService->findCombined(
-                MessageEndpoint::class,
-                EventHandler::class
-            ),
-            $annotationRegistrationService->findCombined(
-                Aggregate::class,
-                EventHandler::class
-            ),
-            );
+            $annotationRegistrationService->findAnnotatedMethods(EndpointAnnotation::class),
+            $annotationRegistrationService->findAnnotatedMethods(EventHandler::class)
+        );
 
         $registeredAsyncEndpoints = [];
         foreach ($asynchronousMethods as $asynchronousMethod) {

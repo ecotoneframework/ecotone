@@ -4,6 +4,7 @@ namespace Ecotone\Modelling\Config;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
@@ -61,27 +62,27 @@ class ModellingHandlerModule implements AnnotationModule
      */
     private $parameterConverterAnnotationFactory;
     /**
-     * @var AnnotatedDefinition[]
+     * @var AnnotatedFinding[]
      */
     private $aggregateCommandHandlerRegistrations;
     /**
-     * @var AnnotatedDefinition[]
+     * @var AnnotatedFinding[]
      */
     private $serviceCommandHandlersRegistrations;
     /**
-     * @var AnnotatedDefinition[]
+     * @var AnnotatedFinding[]
      */
     private $aggregateQueryHandlerRegistrations;
     /**
-     * @var AnnotatedDefinition[]
+     * @var AnnotatedFinding[]
      */
     private $serviceQueryHandlerRegistrations;
     /**
-     * @var array|AnnotatedDefinition[]
+     * @var array|AnnotatedFinding[]
      */
     private $aggregateEventHandlers;
     /**
-     * @var array|AnnotatedDefinition[]
+     * @var array|AnnotatedFinding[]
      */
     private $serviceEventHandlers;
     /**
@@ -93,12 +94,12 @@ class ModellingHandlerModule implements AnnotationModule
      * CqrsMessagingModule constructor.
      *
      * @param ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory
-     * @param AnnotatedDefinition[]            $aggregateCommandHandlerRegistrations
-     * @param AnnotatedDefinition[]            $serviceCommandHandlersRegistrations
-     * @param AnnotatedDefinition[]            $aggregateQueryHandlerRegistrations
-     * @param AnnotatedDefinition[]            $serviceQueryHandlerRegistrations
-     * @param AnnotatedDefinition[]            $aggregateEventHandlers
-     * @param AnnotatedDefinition[]            $serviceEventHandlers
+     * @param AnnotatedFinding[]            $aggregateCommandHandlerRegistrations
+     * @param AnnotatedFinding[]            $serviceCommandHandlersRegistrations
+     * @param AnnotatedFinding[]            $aggregateQueryHandlerRegistrations
+     * @param AnnotatedFinding[]            $serviceQueryHandlerRegistrations
+     * @param AnnotatedFinding[]            $aggregateEventHandlers
+     * @param AnnotatedFinding[]            $serviceEventHandlers
      * @param array                               $aggregateRepositoryReferenceNames
      */
     private function __construct(
@@ -141,17 +142,29 @@ class ModellingHandlerModule implements AnnotationModule
 
         return new self(
             ParameterConverterAnnotationFactory::create(),
-            $annotationRegistrationService->findCombined(Aggregate::class, CommandHandler::class),
-            $annotationRegistrationService->findCombined(MessageEndpoint::class, CommandHandler::class),
-            $annotationRegistrationService->findCombined(Aggregate::class, QueryHandler::class),
-            $annotationRegistrationService->findCombined(MessageEndpoint::class, QueryHandler::class),
-            $annotationRegistrationService->findCombined(Aggregate::class, EventHandler::class),
-            $annotationRegistrationService->findCombined(MessageEndpoint::class, EventHandler::class),
+            array_filter($annotationRegistrationService->findAnnotatedMethods(CommandHandler::class), function(AnnotatedFinding $annotatedFinding){
+                return $annotatedFinding->hasClassAnnotation(Aggregate::class);
+            }),
+            array_filter($annotationRegistrationService->findAnnotatedMethods(CommandHandler::class), function(AnnotatedFinding $annotatedFinding){
+                return !$annotatedFinding->hasClassAnnotation(Aggregate::class);
+            }),
+            array_filter($annotationRegistrationService->findAnnotatedMethods(QueryHandler::class), function(AnnotatedFinding $annotatedFinding){
+                return $annotatedFinding->hasClassAnnotation(Aggregate::class);
+            }),
+            array_filter($annotationRegistrationService->findAnnotatedMethods(QueryHandler::class), function(AnnotatedFinding $annotatedFinding){
+                return !$annotatedFinding->hasClassAnnotation(Aggregate::class);
+            }),
+            array_filter($annotationRegistrationService->findAnnotatedMethods(EventHandler::class), function(AnnotatedFinding $annotatedFinding){
+                return $annotatedFinding->hasClassAnnotation(Aggregate::class);
+            }),
+            array_filter($annotationRegistrationService->findAnnotatedMethods(EventHandler::class), function(AnnotatedFinding $annotatedFinding){
+                return !$annotatedFinding->hasClassAnnotation(Aggregate::class);
+            }),
             $aggregateRepositoryReferenceNames
         );
     }
 
-    public static function getMessagePayloadTypeFor(AnnotatedDefinition $registration): string
+    public static function getMessagePayloadTypeFor(AnnotatedFinding $registration): string
     {
         $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
 
@@ -168,7 +181,7 @@ class ModellingHandlerModule implements AnnotationModule
         return TypeDescriptor::ARRAY;
     }
 
-    public static function getHandlerChannel(AnnotatedDefinition $registration): string
+    public static function getHandlerChannel(AnnotatedFinding $registration): string
     {
         /** @var EndpointAnnotation $annotationForMethod */
         $annotationForMethod = $registration->getAnnotationForMethod();
@@ -176,7 +189,7 @@ class ModellingHandlerModule implements AnnotationModule
         return $annotationForMethod->endpointId . ".target";
     }
 
-    public static function getPayloadClassIfAny(AnnotatedDefinition $registration): ?string
+    public static function getPayloadClassIfAny(AnnotatedFinding $registration): ?string
     {
         $type = TypeDescriptor::create(ModellingHandlerModule::getMessagePayloadTypeFor($registration));
         if ($type->isClassOrInterface() && !$type->isClassOfType(TypeDescriptor::create(Message::class))) {
@@ -186,7 +199,7 @@ class ModellingHandlerModule implements AnnotationModule
         return null;
     }
 
-    public static function hasMessageNameDefined(AnnotatedDefinition $registration) : bool
+    public static function hasMessageNameDefined(AnnotatedFinding $registration) : bool
     {
         /** @var InputOutputEndpointAnnotation $annotationForMethod */
         $annotationForMethod = $registration->getAnnotationForMethod();
@@ -200,7 +213,7 @@ class ModellingHandlerModule implements AnnotationModule
         return $inputChannelName ? true : false;
     }
 
-    public static function getNamedMessageChannelFor(AnnotatedDefinition $registration): string
+    public static function getNamedMessageChannelFor(AnnotatedFinding $registration): string
     {
         /** @var InputOutputEndpointAnnotation $annotationForMethod */
         $annotationForMethod = $registration->getAnnotationForMethod();
@@ -381,7 +394,7 @@ class ModellingHandlerModule implements AnnotationModule
         }
     }
 
-    private function registerAggregateQueryHandler(AnnotatedDefinition $registration, ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory, Configuration $configuration): void
+    private function registerAggregateQueryHandler(AnnotatedFinding $registration, ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory, Configuration $configuration): void
     {
         /** @var QueryHandler $annotation */
         $annotation = $registration->getAnnotationForMethod();
@@ -422,7 +435,7 @@ class ModellingHandlerModule implements AnnotationModule
         );
     }
 
-    private function registerServiceHandler(Configuration $configuration, AnnotatedDefinition $registration): void
+    private function registerServiceHandler(Configuration $configuration, AnnotatedFinding $registration): void
     {
         /** @var QueryHandler|CommandHandler|EventHandler $methodAnnotation */
         $methodAnnotation = $registration->getAnnotationForMethod();

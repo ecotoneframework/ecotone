@@ -7,10 +7,6 @@ use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
-/**
- * @MethodInterceptor()
- * @MessageEndpoint()
- */
 class AddNotificationTimestamp
 {
     private $currentTime = null;

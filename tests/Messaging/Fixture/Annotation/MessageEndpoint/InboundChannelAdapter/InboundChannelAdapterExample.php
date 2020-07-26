@@ -6,12 +6,6 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChann
 use Ecotone\Messaging\Annotation\Scheduled;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
-/**
- * Class InboundChannelAdapterExample
- * @package Fixture\Annotation\MessageEndpoint\InboundChannelAdapter
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class InboundChannelAdapterExample
 {
     /**

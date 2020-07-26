@@ -7,9 +7,6 @@ use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 
-/**
- * @MessageEndpoint()
- */
 interface GatewayWithReplyChannelExample
 {
     /**

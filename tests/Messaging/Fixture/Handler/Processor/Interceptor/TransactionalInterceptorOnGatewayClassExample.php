@@ -8,10 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Transaction\Transactional;
 
 /**
- * Interface TransactionalInterceptorOnGatewayExample
- * @package Fixture\Handler\Processor\Interceptor
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
  * @Transactional({"transactionFactory"})
  */
 interface TransactionalInterceptorOnGatewayClassExample

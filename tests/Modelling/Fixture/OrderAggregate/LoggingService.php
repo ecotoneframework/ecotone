@@ -8,9 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * @MessageEndpoint()
- */
 class LoggingService
 {
     private $logging = [];

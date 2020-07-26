@@ -8,12 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 
-/**
- * Interface LazyEventBus
- * @package Ecotone\Modelling
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 interface LazyEventBus
 {
     const CHANNEL_NAME = "ecotone.modelling.bus.lazy_event";

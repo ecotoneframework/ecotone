@@ -7,9 +7,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\IgnorePayload;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * @MessageEndpoint()
- */
 class ServiceQueryHandlerWithInputChannelAndIgnoreMessage
 {
     /**

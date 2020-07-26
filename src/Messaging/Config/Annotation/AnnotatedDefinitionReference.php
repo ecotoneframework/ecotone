@@ -4,17 +4,27 @@
 namespace Ecotone\Messaging\Config\Annotation;
 
 
-use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Annotation\ClassReference;
 
 class AnnotatedDefinitionReference
 {
-    public static function getReferenceFor(AnnotatedDefinition $annotatedDefinition) : string
+    public static function getReferenceFor(AnnotatedFinding $annotatedDefinition): string
     {
-        return (property_exists($annotatedDefinition->getAnnotationForClass(), 'referenceName') && $annotatedDefinition->getAnnotationForClass()->referenceName) ? $annotatedDefinition->getAnnotationForClass()->referenceName : $annotatedDefinition->getClassName();
+        if ($annotatedDefinition->hasClassAnnotation(ClassReference::class)) {
+            /** @var ClassReference $reference */
+            $reference = $annotatedDefinition->getClassAnnotationsWithType(ClassReference::class)[0];
+
+            if ($reference->referenceName) {
+                return $reference->referenceName;
+            }
+        }
+
+        return $annotatedDefinition->getClassName();
     }
 
-    public static function getSingleAnnotationForClass(AnnotationFinder $annotationFinder, string $className, string $annotationClassName) : ?object
+    public static function getSingleAnnotationForClass(AnnotationFinder $annotationFinder, string $className, string $annotationClassName): ?object
     {
         $annotationClasses = $annotationFinder->getAnnotationsForClass($className);
 

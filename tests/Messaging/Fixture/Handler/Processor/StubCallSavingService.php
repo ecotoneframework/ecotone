@@ -8,12 +8,6 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 
-/**
- * Class StubCallSavingService
- * @package Test\Ecotone\Messaging\Fixture\Handler\Processor
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class StubCallSavingService
 {
     /**

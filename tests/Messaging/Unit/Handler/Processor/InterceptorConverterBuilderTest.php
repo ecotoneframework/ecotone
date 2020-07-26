@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Messaging\Annotation\ClassReference;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
@@ -72,8 +73,8 @@ class InterceptorConverterBuilderTest extends TestCase
         $converter = InterceptorConverterBuilder::create("some", $interfaceToCall, []);
         $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
 
-        $parameter = InterfaceParameter::createNotNullable("some", TypeDescriptor::create(MethodInterceptor::class));
-        $classAnnotation = new MethodInterceptor();
+        $parameter = InterfaceParameter::createNotNullable("some", TypeDescriptor::create(ClassReference::class));
+        $classAnnotation = new ClassReference();
 
         $this->assertTrue($converter->isHandling($parameter));
         $this->assertEquals(

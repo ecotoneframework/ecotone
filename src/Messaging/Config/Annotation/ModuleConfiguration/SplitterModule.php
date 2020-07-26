@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Annotation\Splitter;
 use Ecotone\Messaging\Annotation\Transformer;
@@ -14,7 +14,7 @@ use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
 /**
  * Class AnnotationTransformerConfiguration
  * @package Ecotone\Messaging\Config\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
 class SplitterModule extends MessageHandlerRegisterConfiguration
@@ -24,15 +24,7 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function createMessageHandlerFrom(AnnotatedDefinition $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration): MessageHandlerBuilderWithParameterConverters
     {
         /** @var Transformer $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
@@ -42,11 +34,10 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
                 AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
                 $annotationRegistration->getMethodName()
             )
-            ->withEndpointId($annotation->endpointId)
-            ->withInputChannelName($annotation->inputChannelName)
-            ->withOutputMessageChannel($annotation->outputChannelName)
-            ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
-        ;
+                ->withEndpointId($annotation->endpointId)
+                ->withInputChannelName($annotation->inputChannelName)
+                ->withOutputMessageChannel($annotation->outputChannelName)
+                ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
     }
 
     /**
@@ -55,5 +46,13 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
     public static function getMessageHandlerAnnotation(): string
     {
         return Splitter::class;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getName(): string
+    {
+        return self::MODULE_NAME;
     }
 }

@@ -9,10 +9,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
-/**
- * @MethodInterceptor()
- * @MessageEndpoint()
- */
 class AddExecutorId
 {
     private string $executorId = "";

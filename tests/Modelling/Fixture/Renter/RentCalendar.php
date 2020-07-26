@@ -8,12 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * Class RentCalendar
- * @package Test\Ecotone\Modelling\Fixture\Renter
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class RentCalendar
 {
     private $calendarEvents = [];

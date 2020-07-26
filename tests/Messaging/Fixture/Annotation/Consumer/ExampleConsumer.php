@@ -6,9 +6,6 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\Consumer;
 use Ecotone\Messaging\Annotation\MessageConsumer;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
-/**
- * @MessageEndpoint()
- */
 class ExampleConsumer
 {
     /**

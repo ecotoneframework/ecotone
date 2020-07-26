@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -12,14 +12,11 @@ use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 
 /**
  * Class BaseAnnotationConfiguration
  * @package Ecotone\Messaging\Config\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
 abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModule implements AnnotationModule
@@ -45,7 +42,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
     public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
         $consumerBuilders = [];
-        foreach ($annotationRegistrationService->findCombined(MessageEndpoint::class, static::getConsumerAnnotation()) as $annotationRegistration) {
+        foreach ($annotationRegistrationService->findAnnotatedMethods(static::getConsumerAnnotation()) as $annotationRegistration) {
             $consumerBuilders[] = static::createConsumerFrom($annotationRegistration);
         }
 
@@ -57,7 +54,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
      */
     public static abstract function getConsumerAnnotation(): string;
 
-    public static abstract function createConsumerFrom(AnnotatedDefinition $annotationRegistration): ConsumerLifecycleBuilder;
+    public static abstract function createConsumerFrom(AnnotatedFinding $annotationRegistration): ConsumerLifecycleBuilder;
 
     /**
      * @inheritDoc

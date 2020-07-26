@@ -7,12 +7,6 @@ use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Transaction\Transactional;
 
-/**
- * Interface TransactionalInterceptorOnGatewayMethodExample
- * @package Fixture\Handler\Processor\Interceptor
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 interface TransactionalInterceptorOnGatewayMethodExample
 {
     /**

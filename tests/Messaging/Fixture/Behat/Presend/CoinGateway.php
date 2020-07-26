@@ -6,9 +6,6 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Presend;
 use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
-/**
- * @MessageEndpoint()
- */
 interface CoinGateway
 {
     /**

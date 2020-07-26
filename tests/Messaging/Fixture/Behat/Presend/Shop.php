@@ -7,9 +7,6 @@ use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
-/**
- * @MessageEndpoint()
- */
 class Shop
 {
     /**

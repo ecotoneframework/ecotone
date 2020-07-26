@@ -8,12 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Poller;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
-/**
- * Class InboundCalculation
- * @package Fixture\Behat\Calculating
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class InboundCalculation
 {
     /**

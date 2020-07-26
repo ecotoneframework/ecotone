@@ -6,9 +6,6 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseM
 use Ecotone\Messaging\Annotation\Interceptor\After;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 
-/**
- * @MethodInterceptor()
- */
 class AddFranchiseMargin
 {
     /**

@@ -9,12 +9,6 @@ use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\MessageHeaders;
 
-/**
- * Interface QueryBus
- * @package Ecotone\Modelling
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 interface QueryBus
 {
     const CHANNEL_NAME_BY_OBJECT = "ecotone.modelling.bus.query_by_object";

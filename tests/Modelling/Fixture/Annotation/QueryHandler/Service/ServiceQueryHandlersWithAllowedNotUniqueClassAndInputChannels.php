@@ -8,9 +8,6 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\NotUniqueHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * @MessageEndpoint()
- */
 class ServiceQueryHandlersWithAllowedNotUniqueClassAndInputChannels
 {
     /**

@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\MessageConsumer;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
@@ -16,7 +16,7 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 /**
  * Class BasicMessagingConfiguration
  * @package Ecotone\Messaging\Config\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
 class RequiredConsumersModule extends NoExternalConfigurationModule implements AnnotationModule
@@ -28,6 +28,7 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
 
     /**
      * RequiredConsumersModule constructor.
+     *
      * @param string[] $consumerIds
      */
     private function __construct(array $consumerIds)
@@ -40,14 +41,18 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
      */
     public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
-        $annotationRegistrations = $annotationRegistrationService->findCombined(MessageEndpoint::class, MessageConsumer::class);
+        $annotationRegistrations = $annotationRegistrationService->findAnnotatedMethods( MessageConsumer::class);
 
-        return new self(array_map(function (AnnotatedDefinition $annotationRegistration) {
-            /** @var MessageConsumer $annotationForMethod */
-            $annotationForMethod = $annotationRegistration->getAnnotationForMethod();
+        return new self(
+            array_map(
+                function (AnnotatedFinding $annotationRegistration) {
+                    /** @var MessageConsumer $annotationForMethod */
+                    $annotationForMethod = $annotationRegistration->getAnnotationForMethod();
 
-            return $annotationForMethod->endpointId;
-        }, $annotationRegistrations));
+                    return $annotationForMethod->endpointId;
+                }, $annotationRegistrations
+            )
+        );
     }
 
     /**

@@ -2,22 +2,14 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined;
 
-use Ecotone\Messaging\Annotation\EndpointId;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\MessageParameter;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Annotation\Parameter\Reference;
-use Ecotone\Messaging\Annotation\Parameter\Value;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 use Ecotone\Messaging\Message;
 
-/**
- * Class ServiceActivatorWithAllConfigurationDefined
- * @package Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 class ServiceActivatorWithAllConfigurationDefined
 {
     /**

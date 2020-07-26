@@ -7,6 +7,7 @@ use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\ConverterClass;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Annotation\ClassReference;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Fixture\Conversion\Product;
@@ -567,7 +568,7 @@ class InterfaceToCallTest extends TestCase
             $interfaceToCall->getMethodAnnotations()
         );
         $this->assertEquals(
-            [new ConverterClass()],
+            [new ClassReference()],
             $interfaceToCall->getClassAnnotations()
         );
     }
@@ -577,13 +578,13 @@ class InterfaceToCallTest extends TestCase
         $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, "convert");
 
         $this->assertTrue($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(Converter::class)));
-        $this->assertFalse($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(MessageEndpoint::class)));
+        $this->assertFalse($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(ClassReference::class)));
 
-        $this->assertTrue($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(ConverterClass::class)));
+        $this->assertTrue($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(ClassReference::class)));
 
         $this->assertEquals(
-            new ConverterClass(),
-            $interfaceToCall->getClassAnnotation(TypeDescriptor::create(ConverterClass::class))
+            new ClassReference(),
+            $interfaceToCall->getClassAnnotation(TypeDescriptor::create(ClassReference::class))
         );
         $this->assertEquals(
             new Converter(),
@@ -597,7 +598,7 @@ class InterfaceToCallTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall->getMethodAnnotation(TypeDescriptor::create(MessageEndpoint::class));
+        $interfaceToCall->getMethodAnnotation(TypeDescriptor::create(ClassReference::class));
     }
 
     public function test_throwing_exception_when_retrieving_not_existing_class_annotation()

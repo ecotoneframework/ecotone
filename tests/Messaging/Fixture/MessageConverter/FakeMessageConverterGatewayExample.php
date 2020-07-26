@@ -7,12 +7,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 
-/**
- * Interface FakeHttpMessageConverterGateway
- * @package Test\Ecotone\Messaging\Fixture\MessageConverter
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 interface FakeMessageConverterGatewayExample
 {
     /**

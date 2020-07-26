@@ -728,21 +728,6 @@ class MethodInvokerTest extends MessagingTest
         $this->assertNull($methodInvocation->processMessage($requestMessage));
     }
 
-    public function test_calling_interceptor_with_class_annotation()
-    {
-        $interceptingService1 = CallWithAnnotationFromClassInterceptorExample::create();
-        $interceptedService = StubCallSavingService::createWithReturnType("some");
-        $methodInvocation = MethodInvoker::createWith(
-            $interceptedService, 'methodWithAnnotation', [], InMemoryReferenceSearchService::createWith([
-            CallWithAnnotationFromClassInterceptorExample::class => $interceptingService1
-        ]), InMemoryChannelResolver::createEmpty(),
-            [AroundInterceptorReference::createWithNoPointcut("someId", CallWithAnnotationFromClassInterceptorExample::class, "callWithMethodAnnotation")]
-        );
-
-        $requestMessage = MessageBuilder::withPayload("test")->build();
-        $this->assertNull($methodInvocation->processMessage($requestMessage));
-    }
-
     public function test_calling_interceptor_with_endpoint_annotation()
     {
         $interceptedService = StubCallSavingService::createWithReturnType("some");

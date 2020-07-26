@@ -7,12 +7,6 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
-/**
- * Interface Calculator
- * @package Fixture\Behat\Calculating
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @MessageEndpoint()
- */
 interface Calculator
 {
     /**

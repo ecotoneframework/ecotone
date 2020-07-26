@@ -55,10 +55,17 @@ class GatewayHeadersConverter implements GatewayParameterConverter
         }
 
         foreach ($headers as $headerName => $headerValue) {
-//            @TODO passed $metadata to gateway contain MediaType with type from before conversion. Which results in errors on later stage
+            if (in_array($headerName, [MessageHeaders::ROUTING_SLIP])) {
+                continue;
+            }
             if ($headerName === MessageHeaders::CONTENT_TYPE) {
+                $messagePayloadType = TypeDescriptor::createFromVariable($messageBuilder->getPayload());
                 $mediaType = MediaType::parseMediaType($headerValue);
-                if ($mediaType->hasTypeParameter() && !TypeDescriptor::createFromVariable($messageBuilder->getPayload())->isCompatibleWith($mediaType->getTypeParameter())) {
+                if (!$messagePayloadType->isScalar() && !$mediaType->isCompatibleWith(MediaType::createApplicationXPHP())) {
+                    continue;
+                }
+
+                if ($mediaType->hasTypeParameter() && !$messagePayloadType->isCompatibleWith($mediaType->getTypeParameter())) {
                     continue;
                 }
             }

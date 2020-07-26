@@ -363,9 +363,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         ];
 
         $this->assertRouting($annotatedClasses, [], [], [], [],
-            [
-                stdClass::class => ["execute"]
-            ],
+            [],
             [
                 "execute" => ["execute"]
             ]

@@ -220,16 +220,16 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $externalOutputChannel = QueueChannel::create();
 
         $chainHandler = ChainMessageHandlerBuilder::create()
-            ->withOutputMessageChannel($internalOutputChannelName)
             ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
             ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
-            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"));
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+            ->withOutputMessageChannel($internalOutputChannelName);
 
         $chainHandler = ChainMessageHandlerBuilder::create()
-                ->withOutputMessageChannel($externalOutputChannelName)
                 ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
                 ->chain($chainHandler)
                 ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+                ->withOutputMessageChannel($externalOutputChannelName)
                 ->build(InMemoryChannelResolver::createFromAssociativeArray([
                     $internalOutputChannelName => $internalOutputChannel,
                     $externalOutputChannelName => $externalOutputChannel
@@ -238,7 +238,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $chainHandler->handle(MessageBuilder::withPayload(0)->build());
 
-        $this->assertEquals(10, $externalOutputChannel->receive()->getPayload());
+        $this->assertEquals(9, $externalOutputChannel->receive()->getPayload());
     }
 
     public function test_chaining_multiple_handlers_with_output_channel()

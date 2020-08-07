@@ -94,10 +94,8 @@ class InMemoryChannelResolver implements ChannelResolver
             return $channelName;
         }
 
-        foreach ($this->resolvableChannels as $resolvableChannel) {
-            if ($resolvableChannel->hasName($channelName)) {
-                return $resolvableChannel->getMessageChannel();
-            }
+        if (array_key_exists($channelName, $this->resolvableChannels)) {
+            return $this->resolvableChannels[$channelName];
         }
 
         if ($this->externalChannelResolver) {
@@ -112,10 +110,8 @@ class InMemoryChannelResolver implements ChannelResolver
      */
     public function hasChannelWithName(string $channelName): bool
     {
-        foreach ($this->resolvableChannels as $resolvableChannel) {
-            if ($resolvableChannel->hasName($channelName)) {
-                return true;
-            }
+        if (array_key_exists($channelName, $this->resolvableChannels)) {
+            return true;
         }
 
         if ($this->externalChannelResolver) {
@@ -133,7 +129,12 @@ class InMemoryChannelResolver implements ChannelResolver
     {
         Assert::allInstanceOfType($namedMessageChannels, NamedMessageChannel::class);
 
-        $this->resolvableChannels = array_merge($namedMessageChannels, [NamedMessageChannel::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create())]);
+        /** @var NamedMessageChannel[] $namedMessageChannels */
+        $namedMessageChannels= array_merge($namedMessageChannels, [NamedMessageChannel::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create())]);
+
+        foreach ($namedMessageChannels as $namedMessageChannel) {
+            $this->resolvableChannels[$namedMessageChannel->getName()] = $namedMessageChannel->getMessageChannel();
+        }
     }
 
     /**

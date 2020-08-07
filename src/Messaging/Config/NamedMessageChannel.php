@@ -58,4 +58,9 @@ class NamedMessageChannel
     {
         return $this->channelName == $channelName;
     }
+
+    public function getName() : string
+    {
+        return $this->channelName;
+    }
 }

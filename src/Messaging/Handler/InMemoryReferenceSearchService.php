@@ -106,10 +106,8 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      */
     public function get(string $reference) : object
     {
-        foreach ($this->objectsToResolve as $referenceName => $object) {
-            if ($referenceName == $reference) {
-                return $object;
-            }
+        if (array_key_exists($reference, $this->objectsToResolve)) {
+            return $this->objectsToResolve[$reference];
         }
 
         if ($this->referenceSearchService) {
@@ -121,10 +119,8 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
 
     public function has(string $referenceName): bool
     {
-        foreach ($this->objectsToResolve as $objectReferenceName => $object) {
-            if ($objectReferenceName == $referenceName) {
-                return true;
-            }
+        if (array_key_exists($referenceName, $this->objectsToResolve)) {
+            return true;
         }
 
         if ($this->referenceSearchService) {

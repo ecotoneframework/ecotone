@@ -40,8 +40,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
     private ?MessageHandlerBuilderWithOutputChannel $interceptedHandler = null;
 
-    private ?OutputChannelKeeperBuilder $outputChannelKeeperBuilder = null;
-
     /**
      * ChainMessageHandlerBuilder constructor.
      */
@@ -77,7 +75,9 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         }
 
         if ($outputChannelToKeep) {
-            $this->outputChannelKeeperBuilder = new OutputChannelKeeperBuilder($outputChannelToKeep);
+            $messageHandler = ChainMessageHandlerBuilder::create()
+                ->chain($messageHandler)
+                ->chain(new OutputChannelKeeperBuilder($outputChannelToKeep));
         }
 
         $this->chainedMessageHandlerBuilders[] = $messageHandler;
@@ -126,9 +126,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         $bridgeChannels = [];
         $messageHandlersToChain = $this->chainedMessageHandlerBuilders;
 
-        if ($this->outputChannelKeeperBuilder) {
-            $messageHandlersToChain[] = $this->outputChannelKeeperBuilder;
-        }
         if ($this->outputMessageHandler) {
             $messageHandlersToChain[] = $this->outputMessageHandler;
         }

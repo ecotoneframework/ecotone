@@ -238,7 +238,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
         $chainHandler->handle(MessageBuilder::withPayload(0)->build());
 
-        $this->assertEquals(9, $externalOutputChannel->receive()->getPayload());
+        $this->assertEquals(10, $externalOutputChannel->receive()->getPayload());
     }
 
     public function test_chaining_multiple_handlers_with_output_channel()

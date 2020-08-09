@@ -231,7 +231,10 @@ class BusRouterBuilder implements MessageHandlerBuilder
      */
     public function withInputChannelName(string $inputChannelName)
     {
-        $this->inputChannelName = $inputChannelName;
+        $self = clone $this;
+        $self->inputChannelName = $inputChannelName;
+
+        return $self;
     }
 
     /**

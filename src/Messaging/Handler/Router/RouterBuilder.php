@@ -203,9 +203,10 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      */
     public function withInputChannelName(string $inputChannelName): self
     {
-        $this->inputMessageChannelName = $inputChannelName;
+        $self = clone $this;
+        $self->inputMessageChannelName = $inputChannelName;
 
-        return $this;
+        return $self;
     }
 
     /**

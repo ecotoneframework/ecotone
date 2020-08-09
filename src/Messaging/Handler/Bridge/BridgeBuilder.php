@@ -75,7 +75,10 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
      */
     public function withInputChannelName(string $inputChannelName)
     {
-        return $this->bridgeBuilder->withInputChannelName($inputChannelName);
+        $self = clone $this;
+        $self = $self->bridgeBuilder->withInputChannelName($inputChannelName);
+
+        return $self;
     }
 
     /**
@@ -107,7 +110,10 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
      */
     public function withOutputMessageChannel(string $messageChannelName)
     {
-        return $this->bridgeBuilder->withOutputMessageChannel($messageChannelName);
+        $self = clone $this;
+        $self = $self->bridgeBuilder->withOutputMessageChannel($messageChannelName);
+
+        return $self;
     }
 
     /**

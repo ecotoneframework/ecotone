@@ -38,7 +38,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     private ?MessageHandlerBuilder $outputMessageHandler = null;
 
-    private ?MessageHandlerBuilderWithOutputChannel $interceptedHandler = null;
+    private ?int $interceptedHandlerOffset = null;
 
     /**
      * ChainMessageHandlerBuilder constructor.
@@ -54,10 +54,10 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
     public function chainInterceptedHandler(MessageHandlerBuilderWithOutputChannel $messageHandler): self
     {
-        Assert::null($this->interceptedHandler, "Cannot register two intercepted handlers {$messageHandler}. Already have {$this->interceptedHandler}");
+        Assert::null($this->interceptedHandlerOffset, "Cannot register two intercepted handlers {$messageHandler}. Already have {$this->interceptedHandlerOffset}");
 
         $this->chain($messageHandler);
-        $this->interceptedHandler = $messageHandler;
+        $this->interceptedHandlerOffset = array_key_last($this->chainedMessageHandlerBuilders);
 
         return $this;
     }
@@ -65,18 +65,18 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     public function chain(MessageHandlerBuilderWithOutputChannel $messageHandler): self
     {
         $outputChannelToKeep = $messageHandler->getOutputMessageChannelName();
-        $messageHandler
+        $messageHandler = $messageHandler
             ->withInputChannelName("")
             ->withOutputMessageChannel("");
 
-        if (($messageHandler instanceof ChainMessageHandlerBuilder) && $messageHandler->interceptedHandler) {
-            Assert::null($this->interceptedHandler, "Cannot register two intercepted handlers {$messageHandler}. Already have {$this->interceptedHandler}");
-            $this->interceptedHandler = $messageHandler;
-        }
+//        if (($messageHandler instanceof ChainMessageHandlerBuilder) && $messageHandler->interceptedHandler) {
+//            Assert::null($this->interceptedHandler, "Cannot register two intercepted handlers {$messageHandler}. Already have {$this->interceptedHandler}");
+//            $this->interceptedHandlerOffset = array_key_last($this->chainedMessageHandlerBuilders);
+//        }
 
         if ($outputChannelToKeep) {
             $messageHandler = ChainMessageHandlerBuilder::create()
-                ->chain($messageHandler)
+                ->chainInterceptedHandler($messageHandler)
                 ->chain(new OutputChannelKeeperBuilder($outputChannelToKeep));
         }
 
@@ -117,7 +117,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
                 ->withOutputMessageChannel($this->getOutputMessageChannelName());
 
             foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
-                $singleHandler->addAroundInterceptor($aroundInterceptorReference);
+                $singleHandler = $singleHandler->addAroundInterceptor($aroundInterceptorReference);
             }
             return $singleHandler->build($channelResolver, $referenceSearchService);
         }
@@ -142,10 +142,8 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel,  (bool)$this->outputMessageChannelName), "forward")
             ->withOutputMessageChannel($this->outputMessageChannelName);
 
-        foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
-            if ($this->interceptedHandler) {
-                $this->interceptedHandler->addAroundInterceptor($aroundInterceptorReference);
-            }else {
+        if (is_null($this->interceptedHandlerOffset)) {
+            foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
                 $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
             }
         }
@@ -156,8 +154,14 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             $nextHandlerKey = ($key + 1);
             $previousHandlerKey = ($key - 1);
 
+            if ($key === $this->interceptedHandlerOffset) {
+                foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
+                    $messageHandlerBuilder = $messageHandlerBuilder->addAroundInterceptor($aroundInterceptorReference);
+                }
+            }
+
             if ($this->hasNextHandler($messageHandlersToChain, $nextHandlerKey)) {
-                $messageHandlerBuilder->withOutputMessageChannel($baseKey . $nextHandlerKey);
+                $messageHandlerBuilder = $messageHandlerBuilder->withOutputMessageChannel($baseKey . $nextHandlerKey);
             }
 
             $messageHandler = $messageHandlerBuilder->build($customChannelResolver, $referenceSearchService);
@@ -199,8 +203,8 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        if ($this->interceptedHandler) {
-            return $this->interceptedHandler->getInterceptedInterface($interfaceToCallRegistry);
+        if (!is_null($this->interceptedHandlerOffset)) {
+            return $this->chainedMessageHandlerBuilders[$this->interceptedHandlerOffset]->getInterceptedInterface($interfaceToCallRegistry);
         }
 
         return $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, "forward");

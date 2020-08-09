@@ -30,7 +30,7 @@ use Test\Ecotone\Messaging\Fixture\Handler\Property\PropertyAnnotationExample;
  */
 class ClassDefinitionTest extends TestCase
 {
-    public function __test_retrieving_public_class_property()
+    public function test_retrieving_public_class_property()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
 
@@ -40,7 +40,7 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function __test_retrieving_property_annotations()
+    public function test_retrieving_property_annotations()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
 
@@ -50,7 +50,7 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function __test_retrieving_property_with_annotation()
+    public function test_retrieving_property_with_annotation()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
 
@@ -63,7 +63,7 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function __test_retrieving_public_property()
+    public function test_retrieving_public_property()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
 
@@ -73,7 +73,7 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function __test_retrieving_type_property_if_not_array()
+    public function test_retrieving_type_property_if_not_array()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(DifferentTypeAndDocblockProperty::class));
 
@@ -101,7 +101,7 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function __test_retrieving_private_from_trait()
+    public function test_retrieving_private_from_trait()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderWithTraits::class));
 
@@ -111,7 +111,7 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function __test_retrieving_private_from_trait_inside_trait()
+    public function test_retrieving_private_from_trait_inside_trait()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Rocket::class));
 
@@ -125,7 +125,7 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function __test_retrieving_typed_property()
+    public function test_retrieving_typed_property()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
 
@@ -135,7 +135,7 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function __test_retrieving_nullable_typed_property()
+    public function test_retrieving_nullable_typed_property()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
 
@@ -145,7 +145,7 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
-    public function __test_override_typed_property_with_annotation_type()
+    public function test_override_typed_property_with_annotation_type()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
 

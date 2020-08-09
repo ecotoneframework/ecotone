@@ -249,7 +249,7 @@ class Gateway implements NonProxyGateway
             );
         }
         foreach ($aroundInterceptorReferences as $aroundInterceptorReference) {
-            $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference);
+            $gatewayInternalHandler = $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference);
         }
 
 

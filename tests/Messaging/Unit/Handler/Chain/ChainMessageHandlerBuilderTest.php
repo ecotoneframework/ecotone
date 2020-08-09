@@ -8,8 +8,11 @@ use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\Order;
 use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderConverter;
 use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderIdIncreaser;
@@ -239,6 +242,73 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $chainHandler->handle(MessageBuilder::withPayload(0)->build());
 
         $this->assertEquals(10, $externalOutputChannel->receive()->getPayload());
+    }
+
+    public function test_having_chain_in_chain_with_around_interceptors()
+    {
+        $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObject(
+            "around",
+            CalculatingServiceInterceptorExample::create(1), "sumAfterCalling",
+            1,
+            ConsumerContinuouslyWorkingService::class
+        );
+
+        $chainHandler               = ChainMessageHandlerBuilder::create()
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+            ->chain(
+                ChainMessageHandlerBuilder::create()
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                    ->chainInterceptedHandler(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                    ->addAroundInterceptor($aroundAddOneAfterCall)
+            )
+            ->chainInterceptedHandler(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+            ->addAroundInterceptor($aroundAddOneAfterCall)
+            ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+
+        $replyChannel = QueueChannel::create();
+        $chainHandler->handle(
+            MessageBuilder::withPayload(0)
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(13, $replyChannel->receive()->getPayload());
+    }
+
+    public function test_having_chain_with_output_channel_and_around_interceptor()
+    {
+        $internalOutputChannelName = "internalOutputChannelName";
+        $internalOutputChannel = DirectChannel::create();
+        $internalOutputChannel->subscribe(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty()));
+
+        $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObject(
+            "around",
+            CalculatingServiceInterceptorExample::create(10), "sumAfterCalling",
+            1,
+            ConsumerContinuouslyWorkingService::class
+        );
+
+        $chainHandler               = ChainMessageHandlerBuilder::create()
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "sum"))
+            ->chainInterceptedHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply")
+                    ->withOutputMessageChannel($internalOutputChannelName)
+            )
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+            ->addAroundInterceptor($aroundAddOneAfterCall)
+            ->build(InMemoryChannelResolver::createFromAssociativeArray([
+                $internalOutputChannelName => $internalOutputChannel
+            ]), InMemoryReferenceSearchService::createEmpty());
+
+        $replyChannel = QueueChannel::create();
+        $chainHandler->handle(
+            MessageBuilder::withPayload(0)
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(16, $replyChannel->receive()->getPayload());
     }
 
     public function test_chaining_multiple_handlers_with_output_channel()

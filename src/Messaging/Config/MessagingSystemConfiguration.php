@@ -370,11 +370,11 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->asynchronousEndpoints as $targetEndpointId => $asynchronousMessageChannel) {
             $foundEndpoint = false;
             $asynchronousChannels[] = $asynchronousMessageChannel;
-            foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {
                 if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
                     $originalInputChannelName = $messageHandlerBuilder->getInputMessageChannelName();
                     $targetChannelName = $originalInputChannelName . ".async";
-                    $messageHandlerBuilder->withInputChannelName($targetChannelName);
+                    $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withInputChannelName($targetChannelName);
 
                     $messageHandlerBuilders[$targetChannelName] = (
                         TransformerBuilder::createHeaderEnricher([
@@ -484,7 +484,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function configureInterceptors(InterfaceToCallRegistry $interfaceRegistry): void
     {
-        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+        foreach ($this->messageHandlerBuilders as $messageHandlerEndpointId => $messageHandlerBuilder) {
             if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
                 $aroundInterceptors = [];
                 $beforeCallInterceptors = [];
@@ -501,22 +501,23 @@ final class MessagingSystemConfiguration implements Configuration
                 }
 
                 foreach ($aroundInterceptors as $aroundInterceptorReference) {
-                    $messageHandlerBuilder->addAroundInterceptor($aroundInterceptorReference);
+                    $messageHandlerBuilder = $messageHandlerBuilder->addAroundInterceptor($aroundInterceptorReference);
+                    $this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()] = $messageHandlerBuilder;
                 }
                 if ($beforeCallInterceptors || $afterCallInterceptors) {
                     $outputChannel         = $messageHandlerBuilder->getOutputMessageChannelName();
-                    $messageHandlerBuilder->withOutputMessageChannel("");
+                    $messageHandlerBuilder = $messageHandlerBuilder->withOutputMessageChannel("");
                     $messageHandlerBuilderToUse = ChainMessageHandlerBuilder::create()
                         ->withEndpointId($messageHandlerBuilder->getEndpointId())
                         ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
                         ->withOutputMessageChannel($outputChannel);
 
                     foreach ($beforeCallInterceptors as $beforeCallInterceptor) {
-                        $messageHandlerBuilderToUse->chain($beforeCallInterceptor->getInterceptingObject());
+                        $messageHandlerBuilderToUse = $messageHandlerBuilderToUse->chain($beforeCallInterceptor->getInterceptingObject());
                     }
-                    $messageHandlerBuilderToUse->chain($messageHandlerBuilder);
+                    $messageHandlerBuilderToUse = $messageHandlerBuilderToUse->chain($messageHandlerBuilder);
                     foreach ($afterCallInterceptors as $afterCallInterceptor) {
-                        $messageHandlerBuilderToUse->chain($afterCallInterceptor->getInterceptingObject());
+                        $messageHandlerBuilderToUse = $messageHandlerBuilderToUse->chain($afterCallInterceptor->getInterceptingObject());
                     }
 
                     $this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()] = $messageHandlerBuilderToUse;

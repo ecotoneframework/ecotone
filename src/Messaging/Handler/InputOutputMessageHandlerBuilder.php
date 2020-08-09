@@ -83,9 +83,10 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      */
     public function withEndpointAnnotations(iterable $endpointAnnotations)
     {
-        $this->endpointAnnotations = $endpointAnnotations;
+        $self = clone $this;
+        $self->endpointAnnotations = $endpointAnnotations;
 
-        return $this;
+        return $self;
     }
 
     /**
@@ -101,9 +102,10 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      */
     public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
     {
-        $this->orderedAroundInterceptors[] = $aroundInterceptorReference;
+        $self = clone $this;
+        $self->orderedAroundInterceptors[] = $aroundInterceptorReference;
 
-        return $this;
+        return $self;
     }
 
     /**

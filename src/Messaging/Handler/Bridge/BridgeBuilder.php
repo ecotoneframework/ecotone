@@ -35,7 +35,10 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
      */
     public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
     {
-        return $this->bridgeBuilder->addAroundInterceptor($aroundInterceptorReference);
+        $self = clone $this;
+        $self = $self->bridgeBuilder->addAroundInterceptor($aroundInterceptorReference);
+
+        return $self;
     }
 
     /**
@@ -43,7 +46,10 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
      */
     public function withEndpointAnnotations(iterable $endpointAnnotations)
     {
-        return $this->bridgeBuilder->withEndpointAnnotations($endpointAnnotations);
+        $self = clone $this;
+        $self = $self->bridgeBuilder->withEndpointAnnotations($endpointAnnotations);
+
+        return $self;
     }
 
     /**

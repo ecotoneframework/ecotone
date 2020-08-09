@@ -891,9 +891,9 @@ final class MessagingSystemConfiguration implements Configuration
                 }, $this->afterCallMethodInterceptors
             )
         );
-        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+        foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {
             if ($this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()]->isPollable() && $messageHandlerBuilder instanceof InterceptedEndpoint) {
-                $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), $pollableEndpointAnnotations));
+                $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), $pollableEndpointAnnotations));
             }
         }
         $this->configureInterceptors($interfaceToCallRegistry);

@@ -90,6 +90,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     public function withOutputMessageHandler(MessageHandlerBuilder $outputMessageHandler): self
     {
+        $this->requiredReferences = array_merge($this->requiredReferences, MessagingSystemConfiguration::resolveRequiredReferenceForBuilder($outputMessageHandler));
         $this->outputMessageHandler = $outputMessageHandler;
 
         return $this;

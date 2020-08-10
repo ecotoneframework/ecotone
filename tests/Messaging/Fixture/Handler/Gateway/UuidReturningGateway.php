@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
 
-use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 interface UuidReturningGateway
 {
-    public function executeNoParameter() : Uuid;
+    public function executeNoParameter() : UuidInterface;
 }

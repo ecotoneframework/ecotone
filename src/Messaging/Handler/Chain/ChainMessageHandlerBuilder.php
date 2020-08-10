@@ -59,6 +59,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
         $this->chain($messageHandler);
         $this->interceptedHandlerOffset = array_key_last($this->chainedMessageHandlerBuilders);
+        $this->requiredInterceptorReferenceNames = $messageHandler->getRequiredInterceptorNames();
 
         return $this;
     }

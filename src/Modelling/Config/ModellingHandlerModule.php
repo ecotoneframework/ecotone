@@ -381,6 +381,7 @@ class ModellingHandlerModule implements AnnotationModule
                     CallAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), true)
                         ->withMethodParameterConverters($parameterConverters)
                         ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
+                        ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
                 );
 
             $configuration->registerMessageHandler($chainHandler);
@@ -389,7 +390,6 @@ class ModellingHandlerModule implements AnnotationModule
                     ->withInputChannelName($saveChannel)
                     ->withOutputMessageChannel($annotation->outputChannelName)
                     ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
-                    ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
             );
         }
     }

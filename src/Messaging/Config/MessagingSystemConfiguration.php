@@ -23,6 +23,7 @@ use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
@@ -36,6 +37,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\InterceptorWithPointCut;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\Type;
@@ -366,6 +368,38 @@ final class MessagingSystemConfiguration implements Configuration
         }
     }
 
+    public static function resolveRequiredReferenceForBuilder(object $builder): array
+    {
+        $requiredReferences = [];
+        if ($builder instanceof RouterBuilder) {
+            $requiredReferences = $builder->getRequiredReferenceNames();
+        }
+        if ($builder instanceof MessageHandlerBuilder) {
+            $requiredReferences = $builder->getRequiredReferenceNames();
+        }
+        if ($builder instanceof ChannelAdapterConsumerBuilder) {
+            $requiredReferences = $builder->getRequiredReferences();
+        }
+        if ($builder instanceof GatewayProxyBuilder) {
+            $requiredReferences = $builder->getRequiredReferences();
+        }
+
+        if ($builder instanceof MessageHandlerBuilderWithParameterConverters) {
+            foreach ($builder->getParameterConverters() as $parameterConverter) {
+                $requiredReferences = array_merge($requiredReferences, $parameterConverter->getRequiredReferences());
+            }
+        }
+        if ($builder instanceof InterceptedEndpoint) {
+            foreach ($builder->getEndpointAnnotations() as $endpointAnnotation) {
+                if ($endpointAnnotation instanceof WithRequiredReferenceNameList) {
+                    $requiredReferences = array_merge($requiredReferences, $endpointAnnotation->getRequiredReferenceNameList());
+                }
+            }
+        }
+
+        return array_unique($requiredReferences);
+    }
+
     /**
      * @param string[] $referenceNames
      *
@@ -414,8 +448,9 @@ final class MessagingSystemConfiguration implements Configuration
     public function resolveRequiredReferences(InterfaceToCallRegistry $interfaceToCallRegistry, array $interceptedEndpoints): void
     {
         foreach ($interceptedEndpoints as $interceptedEndpoint) {
-            $relatedInterfaces = $interceptedEndpoint->resolveRelatedInterfaces($interfaceToCallRegistry);
+            $this->requireReferences(self::resolveRequiredReferenceForBuilder($interceptedEndpoint));
 
+            $relatedInterfaces = $interceptedEndpoint->resolveRelatedInterfaces($interfaceToCallRegistry);
             foreach ($relatedInterfaces as $relatedInterface) {
                 foreach ($relatedInterface->getMethodAnnotations() as $methodAnnotation) {
                     if ($methodAnnotation instanceof WithRequiredReferenceNameList) {
@@ -578,21 +613,6 @@ final class MessagingSystemConfiguration implements Configuration
         }
         if ($messageHandlerBuilder->getInputMessageChannelName() === $messageHandlerBuilder->getEndpointId()) {
             throw ConfigurationException::create("Can't register message handler {$messageHandlerBuilder} with same endpointId as inputChannelName.");
-        }
-
-        $this->requireReferences($messageHandlerBuilder->getRequiredReferenceNames());
-
-        if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithParameterConverters) {
-            foreach ($messageHandlerBuilder->getParameterConverters() as $parameterConverter) {
-                $this->requireReferences($parameterConverter->getRequiredReferences());
-            }
-        }
-        if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
-            foreach ($messageHandlerBuilder->getEndpointAnnotations() as $endpointAnnotation) {
-                if ($endpointAnnotation instanceof WithRequiredReferenceNameList) {
-                    $this->requireReferences($endpointAnnotation->getRequiredReferenceNameList());
-                }
-            }
         }
 
         $this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()] = $messageHandlerBuilder;

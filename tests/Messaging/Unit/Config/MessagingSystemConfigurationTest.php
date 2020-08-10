@@ -151,27 +151,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem->runSeparatelyRunningEndpointBy("some");
     }
 
-    /**
-     * @throws NoConsumerFactoryForBuilderException
-     * @throws MessagingException
-     */
-    public function test_resolving_required_references()
-    {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
-
-        $gatewayBuilder = DumbGatewayBuilder::create()->withRequiredReference("some");
-        $messagingSystemConfiguration
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create(NoReturnMessageHandler::create(), 'queue'))
-            ->registerGatewayBuilder($gatewayBuilder)
-            ->registerMessageChannel(SimpleMessageChannelBuilder::create("queue", QueueChannel::create()))
-            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
-            ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create("queue", "interceptor"))
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(["interceptor" => new DumbChannelInterceptor()]));
-
-        $this->assertEquals([$gatewayBuilder], $messagingSystemConfiguration->getRegisteredGateways());
-        $this->assertEquals([NoReturnMessageHandler::class, "some", "interceptor"], $messagingSystemConfiguration->getRequiredReferences());
-    }
-
     public function test_adding_optional_references()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
@@ -196,31 +175,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertEquals(
             $config,
             unserialize(serialize($config))
-        );
-    }
-
-    /**
-     * @throws ConfigurationException
-     * @throws Exception
-     * @throws MessagingException
-     */
-    public function test_registering_required_reference_names()
-    {
-        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
-
-        $messagingSystem->registerMessageHandler(
-            ServiceActivatorBuilder::create("ref-a", "method-a")
-                ->withInputChannelName("someChannel")
-                ->withMethodParameterConverters(
-                    [
-                        ReferenceBuilder::create("some", "ref-b")
-                    ]
-                )
-        );
-
-        $this->assertEquals(
-            ["ref-a", "ref-b"],
-            $messagingSystem->getRequiredReferences()
         );
     }
 
@@ -561,27 +515,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
             );
 
         $channel->send($requestMessage);
-    }
-
-    public function test_registering_reference_from_endpoint_annotation()
-    {
-        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
-
-        $messagingSystem
-            ->registerMessageHandler(
-                ServiceActivatorBuilder::create("reference1", "sum")
-                    ->withInputChannelName("some")
-                    ->withEndpointAnnotations(
-                        [
-                            Transactional::createWith(["reference2"])
-                        ]
-                    )
-            );
-
-        $this->assertEquals(
-            ["reference1", "reference2"],
-            $messagingSystem->getRequiredReferences()
-        );
     }
 
     public function test_registering_reference_from_interface_to_call_on_prepare_method()

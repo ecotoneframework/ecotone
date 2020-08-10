@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Chain;
 
+use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Support\Assert;
 use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\DirectChannel;
@@ -64,15 +65,11 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
     public function chain(MessageHandlerBuilderWithOutputChannel $messageHandler): self
     {
+        $this->requiredReferences = array_merge($this->requiredReferences, MessagingSystemConfiguration::resolveRequiredReferenceForBuilder($messageHandler));
         $outputChannelToKeep = $messageHandler->getOutputMessageChannelName();
         $messageHandler = $messageHandler
             ->withInputChannelName("")
             ->withOutputMessageChannel("");
-
-//        if (($messageHandler instanceof ChainMessageHandlerBuilder) && $messageHandler->interceptedHandler) {
-//            Assert::null($this->interceptedHandler, "Cannot register two intercepted handlers {$messageHandler}. Already have {$this->interceptedHandler}");
-//            $this->interceptedHandlerOffset = array_key_last($this->chainedMessageHandlerBuilders);
-//        }
 
         if ($outputChannelToKeep) {
             $messageHandler = ChainMessageHandlerBuilder::create()
@@ -81,11 +78,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         }
 
         $this->chainedMessageHandlerBuilders[] = $messageHandler;
-        foreach ($messageHandler->getRequiredReferenceNames() as $referenceName) {
-            $this->requiredReferences[] = $referenceName;
-        }
-
-        $this->requiredReferences = array_unique($this->requiredReferences);
 
         return $this;
     }

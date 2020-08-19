@@ -95,7 +95,7 @@ class HeaderBuilderTest extends TestCase
             "",
             $converter->getArgumentFrom(
                 InterfaceToCall::create(ServiceWithDefaultArgument::class, "execute"),
-                InterfaceParameter::createNotNullable("name", TypeDescriptor::createWithDocBlock("string",  "")),
+                InterfaceParameter::create("name", TypeDescriptor::createWithDocBlock("string",  ""), false, true, "", false),
                 MessageBuilder::withPayload("a")->build(),
                 []
             )

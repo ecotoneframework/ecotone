@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Http;
 
+use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Enricher\EnrichException;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -77,7 +78,7 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
             return null;
         }
 
-        $headerMapper = DefaultHeaderMapper::createAllHeadersMapping();
+        $headerMapper = DefaultHeaderMapper::createAllHeadersMapping(InMemoryConversionService::createWithoutConversion());
         $data = (string)$source->getBody();
         $contentType = $source->hasHeader("content-type") ? $source->getHeaderLine("content-type") : MediaType::APPLICATION_OCTET_STREAM;
 

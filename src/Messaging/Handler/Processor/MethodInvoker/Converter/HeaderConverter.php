@@ -3,10 +3,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 
 /**
  * Class HeaderArgument
@@ -16,43 +20,22 @@ use Ecotone\Messaging\Message;
  */
 class HeaderConverter implements ParameterConverter
 {
-    /**
-     * @var string
-     */
-    private $headerName;
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var bool
-     */
-    private $isRequired;
+    private string $headerName;
+    private string $parameterName;
+    private bool $isRequired;
+    private ConversionService $conversionService;
 
-    /**
-     * HeaderArgument constructor.
-     *
-     * @param string $parameterName
-     * @param string $headerName
-     * @param bool   $isRequired
-     */
-    private function __construct(string $parameterName, string $headerName, bool $isRequired)
+    private function __construct(string $parameterName, string $headerName, bool $isRequired, ConversionService $conversionService)
     {
         $this->parameterName = $parameterName;
         $this->headerName = $headerName;
         $this->isRequired = $isRequired;
+        $this->conversionService = $conversionService;
     }
 
-    /**
-     * @param string $parameterName
-     * @param string $headerName
-     * @param bool   $isRequired
-     *
-     * @return HeaderConverter
-     */
-    public static function create(string $parameterName, string $headerName, bool $isRequired) : self
+    public static function create(string $parameterName, string $headerName, bool $isRequired, ConversionService $conversionService) : self
     {
-        return new self($parameterName, $headerName, $isRequired);
+        return new self($parameterName, $headerName, $isRequired, $conversionService);
     }
 
     /**
@@ -64,7 +47,25 @@ class HeaderConverter implements ParameterConverter
             return null;
         }
 
-        return $message->getHeaders()->get($this->headerName);
+        $headerValue = $message->getHeaders()->get($this->headerName);
+        if (!TypeDescriptor::createFromVariable($headerValue)->isCompatibleWith($relatedParameter->getTypeDescriptor())) {
+            if ($this->conversionService->canConvert(
+                TypeDescriptor::createFromVariable($headerValue),
+                MediaType::parseMediaType(DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE),
+                $relatedParameter->getTypeDescriptor(),
+                MediaType::createApplicationXPHP()
+            )) {
+                $headerValue = $this->conversionService->convert(
+                    $headerValue,
+                    TypeDescriptor::createFromVariable($headerValue),
+                    MediaType::parseMediaType(DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE),
+                    $relatedParameter->getTypeDescriptor(),
+                    MediaType::createApplicationXPHP()
+                );
+            }
+        }
+
+        return $headerValue;
     }
 
     /**

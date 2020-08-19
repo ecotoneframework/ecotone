@@ -2,6 +2,8 @@
     "name": "ecotone/ecotone",
     "license": "MIT",
     "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "authors": [
         {
             "name": "Dariusz Gafka",
@@ -37,5 +39,10 @@
         "phan/phan": "^1.2.0",
         "guzzlehttp/psr7": "^1.4",
         "php-coveralls/php-coveralls": "^2.1.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.11.x-dev"
+        }
     }
 }

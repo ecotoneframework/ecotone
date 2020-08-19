@@ -2,6 +2,9 @@
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\InMemoryConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -9,7 +12,9 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ramsey\Uuid\Uuid;
 use Test\Ecotone\Messaging\Fixture\Service\CallableService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceWithUuidArgument;
 
 /**
  * Class HeaderBuilderTest
@@ -37,9 +42,6 @@ class HeaderBuilderTest extends TestCase
         );
     }
 
-    /**
-     * @throws \Ecotone\Messaging\MessagingException
-     */
     public function test_creating_optional_header_converter()
     {
         $converter = HeaderBuilder::createOptional("x", "token");
@@ -54,5 +56,32 @@ class HeaderBuilderTest extends TestCase
                 []
             )
         );
+    }
+
+    public function test_calling_with_json_conversion()
+    {
+        $personId = "05c60a00-2285-431a-bc3b-f840b4e81230";
+        $converter = HeaderBuilder::create("x", "personId");
+        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
+            ConversionService::REFERENCE_NAME => InMemoryConversionService::createWithConversion(
+                MediaType::APPLICATION_JSON,
+                TypeDescriptor::STRING,
+                MediaType::APPLICATION_X_PHP,
+                Uuid::class,
+                Uuid::fromString($personId)
+            )
+        ]));
+
+        $headerResult = $converter->getArgumentFrom(
+            InterfaceToCall::create(ServiceWithUuidArgument::class, "execute"),
+            InterfaceParameter::createNotNullable("x", TypeDescriptor::createWithDocBlock(Uuid::class, "")),
+            MessageBuilder::withPayload("a")
+                ->setHeader("personId",  $personId)
+                ->build(),
+            []
+        );
+
+        $this->assertInstanceOf(Uuid::class, $headerResult);
+        $this->assertEquals(Uuid::fromString($personId), $headerResult);
     }
 }

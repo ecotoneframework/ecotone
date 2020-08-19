@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -87,7 +88,8 @@ class HeaderBuilder implements ParameterConverterBuilder
         return HeaderConverter::create(
             $this->parameterName,
             $this->headerName,
-            $this->isRequired
+            $this->isRequired,
+            $referenceSearchService->get(ConversionService::REFERENCE_NAME)
         );
     }
 }

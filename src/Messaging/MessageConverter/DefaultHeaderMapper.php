@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\MessageConverter;
 
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -12,6 +14,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
  */
 class DefaultHeaderMapper implements HeaderMapper
 {
+    const DEFAULT_HEADER_CONVERSION_MEDIA_TYPE = MediaType::APPLICATION_JSON;
     /**
      * @var string[]
      */
@@ -25,17 +28,18 @@ class DefaultHeaderMapper implements HeaderMapper
      */
     private $headerNamesToLower;
 
+    private ConversionService $conversionService;
+
     /**
-     * DefaultHeaderMapper constructor.
      * @param string[] $toMessageHeadersMapping
      * @param string[] $fromMessageHeadersMapping
-     * @param bool $headerNamesToLower
      */
-    private function __construct(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, bool $headerNamesToLower)
+    private function __construct(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, bool $headerNamesToLower, ConversionService $conversionService)
     {
         $this->fromMessageHeadersMapping = $this->prepareRegex($fromMessageHeadersMapping, $headerNamesToLower);
         $this->toMessageHeadersMapping = $this->prepareRegex($toMessageHeadersMapping, $headerNamesToLower);
         $this->headerNamesToLower = $headerNamesToLower;
+        $this->conversionService = $conversionService;
     }
 
     /**
@@ -43,9 +47,9 @@ class DefaultHeaderMapper implements HeaderMapper
      * @param array $fromMessageHeadersMapping
      * @return DefaultHeaderMapper
      */
-    public static function createWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping) : self
+    public static function createWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, ConversionService $conversionService) : self
     {
-        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, false);
+        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, false, $conversionService);
     }
 
     /**
@@ -53,25 +57,25 @@ class DefaultHeaderMapper implements HeaderMapper
      * @param array $fromMessageHeadersMapping
      * @return DefaultHeaderMapper
      */
-    public static function createCaseInsensitiveHeadersWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping) : self
+    public static function createCaseInsensitiveHeadersWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, ConversionService $conversionService) : self
     {
-        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, true);
+        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, true, $conversionService);
     }
 
     /**
      * @return DefaultHeaderMapper
      */
-    public static function createAllHeadersMapping() : self
+    public static function createAllHeadersMapping(ConversionService $conversionService) : self
     {
-        return new self(["*"], ["*"], false);
+        return new self(["*"], ["*"], false, $conversionService);
     }
 
     /**
      * @return DefaultHeaderMapper
      */
-    public static function createNoMapping() : self
+    public static function createNoMapping(ConversionService $conversionService) : self
     {
-        return new self([], [], false);
+        return new self([], [], false, $conversionService);
     }
 
     /**
@@ -101,8 +105,8 @@ class DefaultHeaderMapper implements HeaderMapper
     {
         $targetHeaders = [];
         $convertedSourceHeaders = [];
-        foreach ($sourceHeaders as $sourceHeaderName => $sourceHeaderValue) {
-            $convertedSourceHeaders[$this->headerNamesToLower ? strtolower($sourceHeaderName) : $sourceHeaderName] = $sourceHeaderValue;
+        foreach ($sourceHeaders as $sourceHeaderName => $value) {
+            $convertedSourceHeaders[$this->headerNamesToLower ? strtolower($sourceHeaderName) : $sourceHeaderName] = $value;
         }
 
         foreach ($mappingHeaders as $mappedHeader) {
@@ -112,17 +116,21 @@ class DefaultHeaderMapper implements HeaderMapper
             }
 
             if (array_key_exists($mappedHeader, $convertedSourceHeaders)) {
-                if ($this->isScalarType($convertedSourceHeaders[$mappedHeader])) {
-                    $targetHeaders[$mappedHeader] = $convertedSourceHeaders[$mappedHeader];
+                $value = $this->extractValue($convertedSourceHeaders[$mappedHeader]);
+
+                if ($value) {
+                    $targetHeaders[$mappedHeader] = $value;
                 }
 
                 continue;
             }
 
-            foreach ($convertedSourceHeaders as $sourceHeaderName => $sourceHeaderValue) {
+            foreach ($convertedSourceHeaders as $sourceHeaderName => $value) {
                 if (preg_match("#{$mappedHeader}#", $sourceHeaderName)) {
-                    if ($this->isScalarType($sourceHeaderValue)) {
-                        $targetHeaders[$sourceHeaderName] = $sourceHeaderValue;
+                    $value = $this->extractValue($value);
+
+                    if ($value) {
+                        $targetHeaders[$sourceHeaderName] = $value;
                     }
                 }
             }
@@ -163,5 +171,29 @@ class DefaultHeaderMapper implements HeaderMapper
         }
 
         return $finalMappingHeaders;
+    }
+
+    private function extractValue($value)
+    {
+        if ($this->isScalarType($value)) {
+            return $value;
+        } else if (
+            $this->conversionService->canConvert(
+                TypeDescriptor::createFromVariable($value),
+                MediaType::createApplicationXPHP(),
+                TypeDescriptor::createStringType(),
+                MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
+            )
+        ) {
+            return $this->conversionService->convert(
+                $value,
+                TypeDescriptor::createFromVariable($value),
+                MediaType::createApplicationXPHP(),
+                TypeDescriptor::createStringType(),
+                MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
+            );
+        }
+
+        return null;
     }
 }

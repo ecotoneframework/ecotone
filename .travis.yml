@@ -12,6 +12,7 @@ install:
   - composer install --prefer-dist --no-interaction
 
 script:
+  - vendor/bin/phpstan analyze
   - vendor/bin/phpunit --coverage-clover ./tests/coverage/clover.xml
   - vendor/bin/behat
 

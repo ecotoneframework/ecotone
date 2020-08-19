@@ -218,13 +218,7 @@ final class TypeDescriptor implements Type
                     }
                 }
 
-                if ($this->isClassOrInterface() && $toCompareClass->isAbstract()) {
-                    if ($thisClass->isSubclassOf($toCompare->getTypeHint())) {
-                        return true;
-                    }
-                }
-
-                return false;
+                return $thisClass->isSubclassOf($toCompare->getTypeHint());
             }
         }
 

@@ -10,3 +10,7 @@ services:
     command: sleep 99999
     networks:
       - default
+networks:
+  default:
+    external:
+      name: ecotone-test

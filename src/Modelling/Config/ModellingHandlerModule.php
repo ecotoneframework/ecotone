@@ -26,6 +26,7 @@ use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
@@ -33,6 +34,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateIdentifierRetrevingServiceBuilder;
 use Ecotone\Modelling\AggregateMessage;
+use Ecotone\Modelling\Annotation\ChangingHeaders;
 use Ecotone\Modelling\Annotation\IgnorePayload;
 use Ecotone\Modelling\CallAggregateServiceBuilder;
 use Ecotone\Modelling\LoadAggregateMode;
@@ -454,8 +456,13 @@ class ModellingHandlerModule implements AnnotationModule
                 ->withInputChannelName($inputChannelName)
                 ->withOutputMessageChannel($endpointInputChannel)
         );
+
+        $handler = $registration->hasMethodAnnotation(ChangingHeaders::class)
+            ? TransformerBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $registration->getMethodName())
+            : ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $registration->getMethodName());
+
         $configuration->registerMessageHandler(
-            ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $registration->getMethodName())
+            $handler
                 ->withInputChannelName($endpointInputChannel)
                 ->withOutputMessageChannel($annotation->outputChannelName)
                 ->withEndpointId($methodAnnotation->endpointId)

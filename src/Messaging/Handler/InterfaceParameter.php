@@ -131,7 +131,7 @@ final class InterfaceParameter
 
     public function hasDefaultValue() : bool
     {
-        return $this->hasDefaultValue;
+        return !is_null($this->hasDefaultValue);
     }
 
     /**

@@ -1472,6 +1472,7 @@ class GatewayProxyBuilderTest extends MessagingTest
     {
         $requestChannelName = "request-channel";
         $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(DataReturningService::createServiceActivator("test"));
         $mediaType = MediaType::APPLICATION_JSON;
 
         /** @var NonProxyGateway $gateway */
@@ -1488,6 +1489,6 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $this->expectException(InvalidArgumentException::class);
 
-        $gateway->execute(["some"]);
+        $gateway->execute([]);
     }
 }

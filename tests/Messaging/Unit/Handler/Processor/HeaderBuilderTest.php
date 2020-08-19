@@ -14,6 +14,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ramsey\Uuid\Uuid;
 use Test\Ecotone\Messaging\Fixture\Service\CallableService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceWithDefaultArgument;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceWithUuidArgument;
 
 /**
@@ -83,5 +84,21 @@ class HeaderBuilderTest extends TestCase
 
         $this->assertInstanceOf(Uuid::class, $headerResult);
         $this->assertEquals(Uuid::fromString($personId), $headerResult);
+    }
+
+    public function test_passing_default_value_if_exists_and_no_header_found()
+    {
+        $converter = HeaderBuilder::create("name", "token");
+        $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
+
+        $this->assertEquals(
+            "",
+            $converter->getArgumentFrom(
+                InterfaceToCall::create(ServiceWithDefaultArgument::class, "execute"),
+                InterfaceParameter::createNotNullable("name", TypeDescriptor::createWithDocBlock("string",  "")),
+                MessageBuilder::withPayload("a")->build(),
+                []
+            )
+        );
     }
 }

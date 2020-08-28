@@ -48,6 +48,7 @@ class ErrorConfigurationContext
     {
         return PollingMetadata::create("orderService")
                 ->setExecutionTimeLimitInMilliseconds(1)
+                ->setHandledMessageLimit(1)
                 ->setErrorChannelName(ErrorConfigurationContext::ERROR_CHANNEL);
     }
 }

@@ -15,6 +15,9 @@ class ErrorHandler
 {
     const ECOTONE_RETRY_HEADER = "ecotone_retry_number";
     const EXCEPTION_STACKTRACE = "exception-stacktrace";
+    const EXCEPTION_FILE = "exception-file";
+    const EXCEPTION_LINE = "exception-line";
+    const EXCEPTION_CODE = "exception-code";
     const EXCEPTION_MESSAGE = "exception-message";
     /**
      * @var RetryTemplate
@@ -34,12 +37,15 @@ class ErrorHandler
 
         $retryNumber = $failedMessage->getHeaders()->containsKey(self::ECOTONE_RETRY_HEADER) ? $failedMessage->getHeaders()->get(self::ECOTONE_RETRY_HEADER) + 1 : 1;
 
-        if (!$this->retryTemplate->canBeCalledNextTime($retryNumber)) {
-            $cause = $messagingException->getCause();
+        if ($this->shouldBeSendToDeadLetter($retryNumber)) {
+            $cause = $messagingException->getCause() ? $messagingException->getCause() : $messagingException;
 
             return MessageBuilder::fromMessage($failedMessage)
-                    ->setHeader(self::EXCEPTION_MESSAGE, $cause ? $cause->getMessage() : $messagingException->getMessage())
-                    ->setHeader(self::EXCEPTION_STACKTRACE, $cause ? $cause->getTraceAsString() : $messagingException->getTraceAsString())
+                    ->setHeader(self::EXCEPTION_MESSAGE, $cause->getMessage())
+                    ->setHeader(self::EXCEPTION_STACKTRACE, $cause->getTraceAsString())
+                    ->setHeader(self::EXCEPTION_FILE, $cause->getFile())
+                    ->setHeader(self::EXCEPTION_LINE, $cause->getLine())
+                    ->setHeader(self::EXCEPTION_CODE, $cause->getCode())
                     ->build();
         }
 
@@ -53,5 +59,10 @@ class ErrorHandler
         );
 
         return null;
+    }
+
+    private function shouldBeSendToDeadLetter(int $retryNumber): bool
+    {
+        return !$this->retryTemplate->canBeCalledNextTime($retryNumber);
     }
 }

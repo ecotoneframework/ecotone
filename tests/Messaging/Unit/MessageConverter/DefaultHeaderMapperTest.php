@@ -9,6 +9,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use stdClass;
 
 /**
@@ -117,7 +118,7 @@ class DefaultHeaderMapperTest extends TestCase
             ["personId"],
             InMemoryConversionService::createWithConversion(
                 MediaType::APPLICATION_X_PHP,
-                Uuid::class,
+                UuidInterface::class,
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 $personId

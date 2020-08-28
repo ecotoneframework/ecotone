@@ -13,6 +13,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use Test\Ecotone\Messaging\Fixture\Service\CallableService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceWithDefaultArgument;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceWithUuidArgument;
@@ -82,7 +83,7 @@ class HeaderBuilderTest extends TestCase
             []
         );
 
-        $this->assertInstanceOf(Uuid::class, $headerResult);
+        $this->assertInstanceOf(UuidInterface::class, $headerResult);
         $this->assertEquals(Uuid::fromString($personId), $headerResult);
     }
 

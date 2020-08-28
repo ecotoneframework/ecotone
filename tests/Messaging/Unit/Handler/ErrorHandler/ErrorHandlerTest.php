@@ -9,6 +9,7 @@ use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -36,14 +37,9 @@ class ErrorHandlerTest extends TestCase
         $this->assertNotNull($consumedChannel->receive());
     }
 
-    private function createFailedMessage(Message $message): Message
+    private function createFailedMessage(Message $message, \Throwable $exception = null): Message
     {
-        return MessageBuilder::withPayload(
-            MessageHandlingException::createWithFailedMessage(
-                "exceptionMessage",
-                $message
-            )
-        )->build();
+        return ErrorMessage::create(MessageHandlingException::fromOtherException($exception ?? new MessageHandlingException(), $message));
     }
 
     public function test_calculating_correct_delay_for_retry_template()
@@ -76,7 +72,8 @@ class ErrorHandlerTest extends TestCase
             MessageBuilder::withPayload("payload")
                 ->setHeader(MessageHeaders::POLLED_CHANNEL, $consumedChannel)
                 ->setHeader(ErrorHandler::ECOTONE_RETRY_HEADER, 2)
-                ->build()
+                ->build(),
+            new \InvalidArgumentException("exceptionMessage")
         ));
 
         $this->assertEquals("exceptionMessage", $resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_MESSAGE));
@@ -106,5 +103,22 @@ class ErrorHandlerTest extends TestCase
 
         $this->assertEquals("causation", $resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_MESSAGE));
         $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_STACKTRACE));
+    }
+
+    public function test_rethrowing_exception_if_no_polled_channel_exists()
+    {
+        $errorHandler = new ErrorHandler(
+            RetryTemplateBuilder::exponentialBackoff(1, 2)
+                ->maxRetryAttempts(2)
+                ->build()
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $errorHandler->handle($this->createFailedMessage(
+            MessageBuilder::withPayload("some")
+                ->build(),
+            new \InvalidArgumentException()
+        ));
     }
 }

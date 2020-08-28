@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling;
+namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter;
 
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;

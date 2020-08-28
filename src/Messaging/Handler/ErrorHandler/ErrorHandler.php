@@ -19,14 +19,12 @@ class ErrorHandler
     const EXCEPTION_LINE = "exception-line";
     const EXCEPTION_CODE = "exception-code";
     const EXCEPTION_MESSAGE = "exception-message";
-    /**
-     * @var RetryTemplate
-     */
-    private $retryTemplate;
 
-    public function __construct(RetryTemplate $retryTemplate)
+    private RetryTemplate $delayedRetryTemplate;
+
+    public function __construct(RetryTemplate $delayedRetryTemplate)
     {
-        $this->retryTemplate = $retryTemplate;
+        $this->delayedRetryTemplate = $delayedRetryTemplate;
     }
 
     public function handle(Message $errorMessage): ?Message
@@ -34,12 +32,14 @@ class ErrorHandler
         /** @var MessagingException $messagingException */
         $messagingException = $errorMessage->getPayload();
         $failedMessage = $messagingException->getFailedMessage();
-
+        $cause = $messagingException->getCause() ? $messagingException->getCause() : $messagingException;
         $retryNumber = $failedMessage->getHeaders()->containsKey(self::ECOTONE_RETRY_HEADER) ? $failedMessage->getHeaders()->get(self::ECOTONE_RETRY_HEADER) + 1 : 1;
 
-        if ($this->shouldBeSendToDeadLetter($retryNumber)) {
-            $cause = $messagingException->getCause() ? $messagingException->getCause() : $messagingException;
+        if (!$failedMessage->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL)) {
+            throw $cause;
+        }
 
+        if ($this->shouldBeSendToDeadLetter($retryNumber)) {
             return MessageBuilder::fromMessage($failedMessage)
                     ->setHeader(self::EXCEPTION_MESSAGE, $cause->getMessage())
                     ->setHeader(self::EXCEPTION_STACKTRACE, $cause->getTraceAsString())
@@ -53,7 +53,7 @@ class ErrorHandler
         $messageChannel = $failedMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL);
         $messageChannel->send(
             MessageBuilder::fromMessage($failedMessage)
-                ->setHeader(MessageHeaders::DELIVERY_DELAY, $this->retryTemplate->calculateNextDelay($retryNumber))
+                ->setHeader(MessageHeaders::DELIVERY_DELAY, $this->delayedRetryTemplate->calculateNextDelay($retryNumber))
                 ->setHeader(self::ECOTONE_RETRY_HEADER, $retryNumber)
                 ->build()
         );
@@ -63,6 +63,6 @@ class ErrorHandler
 
     private function shouldBeSendToDeadLetter(int $retryNumber): bool
     {
-        return !$this->retryTemplate->canBeCalledNextTime($retryNumber);
+        return !$this->delayedRetryTemplate->canBeCalledNextTime($retryNumber);
     }
 }

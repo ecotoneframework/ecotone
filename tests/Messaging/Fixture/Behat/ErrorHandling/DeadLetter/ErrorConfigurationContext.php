@@ -1,11 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling;
+namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter;
 
 use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Annotation\Extension;
-use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\ErrorHandler\ErrorHandlerConfiguration;

@@ -1,10 +1,9 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling;
+namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter;
 
-use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Annotation\MessageGateway;
 
 interface OrderGateway
 {

@@ -11,34 +11,25 @@ use Ecotone\Messaging\MessageHandler;
 
 class ErrorHandlerConfiguration
 {
-    /**
-     * @var string
-     */
-    private $errorChannelName;
-    /**
-     * @var RetryTemplate
-     */
-    private $retryTemplate;
-    /**
-     * @var string|null
-     */
-    private $deadLetterChannel;
+    private string $errorChannelName;
+    private RetryTemplate $delayedRetryTemplate;
+    private ?string $deadLetterChannel;
 
-    private function __construct(string $errorChannelName, RetryTemplate $retryTemplateBuilder, ?string $deadLetterChannel)
+    private function __construct(string $errorChannelName, RetryTemplate $delayedRetryTemplate, ?string $deadLetterChannel)
     {
-        $this->deadLetterChannel = $deadLetterChannel;
-        $this->retryTemplate = $retryTemplateBuilder;
-        $this->errorChannelName = $errorChannelName;
+        $this->deadLetterChannel    = $deadLetterChannel;
+        $this->delayedRetryTemplate = $delayedRetryTemplate;
+        $this->errorChannelName     = $errorChannelName;
     }
 
-    public static function create(string $errorChannelName, RetryTemplateBuilder $retryTemplate) : self
+    public static function create(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate) : self
     {
-        return new self($errorChannelName, $retryTemplate->build(), null);
+        return new self($errorChannelName, $delayedRetryTemplate->build(), null);
     }
 
-    public static function createWithDeadLetterChannel(string $errorChannelName, RetryTemplateBuilder $retryTemplate, string $deadLetterChannel)
+    public static function createWithDeadLetterChannel(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate, string $deadLetterChannel)
     {
-        return new self($errorChannelName, $retryTemplate->build(), $deadLetterChannel);
+        return new self($errorChannelName, $delayedRetryTemplate->build(), $deadLetterChannel);
     }
 
     /**
@@ -54,8 +45,8 @@ class ErrorHandlerConfiguration
         return $this->deadLetterChannel;
     }
 
-    public function getRetryTemplate(): RetryTemplate
+    public function getDelayedRetryTemplate(): RetryTemplate
     {
-        return $this->retryTemplate;
+        return $this->delayedRetryTemplate;
     }
 }

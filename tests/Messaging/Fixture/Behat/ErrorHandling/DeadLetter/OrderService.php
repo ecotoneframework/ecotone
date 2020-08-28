@@ -1,9 +1,8 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling;
+namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter;
 
 use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\Poller;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
 class OrderService

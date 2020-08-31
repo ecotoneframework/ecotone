@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Messaging\Handler\ErrorHandler;
+namespace Ecotone\Messaging\Handler\Recoverability;
 
 
 use Ecotone\Messaging\Support\Assert;

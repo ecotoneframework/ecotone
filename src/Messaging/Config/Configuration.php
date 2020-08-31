@@ -138,6 +138,13 @@ interface Configuration
     public function getRegisteredGateways() : array;
 
     /**
+     * @return OneTimeCommandConfiguration[]
+     */
+    public function getRegisteredOneTimeCommands() : array;
+
+    public function registerOneTimeCommand(OneTimeCommandConfiguration $oneTimeCommandConfiguration) : Configuration;
+
+    /**
      * @param Type $interfaceName
      * @return Configuration
      */

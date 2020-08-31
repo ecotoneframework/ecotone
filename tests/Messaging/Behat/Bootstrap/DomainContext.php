@@ -284,7 +284,7 @@ class DomainContext implements Context
 
         $this->getMessagingSystemConfiguration()
             ->registerMessageHandler(
-                RouterBuilder::createHeaderValueRouter($headerName, $channelToValue)
+                RouterBuilder::createHeaderMappingRouter($headerName, $channelToValue)
                     ->withEndpointId($endpointName)
                     ->withInputChannelName($inputChannelName)
             );

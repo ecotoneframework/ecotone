@@ -79,12 +79,6 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         }
     }
 
-    /**
-     * @param string $objectToInvokeOnReferenceName
-     * @param string $methodName
-     *
-     * @return ServiceActivatorBuilder
-     */
     public static function create(string $objectToInvokeOnReferenceName, string $methodName): self
     {
         return new self($objectToInvokeOnReferenceName, $methodName);

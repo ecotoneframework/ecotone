@@ -1,10 +1,10 @@
 <?php
 
-namespace Ecotone\Messaging\Handler\ErrorHandler;
+namespace Ecotone\Messaging\Handler\Recoverability;
 
 use Ecotone\Messaging\MessageHeaders;
 
-class ErrorMessageDetails
+class ErrorContext
 {
     const EXCEPTION_STACKTRACE = "exception-stacktrace";
     const EXCEPTION_FILE = "exception-file";
@@ -19,9 +19,8 @@ class ErrorMessageDetails
     private string $line;
     private string $code;
     private string $message;
-    private array $allHeaders;
 
-    private function __construct(string $messageId, int $failedTimestamp, string $message, string $stackTrace, string $code, string $file, string $line, array $allHeaders)
+    private function __construct(string $messageId, int $failedTimestamp, string $message, string $stackTrace, string $code, string $file, string $line)
     {
         $this->messageId = $messageId;
         $this->failedTimestamp = $failedTimestamp;
@@ -30,7 +29,6 @@ class ErrorMessageDetails
         $this->line       = $line;
         $this->code       = $code;
         $this->message    = $message;
-        $this->allHeaders = $allHeaders;
     }
 
     public static function fromHeaders(array $messageHeaders) : self
@@ -38,12 +36,11 @@ class ErrorMessageDetails
         return new self(
             $messageHeaders[MessageHeaders::MESSAGE_ID],
             $messageHeaders[MessageHeaders::TIMESTAMP],
-            $messageHeaders[ErrorHandler::EXCEPTION_MESSAGE],
-            $messageHeaders[ErrorHandler::EXCEPTION_STACKTRACE],
-            $messageHeaders[ErrorHandler::EXCEPTION_CODE],
-            $messageHeaders[ErrorHandler::EXCEPTION_FILE],
-            $messageHeaders[ErrorHandler::EXCEPTION_LINE],
-            $messageHeaders
+            $messageHeaders[self::EXCEPTION_MESSAGE],
+            $messageHeaders[self::EXCEPTION_STACKTRACE],
+            $messageHeaders[self::EXCEPTION_CODE],
+            $messageHeaders[self::EXCEPTION_FILE],
+            $messageHeaders[self::EXCEPTION_LINE]
         );
     }
 
@@ -80,10 +77,5 @@ class ErrorMessageDetails
     public function getMessage(): string
     {
         return $this->message;
-    }
-
-    public function getAllHeaders(): array
-    {
-        return $this->allHeaders;
     }
 }

@@ -159,10 +159,18 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
      * @return RouterBuilder
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createHeaderValueRouter(string $headerName, array $headerValueToChannelMapping) : self
+    public static function createHeaderMappingRouter(string $headerName, array $headerValueToChannelMapping) : self
     {
         $routerBuilder = self::create("", 'route');
-        $routerBuilder->setObjectToInvoke(HeaderValueRouter::create($headerName, $headerValueToChannelMapping));
+        $routerBuilder->setObjectToInvoke(HeaderMappingRouter::create($headerName, $headerValueToChannelMapping));
+
+        return $routerBuilder;
+    }
+
+    public static function createHeaderRouter(string $headerName) : self
+    {
+        $routerBuilder = self::create("", 'route');
+        $routerBuilder->setObjectToInvoke(HeaderRouter::create($headerName));
 
         return $routerBuilder;
     }

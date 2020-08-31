@@ -227,7 +227,7 @@ class RouterBuilderTest extends MessagingTest
         $targetChannel2 = QueueChannel::create();
         $headerName = 'type';
 
-        $router = RouterBuilder::createHeaderValueRouter($headerName, [
+        $router = RouterBuilder::createHeaderMappingRouter($headerName, [
             'private' => 'channel1',
             'public' => 'channel2'
         ])

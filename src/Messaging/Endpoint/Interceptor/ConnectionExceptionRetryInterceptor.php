@@ -6,8 +6,8 @@ namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
-use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplate;
-use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
+use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
+use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
 {

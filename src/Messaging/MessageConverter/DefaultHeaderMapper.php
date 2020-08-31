@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\MessageConverter;
 
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Recoverability\ErrorContext;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -118,7 +119,7 @@ class DefaultHeaderMapper implements HeaderMapper
             if (array_key_exists($mappedHeader, $convertedSourceHeaders)) {
                 $value = $this->extractValue($convertedSourceHeaders[$mappedHeader]);
 
-                if ($value) {
+                if (!is_null($value)) {
                     $targetHeaders[$mappedHeader] = $value;
                 }
 
@@ -129,7 +130,7 @@ class DefaultHeaderMapper implements HeaderMapper
                 if (preg_match("#{$mappedHeader}#", $sourceHeaderName)) {
                     $value = $this->extractValue($value);
 
-                    if ($value) {
+                    if (!is_null($value)) {
                         $targetHeaders[$sourceHeaderName] = $value;
                     }
                 }

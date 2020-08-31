@@ -7,8 +7,8 @@ use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Annotation\Extension;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Handler\ErrorHandler\ErrorHandlerConfiguration;
-use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
+use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;
+use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 /**
  * @ApplicationContext()

@@ -102,6 +102,15 @@ final class MessageBuilder
         return $this;
     }
 
+    public function removeHeaders(array $headerNames) : self
+    {
+        foreach ($headerNames as $headerName) {
+            $this->headerAccessor->removeHeader($headerName);
+        }
+
+        return $this;
+    }
+
     /**
      * @param string $headerName
      * @param $headerValue
@@ -211,16 +220,19 @@ final class MessageBuilder
         return new self($payload, HeaderAccessor::create());
     }
 
-    /**
-     * @param Message $message
-     * @return MessageBuilder
-     */
     public static function fromMessage(Message $message) : self
     {
         return new self(
             $message->getPayload(),
             HeaderAccessor::createFrom($message->getHeaders())
         );
+    }
+
+    public static function fromMessageWithPreservedMessageId(Message $message) : self
+    {
+        return self::fromMessage($message)
+                        ->setHeader(MessageHeaders::MESSAGE_ID, $message->getHeaders()->getMessageId())
+                        ->setHeader(MessageHeaders::TIMESTAMP, $message->getHeaders()->getTimestamp());
     }
 
     /**

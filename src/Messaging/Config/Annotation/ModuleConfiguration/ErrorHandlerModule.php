@@ -10,9 +10,11 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Handler\ErrorHandler\ErrorHandler;
-use Ecotone\Messaging\Handler\ErrorHandler\ErrorHandlerConfiguration;
+use Ecotone\Messaging\Handler\Recoverability\ErrorHandler;
+use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;
+use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\MessageHeaders;
 
 /**
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
@@ -59,8 +61,13 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
                 $configuration
                     ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($extensionObject->getDeadLetterQueueChannel()));
             }
-            $configuration->registerMessageHandler($errorHandler)
-                ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($extensionObject->getErrorChannelName()));
+            $configuration
+                ->registerMessageHandler($errorHandler)
+                ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($extensionObject->getErrorChannelName()))
+                ->registerMessageHandler(
+                    RouterBuilder::createHeaderRouter(MessageHeaders::POLLED_CHANNEL_NAME)
+                        ->withInputChannelName("ecotone.recoverability.reply")
+                );
         }
     }
 

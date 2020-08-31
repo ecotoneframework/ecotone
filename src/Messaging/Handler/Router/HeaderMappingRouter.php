@@ -10,7 +10,7 @@ use Ecotone\Messaging\Message;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-final class HeaderValueRouter
+final class HeaderMappingRouter
 {
     /**
      * @var string
@@ -35,7 +35,8 @@ final class HeaderValueRouter
     /**
      * @param string $headerName
      * @param array $typeToChannelMapping
-     * @return HeaderValueRouter
+     *
+     * @return HeaderMappingRouter
      */
     public static function create(string $headerName, array $typeToChannelMapping) : self
     {

@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config;
 
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
+use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 class ApplicationConfiguration
 {

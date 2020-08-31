@@ -1,13 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Messaging\Handler\ErrorHandler;
-
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\MessageHandler;
+namespace Ecotone\Messaging\Handler\Recoverability;
 
 class ErrorHandlerConfiguration
 {

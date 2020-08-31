@@ -1,14 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Messaging\Handler\ErrorHandler;
+namespace Ecotone\Messaging\Handler\Recoverability;
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 class ErrorHandler
@@ -38,21 +36,35 @@ class ErrorHandler
         if (!$failedMessage->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL)) {
             throw $cause;
         }
+        /** @var MessageChannel $messageChannel */
+        $messageChannel = $failedMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL);
+
+        $messageBuilder = MessageBuilder::fromMessage($failedMessage);
+        if ($messageBuilder->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
+            $messageBuilder->removeHeader($messageBuilder->getHeaderWithName(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION));
+        }
+
+        $messageBuilder->removeHeaders([
+            MessageHeaders::DELIVERY_DELAY,
+            MessageHeaders::TIME_TO_LIVE,
+            MessageHeaders::CONSUMER_ACK_HEADER_LOCATION,
+            MessageHeaders::POLLED_CHANNEL
+        ]);
 
         if ($this->shouldBeSendToDeadLetter($retryNumber)) {
-            return MessageBuilder::fromMessage($failedMessage)
-                    ->setHeader(self::EXCEPTION_MESSAGE, $cause->getMessage())
-                    ->setHeader(self::EXCEPTION_STACKTRACE, $cause->getTraceAsString())
-                    ->setHeader(self::EXCEPTION_FILE, $cause->getFile())
-                    ->setHeader(self::EXCEPTION_LINE, $cause->getLine())
-                    ->setHeader(self::EXCEPTION_CODE, $cause->getCode())
+            $messageBuilder->removeHeader(self::ECOTONE_RETRY_HEADER);
+
+            return $messageBuilder
+                    ->setHeader(ErrorContext::EXCEPTION_MESSAGE, $cause->getMessage())
+                    ->setHeader(ErrorContext::EXCEPTION_STACKTRACE, $cause->getTraceAsString())
+                    ->setHeader(ErrorContext::EXCEPTION_FILE, $cause->getFile())
+                    ->setHeader(ErrorContext::EXCEPTION_LINE, $cause->getLine())
+                    ->setHeader(ErrorContext::EXCEPTION_CODE, $cause->getCode())
                     ->build();
         }
 
-        /** @var MessageChannel $messageChannel */
-        $messageChannel = $failedMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL);
         $messageChannel->send(
-            MessageBuilder::fromMessage($failedMessage)
+            $messageBuilder
                 ->setHeader(MessageHeaders::DELIVERY_DELAY, $this->delayedRetryTemplate->calculateNextDelay($retryNumber))
                 ->setHeader(self::ECOTONE_RETRY_HEADER, $retryNumber)
                 ->build()

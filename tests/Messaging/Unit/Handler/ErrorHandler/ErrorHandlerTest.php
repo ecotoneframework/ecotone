@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler\ErrorHandler;
 
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Handler\ErrorHandler\ErrorHandler;
-use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\MessageHandlingException;
+use Ecotone\Messaging\Handler\Recoverability\ErrorHandler;
+use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\ErrorMessage;
@@ -33,7 +33,13 @@ class ErrorHandlerTest extends TestCase
             ))
         );
 
-        $this->assertNull($errorHandler->handle($this->createFailedMessage($consumedChannel->receive())));
+        $this->assertNull($errorHandler->handle(
+            $this->createFailedMessage(
+                MessageBuilder::withPayload("some")
+                    ->setHeader(MessageHeaders::POLLED_CHANNEL, $consumedChannel)
+                    ->build()
+            )
+        ));
         $this->assertNotNull($consumedChannel->receive());
     }
 

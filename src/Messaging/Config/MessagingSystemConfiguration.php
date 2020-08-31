@@ -21,7 +21,6 @@ use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
-use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
@@ -35,6 +34,7 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\InterceptorWithPointCut;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
@@ -154,6 +154,10 @@ final class MessagingSystemConfiguration implements Configuration
      * @var string[]
      */
     private $requiredConsumerEndpointIds = [];
+    /**
+     * @var OneTimeCommandConfiguration[]
+     */
+    private array $oneTimeCommands = [];
 
     /**
      * Only one instance at time
@@ -852,6 +856,18 @@ final class MessagingSystemConfiguration implements Configuration
 
         $this->interfacesToCall             = array_unique($this->interfacesToCall);
         $this->moduleReferenceSearchService = $moduleReferenceSearchService;
+    }
+
+    public function getRegisteredOneTimeCommands(): array
+    {
+        return $this->oneTimeCommands;
+    }
+
+    public function registerOneTimeCommand(OneTimeCommandConfiguration $oneTimeCommandConfiguration): Configuration
+    {
+        $this->oneTimeCommands[] = $oneTimeCommandConfiguration;
+
+        return $this;
     }
 
     /**

@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplate;
-use Ecotone\Messaging\Handler\ErrorHandler\RetryTemplateBuilder;
+use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 /**
  * Class PollingMetadata

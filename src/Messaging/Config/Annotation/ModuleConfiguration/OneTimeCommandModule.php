@@ -60,40 +60,53 @@ class OneTimeCommandModule extends NoExternalConfigurationModule implements Anno
         foreach ($annotationRegistrationService->findAnnotatedMethods(OneTimeCommand::class) as $annotationRegistration) {
             /** @var OneTimeCommand $annotation */
             $annotation               = $annotationRegistration->getAnnotationForMethod();
-            $parameterConverters = [];
-            $parameters = [];
+            $commandName                     = $annotation->name;
             $className    = $annotationRegistration->getClassName();
-            $classReflection = new \ReflectionClass($className);
+            $methodName               = $annotationRegistration->getMethodName();
 
-            $interfaceToCall = InterfaceToCall::create($className, $annotationRegistration->getMethodName());
-            if ($classReflection->getConstructor() && $classReflection->getConstructor()->getParameters()) {
-                throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must not have constructor parameters");
-            }
+            list($messageHandlerBuilder, $oneTimeCommandConfiguration) = self::prepareOneTimeCommand($className, $methodName, $commandName);
 
-            if ($interfaceToCall->canReturnValue() && !$interfaceToCall->getReturnType()->equals(TypeDescriptor::create(OneTimeCommandResultSet::class))) {
-                throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must have void or " . OneTimeCommandResultSet::class . " return type");
-            }
-
-            foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-                if ($interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
-                    $parameterConverters[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeDescriptor()->toString());
-                }else {
-                    $parameterConverters[] = HeaderBuilder::create($interfaceParameter->getName(), self::ECOTONE_COMMAND_PARAMETER_PREFIX . $interfaceParameter->getName());
-                    $parameters[] = $interfaceParameter->hasDefaultValue()
-                        ? OneTimeCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $interfaceParameter->getDefaultValue())
-                        : OneTimeCommandParameter::create($interfaceParameter->getName());
-                }
-            }
-
-            $inputChannel = "ecotone.channel." . $annotation->name;
-            $messageHandlerBuilders[] = ServiceActivatorBuilder::createWithDirectReference(new $className(), $annotationRegistration->getMethodName())
-                ->withEndpointId("ecotone.endpoint." . $annotation->name)
-                ->withInputChannelName($inputChannel)
-                ->withMethodParameterConverters($parameterConverters);
-            $oneTimeConfigurations[] = OneTimeCommandConfiguration::create($inputChannel, $annotation->name, $parameters);
+            $messageHandlerBuilders[] = $messageHandlerBuilder;
+            $oneTimeConfigurations[]     = $oneTimeCommandConfiguration;
         }
 
         return new static($messageHandlerBuilders, $oneTimeConfigurations);
+    }
+
+    public static function prepareOneTimeCommand(string $className, string $methodName, string $commandName): array
+    {
+        $parameterConverters = [];
+        $parameters          = [];
+        $classReflection     = new \ReflectionClass($className);
+
+        $interfaceToCall = InterfaceToCall::create($className, $methodName);
+        if ($classReflection->getConstructor() && $classReflection->getConstructor()->getParameters()) {
+            throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must not have constructor parameters");
+        }
+
+        if ($interfaceToCall->canReturnValue() && !$interfaceToCall->getReturnType()->equals(TypeDescriptor::create(OneTimeCommandResultSet::class))) {
+            throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must have void or " . OneTimeCommandResultSet::class . " return type");
+        }
+
+        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+            if ($interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
+                $parameterConverters[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeDescriptor()->toString());
+            } else {
+                $parameterConverters[] = HeaderBuilder::create($interfaceParameter->getName(), self::ECOTONE_COMMAND_PARAMETER_PREFIX . $interfaceParameter->getName());
+                $parameters[]          = $interfaceParameter->hasDefaultValue()
+                    ? OneTimeCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $interfaceParameter->getDefaultValue())
+                    : OneTimeCommandParameter::create($interfaceParameter->getName());
+            }
+        }
+
+        $inputChannel                = "ecotone.channel." . $commandName;
+        $messageHandlerBuilder    = ServiceActivatorBuilder::createWithDirectReference(new $className(), $methodName)
+            ->withEndpointId("ecotone.endpoint." . $commandName)
+            ->withInputChannelName($inputChannel)
+            ->withMethodParameterConverters($parameterConverters);
+        $oneTimeCommandConfiguration = OneTimeCommandConfiguration::create($inputChannel, $commandName, $parameters);
+
+        return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
     }
 
     public function prepare(Configuration $configuration,array $extensionObjects,ModuleReferenceSearchService $moduleReferenceSearchService) : void

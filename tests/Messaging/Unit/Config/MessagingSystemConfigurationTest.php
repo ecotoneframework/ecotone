@@ -1035,6 +1035,40 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertNotNull($errorChannel->receive());
     }
 
+    public function test_disabling_error_channel_for_endpoint()
+    {
+        $applicationConfiguration = ApplicationConfiguration::createWithDefaults()
+            ->withDefaultErrorChannel("error");
+        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithModuleRetrievingService(null, InMemoryModuleMessaging::createEmpty(), InMemoryReferenceTypeFromNameResolver::createEmpty(), $applicationConfiguration);
+
+        $inputMessageChannelName = "inputChannelName";
+        $messageHandler = ExceptionMessageHandler::create();
+        $endpointName = "pollableName";
+        $errorChannel = QueueChannel::create();
+        $messagingSystem = $messagingSystemConfiguration
+            ->registerMessageHandler(
+                DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName)
+                    ->withEndpointId($endpointName)
+            )
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::create("error", $errorChannel))
+            ->registerPollingMetadata(
+                PollingMetadata::create($endpointName)
+                    ->setExecutionTimeLimitInMilliseconds(1)
+                    ->setHandledMessageLimit(1)
+                    ->setEnabledErrorChannel(false)
+            )
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
+            ->send(MessageBuilder::withPayload("some")->build());
+
+        $messagingSystem->runSeparatelyRunningEndpointBy($endpointName);
+    }
+
     public function test_throwing_exception_if_registering_inbound_channel_adapter_with_same_names()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());

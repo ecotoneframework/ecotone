@@ -1295,7 +1295,7 @@ final class MessagingSystemConfiguration implements Configuration
             $pollingMetadata = $this->pollingMetadata[$endpointId];
         }
 
-        if ($this->applicationConfiguration->getDefaultErrorChannel() && !$pollingMetadata->getErrorChannelName()) {
+        if ($this->applicationConfiguration->getDefaultErrorChannel() && $pollingMetadata->isErrorChannelEnabled() && !$pollingMetadata->getErrorChannelName()) {
             $pollingMetadata = $pollingMetadata
                 ->setErrorChannelName($this->applicationConfiguration->getDefaultErrorChannel());
         }

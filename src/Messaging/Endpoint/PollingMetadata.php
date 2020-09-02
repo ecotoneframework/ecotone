@@ -34,6 +34,7 @@ class PollingMetadata
      * @var string
      */
     private $errorChannelName = "";
+    private bool $isErrorChannelEnabled = true;
     /**
      * @var int in milliseconds
      */
@@ -165,6 +166,19 @@ class PollingMetadata
         $copy->taskExecutorName = $taskExecutorName;
 
         return $copy;
+    }
+
+    public function setEnabledErrorChannel(bool $isErrorChannelEnabled) : PollingMetadata
+    {
+        $copy                        = $this->createCopy();
+        $copy->isErrorChannelEnabled = $isErrorChannelEnabled;
+
+        return $copy;
+    }
+
+    public function isErrorChannelEnabled(): bool
+    {
+        return $this->isErrorChannelEnabled;
     }
 
     /**

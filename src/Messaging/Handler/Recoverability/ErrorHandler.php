@@ -33,6 +33,7 @@ class ErrorHandler
         $cause = $messagingException->getCause() ? $messagingException->getCause() : $messagingException;
         $retryNumber = $failedMessage->getHeaders()->containsKey(self::ECOTONE_RETRY_HEADER) ? $failedMessage->getHeaders()->get(self::ECOTONE_RETRY_HEADER) + 1 : 1;
 
+//        @TODO handle it differently with router. As this requires $errorMessage to contain objects
         if (!$failedMessage->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL)) {
             throw $cause;
         }

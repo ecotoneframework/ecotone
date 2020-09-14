@@ -138,7 +138,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
         if (is_null($this->interceptedHandlerOffset)) {
             foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
-                $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
+                $serviceActivator = $serviceActivator->addAroundInterceptor($aroundInterceptorReference);
             }
         }
 

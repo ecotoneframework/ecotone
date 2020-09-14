@@ -70,6 +70,11 @@ class CalculatingServiceInterceptorExample
         return $this->secondValueForMathOperations + $result;
     }
 
+    public function resultAfterCalling(MethodInvocation $methodInvocation)
+    {
+        return $methodInvocation->proceed();
+    }
+
     /**
      * @param MethodInvocation $methodInvocation
      * @param int $amount

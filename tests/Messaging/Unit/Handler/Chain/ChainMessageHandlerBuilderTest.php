@@ -244,6 +244,38 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $this->assertEquals(10, $externalOutputChannel->receive()->getPayload());
     }
 
+    public function test_having_chain_in_chain_with_default_around_interceptors_before_calling_any_chained_handler()
+    {
+        $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObject(
+            "around",
+            CalculatingServiceInterceptorExample::create(1), "resultAfterCalling",
+            1,
+            ConsumerContinuouslyWorkingService::class
+        );
+
+        $chainHandler               = ChainMessageHandlerBuilder::create()
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+            ->chain(
+                ChainMessageHandlerBuilder::create()
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum"))
+                    ->addAroundInterceptor($aroundAddOneAfterCall)
+            )
+            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), "multiply"))
+            ->addAroundInterceptor($aroundAddOneAfterCall)
+            ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+
+        $replyChannel = QueueChannel::create();
+        $chainHandler->handle(
+            MessageBuilder::withPayload(0)
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(10, $replyChannel->receive()->getPayload());
+    }
+
     public function test_having_chain_in_chain_with_around_interceptors()
     {
         $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObject(

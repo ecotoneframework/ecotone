@@ -52,7 +52,7 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
         /** @var ErrorHandlerConfiguration $extensionObject */
         foreach ($extensionObjects as $extensionObject) {
             $errorHandler = ServiceActivatorBuilder::createWithDirectReference(
-                new ErrorHandler($extensionObject->getDelayedRetryTemplate()), "handle"
+                new ErrorHandler($extensionObject->getDelayedRetryTemplate(), (bool)$extensionObject->getDeadLetterQueueChannel()), "handle"
             )
                 ->withEndpointId("error_handler." . $extensionObject->getErrorChannelName())
                 ->withInputChannelName($extensionObject->getErrorChannelName());

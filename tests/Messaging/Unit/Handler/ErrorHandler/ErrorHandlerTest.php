@@ -23,7 +23,7 @@ class ErrorHandlerTest extends TestCase
             ->build();
 
         $consumedChannel = QueueChannel::create();
-        $errorHandler = new ErrorHandler($retryTemplate);
+        $errorHandler = new ErrorHandler($retryTemplate, false);
 
         $this->assertNull(
             $errorHandler->handle($this->createFailedMessage(
@@ -53,7 +53,7 @@ class ErrorHandlerTest extends TestCase
         $retryTemplate = RetryTemplateBuilder::exponentialBackoff(10, 2)->build();
 
         $consumedChannel = QueueChannel::create();
-        $errorHandler = new ErrorHandler($retryTemplate);
+        $errorHandler = new ErrorHandler($retryTemplate, false);
 
         $errorHandler->handle($this->createFailedMessage(
             MessageBuilder::withPayload("some")
@@ -72,7 +72,7 @@ class ErrorHandlerTest extends TestCase
             ->build();
 
         $consumedChannel = QueueChannel::create();
-        $errorHandler = new ErrorHandler($retryTemplate);
+        $errorHandler = new ErrorHandler($retryTemplate, true);
 
         $resultMessage = $errorHandler->handle($this->createFailedMessage(
             MessageBuilder::withPayload("payload")
@@ -86,6 +86,26 @@ class ErrorHandlerTest extends TestCase
         $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_STACKTRACE));
     }
 
+    public function test_if_exceeded_retries_and_no_dead_letter_defined_drop_message()
+    {
+        $retryTemplate = RetryTemplateBuilder::exponentialBackoff(10, 2)
+            ->maxRetryAttempts(1)
+            ->build();
+
+        $consumedChannel = QueueChannel::create();
+        $errorHandler = new ErrorHandler($retryTemplate, false);
+
+        $resultMessage = $errorHandler->handle($this->createFailedMessage(
+            MessageBuilder::withPayload("payload")
+                ->setHeader(MessageHeaders::POLLED_CHANNEL, $consumedChannel)
+                ->setHeader(ErrorHandler::ECOTONE_RETRY_HEADER, 2)
+                ->build(),
+            new \InvalidArgumentException("exceptionMessage")
+        ));
+
+        $this->assertNull($resultMessage);
+    }
+
     public function test_if_exceeded_retries_returning_message_with_causation_exception_if_exists()
     {
         $retryTemplate = RetryTemplateBuilder::exponentialBackoff(10, 2)
@@ -93,7 +113,7 @@ class ErrorHandlerTest extends TestCase
             ->build();
 
         $consumedChannel = QueueChannel::create();
-        $errorHandler = new ErrorHandler($retryTemplate);
+        $errorHandler = new ErrorHandler($retryTemplate, true);
 
         $resultMessage = $errorHandler->handle(
             MessageBuilder::withPayload(
@@ -116,7 +136,8 @@ class ErrorHandlerTest extends TestCase
         $errorHandler = new ErrorHandler(
             RetryTemplateBuilder::exponentialBackoff(1, 2)
                 ->maxRetryAttempts(2)
-                ->build()
+                ->build(),
+            false
         );
 
         $this->expectException(InvalidArgumentException::class);

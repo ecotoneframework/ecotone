@@ -19,10 +19,12 @@ class ErrorHandler
     const EXCEPTION_MESSAGE = "exception-message";
 
     private RetryTemplate $delayedRetryTemplate;
+    private bool $hasDeadLetterOutput;
 
-    public function __construct(RetryTemplate $delayedRetryTemplate)
+    public function __construct(RetryTemplate $delayedRetryTemplate, bool $hasDeadLetterOutput)
     {
         $this->delayedRetryTemplate = $delayedRetryTemplate;
+        $this->hasDeadLetterOutput = $hasDeadLetterOutput;
     }
 
     public function handle(Message $errorMessage): ?Message
@@ -53,6 +55,10 @@ class ErrorHandler
         ]);
 
         if ($this->shouldBeSendToDeadLetter($retryNumber)) {
+            if (!$this->hasDeadLetterOutput) {
+                return null;
+            }
+
             $messageBuilder->removeHeader(self::ECOTONE_RETRY_HEADER);
 
             return $messageBuilder

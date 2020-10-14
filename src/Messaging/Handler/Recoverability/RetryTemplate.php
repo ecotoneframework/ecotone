@@ -67,6 +67,6 @@ final class RetryTemplate
             return $this->initialDelay;
         }
 
-        return $this->initialDelay * $this->multiplier * ($retryNumber - 1);
+        return $this->delayForRetryNumber($retryNumber - 1) * $this->multiplier;
     }
 }

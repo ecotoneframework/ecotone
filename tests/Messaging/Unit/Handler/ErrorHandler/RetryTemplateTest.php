@@ -31,9 +31,9 @@ class RetryTemplateTest extends TestCase
         $this->assertEquals(10, $retryTemplate->calculateNextDelay(1));
         $this->assertEquals(20, $retryTemplate->calculateNextDelay(2));
         $this->assertEquals(40, $retryTemplate->calculateNextDelay(3));
-        $this->assertEquals(60, $retryTemplate->calculateNextDelay(4));
-        $this->assertEquals(80, $retryTemplate->calculateNextDelay(5));
-        $this->assertEquals(100, $retryTemplate->calculateNextDelay(6));
+        $this->assertEquals(80, $retryTemplate->calculateNextDelay(4));
+        $this->assertEquals(160, $retryTemplate->calculateNextDelay(5));
+        $this->assertEquals(320, $retryTemplate->calculateNextDelay(6));
     }
 
     public function test_stopping_on_max_delay()
@@ -42,7 +42,7 @@ class RetryTemplateTest extends TestCase
             ->build();
 
         $this->assertTrue($retryTemplate->canBeCalledNextTime(1));
-        $this->assertTrue($retryTemplate->canBeCalledNextTime(5));
+        $this->assertTrue($retryTemplate->canBeCalledNextTime(4));
         $this->assertFalse($retryTemplate->canBeCalledNextTime(6));
     }
 }

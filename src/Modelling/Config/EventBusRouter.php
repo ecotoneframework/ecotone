@@ -79,6 +79,7 @@ class EventBusRouter
 
         $resultChannels = [];
         foreach ($this->channelMapping as $listenFor => $destinationChannels) {
+            $listenFor = str_replace("\\", "\\\\", $listenFor);
             if (preg_match("#^" . str_replace("*", ".*", $listenFor) . "$#", $name)) {
                 $resultChannels = array_merge($resultChannels, $destinationChannels);
             }

@@ -18,8 +18,7 @@ class QueryHandlerWithNoReturnValue
      * @return void
      * @QueryHandler()
      */
-    public function searchFor(SomeQuery $query) : void
+    public function searchFor(SomeQuery $query): void
     {
-        return;
     }
 }

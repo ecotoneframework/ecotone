@@ -104,8 +104,6 @@ class EventBusRouterTest extends TestCase
      */
     private function createEventRouter(array $classNameToChannelNameMapping): EventBusRouter
     {
-        $eventBusRouter = new EventBusRouter($classNameToChannelNameMapping);
-
-        return $eventBusRouter;
+        return new EventBusRouter($classNameToChannelNameMapping);
 }
 }

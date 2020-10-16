@@ -9,7 +9,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 
 class AddNotificationTimestamp
 {
-    private $currentTime = null;
+    private $currentTime;
 
     /**
      * @CommandHandler("changeCurrentTime")

@@ -102,9 +102,8 @@ class StubCallSavingService
     /**
      * @param MethodInvocation $methodInvocation
      */
-    public function callWithNoReturnType(MethodInvocation $methodInvocation) : void
+    public function callWithNoReturnType(MethodInvocation $methodInvocation): void
     {
-        return;
     }
 
     /**

@@ -27,8 +27,7 @@ class ServiceActivatorWithAllConfigurationDefined
      *     @Header(parameterName="name", headerName="token", expression="value", isRequired=false)
      * }, requiredInterceptorNames={"someReference"})
      */
-    public function sendMessage(string $to, string $content, Message $message, \stdClass $object, string $name) : void
+    public function sendMessage(string $to, string $content, Message $message, \stdClass $object, string $name): void
     {
-        return;
     }
 }

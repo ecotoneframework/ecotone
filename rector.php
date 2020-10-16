@@ -7,6 +7,10 @@ use Rector\Set\ValueObject\SetList;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
+    $services = $containerConfigurator->services();
+//    $services->set(Rector\TypeDeclaration\Rector\FunctionLike\ReturnTypeDeclarationRector::class);
+//    $services->set(Rector\TypeDeclaration\Rector\Property\CompleteVarDocTypePropertyRector::class);
+
     // get parameters
     $parameters = $containerConfigurator->parameters();
 

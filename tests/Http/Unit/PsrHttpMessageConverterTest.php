@@ -298,8 +298,6 @@ class PsrHttpMessageConverterTest extends MessagingTest
      */
     private function createPsrHttpMessageConverter(): PsrHttpMessageConverter
     {
-        $psrHttpMessageConverter = PsrHttpMessageConverter::create();
-
-        return $psrHttpMessageConverter;
+        return PsrHttpMessageConverter::create();
     }
 }

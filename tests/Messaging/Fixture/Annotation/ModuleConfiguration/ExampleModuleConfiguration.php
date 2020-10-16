@@ -82,8 +82,6 @@ class ExampleModuleConfiguration implements AnnotationModule
         foreach ($this->messageHandlers as $messageHandlerBuilder) {
             $configuration->registerMessageHandler($messageHandlerBuilder);
         }
-
-        return;
     }
 
     /**

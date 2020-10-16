@@ -83,8 +83,6 @@ class InMemoryStandardRepository implements StandardRepository
      */
     private function getAggregateId(array $identifiers)
     {
-        $aggregateId = !empty($identifiers) ? array_shift($identifiers) : null;
-
-        return $aggregateId;
+        return !empty($identifiers) ? array_shift($identifiers) : null;
     }
 }

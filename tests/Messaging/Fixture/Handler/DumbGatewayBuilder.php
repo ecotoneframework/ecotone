@@ -156,7 +156,6 @@ class DumbGatewayBuilder implements GatewayBuilder
      */
     public function withRequiredInterceptorNames(iterable $interceptorNames)
     {
-        return;
     }
 
     /**

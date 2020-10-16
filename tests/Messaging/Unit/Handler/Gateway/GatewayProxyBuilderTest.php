@@ -564,9 +564,8 @@ class GatewayProxyBuilderTest extends MessagingTest
         $internalGatewayProxy2 = $this->createGateway($interfaceName, $methodName, $internalChannel);
         $requestChannel->subscribe(ReplyViaHeadersMessageHandler::createWithCallback(function (Message $message) use ($internalGatewayProxy1, $internalGatewayProxy2) {
             $result = $internalGatewayProxy1->execute($message);
-            $result = $internalGatewayProxy2->execute($result);
 
-            return $result;
+            return $internalGatewayProxy2->execute($result);
         }));
 
         /** @var ServiceReceivingMessageAndReturningMessage $gatewayProxy */
@@ -601,8 +600,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         if ($replyChannel) {
             $gatewayProxyBuilder->withReplyChannel("replyChannel");
         }
-
-        $gatewayProxy = $gatewayProxyBuilder->build(
+        return $gatewayProxyBuilder->build(
             InMemoryReferenceSearchService::createEmpty(),
             InMemoryChannelResolver::createFromAssociativeArray(
                 [
@@ -611,7 +609,6 @@ class GatewayProxyBuilderTest extends MessagingTest
                 ]
             )
         );
-        return $gatewayProxy;
     }
 
     public function test_propagating_error_to_error_channel()

@@ -228,7 +228,7 @@ class PollingConsumerBuilderTest extends MessagingTest
 
     private function createPollingConsumer(string $inputChannelName, QueueChannel $inputChannel, $messageHandler): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
     {
-        $pollingConsumer = (new PollingConsumerBuilder())->build(
+        return (new PollingConsumerBuilder())->build(
             InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => $inputChannel
             ]),
@@ -237,13 +237,11 @@ class PollingConsumerBuilderTest extends MessagingTest
             PollingMetadata::create("some")
                 ->setExecutionAmountLimit(1)
         );
-
-        return $pollingConsumer;
     }
 
     private function createPollingConsumerWithErrorChannel(string $inputChannelName, QueueChannel $inputChannel, $messageHandler, MessageChannel $errorChannel): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
     {
-        $pollingConsumer = (new PollingConsumerBuilder())->build(
+        return (new PollingConsumerBuilder())->build(
             InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => $inputChannel,
                 "errorChannel" => $errorChannel
@@ -254,7 +252,5 @@ class PollingConsumerBuilderTest extends MessagingTest
                 ->setExecutionAmountLimit(1)
                 ->setErrorChannelName("errorChannel")
         );
-
-        return $pollingConsumer;
     }
 }

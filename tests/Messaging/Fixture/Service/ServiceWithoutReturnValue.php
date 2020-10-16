@@ -25,7 +25,6 @@ class ServiceWithoutReturnValue implements CallableService
     public function setName(string $name) : void
     {
         $this->wasCalled = true;
-        return;
     }
 
     /**

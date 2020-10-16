@@ -19,6 +19,5 @@ class ServiceActivatorWithPollerExample
      */
     public function sendMessage(): void
     {
-        return;
     }
 }

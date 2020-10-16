@@ -24,6 +24,5 @@ class ServiceActivatorWithLoggerExample
      */
     public function sendMessage(): void
     {
-        return;
     }
 }

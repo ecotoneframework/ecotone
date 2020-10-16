@@ -12,8 +12,7 @@ class CallWithInterceptedObjectInterceptorExample extends BaseInterceptorExample
      * @param StubCallSavingService $stubCallSavingService
      * @Around()
      */
-    public function callWithInterceptedObject(StubCallSavingService $stubCallSavingService) : void
+    public function callWithInterceptedObject(StubCallSavingService $stubCallSavingService): void
     {
-        return;
     }
 }

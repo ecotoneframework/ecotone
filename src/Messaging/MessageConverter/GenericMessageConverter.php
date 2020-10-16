@@ -34,7 +34,7 @@ class GenericMessageConverter implements MessageConverter
     /**
      * @inheritDoc
      */
-    public function fromMessage(Message $message, Type $targetType)
+    public function fromMessage(Message $message, Type $targetType): void
     {
 
     }

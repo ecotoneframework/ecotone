@@ -259,7 +259,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @inheritDoc
      */
-    public function withEndpointId(string $endpointId)
+    public function withEndpointId(string $endpointId): self
     {
         $this->endpointId = $endpointId;
 

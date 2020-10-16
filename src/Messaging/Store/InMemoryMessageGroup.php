@@ -26,19 +26,15 @@ final class InMemoryMessageGroup implements MessageGroup
         $this->messages = $messages;
     }
 
-    /**
-     * @return MessageGroup
-     */
-    public static function createEmpty() : MessageGroup
+    public static function createEmpty() : \Ecotone\Messaging\Store\InMemoryMessageGroup
     {
         return new self(Uuid::uuid4()->toString(), []);
     }
 
     /**
      * @param string $groupId
-     * @return MessageGroup
      */
-    public static function createEmptyWithId(string $groupId) : MessageGroup
+    public static function createEmptyWithId(string $groupId) : \Ecotone\Messaging\Store\InMemoryMessageGroup
     {
         return new self($groupId, []);
     }

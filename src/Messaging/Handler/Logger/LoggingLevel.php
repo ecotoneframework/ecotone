@@ -63,10 +63,7 @@ class LoggingLevel extends LogLevel
         $this->level = $logLevel;
     }
 
-    /**
-     * @return string
-     */
-    public function getLevel(): string
+    public function getLevel(): ?string
     {
         return $this->level;
     }

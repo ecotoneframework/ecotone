@@ -36,7 +36,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
     {
         $consumerBuilders = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(static::getConsumerAnnotation()) as $annotationRegistration) {

@@ -87,10 +87,8 @@ class ApplicationConfiguration
 
     /**
      * @param bool $failFast
-     *
-     * @return ApplicationConfiguration
      */
-    public function withFailFast(bool $failFast): ApplicationConfiguration
+    public function withFailFast(bool $failFast): self
     {
         $clone           = clone $this;
         $clone->failFast = $failFast;
@@ -100,10 +98,8 @@ class ApplicationConfiguration
 
     /**
      * @param string|null $cacheDirectoryPath
-     *
-     * @return ApplicationConfiguration
      */
-    public function withCacheDirectoryPath(?string $cacheDirectoryPath): ApplicationConfiguration
+    public function withCacheDirectoryPath(?string $cacheDirectoryPath): self
     {
         $clone                     = clone $this;
         $clone->cacheDirectoryPath = rtrim($cacheDirectoryPath, "/");
@@ -113,10 +109,8 @@ class ApplicationConfiguration
 
     /**
      * @param string $environment
-     *
-     * @return ApplicationConfiguration
      */
-    public function withEnvironment(string $environment): ApplicationConfiguration
+    public function withEnvironment(string $environment): self
     {
         $clone              = clone $this;
         $clone->environment = $environment;
@@ -126,10 +120,8 @@ class ApplicationConfiguration
 
     /**
      * @param string $catalog
-     *
-     * @return ApplicationConfiguration
      */
-    public function withLoadCatalog(string $catalog): ApplicationConfiguration
+    public function withLoadCatalog(string $catalog): self
     {
         $clone              = clone $this;
         $clone->loadCatalog = $catalog;
@@ -139,10 +131,8 @@ class ApplicationConfiguration
 
     /**
      * @param string[] $namespaces
-     *
-     * @return ApplicationConfiguration
      */
-    public function withNamespaces(array $namespaces): ApplicationConfiguration
+    public function withNamespaces(array $namespaces): self
     {
         $clone             = clone $this;
         $clone->namespaces = $namespaces;
@@ -152,10 +142,8 @@ class ApplicationConfiguration
 
     /**
      * @param string $defaultSerializationMediaType
-     *
-     * @return ApplicationConfiguration
      */
-    public function withDefaultSerializationMediaType(string $defaultSerializationMediaType): ApplicationConfiguration
+    public function withDefaultSerializationMediaType(string $defaultSerializationMediaType): self
     {
         $clone                                = clone $this;
         $clone->defaultSerializationMediaType = $defaultSerializationMediaType;
@@ -163,7 +151,7 @@ class ApplicationConfiguration
         return $clone;
     }
 
-    public function withDefaultErrorChannel(string $errorChannelName): ApplicationConfiguration
+    public function withDefaultErrorChannel(string $errorChannelName): self
     {
         $clone                      = clone $this;
         $clone->defaultErrorChannel = $errorChannelName;
@@ -171,7 +159,7 @@ class ApplicationConfiguration
         return $clone;
     }
 
-    public function withConnectionRetryTemplate(RetryTemplateBuilder $channelPollRetryTemplate): ApplicationConfiguration
+    public function withConnectionRetryTemplate(RetryTemplateBuilder $channelPollRetryTemplate): self
     {
         $this->connectionRetryTemplate = $channelPollRetryTemplate;
 
@@ -211,10 +199,7 @@ class ApplicationConfiguration
         return $this->defaultErrorChannel;
     }
 
-    /**
-     * @return string
-     */
-    public function getDefaultSerializationMediaType(): string
+    public function getDefaultSerializationMediaType(): ?string
     {
         return $this->defaultSerializationMediaType;
     }

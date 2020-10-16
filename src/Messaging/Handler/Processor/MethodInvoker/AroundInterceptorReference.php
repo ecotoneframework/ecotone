@@ -189,7 +189,7 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     /**
      * @inheritDoc
      */
-    public function getInterceptingObject()
+    public function getInterceptingObject(): object
     {
         return $this;
     }
@@ -209,7 +209,7 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     /**
      * @inheritDoc
      */
-    public function addInterceptedInterfaceToCall(InterfaceToCall $interceptedInterface, array $endpointAnnotations)
+    public function addInterceptedInterfaceToCall(InterfaceToCall $interceptedInterface, array $endpointAnnotations): self
     {
         return $this;
     }

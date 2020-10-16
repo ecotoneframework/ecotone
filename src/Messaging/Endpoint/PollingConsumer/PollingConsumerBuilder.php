@@ -76,7 +76,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     /**
      * @inheritDoc
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): self
     {
         $this->entrypointGateway->addAroundInterceptor($aroundInterceptorReference);
 
@@ -94,7 +94,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     /**
      * @inheritDoc
      */
-    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    public function withEndpointAnnotations(iterable $endpointAnnotations): self
     {
         $this->entrypointGateway->withEndpointAnnotations($endpointAnnotations);
 
@@ -128,7 +128,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     /**
      * @inheritDoc
      */
-    public function withRequiredInterceptorNames(iterable $interceptorNames)
+    public function withRequiredInterceptorNames(iterable $interceptorNames): self
     {
         $this->entrypointGateway->withRequiredInterceptorNames($interceptorNames);
 

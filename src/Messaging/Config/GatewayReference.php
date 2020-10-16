@@ -55,10 +55,7 @@ class GatewayReference
         return $this->referenceName == $referenceName;
     }
 
-    /**
-     * @return object
-     */
-    public function getGateway()
+    public function getGateway(): object
     {
         return $this->gateway;
     }

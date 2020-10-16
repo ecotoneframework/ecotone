@@ -45,7 +45,7 @@ class CombinedGatewayBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
+    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): \ProxyManager\Proxy\RemoteObjectInterface
     {
         $gatewaysToPass = $this->gatewayBuilders;
         $factory = new RemoteObjectFactory(new class($gatewaysToPass) implements AdapterInterface

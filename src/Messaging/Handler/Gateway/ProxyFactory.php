@@ -98,7 +98,7 @@ class ProxyFactory implements \Serializable
                 /**
                  * @inheritDoc
                  */
-                public function call(string $wrappedClass, string $method, array $params = [])
+                public function call(string $wrappedClass, string $method, array $params = []): int
                 {
                     return 0;
                 }
@@ -111,9 +111,8 @@ class ProxyFactory implements \Serializable
     /**
      * @param string $interfaceName
      * @param Closure $buildCallback
-     * @return object
      */
-    public function createProxyClass(string $interfaceName, Closure $buildCallback): object
+    public function createProxyClass(string $interfaceName, Closure $buildCallback): \ProxyManager\Proxy\RemoteObjectInterface
     {
         $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
         {
@@ -147,7 +146,7 @@ class ProxyFactory implements \Serializable
     /**
      * @inheritDoc
      */
-    public function serialize()
+    public function serialize(): string
     {
         return serialize(["path" => $this->cacheDirectoryPath]);
     }
@@ -155,7 +154,7 @@ class ProxyFactory implements \Serializable
     /**
      * @inheritDoc
      */
-    public function unserialize($serialized)
+    public function unserialize($serialized): void
     {
         $serializedProxy = unserialize($serialized);
         $path  = $serializedProxy['path'];

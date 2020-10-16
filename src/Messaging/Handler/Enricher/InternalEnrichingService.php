@@ -116,7 +116,7 @@ class InternalEnrichingService
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    private function getConvertedMessage(Message $message)
+    private function getConvertedMessage(Message $message): \Ecotone\Messaging\Message
     {
         $enrichedMessage = MessageBuilder::fromMessage($message);
 

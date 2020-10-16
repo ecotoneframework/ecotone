@@ -40,7 +40,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
     {
         $messageHandlerBuilders    = [];
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();

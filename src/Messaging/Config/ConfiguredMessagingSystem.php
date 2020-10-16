@@ -13,17 +13,15 @@ interface ConfiguredMessagingSystem
 {
     /**
      * @param string $gatewayReferenceName
-     * @return object
      * @throws \InvalidArgumentException if trying to find not existing gateway reference
      */
-    public function getGatewayByName(string $gatewayReferenceName);
+    public function getGatewayByName(string $gatewayReferenceName): object;
 
     /**
      * @param string $gatewayReferenceName
-     * @return NonProxyCombinedGateway
      * @throws \InvalidArgumentException if trying to find not existing gateway reference
      */
-    public function getNonProxyGatewayByName(string $gatewayReferenceName);
+    public function getNonProxyGatewayByName(string $gatewayReferenceName): \Ecotone\Messaging\Config\NonProxyCombinedGateway;
 
     /**
      * @return GatewayReference[]

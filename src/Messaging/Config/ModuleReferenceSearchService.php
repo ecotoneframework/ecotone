@@ -52,7 +52,7 @@ class ModuleReferenceSearchService
      *
      * @throws MessagingException
      */
-    public function retrieveRequired(string $referenceName)
+    public function retrieveRequired(string $referenceName): ?object
     {
         if (!$this->retrieve($referenceName)) {
             throw InvalidArgumentException::create("Reference with name {$referenceName} does not exist for module reference. Wrong configuration in module.");
@@ -66,7 +66,7 @@ class ModuleReferenceSearchService
      *
      * @return object|null
      */
-    public function retrieve(string $referenceName)
+    public function retrieve(string $referenceName): ?object
     {
         return $this->moduleReferences[$referenceName] ?? null;
     }

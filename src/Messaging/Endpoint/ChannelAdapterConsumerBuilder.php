@@ -32,13 +32,13 @@ interface ChannelAdapterConsumerBuilder extends ConsumerLifecycleBuilder, Interc
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor);
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): self;
 
     /**
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor);
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): self;
 
 
     /**

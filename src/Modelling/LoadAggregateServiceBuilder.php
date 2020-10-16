@@ -143,7 +143,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
     }
 
-    private function getAggregateRepository(ReferenceSearchService $referenceSearchService): object
+    private function getAggregateRepository(ReferenceSearchService $referenceSearchService): ?object
     {
         $aggregateRepository = null;
         foreach ($this->aggregateRepositoryReferenceNames as $aggregateRepositoryName) {

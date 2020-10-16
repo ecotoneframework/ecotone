@@ -81,7 +81,7 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
     /**
      * @inheritDoc
      */
-    public function withMethodParameterConverters(array $methodParameterConverterBuilders)
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders): self
     {
         $this->methodParameterConverters = $methodParameterConverterBuilders;
 

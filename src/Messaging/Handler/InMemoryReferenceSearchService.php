@@ -91,7 +91,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      * @param $object
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function registerReferencedObject(string $referenceName, $object)
+    public function registerReferencedObject(string $referenceName, $object): void
     {
         Assert::isObject($object, "Passed reference {$referenceName} must be object");
 

@@ -39,7 +39,7 @@ class TransformerMessageProcessor implements MessageProcessor
     /**
      * @inheritDoc
      */
-    public function processMessage(Message $message)
+    public function processMessage(Message $message): ?\Ecotone\Messaging\Message
     {
         $reply = $this->methodInvoker->processMessage($message);
         $replyBuilder = MessageBuilder::fromMessage($message);

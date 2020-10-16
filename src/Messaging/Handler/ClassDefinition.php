@@ -58,7 +58,7 @@ class ClassDefinition
         );
     }
 
-    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationResolver $annotationParser)
+    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationResolver $annotationParser): \Ecotone\Messaging\Handler\ClassDefinition
     {
         $typeResolver = TypeResolver::createWithAnnotationParser($annotationParser);
 

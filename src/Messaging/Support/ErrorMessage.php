@@ -48,7 +48,7 @@ final class ErrorMessage implements Message
     /**
      * @inheritDoc
      */
-    public function getPayload()
+    public function getPayload(): \Ecotone\Messaging\MessagingException
     {
         return $this->messagingException;
     }

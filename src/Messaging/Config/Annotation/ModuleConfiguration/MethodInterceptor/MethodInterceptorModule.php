@@ -73,7 +73,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): MethodInterceptorModule
+    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
     {
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
         /** @var AnnotatedFinding[] $methodsInterceptors */

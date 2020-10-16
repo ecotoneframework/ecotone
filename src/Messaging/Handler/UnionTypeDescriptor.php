@@ -112,7 +112,7 @@ class UnionTypeDescriptor implements Type
     /**
      * @return TypeDescriptor[]
      */
-    public function getUnionTypes(): array
+    public function getUnionTypes(): ?array
     {
         return $this->typeDescriptors;
     }

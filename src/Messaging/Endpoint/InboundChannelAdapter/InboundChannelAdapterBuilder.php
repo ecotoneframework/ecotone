@@ -119,7 +119,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     /**
      * @inheritDoc
      */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor)
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): \Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder
     {
         $this->gatewayExecutor->addBeforeInterceptor($methodInterceptor);
 
@@ -129,7 +129,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     /**
      * @inheritDoc
      */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor)
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): \Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder
     {
         $this->gatewayExecutor->addAfterInterceptor($methodInterceptor);
 
@@ -139,7 +139,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     /**
      * @inheritDoc
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): self
     {
         $this->gatewayExecutor->addAroundInterceptor($aroundInterceptorReference);
 
@@ -167,7 +167,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     /**
      * @inheritDoc
      */
-    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    public function withEndpointAnnotations(iterable $endpointAnnotations): self
     {
         $this->gatewayExecutor->withEndpointAnnotations($endpointAnnotations);
 
@@ -193,7 +193,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     /**
      * @inheritDoc
      */
-    public function withRequiredInterceptorNames(iterable $interceptorNames)
+    public function withRequiredInterceptorNames(iterable $interceptorNames): self
     {
         $this->gatewayExecutor->withRequiredInterceptorNames($interceptorNames);
 

@@ -121,7 +121,7 @@ class ModellingHandlerModule implements AnnotationModule
      *
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
     {
         $aggregateRepositoryClasses = $annotationRegistrationService->findAnnotatedClasses(Repository::class);
 
@@ -186,7 +186,7 @@ class ModellingHandlerModule implements AnnotationModule
     {
         $type = TypeDescriptor::create(ModellingHandlerModule::getMessagePayloadTypeFor($registration));
         if ($type->isClassOrInterface() && !$type->isClassOfType(TypeDescriptor::create(Message::class))) {
-            return $type;
+            return $type->toString();
         }
 
         return null;

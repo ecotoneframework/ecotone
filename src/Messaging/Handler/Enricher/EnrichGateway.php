@@ -12,10 +12,5 @@ use Ecotone\Messaging\Message;
  */
 interface EnrichGateway
 {
-    /**
-     * @param Message|null $message
-     *
-     * @return Message
-     */
     public function execute(Message $message) : ?Message;
 }

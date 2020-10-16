@@ -158,7 +158,7 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
     /**
      * @inheritDoc
      */
-    public function serialize()
+    public function serialize(): string
     {
         return "psrHttpMessageConverter";
     }
@@ -166,12 +166,12 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
     /**
      * @inheritDoc
      */
-    public function unserialize($serialized)
+    public function unserialize($serialized): \Ecotone\Http\PsrHttpMessageConverter
     {
         return PsrHttpMessageConverter::create();
     }
 
-    private function dashesToCamelCase(string $header)
+    private function dashesToCamelCase(string $header): string
     {
         $header = str_replace(' ', '', ucwords(str_replace('-', ' ', $header)));
         $header[0] = strtolower($header[0]);

@@ -12,10 +12,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
  */
 interface InterceptorWithPointCut
 {
-    /**
-     * @return object
-     */
-    public function getInterceptingObject();
+    public function getInterceptingObject(): object;
 
     /**
      * @param string $name

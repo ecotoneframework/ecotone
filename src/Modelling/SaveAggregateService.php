@@ -49,7 +49,7 @@ class SaveAggregateService
         $this->aggregateInterface = $aggregateInterface;
     }
 
-    public function save(Message $message, array $metadata) : ?Message
+    public function save(Message $message, array $metadata) : \Ecotone\Messaging\Message
     {
         $aggregate = $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
         $events = [];

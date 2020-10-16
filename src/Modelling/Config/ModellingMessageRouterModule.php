@@ -58,7 +58,7 @@ class ModellingMessageRouterModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService)
+    public static function create(AnnotationFinder $annotationRegistrationService) : self
     {
         return new self(
             BusRouterBuilder::createCommandBusByObject(self::getCommandBusByObjectMapping($annotationRegistrationService)),

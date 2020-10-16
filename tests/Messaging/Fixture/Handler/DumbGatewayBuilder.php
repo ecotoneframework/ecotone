@@ -42,7 +42,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function withLazyBuild(bool $withLazyBuild)
+    public function withLazyBuild(bool $withLazyBuild) : self
     {
         return $this;
     }
@@ -58,7 +58,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function withMessageConverters(array $messageConverterReferenceNames)
+    public function withMessageConverters(array $messageConverterReferenceNames) : self
     {
         return $this;
     }
@@ -114,7 +114,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor)
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor) : self
     {
         return $this;
     }
@@ -122,7 +122,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor)
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor) : self
     {
         return $this;
     }
@@ -169,7 +169,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
+    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver) : object
     {
         return new \stdClass();
     }

@@ -45,32 +45,31 @@ interface GatewayBuilder extends InterceptedEndpoint
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor);
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): self;
 
     /**
      * @param bool $withLazyBuild
      * @return $this
      */
-    public function withLazyBuild(bool $withLazyBuild);
+    public function withLazyBuild(bool $withLazyBuild): self;
 
     /**
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor);
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): self;
 
     /**
      * @param string[] $messageConverterReferenceNames
      * @return $this
      */
-    public function withMessageConverters(array $messageConverterReferenceNames);
+    public function withMessageConverters(array $messageConverterReferenceNames): self;
 
     /**
      * @param ReferenceSearchService $referenceSearchService
      * @param ChannelResolver $channelResolver
-     * @return object
      */
-    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver);
+    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): object;
 
     public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver) : NonProxyGateway;
 }

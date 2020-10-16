@@ -220,7 +220,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function withInputChannelName(string $inputChannelName)
+    public function withInputChannelName(string $inputChannelName): self
     {
         $self = clone $this;
         $self->inputChannelName = $inputChannelName;
@@ -239,7 +239,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function withEndpointId(string $endpointId)
+    public function withEndpointId(string $endpointId): void
     {
         $this->endpointId = $endpointId;
     }

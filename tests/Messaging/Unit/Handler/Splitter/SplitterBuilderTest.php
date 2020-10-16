@@ -111,25 +111,6 @@ class SplitterBuilderTest extends MessagingTest
         $this->assertNotNull($outputChannel->receive());
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws \Exception
-     */
-    public function test_throwing_exception_if_message_for_payload_splitter_do_not_contains_array()
-    {
-        $splitter = SplitterBuilder::createMessagePayloadSplitter();
-
-        $splitter = $splitter->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
-        );
-
-        $this->expectException(MessagingException::class);
-
-        $splitter->handle(MessageBuilder::withPayload("test")->setReplyChannel(QueueChannel::create())->build());
-    }
-
     public function test_converting_to_string()
     {
         $inputChannelName = 'inputChannel';

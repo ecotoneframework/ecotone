@@ -83,7 +83,6 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @param MessageHandlerBuilder[] $messageHandlerBuilders
      * @param ChannelAdapterConsumerBuilder[] $channelAdapterConsumerBuilders
      * @param bool $isLazyConfiguration
-     * @return MessagingSystem
      * @throws MessagingException
      */
     public static function createFrom(
@@ -92,7 +91,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         array $gatewayBuilders, array $consumerFactories,
         array $pollingMetadataConfigurations, array $messageHandlerBuilders, array $channelAdapterConsumerBuilders,
         bool $isLazyConfiguration
-    )
+    ): \Ecotone\Messaging\Config\MessagingSystem
     {
         $channelResolver = self::createChannelResolver($messageChannelInterceptors, $messageChannelBuilders, $referenceSearchService);
 
@@ -121,10 +120,9 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @param ChannelInterceptorBuilder[] $channelInterceptorBuilders
      * @param MessageChannelBuilder[] $channelBuilders
      * @param ReferenceSearchService $referenceSearchService
-     * @return ChannelResolver
      * @throws MessagingException
      */
-    private static function createChannelResolver(array $channelInterceptorBuilders, array $channelBuilders, ReferenceSearchService $referenceSearchService): ChannelResolver
+    private static function createChannelResolver(array $channelInterceptorBuilders, array $channelBuilders, ReferenceSearchService $referenceSearchService): \Ecotone\Messaging\Config\InMemoryChannelResolver
     {
         $channels = [];
         foreach ($channelBuilders as $channelsBuilder) {
@@ -231,7 +229,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     /**
      * @inheritDoc
      */
-    public function getGatewayByName(string $gatewayReferenceName)
+    public function getGatewayByName(string $gatewayReferenceName): object
     {
         foreach ($this->gatewayReferences as $gatewayReference) {
             if ($gatewayReference->hasReferenceName($gatewayReferenceName)) {
@@ -242,7 +240,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         throw InvalidArgumentException::create("Gateway with reference {$gatewayReferenceName} does not exists");
     }
 
-    public function getNonProxyGatewayByName(string $gatewayReferenceName)
+    public function getNonProxyGatewayByName(string $gatewayReferenceName): \Ecotone\Messaging\Config\NonProxyCombinedGateway
     {
         Assert::keyExists($this->nonProxyCombinedGateways, $gatewayReferenceName, "Gateway with reference {$gatewayReferenceName} does not exists");
 

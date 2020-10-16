@@ -40,10 +40,9 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
      * @param string $objectMethodName
      * @param MessageProcessor $messageProcessor
      * @param ReferenceSearchService $referenceSearchService
-     * @return WrapWithMessageBuildProcessor
      * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
      */
-    public static function createWith($objectToInvokeOn, string $objectMethodName, MessageProcessor $messageProcessor, ReferenceSearchService $referenceSearchService)
+    public static function createWith($objectToInvokeOn, string $objectMethodName, MessageProcessor $messageProcessor, ReferenceSearchService $referenceSearchService): \Ecotone\Messaging\Handler\Processor\WrapWithMessageBuildProcessor
     {
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
         $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
@@ -54,7 +53,7 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
     /**
      * @inheritDoc
      */
-    public function processMessage(Message $message)
+    public function processMessage(Message $message): ?\Ecotone\Messaging\Message
     {
         $result = $this->messageProcessor->processMessage($message);
 

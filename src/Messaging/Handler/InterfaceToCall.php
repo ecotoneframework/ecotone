@@ -48,10 +48,7 @@ class InterfaceToCall
         $this->classDefinition = $classDefinition;
     }
 
-    /**
-     * @return string
-     */
-    public function getInterfaceName(): string
+    public function getInterfaceName(): ?string
     {
         return $this->interfaceName;
     }
@@ -137,10 +134,9 @@ class InterfaceToCall
 
     /**
      * @param Type $className
-     * @return object
      * @throws MessagingException
      */
-    public function getClassAnnotation(Type $className)
+    public function getClassAnnotation(Type $className): object
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {
             if (TypeDescriptor::createFromVariable($classAnnotation)->equals($className)) {
@@ -153,10 +149,9 @@ class InterfaceToCall
 
     /**
      * @param Type $className
-     * @return object
      * @throws MessagingException
      */
-    public function getMethodAnnotation(Type $className)
+    public function getMethodAnnotation(Type $className): object
     {
         foreach ($this->methodAnnotations as $methodAnnotation) {
             if (TypeDescriptor::createFromVariable($methodAnnotation)->equals($className)) {
@@ -167,10 +162,7 @@ class InterfaceToCall
         throw InvalidArgumentException::create("Trying to retrieve not existing method annotation {$className} for {$this}");
     }
 
-    /**
-     * @return bool
-     */
-    public function isStaticallyCalled(): bool
+    public function isStaticallyCalled(): ?bool
     {
         return $this->isStaticallyCalled;
     }
@@ -183,10 +175,7 @@ class InterfaceToCall
         return !$this->getReturnType()->isVoid();
     }
 
-    /**
-     * @return Type
-     */
-    public function getReturnType(): Type
+    public function getReturnType(): ?\Ecotone\Messaging\Handler\Type
     {
         return $this->returnType;
     }
@@ -264,7 +253,7 @@ class InterfaceToCall
     /**
      * @return array|InterfaceParameter[]
      */
-    public function getInterfaceParameters(): array
+    public function getInterfaceParameters(): ?iterable
     {
         return $this->parameters;
     }
@@ -326,18 +315,12 @@ class InterfaceToCall
         return $this->getReturnType()->isClassOfType(Message::class);
     }
 
-    /**
-     * @return Type
-     */
-    public function getInterfaceType() : Type
+    public function getInterfaceType() : ?\Ecotone\Messaging\Handler\Type
     {
         return $this->interfaceType;
     }
 
-    /**
-     * @return string
-     */
-    public function getMethodName(): string
+    public function getMethodName(): ?string
     {
         return $this->methodName;
     }

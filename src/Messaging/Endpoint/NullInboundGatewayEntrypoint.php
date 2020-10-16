@@ -22,7 +22,7 @@ class NullInboundGatewayEntrypoint implements InboundGatewayEntrypoint
     /**
      * @inheritDoc
      */
-    public function executeEntrypoint($data)
+    public function executeEntrypoint($data): void
     {
     }
 }

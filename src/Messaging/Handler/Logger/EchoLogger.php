@@ -15,7 +15,7 @@ class EchoLogger extends AbstractLogger
     /**
      * @inheritDoc
      */
-    public function log($level, $message, array $context = array())
+    public function log($level, $message, array $context = array()): void
     {
         echo "{$level}: {$message}\n";
     }

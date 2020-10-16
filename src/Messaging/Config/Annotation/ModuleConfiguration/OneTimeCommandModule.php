@@ -52,7 +52,7 @@ class OneTimeCommandModule extends NoExternalConfigurationModule implements Anno
         $this->oneTimeCommandConfigurations = $oneTimeCommandConfigurations;
     }
 
-    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
     {
         $messageHandlerBuilders    = [];
         $oneTimeConfigurations = [];

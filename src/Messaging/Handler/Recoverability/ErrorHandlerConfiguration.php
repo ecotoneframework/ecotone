@@ -21,7 +21,7 @@ class ErrorHandlerConfiguration
         return new self($errorChannelName, $delayedRetryTemplate->build(), null);
     }
 
-    public static function createWithDeadLetterChannel(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate, string $deadLetterChannel)
+    public static function createWithDeadLetterChannel(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate, string $deadLetterChannel): \Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration
     {
         return new self($errorChannelName, $delayedRetryTemplate->build(), $deadLetterChannel);
     }

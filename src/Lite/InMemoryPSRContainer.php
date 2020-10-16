@@ -70,7 +70,7 @@ class InMemoryPSRContainer implements ContainerInterface
     /**
      * @inheritDoc
      */
-    public function has($id)
+    public function has($id): bool
     {
         return array_key_exists($id, $this->objects);
     }

@@ -51,10 +51,9 @@ class RequestReplyProducer
      * @param MessageProcessor $messageProcessor
      * @param ChannelResolver $channelResolver
      * @param bool $isReplyRequired
-     * @return RequestReplyProducer
      * @throws DestinationResolutionException
      */
-    public static function createRequestAndReply(?string $outputChannelName, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired)
+    public static function createRequestAndReply(?string $outputChannelName, MessageProcessor $messageProcessor, ChannelResolver $channelResolver, bool $isReplyRequired): \Ecotone\Messaging\Handler\RequestReplyProducer
     {
         $outputChannel = $outputChannelName ? $channelResolver->resolve($outputChannelName) : null;
 
@@ -194,7 +193,7 @@ class RequestReplyProducer
     /**
      * @inheritDoc
      */
-    private function getOutputChannel(): MessageChannel
+    private function getOutputChannel(): ?\Ecotone\Messaging\MessageChannel
     {
         return $this->outputChannel;
     }

@@ -44,7 +44,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService) : self
+    public static function create(AnnotationFinder $annotationRegistrationService) : \Ecotone\Messaging\Config\Annotation\AnnotationModule
     {
         $registrations = $annotationRegistrationService->findAnnotatedMethods(Converter::class);
 

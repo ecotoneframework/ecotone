@@ -127,10 +127,7 @@ class MessageHeaders
         return static::createMessageHeadersWith($headers);
     }
 
-    /**
-     * @return array
-     */
-    final public function headers() : array
+    final public function headers() : ?array
     {
         return $this->headers;
     }

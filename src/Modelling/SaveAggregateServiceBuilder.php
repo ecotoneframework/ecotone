@@ -179,7 +179,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 ->build($channelResolver, $referenceSearchService);
     }
 
-    private function getAggregateRepository(ReferenceSearchService $referenceSearchService): object
+    private function getAggregateRepository(ReferenceSearchService $referenceSearchService): ?object
     {
         $aggregateRepository = null;
         foreach ($this->aggregateRepositoryReferenceNames as $aggregateRepositoryName) {

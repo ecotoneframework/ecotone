@@ -145,7 +145,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param bool $withLazyBuild
      * @return GatewayProxyBuilder
      */
-    public function withLazyBuild(bool $withLazyBuild)
+    public function withLazyBuild(bool $withLazyBuild): \Ecotone\Messaging\Handler\Gateway\GatewayBuilder
     {
         $this->withLazyBuild = $withLazyBuild;
 
@@ -207,7 +207,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param string[] $messageConverterReferenceNames
      * @return GatewayProxyBuilder
      */
-    public function withMessageConverters(array $messageConverterReferenceNames): self
+    public function withMessageConverters(array $messageConverterReferenceNames): \Ecotone\Messaging\Handler\Gateway\GatewayBuilder
     {
         $this->messageConverterReferenceNames = $messageConverterReferenceNames;
         foreach ($messageConverterReferenceNames as $messageConverterReferenceName) {
@@ -221,7 +221,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param AroundInterceptorReference $aroundInterceptorReference
      * @return $this
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): self
     {
         $this->aroundInterceptors[] = $aroundInterceptorReference;
         $this->requiredReferenceNames = array_merge($this->requiredReferenceNames, $aroundInterceptorReference->getRequiredReferenceNames());
@@ -241,7 +241,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor)
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): \Ecotone\Messaging\Handler\Gateway\GatewayBuilder
     {
         $this->beforeInterceptors[] = $methodInterceptor;
 
@@ -252,7 +252,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor)
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): \Ecotone\Messaging\Handler\Gateway\GatewayBuilder
     {
         $this->afterInterceptors[] = $methodInterceptor;
 
@@ -282,7 +282,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param object[] $endpointAnnotations
      * @return static
      */
-    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    public function withEndpointAnnotations(iterable $endpointAnnotations): self
     {
         $this->endpointAnnotations = $endpointAnnotations;
 
@@ -300,7 +300,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function withRequiredInterceptorNames(iterable $interceptorNames)
+    public function withRequiredInterceptorNames(iterable $interceptorNames): self
     {
         foreach ($interceptorNames as $interceptorName) {
             $this->requiredInterceptorNames[] = $interceptorName;
@@ -320,7 +320,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     /**
      * @inheritdoc
      */
-    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver)
+    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): object
     {
         /** @var ProxyFactory $proxyFactory */
         $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);

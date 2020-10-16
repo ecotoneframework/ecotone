@@ -15,7 +15,7 @@ class FactoryActionRouter
         $this->channelName = $channelName;
     }
 
-    public function route(Message $message) : string
+    public function route(Message $message) : void
     {
 
     }

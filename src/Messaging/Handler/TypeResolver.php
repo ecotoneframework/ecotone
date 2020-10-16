@@ -521,7 +521,7 @@ class TypeResolver
         return $methodReflection->getFileName() !== $trait->getMethod($methodReflection->getName())->getFileName();
     }
 
-    private function createClassProperty(string $declaringClass, AnnotationResolver $annotationParser, \ReflectionProperty $property, ?Type $docblockType)
+    private function createClassProperty(string $declaringClass, AnnotationResolver $annotationParser, \ReflectionProperty $property, ?Type $docblockType): \Ecotone\Messaging\Handler\ClassPropertyDefinition
     {
         $classProperty = null;
         $type = $docblockType ? $docblockType : TypeDescriptor::createAnythingType();

@@ -39,7 +39,7 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
     {
         $annotationRegistrations = $annotationRegistrationService->findAnnotatedMethods( MessageConsumer::class);
 

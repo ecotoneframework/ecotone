@@ -26,7 +26,7 @@ class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumer
     /**
      * @inheritDoc
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): void
     {
     }
 

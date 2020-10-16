@@ -34,10 +34,7 @@ class PropertyPath
         return new self($path);
     }
 
-    /**
-     * @return string
-     */
-    public function getPath() : string
+    public function getPath() : ?string
     {
         return $this->path;
     }

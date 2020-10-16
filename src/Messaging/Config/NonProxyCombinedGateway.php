@@ -59,10 +59,7 @@ class NonProxyCombinedGateway
         return $this->methodGateways[$methodName]->execute($params);
     }
 
-    /**
-     * @return object
-     */
-    public function getMethodGateways()
+    public function getMethodGateways(): array
     {
         return $this->methodGateways;
     }

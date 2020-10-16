@@ -19,7 +19,7 @@ class UuidToStringConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
+    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): string
     {
         /** @var UuidInterface $source */
         Assert::isSubclassOf($source, UuidInterface::class, "Passed type to String to Uuid converter is not Uuid");

@@ -19,7 +19,7 @@ class StringToUuidConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
+    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): \Ramsey\Uuid\UuidInterface
     {
         return Uuid::fromString($source);
     }

@@ -29,9 +29,8 @@ class PayloadConverter implements ParameterConverter
 
     /**
      * @param string $parameterName
-     * @return PayloadConverter
      */
-    public static function create(string $parameterName)
+    public static function create(string $parameterName): \Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter
     {
         return new self($parameterName);
     }

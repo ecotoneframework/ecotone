@@ -99,7 +99,7 @@ class DefaultHeaderMapper implements HeaderMapper
      * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function mapHeaders(array $mappingHeaders, array $sourceHeaders)
+    private function mapHeaders(array $mappingHeaders, array $sourceHeaders): array
     {
         $targetHeaders = [];
         $convertedSourceHeaders = [];

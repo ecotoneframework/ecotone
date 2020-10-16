@@ -117,7 +117,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * @inheritDoc
      */
-    public function withMethodParameterConverters(array $methodParameterConverterBuilders)
+    public function withMethodParameterConverters(array $methodParameterConverterBuilders): self
     {
         Assert::allInstanceOfType($methodParameterConverterBuilders, ParameterConverterBuilder::class);
 

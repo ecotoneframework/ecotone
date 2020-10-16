@@ -201,14 +201,13 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      *
-     * @return Configuration
      * @throws AnnotationException
      * @throws ConfigurationException
      * @throws InvalidArgumentException
      * @throws MessagingException
      * @throws ReflectionException
      */
-    public static function prepareWithDefaults(ModuleRetrievingService $moduleConfigurationRetrievingService): Configuration
+    public static function prepareWithDefaults(ModuleRetrievingService $moduleConfigurationRetrievingService): \Ecotone\Messaging\Config\MessagingSystemConfiguration
     {
         return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), ApplicationConfiguration::createWithDefaults());
     }
@@ -255,14 +254,13 @@ final class MessagingSystemConfiguration implements Configuration
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
      * @param ApplicationConfiguration      $applicationConfiguration
      *
-     * @return Configuration
      * @throws AnnotationException
      * @throws ConfigurationException
      * @throws InvalidArgumentException
      * @throws MessagingException
      * @throws ReflectionException
      */
-    public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration): Configuration
+    public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration): \Ecotone\Messaging\Config\MessagingSystemConfiguration
     {
         $cacheDirectoryPath = $applicationConfiguration->getCacheDirectoryPath();
 
@@ -337,7 +335,7 @@ final class MessagingSystemConfiguration implements Configuration
         return null;
     }
 
-    private static function deleteFiles(string $target, bool $deleteDirectory)
+    private static function deleteFiles(string $target, bool $deleteDirectory): void
     {
         if (is_dir($target)) {
             $files = glob($target . '*', GLOB_MARK);
@@ -1226,7 +1224,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReferenceNotFoundException
      */
-    private function prepareReferenceSearchServiceWithInternalReferences(ReferenceSearchService $referenceSearchService, array $converters, InterfaceToCallRegistry $interfaceToCallRegistry)
+    private function prepareReferenceSearchServiceWithInternalReferences(ReferenceSearchService $referenceSearchService, array $converters, InterfaceToCallRegistry $interfaceToCallRegistry): \Ecotone\Messaging\Handler\InMemoryReferenceSearchService
     {
         return InMemoryReferenceSearchService::createWithReferenceService(
             $referenceSearchService,

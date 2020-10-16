@@ -31,7 +31,7 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService)
+    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
     {
         return new self();
     }

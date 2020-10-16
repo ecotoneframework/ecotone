@@ -35,7 +35,7 @@ class CollectionConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
+    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): array
     {
         $collection = [];
         foreach ($source as $element) {

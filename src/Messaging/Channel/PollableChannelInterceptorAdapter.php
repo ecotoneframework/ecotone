@@ -47,9 +47,8 @@ class PollableChannelInterceptorAdapter extends SendingInterceptorAdapter implem
 
     /**
      * @param int|null $timeout
-     * @return Message|null
      */
-    private function receiveFor(?int $timeout)
+    private function receiveFor(?int $timeout): ?\Ecotone\Messaging\Message
     {
         foreach ($this->sortedChannelInterceptors as $channelInterceptor) {
             if (!$channelInterceptor->preReceive($this->messageChannel)) {

@@ -337,11 +337,10 @@ final class TypeDescriptor implements Type
 
     /**
      * @param string $className
-     * @return Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createCollection(string $className) : Type
+    public static function createCollection(string $className) : \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self("array<{$className}>");
     }
@@ -358,41 +357,37 @@ final class TypeDescriptor implements Type
     }
 
     /**
-     * @return Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createAnythingType() : Type
+    public static function createAnythingType() : \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::ANYTHING);
     }
 
     /**
-     * @return Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createBooleanType() : Type
+    public static function createBooleanType() : \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::BOOL);
     }
 
     /**
-     * @return Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createIntegerType() : Type
+    public static function createIntegerType() : \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::INTEGER);
     }
 
     /**
-     * @return Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createArrayType() : Type
+    public static function createArrayType() : \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::ARRAY);
     }
@@ -400,21 +395,19 @@ final class TypeDescriptor implements Type
     /**
      * Should be used instead of array, if array is not composed of scalar types or composition of types is unknown
      *
-     * @return Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createIterable() : Type
+    public static function createIterable() : \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::ITERABLE);
     }
 
     /**
-     * @return Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createStringType() : Type
+    public static function createStringType() : \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::STRING);
     }

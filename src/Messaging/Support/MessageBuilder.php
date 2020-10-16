@@ -193,10 +193,7 @@ final class MessageBuilder
         return $this->getCurrentHeaders()[$name];
     }
 
-    /**
-     * @return Message
-     */
-    public function build() : Message
+    public function build() : \Ecotone\Messaging\Support\GenericMessage
     {
         $messageHeaders = MessageHeaders::create(
             $this->headerAccessor->headers()

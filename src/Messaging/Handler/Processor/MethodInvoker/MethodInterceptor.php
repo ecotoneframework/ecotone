@@ -48,9 +48,8 @@ class MethodInterceptor implements InterceptorWithPointCut
      * @param MessageHandlerBuilderWithOutputChannel $messageHandler
      * @param int $precedence
      * @param string $pointcut
-     * @return MethodInterceptor
      */
-    public static function create(string $interceptorName, InterfaceToCall $interceptorInterfaceToCall, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, string $pointcut)
+    public static function create(string $interceptorName, InterfaceToCall $interceptorInterfaceToCall, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, string $pointcut): \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor
     {
         return new self($interceptorName, $interceptorInterfaceToCall, $messageHandler, $precedence, Pointcut::createWith($pointcut));
     }
@@ -70,7 +69,7 @@ class MethodInterceptor implements InterceptorWithPointCut
     /**
      * @inheritDoc
      */
-    public function getInterceptingObject()
+    public function getInterceptingObject(): object
     {
         return $this->messageHandler;
     }

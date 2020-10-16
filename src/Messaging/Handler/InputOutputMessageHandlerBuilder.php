@@ -33,7 +33,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function withOutputMessageChannel(string $messageChannelName)
+    public function withOutputMessageChannel(string $messageChannelName): self
     {
         $self = clone $this;
         $self->outputMessageChannelName = $messageChannelName;
@@ -52,7 +52,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function withInputChannelName(string $inputChannelName)
+    public function withInputChannelName(string $inputChannelName): self
     {
         $self = clone $this;
         $self->inputMessageChannelName = $inputChannelName;
@@ -72,7 +72,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      * @param iterable $endpointAnnotations
      * @return static
      */
-    public function withEndpointAnnotations(iterable $endpointAnnotations)
+    public function withEndpointAnnotations(iterable $endpointAnnotations): self
     {
         $self = clone $this;
         $self->endpointAnnotations = $endpointAnnotations;
@@ -91,7 +91,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference)
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): self
     {
         $self = clone $this;
         $self->orderedAroundInterceptors[] = $aroundInterceptorReference;
@@ -112,7 +112,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      *
      * @return static
      */
-    public function withRequiredInterceptorNames(iterable $interceptorNames)
+    public function withRequiredInterceptorNames(iterable $interceptorNames): self
     {
         $this->requiredInterceptorReferenceNames = $interceptorNames;
 
@@ -130,7 +130,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function withEndpointId(string $endpointId)
+    public function withEndpointId(string $endpointId): self
     {
         $this->name = $endpointId;
 

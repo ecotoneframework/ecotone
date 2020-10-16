@@ -18,7 +18,7 @@ final class MessageHandlingException extends MessagingException
      * @param Message $originalMessage
      * @return MessageHandlingException|static
      */
-    public static function fromOtherException(\Throwable $cause, Message $originalMessage) : self
+    public static function fromOtherException(\Throwable $cause, Message $originalMessage) : \Ecotone\Messaging\MessagingException
     {
         $messageHandlingException = self::createWithFailedMessage($cause->getMessage(), $originalMessage);
 

@@ -120,6 +120,6 @@ final class Router implements MessageHandler
      */
     public function __toString()
     {
-        return "Router - " . (string)$this->methodInvoker;
+        return "Router - " . $this->methodInvoker;
     }
 }

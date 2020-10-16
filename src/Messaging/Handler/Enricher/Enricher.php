@@ -44,6 +44,6 @@ class Enricher implements MessageHandler
 
     public function __toString()
     {
-        return "Enricher - " . (string)$this->replyProducer;
+        return "Enricher - " . $this->replyProducer;
     }
 }

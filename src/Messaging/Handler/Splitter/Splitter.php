@@ -38,6 +38,6 @@ final class Splitter implements MessageHandler
 
     public function __toString()
     {
-        return "Splitter - " . (string)$this->requestReplyProducer;
+        return "Splitter - " . $this->requestReplyProducer;
     }
 }

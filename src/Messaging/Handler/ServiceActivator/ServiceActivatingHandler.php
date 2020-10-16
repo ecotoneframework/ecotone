@@ -40,6 +40,6 @@ final class ServiceActivatingHandler implements MessageHandler
 
     public function __toString()
     {
-        return "Service Activator - " . (string)$this->requestReplyProducer;
+        return "Service Activator - " . $this->requestReplyProducer;
     }
 }

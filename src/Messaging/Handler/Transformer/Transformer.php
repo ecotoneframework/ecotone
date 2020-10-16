@@ -37,6 +37,6 @@ class Transformer implements MessageHandler
 
     public function __toString()
     {
-        return "Transformer - " . (string)$this->requestReplyProducer;
+        return "Transformer - " . $this->requestReplyProducer;
     }
 }

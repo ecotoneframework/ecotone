@@ -20,8 +20,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         Rector\DeadCode\Rector\ClassConst\RemoveUnusedClassConstantRector::class,
         Rector\DeadCode\Rector\ClassMethod\RemoveUnusedParameterRector::class,
         Rector\DeadCode\Rector\Property\RemoveUnusedPrivatePropertyRector::class,
-        Rector\DeadCode\Rector\Property\RemoveSetterOnlyPropertyAndMethodCallRector::class,
-        Rector\DeadCode\Rector\Concat\RemoveConcatAutocastRector::class
+        Rector\DeadCode\Rector\Property\RemoveSetterOnlyPropertyAndMethodCallRector::class
     ]);
 
     // get services (needed for register a single rule)

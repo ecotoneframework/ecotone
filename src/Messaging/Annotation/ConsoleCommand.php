@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Annotation;
 /**
  * @Annotation
  */
-class OneTimeCommand
+class ConsoleCommand
 {
     public string $name;
 }

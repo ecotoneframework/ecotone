@@ -9,14 +9,14 @@ use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
-use Ecotone\Messaging\Annotation\OneTimeCommand;
+use Ecotone\Messaging\Annotation\ConsoleCommand;
 use Ecotone\Messaging\Annotation\Scheduled;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\OneTimeCommandConfiguration;
+use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
 use Ecotone\Messaging\Config\OneTimeCommandParameter;
 use Ecotone\Messaging\Config\OneTimeCommandResultSet;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
@@ -33,7 +33,7 @@ use Ramsey\Uuid\Uuid;
 /**
  * @ModuleAnnotation()
  */
-class OneTimeCommandModule extends NoExternalConfigurationModule implements AnnotationModule
+class ConsoleCommandModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     const ECOTONE_COMMAND_PARAMETER_PREFIX = "ecotone.oneTimeCommand.";
 
@@ -42,7 +42,7 @@ class OneTimeCommandModule extends NoExternalConfigurationModule implements Anno
      */
     private array $oneTimeCommandHandlers;
     /**
-     * @var OneTimeCommandConfiguration[]
+     * @var ConsoleCommandConfiguration[]
      */
     private array $oneTimeCommandConfigurations;
 
@@ -57,14 +57,14 @@ class OneTimeCommandModule extends NoExternalConfigurationModule implements Anno
         $messageHandlerBuilders    = [];
         $oneTimeConfigurations = [];
 
-        foreach ($annotationRegistrationService->findAnnotatedMethods(OneTimeCommand::class) as $annotationRegistration) {
-            /** @var OneTimeCommand $annotation */
+        foreach ($annotationRegistrationService->findAnnotatedMethods(ConsoleCommand::class) as $annotationRegistration) {
+            /** @var ConsoleCommand $annotation */
             $annotation               = $annotationRegistration->getAnnotationForMethod();
             $commandName                     = $annotation->name;
             $className    = $annotationRegistration->getClassName();
             $methodName               = $annotationRegistration->getMethodName();
 
-            list($messageHandlerBuilder, $oneTimeCommandConfiguration) = self::prepareOneTimeCommand($className, $methodName, $commandName);
+            list($messageHandlerBuilder, $oneTimeCommandConfiguration) = self::prepareConsoleCommand($className, $methodName, $commandName);
 
             $messageHandlerBuilders[] = $messageHandlerBuilder;
             $oneTimeConfigurations[]     = $oneTimeCommandConfiguration;
@@ -73,7 +73,7 @@ class OneTimeCommandModule extends NoExternalConfigurationModule implements Anno
         return new static($messageHandlerBuilders, $oneTimeConfigurations);
     }
 
-    public static function prepareOneTimeCommand(string $className, string $methodName, string $commandName): array
+    public static function prepareConsoleCommand(string $className, string $methodName, string $commandName): array
     {
         $parameterConverters = [];
         $parameters          = [];
@@ -104,7 +104,7 @@ class OneTimeCommandModule extends NoExternalConfigurationModule implements Anno
             ->withEndpointId("ecotone.endpoint." . $commandName)
             ->withInputChannelName($inputChannel)
             ->withMethodParameterConverters($parameterConverters);
-        $oneTimeCommandConfiguration = OneTimeCommandConfiguration::create($inputChannel, $commandName, $parameters);
+        $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters);
 
         return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
     }
@@ -115,7 +115,7 @@ class OneTimeCommandModule extends NoExternalConfigurationModule implements Anno
             $configuration->registerMessageHandler($oneTimeCommand);
         }
         foreach ($this->oneTimeCommandConfigurations as $oneTimeCommandConfiguration) {
-            $configuration->registerOneTimeCommand($oneTimeCommandConfiguration);
+            $configuration->registerConsoleCommand($oneTimeCommandConfiguration);
         }
     }
 

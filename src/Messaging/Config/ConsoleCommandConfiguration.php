@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Config;
 
-class OneTimeCommandConfiguration
+class ConsoleCommandConfiguration
 {
     private string $name;
     private string $channelName;

@@ -137,9 +137,9 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private array $requiredConsumerEndpointIds = [];
     /**
-     * @var OneTimeCommandConfiguration[]
+     * @var ConsoleCommandConfiguration[]
      */
-    private array $oneTimeCommands = [];
+    private array $consoleCommands = [];
 
     /**
      * Only one instance at time
@@ -838,14 +838,14 @@ final class MessagingSystemConfiguration implements Configuration
         $this->moduleReferenceSearchService = $moduleReferenceSearchService;
     }
 
-    public function getRegisteredOneTimeCommands(): array
+    public function getRegisteredConsoleCommands(): array
     {
-        return $this->oneTimeCommands;
+        return $this->consoleCommands;
     }
 
-    public function registerOneTimeCommand(OneTimeCommandConfiguration $oneTimeCommandConfiguration): Configuration
+    public function registerConsoleCommand(ConsoleCommandConfiguration $oneTimeCommandConfiguration): Configuration
     {
-        $this->oneTimeCommands[] = $oneTimeCommandConfiguration;
+        $this->consoleCommands[] = $oneTimeCommandConfiguration;
 
         return $this;
     }

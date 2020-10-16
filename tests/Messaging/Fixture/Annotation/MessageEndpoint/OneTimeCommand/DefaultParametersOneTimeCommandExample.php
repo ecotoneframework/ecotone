@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand;
 
-use Ecotone\Messaging\Annotation\OneTimeCommand;
+use Ecotone\Messaging\Annotation\ConsoleCommand;
 
 class DefaultParametersOneTimeCommandExample
 {
     /**
-     * @OneTimeCommand("doSomething")
+     * @ConsoleCommand("doSomething")
      */
     public function execute(string $name, string $surname = "cash") : void
     {

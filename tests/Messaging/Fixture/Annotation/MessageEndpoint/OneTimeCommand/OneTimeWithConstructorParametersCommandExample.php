@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand;
 
-use Ecotone\Messaging\Annotation\OneTimeCommand;
+use Ecotone\Messaging\Annotation\ConsoleCommand;
 
 class OneTimeWithConstructorParametersCommandExample
 {
@@ -12,7 +12,7 @@ class OneTimeWithConstructorParametersCommandExample
     }
 
     /**
-     * @OneTimeCommand("doSomething")
+     * @ConsoleCommand("doSomething")
      */
     public function execute() : void
     {

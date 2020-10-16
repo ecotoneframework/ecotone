@@ -52,15 +52,9 @@ class TransformerMessageProcessor implements MessageProcessor
         }
 
         if (is_array($reply)) {
-            if (is_array($message->getPayload())) {
-                $reply = $replyBuilder
-                    ->setMultipleHeaders($reply)
-                    ->build();
-            }else {
-                $reply = $replyBuilder
-                    ->setMultipleHeaders($reply)
-                    ->build();
-            }
+            $reply = $replyBuilder
+                ->setMultipleHeaders($reply)
+                ->build();
         }else if (!($reply instanceof Message)) {
             $reply = $replyBuilder
                 ->setPayload($reply)

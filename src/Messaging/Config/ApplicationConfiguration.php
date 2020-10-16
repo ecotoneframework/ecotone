@@ -42,7 +42,7 @@ class ApplicationConfiguration
     /**
      * @var null|string
      */
-    private $defaultErrorChannel = null;
+    private $defaultErrorChannel;
     /**
      * @var null|int
      */
@@ -50,7 +50,7 @@ class ApplicationConfiguration
     /**
      * @var RetryTemplateBuilder|null
      */
-    private $connectionRetryTemplate = null;
+    private $connectionRetryTemplate;
 
     /**
      * @var object[]

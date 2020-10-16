@@ -55,7 +55,6 @@ class SignalInterceptor implements ConsumerInterceptor
      */
     public function preRun(): void
     {
-        return;
     }
 
     /**
@@ -63,7 +62,6 @@ class SignalInterceptor implements ConsumerInterceptor
      */
     public function postRun(): void
     {
-        return;
     }
 
     /**
@@ -79,7 +77,6 @@ class SignalInterceptor implements ConsumerInterceptor
      */
     public function postSend(): void
     {
-        return;
     }
 
     /**

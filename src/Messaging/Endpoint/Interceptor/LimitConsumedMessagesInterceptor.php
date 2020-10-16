@@ -43,7 +43,6 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
     {
         $this->currentSentMessages = 0;
         $this->shouldBeStopped = false;
-        return;
     }
 
     /**
@@ -51,7 +50,6 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
      */
     public function preRun(): void
     {
-        return;
     }
 
     /**
@@ -75,7 +73,6 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
      */
     public function postRun(): void
     {
-        return;
     }
 
     /**

@@ -51,11 +51,10 @@ final class TypeDescriptor implements Type
         $collectionTypes = array_map(function (string $type) {
             return self::removeSlashPrefix($type);
         }, $collectionTypes);
-        $collectionTypes = array_filter($collectionTypes, function (string $type) {
+
+        return array_filter($collectionTypes, function (string $type) {
             return $type !== self::MIXED;
         });
-
-        return $collectionTypes;
     }
 
     /**

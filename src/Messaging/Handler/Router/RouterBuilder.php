@@ -53,7 +53,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     /**
      * @var string|null
      */
-    private $defaultResolution = null;
+    private $defaultResolution;
     /**
      * @var bool
      */

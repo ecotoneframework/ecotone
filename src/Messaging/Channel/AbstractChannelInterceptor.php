@@ -26,7 +26,6 @@ abstract class AbstractChannelInterceptor implements ChannelInterceptor
      */
     public function postSend(Message $message, MessageChannel $messageChannel): void
     {
-        return;
     }
 
     /**
@@ -34,7 +33,6 @@ abstract class AbstractChannelInterceptor implements ChannelInterceptor
      */
     public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
     {
-        return;
     }
 
     /**
@@ -56,8 +54,7 @@ abstract class AbstractChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?\Throwable $exception) : void
+    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
     {
-        return;
     }
 }

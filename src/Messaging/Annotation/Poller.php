@@ -64,5 +64,5 @@ class Poller
      *
      * @var \Ecotone\Messaging\Annotation\RetryTemplate
      */
-    public $channelPollRetryTemplate = null;
+    public $channelPollRetryTemplate;
 }

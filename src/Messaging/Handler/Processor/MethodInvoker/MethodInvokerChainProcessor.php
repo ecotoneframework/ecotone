@@ -56,9 +56,7 @@ class MethodInvokerChainProcessor implements MethodInvocation
         $this->aroundMethodInterceptors->next();
 
         if (!$aroundMethodInterceptor) {
-            $returnValue = call_user_func_array([$this->objectToInvokeOn, $this->interceptedInterfaceToCall->getMethodName()], $this->methodCall->getMethodArgumentValues());
-
-            return $returnValue;
+            return call_user_func_array([$this->objectToInvokeOn, $this->interceptedInterfaceToCall->getMethodName()], $this->methodCall->getMethodArgumentValues());
         }
 
         return $aroundMethodInterceptor->invoke(

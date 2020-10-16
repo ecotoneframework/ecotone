@@ -24,7 +24,6 @@ class ExceptionalQueueChannel implements PollableChannel
      */
     public function send(Message $message): void
     {
-        return;
     }
 
     /**

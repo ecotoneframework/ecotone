@@ -17,7 +17,7 @@ class NullTransactionFactory implements TransactionFactory
     /**
      * @var Transaction
      */
-    private $predefinedTransaction = null;
+    private $predefinedTransaction;
 
     /**
      * NullTransactionFactory constructor.

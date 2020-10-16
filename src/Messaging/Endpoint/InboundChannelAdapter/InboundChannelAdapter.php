@@ -60,7 +60,6 @@ class InboundChannelAdapter implements ConsumerLifecycle
      */
     public function stop(): void
     {
-        return;
     }
 
     /**

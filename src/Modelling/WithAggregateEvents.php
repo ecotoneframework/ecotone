@@ -15,7 +15,7 @@ trait WithAggregateEvents
     /**
      * @var object[]|null
      */
-    private $recordedEvents = null;
+    private $recordedEvents;
 
     /**
      * @param object $event

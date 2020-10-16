@@ -87,7 +87,6 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
      */
     public function stop(): void
     {
-        return;
     }
 
     /**

@@ -16,5 +16,5 @@ class TargetAggregateIdentifier
     /**
      * @var string
      */
-    public $identifierName = null;
+    public $identifierName;
 }

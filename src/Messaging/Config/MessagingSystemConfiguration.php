@@ -1045,7 +1045,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function configureInterceptors(InterfaceToCallRegistry $interfaceRegistry): void
     {
-        foreach ($this->messageHandlerBuilders as $messageHandlerEndpointId => $messageHandlerBuilder) {
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
                 $aroundInterceptors     = [];
                 $beforeCallInterceptors = [];
@@ -1257,16 +1257,6 @@ final class MessagingSystemConfiguration implements Configuration
                 ]
             )
         );
-    }
-
-    /**
-     * Only one instance at time
-     *
-     * @internal
-     */
-    private function __clone()
-    {
-
     }
 
     /**

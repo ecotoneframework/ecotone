@@ -44,7 +44,6 @@ class BeforeSendInterceptor implements ChannelInterceptor
      */
     public function postSend(Message $message, MessageChannel $messageChannel): void
     {
-        return;
     }
 
     /**
@@ -52,7 +51,6 @@ class BeforeSendInterceptor implements ChannelInterceptor
      */
     public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
     {
-        return;
     }
 
     /**
@@ -76,7 +74,6 @@ class BeforeSendInterceptor implements ChannelInterceptor
      */
     public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
     {
-        return;
     }
 
 }

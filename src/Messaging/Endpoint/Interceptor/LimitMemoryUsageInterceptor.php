@@ -38,7 +38,6 @@ class LimitMemoryUsageInterceptor implements ConsumerInterceptor
      */
     public function onStartup(): void
     {
-        return;
     }
 
     /**
@@ -66,7 +65,6 @@ class LimitMemoryUsageInterceptor implements ConsumerInterceptor
      */
     public function preRun(): void
     {
-        return;
     }
 
     /**
@@ -74,7 +72,6 @@ class LimitMemoryUsageInterceptor implements ConsumerInterceptor
      */
     public function postRun(): void
     {
-        return;
     }
 
     /**
@@ -82,6 +79,5 @@ class LimitMemoryUsageInterceptor implements ConsumerInterceptor
      */
     public function postSend(): void
     {
-        return;
     }
 }

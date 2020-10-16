@@ -24,6 +24,5 @@ class NullInboundGatewayEntrypoint implements InboundGatewayEntrypoint
      */
     public function executeEntrypoint($data)
     {
-        return;
     }
 }

@@ -59,7 +59,6 @@ class TimeLimitInterceptor implements ConsumerInterceptor
      */
     public function preRun(): void
     {
-        return;
     }
 
     /**
@@ -75,7 +74,6 @@ class TimeLimitInterceptor implements ConsumerInterceptor
      */
     public function postRun(): void
     {
-        return;
     }
 
     /**
@@ -83,6 +81,5 @@ class TimeLimitInterceptor implements ConsumerInterceptor
      */
     public function postSend(): void
     {
-        return;
     }
 }

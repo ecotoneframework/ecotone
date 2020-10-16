@@ -278,7 +278,7 @@ class ModellingHandlerModule implements AnnotationModule
             $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getNamedMessageChannelFor($registration)][] = $registration;
         }
 
-        foreach ($aggregateCommandOrEventHandlers as $className => $channelNameRegistrations) {
+        foreach ($aggregateCommandOrEventHandlers as $channelNameRegistrations) {
             foreach ($channelNameRegistrations as $channelName => $registrations) {
                 $this->registerAggregateCommandHandler($configuration, $this->aggregateRepositoryReferenceNames, $registrations, $channelName);
             }

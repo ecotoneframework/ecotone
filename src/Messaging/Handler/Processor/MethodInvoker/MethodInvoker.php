@@ -366,15 +366,13 @@ final class MethodInvoker implements MessageProcessor
      */
     private function doConversion($data, Type $requestType, MediaType $requestMediaType, Type $parameterType, MediaType $parameterMediaType)
     {
-        $data = $this->conversionService->convert(
+        return $this->conversionService->convert(
             $data,
             $requestType,
             $requestMediaType,
             $parameterType,
             $parameterMediaType
         );
-
-        return $data;
     }
 
     /**

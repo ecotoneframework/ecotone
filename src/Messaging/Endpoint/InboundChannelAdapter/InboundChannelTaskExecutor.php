@@ -41,9 +41,6 @@ class InboundChannelTaskExecutor implements TaskExecutor
         $this->inboundChannelGateway = $inboundChannelGateway;
     }
 
-    /**
-     *
-     */
     public function execute(): void
     {
         $result = call_user_func_array([$this->serviceToCall, $this->method], []);

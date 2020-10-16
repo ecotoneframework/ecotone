@@ -24,7 +24,6 @@ final class NullableMessageChannel implements SubscribableChannel
      */
     public function send(Message $message): void
     {
-        return;
     }
 
     /**
@@ -32,7 +31,6 @@ final class NullableMessageChannel implements SubscribableChannel
      */
     public function subscribe(MessageHandler $messageHandler): void
     {
-        return;
     }
 
     /**
@@ -40,7 +38,6 @@ final class NullableMessageChannel implements SubscribableChannel
      */
     public function unsubscribe(MessageHandler $messageHandler): void
     {
-        return;
     }
 
 

@@ -44,7 +44,6 @@ class LimitExecutionAmountInterceptor implements ConsumerInterceptor
     {
         $this->currentExecutionAmount = 0;
         $this->shouldBeStopped = false;
-        return;
     }
 
     /**
@@ -52,7 +51,6 @@ class LimitExecutionAmountInterceptor implements ConsumerInterceptor
      */
     public function preRun(): void
     {
-        return;
     }
 
     /**

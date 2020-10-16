@@ -89,7 +89,6 @@ class TaskExecutorChannelAdapter implements ConsumerLifecycle
      */
     public function stop(): void
     {
-        return;
     }
 
     /**

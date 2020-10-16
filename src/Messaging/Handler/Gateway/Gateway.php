@@ -139,64 +139,54 @@ class Gateway implements NonProxyGateway
     public function execute(array $methodArgumentValues)
     {
         $internalReplyBridge = null;
-
-        try {
-            if ((count($methodArgumentValues) === 1 && $methodArgumentValues[0] instanceof Message)) {
-                $requestMessage = MessageBuilder::fromMessage($methodArgumentValues[0]);
-            } else {
-                $methodArguments = [];
-                $parameters = $this->interfaceToCall->getInterfaceParameters();
-                $countArguments = count($parameters);
-                for ($index = 0; $index < $countArguments; $index++) {
-                    $parameter = $parameters[$index];
-                    if (!isset($methodArgumentValues[$index]) && $parameter->hasDefaultValue()) {
-                        $methodValue = $parameter->getDefaultValue();
-                    }else {
-                        if (!isset($methodArgumentValues[$index])) {
-                            throw InvalidArgumentException::create("Missing argument {$parameter->getName()} for calling {$this->interfaceToCall}");
-                        }
-                        $methodValue = $methodArgumentValues[$index];
+        if (count($methodArgumentValues) === 1 && $methodArgumentValues[0] instanceof Message) {
+            $requestMessage = MessageBuilder::fromMessage($methodArgumentValues[0]);
+        } else {
+            $methodArguments = [];
+            $parameters = $this->interfaceToCall->getInterfaceParameters();
+            $countArguments = count($parameters);
+            for ($index = 0; $index < $countArguments; $index++) {
+                $parameter = $parameters[$index];
+                if (!isset($methodArgumentValues[$index]) && $parameter->hasDefaultValue()) {
+                    $methodValue = $parameter->getDefaultValue();
+                }else {
+                    if (!isset($methodArgumentValues[$index])) {
+                        throw InvalidArgumentException::create("Missing argument {$parameter->getName()} for calling {$this->interfaceToCall}");
                     }
-
-                    $methodArguments[] = MethodArgument::createWith($parameter, $methodValue);
+                    $methodValue = $methodArgumentValues[$index];
                 }
 
-                $requestMessage = $this->methodCallToMessageConverter->getMessageBuilderUsingPayloadConverter($methodArguments);
-                $requestMessage = $this->methodCallToMessageConverter->convertFor($requestMessage, $methodArguments);
+                $methodArguments[] = MethodArgument::createWith($parameter, $methodValue);
+            }
 
-                foreach ($this->messageConverters as $messageConverter) {
-                    $convertedMessageBuilder = $messageConverter->toMessage(
-                        $requestMessage->getPayload(),
-                        $requestMessage->getCurrentHeaders()
-                    );
+            $requestMessage = $this->methodCallToMessageConverter->getMessageBuilderUsingPayloadConverter($methodArguments);
+            $requestMessage = $this->methodCallToMessageConverter->convertFor($requestMessage, $methodArguments);
 
-                    if ($convertedMessageBuilder) {
-                        $requestMessage = $convertedMessageBuilder;
-                    }
+            foreach ($this->messageConverters as $messageConverter) {
+                $convertedMessageBuilder = $messageConverter->toMessage(
+                    $requestMessage->getPayload(),
+                    $requestMessage->getCurrentHeaders()
+                );
+
+                if ($convertedMessageBuilder) {
+                    $requestMessage = $convertedMessageBuilder;
                 }
             }
-
-
-            $previousReplyChannel = $requestMessage->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaderWithName(MessageHeaders::REPLY_CHANNEL) : null;
-            $replyContentType = $requestMessage->containsKey(MessageHeaders::REPLY_CONTENT_TYPE) ? MediaType::parseMediaType($requestMessage->getHeaderWithName(MessageHeaders::REPLY_CONTENT_TYPE)) : null;
-
-            if ($this->interfaceToCall->canReturnValue()) {
-                $internalReplyBridge = QueueChannel::create();
-                $requestMessage = $requestMessage
-                    ->setReplyChannel($internalReplyBridge);
-            }else {
-                $requestMessage = $requestMessage
-                    ->removeHeader(MessageHeaders::REPLY_CHANNEL);
-            }
-            $requestMessage = $requestMessage
-                ->removeHeader(MessageHeaders::REPLY_CONTENT_TYPE)
-                ->build();
-
-            $messageHandler = $this->buildHandler($replyContentType);
-        } catch (Throwable $exception) {
-//            part before message is created and error handling enabled
-            throw $exception;
         }
+        $previousReplyChannel = $requestMessage->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaderWithName(MessageHeaders::REPLY_CHANNEL) : null;
+        $replyContentType = $requestMessage->containsKey(MessageHeaders::REPLY_CONTENT_TYPE) ? MediaType::parseMediaType($requestMessage->getHeaderWithName(MessageHeaders::REPLY_CONTENT_TYPE)) : null;
+        if ($this->interfaceToCall->canReturnValue()) {
+            $internalReplyBridge = QueueChannel::create();
+            $requestMessage = $requestMessage
+                ->setReplyChannel($internalReplyBridge);
+        } else {
+            $requestMessage = $requestMessage
+                ->removeHeader(MessageHeaders::REPLY_CHANNEL);
+        }
+        $requestMessage = $requestMessage
+            ->removeHeader(MessageHeaders::REPLY_CONTENT_TYPE)
+            ->build();
+        $messageHandler = $this->buildHandler($replyContentType);
 
         $messageHandler->handle($requestMessage);
         $reply = $internalReplyBridge ? $internalReplyBridge->receive() : null;

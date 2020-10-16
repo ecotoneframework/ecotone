@@ -68,7 +68,6 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
         }
 
         usleep($this->retryTemplate->calculateNextDelay($this->currentNumberOfRetries) * 1000);
-        return;
     }
 
     /**
@@ -77,7 +76,6 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
     public function postRun(): void
     {
         $this->currentNumberOfRetries = 0;
-        return;
     }
 
     /**
@@ -85,6 +83,5 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
      */
     public function postSend(): void
     {
-        return;
     }
 }

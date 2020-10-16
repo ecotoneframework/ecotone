@@ -13,14 +13,11 @@ namespace Ecotone\Messaging\Annotation;
 class Scheduled extends ChannelAdapter
 {
     /**
-     * @var string
      * @Required()
      */
-    public $requestChannelName;
+    public string $requestChannelName;
     /**
      * Required interceptor reference names
-     *
-     * @var array
      */
-    public $requiredInterceptorNames = [];
+    public array $requiredInterceptorNames = [];
 }

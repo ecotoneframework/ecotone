@@ -13,14 +13,8 @@ use Ecotone\Modelling\EventBus;
  */
 class LazyEventBusInterceptor
 {
-    /**
-     * @var NonProxyGateway|EventBus
-     */
-    private $eventBus;
-    /**
-     * @var InMemoryEventStore
-     */
-    private $inMemoryEventStore;
+    private \Ecotone\Messaging\Handler\NonProxyGateway $eventBus;
+    private \Ecotone\Modelling\LazyEventBus\InMemoryEventStore $inMemoryEventStore;
 
     /**
      * LazyEventBusInterceptor constructor.

@@ -26,14 +26,8 @@ abstract class MessagingException extends \Exception
 
     const WRONG_EXPRESSION_TO_EVALUATE = 300;
 
-    /**
-     * @var Message
-     */
-    private $failedMessage;
-    /**
-     * @var \Throwable|null
-     */
-    private $cause;
+    private ?\Ecotone\Messaging\Message $failedMessage = null;
+    private ?\Throwable $cause = null;
 
     /**
      * @param string $message
@@ -65,14 +59,6 @@ abstract class MessagingException extends \Exception
     public static function createFromPreviousException(string $message, \Throwable $throwable) : self
     {
         return new static($message, static::errorCode(), $throwable);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function hasErrorCode(int $errorCode): bool
-    {
-        return self::errorCode() === $errorCode;
     }
 
     /**

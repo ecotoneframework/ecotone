@@ -14,10 +14,7 @@ use Ecotone\Messaging\Message;
  */
 class PassThroughService
 {
-    /**
-     * @var MessageProcessor
-     */
-    private $methodInvoker;
+    private \Ecotone\Messaging\Handler\MessageProcessor $methodInvoker;
 
     /**
      * PassThroughService constructor.

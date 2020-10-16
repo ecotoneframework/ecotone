@@ -13,10 +13,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class CronTrigger implements Trigger
 {
-    /**
-     * @var string
-     */
-    private $cronExpression;
+    private ?string $cronExpression;
 
     /**
      * CronTrigger constructor.

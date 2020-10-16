@@ -10,22 +10,10 @@ namespace Ecotone\Http;
  */
 class UploadedMultipartFile
 {
-    /**
-     * @var string
-     */
-    private $originalFileName;
-    /**
-     * @var string
-     */
-    private $mediaType;
-    /**
-     * @var int
-     */
-    private $bytes;
-    /**
-     * @var string
-     */
-    private $fileAccessPath;
+    private ?string $originalFileName;
+    private ?string $mediaType;
+    private int $bytes;
+    private string $fileAccessPath;
 
     /**
      * UploadedMultipartFile constructor.

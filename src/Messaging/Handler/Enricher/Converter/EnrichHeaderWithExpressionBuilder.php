@@ -17,18 +17,9 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class EnrichHeaderWithExpressionBuilder implements PropertyEditorBuilder
 {
-    /**
-     * @var string
-     */
-    private $propertyPath;
-    /**
-     * @var string
-     */
-    private $expression;
-    /**
-     * @var string
-     */
-    private $nullResultExpression = "";
+    private string $propertyPath;
+    private string $expression;
+    private string $nullResultExpression = "";
 
     /**
      * ExpressionSetterBuilder constructor.

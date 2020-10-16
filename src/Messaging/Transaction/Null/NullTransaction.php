@@ -14,14 +14,8 @@ class NullTransaction implements Transaction
 {
     const COMMITTED = "committed";
     const ROLLED_BACK = "rolledBack";
-    /**
-     * @var string
-     */
-    private $status;
-    /**
-     * @var bool
-     */
-    private $isRollbackOnly = false;
+    private ?string $status;
+    private bool $isRollbackOnly = false;
 
     private function __construct()
     {

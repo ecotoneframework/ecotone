@@ -35,14 +35,8 @@ class PsrHttpMessageConverter implements MessageConverter, \Serializable
     public const URI_META_DATA_KEY = 'uri';
 
     private const HTTP_HEADER_PREFIX = "http_";
-    /**
-     * @var PropertyEditorAccessor
-     */
-    private $propertyEditorAccessor;
-    /**
-     * @var PropertyReaderAccessor
-     */
-    private $propertyReaderAccessor;
+    private ?\Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor $propertyEditorAccessor = null;
+    private ?\Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor $propertyReaderAccessor = null;
 
     /**
      * PsrHttpMessageConverter constructor.

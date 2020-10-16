@@ -24,7 +24,7 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
     /**
      * @var string[]
      */
-    private $consumerIds = [];
+    private array $consumerIds = [];
 
     /**
      * RequiredConsumersModule constructor.

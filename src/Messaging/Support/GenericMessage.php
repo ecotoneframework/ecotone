@@ -17,10 +17,7 @@ class GenericMessage implements Message
      * @var mixed
      */
     private $payload;
-    /**
-     * @var MessageHeaders
-     */
-    private $messageHeaders;
+    private \Ecotone\Messaging\MessageHeaders $messageHeaders;
 
     /**
      * GenericMessage constructor.

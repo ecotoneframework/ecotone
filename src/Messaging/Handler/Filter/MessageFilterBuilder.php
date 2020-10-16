@@ -26,27 +26,15 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     /**
      * @var ParameterConverterBuilder[]
      */
-    private $parameterConverters = [];
+    private array $parameterConverters = [];
     /**
      * @var string[]
      */
-    private $requiredReferences = [];
-    /**
-     * @var string
-     */
-    private $referenceName;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var string
-     */
-    private $discardChannelName;
-    /**
-     * @var bool
-     */
-    private $throwExceptionOnDiscard = false;
+    private array $requiredReferences = [];
+    private string $referenceName;
+    private string $methodName;
+    private ?string $discardChannelName = null;
+    private bool $throwExceptionOnDiscard = false;
 
     /**
      * MessageFilterBuilder constructor.

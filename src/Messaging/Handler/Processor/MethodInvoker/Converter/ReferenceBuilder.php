@@ -16,14 +16,8 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class ReferenceBuilder implements ParameterConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var object
-     */
-    private $referenceServiceName;
+    private string $parameterName;
+    private string $referenceServiceName;
 
     /**
      * ServiceReferenceParameterConverter constructor.

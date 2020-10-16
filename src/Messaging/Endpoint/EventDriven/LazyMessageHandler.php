@@ -16,22 +16,10 @@ use Ecotone\Messaging\MessageHandler;
  */
 class LazyMessageHandler implements MessageHandler
 {
-    /**
-     * @var MessageHandlerBuilder
-     */
-    private $messageHandlerBuilder;
-    /**
-     * @var ChannelResolver
-     */
-    private $channelResolver;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
-    /**
-     * @var MessageHandler
-     */
-    private $initializedMessageHandler;
+    private \Ecotone\Messaging\Handler\MessageHandlerBuilder $messageHandlerBuilder;
+    private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private ?\Ecotone\Messaging\MessageHandler $initializedMessageHandler;
 
     /**
      * LazyMessageHandler constructor.

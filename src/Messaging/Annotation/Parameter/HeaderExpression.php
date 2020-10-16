@@ -15,13 +15,11 @@ use Doctrine\Common\Annotations\Annotation\Required;
 class HeaderExpression
 {
     /**
-     * @var string
      * @Required()
      */
-    public $headerName;
+    public string $headerName;
     /**
-     * @var string
      * @Required()
      */
-    public $expression;
+    public string $expression;
 }

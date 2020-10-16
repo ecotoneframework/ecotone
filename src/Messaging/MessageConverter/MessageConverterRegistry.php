@@ -15,7 +15,7 @@ class MessageConverterRegistry
     /**
      * @var MessageConverter[]
      */
-    private $messageConverters;
+    private iterable $messageConverters;
 
     /**
      * DefaultMessageConverterService constructor.

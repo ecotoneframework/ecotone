@@ -12,10 +12,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
  */
 class CollectionConverter implements Converter
 {
-    /**
-     * @var Converter
-     */
-    private $converterForSingleType;
+    private \Ecotone\Messaging\Conversion\Converter $converterForSingleType;
 
     /**
      * CollectionConverter constructor.

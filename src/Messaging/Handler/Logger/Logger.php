@@ -10,8 +10,5 @@ abstract class Logger
      * @var string
      */
     public $logLevel = LoggingLevel::INFO;
-    /**
-     * @var bool
-     */
-    public $logFullMessage = false;
+    public bool $logFullMessage = false;
 }

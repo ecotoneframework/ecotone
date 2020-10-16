@@ -21,10 +21,7 @@ class SignalInterceptor implements ConsumerInterceptor
     /** @var int ctrl+c */
     private const SIGNAL_INTERRUPT = 2;
 
-    /**
-     * @var bool
-     */
-    private $shouldBeStopped = false;
+    private bool $shouldBeStopped = false;
 
     /**
      * @inheritDoc

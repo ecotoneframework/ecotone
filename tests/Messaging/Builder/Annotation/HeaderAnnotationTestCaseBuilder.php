@@ -12,18 +12,9 @@ use Ecotone\Messaging\Annotation\Parameter\Header;
  */
 class HeaderAnnotationTestCaseBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var string
-     */
-    private $headerName;
-    /**
-     * @var bool
-     */
-    private $isRequired = true;
+    private string $parameterName;
+    private string $headerName;
+    private bool $isRequired = true;
 
     /**
      * ExpressionTestBuilder constructor.

@@ -13,14 +13,8 @@ use Ecotone\Messaging\MessageHeaders;
  */
 final class SimpleMessageStore implements MessageStore, MessageGroupStore
 {
-    /**
-     * @var array|Message[]
-     */
-    private $messages;
-    /**
-     * @var array|MessageGroup[]
-     */
-    private $groups;
+    private array $messages;
+    private array $groups;
 
     /**
      * SimpleMessageStore constructor.

@@ -10,14 +10,9 @@ namespace Ecotone\Messaging\Annotation;
  */
 class InputOutputEndpointAnnotation extends EndpointAnnotation
 {
-    /**
-     * @var string
-     */
-    public $outputChannelName = '';
+    public string $outputChannelName = '';
     /**
      * Required interceptor reference names
-     *
-     * @var array
      */
-    public $requiredInterceptorNames = [];
+    public array $requiredInterceptorNames = [];
 }

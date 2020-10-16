@@ -18,10 +18,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class SimpleMessageConverter implements MessageConverter
 {
-    /**
-     * @var ConversionService
-     */
-    private $conversionService;
+    private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
 
     /**
      * SimpleMessageConverter constructor.

@@ -40,70 +40,43 @@ class GatewayProxyBuilder implements GatewayBuilder
 {
     const DEFAULT_REPLY_MILLISECONDS_TIMEOUT = -1;
 
-    /**
-     * @var string
-     */
-    private $referenceName;
-    /**
-     * @var string
-     */
-    private $interfaceName;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var string
-     */
-    private $requestChannelName;
-    /**
-     * @var int
-     */
-    private $replyMilliSecondsTimeout = self::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
-    /**
-     * @var string
-     */
-    private $replyChannelName;
-    /**
-     * @var array|GatewayParameterConverterBuilder[]
-     */
-    private $methodArgumentConverters = [];
-    /**
-     * @var string
-     */
-    private $errorChannelName;
+    private string $referenceName;
+    private string $interfaceName;
+    private string $methodName;
+    private string $requestChannelName;
+    private int $replyMilliSecondsTimeout = self::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
+    private ?string $replyChannelName = null;
+    private array $methodArgumentConverters = [];
+    private ?string $errorChannelName = null;
     /**
      * @var string[]
      */
-    private $requiredReferenceNames = [];
+    private array $requiredReferenceNames = [];
     /**
      * @var string[]
      */
-    private $messageConverterReferenceNames = [];
+    private array $messageConverterReferenceNames = [];
     /**
      * @var AroundInterceptorReference[]
      */
-    private $aroundInterceptors = [];
+    private array $aroundInterceptors = [];
     /**
      * @var MethodInterceptor[]
      */
-    private $beforeInterceptors = [];
+    private array $beforeInterceptors = [];
     /**
      * @var MethodInterceptor[]
      */
-    private $afterInterceptors = [];
+    private array $afterInterceptors = [];
     /**
      * @var object[]
      */
-    private $endpointAnnotations = [];
+    private iterable $endpointAnnotations = [];
     /**
      * @var string[]
      */
-    private $requiredInterceptorNames = [];
-    /**
-     * @var bool
-     */
-    private $withLazyBuild = false;
+    private array $requiredInterceptorNames = [];
+    private bool $withLazyBuild = false;
 
     /**
      * GatewayProxyBuilder constructor.

@@ -22,7 +22,7 @@ abstract class SendingInterceptorAdapter implements MessageChannelInterceptorAda
     /**
      * @var ChannelInterceptor[]
      */
-    protected $sortedChannelInterceptors;
+    protected array $sortedChannelInterceptors;
 
     /**
      * ChannelInterceptorAdapter constructor.

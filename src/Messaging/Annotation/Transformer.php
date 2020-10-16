@@ -15,8 +15,5 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 class Transformer extends InputOutputEndpointAnnotation
 {
-    /**
-     * @var array
-     */
-    public $parameterConverters = [];
+    public array $parameterConverters = [];
 }

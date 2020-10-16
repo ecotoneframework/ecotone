@@ -12,14 +12,8 @@ use Ecotone\Messaging\MessageChannel;
  */
 class NamedMessageChannel
 {
-    /**
-     * @var string
-     */
-    private $channelName;
-    /**
-     * @var MessageChannel
-     */
-    private $messageChannel;
+    private string $channelName;
+    private \Ecotone\Messaging\MessageChannel $messageChannel;
 
     /**
      * ResolvableChannel constructor.

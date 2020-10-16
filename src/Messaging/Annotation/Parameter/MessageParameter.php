@@ -14,8 +14,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 class MessageParameter
 {
     /**
-     * @var string
      * @Required()
      */
-    public $parameterName;
+    public string $parameterName;
 }

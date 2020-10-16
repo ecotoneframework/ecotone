@@ -25,22 +25,13 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
     const LOGGER_REFERENCE = "logger";
     const LOG_FULL_MESSAGE = false;
 
-    /**
-     * @var string
-     */
-    private $logLevel = LogLevel::DEBUG;
-    /**
-     * @var bool
-     */
-    private $logFullMessage = self::LOG_FULL_MESSAGE;
+    private string $logLevel = LogLevel::DEBUG;
+    private bool $logFullMessage = self::LOG_FULL_MESSAGE;
     /**
      * @var ParameterConverterBuilder[]
      */
-    private $methodParameterConverters = [];
-    /**
-     * @var bool
-     */
-    private $isBefore;
+    private array $methodParameterConverters = [];
+    private bool $isBefore;
 
     /**
      * LoggingHandlerBuilder constructor.

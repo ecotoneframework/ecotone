@@ -17,10 +17,7 @@ use Ecotone\Messaging\MessageChannel;
  */
 class BeforeSendInterceptor implements ChannelInterceptor
 {
-    /**
-     * @var NonProxyGateway
-     */
-    private $entrypointGateway;
+    private \Ecotone\Messaging\Handler\NonProxyGateway $entrypointGateway;
 
     /**
      * BeforeSendInterceptor constructor.

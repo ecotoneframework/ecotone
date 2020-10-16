@@ -59,38 +59,29 @@ class ModellingHandlerModule implements AnnotationModule
 {
     const CQRS_MODULE                                          = "cqrsModule";
 
-    /**
-     * @var ParameterConverterAnnotationFactory
-     */
-    private $parameterConverterAnnotationFactory;
+    private \Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory;
     /**
      * @var AnnotatedFinding[]
      */
-    private $aggregateCommandHandlerRegistrations;
+    private array $aggregateCommandHandlerRegistrations;
     /**
      * @var AnnotatedFinding[]
      */
-    private $serviceCommandHandlersRegistrations;
+    private array $serviceCommandHandlersRegistrations;
     /**
      * @var AnnotatedFinding[]
      */
-    private $aggregateQueryHandlerRegistrations;
+    private array $aggregateQueryHandlerRegistrations;
     /**
      * @var AnnotatedFinding[]
      */
-    private $serviceQueryHandlerRegistrations;
-    /**
-     * @var array|AnnotatedFinding[]
-     */
-    private $aggregateEventHandlers;
-    /**
-     * @var array|AnnotatedFinding[]
-     */
-    private $serviceEventHandlers;
+    private array $serviceQueryHandlerRegistrations;
+    private array $aggregateEventHandlers;
+    private array $serviceEventHandlers;
     /**
      * @var string[]
      */
-    private $aggregateRepositoryReferenceNames;
+    private array $aggregateRepositoryReferenceNames;
 
     /**
      * CqrsMessagingModule constructor.

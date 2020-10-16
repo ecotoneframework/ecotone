@@ -19,10 +19,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class Enricher implements MessageHandler
 {
-    /**
-     * @var RequestReplyProducer
-     */
-    private $replyProducer;
+    private \Ecotone\Messaging\Handler\RequestReplyProducer $replyProducer;
 
     /**
      * Enricher constructor.

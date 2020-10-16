@@ -14,18 +14,9 @@ use Ecotone\Messaging\SubscribableChannel;
  */
 class EventDrivenConsumer implements ConsumerLifecycle
 {
-    /**
-     * @var SubscribableChannel
-     */
-    private $subscribableChannel;
-    /**
-     * @var MessageHandler
-     */
-    private $messageHandler;
-    /**
-     * @var string
-     */
-    private $consumerName;
+    private \Ecotone\Messaging\SubscribableChannel $subscribableChannel;
+    private \Ecotone\Messaging\MessageHandler $messageHandler;
+    private string $consumerName;
 
     /**
      * EventDrivenConsumer constructor.

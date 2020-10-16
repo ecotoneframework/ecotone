@@ -13,10 +13,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 final class HeaderEnricher
 {
-    /**
-     * @var array
-     */
-    private $headers;
+    private array $headers;
 
     /**
      * HeaderEnricher constructor.

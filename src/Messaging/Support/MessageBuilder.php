@@ -21,10 +21,7 @@ final class MessageBuilder
      * @var  mixed
      */
     private $payload;
-    /**
-     * @var HeaderAccessor
-     */
-    private $headerAccessor;
+    private \Ecotone\Messaging\Support\HeaderAccessor $headerAccessor;
 
     /**
      * MessageBuilder constructor.

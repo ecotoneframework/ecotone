@@ -16,7 +16,7 @@ class AutoCollectionConversionService implements ConversionService
     /**
      * @var Converter[]
      */
-    private $converters;
+    private ?array $converters;
 
     /**
      * ConversionService constructor.

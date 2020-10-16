@@ -6,10 +6,7 @@ namespace Ecotone\Messaging\Config;
 
 class OptionalReference
 {
-    /**
-     * @var string
-     */
-    private $referenceName;
+    private string $referenceName;
 
     /**
      * RequiredReference constructor.

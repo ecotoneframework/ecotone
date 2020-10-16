@@ -14,10 +14,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class GatewayPayloadBuilder implements GatewayParameterConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
 
     /**
      * PayloadMessageParameter constructor.

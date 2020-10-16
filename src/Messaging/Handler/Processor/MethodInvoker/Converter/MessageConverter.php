@@ -16,10 +16,7 @@ use Ecotone\Messaging\Message;
  */
 class MessageConverter implements ParameterConverter
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
 
     /**
      * MessageArgument constructor.

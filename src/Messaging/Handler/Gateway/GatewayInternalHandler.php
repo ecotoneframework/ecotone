@@ -22,30 +22,12 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayInternalHandler
 {
-    /**
-     * @var MessageChannel
-     */
-    private $requestChannel;
-    /**
-     * @var MessageChannel|null
-     */
-    private $errorChannel;
-    /**
-     * @var PollableChannel|null
-     */
-    private $replyChannel;
-    /**
-     * @var InterfaceToCall
-     */
-    private $interfaceToCall;
-    /**
-     * @var int
-     */
-    private $replyMilliSecondsTimeout;
-    /**
-     * @var array|MessageConverter[]
-     */
-    private $messageConverters;
+    private \Ecotone\Messaging\MessageChannel $requestChannel;
+    private ?\Ecotone\Messaging\MessageChannel $errorChannel;
+    private ?\Ecotone\Messaging\PollableChannel $replyChannel;
+    private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
+    private int $replyMilliSecondsTimeout;
+    private array $messageConverters;
 
     /**
      * GatewayInternalHandler constructor.

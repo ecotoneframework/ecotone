@@ -13,10 +13,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
  */
 class Pointcut
 {
-    /**
-     * @var string|null
-     */
-    private $expression;
+    private ?string $expression;
 
     /**
      * Pointcut constructor.

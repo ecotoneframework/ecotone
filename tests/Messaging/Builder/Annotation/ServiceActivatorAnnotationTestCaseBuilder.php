@@ -12,34 +12,13 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
  */
 class ServiceActivatorAnnotationTestCaseBuilder
 {
-    /**
-     * @var string
-     */
-    private $endpointId = "";
-    /**
-     * @var string
-     */
-    private $outputChannelName = '';
-    /**
-     * @var bool
-     */
-    private $requiresReply = false;
-    /**
-     * @var array
-     */
-    private $parameterConverters = [];
-    /**
-     * @var array
-     */
-    private $preCallInterceptors = [];
-    /**
-     * @var array
-     */
-    private $postCallInterceptors = [];
-    /**
-     * @var string
-     */
-    private $inputChannelName;
+    private string $endpointId = "";
+    private string $outputChannelName = '';
+    private bool $requiresReply = false;
+    private array $parameterConverters = [];
+    private array $preCallInterceptors = [];
+    private array $postCallInterceptors = [];
+    private ?string $inputChannelName;
 
     private function __construct()
     {

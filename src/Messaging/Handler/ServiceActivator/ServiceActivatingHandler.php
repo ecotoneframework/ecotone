@@ -16,10 +16,7 @@ use Ecotone\Messaging\MessageHandler;
  */
 final class ServiceActivatingHandler implements MessageHandler
 {
-    /**
-     * @var RequestReplyProducer
-     */
-    private $requestReplyProducer;
+    private \Ecotone\Messaging\Handler\RequestReplyProducer $requestReplyProducer;
 
     /**
      * ServiceActivatingHandler constructor.

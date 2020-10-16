@@ -13,12 +13,8 @@ use Doctrine\Common\Annotations\Annotation\Target;
 class MessageConsumer
 {
     /**
-     * @var string
      * @Required()
      */
-    public $endpointId;
-    /**
-     * @var array
-     */
-    public $parameterConverters = [];
+    public string $endpointId;
+    public array $parameterConverters = [];
 }

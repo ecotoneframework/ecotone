@@ -14,22 +14,10 @@ use Ramsey\Uuid\Uuid;
 
 class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
 {
-    /**
-     * @var string
-     */
-    private $inputChannelName;
-    /**
-     * @var MethodInterceptor
-     */
-    private $methodInterceptor;
-    /**
-     * @var GatewayProxyBuilder
-     */
-    private $gateway;
-    /**
-     * @var string
-     */
-    private $internalRequestChannelName;
+    private string $inputChannelName;
+    private \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor $methodInterceptor;
+    private \Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder $gateway;
+    private string $internalRequestChannelName;
 
     public function __construct(string $inputChannelName, MethodInterceptor $methodInterceptor)
     {

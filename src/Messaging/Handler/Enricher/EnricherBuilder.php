@@ -28,22 +28,16 @@ use Ecotone\Messaging\Support\Assert;
  */
 class EnricherBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithOutputChannel
 {
-    /**
-     * @var string
-     */
-    private $requestChannelName;
-    /**
-     * @var string|null
-     */
-    private $requestPayloadExpression;
+    private ?string $requestChannelName = null;
+    private ?string $requestPayloadExpression = null;
     /**
      * @var PropertyEditorBuilder[]
      */
-    private $propertyEditors;
+    private array $propertyEditors;
     /**
      * @var string[]
      */
-    private $requestHeaders = [];
+    private array $requestHeaders = [];
 
     /**
      * EnricherBuilder constructor.

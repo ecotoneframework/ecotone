@@ -12,10 +12,7 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
  */
 class PayloadAnnotationTestCaseBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
 
     /**
      * PayloadTestBuilder constructor.

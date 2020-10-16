@@ -19,10 +19,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayPayloadConverter implements GatewayParameterConverter
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
 
     /**
      * PayloadMessageParameter constructor.

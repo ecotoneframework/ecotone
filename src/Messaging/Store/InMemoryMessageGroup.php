@@ -12,14 +12,8 @@ use Ecotone\Messaging\Message;
  */
 final class InMemoryMessageGroup implements MessageGroup
 {
-    /**
-     * @var array|Message[]
-     */
-    private $messages;
-    /**
-     * @var string
-     */
-    private $groupId;
+    private array $messages;
+    private string $groupId;
 
     /**
      * InMemoryMessageGroup constructor.

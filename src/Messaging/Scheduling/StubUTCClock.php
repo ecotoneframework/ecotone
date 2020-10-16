@@ -10,10 +10,7 @@ namespace Ecotone\Messaging\Scheduling;
  */
 class StubUTCClock implements Clock
 {
-    /**
-     * @var int
-     */
-    private $currentTime;
+    private int $currentTime;
 
     /**
      * StubClock constructor.

@@ -17,18 +17,12 @@ use Ecotone\Messaging\Message;
  */
 class InterceptorConverter implements ParameterConverter
 {
-    /**
-     * @var InterfaceToCall
-     */
-    private $interceptedInterface;
+    private \Ecotone\Messaging\Handler\InterfaceToCall $interceptedInterface;
     /**
      * @var object[]
      */
-    private $endpointAnnotations;
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private array $endpointAnnotations;
+    private string $parameterName;
 
     /**
      * AnnotationInterceptorConverter constructor.

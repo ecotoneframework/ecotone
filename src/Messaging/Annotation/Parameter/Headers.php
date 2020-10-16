@@ -12,8 +12,7 @@ namespace Ecotone\Messaging\Annotation\Parameter;
 class Headers
 {
     /**
-     * @var string
      * @Required()
      */
-    public $parameterName;
+    public string $parameterName;
 }

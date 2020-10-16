@@ -32,10 +32,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
  */
 class AsynchronousModule extends NoExternalConfigurationModule implements AnnotationModule
 {
-    /**
-     * @var array
-     */
-    private $asyncEndpoints = [];
+    private array $asyncEndpoints = [];
 
     /**
      * ConverterModule constructor.

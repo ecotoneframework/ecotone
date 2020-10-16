@@ -17,22 +17,10 @@ use Ecotone\Messaging\Support\Assert;
  */
 class HeaderExpressionBuilder implements ParameterConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var string
-     */
-    private $expression;
-    /**
-     * @var string
-     */
-    private $headerName;
-    /**
-     * @var bool
-     */
-    private $isRequired;
+    private string $parameterName;
+    private string $expression;
+    private string $headerName;
+    private bool $isRequired;
 
     /**
      * ExpressionBuilder constructor.

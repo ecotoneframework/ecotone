@@ -8,10 +8,7 @@ namespace Ecotone\Messaging\Annotation\Endpoint;
  */
 class Delayed
 {
-    /**
-     * @var int
-     */
-    private $time;
+    private int $time;
 
     public function __construct(array $values)
     {

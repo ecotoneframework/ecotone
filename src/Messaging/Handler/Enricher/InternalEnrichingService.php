@@ -20,34 +20,16 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class InternalEnrichingService
 {
-    /**
-     * @var array|PropertyEditor[]
-     */
-    private $setters;
-    /**
-     * @var EnrichGateway|null
-     */
-    private $enrichGateway;
-    /**
-     * @var string|null
-     */
-    private $requestPayloadExpression;
-    /**
-     * @var ExpressionEvaluationService
-     */
-    private $expressionEvaluationService;
+    private array $setters;
+    private ?\Ecotone\Messaging\Handler\Enricher\EnrichGateway $enrichGateway;
+    private ?string $requestPayloadExpression;
+    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
     /**
      * @var string[]
      */
-    private $requestHeaders;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
-    /**
-     * @var ConversionService
-     */
-    private $conversionService;
+    private array $requestHeaders;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
 
     /**
      * InternalEnrichingService constructor.

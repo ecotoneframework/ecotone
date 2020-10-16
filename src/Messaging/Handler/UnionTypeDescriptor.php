@@ -17,7 +17,7 @@ class UnionTypeDescriptor implements Type
     /**
      * @var TypeDescriptor[]
      */
-    private $typeDescriptors;
+    private ?array $typeDescriptors;
 
     /**
      * UnionTypeDescriptor constructor.

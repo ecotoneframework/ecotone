@@ -25,30 +25,18 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class TransformerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {
-    /**
-     * @var string
-     */
-    private $objectToInvokeReferenceName;
+    private string $objectToInvokeReferenceName;
     /**
      * @var object
      */
     private $directObject;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var ParameterConverterBuilder[]|array
-     */
-    private $methodParameterConverterBuilders = [];
+    private string $methodName;
+    private array $methodParameterConverterBuilders = [];
     /**
      * @var string[]
      */
-    private $requiredReferenceNames = [];
-    /**
-     * @var string
-     */
-    private $expression;
+    private array $requiredReferenceNames = [];
+    private ?string $expression = null;
 
     /**
      * TransformerBuilder constructor.

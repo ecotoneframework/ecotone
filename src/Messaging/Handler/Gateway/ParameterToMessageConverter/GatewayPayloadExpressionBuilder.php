@@ -16,14 +16,8 @@ use Ecotone\Messaging\Support\Assert;
  */
 class GatewayPayloadExpressionBuilder implements GatewayParameterConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var string
-     */
-    private $expression;
+    private string $parameterName;
+    private string $expression;
 
     /**
      * ExpressionBuilder constructor.

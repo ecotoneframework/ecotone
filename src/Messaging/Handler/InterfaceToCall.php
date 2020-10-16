@@ -21,42 +21,15 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class InterfaceToCall
 {
-    /**
-     * @var string
-     */
-    private $interfaceName;
-    /**
-     * @var TypeDescriptor
-     */
-    private $interfaceType;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var array|InterfaceParameter[]
-     */
-    private $parameters;
-    /**
-     * @var TypeDescriptor
-     */
-    private $returnType;
-    /**
-     * @var bool
-     */
-    private $doesReturnTypeAllowNulls;
-    /**
-     * @var bool
-     */
-    private $isStaticallyCalled;
-    /**
-     * @var iterable|object[]
-     */
-    private $methodAnnotations;
-    /**
-     * @var ClassDefinition
-     */
-    private $classDefinition;
+    private ?string $interfaceName;
+    private ?\Ecotone\Messaging\Handler\Type $interfaceType;
+    private ?string $methodName;
+    private ?iterable $parameters;
+    private ?\Ecotone\Messaging\Handler\Type $returnType;
+    private ?bool $doesReturnTypeAllowNulls;
+    private ?bool $isStaticallyCalled;
+    private iterable $methodAnnotations;
+    private \Ecotone\Messaging\Handler\ClassDefinition $classDefinition;
 
     /**
      * InterfaceToCall constructor.

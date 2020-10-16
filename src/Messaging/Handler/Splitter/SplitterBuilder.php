@@ -25,26 +25,14 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class SplitterBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
-    /**
-     * @var string
-     */
-    private $referenceName;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var array|\Ecotone\Messaging\Handler\ParameterConverterBuilder[]
-     */
-    private $methodParameterConverterBuilders = [];
+    private string $referenceName;
+    private string $methodName;
+    private array $methodParameterConverterBuilders = [];
     /**
      * @var string[]
      */
-    private $requiredReferenceNames = [];
-    /**
-     * @var object
-     */
-    private $directObject;
+    private array $requiredReferenceNames = [];
+    private ?object $directObject = null;
 
     /**
      * ServiceActivatorBuilder constructor.

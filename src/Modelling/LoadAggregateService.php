@@ -20,10 +20,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class LoadAggregateService
 {
-    /**
-     * @var StandardRepository|EventSourcedRepository
-     */
-    private $aggregateRepository;
+    private object $aggregateRepository;
     private string $aggregateClassName;
     private string $aggregateMethod;
     private PropertyReaderAccessor $propertyReaderAccessor;

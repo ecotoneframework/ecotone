@@ -61,99 +61,81 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @var MessageChannelBuilder[]
      */
-    private $channelBuilders = [];
+    private array $channelBuilders = [];
     /**
      * @var MessageChannelBuilder[]
      */
-    private $defaultChannelBuilders = [];
+    private array $defaultChannelBuilders = [];
     /**
      * @var ChannelInterceptorBuilder[]
      */
-    private $channelInterceptorBuilders = [];
+    private array $channelInterceptorBuilders = [];
     /**
      * @var MessageHandlerBuilder[]
      */
-    private $messageHandlerBuilders = [];
+    private array $messageHandlerBuilders = [];
     /**
      * @var PollingMetadata[]
      */
-    private $pollingMetadata = [];
-    /**
-     * @var array|GatewayBuilder[]
-     */
-    private $gatewayBuilders = [];
+    private array $pollingMetadata = [];
+    private array $gatewayBuilders = [];
     /**
      * @var MessageHandlerConsumerBuilder[]
      */
-    private $consumerFactories = [];
+    private array $consumerFactories = [];
     /**
      * @var ChannelAdapterConsumerBuilder[]
      */
-    private $channelAdapters = [];
+    private array $channelAdapters = [];
     /**
      * @var MethodInterceptor[]
      */
-    private $beforeSendInterceptors = [];
+    private array $beforeSendInterceptors = [];
     /**
      * @var MethodInterceptor[]
      */
-    private $beforeCallMethodInterceptors = [];
+    private array $beforeCallMethodInterceptors = [];
     /**
      * @var AroundInterceptorReference[]
      */
-    private $aroundMethodInterceptors = [];
+    private array $aroundMethodInterceptors = [];
     /**
      * @var MethodInterceptor[]
      */
-    private $afterCallMethodInterceptors = [];
+    private array $afterCallMethodInterceptors = [];
     /**
      * @var string[]
      */
-    private $requiredReferences = [];
+    private array $requiredReferences = [];
     /**
      * @var string[]
      */
-    private $optionalReferences = [];
+    private array $optionalReferences = [];
     /**
      * @var ConverterBuilder[]
      */
-    private $converterBuilders = [];
+    private array $converterBuilders = [];
     /**
      * @var string[]
      */
-    private $messageConverterReferenceNames = [];
+    private array $messageConverterReferenceNames = [];
     /**
      * @var InterfaceToCall[]
      */
-    private $interfacesToCall = [];
-    /**
-     * @var ModuleReferenceSearchService
-     */
-    private $moduleReferenceSearchService;
-    /**
-     * @var bool
-     */
-    private $isLazyConfiguration;
-    /**
-     * @var array
-     */
-    private $asynchronousEndpoints = [];
+    private array $interfacesToCall = [];
+    private ?\Ecotone\Messaging\Config\ModuleReferenceSearchService $moduleReferenceSearchService;
+    private bool $isLazyConfiguration;
+    private array $asynchronousEndpoints = [];
     /**
      * @var string[]
      */
-    private $gatewayClassesToGenerateProxies = [];
-    /**
-     * @var string
-     */
-    private $rootPathToSearchConfigurationFor;
-    /**
-     * @var ApplicationConfiguration
-     */
-    private $applicationConfiguration;
+    private array $gatewayClassesToGenerateProxies = [];
+    private ?string $rootPathToSearchConfigurationFor;
+    private \Ecotone\Messaging\Config\ApplicationConfiguration $applicationConfiguration;
     /**
      * @var string[]
      */
-    private $requiredConsumerEndpointIds = [];
+    private array $requiredConsumerEndpointIds = [];
     /**
      * @var OneTimeCommandConfiguration[]
      */

@@ -17,24 +17,11 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 class MessageGateway
 {
     /**
-     * @var string
      * @Required()
      */
-    public $requestChannel;
-    /**
-     * @var string
-     */
-    public $errorChannel = "";
-    /**
-     * @var array
-     */
-    public $parameterConverters = [];
-    /**
-     * @var int
-     */
-    public $replyTimeoutInMilliseconds = GatewayProxyBuilder::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
-    /**
-     * @var array
-     */
-    public $requiredInterceptorNames = [];
+    public string $requestChannel;
+    public string $errorChannel = "";
+    public array $parameterConverters = [];
+    public int $replyTimeoutInMilliseconds = GatewayProxyBuilder::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
+    public array $requiredInterceptorNames = [];
 }

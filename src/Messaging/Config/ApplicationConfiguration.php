@@ -11,66 +11,43 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 class ApplicationConfiguration
 {
-    const DEFAULT_ENVIRONMENT = "dev";
-    const DEFAULT_FAIL_FAST = true;
+    const DEFAULT_ENVIRONMENT              = "dev";
+    const DEFAULT_FAIL_FAST                = true;
     const DEFAULT_SERIALIZATION_MEDIA_TYPE = MediaType::APPLICATION_X_PHP_SERIALIZED;
 
-    /**
-     * @var bool
-     */
-    private $failFast = self::DEFAULT_FAIL_FAST;
-    /**
-     * @var string|null
-     */
-    private $cacheDirectoryPath;
-    /**
-     * @var string
-     */
-    private $environment = self::DEFAULT_ENVIRONMENT;
-    /**
-     * @var string
-     */
-    private $loadCatalog = "";
+    private bool $failFast = self::DEFAULT_FAIL_FAST;
+    private ?string $cacheDirectoryPath = null;
+    private string $environment = self::DEFAULT_ENVIRONMENT;
+    private string $loadCatalog = "";
     /**
      * @var string[]
      */
-    private $namespaces = [];
-    /**
-     * @var string
-     */
-    private $defaultSerializationMediaType;
-    /**
-     * @var null|string
-     */
-    private $defaultErrorChannel;
-    /**
-     * @var null|int
-     */
-    private $defaultMemoryLimitInMegabytes = PollingMetadata::DEFAULT_MEMORY_LIMIT_MEGABYTES;
-    /**
-     * @var RetryTemplateBuilder|null
-     */
-    private $connectionRetryTemplate;
+    private array $namespaces = [];
+    private ?string $defaultSerializationMediaType = null;
+    private ?string $defaultErrorChannel = null;
+    private ?int $defaultMemoryLimitInMegabytes = PollingMetadata::DEFAULT_MEMORY_LIMIT_MEGABYTES;
+    private ?RetryTemplateBuilder $connectionRetryTemplate = null;
 
     /**
      * @var object[]
      */
-    private $pollableEndpointAnnotations = [];
+    private array $pollableEndpointAnnotations = [];
 
     private function __construct()
     {
     }
 
-    public static function createWithDefaults() : self
+    public static function createWithDefaults(): self
     {
         return new self();
     }
 
     /**
      * @param self[] $applicationConfigurations
+     *
      * @return ApplicationConfiguration
      */
-    public function mergeWith(array $applicationConfigurations) : self
+    public function mergeWith(array $applicationConfigurations): self
     {
         $self = $this;
 
@@ -108,14 +85,14 @@ class ApplicationConfiguration
     }
 
 
-
     /**
      * @param bool $failFast
+     *
      * @return ApplicationConfiguration
      */
     public function withFailFast(bool $failFast): ApplicationConfiguration
     {
-        $clone = clone $this;
+        $clone           = clone $this;
         $clone->failFast = $failFast;
 
         return $clone;
@@ -123,11 +100,12 @@ class ApplicationConfiguration
 
     /**
      * @param string|null $cacheDirectoryPath
+     *
      * @return ApplicationConfiguration
      */
     public function withCacheDirectoryPath(?string $cacheDirectoryPath): ApplicationConfiguration
     {
-        $clone = clone $this;
+        $clone                     = clone $this;
         $clone->cacheDirectoryPath = rtrim($cacheDirectoryPath, "/");
 
         return $clone;
@@ -135,11 +113,12 @@ class ApplicationConfiguration
 
     /**
      * @param string $environment
+     *
      * @return ApplicationConfiguration
      */
     public function withEnvironment(string $environment): ApplicationConfiguration
     {
-        $clone = clone $this;
+        $clone              = clone $this;
         $clone->environment = $environment;
 
         return $clone;
@@ -147,11 +126,12 @@ class ApplicationConfiguration
 
     /**
      * @param string $catalog
+     *
      * @return ApplicationConfiguration
      */
     public function withLoadCatalog(string $catalog): ApplicationConfiguration
     {
-        $clone = clone $this;
+        $clone              = clone $this;
         $clone->loadCatalog = $catalog;
 
         return $clone;
@@ -159,11 +139,12 @@ class ApplicationConfiguration
 
     /**
      * @param string[] $namespaces
+     *
      * @return ApplicationConfiguration
      */
     public function withNamespaces(array $namespaces): ApplicationConfiguration
     {
-        $clone = clone $this;
+        $clone             = clone $this;
         $clone->namespaces = $namespaces;
 
         return $clone;
@@ -171,19 +152,20 @@ class ApplicationConfiguration
 
     /**
      * @param string $defaultSerializationMediaType
+     *
      * @return ApplicationConfiguration
      */
     public function withDefaultSerializationMediaType(string $defaultSerializationMediaType): ApplicationConfiguration
     {
-        $clone = clone $this;
+        $clone                                = clone $this;
         $clone->defaultSerializationMediaType = $defaultSerializationMediaType;
 
         return $clone;
     }
 
-    public function withDefaultErrorChannel(string $errorChannelName) : ApplicationConfiguration
+    public function withDefaultErrorChannel(string $errorChannelName): ApplicationConfiguration
     {
-        $clone = clone $this;
+        $clone                      = clone $this;
         $clone->defaultErrorChannel = $errorChannelName;
 
         return $clone;
@@ -192,6 +174,7 @@ class ApplicationConfiguration
     public function withConnectionRetryTemplate(RetryTemplateBuilder $channelPollRetryTemplate): ApplicationConfiguration
     {
         $this->connectionRetryTemplate = $channelPollRetryTemplate;
+
         return $this;
     }
 
@@ -200,9 +183,10 @@ class ApplicationConfiguration
         return $this->connectionRetryTemplate;
     }
 
-    public function withConsumerMemoryLimit(int $memoryLimitInMegabytes) : self
+    public function withConsumerMemoryLimit(int $memoryLimitInMegabytes): self
     {
         $this->defaultMemoryLimitInMegabytes = $memoryLimitInMegabytes;
+
         return $this;
     }
 
@@ -280,7 +264,7 @@ class ApplicationConfiguration
         return $this->namespaces;
     }
 
-    public function isProductionConfiguration() : bool
+    public function isProductionConfiguration(): bool
     {
         return in_array($this->getEnvironment(), ["prod", "production"]);
     }

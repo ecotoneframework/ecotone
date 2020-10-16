@@ -41,14 +41,8 @@ use Ramsey\Uuid\Uuid;
  */
 class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder implements MessageHandlerConsumerBuilder
 {
-    /**
-     * @var GatewayProxyBuilder
-     */
-    private $entrypointGateway;
-    /**
-     * @var string
-     */
-    private $requestChannelName;
+    private \Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder $entrypointGateway;
+    private string $requestChannelName;
 
     public function __construct()
     {

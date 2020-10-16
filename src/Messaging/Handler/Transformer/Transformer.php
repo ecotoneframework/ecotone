@@ -14,10 +14,7 @@ use Ecotone\Messaging\Message;
  */
 class Transformer implements MessageHandler
 {
-    /**
-     * @var RequestReplyProducer
-     */
-    private $requestReplyProducer;
+    private \Ecotone\Messaging\Handler\RequestReplyProducer $requestReplyProducer;
     /**
      * Transformer constructor.
      * @param RequestReplyProducer $requestReplyProducer

@@ -21,14 +21,8 @@ use Throwable;
  */
 class LoggingService
 {
-    /**
-     * @var ConversionService
-     */
-    private $conversionService;
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
+    private \Psr\Log\LoggerInterface $logger;
 
     /**
      * LoggingService constructor.

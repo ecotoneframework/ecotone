@@ -21,10 +21,7 @@ use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
  */
 abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModule implements AnnotationModule
 {
-    /**
-     * @var array|ConsumerLifecycleBuilder[]
-     */
-    private $messageHandlerBuilders;
+    private array $messageHandlerBuilders;
 
     /**
      * AnnotationGatewayConfiguration constructor.

@@ -28,30 +28,12 @@ class ModellingMessageRouterModule implements AnnotationModule
 {
     const MODULE_NAME = self::class;
 
-    /**
-     * @var BusRouterBuilder
-     */
-    private $commandBusByObject;
-    /**
-     * @var BusRouterBuilder
-     */
-    private $queryBusByObject;
-    /**
-     * @var BusRouterBuilder
-     */
-    private $eventBusByObject;
-    /**
-     * @var BusRouterBuilder
-     */
-    private $commandBusByName;
-    /**
-     * @var BusRouterBuilder
-     */
-    private $queryBusByName;
-    /**
-     * @var BusRouterBuilder
-     */
-    private $eventBusByName;
+    private \Ecotone\Modelling\Config\BusRouterBuilder $commandBusByObject;
+    private \Ecotone\Modelling\Config\BusRouterBuilder $queryBusByObject;
+    private \Ecotone\Modelling\Config\BusRouterBuilder $eventBusByObject;
+    private \Ecotone\Modelling\Config\BusRouterBuilder $commandBusByName;
+    private \Ecotone\Modelling\Config\BusRouterBuilder $queryBusByName;
+    private \Ecotone\Modelling\Config\BusRouterBuilder $eventBusByName;
 
     /**
      * AggregateMessageRouterModule constructor.

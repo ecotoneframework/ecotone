@@ -15,18 +15,9 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class PropertyEditorAccessor
 {
-    /**
-     * @var string
-     */
-    private $mappingExpression;
-    /**
-     * @var ExpressionEvaluationService
-     */
-    private $expressionEvaluationService;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
+    private string $mappingExpression;
+    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
 
     /**
      * DataSetter constructor.

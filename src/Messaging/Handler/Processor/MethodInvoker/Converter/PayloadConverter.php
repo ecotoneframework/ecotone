@@ -16,10 +16,7 @@ use Ecotone\Messaging\Message;
  */
 class PayloadConverter implements ParameterConverter
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
 
     /**
      * PayloadArgument constructor.

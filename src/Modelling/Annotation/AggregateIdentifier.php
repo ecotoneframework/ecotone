@@ -14,8 +14,6 @@ class AggregateIdentifier
 {
     /**
      * Name of the routing key property on messages that provides the identifier
-     *
-     * @var string
      */
-    public $targetIdentifierName;
+    public string $targetIdentifierName;
 }

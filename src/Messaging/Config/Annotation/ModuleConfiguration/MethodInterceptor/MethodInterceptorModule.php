@@ -46,26 +46,11 @@ use Ecotone\Modelling\Annotation\IgnorePayload;
 class MethodInterceptorModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME = "methodInterceptorModule";
-    /**
-     * @var array|MethodInterceptor[]
-     */
-    private $postCallInterceptors;
-    /**
-     * @var array|MethodInterceptor[]
-     */
-    private $preCallInterceptors;
-    /**
-     * @var array|AroundInterceptorReference[]
-     */
-    private $aroundInterceptors;
-    /**
-     * @var array|MethodInterceptor[]
-     */
-    private $beforeSendInterceptors;
-    /**
-     * @var array
-     */
-    private $beforeSendRelatedInterfaces = [];
+    private array $postCallInterceptors;
+    private array $preCallInterceptors;
+    private array $aroundInterceptors;
+    private array $beforeSendInterceptors;
+    private array $beforeSendRelatedInterfaces = [];
 
     /**
      * MethodInterceptorModule constructor.

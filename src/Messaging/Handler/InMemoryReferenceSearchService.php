@@ -22,11 +22,8 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     /**
      * @var object[]
      */
-    private $objectsToResolve;
-    /**
-     * @var ReferenceSearchService|null
-     */
-    private $referenceSearchService;
+    private ?array $objectsToResolve = null;
+    private ?\Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService = null;
 
     /**
      * InMemoryReferenceSearchService constructor.

@@ -19,15 +19,12 @@ class DefaultHeaderMapper implements HeaderMapper
     /**
      * @var string[]
      */
-    private $fromMessageHeadersMapping = [];
+    private array $fromMessageHeadersMapping = [];
     /**
      * @var string[]
      */
-    private $toMessageHeadersMapping = [];
-    /**
-     * @var bool
-     */
-    private $headerNamesToLower;
+    private array $toMessageHeadersMapping = [];
+    private bool $headerNamesToLower;
 
     private ConversionService $conversionService;
 

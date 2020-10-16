@@ -14,10 +14,7 @@ use Ecotone\Modelling\EventBus;
  */
 class EventBusRouter
 {
-    /**
-     * @var array
-     */
-    private $channelMapping = [];
+    private array $channelMapping = [];
 
     /**
      * CommandBusRouter constructor.

@@ -14,7 +14,7 @@ class RecipientListRouter
     /**
      * @var string[]
      */
-    private $recipientMessageChannels;
+    private array $recipientMessageChannels;
 
     /**
      * RecipientListRouter constructor.

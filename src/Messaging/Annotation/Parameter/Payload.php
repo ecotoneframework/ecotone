@@ -14,12 +14,8 @@ use Doctrine\Common\Annotations\Annotation\Required;
 class Payload
 {
     /**
-     * @var string
      * @Required()
      */
-    public $parameterName;
-    /**
-     * @var string
-     */
-    public $expression;
+    public string $parameterName;
+    public string $expression = "";
 }

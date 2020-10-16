@@ -24,18 +24,9 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class AroundMethodInterceptor
 {
-    /**
-     * @var object
-     */
-    private $referenceToCall;
-    /**
-     * @var InterfaceToCall
-     */
-    private $interceptorInterfaceToCall;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
+    private object $referenceToCall;
+    private \Ecotone\Messaging\Handler\InterfaceToCall $interceptorInterfaceToCall;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
 
     /**
      * MethodInterceptor constructor.

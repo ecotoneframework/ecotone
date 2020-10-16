@@ -14,13 +14,11 @@ use Doctrine\Common\Annotations\Annotation\Required;
 class HeaderValue
 {
     /**
-     * @var string
      * @Required()
      */
-    public $headerName;
+    public string $headerName;
     /**
-     * @var string
      * @Required()
      */
-    public $headerValue;
+    public string $headerValue;
 }

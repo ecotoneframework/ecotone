@@ -14,18 +14,9 @@ use Ecotone\Messaging\PollableChannel;
  */
 class PollOrThrowExceptionConsumer implements ConsumerLifecycle
 {
-    /**
-     * @var string
-     */
-    private $consumerName;
-    /**
-     * @var PollableChannel
-     */
-    private $pollableChannel;
-    /**
-     * @var MessageHandler
-     */
-    private $messageHandler;
+    private string $consumerName;
+    private \Ecotone\Messaging\PollableChannel $pollableChannel;
+    private \Ecotone\Messaging\MessageHandler $messageHandler;
 
     /**
      * PollingConsumer constructor.

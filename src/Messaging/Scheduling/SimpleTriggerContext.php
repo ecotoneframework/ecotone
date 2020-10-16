@@ -10,14 +10,8 @@ namespace Ecotone\Messaging\Scheduling;
  */
 class SimpleTriggerContext implements TriggerContext
 {
-    /**
-     * @var int|null
-     */
-    private $lastScheduledExecutionTime;
-    /**
-     * @var int|null
-     */
-    private $lastActualExecutionTime;
+    private ?int $lastScheduledExecutionTime;
+    private ?int $lastActualExecutionTime;
 
     /**
      * SimpleTriggerContext constructor.

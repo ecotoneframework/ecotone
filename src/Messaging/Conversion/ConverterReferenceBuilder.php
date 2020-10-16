@@ -11,10 +11,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class ConverterReferenceBuilder implements ConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $referenceName;
+    private string $referenceName;
 
     /**
      * ConverterReferenceBuilder constructor.

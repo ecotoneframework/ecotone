@@ -15,30 +15,15 @@ final class ClassPropertyDefinition
     private const PROTECTED_VISIBILITY = "protected";
     private const PRIVATE_VISIBILITY = "private";
 
-    /**
-     * @var string
-     */
-    private $name;
-    /**
-     * @var Type
-     */
-    private $type;
-    /**
-     * @var bool
-     */
-    private $isNullable;
-    /**
-     * @var bool
-     */
-    private $isStatic;
-    /**
-     * @var string
-     */
-    private $visibility;
+    private string $name;
+    private \Ecotone\Messaging\Handler\Type $type;
+    private bool $isNullable;
+    private bool $isStatic;
+    private string $visibility;
     /**
      * @var object[]
      */
-    private $annotations;
+    private iterable $annotations;
 
     /**
      * PropertyDescriptor constructor.

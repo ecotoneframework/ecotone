@@ -19,26 +19,11 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class MethodInterceptor implements InterceptorWithPointCut
 {
-    /**
-     * @var string
-     */
-    private $interceptorName;
-    /**
-     * @var MessageHandlerBuilderWithOutputChannel
-     */
-    private $messageHandler;
-    /**
-     * @var int
-     */
-    private $precedence;
-    /**
-     * @var Pointcut
-     */
-    private $pointcut;
-    /**
-     * @var InterfaceToCall
-     */
-    private $interceptorInterfaceToCall;
+    private string $interceptorName;
+    private \Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel $messageHandler;
+    private int $precedence;
+    private \Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut $pointcut;
+    private \Ecotone\Messaging\Handler\InterfaceToCall $interceptorInterfaceToCall;
 
     /**
      * Interceptor constructor.

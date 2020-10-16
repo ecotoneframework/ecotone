@@ -13,14 +13,8 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 final class PayloadTypeRouter
 {
-    /**
-     * @var array
-     */
-    private $typeToChannelMapping;
-    /**
-     * @var bool
-     */
-    private $routeByClassName;
+    private array $typeToChannelMapping;
+    private bool $routeByClassName;
 
     /**
      * PayloadTypeRouter constructor.

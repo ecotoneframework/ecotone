@@ -3,6 +3,7 @@
 namespace Ecotone\Messaging\Channel;
 
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\SubscribableChannel;
 
@@ -13,10 +14,7 @@ use Ecotone\Messaging\SubscribableChannel;
  */
 class DirectChannel implements SubscribableChannel
 {
-    /**
-     * @var MessageHandler
-     */
-    private $messageHandler;
+    private ?MessageHandler $messageHandler = null;
 
     /**
      * DirectChannel constructor.

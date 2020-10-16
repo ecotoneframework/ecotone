@@ -14,10 +14,7 @@ use Ecotone\Messaging\Message;
  */
 class AllHeadersConverter implements ParameterConverter
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
 
     /**
      * AllHeadersConverter constructor.

@@ -13,8 +13,5 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 class TargetAggregateIdentifier
 {
-    /**
-     * @var string
-     */
-    public $identifierName;
+    public string $identifierName = "";
 }

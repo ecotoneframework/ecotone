@@ -18,7 +18,7 @@ class ModuleReferenceSearchService
     /**
      * @var object[]
      */
-    private $moduleReferences = [];
+    private array $moduleReferences = [];
 
     /**
      * ModuleReferenceSearchService constructor.

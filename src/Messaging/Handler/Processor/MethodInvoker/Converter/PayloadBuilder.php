@@ -15,10 +15,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class PayloadBuilder implements ParameterConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
 
     /**
      * PayloadParameterConverterBuilder constructor.

@@ -20,12 +20,6 @@ class Router extends EndpointAnnotation
      * @Required()
      */
     public $inputChannelName;
-    /**
-     * @var bool
-     */
-    public $isResolutionRequired = true;
-    /**
-     * @var array
-     */
-    public $parameterConverters = [];
+    public bool $isResolutionRequired = true;
+    public array $parameterConverters = [];
 }

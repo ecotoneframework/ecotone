@@ -20,14 +20,8 @@ use Ecotone\Modelling\EventBus;
  */
 class LazyEventBusAroundInterceptorBuilder implements AroundInterceptorObjectBuilder
 {
-    /**
-     * @var InMemoryEventStore
-     */
-    private $inMemoryEventStore;
-    /**
-     * @var GatewayProxyBuilder
-     */
-    private $eventBusGateway;
+    private \Ecotone\Modelling\LazyEventBus\InMemoryEventStore $inMemoryEventStore;
+    private \Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder $eventBusGateway;
 
     public function __construct(InMemoryEventStore $inMemoryEventStore)
     {

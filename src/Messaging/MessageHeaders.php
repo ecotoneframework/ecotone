@@ -98,10 +98,7 @@ class MessageHeaders
      */
     const REPLY_CONTENT_TYPE = "replyContentType";
 
-    /**
-     * @var array
-     */
-    private $headers;
+    private ?array $headers;
 
 
     /**

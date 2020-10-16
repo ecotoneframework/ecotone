@@ -40,30 +40,12 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 {
-    /**
-     * @var GatewayBuilder
-     */
-    private $gatewayExecutor;
-    /**
-     * @var string
-     */
-    private $referenceName;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var string
-     */
-    private $endpointId;
-    /**
-     * @var string
-     */
-    private $requestChannelName;
-    /**
-     * @var object
-     */
-    private $directObject;
+    private \Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder $gatewayExecutor;
+    private string $referenceName;
+    private string $methodName;
+    private ?string $endpointId = null;
+    private string $requestChannelName;
+    private ?object $directObject = null;
 
     /**
      * InboundChannelAdapterBuilder constructor.

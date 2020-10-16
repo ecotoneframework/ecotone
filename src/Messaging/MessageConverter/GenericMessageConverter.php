@@ -20,10 +20,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GenericMessageConverter implements MessageConverter
 {
-    /**
-     * @var ConversionService
-     */
-    private $conversionService;
+    private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
 
     /**
      * GenericMessageConverter constructor.

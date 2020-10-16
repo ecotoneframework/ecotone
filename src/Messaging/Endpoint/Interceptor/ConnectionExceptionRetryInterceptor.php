@@ -11,14 +11,8 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
 {
-    /**
-     * @var int
-     */
-    private $currentNumberOfRetries = 0;
-    /**
-     * @var RetryTemplate|null
-     */
-    private $retryTemplate;
+    private int $currentNumberOfRetries = 0;
+    private ?\Ecotone\Messaging\Handler\Recoverability\RetryTemplate $retryTemplate;
 
     public function __construct(?RetryTemplateBuilder $retryTemplate)
     {

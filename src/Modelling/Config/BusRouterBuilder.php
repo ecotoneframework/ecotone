@@ -20,23 +20,14 @@ use Ecotone\Modelling\QueryBus;
  */
 class BusRouterBuilder implements MessageHandlerBuilder
 {
-    /**
-     * @var string
-     */
-    private $endpointId;
+    private ?string $endpointId;
 
-    /**
-     * @var array
-     */
-    private $channelNamesRouting;
+    private array $channelNamesRouting;
     /**
      * @var string[]
      */
-    private $inputChannelName;
-    /**
-     * @var string
-     */
-    private $type;
+    private string $inputChannelName;
+    private string $type;
 
     /**
      * BusRouterBuilder constructor.

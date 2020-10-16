@@ -28,10 +28,7 @@ class ProxyFactory implements \Serializable
 {
     const REFERENCE_NAME = "gatewayProxyConfiguration";
 
-    /**
-     * @var string|null
-     */
-    private $cacheDirectoryPath;
+    private ?string $cacheDirectoryPath;
 
     /**
      * ProxyConfiguration constructor.
@@ -120,10 +117,7 @@ class ProxyFactory implements \Serializable
     {
         $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
         {
-            /**
-             * @var Closure
-             */
-            private $buildCallback;
+            private \Closure $buildCallback;
 
             /**
              *  constructor.

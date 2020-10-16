@@ -12,15 +12,15 @@ use Psr\Log\LoggerInterface;
  */
 class LoggerExample implements LoggerInterface
 {
-    private $emergency = [];
-    private $alert = [];
-    private $critical = [];
-    private $error = [];
-    private $warning = [];
-    private $notice = [];
-    private $info = [];
-    private $debug = [];
-    private $log = [];
+    private array $emergency = [];
+    private array $alert = [];
+    private array $critical = [];
+    private array $error = [];
+    private array $warning = [];
+    private array $notice = [];
+    private array $info = [];
+    private array $debug = [];
+    private array $log = [];
 
     private function __construct()
     {

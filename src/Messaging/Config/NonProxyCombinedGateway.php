@@ -9,14 +9,11 @@ use Ecotone\Messaging\Support\Assert;
 
 class NonProxyCombinedGateway
 {
-    /**
-     * @var string
-     */
-    private $referenceName;
+    private string $referenceName;
     /**
      * @var NonProxyGateway[]
      */
-    private $methodGateways;
+    private array $methodGateways;
 
     /**
      * GatewayReference constructor.

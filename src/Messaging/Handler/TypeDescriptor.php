@@ -40,10 +40,7 @@ final class TypeDescriptor implements Type
     private const MIXED = "mixed";
     const NULL = "null";
 
-    /**
-     * @var string
-     */
-    private $type;
+    private string $type;
 
     private static function resolveCollectionTypes(string $foundCollectionTypes): array
     {

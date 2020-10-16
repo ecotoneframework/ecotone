@@ -14,14 +14,8 @@ use Ecotone\Messaging\Support\Assert;
  */
 class GatewayReference
 {
-    /**
-     * @var string
-     */
-    private $referenceName;
-    /**
-     * @var object
-     */
-    private $gateway;
+    private string $referenceName;
+    private object $gateway;
 
     /**
      * GatewayReference constructor.

@@ -14,14 +14,8 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class LoggingLevel extends LogLevel
 {
-    /**
-     * @var string
-     */
-    private $level;
-    /**
-     * @var bool
-     */
-    private $logFullMessage;
+    private ?string $level;
+    private bool $logFullMessage;
 
     /**
      * LogLevel constructor.

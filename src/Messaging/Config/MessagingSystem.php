@@ -32,22 +32,16 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 final class MessagingSystem implements ConfiguredMessagingSystem
 {
-    /**
-     * @var iterable|ConsumerLifecycle[]
-     */
-    private $consumers;
-    /**
-     * @var ChannelResolver
-     */
-    private $channelResolver;
+    private iterable $consumers;
+    private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
     /**
      * @var GatewayReference[]
      */
-    private $gatewayReferences;
+    private array $gatewayReferences;
     /**
      * @var NonProxyCombinedGateway[]
      */
-    private $nonProxyCombinedGateways;
+    private array $nonProxyCombinedGateways;
 
     /**
      * Application constructor.

@@ -14,30 +14,15 @@ use Ecotone\Messaging\Support\ErrorMessage;
  */
 final class InterfaceParameter
 {
-    /**
-     * @var string
-     */
-    private $name;
-    /**
-     * @var Type
-     */
-    private $typeDescriptor;
-    /**
-     * @var bool
-     */
-    private $doesAllowNull;
+    private string $name;
+    private \Ecotone\Messaging\Handler\Type $typeDescriptor;
+    private bool $doesAllowNull;
     /**
      * @var mixed
      */
     private $defaultValue;
-    /**
-     * @var bool
-     */
-    private $hasDefaultValue;
-    /**
-     * @var bool
-     */
-    private $isAnnotation;
+    private bool $hasDefaultValue;
+    private bool $isAnnotation;
 
     private function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation)
     {

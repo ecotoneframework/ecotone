@@ -14,21 +14,13 @@ use Doctrine\Common\Annotations\Annotation\Required;
 class Header
 {
     /**
-     * @var string
      * @Required()
      */
-    public $parameterName;
+    public string $parameterName;
     /**
-     * @var string
      * @Required()
      */
-    public $headerName;
-    /**
-     * @var string
-     */
-    public $expression;
-    /**
-     * @var bool
-     */
-    public $isRequired = true;
+    public string $headerName;
+    public string $expression = "";
+    public bool $isRequired = true;
 }

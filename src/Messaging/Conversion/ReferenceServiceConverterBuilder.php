@@ -18,22 +18,10 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class ReferenceServiceConverterBuilder implements ConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $referenceName;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var Type
-     */
-    private $sourceType;
-    /**
-     * @var Type
-     */
-    private $targetType;
+    private string $referenceName;
+    private string $methodName;
+    private \Ecotone\Messaging\Handler\Type $sourceType;
+    private \Ecotone\Messaging\Handler\Type $targetType;
 
     /**
      * ReferenceConverter constructor.

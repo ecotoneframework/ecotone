@@ -14,30 +14,21 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
  */
 abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithOutputChannel
 {
-    /**
-     * @var string
-     */
-    protected $inputMessageChannelName = "";
-    /**
-     * @var string
-     */
-    protected $outputMessageChannelName = "";
-    /**
-     * @var string
-     */
-    private $name = "";
+    protected string $inputMessageChannelName = "";
+    protected string $outputMessageChannelName = "";
+    private ?string $name = "";
     /**
      * @var string[]
      */
-    protected $requiredInterceptorReferenceNames = [];
+    protected iterable $requiredInterceptorReferenceNames = [];
     /**
      * @var AroundInterceptorReference[]
      */
-    protected $orderedAroundInterceptors = [];
+    protected array $orderedAroundInterceptors = [];
     /**
      * @var object[]
      */
-    private $endpointAnnotations = [];
+    private iterable $endpointAnnotations = [];
 
     /**
      * @inheritDoc

@@ -15,14 +15,11 @@ use ProxyManager\Factory\RemoteObjectFactory;
  */
 class CombinedGatewayBuilder
 {
-    /**
-     * @var string
-     */
-    private $interfaceName;
+    private string $interfaceName;
     /**
      * @var NonProxyGateway[]
      */
-    private $gatewayBuilders;
+    private array $gatewayBuilders;
 
     /**
      * MultipleMethodGatewayBuilder constructor.
@@ -56,7 +53,7 @@ class CombinedGatewayBuilder
             /**
              * @var NonProxyGateway[]
              */
-            private $gateways;
+            private array $gateways;
 
             /**
              *  constructor.

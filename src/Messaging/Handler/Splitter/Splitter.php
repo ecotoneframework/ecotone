@@ -14,10 +14,7 @@ use Ecotone\Messaging\MessageHandler;
  */
 final class Splitter implements MessageHandler
 {
-    /**
-     * @var RequestReplyProducer
-     */
-    private $requestReplyProducer;
+    private \Ecotone\Messaging\Handler\RequestReplyProducer $requestReplyProducer;
 
     /**
      * ServiceActivatingHandler constructor.

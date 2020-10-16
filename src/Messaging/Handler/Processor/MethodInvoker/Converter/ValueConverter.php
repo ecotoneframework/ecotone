@@ -16,10 +16,7 @@ use Ecotone\Messaging\Message;
  */
 class ValueConverter implements ParameterConverter
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
     /**
      * @var mixed
      */

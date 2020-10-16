@@ -14,10 +14,7 @@ use Ecotone\Messaging\Support\ErrorMessage;
 
 class ErrorChannelInterceptor
 {
-    /**
-     * @var MessageChannel
-     */
-    private $errorChannel;
+    private \Ecotone\Messaging\MessageChannel $errorChannel;
 
     /**
      * ErrorChannelInterceptor constructor.

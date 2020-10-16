@@ -15,10 +15,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayHeaderValueConverter implements GatewayParameterConverter
 {
-    /**
-     * @var string
-     */
-    private $headerName;
+    private string $headerName;
     /**
      * @var mixed
      */

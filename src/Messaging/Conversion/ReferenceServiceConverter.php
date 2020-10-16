@@ -14,22 +14,10 @@ use Ecotone\Messaging\Support\Assert;
  */
 class ReferenceServiceConverter implements Converter
 {
-    /**
-     * @var object
-     */
-    private $object;
-    /**
-     * @var string
-     */
-    private $method;
-    /**
-     * @var Type
-     */
-    private $sourceType;
-    /**
-     * @var Type
-     */
-    private $targetType;
+    private object $object;
+    private string $method;
+    private \Ecotone\Messaging\Handler\Type $sourceType;
+    private \Ecotone\Messaging\Handler\Type $targetType;
 
     /**
      * ReferenceConverter constructor.

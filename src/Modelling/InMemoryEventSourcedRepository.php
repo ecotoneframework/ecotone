@@ -11,11 +11,8 @@ namespace Ecotone\Modelling;
  */
 class InMemoryEventSourcedRepository implements EventSourcedRepository
 {
-    /**
-     * @var array
-     */
-    private $eventsPerAggregate;
-    private $aggregateTypes;
+    private array $eventsPerAggregate;
+    private array $aggregateTypes;
 
     public function __construct(array $eventsPerAggregate = [], array $aggregateTypes = [])
     {

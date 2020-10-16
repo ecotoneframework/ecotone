@@ -17,22 +17,13 @@ use Ecotone\Messaging\Message;
  */
 class PayloadExpressionConverter implements ParameterConverter
 {
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
-    /**
-     * @var ExpressionEvaluationService
-     */
-    private $expressionEvaluationService;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
     /**s
      * @var string
      */
-    private $parameterName;
-    /**
-     * @var string
-     */
-    private $expression;
+    private string $parameterName;
+    private string $expression;
 
     /**
      * MessageToExpressionEvaluationParameterConverter constructor.

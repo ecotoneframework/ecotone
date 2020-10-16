@@ -25,10 +25,7 @@ use Ecotone\Modelling\Annotation\IgnorePayload;
  */
 abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurationModule implements AnnotationModule
 {
-    /**
-     * @var array|MessageHandlerBuilder[]
-     */
-    private $messageHandlerBuilders;
+    private array $messageHandlerBuilders;
 
     /**
      * AnnotationGatewayConfiguration constructor.

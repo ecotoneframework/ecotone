@@ -24,22 +24,10 @@ use Ecotone\Messaging\Support\Assert;
  */
 class ConsumerEndpointFactory
 {
-    /**
-     * @var ChannelResolver
-     */
-    private $channelResolver;
-    /**
-     * @var array|MessageHandlerConsumerBuilder[]
-     */
-    private $consumerFactories;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
-    /**
-     * @var array|PollingMetadata[]
-     */
-    private $pollingMetadataMessageHandlers;
+    private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
+    private array $consumerFactories;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private array $pollingMetadataMessageHandlers;
 
     /**
      * ConsumerEndpointFactory constructor.

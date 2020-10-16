@@ -17,10 +17,7 @@ class TimeLimitInterceptor implements ConsumerInterceptor
      * @var int
      */
     private $milliseconds;
-    /**
-     * @var int
-     */
-    private $startTime;
+    private ?float $startTime;
 
     /**
      * LimitMemoryUsageInterceptor constructor.

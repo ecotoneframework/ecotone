@@ -10,8 +10,8 @@ class InMemoryStandardRepository implements StandardRepository
     /**
      * @var object[]
      */
-    private $aggregates;
-    private $aggregateTypes;
+    private array $aggregates;
+    private array $aggregateTypes;
 
     public function __construct(array $aggregates = [], array $aggregateTypes = [])
     {

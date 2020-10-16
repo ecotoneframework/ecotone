@@ -12,22 +12,10 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
 {
-    /**
-     * @var int
-     */
-    private $precedence;
-    /**
-     * @var string
-     */
-    private $channelName;
-    /**
-     * @var string
-     */
-    private $referenceName;
-    /**
-     * @var object
-     */
-    private $directObject;
+    private int $precedence;
+    private string $channelName;
+    private string $referenceName;
+    private ?object $directObject = null;
 
     /**
      * SimpleChannelInterceptorBuilder constructor.

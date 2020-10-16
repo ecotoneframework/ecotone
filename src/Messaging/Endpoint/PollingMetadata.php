@@ -22,63 +22,27 @@ class PollingMetadata
     const DEFAULT_EXECUTION_LIMIT = 0;
     const DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS = 0;
 
-    /**
-     * @var string
-     */
-    private $endpointId;
-    /**
-     * @var string
-     */
-    private $cron = "";
-    /**
-     * @var string
-     */
-    private $errorChannelName = "";
+    private string $endpointId;
+    private string $cron = "";
+    private string $errorChannelName = "";
     private bool $isErrorChannelEnabled = true;
     /**
      * @var int in milliseconds
      */
-    private $fixedRateInMilliseconds = self::DEFAULT_FIXED_RATE;
+    private int $fixedRateInMilliseconds = self::DEFAULT_FIXED_RATE;
     /**
      * @var int in milliseconds
      */
-    private $initialDelayInMilliseconds = self::DEFAULT_INITIAL_DELAY;
-    /**
-     * @var int
-     */
-    private $handledMessageLimit = self::DEFAULT_HANDLED_MESSAGE_LIMIT;
-    /**
-     * @var int
-     */
-    private $memoryLimitInMegabytes = self::DEFAULT_MEMORY_LIMIT_MEGABYTES;
-    /**
-     * @var int
-     */
-    private $executionAmountLimit = self::DEFAULT_EXECUTION_LIMIT;
-    /**
-     * @var int
-     */
-    private $maxMessagePerPoll = self::DEFAULT_MAX_MESSAGES_PER_POLL;
-    /**
-     * @var int
-     */
-    private $executionTimeLimitInMilliseconds = self::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS;
-    /**
-     * @var RetryTemplateBuilder|null
-     */
-    private $connectionRetryTemplate;
-    /**
-     * @var bool
-     */
-    private $withSignalInterceptors = false;
-    /**
-     * @var string
-     */
-    private $triggerReferenceName = "";
-    /**
-     * @var string
-     */
-    private $taskExecutorName = "";
+    private int $initialDelayInMilliseconds = self::DEFAULT_INITIAL_DELAY;
+    private int $handledMessageLimit = self::DEFAULT_HANDLED_MESSAGE_LIMIT;
+    private int $memoryLimitInMegabytes = self::DEFAULT_MEMORY_LIMIT_MEGABYTES;
+    private int $executionAmountLimit = self::DEFAULT_EXECUTION_LIMIT;
+    private int $maxMessagePerPoll = self::DEFAULT_MAX_MESSAGES_PER_POLL;
+    private int $executionTimeLimitInMilliseconds = self::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS;
+    private ?\Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder $connectionRetryTemplate = null;
+    private bool $withSignalInterceptors = false;
+    private string $triggerReferenceName = "";
+    private string $taskExecutorName = "";
 
     /**
      * PollingMetadata constructor.

@@ -15,12 +15,6 @@ use Doctrine\Common\Annotations\Annotation\Target;
  */
 class ServiceActivator extends InputOutputEndpointAnnotation
 {
-    /**
-     * @var bool
-     */
-    public $requiresReply = false;
-    /**
-     * @var array
-     */
-    public $parameterConverters = [];
+    public bool $requiresReply = false;
+    public array $parameterConverters = [];
 }

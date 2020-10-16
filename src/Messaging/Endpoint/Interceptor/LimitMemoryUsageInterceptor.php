@@ -14,10 +14,7 @@ use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
  */
 class LimitMemoryUsageInterceptor implements ConsumerInterceptor
 {
-    /**
-     * @var int
-     */
-    private $memoryLimitInMegaBytes;
+    private int $memoryLimitInMegaBytes;
 
     /**
      * LimitMemoryUsageInterceptor constructor.

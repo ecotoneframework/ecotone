@@ -14,19 +14,10 @@ final class RetryTemplate
     /**
      * @var int in milliseconds
      */
-    private $initialDelay;
-    /**
-     * @var int
-     */
-    private $multiplier;
-    /**
-     * @var int|null
-     */
-    private $maxDelay;
-    /**
-     * @var int|null
-     */
-    private $maxAttempts;
+    private int $initialDelay;
+    private int $multiplier;
+    private ?int $maxDelay;
+    private ?int $maxAttempts;
 
     public function __construct(int $initialDelay, int $multiplier, ?int $maxDelay, ?int $maxAttempts)
     {

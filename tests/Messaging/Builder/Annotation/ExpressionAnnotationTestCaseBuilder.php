@@ -12,14 +12,8 @@ use Ecotone\Messaging\Annotation\Parameter\Expression;
  */
 class ExpressionAnnotationTestCaseBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var string
-     */
-    private $expression;
+    private string $parameterName;
+    private string $expression;
 
     /**
      * ExpressionTestBuilder constructor.

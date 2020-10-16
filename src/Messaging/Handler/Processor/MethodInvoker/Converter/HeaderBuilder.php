@@ -16,18 +16,9 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class HeaderBuilder implements ParameterConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $headerName;
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var bool
-     */
-    private $isRequired;
+    private string $headerName;
+    private string $parameterName;
+    private bool $isRequired;
 
     /**
      * HeaderArgument constructor.

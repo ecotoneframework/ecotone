@@ -12,10 +12,7 @@ use SplQueue;
  */
 class InMemoryEventStore
 {
-    /**
-     * @var SplQueue
-     */
-    private $eventsQueue;
+    private \SplQueue $eventsQueue;
 
     /**
      * InMemoryEventStore constructor.

@@ -8,10 +8,7 @@ namespace Ecotone\Messaging\Annotation\Endpoint;
  */
 class Priority
 {
-    /**
-     * @var int
-     */
-    private $number;
+    private int $number;
 
     public function __construct(array $values)
     {

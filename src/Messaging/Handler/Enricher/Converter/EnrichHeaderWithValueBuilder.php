@@ -18,10 +18,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class EnrichHeaderWithValueBuilder implements PropertyEditorBuilder
 {
-    /**
-     * @var string
-     */
-    private $name;
+    private string $name;
     /**
      * @var mixed
      */

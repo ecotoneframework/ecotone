@@ -14,10 +14,7 @@ use Ecotone\Messaging\MessagingException;
  */
 final class HeaderAccessor
 {
-    /**
-     * @var array
-     */
-    private $headers;
+    private array $headers;
 
     /**
      * HeaderAccessor constructor.

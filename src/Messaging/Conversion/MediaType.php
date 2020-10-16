@@ -34,18 +34,12 @@ final class MediaType
 
     private const TYPE_PARAMETER = "type";
 
-    /**
-     * @var string
-     */
-    private $type;
-    /**
-     * @var string
-     */
-    private $subtype;
+    private string $type;
+    private string $subtype;
     /**
      * @var string[]
      */
-    private $parameters = [];
+    private array $parameters = [];
 
     /**
      * MediaType constructor.

@@ -12,10 +12,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class PropertyPath
 {
-    /**
-     * @var string
-     */
-    private $path;
+    private ?string $path;
 
     /**
      * PropertyPath constructor.

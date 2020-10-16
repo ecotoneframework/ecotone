@@ -17,18 +17,9 @@ use Ecotone\Messaging\PollableChannel;
  */
 class SimpleMessageChannelBuilder implements MessageChannelBuilder
 {
-    /**
-     * @var string
-     */
-    private $messageChannelName;
-    /**
-     * @var MessageChannel
-     */
-    private $messageChannel;
-    /**
-     * @var bool
-     */
-    private $isPollable;
+    private string $messageChannelName;
+    private \Ecotone\Messaging\MessageChannel $messageChannel;
+    private bool $isPollable;
 
     /**
      * SimpleMessageChannelBuilder constructor.

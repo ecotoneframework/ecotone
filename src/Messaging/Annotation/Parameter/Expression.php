@@ -14,13 +14,11 @@ use Doctrine\Common\Annotations\Annotation\Required;
 class Expression
 {
     /**
-     * @var string
      * @Required()
      */
-    public $parameterName;
+    public string $parameterName;
     /**
-     * @var string
      * @Required()
      */
-    public $expression;
+    public string $expression;
 }

@@ -18,30 +18,15 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class HeaderExpressionConverter implements ParameterConverter
 {
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
-    /**
-     * @var ExpressionEvaluationService
-     */
-    private $expressionEvaluationService;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
     /**s
      * @var string
      */
-    private $parameterName;
-    /**
-     * @var string
-     */
-    private $expression;
-    /**
-     * @var string
-     */
-    private $headerName;
-    /**
-     * @var bool
-     */
-    private $isRequired;
+    private string $parameterName;
+    private string $expression;
+    private string $headerName;
+    private bool $isRequired;
 
     /**
      * MessageToExpressionEvaluationParameterConverter constructor.

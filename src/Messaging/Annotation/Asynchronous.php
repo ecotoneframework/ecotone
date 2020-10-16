@@ -15,8 +15,7 @@ use Doctrine\Common\Annotations\Annotation\Required;
 class Asynchronous
 {
     /**
-     * @var string
      * @Required()
      */
-    public $channelName;
+    public string $channelName;
 }

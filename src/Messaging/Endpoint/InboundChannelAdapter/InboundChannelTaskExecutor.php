@@ -15,18 +15,9 @@ use Ecotone\Messaging\Scheduling\TaskExecutor;
  */
 class InboundChannelTaskExecutor implements TaskExecutor
 {
-    /**
-     * @var object
-     */
-    private $serviceToCall;
-    /**
-     * @var string
-     */
-    private $method;
-    /**
-     * @var NonProxyGateway|InboundGatewayEntrypoint
-     */
-    private $inboundChannelGateway;
+    private object $serviceToCall;
+    private string $method;
+    private \Ecotone\Messaging\Handler\NonProxyGateway $inboundChannelGateway;
 
     /**
      * InboundChannelGatewayExecutor constructor.

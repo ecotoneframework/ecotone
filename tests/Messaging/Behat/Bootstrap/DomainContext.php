@@ -42,18 +42,9 @@ class DomainContext implements Context
      * @var MessagingSystemConfiguration
      */
     private $messagingSystemConfiguration;
-    /**
-     * @var ConfiguredMessagingSystem
-     */
-    private $messagingSystem;
-    /**
-     * @var InMemoryReferenceSearchService
-     */
-    private $inMemoryReferenceSearchService;
-    /**
-     * @var Future
-     */
-    private $future;
+    private ?\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem;
+    private ?\Ecotone\Messaging\Handler\InMemoryReferenceSearchService $inMemoryReferenceSearchService;
+    private ?\Ecotone\Messaging\Future $future;
 
     /**
      * @Given I register :bookingRequestName as :type

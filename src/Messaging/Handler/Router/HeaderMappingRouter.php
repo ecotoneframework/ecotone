@@ -12,14 +12,8 @@ use Ecotone\Messaging\Message;
  */
 final class HeaderMappingRouter
 {
-    /**
-     * @var string
-     */
-    private $headerName;
-    /**
-     * @var array
-     */
-    private $headerValueToChannelMapping;
+    private string $headerName;
+    private array $headerValueToChannelMapping;
 
     /**
      * PayloadTypeRouter constructor.

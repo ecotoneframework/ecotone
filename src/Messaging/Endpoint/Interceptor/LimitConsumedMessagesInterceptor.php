@@ -12,20 +12,11 @@ use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
  */
 class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
 {
-    /**
-     * @var bool
-     */
-    private $shouldBeStopped = false;
+    private bool $shouldBeStopped = false;
 
-    /**
-     * @var int
-     */
-    private $currentSentMessages = 0;
+    private int $currentSentMessages = 0;
 
-    /**
-     * @var int
-     */
-    private $messageLimit;
+    private int $messageLimit;
 
     /**
      * LimitConsumedMessagesInterceptor constructor.

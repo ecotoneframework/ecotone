@@ -17,22 +17,10 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class EnrichPayloadWithExpressionBuilder implements PropertyEditorBuilder
 {
-    /**
-     * @var string
-     */
-    private $propertyPath;
-    /**
-     * @var string
-     */
-    private $expression;
-    /**
-     * @var string
-     */
-    private $mappingExpression;
-    /**
-     * @var string
-     */
-    private $nullResultExpression = "";
+    private string $propertyPath;
+    private string $expression;
+    private string $mappingExpression;
+    private string $nullResultExpression = "";
 
     /**
      * ExpressionSetterBuilder constructor.

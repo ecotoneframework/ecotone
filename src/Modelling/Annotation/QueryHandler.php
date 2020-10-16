@@ -15,8 +15,5 @@ use Ramsey\Uuid\Uuid;
  */
 class QueryHandler extends InputOutputEndpointAnnotation
 {
-    /**
-     * @var array
-     */
-    public $parameterConverters = [];
+    public array $parameterConverters = [];
 }

@@ -18,30 +18,12 @@ use Ecotone\Messaging\Message;
  */
 class EnrichHeaderWithExpressionPropertyEditor implements PropertyEditor
 {
-    /**
-     * @var ExpressionEvaluationService
-     */
-    private $expressionEvaluationService;
-    /**
-     * @var PropertyPath
-     */
-    private $propertyPath;
-    /**
-     * @var string
-     */
-    private $expression;
-    /**
-     * @var PropertyEditorAccessor
-     */
-    private $dataSetter;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
-    /**
-     * @var string
-     */
-    private $nullResultExpression;
+    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
+    private \Ecotone\Messaging\Handler\Enricher\PropertyPath $propertyPath;
+    private string $expression;
+    private \Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor $dataSetter;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private string $nullResultExpression;
 
     /**
      * ExpressionSetter constructor.

@@ -15,18 +15,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 final class ExpressionTransformer
 {
-    /**
-     * @var ExpressionEvaluationService
-     */
-    private $expressionEvaluationService;
-    /**
-     * @var string
-     */
-    private $expression;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
+    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
+    private string $expression;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
 
     /**
      * ExpressionTransformer constructor.

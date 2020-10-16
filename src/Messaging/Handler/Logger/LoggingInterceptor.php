@@ -20,10 +20,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class LoggingInterceptor
 {
-    /**
-     * @var LoggingService
-     */
-    private $loggingService;
+    private \Ecotone\Messaging\Handler\Logger\LoggingService $loggingService;
 
     /**
      * LoggingInterceptor constructor.

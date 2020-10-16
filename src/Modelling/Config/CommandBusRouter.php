@@ -16,10 +16,7 @@ use Ecotone\Modelling\CommandBus;
  */
 class CommandBusRouter
 {
-    /**
-     * @var array
-     */
-    private $channelMapping = [];
+    private array $channelMapping = [];
 
     /**
      * CommandBusRouter constructor.

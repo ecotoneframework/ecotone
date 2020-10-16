@@ -13,10 +13,7 @@ use Psr\Container\ContainerInterface;
  */
 class InMemoryPSRContainer implements ContainerInterface
 {
-    /**
-     * @var array
-     */
-    private $objects;
+    private array $objects;
 
     /**
      * InMemoryPSRContainer constructor.

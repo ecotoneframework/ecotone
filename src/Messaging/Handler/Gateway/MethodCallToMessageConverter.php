@@ -18,14 +18,8 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class MethodCallToMessageConverter
 {
-    /**
-     * @var InterfaceToCall
-     */
-    private $interfaceToCall;
-    /**
-     * @var array|GatewayParameterConverter[]
-     */
-    private $methodArgumentConverters;
+    private ?\Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
+    private ?array $methodArgumentConverters;
 
     /**
      * MethodCallToMessageConverter constructor.

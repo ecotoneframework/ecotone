@@ -17,14 +17,8 @@ use Ecotone\Messaging\Support\Assert;
  */
 class PayloadExpressionBuilder implements ParameterConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var string
-     */
-    private $expression;
+    private string $parameterName;
+    private string $expression;
 
     /**
      * ExpressionBuilder constructor.

@@ -19,10 +19,7 @@ use Ecotone\Messaging\MessageHandler;
  */
 class SerializerHandlerBuilder extends InputOutputMessageHandlerBuilder
 {
-    /**
-     * @var string
-     */
-    private $methodName;
+    private string $methodName;
 
     private function __construct(string $methodName)
     {

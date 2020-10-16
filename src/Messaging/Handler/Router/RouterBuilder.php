@@ -22,46 +22,19 @@ use Ecotone\Messaging\Support\Assert;
  */
 class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 {
-    /**
-     * @var string
-     */
-    private $inputMessageChannelName;
-    /**
-     * @var string
-     */
-    private $objectToInvokeReference;
-    /**
-     * @var object
-     */
-    private $directObjectToInvoke;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var array|ParameterConverterBuilder[]
-     */
-    private $methodParameterConverters = [];
-    /**
-     * @var bool
-     */
-    private $resolutionRequired = true;
+    private ?string $inputMessageChannelName = null;
+    private string $objectToInvokeReference;
+    private ?object $directObjectToInvoke = null;
+    private string $methodName;
+    private array $methodParameterConverters = [];
+    private bool $resolutionRequired = true;
     /**
      * @var string[]
      */
-    private $requiredReferenceNames = [];
-    /**
-     * @var string|null
-     */
-    private $defaultResolution;
-    /**
-     * @var bool
-     */
-    private $applySequence = false;
-    /**
-     * @var string
-     */
-    private $endpointId = "";
+    private array $requiredReferenceNames = [];
+    private ?string $defaultResolution = null;
+    private bool $applySequence = false;
+    private ?string $endpointId = "";
 
     /**
      * RouterBuilder constructor.

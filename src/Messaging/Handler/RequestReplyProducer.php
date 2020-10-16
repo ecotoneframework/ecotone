@@ -23,26 +23,11 @@ class RequestReplyProducer
     private const REQUEST_REPLY_METHOD = 1;
     private const REQUEST_SPLIT_METHOD = 2;
 
-    /**
-     * @var MessageChannel|null
-     */
-    private $outputChannel;
-    /**
-     * @var bool
-     */
-    private $isReplyRequired;
-    /**
-     * @var ChannelResolver
-     */
-    private $channelResolver;
-    /**
-     * @var MessageProcessor
-     */
-    private $messageProcessor;
-    /**
-     * @var int
-     */
-    private $method;
+    private ?\Ecotone\Messaging\MessageChannel $outputChannel;
+    private bool $isReplyRequired;
+    private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
+    private \Ecotone\Messaging\Handler\MessageProcessor $messageProcessor;
+    private int $method;
 
     /**
      * RequestReplyProducer constructor.

@@ -17,10 +17,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class EnrichPayloadWithValueBuilder implements PropertyEditorBuilder
 {
-    /**
-     * @var string
-     */
-    private $propertyPath;
+    private string $propertyPath;
     /**
      * @var mixed
      */

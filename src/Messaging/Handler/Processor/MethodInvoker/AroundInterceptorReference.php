@@ -23,30 +23,12 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class AroundInterceptorReference implements InterceptorWithPointCut
 {
-    /**
-     * @var int
-     */
-    private $precedence;
-    /**
-     * @var string
-     */
-    private $interceptorName;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var Pointcut
-     */
-    private $pointcut;
-    /**
-     * @var object
-     */
-    private $directObject;
-    /**
-     * @var string
-     */
-    private $referenceName = "";
+    private int $precedence;
+    private string $interceptorName;
+    private string $methodName;
+    private \Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut $pointcut;
+    private ?object $directObject = null;
+    private string $referenceName = "";
 
     /**
      * InterceptorReference constructor.

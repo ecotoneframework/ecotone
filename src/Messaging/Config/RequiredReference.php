@@ -9,10 +9,7 @@ namespace Ecotone\Messaging\Config;
  */
 class RequiredReference
 {
-    /**
-     * @var string
-     */
-    private $referenceName;
+    private string $referenceName;
 
     /**
      * RequiredReference constructor.

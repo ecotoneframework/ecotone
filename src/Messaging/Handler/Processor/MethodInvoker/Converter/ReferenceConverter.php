@@ -18,18 +18,9 @@ use Ecotone\Messaging\Support\Assert;
  */
 class ReferenceConverter implements ParameterConverter
 {
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var object
-     */
-    private $referenceService;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private string $parameterName;
+    private ?object $referenceService = null;
 
     /**
      * ServiceReferenceParameterConverter constructor.

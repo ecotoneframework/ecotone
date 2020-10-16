@@ -16,5 +16,5 @@ class Environment
     /**
      * @var string[]
      */
-    public $names = [];
+    public array $names = [];
 }

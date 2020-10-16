@@ -13,8 +13,6 @@ class MethodInterceptor
 {
     /**
      * If not configured it will take class name as reference
-     *
-     * @var string
      */
-    public $referenceName;
+    public string $referenceName;
 }

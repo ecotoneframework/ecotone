@@ -9,10 +9,7 @@ namespace Ecotone\Messaging\Handler;
  */
 class MethodArgument
 {
-    /**
-     * @var InterfaceParameter
-     */
-    private $parameter;
+    private \Ecotone\Messaging\Handler\InterfaceParameter $parameter;
     /**
      * @var mixed
      */

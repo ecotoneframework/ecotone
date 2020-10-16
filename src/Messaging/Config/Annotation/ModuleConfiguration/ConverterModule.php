@@ -30,7 +30,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @var ConverterBuilder[]
      */
-    private $converterBuilders = [];
+    private array $converterBuilders = [];
 
     /**
      * ConverterModule constructor.

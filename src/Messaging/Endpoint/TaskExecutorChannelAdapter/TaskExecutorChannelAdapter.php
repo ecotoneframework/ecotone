@@ -23,22 +23,10 @@ use Ecotone\Messaging\Scheduling\Trigger;
  */
 class TaskExecutorChannelAdapter implements ConsumerLifecycle
 {
-    /**
-     * @var string
-     */
-    private $consumerName;
-    /**
-     * @var Trigger
-     */
-    private $trigger;
-    /**
-     * @var TaskScheduler
-     */
-    private $taskScheduler;
-    /**
-     * @var TaskExecutor
-     */
-    private $taskExecutor;
+    private string $consumerName;
+    private \Ecotone\Messaging\Scheduling\Trigger $trigger;
+    private \Ecotone\Messaging\Scheduling\TaskScheduler $taskScheduler;
+    private \Ecotone\Messaging\Scheduling\TaskExecutor $taskExecutor;
 
     /**
      * InboundChannelAdapter constructor.

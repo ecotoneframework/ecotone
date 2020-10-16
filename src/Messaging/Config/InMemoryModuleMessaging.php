@@ -10,14 +10,8 @@ use Ecotone\Messaging\Support\Assert;
  */
 class InMemoryModuleMessaging implements ModuleRetrievingService
 {
-    /**
-     * @var array|Module[]
-     */
-    private $moduleConfigurations = [];
-    /**
-     * @var array
-     */
-    private $extensionObjects;
+    private array $moduleConfigurations = [];
+    private array $extensionObjects;
 
     /**
      * InMemoryModuleMessagingConfiguration constructor.

@@ -14,12 +14,8 @@ use Doctrine\Common\Annotations\Annotation\Required;
 class Reference
 {
     /**
-     * @var string
      * @Required()
      */
-    public $parameterName;
-    /**
-     * @var string
-     */
-    public $referenceName = '';
+    public string $parameterName;
+    public string $referenceName = '';
 }

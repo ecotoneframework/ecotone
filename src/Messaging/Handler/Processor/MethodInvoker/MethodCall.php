@@ -19,11 +19,8 @@ class MethodCall
     /**
      * @var MethodArgument[]
      */
-    private $methodArguments;
-    /**
-     * @var bool
-     */
-    private $canReplaceArguments;
+    private array $methodArguments;
+    private bool $canReplaceArguments;
 
     /**
      * MethodCall constructor.

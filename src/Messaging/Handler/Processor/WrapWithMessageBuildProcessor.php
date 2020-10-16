@@ -21,14 +21,8 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class WrapWithMessageBuildProcessor implements MessageProcessor
 {
-    /**
-     * @var InterfaceToCall
-     */
-    private $interfaceToCall;
-    /**
-     * @var MessageProcessor
-     */
-    private $messageProcessor;
+    private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
+    private \Ecotone\Messaging\Handler\MessageProcessor $messageProcessor;
 
     /**
      * WrapWithMessageProcessor constructor.

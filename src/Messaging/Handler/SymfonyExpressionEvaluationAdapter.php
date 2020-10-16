@@ -12,10 +12,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
  */
 class SymfonyExpressionEvaluationAdapter implements \Ecotone\Messaging\Handler\ExpressionEvaluationService
 {
-    /**
-     * @var ExpressionLanguage
-     */
-    private $language;
+    private \Symfony\Component\ExpressionLanguage\ExpressionLanguage $language;
 
     /**
      * SymfonyExpressionEvaluationAdapter constructor.

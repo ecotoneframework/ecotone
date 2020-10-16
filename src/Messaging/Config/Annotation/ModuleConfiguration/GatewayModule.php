@@ -39,7 +39,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @var GatewayBuilder[]
      */
-    private $gatewayBuilders = [];
+    private array $gatewayBuilders = [];
 
     /**
      * AnnotationGatewayConfiguration constructor.

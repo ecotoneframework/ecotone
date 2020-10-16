@@ -15,14 +15,8 @@ use Psr\Container\ContainerInterface;
  */
 class PsrContainerReferenceSearchService implements ReferenceSearchService
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-    /**
-     * @var array
-     */
-    private $defaults;
+    private \Psr\Container\ContainerInterface $container;
+    private array $defaults;
 
     /**
      * PsrContainerReferenceSearchService constructor.

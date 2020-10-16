@@ -17,18 +17,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
  */
 class InterceptorConverterBuilder implements ParameterConverterBuilder
 {
-    /**
-     * @var InterfaceToCall
-     */
-    private $interceptedInterface;
-    /**
-     * @var array|object[]
-     */
-    private $endpointAnnotations;
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private \Ecotone\Messaging\Handler\InterfaceToCall $interceptedInterface;
+    private array $endpointAnnotations;
+    private string $parameterName;
 
     /**
      * AnnotationInterceptorConverterBuilder constructor.

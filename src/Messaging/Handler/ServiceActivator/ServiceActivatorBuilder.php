@@ -26,42 +26,18 @@ use Ecotone\Messaging\Support\Assert;
  */
 class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
-    /**
-     * @var string
-     */
-    private $objectToInvokeReferenceName;
-    /**
-     * @var string
-     */
-    private $methodName;
-    /**
-     * @var  bool
-     */
-    private $isReplyRequired = false;
-    /**
-     * @var array|\Ecotone\Messaging\Handler\ParameterConverterBuilder[]
-     */
-    private $methodParameterConverterBuilders = [];
+    private string $objectToInvokeReferenceName;
+    private string $methodName;
+    private bool $isReplyRequired = false;
+    private array $methodParameterConverterBuilders = [];
     /**
      * @var string[]
      */
-    private $requiredReferenceNames = [];
-    /**
-     * @var object
-     */
-    private $directObjectReference;
-    /**
-     * @var bool
-     */
-    private $shouldPassThroughMessage = false;
-    /**
-     * @var bool
-     */
-    private $canAroundInterceptorsReplaceArguments = true;
-    /**
-     * @var bool
-     */
-    private $shouldWrapResultInMessage = true;
+    private array $requiredReferenceNames = [];
+    private ?object $directObjectReference = null;
+    private bool $shouldPassThroughMessage = false;
+    private bool $canAroundInterceptorsReplaceArguments = true;
+    private bool $shouldWrapResultInMessage = true;
 
     /**
      * ServiceActivatorBuilder constructor.

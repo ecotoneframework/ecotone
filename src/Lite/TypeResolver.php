@@ -17,10 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class TypeResolver implements ReferenceTypeFromNameResolver
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
+    private \Psr\Container\ContainerInterface $container;
 
     /**
      * SymfonyReferenceTypeResolver constructor.

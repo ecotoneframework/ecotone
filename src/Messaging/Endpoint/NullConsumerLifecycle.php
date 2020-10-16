@@ -11,10 +11,7 @@ namespace Ecotone\Messaging\Endpoint;
  */
 class NullConsumerLifecycle implements ConsumerLifecycle
 {
-    /**
-     * @var bool
-     */
-    private $isRunning;
+    private bool $isRunning;
 
     /**
      * NullConsumerLifecycle constructor.

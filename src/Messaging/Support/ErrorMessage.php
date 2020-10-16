@@ -14,14 +14,8 @@ use Ecotone\Messaging\MessagingException;
  */
 final class ErrorMessage implements Message
 {
-    /**
-     * @var MessagingException
-     */
-    private $messagingException;
-    /**
-     * @var MessageHeaders
-     */
-    private $messageHeaders;
+    private \Ecotone\Messaging\MessagingException $messagingException;
+    private \Ecotone\Messaging\MessageHeaders $messageHeaders;
 
     /**
      * ErrorMessage constructor.

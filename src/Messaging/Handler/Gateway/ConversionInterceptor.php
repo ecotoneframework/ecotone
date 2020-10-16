@@ -14,18 +14,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
 
 class ConversionInterceptor
 {
-    /**
-     * @var InterfaceToCall
-     */
-    private $interfaceToCall;
-    /**
-     * @var ConversionService
-     */
-    private $conversionService;
-    /**
-     * @var MediaType|null
-     */
-    private $replyContentType;
+    private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
+    private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
+    private ?\Ecotone\Messaging\Conversion\MediaType $replyContentType;
 
 
     public function __construct(ConversionService $conversionService, InterfaceToCall $interfaceToCall, ?MediaType $replyContentType)

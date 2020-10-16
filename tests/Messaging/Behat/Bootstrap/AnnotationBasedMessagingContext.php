@@ -61,10 +61,7 @@ use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
 
 class AnnotationBasedMessagingContext extends TestCase implements Context
 {
-    /**
-     * @var ConfiguredMessagingSystem
-     */
-    private static $messagingSystem;
+    private static ?\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem;
 
     /**
      * @Given I active messaging for namespace :namespace

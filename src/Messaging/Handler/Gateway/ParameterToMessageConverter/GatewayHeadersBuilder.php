@@ -13,10 +13,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class GatewayHeadersBuilder implements GatewayParameterConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
 
     /**
      * HeaderMessageParameter constructor.

@@ -14,14 +14,10 @@ class RetryTemplate
      * @var int in milliseconds
      * @Required()
      */
-    public $initialDelay;
+    public int $initialDelay;
     /**
-     * @var int
      * @Required()
      */
-    public $maxAttempts;
-    /**
-     * @var int
-     */
-    public $multiplier = 3;
+    public int $maxAttempts;
+    public int $multiplier = 3;
 }

@@ -11,14 +11,8 @@ use Ecotone\Messaging\Annotation\Parameter\Reference;
  */
 class ReferenceAnnotationTestCaseBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
-    /**
-     * @var string
-     */
-    private $referenceName;
+    private string $parameterName;
+    private string $referenceName;
 
     /**
      * ExpressionTestBuilder constructor.

@@ -10,14 +10,8 @@ namespace Ecotone\Messaging\Scheduling;
  */
 class PeriodicTrigger implements Trigger
 {
-    /**
-     * @var integer
-     */
-    private $fixedRateInMilliseconds;
-    /**
-     * @var int
-     */
-    private $initialDelayInMilliseconds;
+    private int $fixedRateInMilliseconds;
+    private int $initialDelayInMilliseconds;
 
     /**
      * PeriodicTrigger constructor.

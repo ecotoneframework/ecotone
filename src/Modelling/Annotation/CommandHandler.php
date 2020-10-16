@@ -15,18 +15,10 @@ use Ramsey\Uuid\Uuid;
  */
 class CommandHandler extends InputOutputEndpointAnnotation
 {
-    /**
-     * @var array
-     */
-    public $parameterConverters = [];
+    public array $parameterConverters = [];
     /**
      * If @Aggregate was not found, message can be dropped instead of throwing exception
-     *
-     * @var bool
      */
-    public $dropMessageOnNotFound = false;
-    /**
-     * @var array
-     */
-    public $identifierMetadataMapping = [];
+    public bool $dropMessageOnNotFound = false;
+    public array $identifierMetadataMapping = [];
 }

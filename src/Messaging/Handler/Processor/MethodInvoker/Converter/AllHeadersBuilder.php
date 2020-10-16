@@ -15,10 +15,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class AllHeadersBuilder implements ParameterConverterBuilder
 {
-    /**
-     * @var string
-     */
-    private $parameterName;
+    private string $parameterName;
 
     /**
      * AllHeadersConverter constructor.

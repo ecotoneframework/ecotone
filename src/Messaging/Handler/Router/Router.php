@@ -22,26 +22,11 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 final class Router implements MessageHandler
 {
-    /**
-     * @var ChannelResolver
-     */
-    private $channelResolver;
-    /**
-     * @var MessageProcessor
-     */
-    private $methodInvoker;
-    /**
-     * @var bool
-     */
-    private $isResolutionRequired;
-    /**
-     * @var null|string
-     */
-    private $defaultResolutionChannelName;
-    /**
-     * @var bool
-     */
-    private $applySequence;
+    private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
+    private \Ecotone\Messaging\Handler\MessageProcessor $methodInvoker;
+    private bool $isResolutionRequired;
+    private ?string $defaultResolutionChannelName;
+    private bool $applySequence;
 
     /**
      * RouterBuilder constructor.

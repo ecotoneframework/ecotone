@@ -13,14 +13,8 @@ use Ramsey\Uuid\Uuid;
  */
 class IdentifiedAnnotation
 {
-    /**
-     * @var string
-     */
-    public $endpointId;
-    /**
-     * @var bool
-     */
-    private $isGenerated = false;
+    public string $endpointId = "";
+    private bool $isGenerated = false;
 
     public function __construct(array $values = [])
     {

@@ -17,11 +17,8 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
     /**
      * @var string[]
      */
-    private $references;
-    /**
-     * @var ReferenceSearchService|null
-     */
-    private $referenceSearchService;
+    private array $references;
+    private ?\Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService = null;
 
     /**
      * InMemoryReferenceTypeFromNameResolver constructor.

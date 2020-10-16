@@ -12,10 +12,7 @@ use Ecotone\Messaging\PollableChannel;
  */
 class QueueChannel implements PollableChannel
 {
-    /**
-     * @var array|Message[]
-     */
-    private $queue = [];
+    private array $queue = [];
 
     private function __construct()
     {

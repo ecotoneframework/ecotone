@@ -10,14 +10,8 @@ namespace Ecotone\Messaging\Scheduling;
  */
 class SyncTaskScheduler implements TaskScheduler
 {
-    /**
-     * @var Clock
-     */
-    private $clock;
-    /**
-     * @var SimpleTriggerContext
-     */
-    private $triggerContext;
+    private \Ecotone\Messaging\Scheduling\Clock $clock;
+    private \Ecotone\Messaging\Scheduling\TriggerContext $triggerContext;
 
     /**
      * SyncTaskScheduler constructor.

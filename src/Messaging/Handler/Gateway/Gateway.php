@@ -38,58 +38,28 @@ use Throwable;
  */
 class Gateway implements NonProxyGateway
 {
-    /**
-     * @var MethodCallToMessageConverter
-     */
-    private $methodCallToMessageConverter;
+    private \Ecotone\Messaging\Handler\Gateway\MethodCallToMessageConverter $methodCallToMessageConverter;
     /**
      * @var MessageConverter[]
      */
-    private $messageConverters;
-    /**
-     * @var InterfaceToCall
-     */
-    private $interfaceToCall;
-    /**
-     * @var PollableChannel|null
-     */
-    private $replyChannel;
-    /**
-     * @var MessageChannel|null
-     */
-    private $errorChannel;
-    /**
-     * @var int
-     */
-    private $replyMilliSecondsTimeout;
-    /**
-     * @var MessageChannel
-     */
-    private $gatewayRequestChannel;
-    /**
-     * @var ReferenceSearchService
-     */
-    private $referenceSearchService;
-    /**
-     * @var iterable|AroundInterceptorReference[]
-     */
-    private $aroundInterceptors;
+    private array $messageConverters;
+    private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
+    private ?\Ecotone\Messaging\PollableChannel $replyChannel;
+    private ?\Ecotone\Messaging\MessageChannel $errorChannel;
+    private int $replyMilliSecondsTimeout;
+    private \Ecotone\Messaging\MessageChannel $gatewayRequestChannel;
+    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private iterable $aroundInterceptors;
     /**
      * @var InputOutputMessageHandlerBuilder[]
      */
-    private $sortedBeforeInterceptors = [];
+    private iterable $sortedBeforeInterceptors = [];
     /**
      * @var InputOutputMessageHandlerBuilder[]
      */
-    private $sortedAfterInterceptors = [];
-    /**
-     * @var iterable|object[]
-     */
-    private $endpointAnnotations;
-    /**
-     * @var ChannelResolver
-     */
-    private $channelResolver;
+    private iterable $sortedAfterInterceptors = [];
+    private iterable $endpointAnnotations;
+    private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
 
     /**
      * GatewayProxy constructor.

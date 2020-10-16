@@ -8,7 +8,7 @@ use Ecotone\Messaging\PollableChannel;
 
 class ExceptionalQueueChannel implements PollableChannel
 {
-    private $exceptionCount = 0;
+    private int $exceptionCount = 0;
 
     private function __construct()
     {

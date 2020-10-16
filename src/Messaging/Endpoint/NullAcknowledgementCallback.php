@@ -16,9 +16,9 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
     private const REJECT = 2;
     private const REQUEUED = 2;
 
-    private $status = self::AWAITING;
+    private int $status = self::AWAITING;
 
-    private $isAutoAck = true;
+    private bool $isAutoAck = true;
 
     private function __construct()
     {

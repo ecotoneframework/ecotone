@@ -12,10 +12,7 @@ class SerializerHandler
     const MEDIA_TYPE = "ecotone.serializer.media_type";
     const TARGET_TYPE = "ecotone.serializer.target_type";
 
-    /**
-     * @var ConversionService
-     */
-    private $conversionService;
+    private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
 
     public function __construct(ConversionService $conversionService)
     {

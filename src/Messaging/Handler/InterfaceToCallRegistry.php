@@ -26,15 +26,9 @@ class InterfaceToCallRegistry
     /**
      * @var InterfaceToCall[]
      */
-    private $interfacesToCall = [];
-    /**
-     * @var ReferenceTypeFromNameResolver
-     */
-    private $referenceTypeFromNameResolver;
-    /**
-     * @var bool
-     */
-    private $isLocked;
+    private array $interfacesToCall = [];
+    private \Ecotone\Messaging\Config\ReferenceTypeFromNameResolver $referenceTypeFromNameResolver;
+    private bool $isLocked;
 
     /**
      * InterfaceToCallRegistry constructor.

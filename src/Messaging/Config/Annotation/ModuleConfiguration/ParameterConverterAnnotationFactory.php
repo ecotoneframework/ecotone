@@ -43,15 +43,7 @@ class ParameterConverterAnnotationFactory
         return new self();
     }
 
-    /**
-     * @param InterfaceToCall|null $relatedClassInterface
-     * @param array                $parameterConverterAnnotations
-     *
-     * @return array
-     * @throws MessagingException
-     * @throws InvalidArgumentException
-     */
-    public function createParameterConverters(?InterfaceToCall $relatedClassInterface, array $parameterConverterAnnotations): array
+    private function createParameterConverters(?InterfaceToCall $relatedClassInterface, array $parameterConverterAnnotations): array
     {
         $parameterConverters = [];
 
@@ -75,8 +67,6 @@ class ParameterConverterAnnotationFactory
                 } else {
                     $parameterConverters[] = PayloadBuilder::create($parameterConverterAnnotation->parameterName);
                 }
-            } else if ($parameterConverterAnnotation instanceof MessageParameter) {
-                $parameterConverters[] = MessageConverterBuilder::create($parameterConverterAnnotation->parameterName);
             } else if ($parameterConverterAnnotation instanceof Reference) {
                 if ($parameterConverterAnnotation->referenceName) {
                     $parameterConverters[] = ReferenceBuilder::create($parameterConverterAnnotation->parameterName, $parameterConverterAnnotation->referenceName);
@@ -93,7 +83,7 @@ class ParameterConverterAnnotationFactory
         return $parameterConverters;
     }
 
-    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, AnnotatedFinding $registration, bool $ignorePayload): array
+    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, bool $ignorePayload): array
     {
         return
             MethodInvoker::createDefaultMethodParameters(

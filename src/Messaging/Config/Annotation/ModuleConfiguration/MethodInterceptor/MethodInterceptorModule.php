@@ -35,6 +35,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Modelling\Annotation\IgnorePayload;
 
 /**
  * Class MethodInterceptorModule
@@ -171,7 +172,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $isTransformer       = $annotationForMethod->changeHeaders;
         $parameterConverters = $annotationForMethod->parameterConverters;
 
-        $methodParameterConverterBuilders = $parameterConverterFactory->createParameterConverters($interfaceToCall, $parameterConverters);
+        $methodParameterConverterBuilders = $parameterConverterFactory->createParameterConvertersWithReferences($interfaceToCall, $parameterConverters, (bool)$interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)));
         if ($isTransformer) {
             return TransformerBuilder::create(AnnotatedDefinitionReference::getReferenceFor($methodInterceptor), $methodInterceptor->getMethodName())
                 ->withMethodParameterConverters($methodParameterConverterBuilders);

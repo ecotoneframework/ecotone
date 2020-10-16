@@ -4,11 +4,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext;
 
 use Ecotone\Messaging\Annotation\ApplicationContext;
-use Ecotone\Messaging\Annotation\Extension;
 
-/**
- * @ApplicationContext()
- */
 class ApplicationContextWithConstructorParameters
 {
     public function __construct(\stdClass $some)
@@ -16,7 +12,7 @@ class ApplicationContextWithConstructorParameters
     }
 
     /**
-     * @Extension()
+     * @ApplicationContext()
      */
     public function someExtension()
     {

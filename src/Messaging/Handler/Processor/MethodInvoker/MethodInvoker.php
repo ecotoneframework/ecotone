@@ -163,7 +163,12 @@ final class MethodInvoker implements MessageProcessor
             }
 
             foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-                if (!self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
+                if ($interfaceParameter->isAnnotation()) {
+                    continue;
+                }
+                if (!self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->isMessage()) {
+                    $passedMethodParameterConverters[] = MessageConverterBuilder::create($interfaceParameter->getName());
+                }elseif (!self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
                     $passedMethodParameterConverters[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
                 }
             }

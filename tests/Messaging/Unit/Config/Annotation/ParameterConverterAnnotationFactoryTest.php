@@ -10,6 +10,8 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAn
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
@@ -43,11 +45,14 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                     $referenceAnnotation->parameterName,
                     \stdClass::class
                 ),
-                AllHeadersBuilder::createWith("some")
+                AllHeadersBuilder::createWith("some"),
+                PayloadBuilder::create("to"),
+                MessageConverterBuilder::create("message")
             ],
-            $parameterConverterAnnotationFactory->createParameterConverters(
+            $parameterConverterAnnotationFactory->createParameterConvertersWithReferences(
                 InterfaceToCall::create($relatedClassName, $methodName),
-                [$referenceAnnotation, $allHeadersAnnotation]
+                [$referenceAnnotation, $allHeadersAnnotation],
+                false
             )
         );
     }

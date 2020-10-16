@@ -4,18 +4,15 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext;
 
 use Ecotone\Messaging\Annotation\ApplicationContext;
-use Ecotone\Messaging\Annotation\Extension;
+use stdClass;
 
-/**
- * @ApplicationContext()
- */
 class StdClassExtensionApplicationContext
 {
     /**
-     * @Extension()
+     * @ApplicationContext()
      */
     public function someExtension()
     {
-        return new \stdClass();
+        return new stdClass();
     }
 }

@@ -9,7 +9,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @package Ecotone\Messaging\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation
- * @Target({"CLASS"})
+ * @Target({"METHOD"})
  */
 class ApplicationContext
 {

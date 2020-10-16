@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext;
 
 use Ecotone\Messaging\Annotation\ApplicationContext;
-use Ecotone\Messaging\Annotation\Extension;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
@@ -12,21 +11,16 @@ use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use stdClass;
 
-/**
- * Class ApplicationContext
- * @package Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ApplicationContext()
- */
 class ApplicationContextExample
 {
-    const HTTP_INPUT_CHANNEL = "httpEntry";
+    const HTTP_INPUT_CHANNEL  = "httpEntry";
     const HTTP_OUTPUT_CHANNEL = "httpOutput";
 
     /**
      * @return GatewayBuilder
-     * @Extension()
+     * @ApplicationContext()
      */
     public function gateway(): GatewayBuilder
     {
@@ -35,7 +29,7 @@ class ApplicationContextExample
 
     /**
      * @return MessageChannelBuilder
-     * @Extension()
+     * @ApplicationContext()
      */
     public function httpEntryChannel(): MessageChannelBuilder
     {
@@ -44,20 +38,22 @@ class ApplicationContextExample
 
     /**
      * @return MessageHandlerBuilder
-     * @Extension()
+     * @ApplicationContext()
      */
     public function enricherHttpEntry(): MessageHandlerBuilder
     {
-        return TransformerBuilder::createHeaderEnricher([
-            "token" => "abcedfg"
-        ])
+        return TransformerBuilder::createHeaderEnricher(
+            [
+                "token" => "abcedfg"
+            ]
+        )
             ->withInputChannelName(self::HTTP_INPUT_CHANNEL)
             ->withOutputMessageChannel(self::HTTP_OUTPUT_CHANNEL)
             ->withEndpointId("some-id");
     }
 
     /**
-     * @Extension()
+     * @ApplicationContext()
      */
     public function withChannelInterceptors()
     {
@@ -65,19 +61,19 @@ class ApplicationContextExample
     }
 
     /**
-     * @return \stdClass
-     * @Extension()
+     * @return stdClass
+     * @ApplicationContext()
      */
-    public function withStdClassConverterByExtension(): \stdClass
+    public function withStdClassConverterByExtension(): stdClass
     {
-        return new \stdClass();
+        return new stdClass();
     }
 
     /**
-     * @return \stdClass
+     * @return stdClass
      */
-    public function wrongExtensionObject(): \stdClass
+    public function wrongExtensionObject(): stdClass
     {
-        return new \stdClass();
+        return new stdClass();
     }
 }

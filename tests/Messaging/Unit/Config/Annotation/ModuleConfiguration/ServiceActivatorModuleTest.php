@@ -47,10 +47,9 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
                         ->withMethodParameterConverters([
                             HeaderBuilder::create("to", "sendTo"),
                             PayloadBuilder::create("content"),
-                            PayloadExpressionBuilder::create("content2", "value"),
-                            MessageConverterBuilder::create("message"),
                             ReferenceBuilder::create("object", "reference"),
-                            HeaderExpressionBuilder::create("name", "token", "value", false)
+                            HeaderExpressionBuilder::create("name", "token", "value", false),
+                            MessageConverterBuilder::create("message"),
                         ])
                         ->withRequiredReply(true)
                         ->withRequiredInterceptorNames(["someReference"])

@@ -176,7 +176,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            default:
+            case "Test\Ecotone\Messaging\Fixture\Behat\Calculating":
                 {
                     $objects = [
                         InboundCalculation::class => new InboundCalculation(),
@@ -185,6 +185,10 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
+            default:
+            {
+                throw new \InvalidArgumentException("Namespace not registered ". $namespace);
+            }
         }
 
         $objects["logger"] = new NullLogger();

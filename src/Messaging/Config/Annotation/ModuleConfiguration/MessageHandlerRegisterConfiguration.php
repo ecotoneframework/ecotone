@@ -14,6 +14,8 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Modelling\Annotation\IgnorePayload;
 
 /**
  * Class BaseAnnotationConfiguration
@@ -47,9 +49,10 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
         foreach ($annotationRegistrationService->findAnnotatedMethods(static::getMessageHandlerAnnotation()) as $annotationRegistration) {
             $annotation               = $annotationRegistration->getAnnotationForMethod();
+            $relatedInterface = InterfaceToCall::create($annotationRegistration->getClassName(), $annotationRegistration->getMethodName());
             $messageHandlerBuilders[] = static::createMessageHandlerFrom($annotationRegistration)
                 ->withMethodParameterConverters(
-                    $parameterConverterFactory->createParameterConverters(InterfaceToCall::create($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()), $annotation->parameterConverters)
+                    $parameterConverterFactory->createParameterConvertersWithReferences(InterfaceToCall::create($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()), $annotation->parameterConverters, (bool)$relatedInterface->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)))
                 );
         }
 

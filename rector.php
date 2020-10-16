@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 return static function (ContainerConfigurator $containerConfigurator): void {
     $services = $containerConfigurator->services();
 //    $services->set(Rector\TypeDeclaration\Rector\FunctionLike\ReturnTypeDeclarationRector::class);
-//    $services->set(Rector\TypeDeclaration\Rector\Property\CompleteVarDocTypePropertyRector::class);
+//    $services->set(Rector\TypeDeclaration\Rector\Property\TypedPropertyRector::class);
 
     // get parameters
     $parameters = $containerConfigurator->parameters();
@@ -24,7 +24,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         Rector\DeadCode\Rector\ClassConst\RemoveUnusedClassConstantRector::class,
         Rector\DeadCode\Rector\ClassMethod\RemoveUnusedParameterRector::class,
         Rector\DeadCode\Rector\Property\RemoveUnusedPrivatePropertyRector::class,
-        Rector\DeadCode\Rector\Property\RemoveSetterOnlyPropertyAndMethodCallRector::class
+        Rector\DeadCode\Rector\Property\RemoveSetterOnlyPropertyAndMethodCallRector::class,
+        Rector\DeadCode\Rector\ClassMethod\RemoveEmptyClassMethodRector::class,
+        Rector\DeadCode\Rector\ClassMethod\RemoveEmptyClassMethodRector::class
     ]);
 
     // get services (needed for register a single rule)

@@ -12,9 +12,7 @@ use Ecotone\Messaging\Annotation\Interceptor\TransformerInterceptor;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 
-/**
- * @ClassReference("someMethodInterceptor")
- */
+#[ClassReference("someMethodInterceptor")]
 class TransformerInterceptorExample
 {
     /**

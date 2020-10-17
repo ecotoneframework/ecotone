@@ -9,9 +9,7 @@ use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Annotation\Parameter\Reference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
-/**
- * @ClassReference("calculatingService")
- */
+#[ClassReference("calculatingService")]
 class CalculatingServiceInterceptorExample
 {
     /**

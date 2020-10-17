@@ -7,9 +7,7 @@ use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\ConverterClass;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
-/**
- * @ClassReference()
- */
+#[ClassReference("exampleConverterService")]
 class ExampleConverterService
 {
    /**

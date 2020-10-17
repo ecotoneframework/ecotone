@@ -568,7 +568,7 @@ class InterfaceToCallTest extends TestCase
             $interfaceToCall->getMethodAnnotations()
         );
         $this->assertEquals(
-            [new ClassReference()],
+            [new ClassReference("exampleConverterService")],
             $interfaceToCall->getClassAnnotations()
         );
     }
@@ -583,7 +583,7 @@ class InterfaceToCallTest extends TestCase
         $this->assertTrue($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(ClassReference::class)));
 
         $this->assertEquals(
-            new ClassReference(),
+            new ClassReference("exampleConverterService"),
             $interfaceToCall->getClassAnnotation(TypeDescriptor::create(ClassReference::class))
         );
         $this->assertEquals(

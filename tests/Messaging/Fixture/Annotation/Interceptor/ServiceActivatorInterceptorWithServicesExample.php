@@ -8,9 +8,6 @@ use Ecotone\Messaging\Annotation\Interceptor\Before;
 use Ecotone\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
 use stdClass;
 
-/**
- * @ClassReference()
- */
 class ServiceActivatorInterceptorWithServicesExample
 {
     /**

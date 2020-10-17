@@ -33,13 +33,13 @@ class ConverterModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerConverter(
                     ReferenceServiceConverterBuilder::create(
-                        ExampleConverterService::class,
+                        "exampleConverterService",
                         "convert",
                         TypeDescriptor::create("array<string>"),
                         TypeDescriptor::create("array<\stdClass>")
                     )
                 )
-                ->requireReferences([ExampleConverterService::class]),
+                ->requireReferences(["exampleConverterService"]),
             $configuration
         );
     }

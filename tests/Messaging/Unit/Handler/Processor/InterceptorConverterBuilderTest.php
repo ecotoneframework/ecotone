@@ -74,7 +74,7 @@ class InterceptorConverterBuilderTest extends TestCase
         $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
 
         $parameter = InterfaceParameter::createNotNullable("some", TypeDescriptor::create(ClassReference::class));
-        $classAnnotation = new ClassReference();
+        $classAnnotation = new ClassReference("callWithUnordered");
 
         $this->assertTrue($converter->isHandling($parameter));
         $this->assertEquals(

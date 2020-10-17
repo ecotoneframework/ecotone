@@ -7,9 +7,7 @@ use Ecotone\Messaging\Annotation\Interceptor\Around;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
-/**
- * @ClassReference()
- */
+#[ClassReference("callWithUnordered")]
 class CallWithUnorderedClassInvocationInterceptorExample extends BaseInterceptorExample
 {
     /**

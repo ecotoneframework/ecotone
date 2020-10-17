@@ -7,9 +7,7 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeComma
 use Ecotone\Messaging\Annotation\ClassReference;
 use Ecotone\Messaging\Annotation\ConsoleCommand;
 
-/**
- * @ClassReference(referenceName="consoleCommand")
- */
+#[ClassReference("consoleCommand")]
 class ReferenceBasedConsoleCommand
 {
     public function __construct(\stdClass $class) {}

@@ -6,9 +6,6 @@ use Ecotone\Messaging\Annotation\ClassReference;
 use Ecotone\Messaging\Annotation\Converter;
 use stdClass;
 
-/**
- * @ClassReference()
- */
 class ExampleSingleConverterService
 {
     /**

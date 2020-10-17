@@ -58,8 +58,9 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
 
         $registeredAsyncEndpoints = [];
         foreach ($asynchronousMethods as $asynchronousMethod) {
+            /** @var Asynchronous $asyncAnnotation */
             $asyncAnnotation = $asynchronousMethod->getAnnotationForMethod();
-            $inputChannel = $asyncAnnotation->channelName;
+            $inputChannel = $asyncAnnotation->getChannelName();
             foreach ($endpoints as $key => $endpoint) {
                 if ($endpoint->getClassName() === $asynchronousMethod->getClassName() && $endpoint->getMethodName() === $asynchronousMethod->getMethodName()) {
                     /** @var EndpointAnnotation $annotationForMethod */
@@ -96,7 +97,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
                         }
                     }
 
-                    $registeredAsyncEndpoints[$asyncClass->channelName][] = $annotationForMethod->endpointId;
+                    $registeredAsyncEndpoints[$asyncClass->getChannelName()][] = $annotationForMethod->endpointId;
                 }
             }
         }

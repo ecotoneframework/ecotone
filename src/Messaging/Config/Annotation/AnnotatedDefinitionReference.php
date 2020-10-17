@@ -16,9 +16,7 @@ class AnnotatedDefinitionReference
             /** @var ClassReference $reference */
             $reference = $annotatedDefinition->getClassAnnotationsWithType(ClassReference::class)[0];
 
-            if ($reference->referenceName) {
-                return $reference->referenceName;
-            }
+            return $reference->getReferenceName();
         }
 
         return $annotatedDefinition->getClassName();

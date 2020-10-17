@@ -105,7 +105,7 @@ class MessageHeaders
      * MessageHeaders constructor.
      * @param array $headers
      */
-    final private function __construct(array $headers)
+    private function __construct(array $headers)
     {
         $this->initialize($headers);
     }
@@ -276,7 +276,7 @@ class MessageHeaders
      * @param array|string[] $headers
      * @throws \Ecotone\Messaging\MessagingException
      */
-    final private function initialize(array $headers) : void
+    private function initialize(array $headers) : void
     {
         foreach ($headers as $headerName => $headerValue) {
             if (is_null($headerName) || $headerName === '') {
@@ -291,7 +291,7 @@ class MessageHeaders
      * @param array $headers
      * @return MessageHeaders
      */
-    final private static function createMessageHeadersWith(array $headers): MessageHeaders
+    private static function createMessageHeadersWith(array $headers): MessageHeaders
     {
         return new static(array_merge(
             [

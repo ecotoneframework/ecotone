@@ -4,13 +4,10 @@
 namespace Test\Ecotone\Modelling\Fixture\Order;
 
 use Ecotone\Messaging\Annotation\Asynchronous;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\Poller;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\EventBus;
-use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 
 /**
  * @Asynchronous(channelName="orders")

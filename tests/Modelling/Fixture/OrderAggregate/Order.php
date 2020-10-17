@@ -3,7 +3,6 @@
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
 
 use Ecotone\Messaging\Annotation\Asynchronous;
-use Ecotone\Messaging\Annotation\Poller;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
@@ -12,7 +11,6 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\WithAggregateEvents;
 use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
-use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserId;
 
 /**
  * Class OrderService

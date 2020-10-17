@@ -4,8 +4,6 @@
 namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
 use Ecotone\Messaging\Annotation\Scheduled;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\Poller;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
 class InboundCalculation

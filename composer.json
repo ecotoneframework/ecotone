@@ -23,7 +23,7 @@
         }
     },
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
         "ecotone/annotation-finder":  "^1.0",
         "ramsey/uuid": "^3.0|^4.0",
         "ocramius/proxy-manager": "^2.1.1",

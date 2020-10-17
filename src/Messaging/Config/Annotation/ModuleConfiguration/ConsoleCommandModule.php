@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
+use Ecotone\AnnotationFinder\AnnotatedMethod;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
@@ -64,7 +65,7 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
             $className    = $annotationRegistration->getClassName();
             $methodName               = $annotationRegistration->getMethodName();
 
-            list($messageHandlerBuilder, $oneTimeCommandConfiguration) = self::prepareConsoleCommand($className, $methodName, $commandName);
+            list($messageHandlerBuilder, $oneTimeCommandConfiguration) = self::prepareConsoleCommand($annotationRegistration, $className, $methodName, $commandName);
 
             $messageHandlerBuilders[] = $messageHandlerBuilder;
             $oneTimeConfigurations[]     = $oneTimeCommandConfiguration;
@@ -73,16 +74,13 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
         return new static($messageHandlerBuilders, $oneTimeConfigurations);
     }
 
-    public static function prepareConsoleCommand(string $className, string $methodName, string $commandName): array
+    public static function prepareConsoleCommand(AnnotatedMethod $annotatedMethod, string $className, string $methodName, string $commandName): array
     {
         $parameterConverters = [];
         $parameters          = [];
         $classReflection     = new \ReflectionClass($className);
 
         $interfaceToCall = InterfaceToCall::create($className, $methodName);
-        if ($classReflection->getConstructor() && $classReflection->getConstructor()->getParameters()) {
-            throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must not have constructor parameters");
-        }
 
         if ($interfaceToCall->canReturnValue() && !$interfaceToCall->getReturnType()->equals(TypeDescriptor::create(OneTimeCommandResultSet::class))) {
             throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must have void or " . OneTimeCommandResultSet::class . " return type");
@@ -100,7 +98,13 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
         }
 
         $inputChannel                = "ecotone.channel." . $commandName;
-        $messageHandlerBuilder    = ServiceActivatorBuilder::createWithDirectReference(new $className(), $methodName)
+        if ($classReflection->getConstructor() && $classReflection->getConstructor()->getParameters()) {
+            $serviceActivatorBuilder     = ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotatedMethod), $methodName);
+        }else {
+            $serviceActivatorBuilder     = ServiceActivatorBuilder::createWithDirectReference(new $className(), $methodName);
+        }
+
+        $messageHandlerBuilder       = $serviceActivatorBuilder
             ->withEndpointId("ecotone.endpoint." . $commandName)
             ->withInputChannelName($inputChannel)
             ->withMethodParameterConverters($parameterConverters);

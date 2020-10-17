@@ -3,16 +3,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Annotation\Endpoint;
 
-/**
- * @Annotation
- */
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class ExpireAfter
 {
     private int $time;
 
-    public function __construct(array $values)
+    public function __construct(int $time)
     {
-        $this->time = $values['value'];
+        $this->time = $time;
     }
 
     public function getTime(): int

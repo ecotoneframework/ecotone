@@ -20,7 +20,7 @@ class EndpointHeadersInterceptorTest extends TestCase
     public function test_adding_delivery_delay()
     {
         $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new Delayed(["value" => 1]);
+        $annotation = new Delayed(1);
 
         $this->assertEquals(
             [MessageHeaders::DELIVERY_DELAY => 1],
@@ -31,7 +31,7 @@ class EndpointHeadersInterceptorTest extends TestCase
     public function test_adding_time_to_live()
     {
         $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new ExpireAfter(["value" => 1]);
+        $annotation = new ExpireAfter(1);
 
         $this->assertEquals(
             [MessageHeaders::TIME_TO_LIVE => 1],
@@ -42,7 +42,7 @@ class EndpointHeadersInterceptorTest extends TestCase
     public function test_adding_priority()
     {
         $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new Priority(["value" => 1]);
+        $annotation = new Priority(1);
 
         $this->assertEquals(
             [MessageHeaders::PRIORITY => 1],

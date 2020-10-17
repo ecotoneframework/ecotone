@@ -3,16 +3,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Annotation\Endpoint;
 
-/**
- * @Annotation
- */
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class Priority
 {
     private int $number;
 
-    public function __construct(array $values)
+    public function __construct(int $number)
     {
-        $this->number = $values['value'];
+        $this->number = $number;
     }
 
     public function getNumber(): int

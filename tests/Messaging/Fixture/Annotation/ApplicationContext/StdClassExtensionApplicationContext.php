@@ -8,9 +8,7 @@ use stdClass;
 
 class StdClassExtensionApplicationContext
 {
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function someExtension()
     {
         return new stdClass();

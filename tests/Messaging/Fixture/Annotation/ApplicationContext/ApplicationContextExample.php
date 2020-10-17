@@ -18,28 +18,19 @@ class ApplicationContextExample
     const HTTP_INPUT_CHANNEL  = "httpEntry";
     const HTTP_OUTPUT_CHANNEL = "httpOutput";
 
-    /**
-     * @return GatewayBuilder
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function gateway(): GatewayBuilder
     {
         return GatewayProxyBuilder::create("some-ref", GatewayExample::class, "doSomething", self::HTTP_INPUT_CHANNEL);
     }
 
-    /**
-     * @return MessageChannelBuilder
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function httpEntryChannel(): MessageChannelBuilder
     {
         return SimpleMessageChannelBuilder::createDirectMessageChannel(self::HTTP_INPUT_CHANNEL);
     }
 
-    /**
-     * @return MessageHandlerBuilder
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function enricherHttpEntry(): MessageHandlerBuilder
     {
         return TransformerBuilder::createHeaderEnricher(
@@ -52,18 +43,13 @@ class ApplicationContextExample
             ->withEndpointId("some-id");
     }
 
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function withChannelInterceptors()
     {
         return SimpleChannelInterceptorBuilder::create(self::HTTP_INPUT_CHANNEL, "ref");
     }
 
-    /**
-     * @return stdClass
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function withStdClassConverterByExtension(): stdClass
     {
         return new stdClass();

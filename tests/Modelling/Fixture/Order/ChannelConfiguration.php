@@ -9,9 +9,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class ChannelConfiguration
 {
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function registerAsyncChannel() : array
     {
         return [

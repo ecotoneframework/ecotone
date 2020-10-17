@@ -6,9 +6,7 @@ use Ecotone\Messaging\Annotation\ApplicationContext;
 
 class ApplicationContextExamplePSR0
 {
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function doSomething()
     {
 

@@ -10,9 +10,7 @@ class ChannelConfiguration
 {
     const ERROR_CHANNEL = "errorChannel";
 
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function registerAsyncChannel(): array
     {
         return [

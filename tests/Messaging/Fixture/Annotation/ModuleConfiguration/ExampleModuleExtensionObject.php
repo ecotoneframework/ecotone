@@ -7,10 +7,7 @@ use Ecotone\Messaging\Annotation\ApplicationContext;
 
 class ExampleModuleExtensionObject
 {
-    /**
-     * @return \stdClass
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function extensionObject() : \stdClass
     {
         return new \stdClass();

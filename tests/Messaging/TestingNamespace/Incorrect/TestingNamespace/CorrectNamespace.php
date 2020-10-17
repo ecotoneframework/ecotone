@@ -8,10 +8,7 @@ use Ecotone\Messaging\Annotation\ApplicationContext;
 
 class CorrectNamespace
 {
-    /**
-     * @return array
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function someExtension() : array
     {
         return [];

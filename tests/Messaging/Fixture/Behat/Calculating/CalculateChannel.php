@@ -8,10 +8,7 @@ use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 
 class CalculateChannel
 {
-    /**
-     * @return array
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function configuration(): array
     {
         return [

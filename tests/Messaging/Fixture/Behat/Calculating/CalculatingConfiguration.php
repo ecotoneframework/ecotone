@@ -8,9 +8,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class CalculatingConfiguration
 {
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function registerMetadata()
     {
         return PollingMetadata::create("inboundCalculator")

@@ -8,9 +8,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class PresendConfiguration
 {
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function shopBuyConfiguration()
     {
         return [

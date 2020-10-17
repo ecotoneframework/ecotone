@@ -7,10 +7,7 @@ use Ecotone\Messaging\Annotation\ApplicationContext;
 
 class CorrectClass
 {
-    /**
-     * @return array
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function someExtension() : array
     {
         return [];

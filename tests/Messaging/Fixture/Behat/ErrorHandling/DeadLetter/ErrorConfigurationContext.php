@@ -15,17 +15,13 @@ class ErrorConfigurationContext
     const ERROR_CHANNEL       = "errorChannel";
     const DEAD_LETTER_CHANNEL = "deadLetterChannel";
 
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function getInputChannel()
     {
         return SimpleMessageChannelBuilder::createQueueChannel(self::INPUT_CHANNEL);
     }
 
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function errorConfiguration()
     {
         return ErrorHandlerConfiguration::createWithDeadLetterChannel(
@@ -36,9 +32,7 @@ class ErrorConfigurationContext
         );
     }
 
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function pollingConfiguration()
     {
         return PollingMetadata::create("orderService")

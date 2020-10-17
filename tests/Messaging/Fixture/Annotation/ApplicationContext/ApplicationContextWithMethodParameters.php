@@ -7,9 +7,7 @@ use Ecotone\Messaging\Annotation\ApplicationContext;
 
 class ApplicationContextWithMethodParameters
 {
-    /**
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function someExtension(\stdClass $some)
     {
         return new \stdClass();

@@ -7,10 +7,7 @@ use Ecotone\Messaging\Annotation\ApplicationContext;
 
 class ClassWithIncorrectNamespaceAndClassName
 {
-    /**
-     * @return array
-     * @ApplicationContext()
-     */
+    #[ApplicationContext]
     public function someExtension(): array
     {
         return [];

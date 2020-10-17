@@ -7,17 +7,15 @@ use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\EventHandler;
 
-/**
- * @Asynchronous(channelName="asyncChannel")
- */
+#[Asynchronous("asyncChannel")]
 class AsyncEventHandlerExample
 {
     /**
      * @param \stdClass $event
      *
      * @EventHandler(endpointId="asyncEvent")
-     * @Asynchronous(channelName="asyncChannel")
      */
+    #[Asynchronous("asyncChannel")]
     public function doSomething(\stdClass $event) : void
     {
 

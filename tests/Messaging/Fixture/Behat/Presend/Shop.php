@@ -11,8 +11,8 @@ class Shop
 {
     /**
      * @CommandHandler(endpointId="storeCoinsEndpoint", inputChannelName="storeCoins")
-     * @Asynchronous("shop")
      */
+    #[Asynchronous("shop")]
     public function buy(int $command): int
     {
         return $command;

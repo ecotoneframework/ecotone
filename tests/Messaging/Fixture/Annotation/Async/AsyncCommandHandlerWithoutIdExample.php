@@ -8,17 +8,15 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
 
-/**
- * @Asynchronous(channelName="asyncChannel")
- */
+#[Asynchronous("asyncChannel")]
 class AsyncCommandHandlerWithoutIdExample
 {
     /**
      * @param \stdClass $event
      *
-     * @Asynchronous(channelName="asyncChannel")
      * @CommandHandler()
      */
+    #[Asynchronous("asyncChannel")]
     public function doSomething(\stdClass $event) : void
     {
 

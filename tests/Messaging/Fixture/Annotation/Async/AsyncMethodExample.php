@@ -11,8 +11,8 @@ class AsyncMethodExample
 {
     /**
      * @ServiceActivator(endpointId="asyncServiceActivator", inputChannelName="inputChannel")
-     * @Asynchronous(channelName="asyncChannel")
      */
+    #[Asynchronous("asyncChannel")]
     public function doSomething() : void
     {
 

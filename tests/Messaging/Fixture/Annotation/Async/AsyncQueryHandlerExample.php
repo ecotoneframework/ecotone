@@ -14,8 +14,8 @@ class AsyncQueryHandlerExample
      * @param \stdClass $event
      *
      * @QueryHandler(endpointId="asyncEvent")
-     * @Asynchronous(channelName="asyncChannel")
      */
+    #[Asynchronous("asyncChannel")]
     public function doSomething(\stdClass $event) : void
     {
 

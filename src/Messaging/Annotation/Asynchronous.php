@@ -1,21 +1,15 @@
 <?php
 declare(strict_types=1);
 
-
 namespace Ecotone\Messaging\Annotation;
 
-use Doctrine\Common\Annotations\Annotation\Required;
-
-/**
- * Class Async
- * @package Ecotone\Messaging\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- */
+#[\Attribute(\Attribute::TARGET_METHOD | \Attribute::TARGET_CLASS)]
 class Asynchronous
 {
-    /**
-     * @Required()
-     */
     public string $channelName;
+
+    public function __construct(string $channelName)
+    {
+        $this->channelName = $channelName;
+    }
 }

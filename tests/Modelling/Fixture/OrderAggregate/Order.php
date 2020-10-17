@@ -17,8 +17,8 @@ use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
  * @package Test\Ecotone\Amqp\Fixture\Order
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Aggregate()
- * @Asynchronous("orders")
  */
+#[Asynchronous("orders")]
 class Order
 {
     use WithAggregateEvents;

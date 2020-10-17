@@ -7,9 +7,7 @@ use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 
-/**
- * @Asynchronous(channelName="asyncChannel2")
- */
+#[Asynchronous(channelName: "asyncChannel2")]
 class AsyncClassExample
 {
     /**
@@ -22,8 +20,8 @@ class AsyncClassExample
 
     /**
      * @ServiceActivator(endpointId="asyncServiceActivator1", inputChannelName="inputChannel")
-     * @Asynchronous(channelName="asyncChannel1")
      */
+    #[Asynchronous("asyncChannel1")]
     public function doSomething1() : void
     {
 

@@ -14,8 +14,8 @@ class LoggingService
 
     /**
      * @EventHandler(endpointId="loggingService")
-     * @Asynchronous("orders")
      */
+    #[Asynchronous("orders")]
     public function log(OrderWasNotified $event) : void
     {
         $this->logging[] = $event->getOrderId();

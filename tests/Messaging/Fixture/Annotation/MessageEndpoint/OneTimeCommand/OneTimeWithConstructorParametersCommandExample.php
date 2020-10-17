@@ -10,10 +10,8 @@ class OneTimeWithConstructorParametersCommandExample
     {
 
     }
-
-    /**
-     * @ConsoleCommand("doSomething")
-     */
+    
+    #[ConsoleCommand("doSomething")]
     public function execute() : void
     {
 

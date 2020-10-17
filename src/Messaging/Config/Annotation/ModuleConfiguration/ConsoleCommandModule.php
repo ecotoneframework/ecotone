@@ -61,7 +61,7 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
         foreach ($annotationRegistrationService->findAnnotatedMethods(ConsoleCommand::class) as $annotationRegistration) {
             /** @var ConsoleCommand $annotation */
             $annotation               = $annotationRegistration->getAnnotationForMethod();
-            $commandName                     = $annotation->name;
+            $commandName                     = $annotation->getName();
             $className    = $annotationRegistration->getClassName();
             $methodName               = $annotationRegistration->getMethodName();
 

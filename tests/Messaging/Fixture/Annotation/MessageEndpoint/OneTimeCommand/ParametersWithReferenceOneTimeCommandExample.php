@@ -6,9 +6,7 @@ use Ecotone\Messaging\Annotation\ConsoleCommand;
 
 class ParametersWithReferenceOneTimeCommandExample
 {
-    /**
-     * @ConsoleCommand("doSomething")
-     */
+    #[ConsoleCommand("doSomething")]
     public function execute(string $name, string $surname, \stdClass $object) : void
     {
 

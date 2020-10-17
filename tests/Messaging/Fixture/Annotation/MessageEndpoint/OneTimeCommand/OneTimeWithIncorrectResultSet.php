@@ -7,9 +7,7 @@ use Ecotone\Messaging\Config\OneTimeCommandResultSet;
 
 class OneTimeWithIncorrectResultSet
 {
-    /**
-     * @ConsoleCommand("doSomething")
-     */
+    #[ConsoleCommand("doSomething")]
     public function execute() : array
     {
 

@@ -3,10 +3,21 @@
 
 namespace Ecotone\Messaging\Annotation;
 
-/**
- * @Annotation
- */
+use Ecotone\Messaging\Support\Assert;
+
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class ConsoleCommand
 {
-    public string $name;
+    private string $name;
+
+    public function __construct(string $consoleCommandName)
+    {
+        Assert::notNullAndEmpty($consoleCommandName, "Console command name can not be empty string");
+        $this->name = $consoleCommandName;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
 }

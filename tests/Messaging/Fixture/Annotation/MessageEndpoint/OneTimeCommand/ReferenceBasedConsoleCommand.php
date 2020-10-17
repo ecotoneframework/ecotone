@@ -12,9 +12,7 @@ class ReferenceBasedConsoleCommand
 {
     public function __construct(\stdClass $class) {}
 
-    /**
-     * @ConsoleCommand("doSomething")
-     */
+    #[ConsoleCommand("doSomething")]
     public function execute() : void
     {
 

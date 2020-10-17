@@ -7,9 +7,7 @@ use Ecotone\Messaging\Config\OneTimeCommandResultSet;
 
 class OneTimeWithResultExample
 {
-    /**
-     * @ConsoleCommand("doSomething")
-     */
+    #[ConsoleCommand("doSomething")]
     public function execute() : OneTimeCommandResultSet
     {
 

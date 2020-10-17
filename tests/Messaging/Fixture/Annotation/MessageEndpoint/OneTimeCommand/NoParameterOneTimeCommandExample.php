@@ -6,9 +6,7 @@ use Ecotone\Messaging\Annotation\ConsoleCommand;
 
 class NoParameterOneTimeCommandExample
 {
-    /**
-     * @ConsoleCommand("doSomething")
-     */
+    #[ConsoleCommand("doSomething")]
     public function execute() : void
     {
 

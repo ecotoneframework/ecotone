@@ -114,8 +114,8 @@ interface User
      * @param (\stdClass|string)[] $data
      *
      * @return (\stdClass|string)[]
-     * @IgnoreDocblockTypeHint()
      */
+    #[IgnoreDocblockTypeHint]
     public function ignoreDocblockTypeHint(array $data) : array;
 
     /**

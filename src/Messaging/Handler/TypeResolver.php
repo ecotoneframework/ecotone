@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Handler;
 use Doctrine\Common\Annotations\Annotation;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Messaging\Annotation\IgnoreDocblockTypeHint;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -165,7 +166,7 @@ class TypeResolver
     private function getDocComment(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection): string
     {
         $docComment = $methodReflection->getDocComment();
-        if (!$docComment || $this->isIgnoringDocblockTypeHints($docComment)) {
+        if (!$docComment || $this->isIgnoringDocblockTypeHints($methodReflection)) {
             return "";
         }
 
@@ -192,14 +193,9 @@ class TypeResolver
         return preg_match("/@inheritDoc/", $docBlock);
     }
 
-    /**
-     * @param string $docBlock
-     *
-     * @return bool
-     */
-    private function isIgnoringDocblockTypeHints(string $docBlock) : bool
+    private function isIgnoringDocblockTypeHints(\ReflectionMethod $methodReflection) : bool
     {
-        return preg_match("/@IgnoreDocblockTypeHint/", $docBlock);
+        return (bool)$methodReflection->getAttributes(IgnoreDocblockTypeHint::class);
     }
 
     /**

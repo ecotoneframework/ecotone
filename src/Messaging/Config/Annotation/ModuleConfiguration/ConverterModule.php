@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Annotation\ClassReference;
 use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\MediaTypeConverter;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
@@ -61,10 +62,14 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
         $registrations = $annotationRegistrationService->findAnnotatedClasses(MediaTypeConverter::class);
 
         foreach ($registrations as $registration) {
-            /** @var MediaTypeConverter $mediaTypeConverter */
-            $mediaTypeConverter = AnnotatedDefinitionReference::getSingleAnnotationForClass($annotationRegistrationService, $registration, MediaTypeConverter::class);
-
-            $converterBuilders[] = ConverterReferenceBuilder::create($mediaTypeConverter->referenceName ? $mediaTypeConverter->referenceName : $registration);
+            $annotations = $annotationRegistrationService->getAnnotationsForClass($registration);
+            $reference = $registration;
+            foreach ($annotations as $annotation) {
+                if ($annotation instanceof ClassReference) {
+                    $reference = $annotation->getReferenceName();
+                }
+            }
+            $converterBuilders[] = ConverterReferenceBuilder::create($reference);
         }
 
         return new self($converterBuilders);

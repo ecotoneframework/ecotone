@@ -9,12 +9,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
-/**
- * Class ExampleMediaTypeConverter
- * @package Test\Ecotone\Messaging\Fixture\Annotation\Converter
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @MediaTypeConverter()
- */
+#[MediaTypeConverter]
 class ExampleStdClassConverter implements Converter
 {
     /**

@@ -8,9 +8,7 @@ use stdClass;
 
 class ExampleSingleConverterService
 {
-    /**
-     * @Converter()
-     */
+    #[Converter]
     public function convert(string $data): stdClass
     {
         return new stdClass();

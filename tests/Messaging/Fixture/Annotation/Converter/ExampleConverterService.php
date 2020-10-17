@@ -13,8 +13,8 @@ class ExampleConverterService
    /**
      * @param string[] $data
      * @return \stdClass[]
-     * @Converter()
      */
+    #[Converter]
     public function convert(array $data) : iterable
     {
         $converted = [];

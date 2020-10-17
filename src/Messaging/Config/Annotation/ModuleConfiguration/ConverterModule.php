@@ -2,16 +2,13 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
+
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Annotation\Converter;
-use Ecotone\Messaging\Annotation\ConverterClass;
 use Ecotone\Messaging\Annotation\MediaTypeConverter;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Conversion\ConverterBuilder;
@@ -22,7 +19,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 /**
  * Class ConverterModule
  * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
 class ConverterModule extends NoExternalConfigurationModule implements AnnotationModule
@@ -34,6 +31,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
 
     /**
      * ConverterModule constructor.
+     *
      * @param array $converterBuilders
      */
     private function __construct(array $converterBuilders)
@@ -44,19 +42,19 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService) : \Ecotone\Messaging\Config\Annotation\AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
         $registrations = $annotationRegistrationService->findAnnotatedMethods(Converter::class);
 
         $converterBuilders = [];
 
         foreach ($registrations as $registration) {
-            $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
+            $interfaceToCall     = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
             $converterBuilders[] = ReferenceServiceConverterBuilder::create(
-                  AnnotatedDefinitionReference::getReferenceFor($registration),
-                  $registration->getMethodName(),
-                  $interfaceToCall->getFirstParameter()->getTypeDescriptor(),
-                  $interfaceToCall->getReturnType()
+                AnnotatedDefinitionReference::getReferenceFor($registration),
+                $registration->getMethodName(),
+                $interfaceToCall->getFirstParameter()->getTypeDescriptor(),
+                $interfaceToCall->getReturnType()
             );
         }
 

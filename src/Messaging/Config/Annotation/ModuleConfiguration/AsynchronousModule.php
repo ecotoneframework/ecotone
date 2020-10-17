@@ -2,24 +2,16 @@
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
+
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\Asynchronous;
-use Ecotone\Messaging\Annotation\Converter;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
-use Ecotone\Messaging\Annotation\MediaTypeConverter;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Conversion\ConverterBuilder;
-use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
-use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
@@ -27,7 +19,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 /**
  * Class ConverterModule
  * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @ModuleAnnotation()
  */
 class AsynchronousModule extends NoExternalConfigurationModule implements AnnotationModule
@@ -36,6 +28,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
 
     /**
      * ConverterModule constructor.
+     *
      * @param array $asyncEndpoints
      */
     private function __construct(array $asyncEndpoints)
@@ -46,12 +39,12 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService) : \Ecotone\Messaging\Config\Annotation\AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
     {
         $asynchronousClasses = $annotationRegistrationService->findAnnotatedClasses(Asynchronous::class);
 
         $asynchronousMethods = $annotationRegistrationService->findAnnotatedMethods(Asynchronous::class);
-        $endpoints = array_merge(
+        $endpoints           = array_merge(
             $annotationRegistrationService->findAnnotatedMethods(EndpointAnnotation::class),
             $annotationRegistrationService->findAnnotatedMethods(EventHandler::class)
         );
@@ -60,7 +53,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
         foreach ($asynchronousMethods as $asynchronousMethod) {
             /** @var Asynchronous $asyncAnnotation */
             $asyncAnnotation = $asynchronousMethod->getAnnotationForMethod();
-            $inputChannel = $asyncAnnotation->getChannelName();
+            $inputChannel    = $asyncAnnotation->getChannelName();
             foreach ($endpoints as $key => $endpoint) {
                 if ($endpoint->getClassName() === $asynchronousMethod->getClassName() && $endpoint->getMethodName() === $asynchronousMethod->getMethodName()) {
                     /** @var EndpointAnnotation $annotationForMethod */

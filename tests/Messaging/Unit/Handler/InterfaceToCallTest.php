@@ -3,14 +3,18 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
+use DateTimeInterface;
 use Ecotone\Messaging\Annotation\Asynchronous;
-use Ecotone\Messaging\Annotation\Converter;
-use Ecotone\Messaging\Annotation\ConverterClass;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ClassReference;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Ecotone\Messaging\Annotation\Converter;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Fixture\Conversion\Product;
+use PHPUnit\Framework\TestCase;
+use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
 use Test\Ecotone\Messaging\Fixture\Conversion\AbstractSuperAdmin;
 use Test\Ecotone\Messaging\Fixture\Conversion\Admin;
@@ -25,21 +29,17 @@ use Test\Ecotone\Messaging\Fixture\Conversion\Password;
 use Test\Ecotone\Messaging\Fixture\Conversion\SuperAdmin;
 use Test\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword;
 use Test\Ecotone\Messaging\Fixture\Conversion\User;
-use PHPUnit\Framework\TestCase;
-use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class InterfaceToCallTest
  * @package Test\Ecotone\Messaging\Unit\Handler
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceToCallTest extends TestCase
 {
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint()
     {
@@ -54,8 +54,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_from_doc_block_guessing_namespace()
     {
@@ -70,10 +70,9 @@ class InterfaceToCallTest extends TestCase
     }
 
 
-
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_from_global_namespace()
     {
@@ -88,8 +87,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_from_different_namespace_than_class_it_self()
     {
@@ -121,8 +120,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_from_different_namespace_using_use_statements()
     {
@@ -137,8 +136,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_collection_transformation()
     {
@@ -153,8 +152,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_collection_class_name_from_use_statements()
     {
@@ -169,8 +168,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_use_statement_alias()
     {
@@ -185,8 +184,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_collection_of_scalar_type()
     {
@@ -201,8 +200,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_retrieving_parameter_type_hint_with_primitive_type()
     {
@@ -217,8 +216,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_guessing_parameter_type_hint_from_scalar_and_compound_type()
     {
@@ -227,14 +226,14 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("random",TypeDescriptor::create( TypeDescriptor::INTEGER . "|" . TypeDescriptor::ARRAY)),
+            InterfaceParameter::createNullable("random", TypeDescriptor::create(TypeDescriptor::INTEGER . "|" . TypeDescriptor::ARRAY)),
             $interfaceToCall->getParameterWithName("random")
         );
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_guessing_parameter_first_type_hint_from_method_annotation()
     {
@@ -243,14 +242,14 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("phones", TypeDescriptor::create( "array|array<string>")),
+            InterfaceParameter::createNullable("phones", TypeDescriptor::create("array|array<string>")),
             $interfaceToCall->getParameterWithName("phones")
         );
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_guessing_parameter_type_hint_from_scalar_and_class_name()
     {
@@ -265,9 +264,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_guessing_parameter_from_interface_inherit_doc_with_different_parameter_name()
     {
@@ -276,7 +275,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("productId", TypeDescriptor::create(\stdClass::class . "|" . TypeDescriptor::OBJECT)),
+            InterfaceParameter::createNullable("productId", TypeDescriptor::create(stdClass::class . "|" . TypeDescriptor::OBJECT)),
             $interfaceToCall->getParameterWithName("productId")
         );
     }
@@ -294,8 +293,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_ignoring_docblock_type_hint()
     {
@@ -315,9 +314,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_guessing_parameter_from_inherit_doc_with_return_type_from_super_class_namespace()
     {
@@ -332,9 +331,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_guessing_interface_return_parameter_from_global_namespace()
     {
@@ -343,20 +342,20 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("dateTime", TypeDescriptor::create(\DateTimeInterface::class)),
+            InterfaceParameter::createNotNullable("dateTime", TypeDescriptor::create(DateTimeInterface::class)),
             $interfaceToCall->getParameterWithName("dateTime")
         );
 
         $this->assertEquals(
-            TypeDescriptor::create(\DateTimeInterface::class),
+            TypeDescriptor::create(DateTimeInterface::class),
             $interfaceToCall->getReturnType()
         );
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_guessing_parameter_from_abstract_class_inherit_doc()
     {
@@ -419,8 +418,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
     public function test_guessing_return_type_based_on_inherit_doc_annotation()
     {
@@ -432,9 +431,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_guessing_unknown_if_no_type_hint_information_available()
     {
@@ -449,9 +448,9 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     * @throws InvalidArgumentException
      */
     public function test_choosing_unknown_type_if_mixed_type_hint_in_doc_block()
     {
@@ -466,8 +465,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
     public function test_choosing_declaring_class_if_use_this_or_self_or_static()
     {
@@ -500,8 +499,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
     public function test_guessing_type_hint_with_full_qualified_name()
     {
@@ -512,20 +511,20 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
     public function test_guessing_type_hint_from_global_namespace()
     {
         $this->assertEquals(
-            TypeDescriptor::create(\stdClass::class),
+            TypeDescriptor::create(stdClass::class),
             (InterfaceToCall::create(User::class, "returnFromGlobalNamespace"))->getReturnType()
         );
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
     public function test_resolving_sub_class_for_static_type_hint_return_type()
     {
@@ -536,8 +535,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
     public function test_resolving_declaring_class_for_self_type_hint_declared_in_interface()
     {
@@ -548,8 +547,8 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws TypeDefinitionException
+     * @throws MessagingException
      */
     public function test_resolving_declaring_class_for_self_type_hint_declared_in_abstract_class()
     {

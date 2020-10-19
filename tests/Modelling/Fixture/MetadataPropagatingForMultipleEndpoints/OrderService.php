@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\MetadataPropagating;
+namespace Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
 
 
 use Ecotone\Messaging\Conversion\MediaType;
@@ -37,9 +37,17 @@ class OrderService
     /**
      * @EventHandler()
      */
-    public function notify(OrderWasPlaced $event, array $headers, CommandBus $commandBus) : void
+    public function notifyBySms(OrderWasPlaced $event, EventBus $eventBus) : void
     {
-        $commandBus->convertAndSendWithMetadata("sendNotification", MediaType::APPLICATION_X_PHP_ARRAY, [], $this->notifyWithCustomHeaders);
+        $eventBus->send(new NotificationWasPrepared());
+    }
+
+    /**
+     * @EventHandler()
+     */
+    public function notifyByEmail(OrderWasPlaced $event, EventBus $eventBus) : void
+    {
+        $eventBus->send(new NotificationWasPrepared());
     }
 
     /**
@@ -51,11 +59,11 @@ class OrderService
     }
 
     /**
-     * @CommandHandler("sendNotification")
+     * @EventHandler("sendNotification")
      */
-    public function sendNotification($command, array $headers) : void
+    public function sendNotification(NotificationWasPrepared $event, array $headers) : void
     {
-        $this->notificationHeaders = $headers;
+        $this->notificationHeaders[] = $headers;
     }
 
     /**
@@ -63,6 +71,6 @@ class OrderService
      */
     public function getNotificationHeaders() : array
     {
-        return $this->notificationHeaders;
+        return array_shift($this->notificationHeaders);
     }
 }

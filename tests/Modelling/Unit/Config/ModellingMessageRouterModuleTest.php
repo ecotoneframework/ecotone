@@ -5,6 +5,7 @@ namespace Test\Ecotone\Modelling\Unit\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -92,7 +93,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
                                 AllHeadersBuilder::createWith("headers")
                             ]),
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
-                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class
+                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||@(" . AsynchronousRunningEndpoint::class . ")"
                     )
                 )
                 ->registerAroundMethodInterceptor(
@@ -101,7 +102,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
                         new MessageHeadersPropagator(),
                         "storeHeaders",
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class
+                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||@(" . AsynchronousRunningEndpoint::class . ")"
                     )
                 )
                 ->registerMessageHandler(BusRouterBuilder::createCommandBusByObject($messagePropagator, $commandObjectMapping))

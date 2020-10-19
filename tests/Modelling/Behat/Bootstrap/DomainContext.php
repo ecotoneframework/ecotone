@@ -221,8 +221,10 @@ class DomainContext extends TestCase implements Context
      */
     public function iPlaceOrderWithMetadata(string $headerName, $value)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->sendWithMetadata(
-            new PlaceOrder(),
+        AnnotationBasedMessagingContext::getCommandBus()->convertAndSendWithMetadata(
+            "placeOrder",
+            MediaType::APPLICATION_X_PHP_ARRAY,
+            [],
             [$headerName => $value]
         );
     }
@@ -232,8 +234,10 @@ class DomainContext extends TestCase implements Context
      */
     public function iPlaceOrderWithNoAdditionalMetadata()
     {
-        AnnotationBasedMessagingContext::getCommandBus()->send(
-            new PlaceOrder()
+        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+            "placeOrder",
+            MediaType::APPLICATION_X_PHP_ARRAY,
+            []
         );
     }
 

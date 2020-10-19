@@ -5,6 +5,7 @@ namespace Ecotone\Modelling\Config;
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
@@ -114,7 +115,7 @@ class ModellingMessageRouterModule implements AnnotationModule
                             AllHeadersBuilder::createWith("headers")
                         ]),
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
-                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class
+                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||@(" . AsynchronousRunningEndpoint::class . ")"
                 )
             )
             ->registerAroundMethodInterceptor(
@@ -123,7 +124,7 @@ class ModellingMessageRouterModule implements AnnotationModule
                     $this->messageHeadersPropagator,
                     "storeHeaders",
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class
+                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||@(" . AsynchronousRunningEndpoint::class . ")"
                 )
             )
             ->registerMessageHandler($this->commandBusByObject)

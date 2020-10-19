@@ -5,6 +5,7 @@ namespace Test\Ecotone\Modelling\Unit\Config;
 
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Config\EventBusRouter;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Conversion\AbstractSuperAdmin;
 use Test\Ecotone\Messaging\Fixture\Conversion\Admin;
@@ -104,8 +105,6 @@ class EventBusRouterTest extends TestCase
      */
     private function createEventRouter(array $classNameToChannelNameMapping): EventBusRouter
     {
-        $eventBusRouter = new EventBusRouter($classNameToChannelNameMapping);
-
-        return $eventBusRouter;
-}
+        return new EventBusRouter($classNameToChannelNameMapping);
+    }
 }

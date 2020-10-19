@@ -28,9 +28,9 @@ class SaveAggregateService
     private object $aggregateRepository;
     private PropertyReaderAccessor $propertyReaderAccessor;
     /**
-     * @var NonProxyGateway|LazyEventBus
+     * @var NonProxyGateway|EventBus
      */
-    private object $lazyEventBus;
+    private object $eventBus;
     private ?string $eventRetrievingMethod;
     private PropertyEditorAccessor $propertyEditorAccessor;
     private ?array $versionMapping;
@@ -41,7 +41,7 @@ class SaveAggregateService
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
-        $this->lazyEventBus = $lazyEventBus;
+        $this->eventBus = $lazyEventBus;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
         $this->versionMapping = $versionMapping;
         $this->eventRetrievingMethod = $eventMethod;
@@ -131,7 +131,7 @@ class SaveAggregateService
         }
 
         foreach ($events as $event) {
-            $this->lazyEventBus->execute([$event, $metadata]);
+            $this->eventBus->execute([$event, $metadata]);
         }
 
         return MessageBuilder::fromMessage($message)

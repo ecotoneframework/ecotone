@@ -11,6 +11,7 @@ use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
 use Ecotone\Modelling\QueryBus;
 
 /**
@@ -37,23 +38,20 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @var string
      */
     private $type;
+    private MessageHeadersPropagator $messageHeadersPropagator;
 
     /**
-     * BusRouterBuilder constructor.
-     *
-     * @param string $endpointId
-     * @param string $inputChannelName
      * @param string[]  $channelNamesRouting
-     * @param string $type
      *
      * @throws \Exception
      */
-    private function __construct(string $endpointId, string $inputChannelName, array $channelNamesRouting, string $type)
+    private function __construct(MessageHeadersPropagator $messageHeadersPropagator, string $endpointId, string $inputChannelName, array $channelNamesRouting, string $type)
     {
         $this->channelNamesRouting = $channelNamesRouting;
         $this->inputChannelName = $inputChannelName;
         $this->type = $type;
         $this->endpointId = $endpointId;
+        $this->messageHeadersPropagator = $messageHeadersPropagator;
     }
 
     /**
@@ -62,9 +60,10 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws \Exception
      */
-    public static function createEventBusByObject(array $channelNamesRouting) : self
+    public static function createEventBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
     {
         return new self(
+            $messageHeadersPropagator,
             EventBus::CHANNEL_NAME_BY_OBJECT . ".endpoint",
             EventBus::CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
@@ -78,9 +77,10 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws \Exception
      */
-    public static function createEventBusByName(array $channelNamesRouting) : self
+    public static function createEventBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
     {
         return new self(
+            $messageHeadersPropagator,
             EventBus::CHANNEL_NAME_BY_NAME . ".endpoint",
             EventBus::CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
@@ -94,9 +94,10 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws \Exception
      */
-    public static function createCommandBusByObject(array $channelNamesRouting) : self
+    public static function createCommandBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
     {
         return new self(
+            $messageHeadersPropagator,
             CommandBus::CHANNEL_NAME_BY_OBJECT . ".endpoint",
             CommandBus::CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
@@ -110,9 +111,10 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws \Exception
      */
-    public static function createCommandBusByName(array $channelNamesRouting) : self
+    public static function createCommandBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
     {
         return new self(
+            $messageHeadersPropagator,
             CommandBus::CHANNEL_NAME_BY_NAME . ".endpoint",
             CommandBus::CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
@@ -126,9 +128,10 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws \Exception
      */
-    public static function createQueryBusByObject(array $channelNamesRouting) : self
+    public static function createQueryBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
     {
         return new self(
+            $messageHeadersPropagator,
             QueryBus::CHANNEL_NAME_BY_OBJECT . ".endpoint",
             QueryBus::CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
@@ -142,9 +145,10 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws \Exception
      */
-    public static function createQueryBusByName(array $channelNamesRouting) : self
+    public static function createQueryBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
     {
         return new self(
+            $messageHeadersPropagator,
             QueryBus::CHANNEL_NAME_BY_NAME . ".endpoint",
             QueryBus::CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,

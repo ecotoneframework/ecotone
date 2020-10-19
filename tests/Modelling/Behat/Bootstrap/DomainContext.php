@@ -13,6 +13,7 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
+use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PlaceOrder;
 
 /**
  * Defines application features from the specific context.
@@ -213,5 +214,76 @@ class DomainContext extends TestCase implements Context
         }
 
         Assert::assertTrue($exception, "User was allowed to store logs on someones else stream");
+    }
+
+    /**
+     * @When I place order with metadata :headerName :value
+     */
+    public function iPlaceOrderWithMetadata(string $headerName, $value)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithMetadata(
+            new PlaceOrder(),
+            [$headerName => $value]
+        );
+    }
+
+    /**
+     * @When I place order with no additional metadata
+     */
+    public function iPlaceOrderWithNoAdditionalMetadata()
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->send(
+            new PlaceOrder()
+        );
+    }
+
+    /**
+     * @Then there should be notification with metadata :headerName :value
+     */
+    public function thereShouldBeNotificationWithMetadata(string $headerName, $value)
+    {
+        $this->assertEquals(
+            $value,
+            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend("getNotificationHeaders", MediaType::APPLICATION_X_PHP_ARRAY, [])[$headerName]
+        );
+    }
+
+    /**
+     * @Then there should be notification without additional metadata
+     */
+    public function thereShouldBeNotificationWithoutAdditionalMetadata()
+    {
+        $this->assertArrayNotHasKey(
+            "token",
+            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend("getNotificationHeaders", MediaType::APPLICATION_X_PHP_ARRAY, [])
+        );
+    }
+
+    /**
+     * @When I override header :headerName with :value
+     */
+    public function iOverrideHeaderWith(string $headerName, $value)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->convertAndSendWithMetadata(
+            "setCustomNotificationHeaders",
+            MediaType::APPLICATION_X_PHP_ARRAY,
+            [],
+            [$headerName => $value]
+        );
+    }
+
+    /**
+     * @When next command fails with :headerName :headerValue
+     */
+    public function nextCommandFailsWith(string $headerName, $headerValue)
+    {
+        try {
+            AnnotationBasedMessagingContext::getCommandBus()->convertAndSendWithMetadata(
+                "failAction",
+                MediaType::APPLICATION_X_PHP_ARRAY,
+                [],
+                [$headerName => $headerValue]
+            );
+        }catch (\Exception $exception) {}
     }
 }

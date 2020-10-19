@@ -176,6 +176,13 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
+            case "Test\Ecotone\Modelling\Fixture\MetadataPropagating":
+                {
+                    $objects = [
+                        new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()
+                    ];
+                    break;
+                }
             default:
                 {
                     $objects = [

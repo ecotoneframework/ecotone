@@ -38,7 +38,8 @@
         "behat/behat": "^3.3.1",
         "phan/phan": "^1.2.0",
         "guzzlehttp/psr7": "^1.4",
-        "php-coveralls/php-coveralls": "^2.1.0"
+        "php-coveralls/php-coveralls": "^2.1.0",
+        "phpstan/phpstan": "^0.12"
     },
     "extra": {
         "branch-alias": {

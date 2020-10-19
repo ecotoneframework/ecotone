@@ -150,7 +150,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                         ProductExchanger::class => new ProductExchanger(),
                         AddVatService::class => new AddVatService(),
                         AddFranchiseMargin::class => new AddFranchiseMargin(),
-                        ShopRepository::class => new ShopRepository()
+                        ShopRepository::class => ShopRepository::createEmpty()
                     ];
                     break;
                 }

@@ -159,7 +159,8 @@ class MessageHeaders
             self::DELIVERY_DELAY,
             self::POLLED_CHANNEL,
             self::POLLED_CHANNEL_NAME,
-            self::REPLY_CONTENT_TYPE
+            self::REPLY_CONTENT_TYPE,
+            self::CONSUMER_ENDPOINT_ID
         ];
     }
 

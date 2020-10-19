@@ -21,6 +21,7 @@ class MessageHeadersPropagator
         if (isset($headers[MessageHeaders::CONSUMER_ACK_HEADER_LOCATION])) {
             unset($headers[$headers[MessageHeaders::CONSUMER_ACK_HEADER_LOCATION]]);
         }
+        unset($headers[MessageHeaders::CONSUMER_ACK_HEADER_LOCATION]);
 
         $this->currentlyPropagatedHeaders[] = $headers;
 

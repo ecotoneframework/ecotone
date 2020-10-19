@@ -4,6 +4,7 @@
 namespace Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
 
 
+use Ecotone\Messaging\Annotation\Asynchronous;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
@@ -37,17 +38,18 @@ class OrderService
     /**
      * @EventHandler()
      */
-    public function notifyBySms(OrderWasPlaced $event, EventBus $eventBus) : void
+    public function notifyBySms(OrderWasPlaced $event, array $headers, EventBus $eventBus) : void
     {
-        $eventBus->send(new NotificationWasPrepared());
+        $this->notificationHeaders[] = $headers;
     }
 
     /**
-     * @EventHandler()
+     * @Asynchronous("notifications")
+     * @EventHandler(endpointId="notificationEndpoint")
      */
-    public function notifyByEmail(OrderWasPlaced $event, EventBus $eventBus) : void
+    public function notifyByEmail(OrderWasPlaced $event, array $headers, EventBus $eventBus) : void
     {
-        $eventBus->send(new NotificationWasPrepared());
+        $this->notificationHeaders[] = $headers;
     }
 
     /**
@@ -56,14 +58,6 @@ class OrderService
     public function notifyWithCustomerHeaders(array $payload, array $headers) : void
     {
         $this->notifyWithCustomHeaders = $headers;
-    }
-
-    /**
-     * @EventHandler("sendNotification")
-     */
-    public function sendNotification(NotificationWasPrepared $event, array $headers) : void
-    {
-        $this->notificationHeaders[] = $headers;
     }
 
     /**

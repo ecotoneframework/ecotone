@@ -110,4 +110,5 @@ Feature: activating as aggregate order entity
     Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints"
     When I place order with metadata "token" 123
     Then there should be notification with metadata "token" 123
+    When I active receiver "notifications"
     Then there should be notification with metadata "token" 123

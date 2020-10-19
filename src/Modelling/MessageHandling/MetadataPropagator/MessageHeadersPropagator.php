@@ -6,6 +6,7 @@ namespace Ecotone\Modelling\MessageHandling\MetadataPropagator;
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 
 class MessageHeadersPropagator
 {
@@ -13,7 +14,15 @@ class MessageHeadersPropagator
 
     public function storeHeaders(MethodInvocation $methodInvocation, Message $message)
     {
-        $this->currentlyPropagatedHeaders[] = $message->getHeaders()->headers();
+        $headers = $message->getHeaders()->headers();
+        foreach (MessageHeaders::getFrameworksHeaderNames() as $frameworksHeaderName) {
+            unset($headers[$frameworksHeaderName]);
+        }
+        if (isset($headers[MessageHeaders::CONSUMER_ACK_HEADER_LOCATION])) {
+            unset($headers[$headers[MessageHeaders::CONSUMER_ACK_HEADER_LOCATION]]);
+        }
+
+        $this->currentlyPropagatedHeaders[] = $headers;
 
         try {
             $reply = $methodInvocation->proceed();

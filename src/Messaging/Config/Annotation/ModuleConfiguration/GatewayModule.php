@@ -13,16 +13,13 @@ use Ecotone\Messaging\Annotation\Parameter\HeaderValue;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 
@@ -78,19 +75,23 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                     }
                 } else if ($parameterToMessage instanceof Headers) {
                     $parameterConverters[] = GatewayHeadersBuilder::create($parameterToMessage->parameterName);
-                } else if ($parameterToMessage instanceof HeaderValue) {
-                    $parameterConverters[] = GatewayHeaderValueBuilder::create($parameterToMessage->headerName, $parameterToMessage->headerValue);
                 }else {
                     $converterClass = get_class($parameterToMessage);
                     throw new \InvalidArgumentException("Not known converters for gateway {$converterClass} for {$annotationRegistration->getClassName()}::{$annotationRegistration->getMethodName()}. Have you registered converter starting with name @MessageGateway(...) e.g. @MessageGatewayHeader?");
                 }
             }
 
-            $gatewayBuilders[] = GatewayProxyBuilder::create($referenceName, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
+            $gatewayProxyBuilder = GatewayProxyBuilder::create($referenceName, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
                 ->withErrorChannel($annotation->errorChannel)
                 ->withParameterConverters($parameterConverters)
                 ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
                 ->withReplyMillisecondTimeout($annotation->replyTimeoutInMilliseconds);
+
+            if ($annotation->replyContentType) {
+                $gatewayProxyBuilder = $gatewayProxyBuilder->withReplyContentType($annotation->replyContentType);
+            }
+
+            $gatewayBuilders[]   = $gatewayProxyBuilder;
         }
 
         return new self($gatewayBuilders);

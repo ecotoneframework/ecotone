@@ -24,4 +24,5 @@ class MessageGateway
     public array $parameterConverters = [];
     public int $replyTimeoutInMilliseconds = GatewayProxyBuilder::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
     public array $requiredInterceptorNames = [];
+    public ?string $replyContentType = null;
 }

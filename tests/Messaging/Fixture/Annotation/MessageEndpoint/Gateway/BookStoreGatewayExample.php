@@ -29,11 +29,11 @@ interface BookStoreGatewayExample
      *          @Payload(parameterName="bookNumber", expression="upper(value)"),
      *          @Header(parameterName="rentTill", headerName="rentDate"),
      *          @Header(parameterName="cost", headerName="cost"),
-     *          @Headers(parameterName="data"),
-     *          @HeaderValue(headerName="secret", headerValue="123")
+     *          @Headers(parameterName="data")
      *      },
      *      requiredInterceptorNames={"dbalTransaction"},
-     *      replyTimeoutInMilliseconds=100
+     *      replyTimeoutInMilliseconds=100,
+     *      replyContentType="application/json"
      * )
      */
     public function rent(string $bookNumber, string $rentTill, int $cost, array $data): bool;

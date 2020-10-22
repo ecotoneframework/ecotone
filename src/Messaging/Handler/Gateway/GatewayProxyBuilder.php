@@ -5,7 +5,9 @@ namespace Ecotone\Messaging\Handler\Gateway;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
@@ -19,6 +21,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Precedence;
@@ -46,6 +49,7 @@ class GatewayProxyBuilder implements GatewayBuilder
     private string $requestChannelName;
     private int $replyMilliSecondsTimeout = self::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
     private ?string $replyChannelName = null;
+    private ?string $replyContentType = null;
     private array $methodArgumentConverters = [];
     private ?string $errorChannelName = null;
     /**
@@ -115,6 +119,13 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function withReplyChannel(string $replyChannelName): self
     {
         $this->replyChannelName = $replyChannelName;
+
+        return $this;
+    }
+
+    public function withReplyContentType(string $contentType) : self
+    {
+        $this->replyContentType = MediaType::parseMediaType($contentType)->toString();
 
         return $this;
     }
@@ -380,6 +391,10 @@ class GatewayProxyBuilder implements GatewayBuilder
         }
 
         $methodArgumentConverters = [];
+        if ($this->replyContentType) {
+            $methodArgumentConverters[] = GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $this->replyContentType)->build($referenceSearchService);
+        }
+
         foreach ($this->methodArgumentConverters as $messageConverterBuilder) {
             $methodArgumentConverters[] = $messageConverterBuilder->build($referenceSearchService);
         }

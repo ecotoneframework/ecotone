@@ -4,16 +4,11 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Handler\Gateway\CombinedGatewayBuilder;
-use Ecotone\Messaging\Handler\Gateway\CombinedGatewayDefinition;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderExpressionBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\BookStoreGatewayExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
@@ -49,12 +44,12 @@ class GatewayModuleTest extends AnnotationConfigurationTest
                         ->withErrorChannel("errorChannel")
                         ->withRequiredInterceptorNames(['dbalTransaction'])
                         ->withReplyMillisecondTimeout(100)
+                        ->withReplyContentType("application/json")
                         ->withParameterConverters([
                             GatewayPayloadExpressionBuilder::create("bookNumber", "upper(value)"),
                             GatewayHeaderBuilder::create("rentTill", "rentDate"),
                             GatewayHeaderBuilder::create("cost", "cost"),
-                            GatewayHeadersBuilder::create("data"),
-                            GatewayHeaderValueBuilder::create("secret", "123")
+                            GatewayHeadersBuilder::create("data")
                         ])
                 ),
             $messagingSystemConfiguration

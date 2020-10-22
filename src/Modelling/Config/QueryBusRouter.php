@@ -7,6 +7,7 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
 use Ecotone\Modelling\QueryBus;
 
 /**

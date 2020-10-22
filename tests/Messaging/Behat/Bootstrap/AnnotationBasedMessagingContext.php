@@ -147,7 +147,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                         ProductExchanger::class => new ProductExchanger(),
                         AddVatService::class => new AddVatService(),
                         AddFranchiseMargin::class => new AddFranchiseMargin(),
-                        ShopRepository::class => new ShopRepository()
+                        ShopRepository::class => ShopRepository::createEmpty()
                     ];
                     break;
                 }
@@ -173,15 +173,29 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Test\Ecotone\Messaging\Fixture\Behat\Calculating":
+            case "Test\Ecotone\Modelling\Fixture\MetadataPropagating":
                 {
                     $objects = [
-                        InboundCalculation::class => new InboundCalculation(),
-                        ResultService::class => new ResultService(),
-                        CalculatorInterceptor::class => new CalculatorInterceptor()
+                        new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()
                     ];
                     break;
                 }
+            case "Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints":
+            {
+                $objects = [
+                    new \Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints\OrderService()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Messaging\Fixture\Behat\Calculating":
+            {
+                $objects = [
+                    InboundCalculation::class => new InboundCalculation(),
+                    ResultService::class => new ResultService(),
+                    CalculatorInterceptor::class => new CalculatorInterceptor()
+                ];
+                break;
+            }
             default:
             {
                 throw new \InvalidArgumentException("Namespace not registered ". $namespace);

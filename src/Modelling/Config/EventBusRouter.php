@@ -6,6 +6,7 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
 
 /**
  * Class EventPublisherRouter
@@ -16,11 +17,6 @@ class EventBusRouter
 {
     private array $channelMapping = [];
 
-    /**
-     * CommandBusRouter constructor.
-     *
-     * @param array           $channelMapping
-     */
     public function __construct(array $channelMapping)
     {
         $this->channelMapping = $channelMapping;

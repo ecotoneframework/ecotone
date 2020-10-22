@@ -132,6 +132,32 @@ class MessageHeaders
         return $this->headers;
     }
 
+    public static function getFrameworksHeaderNames() : array
+    {
+        return [
+            self::MESSAGE_ID,
+            self::MESSAGE_CORRELATION_ID,
+            self::CAUSATION_MESSAGE_ID,
+            self::CONTENT_TYPE,
+            self::TYPE_ID,
+            self::CONTENT_ENCODING,
+            self::TIMESTAMP,
+            self::ROUTING_SLIP,
+            self::REPLY_CHANNEL,
+            self::ERROR_CHANNEL,
+            self::SEQUENCE_NUMBER,
+            self::SEQUENCE_SIZE,
+            self::PRIORITY,
+            self::DUPLICATE_MESSAGE,
+            self::TIME_TO_LIVE,
+            self::DELIVERY_DELAY,
+            self::POLLED_CHANNEL,
+            self::POLLED_CHANNEL_NAME,
+            self::REPLY_CONTENT_TYPE,
+            self::CONSUMER_ENDPOINT_ID
+        ];
+    }
+
     /**
      * @param string $headerRegex e.g. ecotone-domain-*
      *

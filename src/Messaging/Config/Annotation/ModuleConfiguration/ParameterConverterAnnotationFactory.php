@@ -3,26 +3,18 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
-use Ecotone\Messaging\Annotation\Parameter\MessageParameter;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Annotation\Parameter\Reference;
-use Ecotone\Messaging\Annotation\Parameter\Value;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class ParameterConverterAnnotationFactory
@@ -41,6 +33,18 @@ class ParameterConverterAnnotationFactory
     public static function create(): self
     {
         return new self();
+    }
+
+    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, bool $ignorePayload): array
+    {
+        return
+            MethodInvoker::createDefaultMethodParameters(
+                $relatedClassInterface,
+                $this->createParameterConverters($relatedClassInterface, $methodParameterConverterBuilders),
+                [],
+                null,
+                $ignorePayload
+            );
     }
 
     private function createParameterConverters(?InterfaceToCall $relatedClassInterface, array $parameterConverterAnnotations): array
@@ -81,17 +85,5 @@ class ParameterConverterAnnotationFactory
         }
 
         return $parameterConverters;
-    }
-
-    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, array $methodParameterConverterBuilders, bool $ignorePayload): array
-    {
-        return
-            MethodInvoker::createDefaultMethodParameters(
-                $relatedClassInterface,
-                $this->createParameterConverters($relatedClassInterface, $methodParameterConverterBuilders),
-                [],
-                null,
-                $ignorePayload
-            );
     }
 }

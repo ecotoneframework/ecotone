@@ -5,16 +5,27 @@ namespace Test\Ecotone\Modelling\Unit\Config;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\BusRouterBuilder;
 use Ecotone\Modelling\Config\ModellingMessageRouterModule;
+use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
+use Ecotone\Modelling\QueryBus;
 use ReflectionException;
 use stdClass;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
@@ -70,14 +81,36 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         $annotationRegistrationService = InMemoryAnnotationFinder::createFrom($annotatedClasses);
         $extendedConfiguration = $this->prepareModule($annotationRegistrationService);
 
+        $messagePropagator = new MessageHeadersPropagator();
         $this->assertEquals(
             MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
-                ->registerMessageHandler(BusRouterBuilder::createCommandBusByObject($commandObjectMapping))
-                ->registerMessageHandler(BusRouterBuilder::createCommandBusByName($commandMapping))
-                ->registerMessageHandler(BusRouterBuilder::createQueryBusByObject($queryObjectMapping))
-                ->registerMessageHandler(BusRouterBuilder::createQueryBusByName($queryMapping))
-                ->registerMessageHandler(BusRouterBuilder::createEventBusByObject($eventObjectMapping))
-                ->registerMessageHandler(BusRouterBuilder::createEventBusByName($eventNameMapping)),
+                ->registerBeforeMethodInterceptor(
+                    MethodInterceptor::create(
+                        MessageHeadersPropagator::class,
+                        InterfaceToCall::create(MessageHeadersPropagator::class, "propagateHeaders"),
+                        TransformerBuilder::createWithDirectObject(new MessageHeadersPropagator(), "propagateHeaders")
+                            ->withMethodParameterConverters([
+                                AllHeadersBuilder::createWith("headers")
+                            ]),
+                        Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
+                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||@(" . AsynchronousRunningEndpoint::class . ")"
+                    )
+                )
+                ->registerAroundMethodInterceptor(
+                    AroundInterceptorReference::createWithDirectObject(
+                        MessageHeadersPropagator::class,
+                        new MessageHeadersPropagator(),
+                        "storeHeaders",
+                        Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
+                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||@(" . AsynchronousRunningEndpoint::class . ")"
+                    )
+                )
+                ->registerMessageHandler(BusRouterBuilder::createCommandBusByObject($messagePropagator, $commandObjectMapping))
+                ->registerMessageHandler(BusRouterBuilder::createCommandBusByName($messagePropagator, $commandMapping))
+                ->registerMessageHandler(BusRouterBuilder::createQueryBusByObject($messagePropagator, $queryObjectMapping))
+                ->registerMessageHandler(BusRouterBuilder::createQueryBusByName($messagePropagator, $queryMapping))
+                ->registerMessageHandler(BusRouterBuilder::createEventBusByObject($messagePropagator, $eventObjectMapping))
+                ->registerMessageHandler(BusRouterBuilder::createEventBusByName($messagePropagator, $eventNameMapping)),
             $extendedConfiguration
         );
     }

@@ -87,3 +87,28 @@ Feature: activating as aggregate order entity
     And I notify about order with information "Milk was bought"
     Then current user is "Franco"
     When I notify about order with information "Ham was bought" I should be disallowed
+
+  Scenario: Placing order and notifying. Verify correctness of propagated headers
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\MetadataPropagating"
+    When I place order with metadata "token" 123
+    Then there should be notification with metadata "token" 123
+
+  Scenario: Placing order and notifying. Verify correctness overriding propagated headers
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\MetadataPropagating"
+    And I override header "token" with 1234
+    When I place order with metadata "token" 123
+    Then there should be notification with metadata "token" 1234
+
+  Scenario: Placing order and notifying. Verify correctness overriding propagated headers when exception happened
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\MetadataPropagating"
+    When I place order with metadata "token" 123
+    And next command fails with "token" 1111
+    When I place order with no additional metadata
+    Then there should be notification without additional metadata
+
+  Scenario: Placing order and notifying. Verify correctness overriding propagated headers when there is more endpoints involved
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints"
+    When I place order with metadata "token" 123
+    Then there should be notification with metadata "token" 123
+    When I active receiver "notifications"
+    Then there should be notification with metadata "token" 123

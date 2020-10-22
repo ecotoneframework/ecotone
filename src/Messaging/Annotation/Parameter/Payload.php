@@ -11,6 +11,7 @@ use Doctrine\Common\Annotations\Annotation\Required;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @Annotation()
  */
+#[\Attribute(\Attribute::TARGET_PARAMETER)]
 class Payload
 {
     /**
@@ -18,4 +19,9 @@ class Payload
      */
     public string $parameterName;
     public string $expression = "";
+
+//    public function __construct(string|array $expression)
+//    {
+//        $this->expression = $expression;
+//    }
 }

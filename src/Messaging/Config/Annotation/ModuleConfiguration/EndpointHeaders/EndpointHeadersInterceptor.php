@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders;
 
+use Ecotone\Messaging\Annotation\Endpoint\AddHeader;
 use Ecotone\Messaging\Annotation\Endpoint\Delayed;
 use Ecotone\Messaging\Annotation\Endpoint\Priority;
 use Ecotone\Messaging\Annotation\Endpoint\ExpireAfter;
+use Ecotone\Messaging\Annotation\Endpoint\RemoveHeader;
 use Ecotone\Messaging\MessageHeaders;
 
 /**
@@ -15,7 +17,7 @@ use Ecotone\Messaging\MessageHeaders;
  */
 class EndpointHeadersInterceptor
 {
-    public function addMetadata(?Delayed $deliveryDelay, ?ExpireAfter $timeToLive, ?Priority $priority) : array
+    public function addMetadata(?Delayed $deliveryDelay, ?ExpireAfter $timeToLive, ?Priority $priority, ?AddHeader $addHeader, ?RemoveHeader $removeHeader) : array
     {
         $metadata = [];
 
@@ -29,6 +31,14 @@ class EndpointHeadersInterceptor
 
         if ($priority) {
             $metadata[MessageHeaders::PRIORITY] = $priority->getNumber();
+        }
+
+        if ($addHeader) {
+            $metadata[$addHeader->getHeaderName()] = $addHeader->getHeaderValue();
+        }
+
+        if ($removeHeader) {
+            $metadata[$removeHeader->getHeaderName()] = null;
         }
 
         return $metadata;

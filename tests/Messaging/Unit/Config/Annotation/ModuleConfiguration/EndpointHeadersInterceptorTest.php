@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\Messaging\Annotation\Endpoint\AddHeader;
 use Ecotone\Messaging\Annotation\Endpoint\Delayed;
 use Ecotone\Messaging\Annotation\Endpoint\Priority;
 use Ecotone\Messaging\Annotation\Endpoint\ExpireAfter;
+use Ecotone\Messaging\Annotation\Endpoint\RemoveHeader;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders\EndpointHeadersInterceptor;
 use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +26,7 @@ class EndpointHeadersInterceptorTest extends TestCase
 
         $this->assertEquals(
             [MessageHeaders::DELIVERY_DELAY => 1],
-            $endpointHeadersInterceptor->addMetadata($annotation, null, null)
+            $endpointHeadersInterceptor->addMetadata($annotation, null, null, null, null)
         );
     }
 
@@ -35,7 +37,7 @@ class EndpointHeadersInterceptorTest extends TestCase
 
         $this->assertEquals(
             [MessageHeaders::TIME_TO_LIVE => 1],
-            $endpointHeadersInterceptor->addMetadata(null, $annotation, null)
+            $endpointHeadersInterceptor->addMetadata(null, $annotation, null, null, null)
         );
     }
 
@@ -46,7 +48,29 @@ class EndpointHeadersInterceptorTest extends TestCase
 
         $this->assertEquals(
             [MessageHeaders::PRIORITY => 1],
-            $endpointHeadersInterceptor->addMetadata(null, null, $annotation)
+            $endpointHeadersInterceptor->addMetadata(null, null, $annotation, null, null)
+        );
+    }
+
+    public function test_adding_header()
+    {
+        $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
+        $annotation = new AddHeader("token", 123);
+
+        $this->assertEquals(
+            ["token" => 123],
+            $endpointHeadersInterceptor->addMetadata(null, null, null, $annotation, null)
+        );
+    }
+
+    public function test_removing_header()
+    {
+        $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
+        $annotation = new RemoveHeader("token");
+
+        $this->assertEquals(
+            ["token" => null],
+            $endpointHeadersInterceptor->addMetadata(null, null, null, null, $annotation)
         );
     }
 }

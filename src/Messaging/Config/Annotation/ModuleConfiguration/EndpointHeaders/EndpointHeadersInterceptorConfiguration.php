@@ -4,9 +4,11 @@
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Annotation\Endpoint\AddHeader;
 use Ecotone\Messaging\Annotation\Endpoint\Delayed;
 use Ecotone\Messaging\Annotation\Endpoint\Priority;
 use Ecotone\Messaging\Annotation\Endpoint\ExpireAfter;
+use Ecotone\Messaging\Annotation\Endpoint\RemoveHeader;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
@@ -51,7 +53,7 @@ class EndpointHeadersInterceptorConfiguration extends NoExternalConfigurationMod
                 $interfaceToCall,
                 TransformerBuilder::createWithDirectObject(new EndpointHeadersInterceptor(), "addMetadata"),
                 Precedence::ENDPOINT_HEADERS_PRECEDENCE,
-                "@(" . ExpireAfter::class . ")||(@" . Priority::class . ")||@(" . Delayed::class . ")"
+                "@(" . ExpireAfter::class . ")||(@" . Priority::class . ")||@(" . Delayed::class . ")||@(" . AddHeader::class . ")||@(" . RemoveHeader::class . ")"
             )
         );
         $configuration->registerRelatedInterfaces([$interfaceToCall]);

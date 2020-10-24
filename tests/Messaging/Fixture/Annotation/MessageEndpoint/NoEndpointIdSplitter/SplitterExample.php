@@ -10,13 +10,9 @@ use Ecotone\Messaging\Annotation\Splitter;
 class SplitterExample
 {
     /**
-     * @param string $payload
-     * @return array
-     * @Splitter(inputChannelName="inputChannel", outputChannelName="outputChannel", parameterConverters={
-     *      @Payload(parameterName="payload")
-     * })
+     * @Splitter(inputChannelName="inputChannel", outputChannelName="outputChannel")
      */
-    public function split(string $payload) : array
+    public function split(#[Payload] string $payload) : array
     {
         return [];
     }

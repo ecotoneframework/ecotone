@@ -3,20 +3,18 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Annotation\Parameter;
 
-use Doctrine\Common\Annotations\Annotation\Required;
-
-/**
- * Class ReferenceServiceParameterConverterAnnotation
- * @package Ecotone\Messaging\Annotation\MessageToParameter
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- */
 #[\Attribute(\Attribute::TARGET_PARAMETER)]
 class Reference
 {
-    /**
-     * @Required()
-     */
-    public string $parameterName;
-    public string $referenceName = '';
+    public string $referenceName;
+
+    public function __construct(string $referenceName = "")
+    {
+        $this->referenceName = $referenceName;
+    }
+
+    public function getReferenceName(): string
+    {
+        return $this->referenceName;
+    }
 }

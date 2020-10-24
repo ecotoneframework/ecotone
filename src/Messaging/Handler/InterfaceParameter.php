@@ -23,8 +23,12 @@ final class InterfaceParameter
     private $defaultValue;
     private bool $hasDefaultValue;
     private bool $isAnnotation;
+    /**
+     * @var object[]
+     */
+    private array $annotations;
 
-    private function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation)
+    private function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation, array $annotations)
     {
         $this->name = $name;
         $this->typeDescriptor = $typeDescriptor;
@@ -32,6 +36,7 @@ final class InterfaceParameter
         $this->hasDefaultValue = $hasDefaultValue;
         $this->defaultValue = $defaultValue;
         $this->isAnnotation = $isAnnotation;
+        $this->annotations = $annotations;
     }
 
     /**
@@ -41,7 +46,7 @@ final class InterfaceParameter
      */
     public static function createNullable(string $name, Type $typeDescriptor) : self
     {
-        return new self($name, $typeDescriptor, true, false,null, false);
+        return new self($name, $typeDescriptor, true, false,null, false, []);
     }
 
     /**
@@ -51,12 +56,12 @@ final class InterfaceParameter
      */
     public static function createNotNullable(string $name, Type $typeDescriptor) : self
     {
-        return new self($name, $typeDescriptor, false, false, null, false);
+        return new self($name, $typeDescriptor, false, false, null, false, []);
     }
 
-    public static function create(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation) : self
+    public static function create(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation, array $annotations) : self
     {
-        return new self($name, $typeDescriptor, $doesAllowNull, $hasDefaultValue, $defaultValue, $isAnnotation);
+        return new self($name, $typeDescriptor, $doesAllowNull, $hasDefaultValue, $defaultValue, $isAnnotation, $annotations);
     }
 
     /**
@@ -102,6 +107,11 @@ final class InterfaceParameter
     public function getTypeHint() : string
     {
         return $this->typeDescriptor->getTypeHint();
+    }
+
+    public function getAnnotations(): array
+    {
+        return $this->annotations;
     }
 
     /**

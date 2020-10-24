@@ -11,26 +11,13 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 interface BookStoreGatewayExample
 {
     /**
-     * @param string $bookNumber
-     * @param string $rentTill
-     * @param int $cost
-     * @param array $data
-     *
-     * @return bool
-     *
      * @MessageGateway(
      *      requestChannel="requestChannel",
      *      errorChannel="errorChannel",
-     *      parameterConverters={
-     *          @Payload(parameterName="bookNumber", expression="upper(value)"),
-     *          @Header(parameterName="rentTill", headerName="rentDate"),
-     *          @Header(parameterName="cost", headerName="cost"),
-     *          @Headers(parameterName="data")
-     *      },
      *      requiredInterceptorNames={"dbalTransaction"},
      *      replyTimeoutInMilliseconds=100,
      *      replyContentType="application/json"
      * )
      */
-    public function rent(string $bookNumber, string $rentTill, int $cost, array $data): bool;
+    public function rent(#[Payload("upper(value)")] string $bookNumber, #[Header("rentDate")] string $rentTill, #[Header("cost")] int $cost, #[Headers] array $data): bool;
 }

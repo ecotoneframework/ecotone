@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Annotation\MessageGateway;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
@@ -20,68 +19,34 @@ interface CommandBus
     const CHANNEL_NAME_BY_NAME   = "ecotone.modelling.bus.command_by_name";
 
     /**
-     * Entrypoint for commands, when you access to instance of the command
-     *
-     * @param object $command instance of command
+     * @MessageGateway(requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT)
      *
      * @return mixed
-     *
-     * @MessageGateway(requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT)
      */
     public function send(object $command);
 
     /**
-     * Entrypoint for commands, when you access to instance of the command
-     *
-     * @param object $command instance of command
-     * @param array  $metadata
+     * @MessageGateway(requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT)
      *
      * @return mixed
-     *
-     * @MessageGateway(
-     *     requestChannel=CommandBus::CHANNEL_NAME_BY_OBJECT,
-     *     parameterConverters={
-     *          @Payload(parameterName="command"),
-     *          @Headers(parameterName="metadata")
-     *     }
-     * )
      */
-    public function sendWithMetadata(object $command, array $metadata);
+    public function sendWithMetadata(#[Payload] object $command, #[Headers] array $metadata);
 
     /**
-     * @param string $name
-     * @param string $sourceMediaType
-     * @param mixed  $commandData
+     * @var mixed $commandData
+     *
+     * @MessageGateway(requestChannel=CommandBus::CHANNEL_NAME_BY_NAME)
      *
      * @return mixed
-     * @MessageGateway(
-     *     requestChannel=CommandBus::CHANNEL_NAME_BY_NAME,
-     *     parameterConverters={
-     *          @Header(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
-     *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @Payload(parameterName="commandData")
-     *     }
-     * )
      */
-    public function convertAndSend(string $name, string $sourceMediaType, $commandData);
+    public function convertAndSend(#[Header(CommandBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $commandData);
 
     /**
-     * @param string $name
-     * @param string $sourceMediaType
-     * @param mixed  $commandData
-     * @param array  $metadata
+     * @var mixed $commandData
+     *
+     * @MessageGateway(requestChannel=CommandBus::CHANNEL_NAME_BY_NAME)
      *
      * @return mixed
-     *
-     * @MessageGateway(
-     *     requestChannel=CommandBus::CHANNEL_NAME_BY_NAME,
-     *     parameterConverters={
-     *          @Headers(parameterName="metadata"),
-     *          @Header(parameterName="name", headerName=CommandBus::CHANNEL_NAME_BY_NAME),
-     *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @Payload(parameterName="commandData")
-     *     }
-     * )
      */
-    public function convertAndSendWithMetadata(string $name, string $sourceMediaType, $commandData, array $metadata);
+    public function convertAndSendWithMetadata(#[Header(CommandBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $commandData, #[Headers] array $metadata);
 }

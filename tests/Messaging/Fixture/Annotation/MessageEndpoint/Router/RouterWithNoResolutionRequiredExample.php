@@ -9,13 +9,9 @@ use Ecotone\Messaging\Annotation\Router;
 class RouterWithNoResolutionRequiredExample
 {
     /**
-     * @param $content
-     * @return string
-     * @Router(endpointId="some-id", inputChannelName="inputChannel", isResolutionRequired=false, parameterConverters={
-     *     @Payload(parameterName="content")
-     * })
+     * @Router(endpointId="some-id", inputChannelName="inputChannel", isResolutionRequired=false)
      */
-    public function route($content) : string
+    public function route(#[Payload] $content) : string
     {
         return "outputChannel";
     }

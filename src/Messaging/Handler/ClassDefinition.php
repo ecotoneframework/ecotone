@@ -5,9 +5,13 @@ namespace Ecotone\Messaging\Handler;
 
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Messaging\Annotation\Parameter\Header;
+use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Test\Ecotone\Messaging\Fixture\Behat\Calculating\BeforeMultiplyCalculation;
+use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId;
 
 /**
  * Class ClassDefinition
@@ -54,7 +58,7 @@ class ClassDefinition
             $typeResolver->getClassProperties($classType->toString()),
             $annotationParser->getAnnotationsForClass($classType->toString()),
             array_map(function(\ReflectionMethod $method){return $method->getName();},$reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC)),
-            (bool)preg_match("/@Annotation$/m", $reflectionClass->getDocComment() ? $reflectionClass->getDocComment() : "")
+            (bool)!empty($reflectionClass->getAttributes(\Attribute::class))
         );
     }
 
@@ -69,7 +73,7 @@ class ClassDefinition
             $typeResolver->getClassProperties($classType->toString()),
             $annotationParser->getAnnotationsForClass($classType->toString()),
             array_map(function(\ReflectionMethod $method){return $method->getName();},$reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC)),
-            (bool)preg_match("/@Annotation$/m", $reflectionClass->getDocComment() ? $reflectionClass->getDocComment() : "")
+            (bool)!empty($reflectionClass->getAttributes(\Attribute::class))
         );
     }
 

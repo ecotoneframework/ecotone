@@ -13,6 +13,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
  * @Annotation
  * @Target({"METHOD"})
  */
+#[\Attribute]
 class ServiceActivator extends InputOutputEndpointAnnotation
 {
     public bool $requiresReply = false;

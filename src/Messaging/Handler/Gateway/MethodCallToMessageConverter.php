@@ -93,7 +93,7 @@ class MethodCallToMessageConverter
             throw InvalidArgumentException::create("You need to pass method argument converts for {$this->interfaceToCall}");
         }
 
-        if (empty($methodArgumentConverters) && $this->interfaceToCall->hasSingleArgument()) {
+        if (empty($methodArgumentConverters) && $this->interfaceToCall->hasSingleParameter()) {
             $methodArgumentConverters = [GatewayPayloadConverter::create($this->interfaceToCall->getFirstParameterName())];
         }
 

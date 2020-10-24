@@ -10,14 +10,9 @@ use Ecotone\Messaging\Annotation\Transformer;
 class TransformerWithMethodParameterExample
 {
     /**
-     * @param string $message
-     *
-     * @Transformer(endpointId="some-id", inputChannelName="inputChannel", outputChannelName="outputChannel", parameterConverters={
-     *     @Payload(parameterName="message")
-     * }, requiredInterceptorNames={"someReference"})
-     * @return string
+     * @Transformer(endpointId="some-id", inputChannelName="inputChannel", outputChannelName="outputChannel", requiredInterceptorNames={"someReference"})
      */
-    public function send(string $message) : string
+    public function send(#[Payload] string $message) : string
     {
         return "";
     }

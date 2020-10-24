@@ -67,18 +67,6 @@ class AroundMethodInterceptor
         return false;
     }
 
-    /**
-     * @param object $referenceToCall
-     * @param string $methodName
-     * @param ReferenceSearchService $referenceSearchService
-     * @return AroundMethodInterceptor
-     * @throws AnnotationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReferenceNotFoundException
-     * @throws ReflectionException
-     * @throws TypeDefinitionException
-     */
     public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService): self
     {
         /** @var InterfaceToCallRegistry $interfaceRegistry */

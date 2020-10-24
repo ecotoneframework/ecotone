@@ -71,13 +71,19 @@ class TypeResolver
                 $isAnnotation = $classDefinition->isAnnotation();
             }
 
+            $parameterAttributes = [];
+            foreach ($parameter->getAttributes() as $attribute) {
+                $parameterAttributes[] = $attribute->newInstance();
+            }
+
             $parameters[] = InterfaceParameter::create(
                 $parameter->getName(),
                 $parameterType,
                 $parameter->getType() ? $parameter->getType()->allowsNull() : true,
                 $parameter->isDefaultValueAvailable(),
                 $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null,
-                $isAnnotation
+                $isAnnotation,
+                $parameterAttributes
             );
         }
 

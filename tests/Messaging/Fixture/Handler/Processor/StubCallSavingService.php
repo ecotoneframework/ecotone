@@ -145,6 +145,7 @@ class StubCallSavingService
      * @param Message $message
      * @return Message
      */
+    #[ServiceActivator]
     public function methodWithAnnotationWithReturnType(Message $message) : Message
     {
         return $message;

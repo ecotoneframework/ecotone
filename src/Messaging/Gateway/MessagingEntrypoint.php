@@ -13,27 +13,14 @@ interface MessagingEntrypoint
     const ENTRYPOINT = "ecotone.messaging.entrypoint";
 
     /**
-     * @MessageGateway(
-     *     requestChannel=MessagingEntrypoint::ENTRYPOINT,
-     *     parameterConverters={
-     *          @Payload(parameterName="payload"),
-     *          @Header(parameterName="targetChannel", headerName=MessagingEntrypoint::ENTRYPOINT)
-     *     }
-     * )
+     * @MessageGateway(requestChannel=MessagingEntrypoint::ENTRYPOINT)
      */
-    public function send($payload, string $targetChannel);
+    public function send(#[Payload] $payload, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel);
 
     /**
-     * @MessageGateway(
-     *     requestChannel=MessagingEntrypoint::ENTRYPOINT,
-     *     parameterConverters={
-     *          @Payload(parameterName="payload"),
-     *          @Headers(parameterName="headers"),
-     *          @Header(parameterName="targetChannel", headerName=MessagingEntrypoint::ENTRYPOINT)
-     *     }
-     * )
+     * @MessageGateway(requestChannel=MessagingEntrypoint::ENTRYPOINT)
      */
-    public function sendWithHeaders($payload, array $headers, string $targetChannel);
+    public function sendWithHeaders(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel);
 
     /**
      * It must contain {MessagingEntrypoint::ENTRYPOINT} header

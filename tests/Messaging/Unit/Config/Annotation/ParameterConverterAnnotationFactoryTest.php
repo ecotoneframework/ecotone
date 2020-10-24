@@ -8,6 +8,8 @@ use Ecotone\Messaging\Annotation\Parameter\Reference;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
@@ -28,23 +30,22 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
     public function test_creating_with_class_name_as_reference_name_if_no_reference_passed()
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
-        $referenceAnnotation = new Reference();
-        $referenceAnnotation->parameterName = "object";
+        $referenceAnnotation = new Reference("object");
         $allHeadersAnnotation = new Headers();
-        $allHeadersAnnotation->parameterName = "some";
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
         $methodName = "sendMessage";
 
         $this->assertEquals(
             [
+                HeaderBuilder::create("to", "sendTo"),
+                PayloadBuilder::create("content"),
+                MessageConverterBuilder::create("message"),
                 ReferenceBuilder::create(
-                    $referenceAnnotation->parameterName,
+                    $referenceAnnotation->getReferenceName(),
                     \stdClass::class
                 ),
-                AllHeadersBuilder::createWith("some"),
-                PayloadBuilder::create("to"),
-                MessageConverterBuilder::create("message")
+                HeaderExpressionBuilder::create("name", "token", "value", false)
             ],
             $parameterConverterAnnotationFactory->createParameterConvertersWithReferences(
                 InterfaceToCall::create($relatedClassName, $methodName),

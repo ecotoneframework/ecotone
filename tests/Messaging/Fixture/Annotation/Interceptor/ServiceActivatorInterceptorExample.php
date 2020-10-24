@@ -14,27 +14,17 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 class ServiceActivatorInterceptorExample
 {
     /**
-     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, parameterConverters={
-     *      @Payload(parameterName="name"),
-     *      @Header(parameterName="surname", headerName="surname")
-     * })
-     * @param string $name
-     * @param string $surname
+     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class)
      */
-    public function doSomethingBefore(string $name, string $surname) : void
+    public function doSomethingBefore(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 
     }
 
     /**
-     * @After(parameterConverters={
-     *      @Payload(parameterName="name"),
-     *      @Header(parameterName="surname", headerName="surname")
-     * })
-     * @param string $name
-     * @param string $surname
+     * @After()
      */
-    public function doSomethingAfter(string $name, string $surname) : void
+    public function doSomethingAfter(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 
     }

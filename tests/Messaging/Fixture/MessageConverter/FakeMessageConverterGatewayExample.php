@@ -10,16 +10,7 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 interface FakeMessageConverterGatewayExample
 {
     /**
-     * @param array $some
-     * @param int $amount
-     * @return \stdClass
-     * @MessageGateway(
-     *     requestChannel="requestChannel",
-     *     parameterConverters={
-     *          @Header(parameterName="some", headerName="some"),
-     *          @Payload(parameterName="amount")
-     *     }
-     * )
+     * @MessageGateway(requestChannel="requestChannel")
      */
-    public function execute(array $some, int $amount) : \stdClass;
+    public function execute(#[Header("some")] array $some, #[Payload] int $amount) : \stdClass;
 }

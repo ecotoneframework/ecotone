@@ -15,70 +15,35 @@ interface EventBus
     const CHANNEL_NAME_BY_NAME   = "ecotone.modelling.bus.event_by_name";
 
     /**
-     * Entrypoint for events, when you access to instance of the command
-     *
-     * @param object $event instance of command
+     * @MessageGateway(requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT)
      *
      * @return mixed
-     *
-     * @MessageGateway(requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT)
      */
     public function send(object $event);
 
     /**
-     * Entrypoint for events, when you access to instance of the command
-     *
-     * @param object $event instance of command
-     * @param array  $metadata
+     * @MessageGateway(requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT)
      *
      * @return mixed
-     *
-     * @MessageGateway(
-     *     requestChannel=EventBus::CHANNEL_NAME_BY_OBJECT,
-     *     parameterConverters={
-     *         @Payload(parameterName="event"),
-     *         @Headers(parameterName="metadata")
-     *     }
-     * )
      */
     public function sendWithMetadata(object $event, array $metadata);
 
 
     /**
-     * @param string $name
-     * @param string $sourceMediaType
-     * @param mixed  $data
+     * @var mixed $data
+     *
+     * @MessageGateway(requestChannel=EventBus::CHANNEL_NAME_BY_NAME)
      *
      * @return mixed
-     *
-     * @MessageGateway(
-     *     requestChannel=EventBus::CHANNEL_NAME_BY_NAME,
-     *     parameterConverters={
-     *          @Header(parameterName="name", headerName=EventBus::CHANNEL_NAME_BY_NAME),
-     *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @Payload(parameterName="data")
-     *     }
-     * )
      */
-    public function convertAndSend(string $name, string $sourceMediaType, $data);
+    public function convertAndSend(#[Header(EventBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $data);
 
     /**
-     * @param string $name
-     * @param string $sourceMediaType
-     * @param mixed  $data
-     * @param array  $metadata
+     * @var mixed $data
+     *
+     * @MessageGateway(requestChannel=EventBus::CHANNEL_NAME_BY_NAME)
      *
      * @return mixed
-     *
-     * @MessageGateway(
-     *     requestChannel=EventBus::CHANNEL_NAME_BY_NAME,
-     *     parameterConverters={
-     *          @Headers(parameterName="metadata"),
-     *          @Header(parameterName="name", headerName=EventBus::CHANNEL_NAME_BY_NAME),
-     *          @Header(parameterName="sourceMediaType", headerName=MessageHeaders::CONTENT_TYPE),
-     *          @Payload(parameterName="data")
-     *     }
-     * )
      */
-    public function convertAndSendWithMetadata(string $name, string $sourceMediaType, $data, array $metadata);
+    public function convertAndSendWithMetadata(#[Header(EventBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $data, #[Headers] array $metadata);
 }

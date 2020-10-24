@@ -7,6 +7,7 @@ use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
@@ -50,6 +51,9 @@ class GatewayProxyBuilder implements GatewayBuilder
     private int $replyMilliSecondsTimeout = self::DEFAULT_REPLY_MILLISECONDS_TIMEOUT;
     private ?string $replyChannelName = null;
     private ?string $replyContentType = null;
+    /**
+     * @var GatewayParameterConverterBuilder[]
+     */
     private array $methodArgumentConverters = [];
     private ?string $errorChannelName = null;
     /**
@@ -394,6 +398,14 @@ class GatewayProxyBuilder implements GatewayBuilder
         if ($this->replyContentType) {
             $methodArgumentConverters[] = GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $this->replyContentType)->build($referenceSearchService);
         }
+        if ($interfaceToCall->hasFirstParameter() && !$this->hasConverterFor($interfaceToCall->getFirstParameter())) {
+            $methodArgumentConverters[] = GatewayPayloadBuilder::create($interfaceToCall->getFirstParameter()->getName())->build($referenceSearchService);
+        }
+        if ($interfaceToCall->hasSecondParameter() && !$this->hasConverterFor($interfaceToCall->getSecondParameter())) {
+            if ($interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()) {
+                $methodArgumentConverters[] = GatewayHeadersBuilder::create($interfaceToCall->getFirstParameter()->getName())->build($referenceSearchService);
+            }
+        }
 
         foreach ($this->methodArgumentConverters as $messageConverterBuilder) {
             $methodArgumentConverters[] = $messageConverterBuilder->build($referenceSearchService);
@@ -483,5 +495,16 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function __toString()
     {
         return sprintf("Gateway - %s:%s with reference name `%s` for request channel `%s`", $this->interfaceName, $this->methodName, $this->referenceName, $this->requestChannelName);
+    }
+
+    private function hasConverterFor(\Ecotone\Messaging\Handler\InterfaceParameter $parameter): bool
+    {
+        foreach ($this->methodArgumentConverters as $parameterConverter) {
+            if ($parameterConverter->isHandling($parameter)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

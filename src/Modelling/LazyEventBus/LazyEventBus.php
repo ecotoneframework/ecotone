@@ -7,7 +7,7 @@ use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
-
+// @TODO DROP
 interface LazyEventBus
 {
     const CHANNEL_NAME = "ecotone.modelling.bus.lazy_event";
@@ -31,13 +31,7 @@ interface LazyEventBus
      *
      * @return mixed
      *
-     * @MessageGateway(
-     *     requestChannel=LazyEventBus::CHANNEL_NAME,
-     *     parameterConverters={
-     *         @Payload(parameterName="event"),
-     *         @Headers(parameterName="metadata")
-     *     }
-     * )
+     * @MessageGateway(requestChannel=LazyEventBus::CHANNEL_NAME)
      */
     public function sendWithMetadata(object $event, array $metadata);
 }

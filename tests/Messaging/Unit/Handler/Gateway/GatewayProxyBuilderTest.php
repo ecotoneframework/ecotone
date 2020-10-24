@@ -1408,7 +1408,7 @@ class GatewayProxyBuilderTest extends MessagingTest
                 ])
             );
 
-        $replyMessage = $gateway->execute(["some"]);
+        $replyMessage = $gateway->execute([["some"]]);
 
         $this->assertEquals(
             $replyData,

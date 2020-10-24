@@ -3,25 +3,29 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Annotation\Parameter;
 
-use Doctrine\Common\Annotations\Annotation\Required;
+use Ecotone\Messaging\Support\Assert;
 
-/**
- * Class HeaderParameterConverter
- * @package Ecotone\Messaging\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation()
- */
 #[\Attribute(\Attribute::TARGET_PARAMETER)]
 class Header
 {
-    /**
-     * @Required()
-     */
-    public string $parameterName;
-    /**
-     * @Required()
-     */
     public string $headerName;
     public string $expression = "";
-    public bool $isRequired = true;
+
+    public function __construct(string $headerName, string $expression = "")
+    {
+        Assert::notNullAndEmpty($headerName, "Header name must not be empty string");
+
+        $this->headerName = $headerName;
+        $this->expression = $expression;
+    }
+
+    public function getHeaderName(): string
+    {
+        return $this->headerName;
+    }
+
+    public function getExpression(): string
+    {
+        return $this->expression;
+    }
 }

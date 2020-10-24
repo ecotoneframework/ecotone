@@ -24,10 +24,16 @@ class InterfaceToCall
     private ?string $interfaceName;
     private ?\Ecotone\Messaging\Handler\Type $interfaceType;
     private ?string $methodName;
+    /**
+     * @var InterfaceParameter[]
+     */
     private ?iterable $parameters;
     private ?\Ecotone\Messaging\Handler\Type $returnType;
     private ?bool $doesReturnTypeAllowNulls;
     private ?bool $isStaticallyCalled;
+    /**
+     * @var object[]
+     */
     private iterable $methodAnnotations;
     private \Ecotone\Messaging\Handler\ClassDefinition $classDefinition;
 
@@ -393,9 +399,19 @@ class InterfaceToCall
     /**
      * @return bool
      */
-    public function hasSingleArgument(): bool
+    public function hasSingleParameter(): bool
     {
         return $this->parameterAmount() == 1;
+    }
+
+    public function hasFirstParameter() : bool
+    {
+        return $this->parameterAmount() >= 1;
+    }
+
+    public function hasSecondParameter() : bool
+    {
+        return $this->parameterAmount() >= 2;
     }
 
     /**

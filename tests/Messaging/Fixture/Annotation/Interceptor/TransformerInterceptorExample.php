@@ -16,40 +16,27 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 class TransformerInterceptorExample
 {
     /**
-     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, parameterConverters={
-     *      @Payload(parameterName="name"),
-     *      @Header(parameterName="surname", headerName="surname")
-     * }, changeHeaders=true)
+     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, changeHeaders=true)
      * @param string $name
      * @param string $surname
      */
-    public function doSomethingBefore(string $name, string $surname) : void
+    public function doSomethingBefore(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 
     }
 
     /**
-     * @After(parameterConverters={
-     *      @Payload(parameterName="name"),
-     *      @Header(parameterName="surname", headerName="surname")
-     * }, changeHeaders=true)
-     * @param string $name
-     * @param string $surname
+     * @After(changeHeaders=true)
      */
-    public function doSomethingAfter(string $name, string $surname) : void
+    public function doSomethingAfter(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 
     }
 
     /**
-     * @Presend(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, parameterConverters={
-     *      @Payload(parameterName="name"),
-     *      @Header(parameterName="surname", headerName="surname")
-     * }, changeHeaders=true)
-     * @param string $name
-     * @param string $surname
+     * @Presend(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, changeHeaders=true)
      */
-    public function beforeSend(string $name, string $surname) : void
+    public function beforeSend(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 
     }

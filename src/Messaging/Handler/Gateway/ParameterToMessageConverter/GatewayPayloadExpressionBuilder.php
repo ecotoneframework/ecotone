@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Support\Assert;
 
@@ -38,6 +39,11 @@ class GatewayPayloadExpressionBuilder implements GatewayParameterConverterBuilde
     public static function create(string $parameterName, string $expression): self
     {
         return new self($parameterName, $expression);
+    }
+
+    public function isHandling(InterfaceParameter $parameter): bool
+    {
+        return $this->parameterName === $parameter->getName();
     }
 
     /**

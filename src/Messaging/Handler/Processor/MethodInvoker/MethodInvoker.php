@@ -146,7 +146,7 @@ final class MethodInvoker implements MessageProcessor
         if ($missingParametersAmount > 0) {
             foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
                 if (!self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
-                    if ($interceptedInterface && $interfaceParameter->isAnnotation()) {
+                    if ($interceptedInterface && ($interfaceParameter->isAnnotation() || $interceptedInterface->getInterfaceType()->equals($interfaceParameter->getTypeDescriptor()))) {
                         $passedMethodParameterConverters[] = InterceptorConverterBuilder::create($interfaceParameter->getName(), $interceptedInterface, $endpointAnnotations);
                         $missingParametersAmount--;
                     }

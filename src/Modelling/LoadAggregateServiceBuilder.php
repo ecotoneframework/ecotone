@@ -107,7 +107,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
 
             if ($methodToCheck->hasMethodAnnotation($aggregateFactoryAnnotation)) {
                 $factoryMethodInterface = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
-                Assert::isTrue($factoryMethodInterface->hasSingleArgument(), "Event sourced factory method {$aggregateClassDefinition}:{$method} should contain only one iterable parameter");
+                Assert::isTrue($factoryMethodInterface->hasSingleParameter(), "Event sourced factory method {$aggregateClassDefinition}:{$method} should contain only one iterable parameter");
                 Assert::isTrue($factoryMethodInterface->isStaticallyCalled(), "Event sourced factory method {$aggregateClassDefinition}:{$method} should be static");
                 Assert::isTrue($factoryMethodInterface->getFirstParameter()->getTypeDescriptor()->isIterable(), "Event sourced factory method {$aggregateClassDefinition}:{$method} should type hint for array or iterable");
 

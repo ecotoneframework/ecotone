@@ -10,16 +10,10 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 interface GatewayWithReplyChannelExample
 {
     /**
-     * @param string $orderId
-     * @return bool
-     *
      * @MessageGateway(
      *      requestChannel="requestChannel",
-     *      parameterConverters={
-     *          @Payload(parameterName="orderId")
-     *      },
      *      requiredInterceptorNames={"dbalTransaction"}
      * )
      */
-    public function buy(string $orderId): bool;
+    public function buy(#[Payload] string $orderId): bool;
 }

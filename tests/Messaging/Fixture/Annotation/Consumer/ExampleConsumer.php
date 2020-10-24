@@ -8,9 +8,7 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 class ExampleConsumer
 {
-    /**
-     * @MessageConsumer(endpointId="someId")
-     */
+    #[MessageConsumer("someId")]
     public function some(string $body) : void
     {
 

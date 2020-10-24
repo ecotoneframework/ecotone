@@ -6,15 +6,18 @@ namespace Ecotone\Messaging\Annotation;
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 
-/**
- * @Annotation
- * @Target({"METHOD"})
- */
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class MessageConsumer
 {
-    /**
-     * @Required()
-     */
-    public string $endpointId;
-    public array $parameterConverters = [];
+    private string $endpointId;
+
+    public function __construct(string $endpointId)
+    {
+        $this->endpointId          = $endpointId;
+    }
+
+    public function getEndpointId(): string
+    {
+        return $this->endpointId;
+    }
 }

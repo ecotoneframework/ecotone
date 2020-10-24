@@ -49,7 +49,7 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
                     /** @var MessageConsumer $annotationForMethod */
                     $annotationForMethod = $annotationRegistration->getAnnotationForMethod();
 
-                    return $annotationForMethod->endpointId;
+                    return $annotationForMethod->getEndpointId();
                 }, $annotationRegistrations
             )
         );

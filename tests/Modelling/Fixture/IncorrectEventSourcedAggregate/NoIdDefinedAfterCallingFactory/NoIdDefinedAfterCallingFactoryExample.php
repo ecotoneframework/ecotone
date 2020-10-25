@@ -24,9 +24,7 @@ class NoIdDefinedAfterCallingFactoryExample
      */
     private $id;
 
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public static function create(CreateNoIdDefinedAggregate $command) : array
     {
         return [new \stdClass()];

@@ -10,9 +10,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 
 class ServiceEventHandlerWithListenTo
 {
-    /**
-     * @EventHandler(listenTo="execute", endpointId="eventHandler")
-     */
+    #[EventHandler("execute", "eventHandler")]
     public function execute() : void
     {
 

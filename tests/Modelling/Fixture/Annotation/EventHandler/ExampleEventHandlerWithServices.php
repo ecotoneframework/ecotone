@@ -7,12 +7,7 @@ use Ecotone\Modelling\Annotation\EventHandler;
 
 class ExampleEventHandlerWithServices
 {
-    /**
-     * @EventHandler(inputChannelName="someInput", endpointId="some-id")
-     * @param           $command
-     * @param \stdClass $service1
-     * @param \stdClass $service2
-     */
+    #[EventHandler("someInput", "some-id")]
     public function doSomething($command, \stdClass $service1, \stdClass $service2) : void
     {
 

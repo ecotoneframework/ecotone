@@ -7,13 +7,7 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
 
 class ServiceActivatorWithPollerExample
 {
-    /**
-     * @return void
-     * @ServiceActivator(
-     *     endpointId="test-name",
-     *     inputChannelName="inputChannel"
-     * )
-     */
+    #[ServiceActivator("inputChannel", "test-name")]
     public function sendMessage(): void
     {
     }

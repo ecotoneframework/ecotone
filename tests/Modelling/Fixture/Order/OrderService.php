@@ -21,38 +21,26 @@ class OrderService
      */
     private $notifiedOrders = [];
 
-    /**
-     * @CommandHandler(
-     *     inputChannelName="order.register",
-     *     endpointId="orderReceiver"
-     * )
-     */
+    #[CommandHandler("order.register", "orderReceiver")]
     public function register(PlaceOrder $placeOrder, EventBus $lazyEventBus) : void
     {
         $this->orders[] = $placeOrder;
         $lazyEventBus->sendWithMetadata(new OrderWasPlaced($placeOrder->getOrderId()), []);
     }
 
-    /**
-     * @EventHandler(endpointId="orderPlaced")
-     */
+    #[EventHandler(endpointId: "orderPlaced")]
     public function notify(OrderWasPlaced $orderWasPlaced) : void
     {
         $this->notifiedOrders[] = $orderWasPlaced->getOrderId();
     }
 
-    /**
-     * @QueryHandler(inputChannelName="order.getNotifiedOrders")
-     */
+    #[QueryHandler("order.getNotifiedOrders")]
     public function getNotifiedOrders() : array
     {
         return $this->notifiedOrders;
     }
 
-    /**
-     * @return array
-     * @QueryHandler(inputChannelName="order.getOrders")
-     */
+    #[QueryHandler("order.getOrders")]
     public function getRegisteredOrders() : array
     {
         return $this->orders;

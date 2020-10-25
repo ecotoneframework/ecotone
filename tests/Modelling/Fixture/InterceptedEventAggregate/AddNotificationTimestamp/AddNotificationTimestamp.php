@@ -11,9 +11,7 @@ class AddNotificationTimestamp
 {
     private $currentTime;
 
-    /**
-     * @CommandHandler("changeCurrentTime")
-     */
+    #[CommandHandler("changeCurrentTime")]
     public function setTime(string $currentTime) : void
     {
         $this->currentTime = $currentTime;

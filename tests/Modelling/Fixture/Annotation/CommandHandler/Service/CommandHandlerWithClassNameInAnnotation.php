@@ -7,10 +7,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 
 class CommandHandlerWithClassNameInAnnotation
 {
-    /**
-     * @return int
-     * @CommandHandler(inputChannelName="input", endpointId="command-id", messageClassName=SomeCommand::class)
-     */
+    #[CommandHandler("input", "command-id")]
     public function execute() : int
     {
         return 1;

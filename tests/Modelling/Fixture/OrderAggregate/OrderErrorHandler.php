@@ -8,9 +8,7 @@ use Ecotone\Messaging\MessagingException;
 
 class OrderErrorHandler
 {
-    /**
-     * @ServiceActivator(inputChannelName=ChannelConfiguration::ERROR_CHANNEL)
-     */
+    #[ServiceActivator(ChannelConfiguration::ERROR_CHANNEL)]
     public function errorConfiguration(MessagingException $exception)
     {
         throw $exception;

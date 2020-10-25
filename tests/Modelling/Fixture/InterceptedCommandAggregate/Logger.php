@@ -29,17 +29,13 @@ class Logger
         $this->ownerId = $ownerId;
     }
 
-    /**
-     * @CommandHandler("log")
-     */
+    #[CommandHandler("log")]
     public static function register(array $data): array
     {
         return [new EventWasLogged($data)];
     }
 
-    /**
-     * @CommandHandler("log", outputChannelName="notify")
-     */
+    #[CommandHandler("log", outputChannelName: "notify")]
     public function append(array $data) : array
     {
         return [new EventWasLogged($data)];

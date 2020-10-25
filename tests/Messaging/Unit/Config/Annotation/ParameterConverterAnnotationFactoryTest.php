@@ -23,10 +23,6 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  */
 class ParameterConverterAnnotationFactoryTest extends MessagingTest
 {
-    /**
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
-     */
     public function test_creating_with_class_name_as_reference_name_if_no_reference_passed()
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
@@ -49,7 +45,6 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
             ],
             $parameterConverterAnnotationFactory->createParameterConvertersWithReferences(
                 InterfaceToCall::create($relatedClassName, $methodName),
-                [$referenceAnnotation, $allHeadersAnnotation],
                 false
             )
         );

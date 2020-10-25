@@ -12,20 +12,13 @@ class RentCalendar
 {
     private $calendarEvents = [];
 
-    /**
-     * @param AppointmentWasCreatedEvent $event
-     * @EventHandler()
-     */
+    #[EventHandler]
     public function notify(AppointmentWasCreatedEvent $event) : void
     {
         $this->calendarEvents[$event->getAppointmentId()] = $event;
     }
 
-    /**
-     * @param string $appointmentIdToCheck
-     * @return bool
-     * @QueryHandler("doesCalendarContainAppointments")
-     */
+    #[QueryHandler("doesCalendarContainAppointments")]
     public function getCalendarEvents(string $appointmentIdToCheck): bool
     {
         foreach ($this->calendarEvents as $appointmentId => $calendarEvent) {

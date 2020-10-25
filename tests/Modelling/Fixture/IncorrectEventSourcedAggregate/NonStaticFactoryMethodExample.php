@@ -23,9 +23,7 @@ class NonStaticFactoryMethodExample
      */
     private $id;
 
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public function doSomething() : void {}
 
     /**

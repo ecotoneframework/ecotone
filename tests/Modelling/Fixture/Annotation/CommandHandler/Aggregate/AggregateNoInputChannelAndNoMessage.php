@@ -6,6 +6,7 @@ use Ecotone\Messaging\Annotation\Parameter\Reference;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Annotation\IgnorePayload;
 use Ecotone\Modelling\Annotation\ReferenceCallInterceptorAnnotation;
 
 /**
@@ -22,11 +23,8 @@ class AggregateNoInputChannelAndNoMessage
      */
     private $id;
 
-    /**
-     * @CommandHandler(
-     *     ignorePayload=true
-     * )
-     */
+    #[CommandHandler]
+    #[IgnorePayload]
     public function doAction() : void
     {
 

@@ -12,9 +12,7 @@ use stdClass;
  */
 class AggregateEventHandlerWithListenTo
 {
-    /**
-     * @EventHandler(listenTo="execute", endpointId="eventHandler")
-     */
+    #[EventHandler("execute", endpointId: "eventHandler")]
     public function execute(): void
     {
 

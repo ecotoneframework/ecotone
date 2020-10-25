@@ -7,9 +7,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 
 class CommandHandlerWithNoInputChannelName
 {
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public function noAction() : void
     {
 

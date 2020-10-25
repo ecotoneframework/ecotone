@@ -20,4 +20,28 @@ class Scheduled extends ChannelAdapter
      * Required interceptor reference names
      */
     public array $requiredInterceptorNames = [];
+
+    public function __construct(string $requestChannelName, string $endpointId, array $requiredInterceptorNames)
+    {
+        parent::__construct($endpointId);
+
+        $this->requestChannelName = $requestChannelName;
+        $this->requiredInterceptorNames = $requiredInterceptorNames;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRequestChannelName(): string
+    {
+        return $this->requestChannelName;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRequiredInterceptorNames(): array
+    {
+        return $this->requiredInterceptorNames;
+    }
 }

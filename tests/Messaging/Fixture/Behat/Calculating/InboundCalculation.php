@@ -23,16 +23,7 @@ class InboundCalculation
         return 5;
     }
 
-    /**
-     * The result will be published to channel after this method
-     *
-     * @param int $number
-     * @return int
-     * @ServiceActivator(
-     *     inputChannelName="calculateForInbound",
-     *     outputChannelName="resultChannel"
-     * )
-     */
+    #[ServiceActivator("calculateForInbound", outputChannelName: "resultChannel")]
     public function calculate(int $number) : int
     {
         return $number;

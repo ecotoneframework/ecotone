@@ -38,17 +38,13 @@ class OrderFulfilment
         $this->status = "new";
     }
 
-    /**
-     * @EventHandler()
-     */
+    #[EventHandler]
     public static function createWith(string $orderId) : self
     {
         return new self($orderId);
     }
 
-    /**
-     * @EventHandler(identifierMetadataMapping={"orderId":"paymentId"})
-     */
+    #[EventHandler]
     public function finishOrder(PaymentWasDoneEvent $event) : void
     {
         $this->status = "done";

@@ -2,9 +2,7 @@
 
 namespace Ecotone\Modelling\Annotation;
 
-/**
- * @Annotation
- */
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class IgnorePayload
 {
 

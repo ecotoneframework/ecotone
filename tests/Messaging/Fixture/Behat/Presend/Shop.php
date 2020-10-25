@@ -9,10 +9,8 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 
 class Shop
 {
-    /**
-     * @CommandHandler(endpointId="storeCoinsEndpoint", inputChannelName="storeCoins")
-     */
     #[Asynchronous("shop")]
+    #[CommandHandler("storeCoins", "storeCoinsEndpoint")]
     public function buy(int $command): int
     {
         return $command;

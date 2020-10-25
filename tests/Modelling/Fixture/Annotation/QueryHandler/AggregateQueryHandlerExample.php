@@ -26,12 +26,7 @@ class AggregateQueryHandlerExample
      */
     private $id;
 
-    /**
-     * @param SomeQuery $query
-     *
-     * @return SomeResult
-     * @QueryHandler(endpointId="some-id")
-     */
+    #[QueryHandler(endpointId: "some-id")]
     public function doStuff(SomeQuery $query) : SomeResult
     {
         return new SomeResult();

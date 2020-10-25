@@ -9,19 +9,15 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 
 class ServiceQueryHandlersWithAllowedNotUniqueClass
 {
-    /**
-     * @QueryHandler(endpointId="execute1")
-     * @NotUniqueHandler()
-     */
+    #[QueryHandler(endpointId: "execute1")]
+    #[NotUniqueHandler]
     public function execute1(\stdClass $class) : int
     {
 
     }
 
-    /**
-     * @QueryHandler(endpointId="execute2")
-     * @NotUniqueHandler()
-     */
+    #[QueryHandler(endpointId: "execute2")]
+    #[NotUniqueHandler]
     public function execute2(\stdClass $class) : int
     {
 

@@ -8,9 +8,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 
 class ServiceQueryHandlerWithInputChannelAndObject
 {
-    /**
-     * @QueryHandler(inputChannelName="execute", endpointId="queryHandler")
-     */
+    #[QueryHandler("execute", "queryHandler")]
     public function execute(\stdClass $class) : int
     {
 

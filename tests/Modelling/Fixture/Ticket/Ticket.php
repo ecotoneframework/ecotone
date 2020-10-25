@@ -23,9 +23,7 @@ class Ticket
      */
     private $workerId;
 
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public static function start(StartTicketCommand $command): array
     {
         return [new TicketWasStartedEvent($command->getTicketId())];
@@ -61,9 +59,7 @@ class Ticket
         $this->ticketId = $event->getTicketId();
     }
 
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public function assignWorker(AssignWorkerCommand $command): array
     {
         if ($this->workerId) {

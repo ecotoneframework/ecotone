@@ -14,14 +14,11 @@ class ServiceActivatorWithLoggerExample
 {
     /**
      * @return void
-     * @ServiceActivator(
-     *     endpointId="test-name",
-     *     inputChannelName="inputChannel"
-     * )
      * @LogBefore(logLevel=LoggingLevel::INFO, logFullMessage=true)
      * @LogAfter(logLevel=LoggingLevel::INFO, logFullMessage=true)
      * @LogError(logFullMessage=LoggingLevel::CRITICAL, logFullMessage=true)
      */
+    #[ServiceActivator("inputChannel", "test-name")]
     public function sendMessage(): void
     {
     }

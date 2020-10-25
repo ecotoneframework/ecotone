@@ -18,17 +18,13 @@ class AggregateCommandHandlerWithDoubledActionMethod
      */
     private $id;
 
-    /**
-     * @CommandHandler(inputChannelName="sameChannel")
-     */
+    #[CommandHandler("sameChannel")]
     public function action1() : void
     {
 
     }
 
-    /**
-     * @CommandHandler(inputChannelName="sameChannel")
-     */
+    #[CommandHandler("sameChannel")]
     public function action2() : void
     {
 

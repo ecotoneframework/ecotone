@@ -18,18 +18,13 @@ class AggregateCommandHandlerWithRedirectionByClass
      */
     private $id;
 
-    /**
-     * @param DoStuffCommand $command
-     * @CommandHandler(endpointId="factory")
-     */
+    #[CommandHandler(endpointId: "factory")]
     public static function factory(DoStuffCommand $command) : void
     {
 
     }
 
-    /**
-     * @CommandHandler(endpointId="action")
-     */
+    #[CommandHandler(endpointId: "action")]
     public function action(DoStuffCommand $command) : void
     {
 

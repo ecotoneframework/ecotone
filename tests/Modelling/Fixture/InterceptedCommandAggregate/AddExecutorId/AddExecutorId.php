@@ -13,9 +13,7 @@ class AddExecutorId
 {
     private string $executorId = "";
 
-    /**
-     * @CommandHandler("changeExecutorId")
-     */
+    #[CommandHandler("changeExecutorId")]
     public function addExecutorId(string $executorId) : void
     {
         $this->executorId = $executorId;

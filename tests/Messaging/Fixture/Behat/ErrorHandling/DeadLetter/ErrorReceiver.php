@@ -15,17 +15,13 @@ class ErrorReceiver
      */
     private $errorOrder;
 
-    /**
-     * @ServiceActivator(inputChannelName=ErrorConfigurationContext::DEAD_LETTER_CHANNEL)
-     */
+    #[ServiceActivator(ErrorConfigurationContext::DEAD_LETTER_CHANNEL)]
     public function receiveError(Message $message) : void
     {
         $this->errorOrder = $message->getPayload();
     }
 
-    /**
-     * @ServiceActivator(inputChannelName="getErrorMessage")
-     */
+    #[ServiceActivator("getErrorMessage")]
     public function getErrorOrder() : ?string
     {
         return $this->errorOrder ? $this->errorOrder : null;

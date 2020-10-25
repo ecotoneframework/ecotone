@@ -37,39 +37,26 @@ class Order
         $this->record(new OrderWasPlaced($orderId));
     }
 
-    /**
-     * @param PlaceOrder $placeOrder
-     * @CommandHandler(
-     *     endpointId="orderReceiver",
-     *     inputChannelName="order.register"
-     * )
-     * @return Order
-     */
+    #[CommandHandler("order.register", "orderReceiver")]
     public static function register(PlaceOrder $placeOrder) : self
     {
         return new self($placeOrder->getOrderId());
     }
 
-    /**
-     * @EventHandler(endpointId="orderPlaced")
-     */
+    #[EventHandler(endpointId:"orderPlaced")]
     public function notify(OrderWasPlaced $order) : void
     {
         $this->isNotifiedCount++;
         $this->record(new OrderWasNotified($this->orderId));
     }
 
-    /**
-     * @QueryHandler(inputChannelName="order.getOrder")
-     */
+    #[QueryHandler("order.getOrder")]
     public function getRegisteredOrder() : string
     {
         return $this->orderId;
     }
 
-    /**
-     * @QueryHandler(inputChannelName="order.wasNotified")
-     */
+    #[QueryHandler("order.wasNotified")]
     public function getIsNotifiedCount() : int
     {
         return $this->isNotifiedCount;

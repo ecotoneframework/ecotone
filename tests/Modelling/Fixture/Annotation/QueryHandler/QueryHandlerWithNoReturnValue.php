@@ -13,11 +13,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
  */
 class QueryHandlerWithNoReturnValue
 {
-    /**
-     * @param SomeQuery $query
-     * @return void
-     * @QueryHandler()
-     */
+    #[QueryHandler]
     public function searchFor(SomeQuery $query): void
     {
     }

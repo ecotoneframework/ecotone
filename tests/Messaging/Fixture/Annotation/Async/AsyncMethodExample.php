@@ -9,10 +9,8 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
 
 class AsyncMethodExample
 {
-    /**
-     * @ServiceActivator(endpointId="asyncServiceActivator", inputChannelName="inputChannel")
-     */
     #[Asynchronous("asyncChannel")]
+    #[ServiceActivator("inputChannel", "asyncServiceActivator")]
     public function doSomething() : void
     {
 

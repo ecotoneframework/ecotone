@@ -20,15 +20,7 @@ class AggregateQueryHandlerWithOutputChannelExample
      */
     private $id;
 
-    /**
-     * @param SomeQuery $query
-     *
-     * @return SomeResult
-     * @QueryHandler(
-     *     endpointId="some-id",
-     *     outputChannelName="outputChannel"
-     * )
-     */
+    #[QueryHandler(endpointId: "some-id", outputChannelName: "outputChannel")]
     public function doStuff(SomeQuery $query) : SomeResult
     {
         return new SomeResult();

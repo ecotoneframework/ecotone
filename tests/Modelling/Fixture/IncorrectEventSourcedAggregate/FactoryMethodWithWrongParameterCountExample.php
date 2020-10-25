@@ -23,9 +23,7 @@ class FactoryMethodWithWrongParameterCountExample
      */
     private $id;
 
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public function doSomething() : void {}
 
     /**

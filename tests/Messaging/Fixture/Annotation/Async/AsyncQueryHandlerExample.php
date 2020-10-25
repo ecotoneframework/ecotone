@@ -10,12 +10,8 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 
 class AsyncQueryHandlerExample
 {
-    /**
-     * @param \stdClass $event
-     *
-     * @QueryHandler(endpointId="asyncEvent")
-     */
     #[Asynchronous("asyncChannel")]
+    #[QueryHandler(endpointId: "asyncEvent")]
     public function doSomething(\stdClass $event) : void
     {
 

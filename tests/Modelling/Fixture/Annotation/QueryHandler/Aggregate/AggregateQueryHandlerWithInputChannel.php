@@ -12,9 +12,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
  */
 class AggregateQueryHandlerWithInputChannel
 {
-    /**
-     * @QueryHandler(inputChannelName="execute", endpointId="queryHandler")
-     */
+    #[QueryHandler("execute", "queryHandler")]
     public function execute() : int
     {
 

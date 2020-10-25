@@ -15,27 +15,21 @@ class NotificationService
 
     private ?string $happenedAt = null;
 
-    /**
-     * @ServiceActivator(inputChannelName="notify")
-     */
+    #[ServiceActivator("notify")]
     public function notify(array $logs, array $metadata) : void
     {
         $this->lastLog  = $logs[0];
         $this->happenedAt = $metadata["notificationTimestamp"];
     }
 
-    /**
-     * @EventHandler()
-     */
+    #[EventHandler]
     public function store(EventWasLogged $event, array $metadata) : void
     {
         $this->lastLog = $event;
         $this->happenedAt  = $metadata["notificationTimestamp"];
     }
 
-    /**
-     * @QueryHandler("getLastLog")
-     */
+    #[QueryHandler("getLastLog")]
     public function getLogs() : array
     {
         return [

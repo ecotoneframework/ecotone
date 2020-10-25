@@ -8,17 +8,13 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 
 class ServiceQueryHandlersWithNotUniqueClass
 {
-    /**
-     * @QueryHandler()
-     */
+    #[QueryHandler]
     public function execute1(\stdClass $class) : int
     {
 
     }
 
-    /**
-     * @QueryHandler()
-     */
+    #[QueryHandler]
     public function execute2(\stdClass $class) : int
     {
 

@@ -10,9 +10,13 @@ use Ecotone\Messaging\Message;
 
 class ServiceActivatorWithAllConfigurationDefined
 {
-    /**
-     * @ServiceActivator(endpointId="test-name", inputChannelName="inputChannel", outputChannelName="outputChannel", requiresReply=true, requiredInterceptorNames={"someReference"})
-     */
+    #[ServiceActivator(
+        endpointId: "test-name",
+        inputChannelName: "inputChannel",
+        outputChannelName: "outputChannel",
+        requiresReply: true,
+        requiredInterceptorNames: ["someReference"]
+    )]
     public function sendMessage(#[Header("sendTo")] string $to, #[Payload] string $content, Message $message, #[Reference] \stdClass $object, #[Header("token", "value")] ?string $name): void
     {
     }

@@ -5,4 +5,5 @@ namespace Ecotone\Messaging\Annotation;
 
 abstract class ChannelAdapter extends IdentifiedAnnotation
 {
+
 }

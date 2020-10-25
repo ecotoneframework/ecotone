@@ -7,10 +7,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 
 class AggregateCommandHandlerWithInputChannelNameAndObject
 {
-    /**
-     * @return int
-     * @CommandHandler(inputChannelName="execute", endpointId="commandHandler")
-     */
+    #[CommandHandler("execute", "commandHandler")]
     public function execute(\stdClass $class) : int
     {
         return 1;

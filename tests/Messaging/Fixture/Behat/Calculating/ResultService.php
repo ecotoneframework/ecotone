@@ -7,11 +7,7 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
 
 class ResultService
 {
-    /**
-     * @param int $amount
-     * @return int
-     * @ServiceActivator(inputChannelName="calculateChannel")
-     */
+    #[ServiceActivator("calculateChannel")]
     public function result(int $amount) : int
     {
         return $amount;

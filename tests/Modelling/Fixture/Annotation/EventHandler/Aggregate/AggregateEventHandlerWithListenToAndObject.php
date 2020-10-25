@@ -12,9 +12,7 @@ use stdClass;
  */
 class AggregateEventHandlerWithListenToAndObject
 {
-    /**
-     * @EventHandler(listenTo="execute", endpointId="eventHandler")
-     */
+    #[EventHandler("execute", endpointId: "eventHandler")]
     public function execute(\stdClass $class): void
     {
 

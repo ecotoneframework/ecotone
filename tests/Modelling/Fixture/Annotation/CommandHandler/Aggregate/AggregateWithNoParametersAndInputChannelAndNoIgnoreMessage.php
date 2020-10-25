@@ -23,23 +23,13 @@ class AggregateWithNoParametersAndInputChannelAndNoIgnoreMessage
      */
     private $id;
 
-    /**
-     * @CommandHandler(
-     *     endpointId="endpoint-command",
-     *     inputChannelName="command"
-     * )
-     */
+    #[CommandHandler("command", "endpoint-command")]
     public function doCommand() : void
     {
 
     }
 
-    /**
-     * @QueryHandler(
-     *     endpointId="endpoint-query",
-     *     inputChannelName="query"
-     * )
-     */
+    #[QueryHandler("query", "endpoint-query")]
     public function doQuery()
     {
 

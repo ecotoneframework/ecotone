@@ -16,33 +16,25 @@ class SomeQueryHandler
     const SUM_AND_MULTIPLY = "sumAndMultiply";
     const CALCULATE = "calculate";
 
-    /**
-     * @QueryHandler(inputChannelName=SomeQueryHandler::CALCULATE)
-     */
+    #[QueryHandler(SomeQueryHandler::CALCULATE)]
     public function calculate(int $sum, QueryBus $queryBus) : int
     {
         return $this->callQueryBus(self::SUM_AND_MULTIPLY, $queryBus, $sum);
     }
 
-    /**
-     * @QueryHandler(inputChannelName=SomeQueryHandler::SUM)
-     */
+    #[QueryHandler(SomeQueryHandler::SUM)]
     public function sum(int $amount)
     {
         return $amount + 1;
     }
 
-    /**
-     * @QueryHandler(inputChannelName=SomeQueryHandler::MULTIPLY)
-     */
+    #[QueryHandler(SomeQueryHandler::MULTIPLY)]
     public function multiply(int $amount)
     {
         return $amount * 2;
     }
 
-    /**
-     * @QueryHandler(inputChannelName=SomeQueryHandler::SUM_AND_MULTIPLY)
-     */
+    #[QueryHandler(SomeQueryHandler::SUM_AND_MULTIPLY)]
     public function sumAndMultiply(int $amount, QueryBus $queryBus)
     {
         return $this->callQueryBus(self::MULTIPLY, $queryBus, $this->callQueryBus(self::SUM, $queryBus, $amount));

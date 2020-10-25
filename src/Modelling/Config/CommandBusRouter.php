@@ -35,7 +35,7 @@ class CommandBusRouter
 
         $className = get_class($object);
         if (!array_key_exists($className, $this->channelMapping)) {
-            throw DestinationResolutionException::create("Can't send command to {$className}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method or @MessageEndpoint to class?");
+            throw DestinationResolutionException::create("Can't send command to {$className}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method?");
         }
 
         return $this->channelMapping[$className];
@@ -48,7 +48,7 @@ class CommandBusRouter
         }
 
         if (!array_key_exists($name, $this->channelMapping)) {
-            throw DestinationResolutionException::create("Can't send command to {$name}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method or @MessageEndpoint to class?");
+            throw DestinationResolutionException::create("Can't send command to {$name}. No Command Handler defined for it. Have you forgot to add @CommandHandler to method?");
         }
 
         return $this->channelMapping[$name];

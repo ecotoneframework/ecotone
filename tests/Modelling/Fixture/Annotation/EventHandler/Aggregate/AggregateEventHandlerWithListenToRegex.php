@@ -12,9 +12,7 @@ use stdClass;
  */
 class AggregateEventHandlerWithListenToRegex
 {
-    /**
-     * @EventHandler(listenTo="order.*")
-     */
+    #[EventHandler("order.*")]
     public function execute(\stdClass $class): void
     {
 

@@ -30,9 +30,7 @@ class ShopCalculator
         $this->margin = $margin;
     }
 
-    /**
-     * @CommandHandler(inputChannelName="shop.register")
-     */
+    #[CommandHandler("shop.register")]
     public static function register(array $registerShop): self
     {
         return new self($registerShop["shopId"], $registerShop["margin"]);
@@ -40,9 +38,9 @@ class ShopCalculator
 
     /**
      * @ExchangeProductForPrice()
-     * @QueryHandler(inputChannelName="shop.calculatePrice", outputChannelName="addVat")
      * @AddFranchise()
      */
+    #[QueryHandler("shop.calculatePrice", outputChannelName: "addVat")]
     public function calculatePriceFor(array $query): int
     {
         return $query["productPrice"] + $this->margin;

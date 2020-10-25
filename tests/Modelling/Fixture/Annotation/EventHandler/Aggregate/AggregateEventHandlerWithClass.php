@@ -12,9 +12,7 @@ use stdClass;
  */
 class AggregateEventHandlerWithClass
 {
-    /**
-     * @EventHandler(endpointId="eventHandler")
-     */
+    #[EventHandler(endpointId: "eventHandler")]
     public function execute(stdClass $class): int
     {
 

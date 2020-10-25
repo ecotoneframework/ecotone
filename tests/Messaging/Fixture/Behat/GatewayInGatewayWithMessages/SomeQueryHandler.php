@@ -18,17 +18,13 @@ class SomeQueryHandler
     const SUM_AND_MULTIPLY = "sumAndMultiply";
     const CALCULATE = "calculate";
 
-    /**
-     * @QueryHandler(inputChannelName=SomeQueryHandler::CALCULATE)
-     */
+    #[QueryHandler(SomeQueryHandler::CALCULATE)]
     public function calculate(Message $message, MessageBasedQueryBusExample $queryBus) : Message
     {
         return $this->callQueryBus(self::SUM_AND_MULTIPLY, $queryBus, $message);
     }
 
-    /**
-     * @QueryHandler(inputChannelName=SomeQueryHandler::SUM)
-     */
+    #[QueryHandler(SomeQueryHandler::SUM)]
     public function sum(Message $message) : Message
     {
         return MessageBuilder::fromMessage($message)
@@ -36,9 +32,7 @@ class SomeQueryHandler
             ->build();
     }
 
-    /**
-     * @QueryHandler(inputChannelName=SomeQueryHandler::MULTIPLY)
-     */
+    #[QueryHandler(SomeQueryHandler::MULTIPLY)]
     public function multiply(Message $message) : Message
     {
         return MessageBuilder::fromMessage($message)
@@ -46,9 +40,7 @@ class SomeQueryHandler
             ->build();
     }
 
-    /**
-     * @QueryHandler(inputChannelName=SomeQueryHandler::SUM_AND_MULTIPLY)
-     */
+    #[QueryHandler(SomeQueryHandler::SUM_AND_MULTIPLY)]
     public function sumAndMultiply(Message $message, MessageBasedQueryBusExample $queryBus) : Message
     {
         return $this->callQueryBus(self::MULTIPLY, $queryBus, $this->callQueryBus(self::SUM, $queryBus, $message));

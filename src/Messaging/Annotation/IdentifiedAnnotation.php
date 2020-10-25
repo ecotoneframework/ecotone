@@ -6,29 +6,14 @@ namespace Ecotone\Messaging\Annotation;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ramsey\Uuid\Uuid;
 
-/**
- * Class IdentifiedAnnotation
- * @package Ecotone\Messaging\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
 class IdentifiedAnnotation
 {
     public string $endpointId = "";
     private bool $isGenerated = false;
 
-    public function __construct(array $values = [])
+    public function __construct(string $endpointId = "")
     {
-        if (isset($values["inputChannelName"]) && isset($values["endpointId"]) && $values["inputChannelName"] === $values["endpointId"]) {
-            throw ConfigurationException::create("endpointId should not equals inputChannelName for endpoint with id: `{$values["inputChannelName"]}`");
-        }
-
-        foreach ($values as $propertyName => $value) {
-            if ($propertyName === "value") {
-                continue;
-            }
-
-            $this->{$propertyName} = $value;
-        }
+        $this->endpointId = $endpointId;
 
         if (!$this->endpointId) {
             $this->endpointId = Uuid::uuid4()->toString();
@@ -36,11 +21,13 @@ class IdentifiedAnnotation
         }
     }
 
-    /**
-     * @return bool
-     */
     public function isEndpointIdGenerated() : bool
     {
         return $this->isGenerated;
+    }
+
+    public function getEndpointId(): string
+    {
+        return $this->endpointId;
     }
 }

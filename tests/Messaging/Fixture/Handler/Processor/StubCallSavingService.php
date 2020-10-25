@@ -132,20 +132,13 @@ class StubCallSavingService
 
     }
 
-    /**
-     * @ServiceActivator(inputChannelName="some")
-     */
+    #[ServiceActivator("some")]
     public function methodWithAnnotation() : void
     {
 
     }
 
-    /**
-     * @ServiceActivator(inputChannelName="some")
-     * @param Message $message
-     * @return Message
-     */
-    #[ServiceActivator]
+    #[ServiceActivator("some")]
     public function methodWithAnnotationWithReturnType(Message $message) : Message
     {
         return $message;

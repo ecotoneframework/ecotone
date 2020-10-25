@@ -19,50 +19,38 @@ class OrderService
 
     private array $notifyWithCustomHeaders = [];
 
-    /**
-     * @CommandHandler("placeOrder")
-     */
+    #[CommandHandler("placeOrder")]
     public function doSomething($command, array $headers, EventBus $eventBus) : void
     {
         $eventBus->send(new OrderWasPlaced());
     }
 
-    /**
-     * @CommandHandler("failAction")
-     */
+    #[CommandHandler("failAction")]
     public function failAction() : void
     {
         throw new \InvalidArgumentException("failed action");
     }
 
-    /**
-     * @EventHandler()
-     */
+    #[EventHandler]
     public function notifyBySms(OrderWasPlaced $event, array $headers, EventBus $eventBus) : void
     {
         $this->notificationHeaders[] = $headers;
     }
 
-    /**
-     * @EventHandler(endpointId="notificationEndpoint")
-     */
     #[Asynchronous("notifications")]
+    #[EventHandler(endpointId: "notificationEndpoint")]
     public function notifyByEmail(OrderWasPlaced $event, array $headers, EventBus $eventBus) : void
     {
         $this->notificationHeaders[] = $headers;
     }
 
-    /**
-     * @CommandHandler("setCustomNotificationHeaders")
-     */
+    #[CommandHandler("setCustomNotificationHeaders")]
     public function notifyWithCustomerHeaders(array $payload, array $headers) : void
     {
         $this->notifyWithCustomHeaders = $headers;
     }
 
-    /**
-     * @QueryHandler("getNotificationHeaders")
-     */
+    #[QueryHandler("getNotificationHeaders")]
     public function getNotificationHeaders() : array
     {
         return array_shift($this->notificationHeaders);

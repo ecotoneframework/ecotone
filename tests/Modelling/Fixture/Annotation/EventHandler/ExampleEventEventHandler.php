@@ -7,9 +7,7 @@ use Ecotone\Modelling\Annotation\EventHandler;
 
 class ExampleEventEventHandler
 {
-    /**
-     * @EventHandler(inputChannelName="someInput", endpointId="some-id")
-     */
+    #[EventHandler("someInput", "some-id")]
     public function doSomething() : void
     {
 

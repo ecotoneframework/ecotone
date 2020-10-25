@@ -23,11 +23,7 @@ class AggregateWithoutMessageClassesExample
     private $id;
     private $something;
 
-    /**
-     * @param array $command
-     * @CommandHandler(inputChannelName="createAggregate")
-     * @return AggregateWithoutMessageClassesExample
-     */
+    #[CommandHandler("createAggregate")]
     public static function createWithData(array $command) : self
     {
         $aggregateWithoutMessageClassesExample = new self();
@@ -36,10 +32,7 @@ class AggregateWithoutMessageClassesExample
         return $aggregateWithoutMessageClassesExample;
     }
 
-    /**
-     * @return AggregateWithoutMessageClassesExample
-     * @CommandHandler(inputChannelName="createAggregate")
-     */
+    #[CommandHandler("createAggregate")]
     public static function create() : self
     {
         $aggregateWithoutMessageClassesExample = new self();
@@ -48,45 +41,31 @@ class AggregateWithoutMessageClassesExample
         return $aggregateWithoutMessageClassesExample;
     }
 
-    /**
-     * @CommandHandler(inputChannelName="doSomething")
-     */
+    #[CommandHandler("doSomething")]
     public function doSomething() : void
     {
         $this->something = true;
     }
 
-    /**
-     * @CommandHandler(inputChannelName="doSomethingWithData")
-     * @param array $data
-     */
+    #[CommandHandler("doSomethingWithData")]
     public function doSomethingWithData(array $data) : void
     {
         $this->something = $data;
     }
 
-    /**
-     * @CommandHandler(inputChannelName="doSomething")
-     * @param \stdClass $class
-     */
+    #[CommandHandler("doSomething")]
     public function doSomethingWithReference(\stdClass $class) : void
     {
         $this->something = true;
     }
 
-    /**
-     * @QueryHandler(inputChannelName="querySomething")
-     */
+    #[QueryHandler("querySomething")]
     public function querySomething()
     {
         return true;
     }
 
-    /**
-     * @QueryHandler(inputChannelName="querySomethingWithData")
-     * @param array $data
-     * @return array
-     */
+    #[QueryHandler("querySomethingWithData")]
     public function querySomethingWithData(array $data)
     {
         return $data;

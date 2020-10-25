@@ -10,9 +10,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 
 class ServiceEventHandlerWithListenToAndObject
 {
-    /**
-     * @EventHandler(listenTo="execute", endpointId="eventHandler")
-     */
+    #[EventHandler("execute", "eventHandler")]
     public function execute(\stdClass $class) : void
     {
 

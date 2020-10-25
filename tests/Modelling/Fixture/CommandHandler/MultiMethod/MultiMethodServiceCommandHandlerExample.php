@@ -5,22 +5,19 @@ namespace Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod;
 
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Annotation\NotUniqueHandler;
 
 class MultiMethodServiceCommandHandlerExample
 {
-    /**
-     * @param array $data
-     * @CommandHandler(endpointId="1", inputChannelName="register", mustBeUnique=false)
-     */
+    #[CommandHandler("register", "1")]
+    #[NotUniqueHandler]
     public function doAction1(array $data) : void
     {
 
     }
 
-    /**
-     * @param array $data
-     * @CommandHandler(endpointId="2", inputChannelName="register", mustBeUnique=false)
-     */
+    #[CommandHandler("register", "2")]
+    #[NotUniqueHandler]
     public function doAction2(array $data) : void
     {
 

@@ -20,11 +20,7 @@ class AggregateCommandHandlerWithReferencesExample
      */
     private $id;
 
-    /**
-     * @param DoStuffCommand $command
-     * @param \stdClass      $injectedService
-     * @CommandHandler(inputChannelName="input", endpointId="command-id-with-references")
-     */
+    #[CommandHandler("input", "command-id-with-references")]
     public function doAction(DoStuffCommand $command, \stdClass $injectedService) : void
     {
 

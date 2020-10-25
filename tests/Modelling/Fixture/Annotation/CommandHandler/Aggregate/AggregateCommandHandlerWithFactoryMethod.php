@@ -18,9 +18,7 @@ class AggregateCommandHandlerWithFactoryMethod
      */
     private $id;
 
-    /**
-     * @CommandHandler(endpointId="factory-id")
-     */
+    #[CommandHandler(endpointId: "factory-id")]
     public static function doAction(DoStuffCommand $command) : void
     {
 

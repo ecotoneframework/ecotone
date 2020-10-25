@@ -8,9 +8,7 @@ use Ecotone\Messaging\Annotation\Router;
 
 class RouterWithNoResolutionRequiredExample
 {
-    /**
-     * @Router(endpointId="some-id", inputChannelName="inputChannel", isResolutionRequired=false)
-     */
+    #[Router("inputChannel", false)]
     public function route(#[Payload] $content) : string
     {
         return "outputChannel";

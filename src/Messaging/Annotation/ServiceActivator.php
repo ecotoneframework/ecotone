@@ -6,16 +6,19 @@ namespace Ecotone\Messaging\Annotation;
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 
-/**
- * Class ServiceActivator
- * @package Ecotone\Messaging\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- * @Target({"METHOD"})
- */
-#[\Attribute]
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class ServiceActivator extends InputOutputEndpointAnnotation
 {
-    public bool $requiresReply = false;
-    public array $parameterConverters = [];
+    public bool $requiresReply;
+
+    public function __construct(string $inputChannelName, string $endpointId = "", string $outputChannelName = "", bool $requiresReply = false, array $requiredInterceptorNames = [])
+    {
+        parent::__construct($inputChannelName, $endpointId, $outputChannelName, $requiredInterceptorNames);
+        $this->requiresReply = $requiresReply;
+    }
+
+    public function isRequiresReply(): bool
+    {
+        return $this->requiresReply;
+    }
 }

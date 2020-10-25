@@ -8,30 +8,51 @@ use Ecotone\Messaging\Annotation\IdentifiedAnnotation;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ramsey\Uuid\Uuid;
 
-/**
- * Class EventHandler
- * @package Ecotone\Modelling\Annotation
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- * @Target({"METHOD"})
- */
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class EventHandler extends IdentifiedAnnotation
 {
+    public string $listenTo;
+    public bool $dropMessageOnNotFound;
+    public string $outputChannelName;
+    public array $requiredInterceptorNames;
+    public array $identifierMetadataMapping;
+
     /**
-     * Registers event handler to listen from defined inputs
-     * e.g. from single - "ecotone.modelling.created"
-     * e.g. from multiple - "ecotone.modelling.*"
+     * @param string $listenTo Registers event handler to listen from defined inputs | e.g. from single - "ecotone.modelling.created" | e.g. from multiple - "ecotone.modelling.*"
      */
-    public string $listenTo = "";
-    public array $parameterConverters = [];
-    /**
-     * If @Aggregate was not found, message can be dropped instead of throwing exception
-     */
-    public bool $dropMessageOnNotFound = false;
-    public string $outputChannelName = '';
-    /**
-     * Required interceptor reference names
-     */
-    public array $requiredInterceptorNames = [];
-    public array $identifierMetadataMapping = [];
+    public function __construct(string $listenTo = "", string $endpointId = "", string $outputChannelName = "", bool $dropMessageOnNotFound = false, array $identifierMetadataMapping = [], array $requiredInterceptorNames = [])
+    {
+        parent::__construct($endpointId);
+
+        $this->listenTo = $listenTo;
+        $this->dropMessageOnNotFound = $dropMessageOnNotFound;
+        $this->outputChannelName = $outputChannelName;
+        $this->requiredInterceptorNames = $requiredInterceptorNames;
+        $this->identifierMetadataMapping = $identifierMetadataMapping;
+    }
+
+    public function getListenTo(): string
+    {
+        return $this->listenTo;
+    }
+
+    public function isDropMessageOnNotFound(): bool
+    {
+        return $this->dropMessageOnNotFound;
+    }
+
+    public function getOutputChannelName(): string
+    {
+        return $this->outputChannelName;
+    }
+
+    public function getRequiredInterceptorNames(): array
+    {
+        return $this->requiredInterceptorNames;
+    }
+
+    public function getIdentifierMetadataMapping(): array
+    {
+        return $this->identifierMetadataMapping;
+    }
 }

@@ -14,11 +14,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
  */
 class ServiceCommandHandlerWithClass
 {
-    /**
-     * @param \stdClass $command
-     * @return int
-     * @CommandHandler(endpointId="commandHandler")
-     */
+    #[CommandHandler(endpointId: "commandHandler")]
     public function execute(\stdClass $command) : int
     {
         return 1;

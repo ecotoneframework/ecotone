@@ -46,32 +46,19 @@ class Article
         $this->content = $content;
     }
 
-    /**
-     * @param PublishArticleCommand $command
-     * @return Article
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public static function createWith(PublishArticleCommand $command) : self
     {
         return new self($command->getAuthor(), $command->getTitle(), $command->getContent());
     }
 
-    /**
-     * @param PublishArticleWithTitleOnlyCommand $command
-     *
-     * @return Article
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public static function createWithoutContent(PublishArticleWithTitleOnlyCommand $command) : self
     {
         return new self($command->getAuthor(), $command->getTitle(), "");
     }
 
-    /**
-     * @param ChangeArticleContentCommand $command
-     * @return bool
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public function changeContent(ChangeArticleContentCommand $command) : bool
     {
         $this->content = $command->getContent();

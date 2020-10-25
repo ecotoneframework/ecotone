@@ -12,18 +12,14 @@ class LoggingService
 {
     private $logging = [];
 
-    /**
-     * @EventHandler(endpointId="loggingService")
-     */
     #[Asynchronous("orders")]
+    #[EventHandler(endpointId: "loggingService")]
     public function log(OrderWasNotified $event) : void
     {
         $this->logging[] = $event->getOrderId();
     }
 
-    /**
-     * @QueryHandler(inputChannelName="getLogs")
-     */
+    #[QueryHandler("getLogs")]
     public function getLoggedEvents() : array
     {
         return $this->logging;

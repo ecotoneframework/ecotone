@@ -11,20 +11,13 @@ class OrderNotificator
     /** @var Notification[] */
     private $notifications = [];
 
-    /**
-     * @param Notification $notification
-     * @EventHandler()
-     */
+    #[EventHandler]
     public function notify(Notification $notification) : void
     {
         $this->notifications[] = $notification;
     }
 
-    /**
-     * @param array $query
-     * @return array
-     * @QueryHandler(inputChannelName="getOrderNotifications")
-     */
+    #[QueryHandler("getOrderNotifications")]
     public function getNotifications(array $query) : array
     {
         return $this->notifications;

@@ -10,9 +10,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 
 class ServiceEventHandlerWithListenToToRegex
 {
-    /**
-     * @EventHandler(listenTo="order.*", endpointId="eventHandler")
-     */
+    #[EventHandler("order.*", "eventHandler")]
     public function execute(\stdClass $class) : void
     {
 

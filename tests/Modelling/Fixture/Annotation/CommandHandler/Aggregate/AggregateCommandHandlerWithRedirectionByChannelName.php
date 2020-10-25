@@ -18,17 +18,13 @@ class AggregateCommandHandlerWithRedirectionByChannelName
      */
     private $id;
 
-    /**
-     * @CommandHandler(inputChannelName="sameChannel", endpointId="factory")
-     */
+    #[CommandHandler("sameChannel", "factory")]
     public static function factory() : void
     {
 
     }
 
-    /**
-     * @CommandHandler(inputChannelName="sameChannel", endpointId="action")
-     */
+    #[CommandHandler("sameChannel", "action")]
     public function action() : void
     {
 

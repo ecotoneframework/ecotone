@@ -31,17 +31,13 @@ class Logger
         $this->ownerId = $ownerId;
     }
 
-    /**
-     * @EventHandler(listenTo="order.was_created")
-     */
+    #[EventHandler("order.was_created")]
     public static function register(array $data): array
     {
         return [new EventWasLogged($data)];
     }
 
-    /**
-     * @EventHandler(listenTo="order.was_created", outputChannelName="notify")
-     */
+    #[EventHandler("order.was_created", outputChannelName: "notify")]
     public function append(array $data) : array
     {
         return [new EventWasLogged($data)];

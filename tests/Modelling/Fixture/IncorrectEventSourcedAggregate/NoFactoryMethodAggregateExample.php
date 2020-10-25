@@ -21,8 +21,6 @@ class NoFactoryMethodAggregateExample
      */
     private $id;
 
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public function doSomething(iterable $events) : void {}
 }

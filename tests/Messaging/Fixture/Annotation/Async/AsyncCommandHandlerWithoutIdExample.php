@@ -11,12 +11,8 @@ use Ecotone\Modelling\Annotation\EventHandler;
 #[Asynchronous("asyncChannel")]
 class AsyncCommandHandlerWithoutIdExample
 {
-    /**
-     * @param \stdClass $event
-     *
-     * @CommandHandler()
-     */
     #[Asynchronous("asyncChannel")]
+    #[CommandHandler]
     public function doSomething(\stdClass $event) : void
     {
 

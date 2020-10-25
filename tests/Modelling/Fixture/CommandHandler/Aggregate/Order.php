@@ -5,6 +5,7 @@ namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Annotation\IgnorePayload;
 use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\Annotation\Version;
 use Ecotone\Modelling\WithAggregateEvents;
@@ -56,17 +57,13 @@ class Order implements VersionAggregate
         $this->record(new Notification());
     }
 
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public static function createWith(CreateOrderCommand $command) : self
     {
         return new self($command);
     }
 
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public function increaseAmount(CreateOrderCommand $command) : void
     {
         $this->amount += $command->getAmount();
@@ -77,10 +74,7 @@ class Order implements VersionAggregate
         $this->amount += $command->getAmount();
     }
 
-    /**
-     * @param ChangeShippingAddressCommand $command
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public function changeShippingAddress(ChangeShippingAddressCommand $command) : void
     {
         $this->shippingAddress = $command->getShippingAddress();
@@ -89,10 +83,7 @@ class Order implements VersionAggregate
     }
 
 
-    /**
-     * @param MultiplyAmountCommand $command
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public function multiplyOrder(MultiplyAmountCommand $command) : void
     {
         $this->amount *= $command->getAmount();
@@ -131,12 +122,7 @@ class Order implements VersionAggregate
         return $this->amount;
     }
 
-    /**
-     * @param GetOrderAmountQuery $query
-     *
-     * @return int
-     * @QueryHandler(inputChannelName="get_order_amount_channel")
-     */
+    #[QueryHandler("get_order_amount_channel")]
     public function getAmountWithQuery(GetOrderAmountQuery $query) : int
     {
         return $this->amount;
@@ -147,18 +133,14 @@ class Order implements VersionAggregate
         return $this->version == $version;
     }
 
-    /**
-     * @return string
-     * @QueryHandler(endpointId="getShipping")
-     */
+    #[QueryHandler(endpointId: "getShipping")]
     public function getShippingAddress(GetShippingAddressQuery $query): string
     {
         return $this->shippingAddress;
     }
 
-    /**
-     * @QueryHandler(inputChannelName="getVersion", ignorePayload=true)
-     */
+    #[QueryHandler("getVersion")]
+    #[IgnorePayload]
     public function getVersion(): ?int
     {
         return $this->version;

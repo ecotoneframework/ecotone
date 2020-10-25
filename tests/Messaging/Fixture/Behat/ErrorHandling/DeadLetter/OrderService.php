@@ -7,12 +7,7 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
 
 class OrderService
 {
-    /**
-     * @ServiceActivator(
-     *     endpointId="orderService",
-     *     inputChannelName=ErrorConfigurationContext::INPUT_CHANNEL
-     * )
-     */
+    #[ServiceActivator(ErrorConfigurationContext::INPUT_CHANNEL, "orderService")]
     public function order(string $orderName) : void
     {
         throw new \InvalidArgumentException("exception");

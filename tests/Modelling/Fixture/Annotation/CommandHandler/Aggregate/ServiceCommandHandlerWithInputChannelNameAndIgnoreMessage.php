@@ -15,11 +15,8 @@ use Ecotone\Modelling\Annotation\IgnorePayload;
  */
 class ServiceCommandHandlerWithInputChannelNameAndIgnoreMessage
 {
-    /**
-     * @return int
-     * @CommandHandler(inputChannelName="execute", endpointId="commandHandler")
-     * @IgnorePayload()
-     */
+    #[CommandHandler("execute", "commandHandler")]
+    #[IgnorePayload]
     public function execute(\stdClass $class) : int
     {
         return 1;

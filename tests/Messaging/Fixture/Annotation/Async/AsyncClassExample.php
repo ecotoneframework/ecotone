@@ -10,18 +10,14 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
 #[Asynchronous(channelName: "asyncChannel2")]
 class AsyncClassExample
 {
-    /**
-     * @ServiceActivator(endpointId="asyncServiceActivator2", inputChannelName="inputChannel")
-     */
+    #[ServiceActivator("inputChannel", "asyncServiceActivator2")]
     public function doSomething2() : void
     {
 
     }
 
-    /**
-     * @ServiceActivator(endpointId="asyncServiceActivator1", inputChannelName="inputChannel")
-     */
     #[Asynchronous("asyncChannel1")]
+    #[ServiceActivator("inputChannel", "asyncServiceActivator1")]
     public function doSomething1() : void
     {
 

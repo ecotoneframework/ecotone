@@ -6,19 +6,30 @@ use Doctrine\Common\Annotations\Annotation\Target;
 use Ecotone\Messaging\Annotation\InputOutputEndpointAnnotation;
 use Ramsey\Uuid\Uuid;
 
-/**
- * Class CommandHandler
- * @package Ecotone\Modelling\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- * @Target({"METHOD"})
- */
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class CommandHandler extends InputOutputEndpointAnnotation
 {
-    public array $parameterConverters = [];
     /**
      * If @Aggregate was not found, message can be dropped instead of throwing exception
      */
     public bool $dropMessageOnNotFound = false;
     public array $identifierMetadataMapping = [];
+
+    public function __construct(string $inputChannelName = "", string $endpointId = "", string $outputChannelName = "", bool $dropMessageOnNotFound = false, $identifierMetadataMapping = [], array $requiredInterceptorNames = [])
+    {
+        parent::__construct($inputChannelName, $endpointId, $outputChannelName, $requiredInterceptorNames);
+
+        $this->dropMessageOnNotFound = $dropMessageOnNotFound;
+        $this->identifierMetadataMapping = $identifierMetadataMapping;
+    }
+
+    public function isDropMessageOnNotFound(): bool
+    {
+        return $this->dropMessageOnNotFound;
+    }
+
+    public function getIdentifierMetadataMapping(): array
+    {
+        return $this->identifierMetadataMapping;
+    }
 }

@@ -21,10 +21,7 @@ class AggregateCommandHandlerExample
      */
     private $id;
 
-    /**
-     * @param DoStuffCommand $command
-     * @CommandHandler(endpointId="command-id")
-     */
+    #[CommandHandler(endpointId: "command-id")]
     public function doAction(DoStuffCommand $command) : void
     {
 

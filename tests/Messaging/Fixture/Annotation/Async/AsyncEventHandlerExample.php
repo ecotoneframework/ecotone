@@ -10,12 +10,8 @@ use Ecotone\Modelling\Annotation\EventHandler;
 #[Asynchronous("asyncChannel")]
 class AsyncEventHandlerExample
 {
-    /**
-     * @param \stdClass $event
-     *
-     * @EventHandler(endpointId="asyncEvent")
-     */
     #[Asynchronous("asyncChannel")]
+    #[EventHandler(endpointId: "asyncEvent")]
     public function doSomething(\stdClass $event) : void
     {
 

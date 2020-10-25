@@ -36,11 +36,7 @@ class Appointment
         $this->record(new AppointmentWasCreatedEvent($command->getAppointmentId()));
     }
 
-    /**
-     * @param CreateAppointmentCommand $command
-     * @return Appointment
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public static function create(CreateAppointmentCommand $command) : self
     {
         return new self($command);

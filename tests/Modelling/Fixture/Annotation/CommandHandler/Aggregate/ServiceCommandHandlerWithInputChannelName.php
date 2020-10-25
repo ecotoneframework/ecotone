@@ -14,10 +14,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
  */
 class ServiceCommandHandlerWithInputChannelName
 {
-    /**
-     * @return int
-     * @CommandHandler(inputChannelName="execute", endpointId="commandHandler")
-     */
+    #[CommandHandler("execute", "commandHandler")]
     public function execute() : int
     {
         return 1;

@@ -18,17 +18,13 @@ class AggregateCommandHandlerWithDoubledFactoryMethod
      */
     private $id;
 
-    /**
-     * @CommandHandler(inputChannelName="sameChannel")
-     */
+    #[CommandHandler("sameChannel")]
     public static function factory() : void
     {
 
     }
 
-    /**
-     * @CommandHandler(inputChannelName="sameChannel")
-     */
+    #[CommandHandler("sameChannel")]
     public static function factory2() : void
     {
 

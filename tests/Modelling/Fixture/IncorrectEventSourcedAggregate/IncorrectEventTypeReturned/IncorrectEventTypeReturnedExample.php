@@ -24,9 +24,7 @@ class IncorrectEventTypeReturnedExample
      */
     private $id;
 
-    /**
-     * @CommandHandler()
-     */
+    #[CommandHandler]
     public static function create(CreateIncorrectEventTypeReturnedAggregate $command) : array
     {
         return [["id" => 1]];

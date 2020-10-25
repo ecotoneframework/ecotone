@@ -7,13 +7,9 @@ use Ecotone\Messaging\Annotation\MessageGateway;
 
 interface OrderGateway
 {
-    /**
-     * @MessageGateway(requestChannel=ErrorConfigurationContext::INPUT_CHANNEL)
-     */
+    #[MessageGateway(ErrorConfigurationContext::INPUT_CHANNEL)]
     public function order(string $type) : void;
 
-    /**
-     * @MessageGateway(requestChannel="getErrorMessage")
-     */
+    #[MessageGateway("getErrorMessage")]
     public function getIncorrectOrder() : ?string;
 }

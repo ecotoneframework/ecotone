@@ -8,15 +8,9 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 interface MultipleMethodsGatewayExample
 {
-    /**
-     * @MessageGateway(requestChannel="channel1")
-     * @param $data
-     */
+    #[MessageGateway("channel1")]
     public function execute1($data) : void;
 
-    /**
-     * @MessageGateway(requestChannel="channel2")
-     * @param $data
-     */
+    #[MessageGateway("channel2")]
     public function execute2($data) : void;
 }

@@ -14,34 +14,28 @@ interface QueryBus
     const CHANNEL_NAME_BY_NAME   = "ecotone.modelling.bus.query_by_name";
 
     /**
-     * @MessageGateway(requestChannel=QueryBus::CHANNEL_NAME_BY_OBJECT)
-     *
      * @return mixed
      */
+    #[MessageGateway(QueryBus::CHANNEL_NAME_BY_OBJECT)]
     public function send(object $query);
 
     /**
-     * @MessageGateway(requestChannel=QueryBus::CHANNEL_NAME_BY_OBJECT)
-     *
      * @return mixed
      */
+    #[MessageGateway(QueryBus::CHANNEL_NAME_BY_OBJECT)]
     public function sendWithMetadata(object $query, array $metadata);
 
     /**
      * @var mixed $data
-     *
-     * @MessageGateway(requestChannel=QueryBus::CHANNEL_NAME_BY_NAME)
-     *
      * @return mixed
      */
+    #[MessageGateway(QueryBus::CHANNEL_NAME_BY_NAME)]
     public function convertAndSend(#[Header(QueryBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $dataMediaType, #[Payload] $data);
 
     /**
      * @var mixed $data
-     *
-     * @MessageGateway(requestChannel=QueryBus::CHANNEL_NAME_BY_NAME)
-     *
      * @return mixed
      */
+    #[MessageGateway(QueryBus::CHANNEL_NAME_BY_NAME)]
     public function convertAndSendWithMetadata(#[Header(QueryBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $dataMediaType, #[Payload] $data, #[Headers] array $metadata);
 }

@@ -4,7 +4,6 @@
 namespace Ecotone\Modelling\LazyEventBus;
 
 use Ecotone\Messaging\Annotation\MessageGateway;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 // @TODO DROP
@@ -18,9 +17,8 @@ interface LazyEventBus
      * @param object $event instance of command
      *
      * @return mixed
-     *
-     * @MessageGateway(requestChannel=LazyEventBus::CHANNEL_NAME)
      */
+    #[MessageGateway(LazyEventBus::CHANNEL_NAME)]
     public function send(object $event);
 
     /**
@@ -30,8 +28,7 @@ interface LazyEventBus
      * @param array  $metadata
      *
      * @return mixed
-     *
-     * @MessageGateway(requestChannel=LazyEventBus::CHANNEL_NAME)
      */
+    #[MessageGateway(LazyEventBus::CHANNEL_NAME)]
     public function sendWithMetadata(object $event, array $metadata);
 }

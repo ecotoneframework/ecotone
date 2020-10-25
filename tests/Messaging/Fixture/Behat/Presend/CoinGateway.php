@@ -8,8 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 interface CoinGateway
 {
-    /**
-     * @MessageGateway(requestChannel="storeCoins")
-     */
+    #[MessageGateway("storeCoins")]
     public function store(int $coins);
 }

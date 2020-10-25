@@ -12,8 +12,6 @@ use Ecotone\Messaging\MessageHeaders;
 
 interface MessageBasedQueryBusExample
 {
-    /**
-     * @MessageGateway(requestChannel=QueryBus::CHANNEL_NAME_BY_NAME)
-     */
+    #[MessageGateway(QueryBus::CHANNEL_NAME_BY_NAME)]
     public function convertAndSend(#[Header(QueryBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $dataMediaType, #[Payload] $data) : Message;
 }

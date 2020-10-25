@@ -10,12 +10,12 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 interface Calculator
 {
     /**
-     * @MessageGateway(requestChannel="calculateChannel")
      * @param int $amount
      * @return int
      * @BeforeMultiplyCalculation(amount=2)
      * @AroundSumCalculation(amount=3)
      * @AfterMultiplyCalculation(amount=2)
      */
+    #[MessageGateway("calculateChannel")]
     public function calculate(int $amount) : int;
 }

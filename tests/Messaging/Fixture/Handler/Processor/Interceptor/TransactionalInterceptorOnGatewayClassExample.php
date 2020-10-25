@@ -12,8 +12,6 @@ use Ecotone\Messaging\Transaction\Transactional;
  */
 interface TransactionalInterceptorOnGatewayClassExample
 {
-    /**
-     * @MessageGateway(requestChannel="requestChannel")
-     */
+    #[MessageGateway("requestChannel")]
     public function invoke() : void;
 }

@@ -4,14 +4,10 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext {
 
     use Ecotone\Messaging\Annotation\MessageGateway;
-    use Ecotone\Messaging\Annotation\MessageEndpoint;
 
     interface GatewayExample
     {
-        /**
-         * @return string
-         * @MessageGateway()
-         */
+        #[MessageGateway(ApplicationContextExample::HTTP_INPUT_CHANNEL)]
         public function doSomething(): string;
     }
 }

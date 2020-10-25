@@ -8,8 +8,6 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 interface SingleMethodGatewayExample
 {
-    /**
-     * @MessageGateway(requestChannel="buy")
-     */
+    #[MessageGateway("buy")]
     public function buy();
 }

@@ -9,8 +9,6 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 
 interface FakeMessageConverterGatewayExample
 {
-    /**
-     * @MessageGateway(requestChannel="requestChannel")
-     */
+    #[MessageGateway("requestChannel")]
     public function execute(#[Header("some")] array $some, #[Payload] int $amount) : \stdClass;
 }

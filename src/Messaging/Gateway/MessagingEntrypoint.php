@@ -12,20 +12,15 @@ interface MessagingEntrypoint
 {
     const ENTRYPOINT = "ecotone.messaging.entrypoint";
 
-    /**
-     * @MessageGateway(requestChannel=MessagingEntrypoint::ENTRYPOINT)
-     */
+    #[MessageGateway(MessagingEntrypoint::ENTRYPOINT)]
     public function send(#[Payload] $payload, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel);
 
-    /**
-     * @MessageGateway(requestChannel=MessagingEntrypoint::ENTRYPOINT)
-     */
+    #[MessageGateway(MessagingEntrypoint::ENTRYPOINT)]
     public function sendWithHeaders(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel);
 
     /**
      * It must contain {MessagingEntrypoint::ENTRYPOINT} header
-     *
-     * @MessageGateway(requestChannel=MessagingEntrypoint::ENTRYPOINT)
      */
+    #[MessageGateway(MessagingEntrypoint::ENTRYPOINT)]
     public function sendMessage(Message $message);
 }

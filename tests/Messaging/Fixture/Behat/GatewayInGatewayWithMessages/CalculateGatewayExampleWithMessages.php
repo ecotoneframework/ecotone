@@ -9,8 +9,6 @@ use Ecotone\Messaging\Message;
 
 interface CalculateGatewayExampleWithMessages
 {
-    /**
-     * @MessageGateway(requestChannel=SomeQueryHandler::CALCULATE,requiredInterceptorNames={InterceptorExample::class})
-     */
+    #[MessageGateway(SomeQueryHandler::CALCULATE, requiredInterceptorNames: [InterceptorExample::class])]
     public function calculate(Message $amount) : Message;
 }

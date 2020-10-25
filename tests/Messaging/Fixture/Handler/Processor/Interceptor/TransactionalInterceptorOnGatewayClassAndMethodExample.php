@@ -13,8 +13,8 @@ use Ecotone\Messaging\Transaction\Transactional;
 interface TransactionalInterceptorOnGatewayClassAndMethodExample
 {
     /**
-     * @MessageGateway(requestChannel="requestChannel")
      * @Transactional({"transactionFactory2"})
      */
+    #[MessageGateway("requestChannel")]
     public function invoke() : void;
 }

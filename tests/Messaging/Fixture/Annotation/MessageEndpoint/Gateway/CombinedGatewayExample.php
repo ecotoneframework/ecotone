@@ -8,13 +8,9 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 interface CombinedGatewayExample
 {
-    /**
-     * @MessageGateway(requestChannel="buy")
-     */
+    #[MessageGateway("buy")]
     public function buy() : void;
 
-    /**
-     * @MessageGateway(requestChannel="sell")
-     */
+    #[MessageGateway("sell")]
     public function sell() : void;
 }

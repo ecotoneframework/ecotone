@@ -9,11 +9,6 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 
 interface GatewayWithReplyChannelExample
 {
-    /**
-     * @MessageGateway(
-     *      requestChannel="requestChannel",
-     *      requiredInterceptorNames={"dbalTransaction"}
-     * )
-     */
+    #[MessageGateway("requestChannel", requiredInterceptorNames: ["dbalTransaction"])]
     public function buy(#[Payload] string $orderId): bool;
 }

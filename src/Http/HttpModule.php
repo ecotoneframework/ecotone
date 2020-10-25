@@ -11,18 +11,13 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurat
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 
-/**
- * Class HttpModule
- * @package Ecotone\Http
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class HttpModule extends NoExternalConfigurationModule
 {
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): static
     {
         return new self();
     }

@@ -13,12 +13,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 
-/**
- * Class BasicMessagingConfiguration
- * @package Ecotone\Messaging\Config\Annotation
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class RequiredConsumersModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
@@ -39,7 +34,7 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): static
     {
         $annotationRegistrations = $annotationRegistrationService->findAnnotatedMethods( MessageConsumer::class);
 

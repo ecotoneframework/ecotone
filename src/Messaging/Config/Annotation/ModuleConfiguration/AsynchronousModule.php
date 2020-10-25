@@ -16,12 +16,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * Class ConverterModule
- * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class AsynchronousModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     private array $asyncEndpoints = [];
@@ -39,7 +34,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): static
     {
         $asynchronousClasses = $annotationRegistrationService->findAnnotatedClasses(Asynchronous::class);
 

@@ -22,18 +22,13 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Precedence;
 
-/**
- * Class LoggingModule
- * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class LoggingModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): static
     {
         return new self();
     }

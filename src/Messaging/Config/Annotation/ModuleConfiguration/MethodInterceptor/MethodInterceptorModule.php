@@ -37,12 +37,7 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Annotation\IgnorePayload;
 
-/**
- * Class MethodInterceptorModule
- * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class MethodInterceptorModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME = "methodInterceptorModule";
@@ -73,7 +68,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): static
     {
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
         /** @var AnnotatedFinding[] $methodsInterceptors */

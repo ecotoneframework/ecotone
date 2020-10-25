@@ -10,12 +10,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 
-/**
- * Class AnnotationRouterConfiguration
- * @package Ecotone\Messaging\Config\Annotation\Annotation
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class RouterModule extends MessageHandlerRegisterConfiguration
 {
     public const MODULE_NAME = "routerModule";

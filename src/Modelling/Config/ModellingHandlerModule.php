@@ -49,12 +49,7 @@ use Ecotone\Modelling\LoadAggregateServiceBuilder;
 use Ramsey\Uuid\Uuid;
 use ReflectionException;
 
-/**
- * Class IntegrationMessagingCqrsModule
- * @package Ecotone\Modelling\Config
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class ModellingHandlerModule implements AnnotationModule
 {
     const CQRS_MODULE                                          = "cqrsModule";
@@ -121,7 +116,7 @@ class ModellingHandlerModule implements AnnotationModule
      *
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): static
     {
         $aggregateRepositoryClasses = $annotationRegistrationService->findAnnotatedClasses(Repository::class);
 

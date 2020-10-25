@@ -13,12 +13,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 
-/**
- * Class InboundChannelAdapterModule
- * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class InboundChannelAdapterModule extends ConsumerRegisterConfiguration
 {
     /**

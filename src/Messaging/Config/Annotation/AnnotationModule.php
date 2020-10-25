@@ -13,5 +13,5 @@ use Ecotone\Messaging\Config\Module;
  */
 interface AnnotationModule extends Module
 {
-    public static function create(AnnotationFinder $annotationRegistrationService): self;
+    public static function create(AnnotationFinder $annotationRegistrationService): static;
 }

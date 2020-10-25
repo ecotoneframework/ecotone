@@ -7,13 +7,6 @@ use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 
-/**
- * Class GatewayAnnotation
- * @package Ecotone\Messaging\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- * @Target({"METHOD"})
- */
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class MessageGateway
 {

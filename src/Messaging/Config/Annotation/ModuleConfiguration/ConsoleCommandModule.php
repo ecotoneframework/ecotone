@@ -31,9 +31,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 
-/**
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class ConsoleCommandModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     const ECOTONE_COMMAND_PARAMETER_PREFIX = "ecotone.oneTimeCommand.";
@@ -53,7 +51,7 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
         $this->oneTimeCommandConfigurations = $oneTimeCommandConfigurations;
     }
 
-    public static function create(AnnotationFinder $annotationRegistrationService): \Ecotone\Messaging\Config\Annotation\AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): static
     {
         $messageHandlerBuilders    = [];
         $oneTimeConfigurations = [];

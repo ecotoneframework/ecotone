@@ -17,12 +17,7 @@ use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 
-/**
- * Class ConverterModule
- * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class ConverterModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
@@ -43,7 +38,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): AnnotationModule
+    public static function create(AnnotationFinder $annotationRegistrationService): static
     {
         $registrations = $annotationRegistrationService->findAnnotatedMethods(Converter::class);
 

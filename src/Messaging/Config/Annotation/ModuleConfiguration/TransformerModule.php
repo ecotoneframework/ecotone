@@ -11,12 +11,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 
-/**
- * Class AnnotationTransformerConfiguration
- * @package Ecotone\Messaging\Config\Annotation
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class TransformerModule extends MessageHandlerRegisterConfiguration
 {
     public const MODULE_NAME = "transformerModule";

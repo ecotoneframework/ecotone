@@ -30,12 +30,7 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
 use Ecotone\Modelling\QueryBus;
 
-/**
- * Class AggregateMessageRouterModule
- * @package Ecotone\Modelling\Config
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @ModuleAnnotation()
- */
+#[ModuleAnnotation]
 class ModellingMessageRouterModule implements AnnotationModule
 {
     const MODULE_NAME = self::class;
@@ -62,7 +57,7 @@ class ModellingMessageRouterModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService) : self
+    public static function create(AnnotationFinder $annotationRegistrationService) : static
     {
         $messageHeadersPropagator = new MessageHeadersPropagator();
         return new self(

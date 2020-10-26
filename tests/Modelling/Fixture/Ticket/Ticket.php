@@ -8,9 +8,7 @@ use Ecotone\Modelling\Annotation\AggregateFactory;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
-/**
- * @Aggregate()
- */
+#[Aggregate]
 class Ticket
 {
     /**

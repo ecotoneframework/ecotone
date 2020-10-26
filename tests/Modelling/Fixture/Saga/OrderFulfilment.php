@@ -9,12 +9,7 @@ use Ecotone\Modelling\Annotation\EventHandler;
 use Test\Ecotone\Modelling\Fixture\Saga\OrderWasPlacedEvent;
 use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 
-/**
- * Class Article
- * @package Test\Ecotone\Modelling\Fixture\Blog
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
- */
+#[Aggregate]
 class OrderFulfilment
 {
     /**

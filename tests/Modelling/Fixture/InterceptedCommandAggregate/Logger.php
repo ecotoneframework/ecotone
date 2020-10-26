@@ -8,10 +8,8 @@ use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSavingLogs\ValidateExecutor;
 
-/**
- * @Aggregate()
- * @ValidateExecutor()
- */
+#[Aggregate]
+#[ValidateExecutor]
 class Logger
 {
     /**

@@ -12,13 +12,8 @@ use Ecotone\Modelling\WithAggregateEvents;
 use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 
-/**
- * Class OrderService
- * @package Test\Ecotone\Amqp\Fixture\Order
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
- */
 #[Asynchronous("orders")]
+#[Aggregate]
 class Order
 {
     use WithAggregateEvents;

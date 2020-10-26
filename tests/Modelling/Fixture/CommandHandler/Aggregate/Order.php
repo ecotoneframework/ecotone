@@ -10,12 +10,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\Annotation\Version;
 use Ecotone\Modelling\WithAggregateEvents;
 
-/**
- * Class Order
- * @package Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
- */
+#[Aggregate]
 class Order implements VersionAggregate
 {
     use WithAggregateEvents;

@@ -7,9 +7,7 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * @Aggregate()
- */
+#[Aggregate]
 class AggregateQueryHandlerWithInputChannelAndObject
 {
     #[QueryHandler("execute", "queryHandler")]

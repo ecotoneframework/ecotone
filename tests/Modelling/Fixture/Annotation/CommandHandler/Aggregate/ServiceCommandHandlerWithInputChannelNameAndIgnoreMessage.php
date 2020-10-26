@@ -7,12 +7,7 @@ use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\IgnorePayload;
 
-/**
- * Class CommandHandlerWithReturnValue
- * @package Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
- */
+#[Aggregate]
 class ServiceCommandHandlerWithInputChannelNameAndIgnoreMessage
 {
     #[CommandHandler("execute", "commandHandler")]

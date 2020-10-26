@@ -9,12 +9,7 @@ use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\NotUniqueHandler;
 
-/**
- * Class MultiMethod
- * @package Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
- */
+#[Aggregate]
 class MultiMethodAggregateCommandHandlerExample
 {
     /**

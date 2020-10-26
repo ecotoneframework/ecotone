@@ -10,9 +10,7 @@ use Ecotone\Modelling\WithAggregateEvents;
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin\AddFranchise;
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ExchangeProductForPrice;
 
-/**
- * @Aggregate()
- */
+#[Aggregate]
 class ShopCalculator
 {
     use WithAggregateEvents;

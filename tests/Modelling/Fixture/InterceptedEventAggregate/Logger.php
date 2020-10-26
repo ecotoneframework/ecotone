@@ -10,10 +10,8 @@ use Ecotone\Modelling\Annotation\EventHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\ValidateExecutor;
 
-/**
- * @Aggregate()
- * @ValidateExecutor()
- */
+#[Aggregate]
+#[ValidateExecutor]
 class Logger
 {
     /**

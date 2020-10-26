@@ -7,9 +7,7 @@ use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\EventHandler;
 use stdClass;
 
-/**
- * @Aggregate()
- */
+#[Aggregate]
 class AggregateEventHandlerWithClass
 {
     #[EventHandler(endpointId: "eventHandler")]

@@ -7,9 +7,7 @@ use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\ReferenceCallInterceptorAnnotation;
 
-/**
- * @Aggregate()
- */
+#[Aggregate]
 class AggregateCommandHandlerWithRedirectionByClass
 {
     /**

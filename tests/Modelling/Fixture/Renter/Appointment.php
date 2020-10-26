@@ -8,12 +8,7 @@ use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\WithAggregateEvents;
 
-/**
- * Class Appointment
- * @package Test\Ecotone\Modelling\Fixture\Renter
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
- */
+#[Aggregate]
 class Appointment
 {
     use WithAggregateEvents;

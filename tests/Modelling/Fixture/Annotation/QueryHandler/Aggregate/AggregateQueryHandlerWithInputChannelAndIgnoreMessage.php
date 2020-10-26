@@ -8,9 +8,7 @@ use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\IgnorePayload;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * @Aggregate()
- */
+#[Aggregate]
 class AggregateQueryHandlerWithInputChannelAndIgnoreMessage
 {
     #[QueryHandler("execute", "queryHandler")]

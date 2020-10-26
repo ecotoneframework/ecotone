@@ -9,13 +9,7 @@ use Ecotone\Modelling\Annotation\AggregateFactory;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
-/**
- * Class NoIdDefinedAfterCallingFactoryExample
- * @package Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- *
- * @Aggregate()
- */
+#[Aggregate]
 class NoIdDefinedAfterCallingFactoryExample
 {
     /**

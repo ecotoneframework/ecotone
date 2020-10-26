@@ -6,12 +6,7 @@ use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\QueryHandler;
 
-/**
- * Class AggregateQueryHandlerWithOutputChannelExample
- * @package Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
- */
+#[Aggregate]
 class AggregateQueryHandlerWithOutputChannelExample
 {
     /**

@@ -6,12 +6,7 @@ use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
-/**
- * Class Article
- * @package Test\Ecotone\Modelling\Fixture\Blog
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Aggregate()
- */
+#[Aggregate]
 class Article
 {
     /**

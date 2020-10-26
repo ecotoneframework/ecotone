@@ -15,27 +15,19 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 #[ClassReference("someMethodInterceptor")]
 class TransformerInterceptorExample
 {
-    /**
-     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, changeHeaders=true)
-     * @param string $name
-     * @param string $surname
-     */
+    #[Before(2, ServiceActivatorInterceptorExample::class, true)]
     public function doSomethingBefore(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 
     }
 
-    /**
-     * @After(changeHeaders=true)
-     */
+    #[After(changeHeaders: true)]
     public function doSomethingAfter(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 
     }
 
-    /**
-     * @Presend(precedence=2, pointcut=ServiceActivatorInterceptorExample::class, changeHeaders=true)
-     */
+    #[Presend(2, ServiceActivatorInterceptorExample::class, true)]
     public function beforeSend(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 

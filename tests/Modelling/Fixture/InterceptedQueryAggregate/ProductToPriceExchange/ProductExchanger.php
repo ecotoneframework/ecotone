@@ -11,9 +11,7 @@ class ProductExchanger
     const MILK = "milk";
     const MILK_PRICE = 100;
 
-    /**
-     * @Before(pointcut="@(Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ExchangeProductForPrice)")
-     */
+    #[Before(pointcut: ExchangeProductForPrice::class)]
     public function exchange(array $query) : array
     {
         return [

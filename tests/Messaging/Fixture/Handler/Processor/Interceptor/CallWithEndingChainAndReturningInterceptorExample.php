@@ -8,11 +8,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 class CallWithEndingChainAndReturningInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @return mixed
-     * @Around()
-     */
+    #[Around]
     public function callWithEndingChainAndReturning(MethodInvocation $methodInvocation)
     {
         return $this->valueToReturn;

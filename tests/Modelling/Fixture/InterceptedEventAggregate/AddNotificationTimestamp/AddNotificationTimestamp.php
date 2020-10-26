@@ -6,6 +6,7 @@ use Ecotone\Messaging\Annotation\Interceptor\After;
 use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Modelling\Annotation\CommandHandler;
+use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 
 class AddNotificationTimestamp
 {
@@ -17,9 +18,7 @@ class AddNotificationTimestamp
         $this->currentTime = $currentTime;
     }
 
-    /**
-     * @After(pointcut="Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger", changeHeaders=true)
-     */
+    #[After(pointcut: Logger::class, changeHeaders: true)]
     public function add(array $events, array $metadata) : array
     {
         return array_merge(

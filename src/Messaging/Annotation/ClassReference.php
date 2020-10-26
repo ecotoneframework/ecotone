@@ -5,10 +5,6 @@ namespace Ecotone\Messaging\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 use Ecotone\Messaging\Support\Assert;
 
-/**
- * @Annotation
- * @Target({"CLASS"})
- */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class ClassReference
 {

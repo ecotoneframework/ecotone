@@ -13,10 +13,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class CallWithReferenceSearchServiceExample extends BaseInterceptorExample
 {
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @Around()
-     */
+    #[Around]
     public function call(ReferenceSearchService $referenceSearchService) : void
     {
 

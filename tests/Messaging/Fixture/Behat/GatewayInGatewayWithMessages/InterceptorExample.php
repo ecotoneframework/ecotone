@@ -13,9 +13,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 
 class InterceptorExample
 {
-    /**
-     * @Before(pointcut="Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::sum")
-     */
+    #[Before(pointcut: SomeQueryHandler::class . "::sum")]
     public function multiplyBefore(Message $message): Message
     {
         return MessageBuilder::fromMessage($message)
@@ -23,9 +21,7 @@ class InterceptorExample
                 ->build();
     }
 
-    /**
-     * @Around(pointcut="Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::multiply")
-     */
+    #[Around(pointcut: SomeQueryHandler::class . "::multiply")]
     public function sum(MethodInvocation $methodInvocation): Message
     {
         $message = $methodInvocation->proceed();
@@ -35,9 +31,7 @@ class InterceptorExample
             ->build();
     }
 
-    /**
-     * @After(pointcut="Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::sum")
-     */
+    #[After(pointcut: SomeQueryHandler::class . "::sum")]
     public function multiplyAfter(Message $message): Message
     {
         return MessageBuilder::fromMessage($message)

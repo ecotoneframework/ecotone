@@ -12,10 +12,7 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
  */
 class CallWithAnnotationFromMethodInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @param ServiceActivator $methodAnnotation
-     * @Around()
-     */
+    #[Around]
     public function callWithMethodAnnotation(ServiceActivator $methodAnnotation) : void
     {
 

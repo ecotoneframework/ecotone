@@ -9,10 +9,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 class CallWithEndingChainNoReturningInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @Around()
-     */
+    #[Around]
     public function callWithEndingChainNoReturning(MethodInvocation $methodInvocation) : void
     {
 

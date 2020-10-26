@@ -8,10 +8,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 class CallWithProceedingInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @Around()
-     */
+    #[Around]
     public function callWithProceeding(MethodInvocation $methodInvocation) : void
     {
         $methodInvocation->proceed();

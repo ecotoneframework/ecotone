@@ -8,10 +8,7 @@ use Test\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
 
 class CallWithInterceptedObjectInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @param StubCallSavingService $stubCallSavingService
-     * @Around()
-     */
+    #[Around]
     public function callWithInterceptedObject(StubCallSavingService $stubCallSavingService): void
     {
     }

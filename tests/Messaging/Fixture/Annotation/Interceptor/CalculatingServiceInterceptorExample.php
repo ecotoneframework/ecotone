@@ -43,12 +43,7 @@ class CalculatingServiceInterceptorExample
         return $amount;
     }
 
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @param int $amount
-     * @Around(precedence=2, pointcut=CalculatingServiceInterceptorExample::class)
-     * @return mixed
-     */
+    #[Around(2, CalculatingServiceInterceptorExample::class)]
     public function sum(MethodInvocation $methodInvocation, int $amount)
     {
         $result = $amount + $this->secondValueForMathOperations;
@@ -73,12 +68,7 @@ class CalculatingServiceInterceptorExample
         return $methodInvocation->proceed();
     }
 
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @param int $amount
-     * @return int
-     * @Around()
-     */
+    #[Around]
     public function subtract(MethodInvocation $methodInvocation, int $amount) : int
     {
         $result = $amount - $this->secondValueForMathOperations;
@@ -87,12 +77,7 @@ class CalculatingServiceInterceptorExample
         return $methodInvocation->proceed();
     }
 
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @param int $amount
-     * @return int
-     * @Around(precedence=2, pointcut=CalculatingServiceInterceptorExample::class)
-     */
+    #[Around(2, CalculatingServiceInterceptorExample::class)]
     public function multiply(MethodInvocation $methodInvocation, int $amount) : int
     {
         $result = $amount * $this->secondValueForMathOperations;

@@ -10,13 +10,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 #[ClassReference("callWithUnordered")]
 class CallWithUnorderedClassInvocationInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @param int $test
-     * @param \stdClass $stdClass
-     * @return mixed
-     * @Around()
-     */
+    #[Around]
     public function callWithUnorderedClassInvocation(MethodInvocation $methodInvocation, int $test, \stdClass $stdClass)
     {
         return $methodInvocation->proceed();

@@ -12,26 +12,20 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 class InterceptorExample
 {
-    /**
-     * @Before(pointcut="Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler::sum")
-     */
+    #[Before(pointcut: SomeQueryHandler::class . "::sum")]
     public function multiplyBefore(int $amount): int
     {
         return $amount * 2;
     }
 
-    /**
-     * @Around(pointcut="Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler::multiply")
-     */
+    #[Around(pointcut: SomeQueryHandler::class . "::multiply")]
     public function sum(MethodInvocation $methodInvocation): int
     {
         $proceed = $methodInvocation->proceed();
         return $proceed + 1;
     }
 
-    /**
-     * @After(pointcut="Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler::sum")
-     */
+    #[After(pointcut: SomeQueryHandler::class . "::sum")]
     public function multiplyAfter(int $amount): int
     {
         return $amount * 2;

@@ -14,8 +14,8 @@ class CallMultipleUnorderedArgumentsInvocationInterceptorExample extends BaseInt
      * @param string[]|array $strings
      * @param \stdClass $some
      * @return mixed
-     * @Around()
      */
+    #[Around]
     public function callMultipleUnorderedArgumentsInvocation(MethodInvocation $methodInvocation, iterable $numbers, array $strings, \stdClass $some)
     {
         return $methodInvocation->proceed();

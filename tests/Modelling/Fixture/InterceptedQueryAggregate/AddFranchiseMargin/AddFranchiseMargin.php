@@ -8,9 +8,7 @@ use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 
 class AddFranchiseMargin
 {
-    /**
-     * @After(pointcut="@(Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin\AddFranchise)")
-     */
+    #[After(pointcut: "@(" . AddFranchise::class . ")")]
     public function add(int $amount) : int
     {
         return $amount + 10;

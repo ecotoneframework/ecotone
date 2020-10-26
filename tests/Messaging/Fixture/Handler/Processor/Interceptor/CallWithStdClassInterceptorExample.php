@@ -10,22 +10,13 @@ class CallWithStdClassInterceptorExample extends BaseInterceptorExample
 {
     private $calledHeaders;
 
-    /**
-     * @param \stdClass|null $stdClass
-     * @Around()
-     */
+    #[Around]
     public function callWithStdClass(\stdClass $stdClass) : void
     {
 
     }
 
-    /**
-     * @param \stdClass|null $stdClass
-     * @param array          $headers
-     * @Around()
-     *
-     * @return void
-     */
+    #[Around]
     public function callWithStdClassAndHeaders(\stdClass $stdClass, array $headers) : void
     {
         $this->calledHeaders = $headers;

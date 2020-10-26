@@ -8,11 +8,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 class CallWithReplacingArgumentsInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @return mixed
-     * @Around()
-     */
+    #[Around]
     public function callWithReplacingArguments(MethodInvocation $methodInvocation)
     {
         foreach ($this->argumentsToReplace as $parameterName => $value) {

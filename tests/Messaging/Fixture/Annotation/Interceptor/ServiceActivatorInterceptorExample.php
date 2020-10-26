@@ -13,17 +13,13 @@ use Ecotone\Messaging\Annotation\Parameter\Payload;
 #[ClassReference("someMethodInterceptor")]
 class ServiceActivatorInterceptorExample
 {
-    /**
-     * @Before(precedence=2, pointcut=ServiceActivatorInterceptorExample::class)
-     */
+    #[Before(2, ServiceActivatorInterceptorExample::class)]
     public function doSomethingBefore(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 
     }
 
-    /**
-     * @After()
-     */
+    #[After]
     public function doSomethingAfter(#[Payload] string $name, #[Header("surname")] string $surname) : void
     {
 

@@ -30,12 +30,7 @@ class SummingInterceptorExample
         return $calculatingService;
     }
 
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @param int $amount
-     * @return int
-     * @Around(precedence=4)
-     */
+    #[Around(4)]
     public function sum(MethodInvocation $methodInvocation, int $amount) : int
     {
         $result = $amount + $this->secondValueForMathOperations;

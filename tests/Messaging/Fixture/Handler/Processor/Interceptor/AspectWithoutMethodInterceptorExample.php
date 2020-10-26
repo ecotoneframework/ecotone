@@ -11,9 +11,7 @@ use Ecotone\Messaging\Annotation\Interceptor\Around;
  */
 class AspectWithoutMethodInterceptorExample
 {
-    /**
-     * @Around()
-     */
+    #[Around]
     public function doSomething() : void
     {
 

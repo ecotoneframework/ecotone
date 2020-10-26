@@ -8,6 +8,7 @@ use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Annotation\ServiceActivator;
 use Ecotone\Modelling\Annotation\CommandHandler;
+use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 
 class AddExecutorId
 {
@@ -19,9 +20,7 @@ class AddExecutorId
         $this->executorId = $executorId;
     }
 
-    /**
-     * @Before(pointcut="Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger")
-     */
+    #[Before(pointcut: Logger::class)]
     public function add(array $payload) : array
     {
         if (isset($payload["executorId"])) {

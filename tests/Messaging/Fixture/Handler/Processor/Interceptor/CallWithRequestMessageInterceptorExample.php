@@ -9,12 +9,7 @@ use Ecotone\Messaging\Message;
 
 class CallWithRequestMessageInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @param Message $message
-     * @return Message
-     * @Around()
-     */
+    #[Around]
     public function callWithRequestMessage(MethodInvocation $methodInvocation, Message $message)
     {
         return $message;

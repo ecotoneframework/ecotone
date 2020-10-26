@@ -8,11 +8,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 class CallWithProceedingAndReturningInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @return mixed
-     * @Around()
-     */
+    #[Around]
     public function callWithProceedingAndReturning(MethodInvocation $methodInvocation)
     {
         $this->wasCalled = true;

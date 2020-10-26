@@ -13,42 +13,20 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 class CalculatorInterceptor
 {
-    /**
-     * @param int $amount
-     * @param array $metadata
-     * @param BeforeMultiplyCalculation $beforeMultiplyCalculation
-     * @return int
-     * @Before(
-     *     pointcut="@(Test\Ecotone\Messaging\Fixture\Behat\Calculating\BeforeMultiplyCalculation)"
-     * )
-     */
+    #[Before(pointcut: "@(" . BeforeMultiplyCalculation::class . ")")]
     public function multiplyBefore(int $amount, array $metadata, BeforeMultiplyCalculation $beforeMultiplyCalculation) : int
     {
         return $amount * $beforeMultiplyCalculation->amount;
     }
 
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @param AroundSumCalculation $aroundResultCalculation
-     * @return int
-     * @Around(
-     *     pointcut="@(Test\Ecotone\Messaging\Fixture\Behat\Calculating\AroundSumCalculation)"
-     * )
-     */
+    #[Around(pointcut: "@(" . AroundSumCalculation::class . ")")]
     public function sumAround(MethodInvocation $methodInvocation, AroundSumCalculation $aroundResultCalculation) : int
     {
         $proceed = $methodInvocation->proceed();
         return $proceed + $aroundResultCalculation->amount;
     }
 
-    /**
-     * @param int $amount
-     * @param AfterMultiplyCalculation $afterMultiplyCalculation
-     * @return int
-     * @After(
-     *     pointcut="@(Test\Ecotone\Messaging\Fixture\Behat\Calculating\AfterMultiplyCalculation)"
-     * )
-     */
+    #[After(pointcut: "@(" . AfterMultiplyCalculation::class . "")]
     public function multiplyAfter(int $amount, AfterMultiplyCalculation $afterMultiplyCalculation) : int
     {
         return $amount * $afterMultiplyCalculation->amount;

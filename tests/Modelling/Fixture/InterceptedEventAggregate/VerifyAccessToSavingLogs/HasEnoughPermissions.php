@@ -9,11 +9,7 @@ use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 
 class HasEnoughPermissions
 {
-    /**
-     * @Around(
-     *     pointcut="@(Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\ValidateExecutor)"
-     * )
-     */
+    #[Around(pointcut: "@(" . ValidateExecutor::class . ")")]
     public function validate(MethodInvocation $methodInvocation, ?Logger $logger)
     {
         if (is_null($logger)) {

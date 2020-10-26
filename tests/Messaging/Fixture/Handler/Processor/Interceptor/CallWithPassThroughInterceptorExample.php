@@ -8,10 +8,7 @@ use Ecotone\Messaging\Message;
 
 class CallWithPassThroughInterceptorExample extends BaseInterceptorExample
 {
-    /**
-     * @Around()
-     * @param Message $message
-     */
+    #[Around]
     public function callWithPassThrough(Message $message) : void
     {
 

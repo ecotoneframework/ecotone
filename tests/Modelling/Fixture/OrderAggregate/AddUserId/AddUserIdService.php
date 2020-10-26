@@ -7,13 +7,7 @@ use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 
 class AddUserIdService
 {
-    /**
-     * @Before(
-     *     pointcut="@(Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserId)",
-     *     changeHeaders=true,
-     *     precedence=0
-     * )
-     */
+    #[Before(0, "@(" . AddUserId::class . ")", true)]
     public function add() : array
     {
         return ["userId" => 1];

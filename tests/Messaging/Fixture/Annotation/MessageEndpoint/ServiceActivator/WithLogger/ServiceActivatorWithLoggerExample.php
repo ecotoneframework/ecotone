@@ -12,13 +12,12 @@ use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 
 class ServiceActivatorWithLoggerExample
 {
-    /**
-     * @return void
-     * @LogBefore(logLevel=LoggingLevel::INFO, logFullMessage=true)
-     * @LogAfter(logLevel=LoggingLevel::INFO, logFullMessage=true)
-     * @LogError(logFullMessage=LoggingLevel::CRITICAL, logFullMessage=true)
-     */
     #[ServiceActivator("inputChannel", "test-name")]
+    #[
+        LogBefore(LoggingLevel::INFO, true),
+        LogAfter(LoggingLevel::INFO, true),
+        LogError(LoggingLevel::CRITICAL, true)
+    ]
     public function sendMessage(): void
     {
     }

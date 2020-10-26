@@ -13,11 +13,7 @@ use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
  */
 interface InboundGatewayEntrypoint
 {
-    /**
-     * @param mixed $data
-     * @return mixed
-     * @LogBefore()
-     * @LogError()
-     */
+    #[LogBefore]
+    #[LogError]
     public function executeEntrypoint($data);
 }

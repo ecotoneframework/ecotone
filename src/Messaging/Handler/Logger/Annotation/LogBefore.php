@@ -6,12 +6,7 @@ namespace Ecotone\Messaging\Handler\Logger\Annotation;
 
 use Ecotone\Messaging\Handler\Logger\Logger;
 
-/**
- * Class Log
- * @package Ecotone\Messaging\Handler\Logger\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- */
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class LogBefore extends Logger
 {
 

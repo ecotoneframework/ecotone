@@ -6,16 +6,8 @@ namespace Ecotone\Messaging\Handler\Logger\Annotation;
 use Ecotone\Messaging\Handler\Logger\Logger;
 use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 
-/**
- * Class LogError
- * @package Ecotone\Messaging\Handler\Logger\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- */
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class LogError extends Logger
 {
-    /**
-     * @var string
-     */
-    public $logLevel = LoggingLevel::CRITICAL;
+    public string $logLevel = LoggingLevel::CRITICAL;
 }

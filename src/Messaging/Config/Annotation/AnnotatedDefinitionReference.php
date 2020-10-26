@@ -22,6 +22,19 @@ class AnnotatedDefinitionReference
         return $annotatedDefinition->getClassName();
     }
 
+    public static function getReferenceForClassName(AnnotationFinder $annotationRegistrationServiceFinder, string $className) : string
+    {
+        $reference = $className;
+
+        foreach ($annotationRegistrationServiceFinder->getAnnotationsForClass($className) as $annotation) {
+            if ($annotation instanceof ClassReference) {
+                $reference = $annotation->getReferenceName();
+            }
+        }
+
+        return $reference;
+    }
+
     public static function getSingleAnnotationForClass(AnnotationFinder $annotationFinder, string $className, string $annotationClassName): ?object
     {
         $annotationClasses = $annotationFinder->getAnnotationsForClass($className);

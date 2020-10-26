@@ -6,9 +6,7 @@ namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
 use Ecotone\Modelling\Annotation\Repository;
 use Ecotone\Modelling\InMemoryStandardRepository;
 
-/**
- * @Repository()
- */
+#[Repository]
 class OrderRepository extends InMemoryStandardRepository
 {
 

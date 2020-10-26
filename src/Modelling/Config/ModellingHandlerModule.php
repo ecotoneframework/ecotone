@@ -7,6 +7,7 @@ use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Annotation\Asynchronous;
+use Ecotone\Messaging\Annotation\ClassReference;
 use Ecotone\Messaging\Annotation\EndpointAnnotation;
 use Ecotone\Messaging\Annotation\InputOutputEndpointAnnotation;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
@@ -110,10 +111,7 @@ class ModellingHandlerModule implements AnnotationModule
 
         $aggregateRepositoryReferenceNames = [];
         foreach ($aggregateRepositoryClasses as $aggregateRepositoryClass) {
-            /** @var Repository $aggregateRepositoryAnnotation */
-            $aggregateRepositoryAnnotation = AnnotatedDefinitionReference::getSingleAnnotationForClass($annotationRegistrationService, $aggregateRepositoryClass, Repository::class);
-
-            $aggregateRepositoryReferenceNames[] = $aggregateRepositoryAnnotation->referenceName ? $aggregateRepositoryAnnotation->referenceName : $aggregateRepositoryClass;
+            $aggregateRepositoryReferenceNames[] = AnnotatedDefinitionReference::getReferenceForClassName($annotationRegistrationService, $aggregateRepositoryClass);
         }
 
         return new self(

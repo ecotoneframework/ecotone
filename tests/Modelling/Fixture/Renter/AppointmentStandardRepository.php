@@ -7,12 +7,7 @@ use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\Repository;
 use Ecotone\Modelling\StandardRepository;
 
-/**
- * Class AppointmentCalendar
- * @package Test\Ecotone\Modelling\Fixture\Renter
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Repository()
- */
+#[Repository]
 class AppointmentStandardRepository implements StandardRepository
 {
     /**

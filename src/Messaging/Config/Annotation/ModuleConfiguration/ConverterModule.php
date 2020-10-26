@@ -57,14 +57,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
         $registrations = $annotationRegistrationService->findAnnotatedClasses(MediaTypeConverter::class);
 
         foreach ($registrations as $registration) {
-            $annotations = $annotationRegistrationService->getAnnotationsForClass($registration);
-            $reference = $registration;
-            foreach ($annotations as $annotation) {
-                if ($annotation instanceof ClassReference) {
-                    $reference = $annotation->getReferenceName();
-                }
-            }
-            $converterBuilders[] = ConverterReferenceBuilder::create($reference);
+            $converterBuilders[] = ConverterReferenceBuilder::create(AnnotatedDefinitionReference::getReferenceForClassName($annotationRegistrationService, $registration));
         }
 
         return new self($converterBuilders);

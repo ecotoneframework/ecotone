@@ -5,12 +5,7 @@ namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 use Ecotone\Modelling\Annotation\Repository;
 use Ecotone\Modelling\StandardRepository;
 
-/**
- * Class InMemoryAggregateRepository
- * @package Ecotone\Modelling
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Repository()
- */
+#[Repository]
 class InMemoryStandardRepository implements StandardRepository
 {
     /**

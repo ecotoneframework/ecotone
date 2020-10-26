@@ -9,9 +9,7 @@ use Ecotone\Messaging\Annotation\Transformer;
 
 class TransformerWithMethodParameterExample
 {
-    /**
-     * @Transformer(endpointId="some-id", inputChannelName="inputChannel", outputChannelName="outputChannel", requiredInterceptorNames={"someReference"})
-     */
+    #[Transformer("inputChannel", "some-id", "outputChannel", ["someReference"])]
     public function send(#[Payload] string $message) : string
     {
         return "";

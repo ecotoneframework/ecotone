@@ -11,9 +11,9 @@ class Router extends EndpointAnnotation
 {
     public bool $isResolutionRequired = true;
 
-    public function __construct(string $inputChannelName, bool $isResolutionRequired)
+    public function __construct(string $inputChannelName, string $endpointId, bool $isResolutionRequired)
     {
-        $this->inputChannelName = $inputChannelName;
+        parent::__construct($inputChannelName, $endpointId);
         $this->isResolutionRequired = $isResolutionRequired;
     }
 

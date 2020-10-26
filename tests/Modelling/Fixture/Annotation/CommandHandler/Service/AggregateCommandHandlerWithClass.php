@@ -7,7 +7,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 
 class AggregateCommandHandlerWithClass
 {
-    #[CommandHandler("commandHandler")]
+    #[CommandHandler(endpointId: "commandHandler")]
     public function execute(\stdClass $command) : int
     {
         return 1;

@@ -8,14 +8,7 @@ use Ecotone\Messaging\Annotation\MessageEndpoint;
 
 class InboundChannelAdapterExample
 {
-    /**
-     * @return array
-     * @Scheduled(
-     *     endpointId="run",
-     *     requestChannelName="requestChannel",
-     *     requiredInterceptorNames={"some"}
-     * )
-     */
+    #[Scheduled("requestChannel", "run", ["some"])]
     public function doRun() : array
     {
         return [];

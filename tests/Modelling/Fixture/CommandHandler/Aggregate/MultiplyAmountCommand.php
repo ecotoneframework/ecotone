@@ -13,10 +13,7 @@ class MultiplyAmountCommand
 {
     #[TargetAggregateIdentifier]
     private $orderId;
-    /**
-     * @var int
-     * @TargetAggregateVersion()
-     */
+    #[TargetAggregateVersion]
     private $version;
     /**
      * @var int

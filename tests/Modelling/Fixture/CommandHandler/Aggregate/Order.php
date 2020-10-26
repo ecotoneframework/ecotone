@@ -25,10 +25,7 @@ class Order implements VersionAggregate
      * @var string
      */
     private $shippingAddress;
-    /**
-     * @var int
-     * @Version()
-     */
+    #[Version]
     private $version;
     /**
      * @var string|null

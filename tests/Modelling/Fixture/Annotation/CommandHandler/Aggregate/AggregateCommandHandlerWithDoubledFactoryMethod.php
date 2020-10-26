@@ -10,11 +10,8 @@ use Ecotone\Modelling\Annotation\ReferenceCallInterceptorAnnotation;
 #[Aggregate]
 class AggregateCommandHandlerWithDoubledFactoryMethod
 {
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
 
     #[CommandHandler("sameChannel")]
     public static function factory() : void

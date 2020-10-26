@@ -14,9 +14,7 @@ use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavin
 #[ValidateExecutor]
 class Logger
 {
-    /**
-     * @AggregateIdentifier()
-     */
+    #[AggregateIdentifier]
     private string $loggerId;
 
     private array $logs;

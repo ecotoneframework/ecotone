@@ -12,11 +12,8 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 #[Aggregate]
 class IncorrectEventTypeReturnedExample
 {
-    /**
-     * @AggregateIdentifier()
-     * @var string
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
 
     #[CommandHandler]
     public static function create(CreateIncorrectEventTypeReturnedAggregate $command) : array

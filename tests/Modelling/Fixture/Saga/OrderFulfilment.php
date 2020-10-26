@@ -12,10 +12,7 @@ use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 #[Aggregate]
 class OrderFulfilment
 {
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
+    #[AggregateIdentifier]
     private $orderId;
     /**
      * @var string

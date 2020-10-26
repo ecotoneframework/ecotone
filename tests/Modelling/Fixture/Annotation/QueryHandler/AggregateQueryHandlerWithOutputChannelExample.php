@@ -9,11 +9,8 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 #[Aggregate]
 class AggregateQueryHandlerWithOutputChannelExample
 {
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
 
     #[QueryHandler(endpointId: "some-id", outputChannelName: "outputChannel")]
     public function doStuff(SomeQuery $query) : SomeResult

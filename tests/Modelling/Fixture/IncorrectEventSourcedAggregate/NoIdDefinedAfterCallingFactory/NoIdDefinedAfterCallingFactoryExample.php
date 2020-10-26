@@ -12,10 +12,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 #[Aggregate]
 class NoIdDefinedAfterCallingFactoryExample
 {
-    /**
-     * @AggregateIdentifier()
-     * @var string
-     */
+    #[AggregateIdentifier]
     private $id;
 
     #[CommandHandler]

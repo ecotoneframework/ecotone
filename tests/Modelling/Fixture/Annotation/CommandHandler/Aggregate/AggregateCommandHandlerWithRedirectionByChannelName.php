@@ -10,11 +10,8 @@ use Ecotone\Modelling\Annotation\ReferenceCallInterceptorAnnotation;
 #[Aggregate]
 class AggregateCommandHandlerWithRedirectionByChannelName
 {
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
 
     #[CommandHandler("sameChannel", "factory")]
     public static function factory() : void

@@ -10,11 +10,8 @@ use Ecotone\Modelling\Annotation\ReferenceCallInterceptorAnnotation;
 #[Aggregate]
 class AggregateCommandHandlerWithRedirectionByClass
 {
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
 
     #[CommandHandler(endpointId: "factory")]
     public static function factory(DoStuffCommand $command) : void

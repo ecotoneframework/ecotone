@@ -15,11 +15,8 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 #[Aggregate]
 class AggregateQueryHandlerExample
 {
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
 
     #[QueryHandler(endpointId: "some-id")]
     public function doStuff(SomeQuery $query) : SomeResult

@@ -12,11 +12,8 @@ use Ecotone\Modelling\Annotation\NotUniqueHandler;
 #[Aggregate]
 class MultiMethodAggregateCommandHandlerExample
 {
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
 
     #[CommandHandler("register", "1")]
     #[NotUniqueHandler]

@@ -13,10 +13,7 @@ class Appointment
 {
     use WithAggregateEvents;
 
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
+    #[AggregateIdentifier]
     private $appointmentId;
     /**
      * @var int

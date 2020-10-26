@@ -12,9 +12,7 @@ use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSav
 #[ValidateExecutor]
 class Logger
 {
-    /**
-     * @AggregateIdentifier()
-     */
+    #[AggregateIdentifier]
     private string $loggerId;
 
     private array $logs;

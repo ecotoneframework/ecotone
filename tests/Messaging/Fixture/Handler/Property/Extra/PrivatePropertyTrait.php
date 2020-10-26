@@ -6,8 +6,6 @@ use Ecotone\Modelling\Annotation\AggregateIdentifier;
 
 trait PrivatePropertyTrait
 {
-    /**
-     * @AggregateIdentifier()
-     */
+    #[AggregateIdentifier]
     private ?ExtraObject $property;
 }

@@ -1,19 +1,24 @@
 <?php
 
 namespace Ecotone\Modelling\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
 
-/**
- * Class AggregateIdentifier
- * @package Ecotone\Modelling\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- * @Target({"PROPERTY"})
- */
+use Ecotone\Messaging\Support\Assert;
+
+#[\Attribute(\Attribute::TARGET_PROPERTY)]
 class AggregateIdentifier
 {
     /**
      * Name of the routing key property on messages that provides the identifier
      */
     public string $targetIdentifierName;
+
+    public function __construct(string $targetIdentifierName = "")
+    {
+        $this->targetIdentifierName = $targetIdentifierName;
+    }
+
+    public function getTargetIdentifierName(): string
+    {
+        return $this->targetIdentifierName;
+    }
 }

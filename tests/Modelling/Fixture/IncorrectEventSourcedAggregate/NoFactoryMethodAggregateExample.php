@@ -10,11 +10,8 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 #[Aggregate]
 class NoFactoryMethodAggregateExample
 {
-    /**
-     * @AggregateIdentifier()
-     * @var string
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
 
     #[CommandHandler]
     public function doSomething(iterable $events) : void {}

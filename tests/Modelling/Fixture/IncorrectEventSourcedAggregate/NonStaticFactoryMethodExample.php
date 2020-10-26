@@ -11,11 +11,8 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 #[Aggregate]
 class NonStaticFactoryMethodExample
 {
-    /**
-     * @AggregateIdentifier()
-     * @var string
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
 
     #[CommandHandler]
     public function doSomething() : void {}

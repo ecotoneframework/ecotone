@@ -11,10 +11,7 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 #[Aggregate]
 class Ticket
 {
-    /**
-     * @AggregateIdentifier()
-     * @var string
-     */
+    #[AggregateIdentifier]
     private $ticketId;
     /**
      * @var string

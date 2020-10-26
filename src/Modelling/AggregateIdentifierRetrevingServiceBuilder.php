@@ -116,7 +116,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
         }
 
         if (empty($aggregatePayloadIdentifiersMapping)) {
-            throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifiers defined. How you forgot to mark @AggregateIdentifier?");
+            throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifiers defined. How you forgot to mark #[AggregateIdentifier]?");
         }
 
         $messageProperties = [];

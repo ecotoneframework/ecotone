@@ -15,9 +15,7 @@ class ShopCalculator
 {
     use WithAggregateEvents;
 
-    /**
-     * @AggregateIdentifier()
-     */
+    #[AggregateIdentifier]
     private string $shopId;
 
     private int $margin;

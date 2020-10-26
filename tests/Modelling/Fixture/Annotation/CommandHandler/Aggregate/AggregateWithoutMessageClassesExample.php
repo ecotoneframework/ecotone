@@ -11,11 +11,8 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 #[Aggregate]
 class AggregateWithoutMessageClassesExample
 {
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $id;
+    #[AggregateIdentifier]
+    private string $id;
     private $something;
 
     #[CommandHandler("createAggregate")]

@@ -9,16 +9,10 @@ use Ecotone\Modelling\Annotation\CommandHandler;
 #[Aggregate]
 class Article
 {
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $author;
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $title;
+    #[AggregateIdentifier]
+    private string $author;
+    #[AggregateIdentifier]
+    private string $title;
     /**
      * @var string
      */

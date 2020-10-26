@@ -15,11 +15,8 @@ class Order implements VersionAggregate
 {
     use WithAggregateEvents;
 
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
-    private $orderId;
+    #[AggregateIdentifier]
+    private string $orderId;
     /**
      * @var int
      */

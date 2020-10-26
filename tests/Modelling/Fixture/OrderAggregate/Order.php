@@ -18,10 +18,7 @@ class Order
 {
     use WithAggregateEvents;
 
-    /**
-     * @var string
-     * @AggregateIdentifier()
-     */
+    #[AggregateIdentifier]
     private $orderId;
 
     private $isNotifiedCount = 0;

@@ -11,10 +11,7 @@ use Ecotone\Modelling\Annotation\TargetAggregateIdentifier;
  */
 class FinishOrderCommand
 {
-    /**
-     * @var string
-     * @TargetAggregateIdentifier()
-     */
+    #[TargetAggregateIdentifier]
     private $orderId;
 
     /**

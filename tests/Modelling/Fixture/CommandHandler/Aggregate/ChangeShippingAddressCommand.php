@@ -11,10 +11,7 @@ use Ecotone\Modelling\Annotation\TargetAggregateIdentifier;
  */
 class ChangeShippingAddressCommand implements RegisterWithShipping
 {
-    /**
-     * @var string
-     * @TargetAggregateIdentifier()
-     */
+    #[TargetAggregateIdentifier]
     private $orderId;
     /**
      * @var int

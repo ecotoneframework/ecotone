@@ -11,29 +11,13 @@ use Ecotone\Modelling\Annotation\TargetAggregateIdentifier;
  */
 class CloseArticleCommand
 {
-    /**
-     * @var string
-     * @TargetAggregateIdentifier("author")
-     */
+    #[TargetAggregateIdentifier("author")]
     private $authorName;
-    /**
-     * @var string
-     * @TargetAggregateIdentifier(identifierName="title")
-     */
+    #[TargetAggregateIdentifier("title")]
     private $titleName;
-    /**
-     * for testing purposes
-     *
-     * @var string
-     * @TargetAggregateIdentifier(identifierName="additionalUnusedIdentifier")
-     */
+    #[TargetAggregateIdentifier("additionalUnusedIdentifier")]
     private $additionalUnusedIdentifier;
-    /**
-     * for testing purposes
-     *
-     * @var bool
-     * @TargetAggregateIdentifier(identifierName="isPublished")
-     */
+    #[TargetAggregateIdentifier("isPublished")]
     private $isPublished;
 
     /**

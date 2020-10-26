@@ -11,10 +11,7 @@ use Ecotone\Modelling\Annotation\TargetAggregateIdentifier;
  */
 class GetOrderAmountQuery
 {
-    /**
-     * @var int
-     * @TargetAggregateIdentifier()
-     */
+    #[TargetAggregateIdentifier]
     private $orderId;
 
     /**

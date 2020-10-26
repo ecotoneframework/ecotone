@@ -2,16 +2,18 @@
 
 namespace Ecotone\Modelling\Annotation;
 
-use Doctrine\Common\Annotations\Annotation\Target;
-
-/**
- * Class TargetAggregateIdentifier
- * @package Ecotone\Modelling\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- * @Target({"PROPERTY"})
- */
+#[\Attribute(\Attribute::TARGET_PROPERTY)]
 class TargetAggregateIdentifier
 {
     public string $identifierName = "";
+
+    public function __construct(string $identifierName = "")
+    {
+        $this->identifierName = $identifierName;
+    }
+
+    public function getIdentifierName(): string
+    {
+        return $this->identifierName;
+    }
 }

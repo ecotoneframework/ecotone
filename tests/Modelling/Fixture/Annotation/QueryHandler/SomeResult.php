@@ -11,9 +11,6 @@ use Ecotone\Modelling\Annotation\TargetAggregateIdentifier;
  */
 class SomeResult
 {
-    /**
-     * @var string
-     * @TargetAggregateIdentifier()
-     */
+    #[TargetAggregateIdentifier]
     private $aggregateId;
 }

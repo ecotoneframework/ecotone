@@ -10,15 +10,9 @@ use Ecotone\Modelling\Annotation\TargetAggregateIdentifier;
  */
 class PublishArticleCommand
 {
-    /**
-     * @var string
-     * @TargetAggregateIdentifier()
-     */
+    #[TargetAggregateIdentifier]
     private $author;
-    /**
-     * @var string
-     * @TargetAggregateIdentifier()
-     */
+    #[TargetAggregateIdentifier]
     private $title;
     /**
      * @var string

@@ -26,10 +26,7 @@ trait WithAggregateEvents
         $this->recordedEvents[] = $event;
     }
 
-    /**
-     * @return object[]
-     * @AggregateEvents()
-     */
+    #[AggregateEvents]
     public function getRecordedEvents() : array
     {
         if (!$this->recordedEvents) {

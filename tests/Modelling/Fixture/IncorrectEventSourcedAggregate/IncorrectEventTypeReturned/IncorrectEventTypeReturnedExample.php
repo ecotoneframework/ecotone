@@ -24,9 +24,7 @@ class IncorrectEventTypeReturnedExample
         return [["id" => 1]];
     }
 
-    /**
-     * @AggregateFactory()
-     */
+    #[AggregateFactory]
     public static function factory(array $events) : self
     {
         $noIdDefinedAfterCallingFactoryExample = new self();

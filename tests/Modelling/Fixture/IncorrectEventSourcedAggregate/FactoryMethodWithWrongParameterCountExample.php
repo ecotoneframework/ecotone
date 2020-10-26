@@ -20,8 +20,6 @@ class FactoryMethodWithWrongParameterCountExample
     #[CommandHandler]
     public function doSomething() : void {}
 
-    /**
-     * @AggregateFactory()
-     */
+    #[AggregateFactory]
     public static function factory(iterable $object, array $metadata){}
 }

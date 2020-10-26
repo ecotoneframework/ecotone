@@ -40,9 +40,9 @@ class Logger
     }
 
     /**
-     * @AggregateFactory()
      * @var EventWasLogged[] $events
      */
+    #[AggregateFactory]
     public static function restore(array $events) : self
     {
         return new self($events[0]->getLoggerId(), $events[0]->getData()['executorId'], $events);

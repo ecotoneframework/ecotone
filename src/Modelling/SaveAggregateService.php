@@ -13,6 +13,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Annotation\AggregateFactory;
 use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 
 /**
@@ -92,7 +93,7 @@ class SaveAggregateService
                     : null;
 
             if (!$id) {
-                throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. Please provide implementation for @AggregateFactory, which assigns identifier to the aggregate.");
+                throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. Please provide implementation for #[AggregateFactory], which assigns identifier to the aggregate.");
             }
 
             $aggregateIds[$aggregateIdName] = $id;

@@ -20,8 +20,6 @@ class NonStaticFactoryMethodExample
     #[CommandHandler]
     public function doSomething() : void {}
 
-    /**
-     * @AggregateFactory()
-     */
+    #[AggregateFactory]
     public function factory(iterable $events){}
 }

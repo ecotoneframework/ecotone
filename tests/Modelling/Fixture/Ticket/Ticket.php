@@ -27,9 +27,7 @@ class Ticket
         return [new TicketWasStartedEvent($command->getTicketId())];
     }
 
-    /**
-     * @AggregateFactory()
-     */
+    #[AggregateFactory]
     public static function createFrom(array $events): self
     {
         $self = new self();

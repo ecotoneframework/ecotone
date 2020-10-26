@@ -24,9 +24,7 @@ class NoIdDefinedAfterCallingFactoryExample
         return [new \stdClass()];
     }
 
-    /**
-     * @AggregateFactory()
-     */
+    #[AggregateFactory]
     public static function factory(array $events) : self
     {
         return new self();

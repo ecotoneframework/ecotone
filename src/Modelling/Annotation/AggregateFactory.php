@@ -3,12 +3,7 @@
 
 namespace Ecotone\Modelling\Annotation;
 
-/**
- * Class AggregateFactory
- * @package Ecotone\Modelling\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- */
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class AggregateFactory
 {
 

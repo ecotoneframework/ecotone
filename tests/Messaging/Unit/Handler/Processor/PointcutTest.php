@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
+use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Annotation\ClassReference;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Annotation\Interceptor\Around;
@@ -69,12 +70,12 @@ class PointcutTest extends TestCase
     public function test_targeting_on_method_annotation()
     {
         $this->itShouldCut(
-            "@(" . Around::class . ")",
+            Around::class,
             InterfaceToCall::create(AspectWithoutMethodInterceptorExample::class, "doSomething")
         );
 
         $this->itShouldNotCut(
-            "@(" . ClassReference::class . ")",
+            ClassReference::class,
             InterfaceToCall::create(AspectWithoutMethodInterceptorExample::class, "doSomething")
         );
     }
@@ -82,12 +83,12 @@ class PointcutTest extends TestCase
     public function test_targeting_on_class_annotation()
     {
         $this->itShouldNotCut(
-            "@(" . Around::class . ")",
+            Around::class,
             InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
 
         $this->itShouldCut(
-            "@(" . ClassReference::class . ")",
+            ClassReference::class,
             InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
     }
@@ -118,9 +119,9 @@ class PointcutTest extends TestCase
 
     public function test_targeting_on_endpoint_annotations()
     {
-        $this->assertTrue(Pointcut::createWith("@(" . \stdClass::class . ")")->doesItCut(
+        $this->assertTrue(Pointcut::createWith(AsynchronousRunningEndpoint::class)->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
-                [new \stdClass()]
+                [new AsynchronousRunningEndpoint()]
             )
         );
     }

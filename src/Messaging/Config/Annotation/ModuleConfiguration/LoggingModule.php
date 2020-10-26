@@ -52,7 +52,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 InterfaceToCall::create(LoggingInterceptor::class, "logBefore"),
                 LoggingHandlerBuilder::createForBefore(),
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
-                "@(" .  LogBefore::class . ")"
+                LogBefore::class
             )
         );
         $configuration->registerAfterMethodInterceptor(
@@ -61,7 +61,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 InterfaceToCall::create(LoggingInterceptor::class, "logAfter"),
                 LoggingHandlerBuilder::createForAfter(),
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
-                "@(" . LogAfter::class . ")"
+                LogAfter::class
             )
         );
         $configuration->registerAroundMethodInterceptor(
@@ -70,7 +70,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 new ExceptionLoggingInterceptorBuilder(),
                 "logException",
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
-                "@(" . LogError::class . ")"
+                LogError::class
             )
         );
     }

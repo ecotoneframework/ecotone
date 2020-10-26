@@ -58,7 +58,7 @@ class LazyEventBusConfiguration implements AnnotationModule
                  new LazyEventBusAroundInterceptorBuilder($inMemoryEventStore),
                     "publish",
                     Precedence::LAZY_EVENT_PUBLICATION_PRECEDENCE,
-                    "@(" . LazyEventPublishing::class . ")" . "||" . "@(" . AsynchronousRunningEndpoint::class . ")"
+                    LazyEventPublishing::class . "||" . AsynchronousRunningEndpoint::class
                 )
             );
     }

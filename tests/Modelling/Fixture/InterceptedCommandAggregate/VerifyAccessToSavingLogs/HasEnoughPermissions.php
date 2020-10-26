@@ -9,7 +9,7 @@ use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\Logger;
 
 class HasEnoughPermissions
 {
-    #[Around(pointcut: "@(" . ValidateExecutor::class . ")")]
+    #[Around(pointcut: ValidateExecutor::class)]
     public function validate(MethodInvocation $methodInvocation, ?Logger $logger)
     {
         if (is_null($logger)) {

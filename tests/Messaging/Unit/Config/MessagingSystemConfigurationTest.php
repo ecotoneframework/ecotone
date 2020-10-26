@@ -264,7 +264,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 InterfaceToCall::create(CalculatingService::class, "sum"),
                 ServiceActivatorBuilder::createWithDirectReference($calculatingService, "sum"),
                 1,
-                "@(" . AsynchronousRunningEndpoint::class . ")"
+                AsynchronousRunningEndpoint::class
             ))
             ->registerPollingMetadata(PollingMetadata::create("asyncChannel")->setExecutionAmountLimit(1))
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("asyncChannel"))

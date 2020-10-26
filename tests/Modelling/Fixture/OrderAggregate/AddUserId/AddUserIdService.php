@@ -7,7 +7,7 @@ use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
 
 class AddUserIdService
 {
-    #[Before(0, "@(" . AddUserId::class . ")", true)]
+    #[Before(0, AddUserId::class, true)]
     public function add() : array
     {
         return ["userId" => 1];

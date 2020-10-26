@@ -51,7 +51,7 @@ class EndpointHeadersInterceptorConfiguration extends NoExternalConfigurationMod
                 $interfaceToCall,
                 TransformerBuilder::createWithDirectObject(new EndpointHeadersInterceptor(), "addMetadata"),
                 Precedence::ENDPOINT_HEADERS_PRECEDENCE,
-                "@(" . ExpireAfter::class . ")||(@" . Priority::class . ")||@(" . Delayed::class . ")||@(" . AddHeader::class . ")||@(" . RemoveHeader::class . ")"
+                ExpireAfter::class . "||" . Priority::class . "||" . Delayed::class . "||" . AddHeader::class . "||" . RemoveHeader::class
             )
         );
         $configuration->registerRelatedInterfaces([$interfaceToCall]);

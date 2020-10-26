@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
@@ -57,9 +58,30 @@ class Pointcut
         $multipleExpression = explode("||", $this->expression);
 
         foreach ($multipleExpression as $expression) {
-            if ($this->isRelatedClass($expression, $interfaceToCall)) {
-                return true;
+            if (TypeDescriptor::isItTypeOfExistingClassOrInterface($expression)) {
+                $classDefinition = ClassDefinition::createFor(TypeDescriptor::create($expression));
+                if ($classDefinition->isAnnotation()) {
+                    $annotationToCheck = $classDefinition->getClassType();
+
+                    foreach ($endpointAnnotations as $endpointAnnotation) {
+                        $endpointType = TypeDescriptor::createFromVariable($endpointAnnotation);
+
+                        if ($endpointType->equals($annotationToCheck)) {
+                            return true;
+                        }
+                    }
+
+                    if ($interfaceToCall->hasMethodAnnotation($annotationToCheck)
+                        || $interfaceToCall->hasClassAnnotation($annotationToCheck)) {
+                        return true;
+                    }
+                }
+
+                if ($interfaceToCall->getInterfaceType()->isCompatibleWith($classDefinition->getClassType())) {
+                    return true;
+                }
             }
+
             if (strpos($expression, "::") !== false) {
                 list($class, $method) = explode("::", $expression);
 
@@ -71,23 +93,7 @@ class Pointcut
                 }
             }
 
-            if (strpos($expression, "@(") !== false) {
-                $annotationToCheck = str_replace(["@(", ")"], "", $expression);
-                $annotationToCheck = TypeDescriptor::create($annotationToCheck);
-
-                foreach ($endpointAnnotations as $endpointAnnotation) {
-                    $endpointType = TypeDescriptor::createFromVariable($endpointAnnotation);
-
-                    if ($endpointType->equals($annotationToCheck)) {
-                        return true;
-                    }
-                }
-
-                if ($interfaceToCall->hasMethodAnnotation($annotationToCheck)
-                    || $interfaceToCall->hasClassAnnotation($annotationToCheck)) {
-                    return true;
-                }
-            }else if (strpos($expression, "*") !== false) {
+            if (strpos($expression, "*") !== false) {
                 $expression = "#" . str_replace("*", ".*", $expression) . "#";
                 $expression = str_replace("\\", "\\\\", $expression);
 

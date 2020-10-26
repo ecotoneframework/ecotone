@@ -9,7 +9,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class Router extends EndpointAnnotation
 {
-    public bool $isResolutionRequired = true;
+    private bool $isResolutionRequired = true;
 
     public function __construct(string $inputChannelName, string $endpointId, bool $isResolutionRequired)
     {

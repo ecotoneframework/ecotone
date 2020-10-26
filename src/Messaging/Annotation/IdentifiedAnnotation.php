@@ -8,7 +8,7 @@ use Ramsey\Uuid\Uuid;
 
 class IdentifiedAnnotation
 {
-    public string $endpointId = "";
+    private string $endpointId = "";
     private bool $isGenerated = false;
 
     public function __construct(string $endpointId = "")

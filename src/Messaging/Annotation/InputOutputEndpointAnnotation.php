@@ -5,8 +5,8 @@ namespace Ecotone\Messaging\Annotation;
 
 abstract class InputOutputEndpointAnnotation extends EndpointAnnotation
 {
-    public string $outputChannelName;
-    public array $requiredInterceptorNames;
+    private string $outputChannelName;
+    private array $requiredInterceptorNames;
 
     public function __construct(string $inputChannelName = "", string $endpointId = "", string $outputChannelName = "", array $requiredInterceptorNames = [])
     {

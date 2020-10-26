@@ -9,7 +9,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class ServiceActivator extends InputOutputEndpointAnnotation
 {
-    public bool $requiresReply;
+    private bool $requiresReply;
 
     public function __construct(string $inputChannelName, string $endpointId = "", string $outputChannelName = "", bool $requiresReply = false, array $requiredInterceptorNames = [])
     {

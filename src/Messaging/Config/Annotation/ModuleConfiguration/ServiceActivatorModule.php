@@ -25,11 +25,11 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotationRegistration), $annotationRegistration->getMethodName())
-            ->withEndpointId($annotation->endpointId)
-            ->withRequiredReply($annotation->requiresReply)
-            ->withOutputMessageChannel($annotation->outputChannelName)
-            ->withInputChannelName($annotation->inputChannelName)
-            ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
+            ->withEndpointId($annotation->getEndpointId())
+            ->withRequiredReply($annotation->isRequiresReply())
+            ->withOutputMessageChannel($annotation->getOutputChannelName())
+            ->withInputChannelName($annotation->getInputChannelName())
+            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames());
     }
 
     /**

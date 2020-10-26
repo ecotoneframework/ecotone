@@ -12,7 +12,7 @@ use Ecotone\Messaging\Config\ConfigurationException;
  */
 abstract class EndpointAnnotation extends IdentifiedAnnotation
 {
-    public string $inputChannelName = "";
+    private string $inputChannelName = "";
 
     public function __construct(string $inputChannelName = "", string $endpointId = "")
     {

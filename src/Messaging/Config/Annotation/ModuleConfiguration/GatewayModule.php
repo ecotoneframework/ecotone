@@ -64,14 +64,14 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                 }
             }
 
-            $gatewayProxyBuilder = GatewayProxyBuilder::create($referenceName, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
-                ->withErrorChannel($annotation->errorChannel)
+            $gatewayProxyBuilder = GatewayProxyBuilder::create($referenceName, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->getRequestChannel())
+                ->withErrorChannel($annotation->getErrorChannel())
                 ->withParameterConverters($parameterConverters)
-                ->withRequiredInterceptorNames($annotation->requiredInterceptorNames)
-                ->withReplyMillisecondTimeout($annotation->replyTimeoutInMilliseconds);
+                ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames())
+                ->withReplyMillisecondTimeout($annotation->getReplyTimeoutInMilliseconds());
 
-            if ($annotation->replyContentType) {
-                $gatewayProxyBuilder = $gatewayProxyBuilder->withReplyContentType($annotation->replyContentType);
+            if ($annotation->getReplyContentType()) {
+                $gatewayProxyBuilder = $gatewayProxyBuilder->withReplyContentType($annotation->getReplyContentType());
             }
 
             $gatewayBuilders[] = $gatewayProxyBuilder;

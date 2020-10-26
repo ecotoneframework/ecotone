@@ -10,11 +10,11 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class MessageGateway
 {
-    public string $requestChannel;
-    public string $errorChannel;
-    public int $replyTimeoutInMilliseconds;
-    public array $requiredInterceptorNames;
-    public ?string $replyContentType;
+    private string $requestChannel;
+    private string $errorChannel;
+    private int $replyTimeoutInMilliseconds;
+    private array $requiredInterceptorNames;
+    private ?string $replyContentType;
 
     public function __construct(string $requestChannel, string $errorChannel = "", int $replyTimeoutInMilliseconds = GatewayProxyBuilder::DEFAULT_REPLY_MILLISECONDS_TIMEOUT, array $requiredInterceptorNames = [], ?string $replyContentType = null)
     {

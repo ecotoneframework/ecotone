@@ -28,10 +28,10 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
             AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
             $annotationRegistration->getMethodName()
         )
-            ->withEndpointId($annotation->endpointId)
-            ->withInputChannelName($annotation->inputChannelName)
-            ->withOutputMessageChannel($annotation->outputChannelName)
-            ->withRequiredInterceptorNames($annotation->requiredInterceptorNames);
+            ->withEndpointId($annotation->getEndpointId())
+            ->withInputChannelName($annotation->getInputChannelName())
+            ->withOutputMessageChannel($annotation->getOutputChannelName())
+            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames());
     }
 
     /**

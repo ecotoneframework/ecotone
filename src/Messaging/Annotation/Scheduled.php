@@ -9,8 +9,8 @@ use Ecotone\Messaging\Support\Assert;
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class Scheduled extends ChannelAdapter
 {
-    public string $requestChannelName;
-    public array $requiredInterceptorNames = [];
+    private string $requestChannelName;
+    private array $requiredInterceptorNames;
 
     public function __construct(string $requestChannelName, string $endpointId = "", array $requiredInterceptorNames = [])
     {

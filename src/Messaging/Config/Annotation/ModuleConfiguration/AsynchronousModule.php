@@ -62,7 +62,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
                         }
                     }
 
-                    $registeredAsyncEndpoints[$inputChannel][] = $annotationForMethod->endpointId;
+                    $registeredAsyncEndpoints[$inputChannel][] = $annotationForMethod->getEndpointId();
                     unset($endpoints[$key]);
                 }
             }
@@ -85,7 +85,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
                         }
                     }
 
-                    $registeredAsyncEndpoints[$asyncClass->getChannelName()][] = $annotationForMethod->endpointId;
+                    $registeredAsyncEndpoints[$asyncClass->getChannelName()][] = $annotationForMethod->getEndpointId();
                 }
             }
         }

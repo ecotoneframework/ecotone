@@ -2,7 +2,5 @@
 
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId;
 
-/**
- * @Annotation
- */
+#[\Attribute]
 class AddUserId {}

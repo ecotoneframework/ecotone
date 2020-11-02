@@ -56,7 +56,7 @@ class ServiceExpectingOneArgument
      * @param $value
      * @return \stdClass[]|array
      */
-    public function withCollectionAndArrayReturnType($value)
+    public function withCollectionAndArrayReturnType($value) : array
     {
         return $value;
     }

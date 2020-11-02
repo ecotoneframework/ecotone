@@ -7,14 +7,10 @@ use Ecotone\Messaging\Annotation\MessageGateway;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 use Ecotone\Messaging\Transaction\Transactional;
 
-/**
- * @Transactional({"transactionFactory1"})
- */
+#[Transactional(["transactionFactory1"])]
 interface TransactionalInterceptorOnGatewayClassAndMethodExample
 {
-    /**
-     * @Transactional({"transactionFactory2"})
-     */
+    #[Transactional(["transactionFactory2"])]
     #[MessageGateway("requestChannel")]
     public function invoke() : void;
 }

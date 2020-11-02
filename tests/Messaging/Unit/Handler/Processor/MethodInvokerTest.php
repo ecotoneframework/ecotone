@@ -378,11 +378,11 @@ class MethodInvokerTest extends MessagingTest
                 $referenceSearchService
             );
 
-        $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload("test")->build());
+        $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload(["test"])->build());
 
         $this->assertMessages(
-            MessageBuilder::withPayload("test")
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter("string"))
+            MessageBuilder::withPayload(["test"])
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter("array"))
                 ->build(),
             $replyMessage
         );

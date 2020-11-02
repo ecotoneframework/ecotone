@@ -9,9 +9,7 @@ use Ecotone\Messaging\Transaction\Transactional;
 
 interface TransactionalInterceptorOnGatewayMethodExample
 {
-    /**
-     * @Transactional({"transactionFactory"})
-     */
+    #[Transactional(["transactionFactory"])]
     #[MessageGateway("requestChannel")]
     public function invoke() : void;
 }

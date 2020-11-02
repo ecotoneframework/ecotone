@@ -32,11 +32,9 @@ class ShopCalculator
         return new self($registerShop["shopId"], $registerShop["margin"]);
     }
 
-    /**
-     * @ExchangeProductForPrice()
-     * @AddFranchise()
-     */
     #[QueryHandler("shop.calculatePrice", outputChannelName: "addVat")]
+    #[AddFranchise]
+    #[ExchangeProductForPrice]
     public function calculatePriceFor(array $query): int
     {
         return $query["productPrice"] + $this->margin;

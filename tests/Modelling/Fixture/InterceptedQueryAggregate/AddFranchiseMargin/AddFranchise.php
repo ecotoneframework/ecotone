@@ -3,9 +3,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin;
 
-/**
- * @Annotation
- */
+#[\Attribute]
 class AddFranchise
 {
 

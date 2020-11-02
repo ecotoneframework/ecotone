@@ -8,16 +8,10 @@ use Ecotone\Messaging\Annotation\ServiceActivator;
 
 class InboundCalculation
 {
-    /**
-     * @return int
-     * @Scheduled(
-     *     endpointId="inboundCalculator",
-     *     requestChannelName="calculateForInbound"
-     * )
-     * @BeforeMultiplyCalculation(amount=3)
-     * @AroundSumCalculation(amount=2)
-     * @AfterMultiplyCalculation(amount=10)
-     */
+    #[Scheduled("calculateForInbound", "inboundCalculator")]
+    #[BeforeMultiplyCalculation(3)]
+    #[AfterMultiplyCalculation(10)]
+    #[AroundSumCalculation(2)]
     public function calculateFor() : int
     {
         return 5;

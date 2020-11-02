@@ -264,35 +264,6 @@ class InterfaceToCallTest extends TestCase
     }
 
     /**
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     * @throws InvalidArgumentException
-     */
-    public function test_guessing_parameter_from_interface_inherit_doc_with_different_parameter_name()
-    {
-        $interfaceToCall = InterfaceToCall::create(
-            OnlineShop::class, "buy"
-        );
-
-        $this->assertEquals(
-            InterfaceParameter::createNullable("productId", TypeDescriptor::create(stdClass::class . "|" . TypeDescriptor::OBJECT)),
-            $interfaceToCall->getParameterWithName("productId")
-        );
-    }
-
-    public function test_retrieving_annotations_from_inherit_doc()
-    {
-        $interfaceToCall = InterfaceToCall::create(
-            OnlineShop::class, "buy"
-        );
-
-        $this->assertEquals(
-            [new ExampleTestAnnotation()],
-            $interfaceToCall->getMethodAnnotations()
-        );
-    }
-
-    /**
      * @throws MessagingException
      * @throws InvalidArgumentException
      */
@@ -352,23 +323,6 @@ class InterfaceToCallTest extends TestCase
         );
     }
 
-    /**
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     * @throws InvalidArgumentException
-     */
-    public function test_guessing_parameter_from_abstract_class_inherit_doc()
-    {
-        $interfaceToCall = InterfaceToCall::create(
-            OnlineShop::class, "findGames"
-        );
-
-        $this->assertEquals(
-            InterfaceParameter::createNullable("gameId", TypeDescriptor::create(TypeDescriptor::STRING)),
-            $interfaceToCall->getParameterWithName("gameId")
-        );
-    }
-
     public function test_resolving_return_type_type_hint_from_trait_in_different_namespace()
     {
         $interfaceToCall = InterfaceToCall::create(
@@ -415,19 +369,6 @@ class InterfaceToCallTest extends TestCase
             TypeDescriptor::create(SuperAdmin::class),
             $interfaceToCall->getReturnType()
         );
-    }
-
-    /**
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
-    public function test_guessing_return_type_based_on_inherit_doc_annotation()
-    {
-        $interfaceToCall = InterfaceToCall::create(
-            OnlineShop::class, "findGames"
-        );
-
-        $this->assertTrue($interfaceToCall->doesItReturnIterable());
     }
 
     /**
@@ -526,22 +467,10 @@ class InterfaceToCallTest extends TestCase
      * @throws TypeDefinitionException
      * @throws MessagingException
      */
-    public function test_resolving_sub_class_for_static_type_hint_return_type()
-    {
-        $this->assertEquals(
-            TypeDescriptor::create(SuperAdmin::class),
-            (InterfaceToCall::create(SuperAdmin::class, "getSuperAdmin"))->getReturnType()
-        );
-    }
-
-    /**
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
     public function test_resolving_declaring_class_for_self_type_hint_declared_in_interface()
     {
         $this->assertEquals(
-            TypeDescriptor::create(Admin::class),
+            TypeDescriptor::createAnythingType(),
             (InterfaceToCall::create(SuperAdmin::class, "getAdmin"))->getReturnType()
         );
     }

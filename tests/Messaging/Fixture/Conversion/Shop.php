@@ -10,9 +10,6 @@ namespace Test\Ecotone\Messaging\Fixture\Conversion;
  */
 interface Shop
 {
-    /**
-     * @param \stdClass|object $product
-     * @ExampleTestAnnotation
-     */
+    #[ExampleTestAnnotation]
     public function buy($product) : void;
 }

@@ -17,13 +17,10 @@ class OrderPropertyExample
 
     public $extendedName;
 
-    /**
-     * @PropertyAnnotationExample()
-     */
+    #[PropertyAnnotationExample]
     protected static ?string $reference;
-    /**
-     * @PropertyAnnotationExample()
-     */
+
+    #[PropertyAnnotationExample]
     private ?SomeClass $someClass;
 
     public function doSomething() : void

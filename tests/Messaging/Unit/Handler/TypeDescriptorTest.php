@@ -46,11 +46,6 @@ class TypeDescriptorTest extends TestCase
             TypeDescriptor::NULL,
             ($typeDescription = TypeDescriptor::create("null"))->getTypeHint()
         );
-
-        $this->assertEquals(
-            TypeDescriptor::NULL,
-            ($typeDescription = TypeDescriptor::createWithDocBlock(TypeDescriptor::ANYTHING, "null"))->getTypeHint()
-        );
     }
 
     public function test_guessing_unknown_type_if_only_empty_strings_passed()
@@ -244,22 +239,10 @@ class TypeDescriptorTest extends TestCase
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function test_choosing_docblock_type_if_declaration_is_unknown()
+    public function test_ignoring_docblock_if_not_property_is_not_iterable()
     {
         $this->assertEquals(
-            \stdClass::class . "|" . \Countable::class,
-            (string)TypeDescriptor::createWithDocBlock(TypeDescriptor::ANYTHING, "\stdClass|\Countable")
-        );
-    }
-
-    /**
-     * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function test_choosing_doc_block_type_if_type_hint_is_unknown()
-    {
-        $this->assertEquals(
-            TypeDescriptor::ARRAY,
+            TypeDescriptor::ANYTHING,
             TypeDescriptor::createWithDocBlock(TypeDescriptor::ANYTHING,  TypeDescriptor::ARRAY)->getTypeHint()
         );
     }

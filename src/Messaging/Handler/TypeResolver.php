@@ -143,17 +143,6 @@ class TypeResolver
         if ($analyzedClass->getName() !== $declaringClass->getName()) {
             return self::getMethodOwnerClass($declaringClass, $methodName);
         }
-        if (self::isInheritDocComment($methodReflection->getDocComment())) {
-            if ($analyzedClass->getParentClass() && $analyzedClass->getParentClass()->hasMethod($methodReflection->getName())) {
-                return self::getMethodOwnerClass($analyzedClass->getParentClass(), $methodName);
-            }
-            foreach ($analyzedClass->getInterfaceNames() as $interfaceName) {
-                if (method_exists($interfaceName, $methodReflection->getName())) {
-                    $reflectionClass = new \ReflectionClass($interfaceName);
-                    return self::getMethodOwnerClass($reflectionClass, $methodName);
-                }
-            }
-        }
         foreach ($analyzedClass->getTraits() as $trait) {
             if ($trait->hasMethod($methodReflection->getName()) && !self::wasTraitOverwritten($methodReflection, $trait)) {
                 return self::getMethodOwnerClass($trait, $methodName);
@@ -176,27 +165,7 @@ class TypeResolver
             return "";
         }
 
-        if (preg_match("/@inheritDoc/", $docComment)) {
-            if ($reflectionClass->getParentClass() && $reflectionClass->getParentClass()->hasMethod($methodReflection->getName())) {
-                $docComment = $reflectionClass->getParentClass()->getMethod($methodReflection->getName())->getDocComment();
-            }
-            foreach ($reflectionClass->getInterfaceNames() as $interfaceName) {
-                if (method_exists($interfaceName, $methodReflection->getName())) {
-                    $docComment = (new \ReflectionMethod($interfaceName, $methodReflection->getName()))->getDocComment();
-                }
-            }
-        }
-
         return $docComment;
-    }
-
-    /**
-     * @param string $docBlock
-     * @return bool
-     */
-    private static function isInheritDocComment(string $docBlock) : bool
-    {
-        return preg_match("/@inheritDoc/", $docBlock);
     }
 
     private function isIgnoringDocblockTypeHints(\ReflectionMethod $methodReflection) : bool

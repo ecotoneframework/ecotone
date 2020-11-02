@@ -5,12 +5,7 @@ namespace Ecotone\Messaging\Transaction;
 
 use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
 
-/**
- * Class Transactional
- * @package Ecotone\Messaging\Transaction
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- * @Annotation
- */
+#[\Attribute]
 class Transactional implements WithRequiredReferenceNameList
 {
     private const FACTORY_REFERENCE_NAME_LIST = 'factoryReferenceNameList';
@@ -19,19 +14,9 @@ class Transactional implements WithRequiredReferenceNameList
      */
     private $factoryReferenceNameList;
 
-    /**
-     * Transactional constructor.
-     * @param string[] $values
-     */
-    public function __construct(array $values)
+    public function __construct(array $factoryReferenceNameList)
     {
-        if (isset($values[self::FACTORY_REFERENCE_NAME_LIST])) {
-            $this->factoryReferenceNameList = $values[self::FACTORY_REFERENCE_NAME_LIST];
-        }else {
-            if (isset($values['value'])) {
-                $this->factoryReferenceNameList = is_array($values['value']) ? $values['value'] : [$values['value']];
-            }
-        }
+        $this->factoryReferenceNameList = $factoryReferenceNameList;
     }
 
     /**
@@ -40,7 +25,7 @@ class Transactional implements WithRequiredReferenceNameList
      */
     public static function createWith(array $factoryReferenceNameList) : self
     {
-        return new self([self::FACTORY_REFERENCE_NAME_LIST => $factoryReferenceNameList]);
+        return new self($factoryReferenceNameList);
     }
 
     /**

@@ -571,7 +571,7 @@ final class TypeDescriptor implements Type
     {
         $declarationType = self::resolveType($typeHint);
 
-        if ($declarationType->isAnything() || $declarationType->isIterable() && !$declarationType->isCollection()) {
+        if ($declarationType->isIterable() && !$declarationType->isCollection()) {
             $docblockType = self::resolveType($docBlockTypeDescription);
             if ($docblockType->isAnything()) {
                 return $declarationType;

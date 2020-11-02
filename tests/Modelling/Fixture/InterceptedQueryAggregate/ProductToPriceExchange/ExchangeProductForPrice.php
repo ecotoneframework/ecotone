@@ -3,9 +3,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange;
 
-/**
- * @Annotation
- */
+#[\Attribute]
 class ExchangeProductForPrice
 {
 

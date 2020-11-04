@@ -290,4 +290,47 @@ class DomainContext extends TestCase implements Context
             );
         }catch (\Exception $exception) {}
     }
+
+    /**
+     * @Given current user id :userId
+     */
+    public function currentUserId(string $userId)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+            "addCurrentUserId",
+            MediaType::APPLICATION_X_PHP,
+            $userId
+        );
+    }
+
+    /**
+     * @Then basket should contains :item
+     */
+    public function basketShouldContains(string $item)
+    {
+        $this->assertContains(
+            $item,
+            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend(
+                "basket.get",
+                MediaType::APPLICATION_X_PHP_ARRAY,
+                [
+                    "item" => $item
+                ]
+            )
+        );
+    }
+
+    /**
+     * @When I add to basket :arg1
+     */
+    public function iAddToBasket(string $item)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+            "basket.add",
+            MediaType::APPLICATION_X_PHP_ARRAY,
+            [
+                "item" => $item
+            ]
+        );
+    }
 }

@@ -112,3 +112,11 @@ Feature: activating as aggregate order entity
     Then there should be notification with metadata "token" 123
     When I active receiver "notifications"
     Then there should be notification with metadata "token" 123
+
+  Scenario: Handle presend interceptor for aggregate
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\InterceptingAggregate"
+    And current user id 123
+    When I add to basket "milk"
+    Then basket should contains "milk"
+    When I add to basket "cheese"
+    Then basket should contains "cheese"

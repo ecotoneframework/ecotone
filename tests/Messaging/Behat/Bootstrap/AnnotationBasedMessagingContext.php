@@ -50,6 +50,8 @@ use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin\
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddVat\AddVatService;
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ProductExchanger;
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ShopRepository;
+use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\AddCurrentUserId;
+use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\BasketRepository;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\LoggingService;
@@ -184,6 +186,14 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             {
                 $objects = [
                     new \Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints\OrderService()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\InterceptingAggregate":
+            {
+                $objects = [
+                    new AddCurrentUserId(),
+                    BasketRepository::createEmpty()
                 ];
                 break;
             }

@@ -87,6 +87,33 @@ class HeaderBuilderTest extends TestCase
         $this->assertEquals(Uuid::fromString($personId), $headerResult);
     }
 
+    public function test_calling_with_php_to_php_conversion()
+    {
+        $personId = "05c60a00-2285-431a-bc3b-f840b4e81230";
+        $converter = HeaderBuilder::create("x", "personId");
+        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
+            ConversionService::REFERENCE_NAME => InMemoryConversionService::createWithConversion(
+                MediaType::APPLICATION_X_PHP,
+                TypeDescriptor::STRING,
+                MediaType::APPLICATION_X_PHP,
+                Uuid::class,
+                Uuid::fromString($personId)
+            )
+        ]));
+
+        $headerResult = $converter->getArgumentFrom(
+            InterfaceToCall::create(ServiceWithUuidArgument::class, "execute"),
+            InterfaceParameter::createNotNullable("x", TypeDescriptor::createWithDocBlock(Uuid::class, "")),
+            MessageBuilder::withPayload("a")
+                ->setHeader("personId",  $personId)
+                ->build(),
+            []
+        );
+
+        $this->assertInstanceOf(UuidInterface::class, $headerResult);
+        $this->assertEquals(Uuid::fromString($personId), $headerResult);
+    }
+
     public function test_passing_default_value_if_exists_and_no_header_found()
     {
         $converter = HeaderBuilder::create("name", "token");

@@ -27,6 +27,7 @@ class TypeResolver
     private const SELF_TYPE_HINT = "self";
     private const STATIC_TYPE_HINT = "static";
     private const THIS_TYPE_HINT = '$this';
+    private const NULL_HINT = "null";
 
     private ?AnnotationResolver $annotationParser;
 
@@ -62,7 +63,7 @@ class TypeResolver
         $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($analyzedClass, $analyzedClass, $methodName);
         foreach ($reflectionMethod->getParameters() as $parameter) {
             $parameterType = TypeDescriptor::createWithDocBlock(
-                $parameter->getType() ? $this->expandParameterTypeHint($parameter->getType()->getName(), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName)) : null,
+                $parameter->getType() ? $this->expandParameterTypeHint($this->getTypeFromReflection($parameter->getType()), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName)) : null,
                 array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ""
             );
             $isAnnotation = false;
@@ -173,13 +174,6 @@ class TypeResolver
         return (bool)$methodReflection->getAttributes(IgnoreDocblockTypeHint::class);
     }
 
-    /**
-     * @param string $parameterTypeHint
-     * @param \ReflectionClass $thisClass
-     * @param \ReflectionClass $analyzedClass
-     * @param \ReflectionClass $declaringClass
-     * @return string
-     */
     private function expandParameterTypeHint(string $parameterTypeHint, \ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionClass $declaringClass): string
     {
         $multipleTypeHints = explode("|", $parameterTypeHint);
@@ -192,6 +186,9 @@ class TypeResolver
 
         $fullNames = [];
         foreach ($multipleTypeHints as $typeHint) {
+            if ($typeHint === self::NULL_HINT) {
+                continue;
+            }
             if (class_exists($typeHint)) {
                 $fullNames[] = $typeHint;
                 continue;
@@ -199,6 +196,13 @@ class TypeResolver
 
             if (strpos($typeHint, "[]") !== false) {
                 $typeHint = "array<" . str_replace("[]", "", $typeHint) . ">";
+            }
+
+            $relatedTypehint = $this->getRelatedClassNameFromTypeHint($typeHint);
+            if ($relatedTypehint === self::SELF_TYPE_HINT) {
+                $typeHint = str_replace($relatedTypehint, $declaringClass->getName(), $typeHint);
+            }else if ($relatedTypehint === self::STATIC_TYPE_HINT) {
+                $typeHint = str_replace($relatedTypehint, $analyzedClass->getName(), $typeHint);
             }
 
             $fullNames[] = $this->isInGlobalNamespace($typeHint)
@@ -274,7 +278,7 @@ class TypeResolver
         }
 
         if (preg_match(self::COLLECTION_TYPE_REGEX, $className, $matches)) {
-            return TypeDescriptor::isItTypeOfPrimitive($matches[1]) || TypeDescriptor::isInternalClassOrInterface($matches[1]) || TypeDescriptor::isMixedType($matches[1]) ;
+            return TypeDescriptor::isItTypeOfPrimitive($matches[1]) || TypeDescriptor::isInternalClassOrInterface($matches[1]) || TypeDescriptor::isMixedType($matches[1]);
         }
 
         return count(explode("\\", $className)) == 2;
@@ -295,8 +299,7 @@ class TypeResolver
         }
 
         return
-            array_key_exists($classNameTypeHint, $statements)
-            ||
+            array_key_exists($classNameTypeHint, $statements) ||
             count(explode("\\", $classNameTypeHint)) > 2;
     }
 
@@ -432,29 +435,15 @@ class TypeResolver
         return $typeDescriptor;
     }
 
-    /**
-     * @param string $interfaceName
-     * @param string $methodName
-     * @return Type
-     * @throws TypeDefinitionException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
     public function getReturnType(string $interfaceName, string $methodName): Type
     {
         $analyzedClass = new \ReflectionClass($interfaceName);
         $reflectionMethod = $analyzedClass->getMethod($methodName);
 
-        $finalType = TypeDescriptor::createWithDocBlock(
-            $this->expandParameterTypeHint($reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->getName() : "", $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName)),
+        return TypeDescriptor::createWithDocBlock(
+            $this->expandParameterTypeHint($this->getTypeFromReflection($reflectionMethod->getReturnType()), $analyzedClass, $analyzedClass, self::getMethodDeclaringClass($analyzedClass, $methodName)),
             $this->getReturnTypeDocBlockParameterTypeHint($analyzedClass, $analyzedClass, $methodName)
         );
-
-        if ($reflectionMethod->getReturnType() && $reflectionMethod->getReturnType()->getName() === TypeDescriptor::VOID && !$finalType->isVoid()) {
-            throw InvalidArgumentException::create("Interface {$interfaceName} with method {$methodName} has return type definition in docblock, but declared is void");
-        }
-
-        return $finalType;
     }
 
     /**
@@ -497,7 +486,7 @@ class TypeResolver
         $classProperty = null;
         $type = $docblockType ? $docblockType : TypeDescriptor::createAnythingType();
         if ($type->isAnything()) {
-            $type = $property->hasType() ? TypeDescriptor::create($property->getType()->getName()) : $type;
+            $type = $property->hasType() ? TypeDescriptor::create($this->getTypeFromReflection($property->getType())) : $type;
         }
         $isNullable = $property->hasType() ? $property->getType()->allowsNull() : true;
 
@@ -546,11 +535,28 @@ class TypeResolver
             }
         }
 
+        $type = TypeDescriptor::create($this->getTypeFromReflection($property->getType()));
         return $this->createClassProperty(
                 $declaringClass->getName(),
                 $annotationParser,
                 $property,
-            ($property->getType() && $property->getType()->getName() === TypeDescriptor::ARRAY) ? $this->getPropertyDocblockTypeHint($reflectionClassOrTrait, $property->getDeclaringClass(), $property->getDeclaringClass(), $property) : null
+            $type && $type->isIterable() && !$type->isCollection()  ? $this->getPropertyDocblockTypeHint($reflectionClassOrTrait, $property->getDeclaringClass(), $property->getDeclaringClass(), $property) : null
         );
+    }
+
+    private function getTypeFromReflection(?\ReflectionType $returnType): string
+    {
+        if ($returnType instanceof \ReflectionUnionType) {
+            $types = [];
+            foreach ($returnType->getTypes() as $type) {
+                $types[] = $type;
+            }
+
+            $returnTypeName = implode("|", $types);
+        } else {
+            $returnTypeName = $returnType ? $returnType->getName() : "";
+        }
+
+        return $returnTypeName;
     }
 }

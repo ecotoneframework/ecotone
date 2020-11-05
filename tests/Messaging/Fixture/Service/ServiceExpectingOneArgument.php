@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
 
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
+
 /**
  * Class ServiceExpectingOneArgument
  * @package Test\Ecotone\Messaging\Fixture\Service
@@ -44,19 +47,25 @@ class ServiceExpectingOneArgument
     }
 
     /**
-     * @param object $value
-     * @return \stdClass|string
+     * @param $value
+     * @return ServiceExpectingOneArgument[]|\stdClass[]
      */
-    public function withDifferentScalarOrObjectReturnType($value)
+    public function withCollectionAndArrayReturnType($value) : array
     {
         return $value;
     }
 
-    /**
-     * @param $value
-     * @return \stdClass[]|array
-     */
-    public function withCollectionAndArrayReturnType($value) : array
+    public function withUnionReturnType($value) : ServiceExpectingOneArgument|\stdClass
+    {
+        return $value;
+    }
+
+    public function withUnionParameter(\stdClass|string $value)
+    {
+        return $value;
+    }
+
+    public function withUnionParameterWithUuid(\stdClass|UuidInterface $value)
     {
         return $value;
     }

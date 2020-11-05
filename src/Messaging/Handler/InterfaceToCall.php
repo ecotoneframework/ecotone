@@ -5,44 +5,46 @@ namespace Ecotone\Messaging\Handler;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionMethod;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
 
 /**
  * Class InterfaceToCall
  * @package Ecotone\Messaging\Handler\Gateway\Gateway
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceToCall
 {
     private ?string $interfaceName;
-    private ?\Ecotone\Messaging\Handler\Type $interfaceType;
+    private ?Type $interfaceType;
     private ?string $methodName;
     /**
      * @var InterfaceParameter[]
      */
     private ?iterable $parameters;
-    private ?\Ecotone\Messaging\Handler\Type $returnType;
+    private ?Type $returnType;
     private ?bool $doesReturnTypeAllowNulls;
     private ?bool $isStaticallyCalled;
     /**
      * @var object[]
      */
     private iterable $methodAnnotations;
-    private \Ecotone\Messaging\Handler\ClassDefinition $classDefinition;
+    private ClassDefinition $classDefinition;
 
     /**
      * InterfaceToCall constructor.
-     * @param string $interfaceName
-     * @param string $methodName
+     *
+     * @param string          $interfaceName
+     * @param string          $methodName
      * @param ClassDefinition $classDefinition
-     * @param object[] $methodAnnotations
+     * @param object[]        $methodAnnotations
+     *
      * @throws InvalidArgumentException
      * @throws ReflectionException
      * @throws MessagingException
@@ -51,17 +53,13 @@ class InterfaceToCall
     {
         $this->initialize($interfaceName, $methodName);
         $this->methodAnnotations = $methodAnnotations;
-        $this->classDefinition = $classDefinition;
-    }
-
-    public function getInterfaceName(): ?string
-    {
-        return $this->interfaceName;
+        $this->classDefinition   = $classDefinition;
     }
 
     /**
      * @param string|object $interfaceOrObjectName
-     * @param string $methodName
+     * @param string        $methodName
+     *
      * @return InterfaceToCall
      * @throws InvalidArgumentException
      * @throws AnnotationException
@@ -78,6 +76,11 @@ class InterfaceToCall
         $annotationParser = InMemoryAnnotationFinder::createFrom([$interface]);
 
         return new self($interface, $methodName, ClassDefinition::createUsingAnnotationParser(TypeDescriptor::create($interface), $annotationParser), $annotationParser->getAnnotationsForMethod($interface, $methodName));
+    }
+
+    public function getInterfaceName(): ?string
+    {
+        return $this->interfaceName;
     }
 
     /**
@@ -99,13 +102,14 @@ class InterfaceToCall
     /**
      * @return ClassDefinition
      */
-    public function getClassDefinition() : ClassDefinition
+    public function getClassDefinition(): ClassDefinition
     {
         return $this->classDefinition;
     }
 
     /**
      * @param Type $className
+     *
      * @return bool
      * @throws TypeDefinitionException
      * @throws MessagingException
@@ -123,6 +127,7 @@ class InterfaceToCall
 
     /**
      * @param Type $className
+     *
      * @return bool
      * @throws TypeDefinitionException
      * @throws MessagingException
@@ -140,6 +145,7 @@ class InterfaceToCall
 
     /**
      * @param Type $className
+     *
      * @throws MessagingException
      */
     public function getClassAnnotation(Type $className): object
@@ -155,6 +161,7 @@ class InterfaceToCall
 
     /**
      * @param Type $className
+     *
      * @throws MessagingException
      */
     public function getMethodAnnotation(Type $className): object
@@ -181,7 +188,7 @@ class InterfaceToCall
         return !$this->getReturnType()->isVoid();
     }
 
-    public function getReturnType(): ?\Ecotone\Messaging\Handler\Type
+    public function getReturnType(): ?Type
     {
         return $this->returnType;
     }
@@ -249,14 +256,6 @@ class InterfaceToCall
     }
 
     /**
-     * @return int
-     */
-    private function parameterAmount(): int
-    {
-        return count($this->getInterfaceParameters());
-    }
-
-    /**
      * @return array|InterfaceParameter[]
      */
     public function getInterfaceParameters(): ?iterable
@@ -267,13 +266,14 @@ class InterfaceToCall
     /**
      * @return int
      */
-    public function getInterfaceParameterAmount() : int
+    public function getInterfaceParameterAmount(): int
     {
         return count($this->parameters);
     }
 
     /**
      * @param int $index
+     *
      * @return InterfaceParameter
      * @throws InvalidArgumentException
      * @throws MessagingException
@@ -321,7 +321,7 @@ class InterfaceToCall
         return $this->getReturnType()->isClassOfType(Message::class);
     }
 
-    public function getInterfaceType() : ?\Ecotone\Messaging\Handler\Type
+    public function getInterfaceType(): ?Type
     {
         return $this->interfaceType;
     }
@@ -333,9 +333,10 @@ class InterfaceToCall
 
     /**
      * @param string $methodName
+     *
      * @return bool
      */
-    public function hasMethodName(string $methodName) : bool
+    public function hasMethodName(string $methodName): bool
     {
         return $this->getMethodName() === $methodName;
     }
@@ -404,12 +405,12 @@ class InterfaceToCall
         return $this->parameterAmount() == 1;
     }
 
-    public function hasFirstParameter() : bool
+    public function hasFirstParameter(): bool
     {
         return $this->parameterAmount() >= 1;
     }
 
-    public function hasSecondParameter() : bool
+    public function hasSecondParameter(): bool
     {
         return $this->parameterAmount() >= 2;
     }
@@ -423,8 +424,17 @@ class InterfaceToCall
     }
 
     /**
+     * @return int
+     */
+    private function parameterAmount(): int
+    {
+        return count($this->getInterfaceParameters());
+    }
+
+    /**
      * @param string $interfaceName
      * @param string $methodName
+     *
      * @throws InvalidArgumentException
      * @throws ReflectionException
      * @throws MessagingException
@@ -432,11 +442,11 @@ class InterfaceToCall
     private function initialize(string $interfaceName, string $methodName): void
     {
         try {
-            $typeResolver = TypeResolver::create();
+            $typeResolver        = TypeResolver::create();
             $this->interfaceType = TypeDescriptor::create($interfaceName);
             $this->interfaceName = $this->interfaceType->toString();
-            $this->methodName = $methodName;
-            $reflectionClass = new ReflectionClass($interfaceName);
+            $this->methodName    = $methodName;
+            $reflectionClass     = new ReflectionClass($interfaceName);
             if (!$reflectionClass->hasMethod($methodName)) {
                 throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
             }
@@ -446,7 +456,7 @@ class InterfaceToCall
             $this->returnType = $typeResolver->getReturnType($interfaceName, $methodName);
 
             $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
-            $this->isStaticallyCalled = $reflectionMethod->isStatic();
+            $this->isStaticallyCalled       = $reflectionMethod->isStatic();
         } catch (TypeDefinitionException $definitionException) {
             throw InvalidArgumentException::create("Interface {$this} has problem with type declaration. {$definitionException->getMessage()}");
         }

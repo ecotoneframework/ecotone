@@ -79,6 +79,15 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
             if (!$foundUnionType) {
                 foreach ($returnType->getUnionTypes() as $type) {
                     if ($type->isCompatibleWith($returnValueType)) {
+                        if ($type->isCollection()) {
+                            $collectionOf = $type->resolveGenericTypes();
+                            $firstKey = array_key_first($result);
+                            if (count($collectionOf) === 1 && !is_null($firstKey)) {
+                                if (!$collectionOf[0]->isCompatibleWith(TypeDescriptor::createFromVariable($result[$firstKey]))) {
+                                    continue;
+                                }
+                            }
+                        }
                         $foundUnionType = $type;
                         break;
                     }

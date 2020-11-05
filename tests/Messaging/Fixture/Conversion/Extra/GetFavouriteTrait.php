@@ -12,11 +12,7 @@ use Test\Ecotone\Messaging\Fixture\Conversion\Extra\PrivateDetails\GetPrivilegeT
  */
 trait GetFavouriteTrait
 {
-    /**
-     * @param Favourite $favourite
-     * @return Favourite
-     */
-    public function getYourVeryBestFavourite($favourite)
+    public function getYourVeryBestFavourite(?Favourite $favourite) : ?Favourite
     {
 
     }

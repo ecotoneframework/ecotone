@@ -21,10 +21,7 @@ interface User
      */
     public function changePassword(Password $password) : void;
 
-    /**
-     * @param \stdClass $details
-     */
-    public function changeDetails($details) : void;
+    public function changeDetails(?\stdClass $details) : void;
 
     /**
      * @param  array<Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite> $favourites
@@ -61,20 +58,14 @@ interface User
      */
     public function removeRating(int $rating) : void;
 
-    /**
-     * @param int|array $random
-     */
-    public function randomRating($random) : void;
+    public function randomRating(int|array|null $random) : void;
 
     /**
      * @param array|string[] $phones
      */
-    public function addPhones($phones) : void;
+    public function addPhones(array $phones) : void;
 
-    /**
-     * @param Email|Favourite $email
-     */
-    public function addEmail($email) : void;
+    public function addEmail(Email|Favourite $email) : void;
 
     /**
      * @param $surname
@@ -86,17 +77,19 @@ interface User
      */
     public function changeAddress($address) : void;
 
-    /**
-     * @return self
-     */
     public function getSelf() : self;
 
-    public function getSelfWithoutDocBlock() : self;
+    /**
+     * @return self[]
+     */
+    public function getSelfArray() : array;
+
+    public function getStatic() : static;
 
     /**
-     * @return static
+     * @return static[]
      */
-    public function getStatic();
+    public function getStaticArray() : array;
 
     public function returnFullUser() : \Test\Ecotone\Messaging\Fixture\Conversion\User;
 

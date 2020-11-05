@@ -580,7 +580,7 @@ class TypeDescriptorTest extends TestCase
         $this->assertEquals(TypeDescriptor::FLOAT, TypeDescriptor::createFromVariable(1.21));
         $this->assertEquals(TypeDescriptor::INTEGER, TypeDescriptor::createFromVariable(121));
         $this->assertEquals(TypeDescriptor::STRING, TypeDescriptor::createFromVariable("text"));
-        $this->assertEquals(TypeDescriptor::ITERABLE, TypeDescriptor::createFromVariable([]));
+        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([]));
         $this->assertEquals(\stdClass::class, TypeDescriptor::createFromVariable(new \stdClass()));
         $this->assertEquals(TypeDescriptor::RESOURCE, TypeDescriptor::createFromVariable(fopen('file', 'w+')));
         $this->assertEquals(TypeDescriptor::NULL, TypeDescriptor::createFromVariable(null));

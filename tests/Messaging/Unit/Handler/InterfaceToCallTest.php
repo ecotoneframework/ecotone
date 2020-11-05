@@ -215,18 +215,14 @@ class InterfaceToCallTest extends TestCase
         );
     }
 
-    /**
-     * @throws MessagingException
-     * @throws InvalidArgumentException
-     */
-    public function test_guessing_parameter_type_hint_from_scalar_and_compound_type()
+    public function test_parsing_union_parameter_type_with_null()
     {
         $interfaceToCall = InterfaceToCall::create(
             User::class, "randomRating"
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("random", TypeDescriptor::create(TypeDescriptor::INTEGER . "|" . TypeDescriptor::ARRAY)),
+            InterfaceParameter::createNullable("random", TypeDescriptor::create(TypeDescriptor::ARRAY . "|" . TypeDescriptor::INTEGER)),
             $interfaceToCall->getParameterWithName("random")
         );
     }
@@ -242,7 +238,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("phones", TypeDescriptor::create("array|array<string>")),
+            InterfaceParameter::createNotNullable("phones", TypeDescriptor::create("array|array<string>")),
             $interfaceToCall->getParameterWithName("phones")
         );
     }
@@ -258,7 +254,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("email", TypeDescriptor::create(Email::class . "|" . Favourite::class)),
+            InterfaceParameter::createNotNullable("email", TypeDescriptor::create(Email::class . "|" . Favourite::class)),
             $interfaceToCall->getParameterWithName("email")
         );
     }
@@ -339,7 +335,7 @@ class InterfaceToCallTest extends TestCase
         );
     }
 
-    public function test_resolving_return_type_type_hint_located_in_docblock_from_trait_in_different_namespace()
+    public function test_resolving_return_type_from_trait_in_different_namespace()
     {
         $interfaceToCall = InterfaceToCall::create(
             SuperAdmin::class, "getYourVeryBestFavourite"
@@ -362,7 +358,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable("user", TypeDescriptor::create(SuperAdmin::class)),
+            InterfaceParameter::createNotNullable("user", TypeDescriptor::create(SuperAdmin::class)),
             $interfaceToCall->getParameterWithName("user")
         );
         $this->assertEquals(
@@ -422,8 +418,13 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            TypeDescriptor::create(User::class),
-            (InterfaceToCall::create(User::class, "getSelfWithoutDocBlock"))->getReturnType()
+            TypeDescriptor::create("array<" . User::class . ">"),
+            (InterfaceToCall::create(User::class, "getSelfArray"))->getReturnType()
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create("array<" . User::class . ">"),
+            (InterfaceToCall::create(User::class, "getStaticArray"))->getReturnType()
         );
     }
 

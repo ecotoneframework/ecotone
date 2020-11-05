@@ -217,7 +217,7 @@ final class MethodInvoker implements MessageProcessor
             }
         }
 
-        throw InvalidArgumentException::create("Invoked object {$invokedClass} with method {$methodToInvoke} has no converter for {$invokeParameter->getName()}");
+        throw InvalidArgumentException::create("Invoked object {$invokedClass}:{$methodToInvoke} has no converter for parameter `{$invokeParameter->getName()}`");
     }
 
     /**

@@ -56,19 +56,11 @@ class HeaderConverter implements ParameterConverter
 
         $headerValue = $message->getHeaders()->get($this->headerName);
         if (!TypeDescriptor::createFromVariable($headerValue)->isCompatibleWith($relatedParameter->getTypeDescriptor())) {
-            if ($this->conversionService->canConvert(
-                TypeDescriptor::createFromVariable($headerValue),
-                MediaType::parseMediaType(DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE),
-                $relatedParameter->getTypeDescriptor(),
-                MediaType::createApplicationXPHP()
-            )) {
-                $headerValue = $this->conversionService->convert(
-                    $headerValue,
-                    TypeDescriptor::createFromVariable($headerValue),
-                    MediaType::parseMediaType(DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE),
-                    $relatedParameter->getTypeDescriptor(),
-                    MediaType::createApplicationXPHP()
-                );
+            if ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter)) {
+                $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter);
+            }
+            if ($this->canConvertTo($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter)) {
+                $headerValue = $this->doConversion($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter);
             }
         }
 
@@ -81,5 +73,28 @@ class HeaderConverter implements ParameterConverter
     public function isHandling(InterfaceParameter $parameter): bool
     {
         return $parameter->getName() == $this->parameterName;
+    }
+
+    private function canConvertTo(mixed $headerValue, string $sourceMediaType, InterfaceParameter $relatedParameter): bool
+    {
+        return $this->conversionService->canConvert(
+            TypeDescriptor::createFromVariable($headerValue),
+            MediaType::parseMediaType($sourceMediaType),
+            $relatedParameter->getTypeDescriptor(),
+            MediaType::createApplicationXPHP()
+        );
+    }
+
+    private function doConversion(mixed $headerValue, string $sourceMediaType, InterfaceParameter $relatedParameter)
+    {
+        $headerValue = $this->conversionService->convert(
+            $headerValue,
+            TypeDescriptor::createFromVariable($headerValue),
+            MediaType::parseMediaType($sourceMediaType),
+            $relatedParameter->getTypeDescriptor(),
+            MediaType::createApplicationXPHP()
+        );
+
+        return $headerValue;
     }
 }

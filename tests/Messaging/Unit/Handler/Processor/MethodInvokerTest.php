@@ -294,7 +294,7 @@ class MethodInvokerTest extends MessagingTest
         );
     }
 
-    public function test_calling_if_media_type_is_incompatible_but_types_are()
+    public function test_calling_if_media_type_is_incompatible_but_types_are_fine()
     {
         $referenceSearchService = InMemoryReferenceSearchService::createWith([
             AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([])
@@ -317,56 +317,54 @@ class MethodInvokerTest extends MessagingTest
         $this->assertEquals("some", $result->getPayload());
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws ReferenceNotFoundException
-     * @throws MessagingException
-     */
-    public function test_choosing_one_of_compatible_return_union_type_when_first_is_correct()
+    public function test_calling_if_when_parameter_is_union_type_and_argument_compatible_with_second()
     {
-        $referenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $referenceSearchService = InMemoryReferenceSearchService::createWith([
+            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([])
+        ]);
         $methodInvocation =
             WrapWithMessageBuildProcessor::createWith(
-                new ServiceExpectingOneArgument(), 'withDifferentScalarOrObjectReturnType',
-                MethodInvoker::createWith(new ServiceExpectingOneArgument(), 'withDifferentScalarOrObjectReturnType', [
+                new ServiceExpectingOneArgument(), 'withUnionParameter',
+                MethodInvoker::createWith(new ServiceExpectingOneArgument(), 'withUnionParameter', [
                     PayloadBuilder::create('value')
                 ], $referenceSearchService),
                 $referenceSearchService
             );
 
-        $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload(new stdClass())->build());
-
-        $this->assertMessages(
-            MessageBuilder::withPayload(new stdClass())
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(stdClass::class))
-                ->build(),
-            $replyMessage
+        $result = $methodInvocation->processMessage(
+            MessageBuilder::withPayload("some")
+                ->setContentType(MediaType::createApplicationXPHPSerialized())
+                ->build()
         );
+
+        $this->assertEquals("some", $result->getPayload());
     }
 
-    public function test_choosing_one_of_compatible_return_union_type_when_first_is_incorrect()
+    public function test_invoking_with_header_conversion_for_union_type_parameter()
     {
-        $referenceSearchService = InMemoryReferenceSearchService::createEmpty();
-        $methodInvocation =
-            WrapWithMessageBuildProcessor::createWith(
-                new ServiceExpectingOneArgument(), 'withDifferentScalarOrObjectReturnType',
-                MethodInvoker::createWith(new ServiceExpectingOneArgument(), 'withDifferentScalarOrObjectReturnType', [
-                    PayloadBuilder::create('value')
-                ], $referenceSearchService),
-                $referenceSearchService
-            );
+        $methodInvocation = MethodInvoker::createWith(new ServiceExpectingOneArgument(), 'withUnionParameterWithUuid', [
+            HeaderBuilder::create("value", "uuid")
+        ], InMemoryReferenceSearchService::createWith([
+            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
+                new StringToUuidConverter()
+            ])
+        ]));
 
-        $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload("test")->build());
+        $uuid = "fd825894-907c-4c6c-88a9-ae1ecdf3d307";
+        $replyMessage = $methodInvocation->processMessage(
+            MessageBuilder::withPayload("some")
+                ->setHeader("uuid", $uuid)
+                ->setContentType(MediaType::createTextPlain())
+                ->build()
+        );
 
-        $this->assertMessages(
-            MessageBuilder::withPayload("test")
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter("string"))
-                ->build(),
+        $this->assertEquals(
+            Uuid::fromString($uuid),
             $replyMessage
         );
     }
 
-    public function test_if_can_not_decide_return_type_make_use_resolved_from_return_value()
+    public function test_if_can_not_decide_return_type_make_use_resolved_from_return_value_for_array()
     {
         $referenceSearchService = InMemoryReferenceSearchService::createEmpty();
         $methodInvocation =
@@ -380,11 +378,49 @@ class MethodInvokerTest extends MessagingTest
 
         $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload(["test"])->build());
 
-        $this->assertMessages(
-            MessageBuilder::withPayload(["test"])
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter("array"))
-                ->build(),
-            $replyMessage
+        $this->assertEquals(
+            MediaType::createApplicationXPHPWithTypeParameter("array")->toString(),
+            $replyMessage->getHeaders()->getContentType()->toString()
+        );
+    }
+
+    public function test_if_can_decide_based_on_return_type_then_should_be_used_for_array()
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                new ServiceExpectingOneArgument(), 'withCollectionAndArrayReturnType',
+                MethodInvoker::createWith(new ServiceExpectingOneArgument(), 'withCollectionAndArrayReturnType', [
+                    PayloadBuilder::create('value')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
+
+        $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload([new \stdClass()])->build());
+
+        $this->assertEquals(
+            MediaType::createApplicationXPHPWithTypeParameter("array<stdClass>")->toString(),
+            $replyMessage->getHeaders()->getContentType()->toString()
+        );
+    }
+
+    public function test_given_return_type_is_union_then_should_decide_on_return_type_based_on_return_variable()
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                new ServiceExpectingOneArgument(), 'withUnionReturnType',
+                MethodInvoker::createWith(new ServiceExpectingOneArgument(), 'withUnionReturnType', [
+                    PayloadBuilder::create('value')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
+
+        $replyMessage = $methodInvocation->processMessage(MessageBuilder::withPayload(new \stdClass)->build());
+
+        $this->assertEquals(
+            MediaType::createApplicationXPHPWithTypeParameter(\stdClass::class)->toString(),
+            $replyMessage->getHeaders()->getContentType()->toString()
         );
     }
 

@@ -37,7 +37,7 @@ final class TypeDescriptor implements Type
     const ANYTHING = "anything";
     const VOID = "void";
 
-    private const MIXED = "mixed";
+    const MIXED = "mixed";
     const NULL = "null";
 
     private string $type;
@@ -285,6 +285,8 @@ final class TypeDescriptor implements Type
         }else if ($type === self::BOOL_LONG_NAME) {
             $type = self::BOOL;
         }else if ($type === self::ARRAY) {
+            $type = self::ARRAY;
+        }else if ($type === self::ITERABLE) {
             $type = self::ITERABLE;
         }else if (is_callable($variable)){
             $type = self::CALLABLE;

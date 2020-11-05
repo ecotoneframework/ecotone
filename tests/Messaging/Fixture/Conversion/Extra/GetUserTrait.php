@@ -11,12 +11,7 @@ use Test\Ecotone\Messaging\Fixture\Conversion\User;
  */
 trait GetUserTrait
 {
-    /**
-     *
-     * @param User $user
-     * @return User
-     */
-    public function getUser($user)
+    public function getUser(User $user) : User
     {
 
     }

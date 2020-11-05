@@ -22,10 +22,10 @@ class OrderService
     private $notifiedOrders = [];
 
     #[CommandHandler("order.register", "orderReceiver")]
-    public function register(PlaceOrder $placeOrder, EventBus $lazyEventBus) : void
+    public function register(PlaceOrder $placeOrder, EventBus $eventBus) : void
     {
         $this->orders[] = $placeOrder;
-        $lazyEventBus->sendWithMetadata(new OrderWasPlaced($placeOrder->getOrderId()), []);
+        $eventBus->sendWithMetadata(new OrderWasPlaced($placeOrder->getOrderId()), []);
     }
 
     #[EventHandler(endpointId: "orderPlaced")]

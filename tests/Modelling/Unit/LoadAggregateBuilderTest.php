@@ -16,7 +16,6 @@ use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
-use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 use Ecotone\Modelling\LoadAggregateMode;
 use Ecotone\Modelling\LoadAggregateServiceBuilder;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
@@ -76,9 +75,7 @@ class LoadAggregateBuilderTest extends TestCase
             ->withInputChannelName("inputChannel");
 
         $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
-            ]),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
                 "repository" => InMemoryEventSourcedRepository::createEmpty(),
                 ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()

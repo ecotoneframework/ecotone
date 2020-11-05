@@ -15,8 +15,8 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CallAggregateServiceBuilder;
+use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
-use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
@@ -74,9 +74,7 @@ class CallAggregateBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(["orderRepository"]);
 
         $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                LazyEventBus::CHANNEL_NAME => QueueChannel::create()
-            ]),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
                 "orderRepository" => InMemoryStandardRepository::createEmpty(),
                 ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
@@ -177,9 +175,7 @@ class CallAggregateBuilderTest extends TestCase
         $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createEmpty();
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                LazyEventBus::CHANNEL_NAME => $queueChannel
-            ]),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
                 "repository" => $inMemoryEventSourcedRepository,
                 ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
@@ -211,9 +207,7 @@ class CallAggregateBuilderTest extends TestCase
         $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], Ticket::class, [new TicketWasStartedEvent($ticketId)]);
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                LazyEventBus::CHANNEL_NAME => $queueChannel
-            ]),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
                 "repository" => $inMemoryEventSourcedRepository,
                 ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()

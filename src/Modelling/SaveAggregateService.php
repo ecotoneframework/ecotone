@@ -13,8 +13,6 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Modelling\Annotation\AggregateFactory;
-use Ecotone\Modelling\LazyEventBus\LazyEventBus;
 
 /**
  * Class SaveAggregateService
@@ -38,11 +36,11 @@ class SaveAggregateService
     private array $aggregateIdentifierMapping;
     private InterfaceToCall $aggregateInterface;
 
-    public function __construct(InterfaceToCall $aggregateInterface, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $lazyEventBus, ?string $eventMethod, ?array $versionMapping, array $aggregateIdentifierMapping)
+    public function __construct(InterfaceToCall $aggregateInterface, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $eventMethod, ?array $versionMapping, array $aggregateIdentifierMapping)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
-        $this->eventBus = $lazyEventBus;
+        $this->eventBus = $eventBus;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
         $this->versionMapping = $versionMapping;
         $this->eventRetrievingMethod = $eventMethod;

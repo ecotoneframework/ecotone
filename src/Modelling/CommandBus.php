@@ -9,9 +9,7 @@ use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Modelling\LazyEventBus\LazyEventPublishing;
 
-#[LazyEventPublishing]
 interface CommandBus
 {
     const CHANNEL_NAME_BY_OBJECT = "ecotone.modelling.bus.command_by_object";

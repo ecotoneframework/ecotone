@@ -177,12 +177,15 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
             $this->requestHeaders
         );
 
+        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
+        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
+
         return new Enricher(
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
                 MethodInvoker::createWith(
+                    $interfaceToCallRegistry->getFor($internalEnrichingService, "enrich"),
                     $internalEnrichingService,
-                    "enrich",
                     [],
                     $referenceSearchService,
                     $channelResolver,

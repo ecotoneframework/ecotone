@@ -198,12 +198,14 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         if (!$this->isStaticallyCalled()) {
             $objectToInvoke = $this->directObjectReference ? $this->directObjectReference : $referenceSearchService->get($this->objectToInvokeReferenceName);
         }
-        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($objectToInvoke, $this->methodName);
 
+        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
+        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
+        $interfaceToCall = $interfaceToCallRegistry->getFor($objectToInvoke, $this->methodName);
 
         $messageProcessor = MethodInvoker::createWith(
+            $interfaceToCall,
             $objectToInvoke,
-            $this->methodName,
             $this->methodParameterConverterBuilders,
             $referenceSearchService,
             $channelResolver,
@@ -212,16 +214,16 @@ class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implement
         );
         if ($this->shouldWrapResultInMessage) {
             $messageProcessor = WrapWithMessageBuildProcessor::createWith(
-                $objectToInvoke,
-                $this->methodName,
+                $interfaceToCall,
                 $messageProcessor,
                 $referenceSearchService
             );
         }
         if ($this->shouldPassThroughMessage && $interfaceToCall->hasReturnTypeVoid()) {
-            $messageProcessor = MethodInvoker::createWith(
-                new PassThroughService($messageProcessor),
-                "invoke",
+            $passThroughService = new PassThroughService($messageProcessor);
+            $messageProcessor   = MethodInvoker::createWith(
+                $interfaceToCallRegistry->getFor($passThroughService, "invoke"),
+                $passThroughService,
                 [],
                 $referenceSearchService
             );

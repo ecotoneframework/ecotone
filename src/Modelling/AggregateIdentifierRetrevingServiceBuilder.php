@@ -90,7 +90,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
     private function hasAccordingIdentifier(ClassDefinition $aggregateClassName, $propertyName): bool
     {
         foreach ($aggregateClassName->getProperties() as $property) {
-            if ($property->hasAnnotation(TypeDescriptor::create(AggregateIdentifier::class)) && $propertyName === $property->getName()) {
+            if ($property->hasAnnotation(TypeDescriptor::create(AggregateIdentifier::class)) && ($propertyName === $property->getName())) {
                 return true;
             }
         }

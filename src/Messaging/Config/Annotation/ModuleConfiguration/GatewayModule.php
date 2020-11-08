@@ -83,6 +83,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     private static function getConverterForParameter(InterfaceParameter $interfaceParameter, string $referenceName): ?GatewayParameterConverterBuilder
     {
         $annotations = $interfaceParameter->getAnnotations();
+
         foreach ($annotations as $parameterAnnotation) {
             if ($parameterAnnotation instanceof Payload) {
                 if ($parameterAnnotation->getExpression()) {

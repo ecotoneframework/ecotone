@@ -106,7 +106,7 @@ class SaveAggregateService
         $version = null;
         if ($nextVersion && $message->getHeaders()->containsKey(AggregateMessage::TARGET_VERSION)) {
             $expectedVersion = $message->getHeaders()->get(AggregateMessage::TARGET_VERSION);
-            if ($expectedVersion && $nextVersion != $expectedVersion + 1) {
+            if ($expectedVersion && ($nextVersion != $expectedVersion + 1)) {
                 throw AggregateVersionMismatchException::create("Aggregate version is different");
             }
         }

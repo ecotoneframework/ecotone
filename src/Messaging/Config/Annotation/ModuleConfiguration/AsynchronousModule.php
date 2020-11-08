@@ -50,7 +50,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
             $asyncAnnotation = $asynchronousMethod->getAnnotationForMethod();
             $inputChannel    = $asyncAnnotation->getChannelName();
             foreach ($endpoints as $key => $endpoint) {
-                if ($endpoint->getClassName() === $asynchronousMethod->getClassName() && $endpoint->getMethodName() === $asynchronousMethod->getMethodName()) {
+                if (($endpoint->getClassName() === $asynchronousMethod->getClassName()) && ($endpoint->getMethodName() === $asynchronousMethod->getMethodName())) {
                     /** @var EndpointAnnotation $annotationForMethod */
                     $annotationForMethod = $endpoint->getAnnotationForMethod();
                     if ($annotationForMethod instanceof QueryHandler) {

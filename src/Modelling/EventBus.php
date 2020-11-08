@@ -31,12 +31,12 @@ interface EventBus
      * @return mixed
      */
     #[MessageGateway(EventBus::CHANNEL_NAME_BY_NAME)]
-    public function convertAndSend(#[Header(EventBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $data);
+    public function convertAndSend(#[Header(EventBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $event);
 
     /**
      * @var mixed $data
      * @return mixed
      */
     #[MessageGateway(EventBus::CHANNEL_NAME_BY_NAME)]
-    public function convertAndSendWithMetadata(#[Header(EventBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $data, #[Headers] array $metadata);
+    public function convertAndSendWithMetadata(#[Header(EventBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $event, #[Headers] array $metadata);
 }

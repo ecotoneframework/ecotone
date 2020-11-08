@@ -33,10 +33,7 @@ class MethodCallToMessageConverter
     }
 
     /**
-     * @param MessageBuilder $messageBuilder
-     * @param array|MethodArgument[] $methodArguments
-     * @return MessageBuilder
-     * @throws \Ecotone\Messaging\MessagingException
+     * @param MethodArgument[] $methodArguments
      */
     public function convertFor(MessageBuilder $messageBuilder, array $methodArguments) : MessageBuilder
     {

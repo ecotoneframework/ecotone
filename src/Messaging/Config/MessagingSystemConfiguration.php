@@ -908,7 +908,7 @@ final class MessagingSystemConfiguration implements Configuration
             )
         );
         foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {
-            if ($this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()]->isPollable() && $messageHandlerBuilder instanceof InterceptedEndpoint) {
+            if ($this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()]->isPollable() && ($messageHandlerBuilder instanceof InterceptedEndpoint)) {
                 $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), $pollableEndpointAnnotations));
             }
         }

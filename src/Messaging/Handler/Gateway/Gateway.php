@@ -109,7 +109,7 @@ class Gateway implements NonProxyGateway
     public function execute(array $methodArgumentValues)
     {
         $internalReplyBridge = null;
-        if (count($methodArgumentValues) === 1 && $methodArgumentValues[0] instanceof Message) {
+        if (count($methodArgumentValues) === 1 && ($methodArgumentValues[0] instanceof Message)) {
             $requestMessage = MessageBuilder::fromMessage($methodArgumentValues[0]);
         } else {
             $methodArguments = [];

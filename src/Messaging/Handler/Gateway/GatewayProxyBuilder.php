@@ -403,7 +403,7 @@ class GatewayProxyBuilder implements GatewayBuilder
         }
         if ($interfaceToCall->hasSecondParameter() && !$this->hasConverterFor($interfaceToCall->getSecondParameter())) {
             if ($interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()) {
-                $methodArgumentConverters[] = GatewayHeadersBuilder::create($interfaceToCall->getFirstParameter()->getName())->build($referenceSearchService);
+                $methodArgumentConverters[] = GatewayHeadersBuilder::create($interfaceToCall->getSecondParameter()->getName())->build($referenceSearchService);
             }
         }
 

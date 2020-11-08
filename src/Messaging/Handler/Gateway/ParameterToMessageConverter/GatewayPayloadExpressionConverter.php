@@ -66,6 +66,6 @@ class GatewayPayloadExpressionConverter implements GatewayParameterConverter
      */
     public function isSupporting(?MethodArgument $methodArgument): bool
     {
-        return $methodArgument && $methodArgument->getParameterName() === $this->parameterName;
+        return $methodArgument && ($methodArgument->getParameterName() === $this->parameterName);
     }
 }

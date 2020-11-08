@@ -55,7 +55,7 @@ class ApplicationConfiguration
             $defaultSerializationMediaType = null;
             foreach ($applicationConfigurations as $applicationConfiguration) {
                 if ($applicationConfiguration->defaultSerializationMediaType) {
-                    if ($defaultSerializationMediaType && $applicationConfiguration->defaultSerializationMediaType !== $defaultSerializationMediaType) {
+                    if ($defaultSerializationMediaType && ($applicationConfiguration->defaultSerializationMediaType !== $defaultSerializationMediaType)) {
                         throw ConfigurationException::create("Ecotone can't resolve defaultSerializationMediaType. In order to continue you need to set it up.");
                     }
                     $defaultSerializationMediaType = $applicationConfiguration->defaultSerializationMediaType;

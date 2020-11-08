@@ -16,7 +16,7 @@ abstract class EndpointAnnotation extends IdentifiedAnnotation
 
     public function __construct(string $inputChannelName = "", string $endpointId = "")
     {
-        if ($inputChannelName && $endpointId && $inputChannelName === $endpointId) {
+        if ($inputChannelName && $endpointId && ($inputChannelName === $endpointId)) {
             throw ConfigurationException::create("endpointId should not equals inputChannelName for endpoint with id: `{$inputChannelName}`");
         }
 

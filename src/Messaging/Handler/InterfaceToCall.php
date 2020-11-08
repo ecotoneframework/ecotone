@@ -38,16 +38,7 @@ class InterfaceToCall
     private ClassDefinition $classDefinition;
 
     /**
-     * InterfaceToCall constructor.
-     *
-     * @param string          $interfaceName
-     * @param string          $methodName
-     * @param ClassDefinition $classDefinition
      * @param object[]        $methodAnnotations
-     *
-     * @throws InvalidArgumentException
-     * @throws ReflectionException
-     * @throws MessagingException
      */
     private function __construct(string $interfaceName, string $methodName, ClassDefinition $classDefinition, iterable $methodAnnotations = [])
     {
@@ -56,17 +47,7 @@ class InterfaceToCall
         $this->classDefinition   = $classDefinition;
     }
 
-    /**
-     * @param string|object $interfaceOrObjectName
-     * @param string        $methodName
-     *
-     * @return InterfaceToCall
-     * @throws InvalidArgumentException
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws MessagingException
-     */
-    public static function create($interfaceOrObjectName, string $methodName): self
+    public static function create(string|object $interfaceOrObjectName, string $methodName): self
     {
         $interface = $interfaceOrObjectName;
         if (is_object($interfaceOrObjectName)) {

@@ -196,8 +196,8 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
                 $this->outputMessageChannelName,
                 TransformerMessageProcessor::createFrom(
                     MethodInvoker::createWith(
+                        $interfaceToCall,
                         $objectToInvokeOn,
-                        $this->methodName,
                         $this->methodParameterConverterBuilders,
                         $referenceSearchService,
                         $channelResolver,

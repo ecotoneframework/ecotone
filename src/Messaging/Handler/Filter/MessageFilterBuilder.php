@@ -141,12 +141,14 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
         }
 
         $discardChannel = $this->discardChannelName ? $channelResolver->resolve($this->discardChannelName) : null;
+        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
+        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
 
         $serviceActivatorBuilder = ServiceActivatorBuilder::createWithDirectReference(
             new MessageFilter(
                 MethodInvoker::createWith(
+                    $interfaceToCallRegistry->getFor($messageSelector, $this->methodName),
                     $messageSelector,
-                    $this->methodName,
                     $this->parameterConverters,
                     $referenceSearchService,
                     $channelResolver,

@@ -103,7 +103,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         if ($this->outputMessageHandler && $this->outputMessageChannelName) {
-            var_dump($this->outputMessageHandler, $this->outputMessageChannelName, $this->chainedMessageHandlerBuilders, $this->inputMessageChannelName);
             throw InvalidArgumentException::create("Can't configure output message handler and output message channel for chain handler");
         }
 

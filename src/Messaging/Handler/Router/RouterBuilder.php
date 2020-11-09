@@ -207,10 +207,12 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
     {
         $objectToInvoke = $this->directObjectToInvoke ? $this->directObjectToInvoke : $referenceSearchService->get($this->objectToInvokeReference);
+        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
+        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
 
         return Router::create(
             $channelResolver,
-            MethodInvoker::createWith($objectToInvoke, $this->methodName, $this->methodParameterConverters, $referenceSearchService),
+            MethodInvoker::createWith($interfaceToCallRegistry->getFor($objectToInvoke, $this->methodName), $objectToInvoke, $this->methodParameterConverters, $referenceSearchService),
             $this->resolutionRequired,
             $this->defaultResolution,
             $this->applySequence

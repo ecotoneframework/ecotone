@@ -3,6 +3,7 @@
 namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
@@ -30,13 +31,12 @@ class CallAggregateService
      */
     private array $aroundMethodInterceptors;
     private bool $isCommandHandler;
-    private string $aggregateClassName;
-    private string $aggregateMethodName;
     private bool $isEventSourced;
     private ?string $eventSourcedFactoryMethod;
     private bool $isFactoryMethod;
+    private InterfaceToCall $aggregateInterface;
 
-    public function __construct(string $aggregateClassName, string $methodName, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, bool $isCommand, bool $isFactoryMethod, ?string $eventSourcedFactoryMethod)
+    public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, bool $isCommand, bool $isFactoryMethod, ?string $eventSourcedFactoryMethod)
     {
         Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
         Assert::allInstanceOfType($aroundMethodInterceptors, AroundInterceptorReference::class);
@@ -46,11 +46,10 @@ class CallAggregateService
         $this->referenceSearchService     = $referenceSearchService;
         $this->aroundMethodInterceptors   = $aroundMethodInterceptors;
         $this->isCommandHandler           = $isCommand;
-        $this->aggregateClassName         = $aggregateClassName;
-        $this->aggregateMethodName        = $methodName;
         $this->isEventSourced             = $isEventSourced;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
         $this->isFactoryMethod = $isFactoryMethod;
+        $this->aggregateInterface = $interfaceToCall;
     }
 
     public function call(Message $message): ?Message
@@ -60,8 +59,8 @@ class CallAggregateService
             : null;
 
         $methodInvoker = MethodInvoker::createWith(
-            $aggregate ? $aggregate : $this->aggregateClassName,
-            $this->aggregateMethodName,
+            $this->aggregateInterface,
+            $aggregate ? $aggregate : $this->aggregateInterface->getInterfaceType()->toString(),
             $this->parameterConverterBuilders,
             $this->referenceSearchService,
             $this->channelResolver,
@@ -77,7 +76,7 @@ class CallAggregateService
                 $resultMessage = $resultMessage
                     ->setHeader(
                         AggregateMessage::AGGREGATE_OBJECT,
-                        call_user_func([$this->aggregateClassName, $this->eventSourcedFactoryMethod], $result)
+                        call_user_func([$this->aggregateInterface->getInterfaceType()->toString(), $this->eventSourcedFactoryMethod], $result)
                     );
             }else {
                 $resultMessage = $resultMessage

@@ -110,7 +110,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
 
         $handler = ServiceActivatorBuilder::createWithDirectReference(
-            new CallAggregateService($this->interfaceToCall->getInterfaceName(), $this->interfaceToCall->getMethodName(), $isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod),
+            new CallAggregateService($this->interfaceToCall, $isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod),
             "call"
         )
             ->withPassThroughMessageOnVoidInterface($this->isVoidMethod)

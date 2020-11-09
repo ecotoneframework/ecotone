@@ -150,8 +150,8 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
             RequestReplyProducer::createRequestAndSplit(
                 $this->outputMessageChannelName,
                 MethodInvoker::createWith(
+                    $interfaceToCall,
                     $objectToInvokeOn,
-                    $this->methodName,
                     $this->methodParameterConverterBuilders,
                     $referenceSearchService,
                     $channelResolver,

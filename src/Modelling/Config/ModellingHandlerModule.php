@@ -306,6 +306,7 @@ class ModellingHandlerModule implements AnnotationModule
         $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
         $hasFactoryAndActionRedirect = count($registrations) === 2;
         if ($hasFactoryAndActionRedirect) {
+            $inputChannelNameRouter = $inputChannelName . ".route";
             $configuration->registerMessageHandler(
                 ChainMessageHandlerBuilder::create()
                     ->withInputChannelName($inputChannelName)
@@ -314,7 +315,11 @@ class ModellingHandlerModule implements AnnotationModule
                         LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $factoryHandledPayloadType, LoadAggregateMode::createContinueOnNotFound())
                             ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
                     )
-                    ->withOutputMessageHandler(RouterBuilder::createHeaderMappingRouter(AggregateMessage::AGGREGATE_OBJECT_EXISTS, [true => $actionChannel, false => $factoryChannel]))
+                    ->withOutputMessageChannel($inputChannelNameRouter)
+            );
+            $configuration->registerMessageHandler(
+                RouterBuilder::createHeaderMappingRouter(AggregateMessage::AGGREGATE_OBJECT_EXISTS, [true => $actionChannel, false => $factoryChannel])
+                    ->withInputChannelName($inputChannelNameRouter)
             );
         }
 

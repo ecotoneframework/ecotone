@@ -44,7 +44,7 @@ class CommandBusRouter
     public function routeByName(?string $name) : array
     {
         if (is_null($name)) {
-            throw DestinationResolutionException::create("Can't send via name using CommandBus without " . CommandBus::CHANNEL_NAME_BY_NAME . " header defined");
+            throw DestinationResolutionException::create("Missing routing key for sending via Command Bus");
         }
 
         if (!array_key_exists($name, $this->channelMapping)) {

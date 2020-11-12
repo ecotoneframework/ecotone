@@ -42,6 +42,6 @@ class SomeQueryHandler
 
     private function callQueryBus(string $action, QueryBus $queryBus, int $sum)
     {
-        return $queryBus->convertAndSend($action, MediaType::APPLICATION_X_PHP, $sum);
+        return $queryBus->sendWithRouting($action, MediaType::APPLICATION_X_PHP, $sum);
     }
 }

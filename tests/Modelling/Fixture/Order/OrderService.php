@@ -25,7 +25,7 @@ class OrderService
     public function register(PlaceOrder $placeOrder, EventBus $eventBus) : void
     {
         $this->orders[] = $placeOrder;
-        $eventBus->sendWithMetadata(new OrderWasPlaced($placeOrder->getOrderId()), []);
+        $eventBus->publishWithMetadata(new OrderWasPlaced($placeOrder->getOrderId()), []);
     }
 
     #[EventHandler(endpointId: "orderPlaced")]

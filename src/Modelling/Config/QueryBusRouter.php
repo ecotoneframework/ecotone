@@ -44,7 +44,7 @@ class QueryBusRouter
     public function routeByName(?string $name) : array
     {
         if (is_null($name)) {
-            throw DestinationResolutionException::create("Can't send via name using QueryBus without " . QueryBus::CHANNEL_NAME_BY_NAME . " header defined");
+            throw DestinationResolutionException::create("Lack of routing key for sending via Query Bus");
         }
 
         if (!array_key_exists($name, $this->channelMapping)) {

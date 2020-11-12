@@ -23,6 +23,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Annotation\AggregateEvents;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\Version;
+use Ecotone\Modelling\Config\BusModule;
 
 /**
  * Class AggregateCallingCommandHandlerBuilder
@@ -103,7 +104,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     {
         $aggregateRepository = $this->getAggregateRepository($referenceSearchService);
 
-        $eventBus = GatewayProxyBuilder::create("", EventBus::class, "sendWithMetadata", EventBus::CHANNEL_NAME_BY_OBJECT)
+        $eventBus = GatewayProxyBuilder::create("", EventBus::class, "publishWithMetadata", BusModule::EVENT_CHANNEL_NAME_BY_OBJECT)
             ->withParameterConverters(
                 [
                     GatewayPayloadBuilder::create("event"),

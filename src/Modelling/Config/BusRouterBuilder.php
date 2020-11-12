@@ -55,8 +55,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     {
         return new self(
             $messageHeadersPropagator,
-            EventBus::CHANNEL_NAME_BY_OBJECT . ".endpoint",
-            EventBus::CHANNEL_NAME_BY_OBJECT,
+            BusModule::EVENT_CHANNEL_NAME_BY_OBJECT . ".endpoint",
+            BusModule::EVENT_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
             "eventByObject"
         );
@@ -72,8 +72,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     {
         return new self(
             $messageHeadersPropagator,
-            EventBus::CHANNEL_NAME_BY_NAME . ".endpoint",
-            EventBus::CHANNEL_NAME_BY_NAME,
+            BusModule::EVENT_CHANNEL_NAME_BY_NAME . ".endpoint",
+            BusModule::EVENT_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
             "eventByName"
         );
@@ -89,8 +89,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     {
         return new self(
             $messageHeadersPropagator,
-            CommandBus::CHANNEL_NAME_BY_OBJECT . ".endpoint",
-            CommandBus::CHANNEL_NAME_BY_OBJECT,
+            BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT . ".endpoint",
+            BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
             "commandByObject"
         );
@@ -106,8 +106,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     {
         return new self(
             $messageHeadersPropagator,
-            CommandBus::CHANNEL_NAME_BY_NAME . ".endpoint",
-            CommandBus::CHANNEL_NAME_BY_NAME,
+            BusModule::COMMAND_CHANNEL_NAME_BY_NAME . ".endpoint",
+            BusModule::COMMAND_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
             "commandByName"
         );
@@ -123,8 +123,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     {
         return new self(
             $messageHeadersPropagator,
-            QueryBus::CHANNEL_NAME_BY_OBJECT . ".endpoint",
-            QueryBus::CHANNEL_NAME_BY_OBJECT,
+            BusModule::QUERY_CHANNEL_NAME_BY_OBJECT . ".endpoint",
+            BusModule::QUERY_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
             "queryByObject"
         );
@@ -140,8 +140,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     {
         return new self(
             $messageHeadersPropagator,
-            QueryBus::CHANNEL_NAME_BY_NAME . ".endpoint",
-            QueryBus::CHANNEL_NAME_BY_NAME,
+            BusModule::QUERY_CHANNEL_NAME_BY_NAME . ".endpoint",
+            BusModule::QUERY_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
             "queryByName"
         );
@@ -167,7 +167,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
                 )
                     ->setResolutionRequired(false)
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional("name", EventBus::CHANNEL_NAME_BY_NAME)
+                        HeaderBuilder::createOptional("name", BusModule::EVENT_CHANNEL_NAME_BY_NAME)
                     ])
                     ->build($channelResolver, $referenceSearchService);
             }
@@ -183,7 +183,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
                     "routeByName"
                 )
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional("name", CommandBus::CHANNEL_NAME_BY_NAME)
+                        HeaderBuilder::createOptional("name", BusModule::COMMAND_CHANNEL_NAME_BY_NAME)
                     ])
                     ->build($channelResolver, $referenceSearchService);
             }
@@ -199,7 +199,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
                     "routeByName"
                 )
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional("name", QueryBus::CHANNEL_NAME_BY_NAME)
+                        HeaderBuilder::createOptional("name", BusModule::QUERY_CHANNEL_NAME_BY_NAME)
                     ])
                     ->build($channelResolver, $referenceSearchService);
             }

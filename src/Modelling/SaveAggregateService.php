@@ -13,6 +13,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Config\BusModule;
 
 /**
  * Class SaveAggregateService
@@ -115,12 +116,12 @@ class SaveAggregateService
         unset($metadata[AggregateMessage::AGGREGATE_ID]);
         unset($metadata[AggregateMessage::AGGREGATE_OBJECT]);
         unset($metadata[AggregateMessage::TARGET_VERSION]);
-        unset($metadata[CommandBus::CHANNEL_NAME_BY_NAME]);
-        unset($metadata[CommandBus::CHANNEL_NAME_BY_OBJECT]);
-        unset($metadata[EventBus::CHANNEL_NAME_BY_NAME]);
-        unset($metadata[EventBus::CHANNEL_NAME_BY_OBJECT]);
-        unset($metadata[QueryBus::CHANNEL_NAME_BY_NAME]);
-        unset($metadata[QueryBus::CHANNEL_NAME_BY_OBJECT]);
+        unset($metadata[BusModule::COMMAND_CHANNEL_NAME_BY_NAME]);
+        unset($metadata[BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT]);
+        unset($metadata[BusModule::EVENT_CHANNEL_NAME_BY_NAME]);
+        unset($metadata[BusModule::EVENT_CHANNEL_NAME_BY_OBJECT]);
+        unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_NAME]);
+        unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_OBJECT]);
         unset($metadata[MessageHeaders::REPLY_CHANNEL]);
 
         if ($this->aggregateRepository instanceof EventSourcedRepository) {

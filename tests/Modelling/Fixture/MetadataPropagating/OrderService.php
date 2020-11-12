@@ -21,7 +21,7 @@ class OrderService
     #[CommandHandler("placeOrder")]
     public function doSomething($command, array $headers, EventBus $eventBus) : void
     {
-        $eventBus->send(new OrderWasPlaced());
+        $eventBus->publish(new OrderWasPlaced());
     }
 
     #[CommandHandler("failAction")]
@@ -33,7 +33,7 @@ class OrderService
     #[EventHandler]
     public function notify(OrderWasPlaced $event, array $headers, CommandBus $commandBus) : void
     {
-        $commandBus->convertAndSendWithMetadata("sendNotification", MediaType::APPLICATION_X_PHP_ARRAY, [], $this->notifyWithCustomHeaders);
+        $commandBus->sendWithRoutingAndMetadata("sendNotification", MediaType::APPLICATION_X_PHP_ARRAY, [], $this->notifyWithCustomHeaders);
     }
 
     #[CommandHandler("setCustomNotificationHeaders")]

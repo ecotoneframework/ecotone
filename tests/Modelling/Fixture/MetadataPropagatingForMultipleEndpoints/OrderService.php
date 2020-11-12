@@ -22,7 +22,7 @@ class OrderService
     #[CommandHandler("placeOrder")]
     public function doSomething($command, array $headers, EventBus $eventBus) : void
     {
-        $eventBus->send(new OrderWasPlaced());
+        $eventBus->publish(new OrderWasPlaced());
     }
 
     #[CommandHandler("failAction")]

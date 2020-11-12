@@ -67,7 +67,7 @@ class EventBusRouter
     public function routeByName(?string $name) : array
     {
         if (is_null($name)) {
-            throw ConfigurationException::create("Can't send via name using EventBus without " . EventBus::CHANNEL_NAME_BY_NAME . " header defined");
+            throw ConfigurationException::create("Lack of routing key for sending via EventBus");
         }
 
         $resultChannels = [];

@@ -12,6 +12,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
+use Ecotone\Modelling\Config\BusModule;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
@@ -45,7 +46,7 @@ class SaveAggregateBuilderTest extends TestCase
         $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray(
                 [
-                    EventBus::CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
                 ]
             ),
             InMemoryReferenceSearchService::createWith(
@@ -102,7 +103,7 @@ class SaveAggregateBuilderTest extends TestCase
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray(
                 [
-                    EventBus::CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
                 ]
             ),
             InMemoryReferenceSearchService::createWith(
@@ -133,7 +134,7 @@ class SaveAggregateBuilderTest extends TestCase
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray(
                 [
-                    EventBus::CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
                 ]
             ),
             InMemoryReferenceSearchService::createWith(

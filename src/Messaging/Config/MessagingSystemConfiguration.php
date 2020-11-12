@@ -46,6 +46,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\Config\BusModule;
 use Ecotone\Modelling\EventBus;
 use Exception;
 use Ramsey\Uuid\Uuid;
@@ -955,10 +956,10 @@ final class MessagingSystemConfiguration implements Configuration
                     $this->messageHandlerBuilders[$targetChannelName] = (
                     TransformerBuilder::createHeaderEnricher(
                         [
-                            CommandBus::CHANNEL_NAME_BY_NAME => null,
-                            CommandBus::CHANNEL_NAME_BY_OBJECT => null,
-                            EventBus::CHANNEL_NAME_BY_OBJECT => null,
-                            EventBus::CHANNEL_NAME_BY_NAME => null,
+                            BusModule::COMMAND_CHANNEL_NAME_BY_NAME => null,
+                            BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT => null,
+                            BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => null,
+                            BusModule::EVENT_CHANNEL_NAME_BY_NAME => null,
                             MessageHeaders::REPLY_CHANNEL => null,
                             MessageHeaders::ROUTING_SLIP => $targetChannelName
                         ]

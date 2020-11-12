@@ -2,41 +2,28 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Annotation\MessageGateway;
-use Ecotone\Messaging\Annotation\Parameter\Header;
-use Ecotone\Messaging\Annotation\Parameter\Headers;
-use Ecotone\Messaging\Annotation\Parameter\Payload;
-use Ecotone\Messaging\MessageHeaders;
-
 interface EventBus
 {
-    const CHANNEL_NAME_BY_OBJECT = "ecotone.modelling.bus.event_by_object";
-    const CHANNEL_NAME_BY_NAME   = "ecotone.modelling.bus.event_by_name";
+    /**
+     * @return mixed
+     */
+    public function publish(object $event);
 
     /**
      * @return mixed
      */
-    #[MessageGateway(EventBus::CHANNEL_NAME_BY_OBJECT)]
-    public function send(object $event);
+    public function publishWithMetadata(object $event, array $metadata);
+
 
     /**
      * @return mixed
-     */
-    #[MessageGateway(EventBus::CHANNEL_NAME_BY_OBJECT)]
-    public function sendWithMetadata(object $event, array $metadata);
-
-
-    /**
      * @var mixed $data
-     * @return mixed
      */
-    #[MessageGateway(EventBus::CHANNEL_NAME_BY_NAME)]
-    public function convertAndSend(#[Header(EventBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $event);
+    public function publishWithRouting(string $routingKey, string $eventMediaType, $event);
 
     /**
-     * @var mixed $data
      * @return mixed
+     * @var mixed $data
      */
-    #[MessageGateway(EventBus::CHANNEL_NAME_BY_NAME)]
-    public function convertAndSendWithMetadata(#[Header(EventBus::CHANNEL_NAME_BY_NAME)] string $name, #[Header(MessageHeaders::CONTENT_TYPE)] string $sourceMediaType, #[Payload] $event, #[Headers] array $metadata);
+    public function publishWithRoutingAndMetadata(string $routingKey, string $eventMediaType, $event, array $metadata);
 }

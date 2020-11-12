@@ -65,7 +65,7 @@ class DomainContext extends TestCase implements Context
      */
     public function thereShouldBeProductsForOrderWithIdRetrievedFrom(int $productsAmount, int $orderId, string $channelName)
     {
-        $executeWithContentType = AnnotationBasedMessagingContext::getQueryBus()->convertAndSend($channelName, MediaType::APPLICATION_X_PHP_SERIALIZED, serialize(GetOrderAmountQuery::createWith($orderId)));
+        $executeWithContentType = AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting($channelName, MediaType::APPLICATION_X_PHP_SERIALIZED, serialize(GetOrderAmountQuery::createWith($orderId)));
         $this->assertEquals(
             $productsAmount,
             $executeWithContentType
@@ -80,7 +80,7 @@ class DomainContext extends TestCase implements Context
      */
     public function thereShouldNotificationAwaitingNotification(int $numberOfNotifications)
     {
-        $this->assertCount($numberOfNotifications, AnnotationBasedMessagingContext::getQueryBus()->convertAndSend(
+        $this->assertCount($numberOfNotifications, AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
             "getOrderNotifications",
             MediaType::APPLICATION_X_PHP,
             []
@@ -92,7 +92,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iRegisterShopWithMargin(int $margin)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "shop.register",
             MediaType::APPLICATION_X_PHP_ARRAY,
             ["shopId" => 1, "margin" => $margin]
@@ -106,7 +106,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $expectedPrice,
-            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend(
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
                 "shop.calculatePrice",
                 MediaType::APPLICATION_X_PHP_ARRAY,
                 ["shopId" => 1, "productType" => $productType]
@@ -119,7 +119,7 @@ class DomainContext extends TestCase implements Context
      */
     public function currentTimeIs(string $currentTime)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "changeCurrentTime",
             MediaType::APPLICATION_X_PHP,
             $currentTime
@@ -131,7 +131,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iSendLogWithInformation(string $logData)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "log",
             MediaType::APPLICATION_X_PHP_ARRAY,
             [
@@ -146,7 +146,7 @@ class DomainContext extends TestCase implements Context
      */
     public function currentUserIs(string $currentUser)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "changeExecutorId",
             MediaType::APPLICATION_X_PHP,
             $currentUser
@@ -163,7 +163,7 @@ class DomainContext extends TestCase implements Context
                 "event" => new EventWasLogged(["data" => $expectedLogData, "executorId" => $userId, "loggerId" => 1]),
                 "happenedAt" => $expectedTime
             ],
-            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend(
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
                 "getLastLog",
                 MediaType::APPLICATION_X_PHP_ARRAY,
                 []
@@ -191,7 +191,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iNotifyAboutOrderWithInformation(string $logData)
     {
-        AnnotationBasedMessagingContext::getEventBus()->convertAndSend(
+        AnnotationBasedMessagingContext::getEventBus()->publishWithRouting(
             "order.was_created",
             MediaType::APPLICATION_X_PHP_ARRAY,
             [
@@ -221,7 +221,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iPlaceOrderWithMetadata(string $headerName, $value)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->convertAndSendWithMetadata(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRoutingAndMetadata(
             "placeOrder",
             MediaType::APPLICATION_X_PHP_ARRAY,
             [],
@@ -234,7 +234,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iPlaceOrderWithNoAdditionalMetadata()
     {
-        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "placeOrder",
             MediaType::APPLICATION_X_PHP_ARRAY,
             []
@@ -248,7 +248,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $value,
-            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend("getNotificationHeaders", MediaType::APPLICATION_X_PHP_ARRAY, [])[$headerName]
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("getNotificationHeaders", MediaType::APPLICATION_X_PHP_ARRAY, [])[$headerName]
         );
     }
 
@@ -259,7 +259,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertArrayNotHasKey(
             "token",
-            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend("getNotificationHeaders", MediaType::APPLICATION_X_PHP_ARRAY, [])
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("getNotificationHeaders", MediaType::APPLICATION_X_PHP_ARRAY, [])
         );
     }
 
@@ -268,7 +268,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iOverrideHeaderWith(string $headerName, $value)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->convertAndSendWithMetadata(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRoutingAndMetadata(
             "setCustomNotificationHeaders",
             MediaType::APPLICATION_X_PHP_ARRAY,
             [],
@@ -282,7 +282,7 @@ class DomainContext extends TestCase implements Context
     public function nextCommandFailsWith(string $headerName, $headerValue)
     {
         try {
-            AnnotationBasedMessagingContext::getCommandBus()->convertAndSendWithMetadata(
+            AnnotationBasedMessagingContext::getCommandBus()->sendWithRoutingAndMetadata(
                 "failAction",
                 MediaType::APPLICATION_X_PHP_ARRAY,
                 [],
@@ -296,7 +296,7 @@ class DomainContext extends TestCase implements Context
      */
     public function currentUserId(string $userId)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "addCurrentUserId",
             MediaType::APPLICATION_X_PHP,
             $userId
@@ -310,7 +310,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertContains(
             $item,
-            AnnotationBasedMessagingContext::getQueryBus()->convertAndSend(
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
                 "basket.get",
                 MediaType::APPLICATION_X_PHP_ARRAY,
                 [
@@ -325,7 +325,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iAddToBasket(string $item)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->convertAndSend(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "basket.add",
             MediaType::APPLICATION_X_PHP_ARRAY,
             [

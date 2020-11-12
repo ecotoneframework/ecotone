@@ -2,6 +2,8 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Conversion\MediaType;
+
 interface EventBus
 {
     /**
@@ -19,11 +21,11 @@ interface EventBus
      * @return mixed
      * @var mixed $data
      */
-    public function publishWithRouting(string $routingKey, string $eventMediaType, $event);
+    public function publishWithRouting(string $routingKey, $event, string $eventMediaType = MediaType::APPLICATION_X_PHP);
 
     /**
      * @return mixed
      * @var mixed $data
      */
-    public function publishWithRoutingAndMetadata(string $routingKey, string $eventMediaType, $event, array $metadata);
+    public function publishWithRoutingAndMetadata(string $routingKey, $event, string $eventMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []);
 }

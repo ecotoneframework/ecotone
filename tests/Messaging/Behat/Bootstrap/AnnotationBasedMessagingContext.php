@@ -319,7 +319,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function calendarShouldContainEventWithAppointmentId(int $appointmentId)
     {
-        Assert::assertTrue(self::getQueryBus()->sendWithRouting("doesCalendarContainAppointments", MediaType::APPLICATION_X_PHP, $appointmentId));
+        Assert::assertTrue(self::getQueryBus()->sendWithRouting("doesCalendarContainAppointments", $appointmentId));
     }
 
     /**
@@ -406,7 +406,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     {
         $this->assertEquals(
             [],
-            $this->getQueryBus()->sendWithRouting("order.getOrders", MediaType::APPLICATION_X_PHP, [])
+            $this->getQueryBus()->sendWithRouting("order.getOrders", [])
         );
     }
 
@@ -425,7 +425,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     {
         $this->assertEquals(
             [new PlaceOrder($order)],
-            $this->getQueryBus()->sendWithRouting("order.getOrders", MediaType::APPLICATION_X_PHP, [])
+            $this->getQueryBus()->sendWithRouting("order.getOrders", [])
         );
     }
 
@@ -434,7 +434,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iOrderProduct(string $order)
     {
-        return $this->getCommandBus()->sendWithRouting("order.register", MediaType::APPLICATION_X_PHP, new PlaceOrder($order));
+        return $this->getCommandBus()->sendWithRouting("order.register", new PlaceOrder($order));
     }
 
 
@@ -443,7 +443,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function thereShouldBeOrder(string $orderName)
     {
-        Assert::assertNotNull($this->getQueryBus()->sendWithRouting("order.getOrder", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
+        Assert::assertNotNull($this->getQueryBus()->sendWithRouting("order.getOrder", ["orderId" => $orderName]));
     }
 
     /**
@@ -453,7 +453,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     {
         $aggregateFound = true;
         try {
-            $this->getQueryBus()->sendWithRouting("order.getOrder", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]);
+            $this->getQueryBus()->sendWithRouting("order.getOrder", ["orderId" => $orderName]);
         }catch (AggregateNotFoundException $exception) {
             $aggregateFound = false;
         }
@@ -466,7 +466,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function notificationListShouldBeEmpty()
     {
-        Assert::assertEmpty($this->getQueryBus()->sendWithRouting("order.getNotifiedOrders", MediaType::APPLICATION_X_PHP_ARRAY, []));
+        Assert::assertEmpty($this->getQueryBus()->sendWithRouting("order.getNotifiedOrders", []));
     }
 
     /**
@@ -476,7 +476,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     {
         $this->assertEquals(
             [$orderName],
-            $this->getQueryBus()->sendWithRouting("order.getNotifiedOrders", MediaType::APPLICATION_X_PHP_ARRAY, [])
+            $this->getQueryBus()->sendWithRouting("order.getNotifiedOrders", [])
         );
     }
 
@@ -485,7 +485,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function noNotificationFor(string $orderName)
     {
-        $this->assertEquals(0, $this->getQueryBus()->sendWithRouting("order.wasNotified", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
+        $this->assertEquals(0, $this->getQueryBus()->sendWithRouting("order.wasNotified", ["orderId" => $orderName]));
     }
 
     /**
@@ -493,7 +493,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function thereShouldBeNotificationAboutTime(string $orderName, int $number)
     {
-        $this->assertEquals($number, $this->getQueryBus()->sendWithRouting("order.wasNotified", MediaType::APPLICATION_X_PHP_ARRAY, ["orderId" => $orderName]));
+        $this->assertEquals($number, $this->getQueryBus()->sendWithRouting("order.wasNotified", ["orderId" => $orderName]));
     }
 
     /**
@@ -501,7 +501,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function logsCountBe(int $count)
     {
-        $this->assertEquals($count, count($this->getQueryBus()->sendWithRouting("getLogs", MediaType::APPLICATION_X_PHP_ARRAY, [])));
+        $this->assertEquals($count, count($this->getQueryBus()->sendWithRouting("getLogs", [])));
     }
 
     /**

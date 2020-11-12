@@ -65,7 +65,7 @@ class DomainContext extends TestCase implements Context
      */
     public function thereShouldBeProductsForOrderWithIdRetrievedFrom(int $productsAmount, int $orderId, string $channelName)
     {
-        $executeWithContentType = AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting($channelName, MediaType::APPLICATION_X_PHP_SERIALIZED, serialize(GetOrderAmountQuery::createWith($orderId)));
+        $executeWithContentType = AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting($channelName, serialize(GetOrderAmountQuery::createWith($orderId)), MediaType::APPLICATION_X_PHP_SERIALIZED);
         $this->assertEquals(
             $productsAmount,
             $executeWithContentType
@@ -82,7 +82,6 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertCount($numberOfNotifications, AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
             "getOrderNotifications",
-            MediaType::APPLICATION_X_PHP,
             []
         ));
     }
@@ -94,8 +93,8 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "shop.register",
-            MediaType::APPLICATION_X_PHP_ARRAY,
-            ["shopId" => 1, "margin" => $margin]
+            ["shopId" => 1, "margin" => $margin],
+            MediaType::APPLICATION_X_PHP_ARRAY
         );
     }
 
@@ -108,7 +107,6 @@ class DomainContext extends TestCase implements Context
             $expectedPrice,
             AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
                 "shop.calculatePrice",
-                MediaType::APPLICATION_X_PHP_ARRAY,
                 ["shopId" => 1, "productType" => $productType]
             )
         );
@@ -121,7 +119,6 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "changeCurrentTime",
-            MediaType::APPLICATION_X_PHP,
             $currentTime
         );
     }
@@ -133,7 +130,6 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "log",
-            MediaType::APPLICATION_X_PHP_ARRAY,
             [
                 "loggerId" => 1,
                 "data" => $logData
@@ -148,7 +144,6 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "changeExecutorId",
-            MediaType::APPLICATION_X_PHP,
             $currentUser
         );
     }
@@ -165,7 +160,6 @@ class DomainContext extends TestCase implements Context
             ],
             AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
                 "getLastLog",
-                MediaType::APPLICATION_X_PHP_ARRAY,
                 []
             )
         );
@@ -193,7 +187,6 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getEventBus()->publishWithRouting(
             "order.was_created",
-            MediaType::APPLICATION_X_PHP_ARRAY,
             [
                 "loggerId" => 1,
                 "data" => $logData
@@ -223,8 +216,8 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRoutingAndMetadata(
             "placeOrder",
-            MediaType::APPLICATION_X_PHP_ARRAY,
             [],
+            MediaType::APPLICATION_X_PHP_ARRAY,
             [$headerName => $value]
         );
     }
@@ -236,8 +229,8 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "placeOrder",
-            MediaType::APPLICATION_X_PHP_ARRAY,
-            []
+            [],
+            MediaType::APPLICATION_X_PHP_ARRAY
         );
     }
 
@@ -248,7 +241,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $value,
-            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("getNotificationHeaders", MediaType::APPLICATION_X_PHP_ARRAY, [])[$headerName]
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("getNotificationHeaders", [])[$headerName]
         );
     }
 
@@ -259,7 +252,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertArrayNotHasKey(
             "token",
-            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("getNotificationHeaders", MediaType::APPLICATION_X_PHP_ARRAY, [])
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("getNotificationHeaders", [])
         );
     }
 
@@ -270,8 +263,8 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRoutingAndMetadata(
             "setCustomNotificationHeaders",
-            MediaType::APPLICATION_X_PHP_ARRAY,
             [],
+            MediaType::APPLICATION_X_PHP_ARRAY,
             [$headerName => $value]
         );
     }
@@ -284,8 +277,8 @@ class DomainContext extends TestCase implements Context
         try {
             AnnotationBasedMessagingContext::getCommandBus()->sendWithRoutingAndMetadata(
                 "failAction",
-                MediaType::APPLICATION_X_PHP_ARRAY,
                 [],
+                MediaType::APPLICATION_X_PHP_ARRAY,
                 [$headerName => $headerValue]
             );
         }catch (\Exception $exception) {}
@@ -298,7 +291,6 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "addCurrentUserId",
-            MediaType::APPLICATION_X_PHP,
             $userId
         );
     }
@@ -312,7 +304,6 @@ class DomainContext extends TestCase implements Context
             $item,
             AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
                 "basket.get",
-                MediaType::APPLICATION_X_PHP_ARRAY,
                 [
                     "item" => $item
                 ]
@@ -327,10 +318,10 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "basket.add",
-            MediaType::APPLICATION_X_PHP_ARRAY,
             [
                 "item" => $item
-            ]
+            ],
+            MediaType::APPLICATION_X_PHP_ARRAY
         );
     }
 }

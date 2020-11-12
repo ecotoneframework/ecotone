@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Conversion\MediaType;
+
 interface CommandBus
 {
     /**
@@ -24,7 +26,7 @@ interface CommandBus
      * @var mixed $command
      */
     public function sendWithRouting(
-        string $routingKey, string $commandMediaType, $command
+        string $routingKey, $command, string $commandMediaType = MediaType::APPLICATION_X_PHP
     );
 
     /**
@@ -32,6 +34,6 @@ interface CommandBus
      * @var mixed $command
      */
     public function sendWithRoutingAndMetadata(
-        string $routingKey, string $commandMediaType, $command, array $metadata
+        string $routingKey, $command, string $commandMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []
     );
 }

@@ -10,7 +10,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
-use Ecotone\Messaging\Config\OneTimeCommandParameter;
+use Ecotone\Messaging\Config\ConsoleCommandParameter;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
@@ -116,7 +116,7 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $this->assertEquals(
             $configuration,
             $this->createMessagingSystemConfiguration()
-                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [OneTimeCommandParameter::create("name"), OneTimeCommandParameter::create("surname")]))
+                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name"), ConsoleCommandParameter::create("surname")]))
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::createWithDirectReference(new ParametersOneTimeCommandExample(), "execute")
                         ->withMethodParameterConverters([
@@ -143,7 +143,7 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $this->assertEquals(
             $configuration,
             $this->createMessagingSystemConfiguration()
-                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [OneTimeCommandParameter::create("name"), OneTimeCommandParameter::createWithDefaultValue("surname", "cash")]))
+                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name"), ConsoleCommandParameter::createWithDefaultValue("surname", "cash")]))
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::createWithDirectReference(new DefaultParametersOneTimeCommandExample(), "execute")
                         ->withMethodParameterConverters([
@@ -170,7 +170,7 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $this->assertEquals(
             $configuration,
             $this->createMessagingSystemConfiguration()
-                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [OneTimeCommandParameter::create("name"), OneTimeCommandParameter::create("surname")]))
+                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name"), ConsoleCommandParameter::create("surname")]))
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::createWithDirectReference(new ParametersWithReferenceOneTimeCommandExample(), "execute")
                         ->withMethodParameterConverters([

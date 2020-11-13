@@ -250,7 +250,8 @@ class ChainMessageHandlerBuilderTest extends TestCase
             "around",
             CalculatingServiceInterceptorExample::create(1), "resultAfterCalling",
             1,
-            ConsumerContinuouslyWorkingService::class
+            ConsumerContinuouslyWorkingService::class,
+            []
         );
 
         $chainHandler               = ChainMessageHandlerBuilder::create()
@@ -282,7 +283,8 @@ class ChainMessageHandlerBuilderTest extends TestCase
             "around",
             CalculatingServiceInterceptorExample::create(1), "sumAfterCalling",
             1,
-            ConsumerContinuouslyWorkingService::class
+            ConsumerContinuouslyWorkingService::class,
+            []
         );
 
         $chainHandler               = ChainMessageHandlerBuilder::create()
@@ -318,7 +320,8 @@ class ChainMessageHandlerBuilderTest extends TestCase
             "around",
             CalculatingServiceInterceptorExample::create(10), "sumAfterCalling",
             1,
-            ConsumerContinuouslyWorkingService::class
+            ConsumerContinuouslyWorkingService::class,
+            []
         );
 
         $chainHandler               = ChainMessageHandlerBuilder::create()

@@ -60,7 +60,8 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             new ExceptionLoggingInterceptorBuilder(),
             "logException",
             Precedence::EXCEPTION_LOGGING_PRECEDENCE,
-            ""
+            "",
+            []
         ));
         $this->entrypointGateway->addAroundInterceptor(
             AroundInterceptorReference::createWithObjectBuilder(
@@ -68,7 +69,8 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
                 new ExceptionLoggingInterceptorBuilder(),
                 "logBefore",
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 100,
-                ""
+                "",
+                []
             )
         );
     }

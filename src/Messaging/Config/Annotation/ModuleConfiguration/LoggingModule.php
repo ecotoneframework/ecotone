@@ -70,7 +70,8 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 new ExceptionLoggingInterceptorBuilder(),
                 "logException",
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
-                LogError::class
+                LogError::class,
+                []
             )
         );
     }

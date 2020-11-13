@@ -101,7 +101,8 @@ class ModellingMessageRouterModule implements AnnotationModule
                     $this->messageHeadersPropagator,
                     "storeHeaders",
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class
+                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class,
+                    []
                 )
             )
             ->registerMessageHandler($this->commandBusByObject)

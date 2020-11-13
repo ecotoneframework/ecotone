@@ -43,7 +43,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                 ),
                 HeaderExpressionBuilder::create("name", "token", "value", false)
             ],
-            $parameterConverterAnnotationFactory->createParameterConvertersWithReferences(
+            $parameterConverterAnnotationFactory->createParameterWithDefaults(
                 InterfaceToCall::create($relatedClassName, $methodName),
                 false
             )

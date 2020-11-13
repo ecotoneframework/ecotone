@@ -188,7 +188,8 @@ class MessageFilterBuilderTest extends MessagingTest
             ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject(
                 "someId",
                 CallWithEndingChainAndReturningInterceptorExample::createWithReturnType(false), "callWithEndingChainAndReturning",
-                1, ""
+                1, "",
+                []
             ))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([

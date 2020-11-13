@@ -88,7 +88,8 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
                     $methodInterceptor->getMethodName(),
                     $aroundInterceptor->precedence,
-                    $aroundInterceptor->pointcut
+                    $aroundInterceptor->pointcut,
+                    $parameterConverterFactory->createParameterConverters($interceptorInterface)
                 );
             }
 
@@ -139,7 +140,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $annotationForMethod = $methodInterceptor->getAnnotationForMethod();
         $isTransformer       = $annotationForMethod->changeHeaders;
 
-        $methodParameterConverterBuilders = $parameterConverterFactory->createParameterConvertersWithReferences($interfaceToCall, (bool)$interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)));
+        $methodParameterConverterBuilders = $parameterConverterFactory->createParameterWithDefaults($interfaceToCall, (bool)$interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)));
         if ($isTransformer) {
             return TransformerBuilder::create(AnnotatedDefinitionReference::getReferenceFor($methodInterceptor), $methodInterceptor->getMethodName())
                 ->withMethodParameterConverters($methodParameterConverterBuilders);

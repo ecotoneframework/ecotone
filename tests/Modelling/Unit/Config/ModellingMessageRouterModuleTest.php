@@ -102,7 +102,8 @@ class ModellingMessageRouterModuleTest extends MessagingTest
                         new MessageHeadersPropagator(),
                         "storeHeaders",
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class
+                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class,
+                        []
                     )
                 )
                 ->registerMessageHandler(BusRouterBuilder::createCommandBusByObject($messagePropagator, $commandObjectMapping))

@@ -21,6 +21,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\MessagingException;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\AroundInterceptorWithCustomParameterConverters;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorWithServicesExample;
@@ -43,9 +44,9 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     public function test_registering_around_method_level_interceptor()
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
-            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "sum", 2, CalculatingServiceInterceptorExample::class))
-            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "subtract", Precedence::DEFAULT_PRECEDENCE, ""))
-            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "multiply", 2, CalculatingServiceInterceptorExample::class));
+            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "sum", 2, CalculatingServiceInterceptorExample::class, []))
+            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "subtract", Precedence::DEFAULT_PRECEDENCE, "", []))
+            ->registerAroundMethodInterceptor(AroundInterceptorReference::create("calculatingService", "calculatingService", "multiply", 2, CalculatingServiceInterceptorExample::class, []));
 
         $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
             CalculatingServiceInterceptorExample::class
@@ -64,6 +65,30 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         );
     }
 
+    public function test_registering_around_method_level_interceptor_with_parameter_converters()
+    {
+        $expectedConfiguration = $this->createMessagingSystemConfiguration()
+            ->registerAroundMethodInterceptor(
+                AroundInterceptorReference::create(AroundInterceptorWithCustomParameterConverters::class, AroundInterceptorWithCustomParameterConverters::class, "handle", 1, AroundInterceptorWithCustomParameterConverters::class, [])
+                    ->withParameterConverters([
+                        HeaderBuilder::create("token", "token"),
+                        PayloadBuilder::create("payload"),
+                        AllHeadersBuilder::createWith("headers")
+                    ])
+            );
+
+        $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
+            AroundInterceptorWithCustomParameterConverters::class
+        ]);
+        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
+        $configuration = $this->createMessagingSystemConfiguration();
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+
+        $this->assertEquals(
+            $expectedConfiguration,
+            $configuration
+        );
+    }
 
     public function test_registering_before_and_after_with_payload_modification()
     {

@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Config;
 
-class OneTimeCommandResultSet
+class ConsoleCommandResultSet
 {
     private array $columnHeaders;
     private array $rows;

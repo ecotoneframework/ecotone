@@ -7,12 +7,12 @@ class ConsoleCommandConfiguration
     private string $name;
     private string $channelName;
     /**
-     * @var OneTimeCommandParameter[]
+     * @var ConsoleCommandParameter[]
      */
     private array $parameterNames;
 
     /**
-     * @var OneTimeCommandParameter[] $parameterNames
+     * @var ConsoleCommandParameter[] $parameterNames
      */
     private function __construct(string $channelName, string $name, array $parameterNames)
     {
@@ -22,7 +22,7 @@ class ConsoleCommandConfiguration
     }
 
     /**
-     * @var OneTimeCommandParameter[] $parameterNames
+     * @var ConsoleCommandParameter[] $parameterNames
      */
     public static function create(string $channelName, string $name, array $parameterNames) : self
     {
@@ -40,7 +40,7 @@ class ConsoleCommandConfiguration
     }
 
     /**
-     * @return OneTimeCommandParameter[]
+     * @return ConsoleCommandParameter[]
      */
     public function getParameters(): array
     {

@@ -3,84 +3,59 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use ReflectionException;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ReferenceNotFoundException;
+use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Interface MethodInterceptor
  * @package Ecotone\Messaging\MethodInterceptor
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AroundMethodInterceptor
 {
     private object $referenceToCall;
-    private \Ecotone\Messaging\Handler\InterfaceToCall $interceptorInterfaceToCall;
-    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private InterfaceToCall $interceptorInterfaceToCall;
+    private ReferenceSearchService $referenceSearchService;
+    /** @var ParameterConverter[] */
+    private array $parameterConverters;
 
-    /**
-     * MethodInterceptor constructor.
-     * @param object $referenceToCall
-     * @param InterfaceToCall $interfaceToCall
-     * @param ReferenceSearchService $referenceSearchService
-     * @throws MessagingException
-     * @throws TypeDefinitionException
-     */
-    private function __construct($referenceToCall, InterfaceToCall $interfaceToCall, ReferenceSearchService $referenceSearchService)
+
+    private function __construct(object $referenceToCall, InterfaceToCall $interfaceToCall, ReferenceSearchService $referenceSearchService, array $parameterConverters)
     {
-        Assert::isObject($referenceToCall, "Method Interceptor should point to instance not class name");
-
         if ($interfaceToCall->canReturnValue() && !$this->hasMethodInvocationParameter($interfaceToCall)) {
             throw InvalidArgumentException::create("Trying to register {$interfaceToCall} as Around Advice which can return value, but doesn't control invocation using " . MethodInvocation::class . ". Have you wanted to register Before/After Advice or forgot to type hint MethodInvocation?");
         }
 
-        $this->referenceToCall = $referenceToCall;
+        $this->referenceToCall            = $referenceToCall;
         $this->interceptorInterfaceToCall = $interfaceToCall;
-        $this->referenceSearchService = $referenceSearchService;
+        $this->referenceSearchService     = $referenceSearchService;
+        $this->parameterConverters = $parameterConverters;
     }
 
     /**
-     * @param InterfaceToCall $interfaceToCall
-     * @return bool
-     * @throws TypeDefinitionException
-     * @throws MessagingException
+     * @var ParameterConverter[] $parameterConverters
      */
-    private function hasMethodInvocationParameter(InterfaceToCall $interfaceToCall): bool
-    {
-        $methodInvocation = TypeDescriptor::create(MethodInvocation::class);
-        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-            if ($interfaceParameter->canBePassedIn($methodInvocation)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService): self
+    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService, array $parameterConverters): self
     {
         /** @var InterfaceToCallRegistry $interfaceRegistry */
         $interfaceRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
 
         $interfaceToCall = $interfaceRegistry->getFor($referenceToCall, $methodName);
 
-        return new self($referenceToCall, $interfaceToCall, $referenceSearchService);
+        return new self($referenceToCall, $interfaceToCall, $referenceSearchService, $parameterConverters);
     }
 
     /**
      * @param MethodInvocation $methodInvocation
-     * @param MethodCall $methodCall
-     * @param Message $requestMessage
+     * @param MethodCall       $methodCall
+     * @param Message          $requestMessage
      *
      * @return mixed
      * @throws TypeDefinitionException
@@ -90,17 +65,22 @@ class AroundMethodInterceptor
     {
         $methodInvocationType = TypeDescriptor::create(MethodInvocation::class);
 
-        $hasMethodInvocation = false;
-        $argumentsToCallInterceptor = [];
-        $interceptedInstanceType = is_string($methodInvocation->getObjectToInvokeOn()) ? TypeDescriptor::create($methodInvocation->getObjectToInvokeOn()) : TypeDescriptor::createFromVariable($methodInvocation->getObjectToInvokeOn());
+        $hasMethodInvocation                  = false;
+        $argumentsToCallInterceptor           = [];
+        $interceptedInstanceType              = is_string($methodInvocation->getObjectToInvokeOn()) ? TypeDescriptor::create($methodInvocation->getObjectToInvokeOn()) : TypeDescriptor::createFromVariable($methodInvocation->getObjectToInvokeOn());
         $referenceSearchServiceTypeDescriptor = TypeDescriptor::create(ReferenceSearchService::class);
-        $messageType = TypeDescriptor::create(Message::class);
-        $messagePayloadType = $requestMessage->getHeaders()->hasContentType() && $requestMessage->getHeaders()->getContentType()->hasTypeParameter()
-                                ? $requestMessage->getHeaders()->getContentType()->getTypeParameter()
-                                : TypeDescriptor::createFromVariable($requestMessage->getPayload());
+        $messageType                          = TypeDescriptor::create(Message::class);
+        $messagePayloadType                   = $requestMessage->getHeaders()->hasContentType() && $requestMessage->getHeaders()->getContentType()->hasTypeParameter()
+            ? $requestMessage->getHeaders()->getContentType()->getTypeParameter()
+            : TypeDescriptor::createFromVariable($requestMessage->getPayload());
 
         foreach ($this->interceptorInterfaceToCall->getInterfaceParameters() as $parameter) {
             $resolvedArgument = null;
+            foreach ($this->parameterConverters as $parameterConverter) {
+                if ($parameterConverter->isHandling($parameter)) {
+                    $resolvedArgument = $parameterConverter->getArgumentFrom($this->interceptorInterfaceToCall, $parameter, $requestMessage, []);
+                }
+            }
 
             if (!$resolvedArgument && $parameter->canBePassedIn($messagePayloadType)) {
                 $resolvedArgument = $requestMessage->getPayload();
@@ -108,7 +88,7 @@ class AroundMethodInterceptor
 
             if (!$resolvedArgument && $parameter->canBePassedIn($methodInvocationType)) {
                 $hasMethodInvocation = true;
-                $resolvedArgument = $methodInvocation;
+                $resolvedArgument    = $methodInvocation;
             }
 
             if (!$resolvedArgument && $parameter->canBePassedIn($interceptedInstanceType)) {
@@ -144,7 +124,7 @@ class AroundMethodInterceptor
                     $resolvedArgument = $methodArgument->value();
                 }
             }
-    
+
             if (!$resolvedArgument && $parameter->getTypeDescriptor()->isNonCollectionArray()) {
                 $resolvedArgument = $requestMessage->getHeaders()->headers();
             }
@@ -166,5 +146,24 @@ class AroundMethodInterceptor
         }
 
         return $returnValue;
+    }
+
+    /**
+     * @param InterfaceToCall $interfaceToCall
+     *
+     * @return bool
+     * @throws TypeDefinitionException
+     * @throws MessagingException
+     */
+    private function hasMethodInvocationParameter(InterfaceToCall $interfaceToCall): bool
+    {
+        $methodInvocation = TypeDescriptor::create(MethodInvocation::class);
+        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+            if ($interfaceParameter->canBePassedIn($methodInvocation)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

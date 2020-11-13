@@ -33,7 +33,7 @@ abstract class InterceptedMessageHandlerConsumerBuilder implements MessageHandle
                     $interceptor,
                     "postSend",
                     Precedence::ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE,
-                    ""
+                    "", []
                 )
             );
         }

@@ -18,8 +18,8 @@ use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
-use Ecotone\Messaging\Config\OneTimeCommandParameter;
-use Ecotone\Messaging\Config\OneTimeCommandResultSet;
+use Ecotone\Messaging\Config\ConsoleCommandParameter;
+use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -80,8 +80,8 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
 
         $interfaceToCall = InterfaceToCall::create($className, $methodName);
 
-        if ($interfaceToCall->canReturnValue() && !$interfaceToCall->getReturnType()->equals(TypeDescriptor::create(OneTimeCommandResultSet::class))) {
-            throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must have void or " . OneTimeCommandResultSet::class . " return type");
+        if ($interfaceToCall->canReturnValue() && !$interfaceToCall->getReturnType()->equals(TypeDescriptor::create(ConsoleCommandResultSet::class))) {
+            throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must have void or " . ConsoleCommandResultSet::class . " return type");
         }
 
         foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
@@ -90,8 +90,8 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
             } else {
                 $parameterConverters[] = HeaderBuilder::create($interfaceParameter->getName(), self::ECOTONE_COMMAND_PARAMETER_PREFIX . $interfaceParameter->getName());
                 $parameters[]          = $interfaceParameter->hasDefaultValue()
-                    ? OneTimeCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $interfaceParameter->getDefaultValue())
-                    : OneTimeCommandParameter::create($interfaceParameter->getName());
+                    ? ConsoleCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $interfaceParameter->getDefaultValue())
+                    : ConsoleCommandParameter::create($interfaceParameter->getName());
             }
         }
 

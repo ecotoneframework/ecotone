@@ -4,113 +4,125 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Precedence;
-use ReflectionException;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\ReferenceNotFoundException;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use ReflectionException;
 
-/**
- * Class InterceptorReference
- * @package Ecotone\Messaging\Handler
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
-class AroundInterceptorReference implements InterceptorWithPointCut
+final class AroundInterceptorReference implements InterceptorWithPointCut
 {
     private int $precedence;
     private string $interceptorName;
     private string $methodName;
-    private \Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut $pointcut;
+    private Pointcut $pointcut;
     private ?object $directObject = null;
     private string $referenceName = "";
+    /**
+     * @var ParameterConverterBuilder[]
+     */
+    private array $parameterConverters;
 
     /**
-     * InterceptorReference constructor.
-     * @param int $precedence
-     * @param string $interceptorName
-     * @param string $referenceName
-     * @param string $methodName
-     * @param Pointcut $pointcut
+     * @var ParameterConverterBuilder[] $parameterConverters
      */
-    private function __construct(int $precedence, string $interceptorName, string $referenceName, string $methodName, Pointcut $pointcut)
+    private function __construct(int $precedence, string $interceptorName, string $referenceName, string $methodName, Pointcut $pointcut, array $parameterConverters)
     {
         $this->interceptorName = $interceptorName;
-        $this->methodName = $methodName;
-        $this->precedence = $precedence;
-        $this->pointcut = $pointcut;
-        $this->referenceName = $referenceName;
+        $this->methodName      = $methodName;
+        $this->precedence      = $precedence;
+        $this->pointcut        = $pointcut;
+        $this->referenceName   = $referenceName;
+        $this->parameterConverters = $parameterConverters;
     }
 
-    /**
-     * @param string $interceptorName
-     * @param string $referenceName
-     * @param string $methodName
-     * @return AroundInterceptorReference
-     */
     public static function createWithNoPointcut(string $interceptorName, string $referenceName, string $methodName): self
     {
-        return new self(Precedence::DEFAULT_PRECEDENCE, $interceptorName, $referenceName, $methodName, Pointcut::createEmpty());
+        return new self(Precedence::DEFAULT_PRECEDENCE, $interceptorName, $referenceName, $methodName, Pointcut::createEmpty(), []);
     }
 
     /**
-     * @param string $interceptorName
-     * @param string $referenceName
-     * @param string $methodName
-     * @param int $precedence
-     * @param string $pointcut
-     * @return AroundInterceptorReference
+     * @var ParameterConverterBuilder[] $parameterConverters
      */
-    public static function create(string $interceptorName, string $referenceName, string $methodName, int $precedence, string $pointcut): self
+    public static function create(string $interceptorName, string $referenceName, string $methodName, int $precedence, string $pointcut, array $parameterConverters): self
     {
-        return new self($precedence, $interceptorName, $referenceName, $methodName, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty());
+        return new self($precedence, $interceptorName, $referenceName, $methodName, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty(), $parameterConverters);
     }
 
     /**
-     * @param string $interceptorName
-     * @param object $referenceObject
-     * @param string $methodName
-     * @param int $precedence
-     * @param string $pointcut
-     * @return AroundInterceptorReference
+     * @var ParameterConverterBuilder[] $parameterConverters
      */
-    public static function createWithDirectObject(string $interceptorName, object $referenceObject, string $methodName, int $precedence, string $pointcut): self
+    public static function createWithDirectObject(string $interceptorName, object $referenceObject, string $methodName, int $precedence, string $pointcut, array $parameterConverters): self
     {
-        $aroundInterceptorReference = new self($precedence, $interceptorName, "", $methodName, Pointcut::createWith($pointcut));
+        $aroundInterceptorReference               = new self($precedence, $interceptorName, "", $methodName, Pointcut::createWith($pointcut), $parameterConverters);
         $aroundInterceptorReference->directObject = $referenceObject;
 
         return $aroundInterceptorReference;
     }
 
     /**
-     * @param string $interceptorName
-     * @param AroundInterceptorObjectBuilder $aroundInterceptorObjectBuilder
-     * @param string $methodName
-     * @param int $precedence
-     * @param string $pointcut
-     * @return AroundInterceptorReference
-     * @throws MessagingException
+     * @var ParameterConverterBuilder[] $parameterConverters
      */
-    public static function createWithObjectBuilder(string $interceptorName, AroundInterceptorObjectBuilder $aroundInterceptorObjectBuilder, string $methodName, int $precedence, string $pointcut) : self
+    public static function createWithObjectBuilder(string $interceptorName, AroundInterceptorObjectBuilder $aroundInterceptorObjectBuilder, string $methodName, int $precedence, string $pointcut, array $parameterConverters): self
     {
-        return self::createWithDirectObject($interceptorName, $aroundInterceptorObjectBuilder, $methodName, $precedence, $pointcut);
+        return self::createWithDirectObject($interceptorName, $aroundInterceptorObjectBuilder, $methodName, $precedence, $pointcut, $parameterConverters);
+    }
+
+    /**
+     * @var ParameterConverterBuilder[]
+     */
+    public function withParameterConverters(array $parameterConverters) : static
+    {
+        $this->parameterConverters = $parameterConverters;
+
+        return $this;
+    }
+
+    /**
+     * @param self[] $interceptorsReferences
+     *
+     * @return AroundMethodInterceptor[]
+     */
+    public static function createAroundInterceptorsWithChannel(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $interceptorsReferences): array
+    {
+        $aroundMethodInterceptors = [];
+        usort(
+            $interceptorsReferences, function (AroundInterceptorReference $element, AroundInterceptorReference $elementToCompare) {
+            if ($element->getPrecedence() == $elementToCompare->getPrecedence()) {
+                return 0;
+            }
+
+            return $element->getPrecedence() > $elementToCompare->getPrecedence() ? 1 : -1;
+        }
+        );
+        if ($interceptorsReferences) {
+            foreach ($interceptorsReferences as $interceptorsReferenceName) {
+                $interceptingService = $interceptorsReferenceName->buildAroundInterceptor($channelResolver, $referenceSearchService);
+
+                $aroundMethodInterceptors[] = $interceptingService;
+            }
+        }
+
+        return $aroundMethodInterceptors;
     }
 
     /**
      * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     *
      * @return InterfaceToCall
      * @throws AnnotationException
      * @throws InvalidArgumentException
      * @throws MessagingException
      * @throws ReflectionException
-     * @throws \Ecotone\Messaging\Config\ConfigurationException
+     * @throws ConfigurationException
      */
-    public function getInterceptingInterface(InterfaceToCallRegistry $interfaceToCallRegistry) : InterfaceToCall
+    public function getInterceptingInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
         if ($this->directObject instanceof AroundInterceptorObjectBuilder) {
             return $interfaceToCallRegistry->getFor($this->directObject->getInterceptingInterfaceClassName(), $this->methodName);
@@ -131,31 +143,6 @@ class AroundInterceptorReference implements InterceptorWithPointCut
         return $this->precedence;
     }
 
-    /**
-     * @param self[] $interceptorsReferences
-     * @return AroundMethodInterceptor[]
-     */
-    public static function createAroundInterceptorsWithChannel(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $interceptorsReferences): array
-    {
-        $aroundMethodInterceptors = [];
-        usort($interceptorsReferences, function (AroundInterceptorReference $element, AroundInterceptorReference $elementToCompare) {
-            if ($element->getPrecedence() == $elementToCompare->getPrecedence()) {
-                return 0;
-            }
-
-            return $element->getPrecedence() > $elementToCompare->getPrecedence() ? 1 : -1;
-        });
-        if ($interceptorsReferences) {
-            foreach ($interceptorsReferences as $interceptorsReferenceName) {
-                $interceptingService = $interceptorsReferenceName->buildAroundInterceptor($channelResolver, $referenceSearchService);
-
-                $aroundMethodInterceptors[] = $interceptingService;
-            }
-        }
-
-        return $aroundMethodInterceptors;
-    }
-
     public function buildAroundInterceptor(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
     {
         $referenceToCall = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
@@ -163,10 +150,16 @@ class AroundInterceptorReference implements InterceptorWithPointCut
             $referenceToCall = $referenceToCall->build($channelResolver, $referenceSearchService);
         }
 
+        $builtConverters = [];
+        foreach ($this->parameterConverters as $parameterConverter) {
+            $builtConverters[] = $parameterConverter->build($referenceSearchService);
+        }
+
         return AroundMethodInterceptor::createWith(
             $referenceToCall,
             $this->methodName,
-            $referenceSearchService
+            $referenceSearchService,
+            $builtConverters
         );
     }
 
@@ -181,7 +174,7 @@ class AroundInterceptorReference implements InterceptorWithPointCut
     /**
      * @return array
      */
-    public function getRequiredReferenceNames() : array
+    public function getRequiredReferenceNames(): array
     {
         return $this->directObject instanceof AroundInterceptorObjectBuilder ? $this->directObject->getRequiredReferenceNames() : [$this->referenceName];
     }
@@ -196,7 +189,8 @@ class AroundInterceptorReference implements InterceptorWithPointCut
 
     /**
      * @param InterfaceToCall $interfaceToCall
-     * @param object[] $endpointAnnotations
+     * @param object[]        $endpointAnnotations
+     *
      * @return bool
      * @throws TypeDefinitionException
      * @throws MessagingException

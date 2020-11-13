@@ -206,7 +206,7 @@ class Gateway implements NonProxyGateway
                 ),
                 "convert",
                 Precedence::GATEWAY_REPLY_CONVERSION_PRECEDENCE,
-                ""
+                "", []
             );
         }
         foreach ($aroundInterceptorReferences as $aroundInterceptorReference) {

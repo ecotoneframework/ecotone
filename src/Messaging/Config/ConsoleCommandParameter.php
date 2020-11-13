@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Config;
 
-class OneTimeCommandParameter
+class ConsoleCommandParameter
 {
     private string $name;
     private $defaultValue;

@@ -39,7 +39,7 @@ class ParameterConverterAnnotationFactory
         return new self();
     }
 
-    public function createParameterConvertersWithReferences(InterfaceToCall $relatedClassInterface, bool $ignorePayload): array
+    public function createParameterWithDefaults(InterfaceToCall $relatedClassInterface, bool $ignorePayload): array
     {
         return
             MethodInvoker::createDefaultMethodParameters(
@@ -51,7 +51,7 @@ class ParameterConverterAnnotationFactory
             );
     }
 
-    private function createParameterConverters(InterfaceToCall $relatedClassInterface): array
+    public function createParameterConverters(InterfaceToCall $relatedClassInterface): array
     {
         $parameterConverters = [];
 

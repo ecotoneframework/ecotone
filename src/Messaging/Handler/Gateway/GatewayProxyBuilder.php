@@ -386,7 +386,7 @@ class GatewayProxyBuilder implements GatewayBuilder
                 new ErrorChannelInterceptor($errorChannel),
                 "handle",
                 Precedence::ERROR_CHANNEL_PRECEDENCE,
-                ""
+                "", []
             );
         }
 

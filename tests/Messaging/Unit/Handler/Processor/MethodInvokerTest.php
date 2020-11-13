@@ -11,6 +11,7 @@ use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
@@ -25,6 +26,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Ramsey\Uuid\Uuid;
 use ReflectionException;
 use stdClass;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\AroundInterceptorWithCustomParameterConverters;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\Order;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
@@ -522,6 +524,33 @@ class MethodInvokerTest extends MessagingTest
         $this->assertTrue($interceptingService1->wasCalled());
     }
 
+    public function test_calling_with_custom_converters()
+    {
+        $interceptingService1 = new AroundInterceptorWithCustomParameterConverters();
+        $interceptedService = StubCallSavingService::create();
+        $methodInvocation = MethodInvoker::createWith(
+            InterfaceToCall::create($interceptedService, 'callNoArgumentsAndReturnType'),
+            $interceptedService, [],
+            InMemoryReferenceSearchService::createWith([
+                AroundInterceptorWithCustomParameterConverters::class => $interceptingService1
+            ]), InMemoryChannelResolver::createEmpty(),
+            [
+                AroundInterceptorReference::create("someId", AroundInterceptorWithCustomParameterConverters::class, "handle", 0, "", [
+                    HeaderBuilder::create("token", "token"),
+                    PayloadBuilder::create("payload"),
+                    AllHeadersBuilder::createWith("headers")
+                ])
+            ]
+        );
+
+        $methodInvocation->processMessage(
+            MessageBuilder::withPayload(new \stdClass())
+                ->setHeader("token", 123)
+                ->build()
+        );
+        $this->assertTrue($interceptedService->wasCalled());
+    }
+
     public function test_calling_with_around_interceptor_from_object_builder()
     {
         $interceptingService1 = StubCallSavingService::create();
@@ -531,7 +560,7 @@ class MethodInvokerTest extends MessagingTest
             $interceptedService, [],
             InMemoryReferenceSearchService::createEmpty(), InMemoryChannelResolver::createEmpty(),
             [
-                AroundInterceptorReference::createWithObjectBuilder("someId", AroundInterceptorObjectBuilderExample::create($interceptingService1), "callWithProceed", 0, "")
+                AroundInterceptorReference::createWithObjectBuilder("someId", AroundInterceptorObjectBuilderExample::create($interceptingService1), "callWithProceed", 0, "", [])
             ]
         );
 
@@ -808,7 +837,7 @@ class MethodInvokerTest extends MessagingTest
         $interceptedService = StubCallSavingService::createWithReturnType("some");
         $methodInvocation = MethodInvoker::createWith(
             InterfaceToCall::create($interceptedService, 'methodWithAnnotation'), $interceptedService , [], InMemoryReferenceSearchService::createEmpty(), InMemoryChannelResolver::createEmpty(),
-            [AroundInterceptorReference::createWithDirectObject("someId", CallWithStdClassInterceptorExample::create(), "callWithStdClass", 0, "")],
+            [AroundInterceptorReference::createWithDirectObject("someId", CallWithStdClassInterceptorExample::create(), "callWithStdClass", 0, "", [])],
             [
                 new stdClass()
             ]

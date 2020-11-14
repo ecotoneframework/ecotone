@@ -12,6 +12,8 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\UnionTypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -52,12 +54,33 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
         $interfaceToCall = InterfaceToCall::create($interceptorClass, $methodName);
         $pointcut = "";
 
+        $optionalAttributes = [];
+        $requiredAttributes = [];
         foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-            if (!$interfaceParameter->getTypeDescriptor()->isUnionType()) {
-                if (ClassDefinition::createFor($interfaceParameter->getTypeDescriptor())->isAnnotation()) {
-                    $pointcut = $pointcut ? $pointcut . "||" . $interfaceParameter->getTypeDescriptor()->toString() : $interfaceParameter->getTypeDescriptor()->toString();
+            /** @var UnionTypeDescriptor|TypeDescriptor $type */
+            $type = $interfaceParameter->getTypeDescriptor();
+            $expression = "";
+            if ($type->isUnionType()) {
+                $expression = "";
+                foreach ($type->getUnionTypes() as $unionType) {
+                    if ($interfaceParameter->doesAllowNulls()) {
+                        throw InvalidArgumentException::create("Error during initialization of pointcut. Union types can only be non nullable for expressions in {$interfaceToCall} parameter: {$interfaceParameter}");
+                    }
+                    if (!ClassDefinition::createFor($unionType)->isAnnotation()) {
+                        throw InvalidArgumentException::create("Error during initialization of pointcut. Union types can only combined from attributes, non attribute type given {$unionType->toString()} in {$interfaceToCall} parameter: {$interfaceParameter}");
+                    }
+
+                    $expression .= $expression ? "||" . $unionType->toString() : $unionType->toString();
+                }
+                $expression = "(" . $expression . ")";
+            }else {
+                if (ClassDefinition::createFor($type)->isAnnotation()) {
+                    $expression = "(" . $type->toString() . ")";
                 }
             }
+
+            $inBetweenExpression      = $interfaceParameter->doesAllowNulls() ? "||" : "&&";
+            $pointcut = $pointcut ? $pointcut . $inBetweenExpression . $expression : $expression;
         }
 
         return Pointcut::createWith($pointcut);

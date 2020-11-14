@@ -141,6 +141,16 @@ class PointcutTest extends TestCase
         );
     }
 
+    public function test_cutting_with_single_bracket()
+    {
+        $this->assertTrue(
+            Pointcut::createWith("(" . AttributeOne::class . ")")->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
+                [new AttributeOne()]
+            )
+        );
+    }
+
     public function test_cutting_with_OR_and_brackets()
     {
         $this->assertTrue(
@@ -163,10 +173,10 @@ class PointcutTest extends TestCase
 
     public function test_cutting_with_AND_and_brackets()
     {
-        $this->assertFalse(
+        $this->assertTrue(
             Pointcut::createWith("(" . AttributeOne::class . ")&&(" . AttributeTwo::class . ")")->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
-                [new AttributeTwo(), new AttributeTwo()]
+                [new AttributeOne(), new AttributeTwo()]
             )
         );
     }

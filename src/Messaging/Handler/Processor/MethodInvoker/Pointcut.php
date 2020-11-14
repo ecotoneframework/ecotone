@@ -22,7 +22,7 @@ class Pointcut
         $results = $this->getExpressionsDivinedByBrackets($expression);
 
         if ($results) {
-            Assert::isTrue(count($results) === count($this->getInBetweenBracketsExpressions($expression)) + 1, "Expression {$expression} is missing || or && between brackets");
+            Assert::isTrue(count($results) === count($this->getInBetweenBracketsExpressions($expression)) + 1, "Expression {$expression} is missing `||` or `&&` between brackets or `{}&&{}` bracket is missing on one of the expressions");
         }
 
         $this->expression = $expression;

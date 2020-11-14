@@ -31,4 +31,34 @@ class AroundInterceptorExample
     {
 
     }
+
+    #[Around]
+    public function withUnionAttributes(AttributeOne|AttributeTwo $attributeOne)
+    {
+
+    }
+
+    #[Around]
+    public function withUnionAttributesAndRequiredAttribute(AttributeOne|AttributeTwo $attributeOne, AttributeThree $attributeThree)
+    {
+
+    }
+
+    #[Around]
+    public function withOptionalUnionAttributes(AttributeOne|AttributeTwo|null $attributeOne)
+    {
+
+    }
+
+    #[Around]
+    public function withUnionTypeOfAttributeAndNonAttributeClass(AttributeOne|\stdClass $attributeOne)
+    {
+
+    }
+
+    #[Around]
+    public function withOptionalAttributesAndRequired(?AttributeOne $attributeOne, AttributeTwo $attributeTwo, ?AttributeThree $attributeThree)
+    {
+
+    }
 }

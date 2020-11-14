@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -37,9 +38,29 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
         $this->interceptorName = $interceptorName;
         $this->methodName      = $methodName;
         $this->precedence      = $precedence;
-        $this->pointcut        = $pointcut;
+        $this->pointcut        = $this->initializePointcut($interceptorName, $methodName, $pointcut);
         $this->referenceName   = $referenceName;
         $this->parameterConverters = $parameterConverters;
+    }
+
+    private function initializePointcut(string $interceptorClass, string $methodName, Pointcut $pointcut) : Pointcut
+    {
+        if (!$pointcut->isEmpty()) {
+            return $pointcut;
+        }
+
+        $interfaceToCall = InterfaceToCall::create($interceptorClass, $methodName);
+        $pointcut = "";
+
+        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+            if (!$interfaceParameter->getTypeDescriptor()->isUnionType()) {
+                if (ClassDefinition::createFor($interfaceParameter->getTypeDescriptor())->isAnnotation()) {
+                    $pointcut = $pointcut ? $pointcut . "||" . $interfaceParameter->getTypeDescriptor()->toString() : $interfaceParameter->getTypeDescriptor()->toString();
+                }
+            }
+        }
+
+        return Pointcut::createWith($pointcut);
     }
 
     public static function createWithNoPointcut(string $interceptorName, string $referenceName, string $methodName): self

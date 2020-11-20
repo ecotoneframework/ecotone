@@ -22,7 +22,6 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Logger\ExceptionLoggingInterceptorBuilder;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -63,15 +62,6 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             "",
             []
         ));
-        $this->entrypointGateway->addAroundInterceptor(
-            AroundInterceptorReference::createWithDirectObject(
-                new LoggingInterceptor(null),
-                "logBefore",
-                Precedence::ERROR_CHANNEL_PRECEDENCE - 100,
-                "",
-                []
-            )
-        );
     }
 
     /**

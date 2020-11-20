@@ -1345,7 +1345,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             )
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")
-                        ->withRequiredInterceptorNames([$calculatorWithTwo, $calculatorWithTwoAround])
+                        ->withRequiredInterceptorNames([$calculatorWithTwo, CalculatingServiceInterceptorExample::class])
                         ->withInputChannelName($inputChannelName)
                         ->withEndpointId($endpointName)
                 )
@@ -1369,14 +1369,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::create(
-                        $calculatorWithOne,
+                        CalculatingService::class,
                         $calculatorWithOne, "sum",
                         1, "", []
                     )
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::create(
-                        $calculatorWithTwoAround,
+                        CalculatingServiceInterceptorExample::class,
                         $calculatorWithTwoAround, "sum",
                         1, "", []
                     )
@@ -1729,7 +1729,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
                 ->registerGatewayBuilder(
                     GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
-                        ->withRequiredInterceptorNames(["interceptor0", "interceptor1", "around", "interceptor2", "interceptor3"])
+                        ->withRequiredInterceptorNames(["interceptor0", "interceptor1", NoReturnMessageHandler::class, "interceptor2", "interceptor3"])
                 )
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), "result")

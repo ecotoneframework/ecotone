@@ -10,6 +10,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
@@ -18,6 +19,7 @@ use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
 use Ecotone\Messaging\Handler\Logger\ExceptionLoggingInterceptorBuilder;
 use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
+use Ecotone\Messaging\Handler\Logger\LoggingService;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Precedence;
@@ -65,9 +67,8 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
             )
         );
         $configuration->registerAroundMethodInterceptor(
-            AroundInterceptorReference::createWithObjectBuilder(
-                "errorLog",
-                new ExceptionLoggingInterceptorBuilder(),
+            AroundInterceptorReference::createWithDirectObject(
+                new LoggingInterceptor(null),
                 "logException",
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
                 LogError::class,

@@ -98,7 +98,6 @@ class ModellingMessageRouterModuleTest extends MessagingTest
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::createWithDirectObject(
-                        MessageHeadersPropagator::class,
                         new MessageHeadersPropagator(),
                         "storeHeaders",
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,

@@ -19,9 +19,9 @@ use Throwable;
  */
 class AcknowledgeConfirmationInterceptor
 {
-    public static function createAroundInterceptor(string $interceptorName) : AroundInterceptorReference
+    public static function createAroundInterceptor() : AroundInterceptorReference
     {
-        return AroundInterceptorReference::createWithDirectObject($interceptorName, new self(), "ack", Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, "", []);
+        return AroundInterceptorReference::createWithDirectObject(new self(), "ack", Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, "", []);
     }
 
     /**

@@ -240,6 +240,17 @@ class UnionTypeDescriptor implements Type
         return false;
     }
 
+    public function isClassNotInterface(): bool
+    {
+        foreach ($this->typeDescriptors as $typeDescriptor) {
+            if ($typeDescriptor->isClassNotInterface()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @inheritDoc
      */

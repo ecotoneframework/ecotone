@@ -186,9 +186,9 @@ class MessageFilterBuilderTest extends MessagingTest
         $messageFilter = MessageFilterBuilder::createWithReferenceName( MessageSelectorExample::class, "accept")
             ->withOutputMessageChannel($outputChannelName)
             ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject(
-                "someId",
                 CallWithEndingChainAndReturningInterceptorExample::createWithReturnType(false), "callWithEndingChainAndReturning",
-                1, "",
+                1,
+                MessageSelectorExample::class,
                 []
             ))
             ->build(

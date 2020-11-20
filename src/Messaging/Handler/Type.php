@@ -80,6 +80,8 @@ interface Type
      */
     public function isClassOrInterface(): bool;
 
+    public function isClassNotInterface() : bool;
+
     /**
      * @return bool
      */

@@ -69,12 +69,11 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::create(AroundInterceptorWithCustomParameterConverters::class, AroundInterceptorWithCustomParameterConverters::class, "handle", 1, AroundInterceptorWithCustomParameterConverters::class, [])
-                    ->withParameterConverters([
-                        HeaderBuilder::create("token", "token"),
-                        PayloadBuilder::create("payload"),
-                        AllHeadersBuilder::createWith("headers")
-                    ])
+                AroundInterceptorReference::create(AroundInterceptorWithCustomParameterConverters::class, AroundInterceptorWithCustomParameterConverters::class, "handle", 1, AroundInterceptorWithCustomParameterConverters::class, [
+                    HeaderBuilder::create("token", "token"),
+                    PayloadBuilder::create("payload"),
+                    AllHeadersBuilder::createWith("headers")
+                ])
             );
 
         $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([

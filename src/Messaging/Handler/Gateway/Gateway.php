@@ -198,7 +198,6 @@ class Gateway implements NonProxyGateway
         $aroundInterceptorReferences = $this->aroundInterceptors;
         if (($replyContentType || !$this->interfaceToCall->getReturnType()->isAnything()) && $this->interfaceToCall->canReturnValue()) {
             $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObject(
-                "",
                 new ConversionInterceptor(
                     $this->referenceSearchService->get(ConversionService::REFERENCE_NAME),
                     $this->interfaceToCall,
@@ -206,7 +205,8 @@ class Gateway implements NonProxyGateway
                 ),
                 "convert",
                 Precedence::GATEWAY_REPLY_CONVERSION_PRECEDENCE,
-                "", []
+                $this->interfaceToCall->getInterfaceName(),
+                []
             );
         }
         foreach ($aroundInterceptorReferences as $aroundInterceptorReference) {

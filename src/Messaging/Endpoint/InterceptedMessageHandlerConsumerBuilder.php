@@ -29,7 +29,6 @@ abstract class InterceptedMessageHandlerConsumerBuilder implements MessageHandle
         foreach ($interceptors as $interceptor) {
             $this->addAroundInterceptor(
                 AroundInterceptorReference::createWithDirectObject(
-                    "",
                     $interceptor,
                     "postSend",
                     Precedence::ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE,

@@ -370,8 +370,8 @@ class TransformerBuilderTest extends MessagingTest
         $serviceActivator = TransformerBuilder::createWithDirectObject($objectToInvoke, "result")
             ->withInputChannelName("someName")
             ->withEndpointId("someEndpoint")
-            ->addAroundInterceptor(AroundInterceptorReference::create("calculator1",CalculatingServiceInterceptorExample::class, "sum", 2, "", []))
-            ->addAroundInterceptor(AroundInterceptorReference::create("calculator2",CalculatingServiceInterceptorExample::class, "multiply", 1, "", []))
+            ->addAroundInterceptor(AroundInterceptorReference::create(CalculatingServiceInterceptorExample::class,CalculatingServiceInterceptorExample::class, "sum", 2, "", []))
+            ->addAroundInterceptor(AroundInterceptorReference::create(CalculatingServiceInterceptorExample::class,CalculatingServiceInterceptorExample::class, "multiply", 1, "", []))
             ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
                 CalculatingServiceInterceptorExample::class => CalculatingServiceInterceptorExample::create(4)
             ]));

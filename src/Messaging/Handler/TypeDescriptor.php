@@ -497,6 +497,11 @@ final class TypeDescriptor implements Type
         return $this->type === self::OBJECT || class_exists($this->type) || interface_exists($this->type);
     }
 
+    public function isClassNotInterface() : bool
+    {
+        return class_exists($this->type);
+    }
+
     /**
      * @return bool
      */

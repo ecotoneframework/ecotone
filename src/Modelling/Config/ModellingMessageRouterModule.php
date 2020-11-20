@@ -97,7 +97,6 @@ class ModellingMessageRouterModule implements AnnotationModule
             )
             ->registerAroundMethodInterceptor(
                 AroundInterceptorReference::createWithDirectObject(
-                    MessageHeadersPropagator::class,
                     $this->messageHeadersPropagator,
                     "storeHeaders",
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,

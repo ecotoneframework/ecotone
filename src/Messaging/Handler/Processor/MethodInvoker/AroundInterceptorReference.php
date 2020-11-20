@@ -40,92 +40,95 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
         $this->interceptorName = $interceptorName;
         $this->methodName      = $methodName;
         $this->precedence      = $precedence;
-        $this->pointcut        = $this->initializePointcut($interceptorName, $methodName, $pointcut);
+        $this->pointcut        = $this->initializePointcut($interceptorName, $methodName, $pointcut, $parameterConverters);
         $this->referenceName   = $referenceName;
         $this->parameterConverters = $parameterConverters;
     }
 
-    private function initializePointcut(string $interceptorClass, string $methodName, Pointcut $pointcut) : Pointcut
+    /**
+     * @var ParameterConverterBuilder[] $parameterConverters
+     */
+    private function initializePointcut(string $interceptorClass, string $methodName, Pointcut $pointcut, array $parameterConverters) : Pointcut
     {
         if (!$pointcut->isEmpty()) {
             return $pointcut;
         }
 
         $interfaceToCall = InterfaceToCall::create($interceptorClass, $methodName);
-        $pointcut = "";
-
         $optionalAttributes = [];
         $requiredAttributes = [];
         foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+            if ($this->hasConverter($parameterConverters, $interfaceParameter)) {
+                continue;
+            }
+
             /** @var UnionTypeDescriptor|TypeDescriptor $type */
             $type = $interfaceParameter->getTypeDescriptor();
-            $expression = "";
             if ($type->isUnionType()) {
-                $expression = "";
+                if (!$this->doesContainAnnotation($type)) {
+                    continue;
+                }
+
                 foreach ($type->getUnionTypes() as $unionType) {
                     if ($interfaceParameter->doesAllowNulls()) {
                         throw InvalidArgumentException::create("Error during initialization of pointcut. Union types can only be non nullable for expressions in {$interfaceToCall} parameter: {$interfaceParameter}");
                     }
-                    if (!ClassDefinition::createFor($unionType)->isAnnotation()) {
+                    if (!$unionType->isClassOrInterface() || !ClassDefinition::createFor($unionType)->isAnnotation()) {
                         throw InvalidArgumentException::create("Error during initialization of pointcut. Union types can only combined from attributes, non attribute type given {$unionType->toString()} in {$interfaceToCall} parameter: {$interfaceParameter}");
                     }
 
-                    $expression .= $expression ? "||" . $unionType->toString() : $unionType->toString();
+                    $optionalAttributes[] = $unionType->toString();
                 }
-                $expression = "(" . $expression . ")";
             }else {
-                if (ClassDefinition::createFor($type)->isAnnotation()) {
-                    $expression = "(" . $type->toString() . ")";
+                if (!$type->isClassNotInterface()) {
+                    continue;
+                }
+                if (!ClassDefinition::createFor($type)->isAnnotation()) {
+                    continue;
+                }
+
+                if ($interfaceParameter->doesAllowNulls()) {
+                    $optionalAttributes[] = $type->toString();
+                }else {
+                    $requiredAttributes[] = $type->toString();
                 }
             }
+        }
 
-            $inBetweenExpression      = $interfaceParameter->doesAllowNulls() ? "||" : "&&";
-            $pointcut = $pointcut ? $pointcut . $inBetweenExpression . $expression : $expression;
+        $pointcut = "";
+        if ($optionalAttributes) {
+            $pointcut = "(" .  implode("||", $optionalAttributes) . ")";
+        }
+        if ($requiredAttributes) {
+            $pointcut .= $pointcut ? "&&" : "";
+            $pointcut .= implode("&&", array_map(fn(string $attribute) => "(" . $attribute . ")", $requiredAttributes));
         }
 
         return Pointcut::createWith($pointcut);
     }
 
-    public static function createWithNoPointcut(string $interceptorName, string $referenceName, string $methodName): self
+    public static function createWithNoPointcut(string $interceptorClass, string $referenceName, string $methodName): self
     {
-        return new self(Precedence::DEFAULT_PRECEDENCE, $interceptorName, $referenceName, $methodName, Pointcut::createEmpty(), []);
+        return new self(Precedence::DEFAULT_PRECEDENCE, $interceptorClass, $referenceName, $methodName, Pointcut::createEmpty(), []);
     }
 
     /**
      * @var ParameterConverterBuilder[] $parameterConverters
      */
-    public static function create(string $interceptorName, string $referenceName, string $methodName, int $precedence, string $pointcut, array $parameterConverters): self
+    public static function create(string $interceptorClass, string $referenceName, string $methodName, int $precedence, string $pointcut, array $parameterConverters): self
     {
-        return new self($precedence, $interceptorName, $referenceName, $methodName, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty(), $parameterConverters);
+        return new self($precedence, $interceptorClass, $referenceName, $methodName, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty(), $parameterConverters);
     }
 
     /**
      * @var ParameterConverterBuilder[] $parameterConverters
      */
-    public static function createWithDirectObject(string $interceptorName, object $referenceObject, string $methodName, int $precedence, string $pointcut, array $parameterConverters): self
+    public static function createWithDirectObject(object $referenceObject, string $methodName, int $precedence, string $pointcut, array $parameterConverters): self
     {
-        $aroundInterceptorReference               = new self($precedence, $interceptorName, "", $methodName, Pointcut::createWith($pointcut), $parameterConverters);
+        $aroundInterceptorReference               = new self($precedence, get_class($referenceObject), "", $methodName, Pointcut::createWith($pointcut), $parameterConverters);
         $aroundInterceptorReference->directObject = $referenceObject;
 
         return $aroundInterceptorReference;
-    }
-
-    /**
-     * @var ParameterConverterBuilder[] $parameterConverters
-     */
-    public static function createWithObjectBuilder(string $interceptorName, AroundInterceptorObjectBuilder $aroundInterceptorObjectBuilder, string $methodName, int $precedence, string $pointcut, array $parameterConverters): self
-    {
-        return self::createWithDirectObject($interceptorName, $aroundInterceptorObjectBuilder, $methodName, $precedence, $pointcut, $parameterConverters);
-    }
-
-    /**
-     * @var ParameterConverterBuilder[]
-     */
-    public function withParameterConverters(array $parameterConverters) : static
-    {
-        $this->parameterConverters = $parameterConverters;
-
-        return $this;
     }
 
     /**
@@ -168,10 +171,6 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
      */
     public function getInterceptingInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        if ($this->directObject instanceof AroundInterceptorObjectBuilder) {
-            return $interfaceToCallRegistry->getFor($this->directObject->getInterceptingInterfaceClassName(), $this->methodName);
-        }
-
         if ($this->directObject) {
             return $interfaceToCallRegistry->getFor($this->directObject, $this->methodName);
         }
@@ -190,9 +189,6 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
     public function buildAroundInterceptor(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
     {
         $referenceToCall = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
-        if ($referenceToCall instanceof AroundInterceptorObjectBuilder) {
-            $referenceToCall = $referenceToCall->build($channelResolver, $referenceSearchService);
-        }
 
         $builtConverters = [];
         foreach ($this->parameterConverters as $parameterConverter) {
@@ -220,7 +216,7 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
      */
     public function getRequiredReferenceNames(): array
     {
-        return $this->directObject instanceof AroundInterceptorObjectBuilder ? $this->directObject->getRequiredReferenceNames() : [$this->referenceName];
+        return [$this->referenceName];
     }
 
     /**
@@ -266,5 +262,27 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
     public function __toString()
     {
         return $this->interceptorName . $this->referenceName . $this->methodName;
+    }
+
+    private function hasConverter(array $parameterConverters, mixed $interfaceParameter): bool
+    {
+        foreach ($parameterConverters as $parameterConverter) {
+            if ($parameterConverter->isHandling($interfaceParameter)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function doesContainAnnotation(TypeDescriptor|UnionTypeDescriptor $type): bool
+    {
+        foreach ($type->getUnionTypes() as $unionType) {
+            if ($unionType->isClassOrInterface() && ClassDefinition::createFor($unionType)->isAnnotation()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

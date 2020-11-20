@@ -5,6 +5,11 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
@@ -42,7 +47,7 @@ class AroundInterceptorReferenceTest extends TestCase
     {
         $interceptorClass = AroundInterceptorExample::class;
         $methodName = "withTwoOptionalAttributes";
-        $expectedPointcut = "(" . AttributeOne::class  . ")||(" . AttributeTwo::class . ")";
+        $expectedPointcut = "(" . AttributeOne::class  . "||" . AttributeTwo::class . ")";
 
         $this->assertEquals(
             AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
@@ -116,5 +121,49 @@ class AroundInterceptorReferenceTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, "", []);
+    }
+
+    public function test_ignoring_non_class_parameters()
+    {
+        $interceptorClass = AroundInterceptorExample::class;
+        $methodName = "withNonClassParameters";
+        $expectedPointcut = "(" . AttributeOne::class . ")";
+
+        $this->assertEquals(
+            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
+            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, "", [])
+        );
+    }
+
+    public function test_ignoring_non_attribute_parameters()
+    {
+        $interceptorClass = AroundInterceptorExample::class;
+        $methodName = "withNonAnnotationClass";
+        $expectedPointcut = "(" . AttributeOne::class . ")";
+
+        $this->assertEquals(
+            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
+            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, "", [])
+        );
+    }
+
+    public function test_ignoring_parameter_converters()
+    {
+        $interceptorClass = AroundInterceptorExample::class;
+        $methodName = "withParameterConverters";
+        $expectedPointcut = "(" . AttributeOne::class . ")";
+
+        $this->assertEquals(
+            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, [
+                PayloadConverter::create("payload"),
+                HeaderBuilder::create("class", "token"),
+                AllHeadersBuilder::createWith("headers")
+            ]),
+            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, "", [
+                PayloadConverter::create("payload"),
+                HeaderBuilder::create("class", "token"),
+                AllHeadersBuilder::createWith("headers")
+            ])
+        );
     }
 }

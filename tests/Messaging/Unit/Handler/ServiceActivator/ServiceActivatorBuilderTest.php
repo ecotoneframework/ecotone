@@ -181,9 +181,9 @@ class ServiceActivatorBuilderTest extends MessagingTest
     {
         $objectToInvoke = CalculatingService::create(0);
 
-        $firstInterceptor = AroundInterceptorReference::create("calculator1","calculator", "sum", 1, "", []);
-        $secondInterceptor = AroundInterceptorReference::create("calculator2","calculator", "multiply", 2, "", []);
-        $thirdInterceptor = AroundInterceptorReference::create("calculator3","calculator", "sum", 3, "", []);
+        $firstInterceptor = AroundInterceptorReference::create(CalculatingServiceInterceptorExample::class,"calculator", "sum", 1, "", []);
+        $secondInterceptor = AroundInterceptorReference::create(CalculatingServiceInterceptorExample::class,"calculator", "multiply", 2, "", []);
+        $thirdInterceptor = AroundInterceptorReference::create(CalculatingServiceInterceptorExample::class,"calculator", "sum", 3, "", []);
         $replyChannel = QueueChannel::create();
 
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, "result")

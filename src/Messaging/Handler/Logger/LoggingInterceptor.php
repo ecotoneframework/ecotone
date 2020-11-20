@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
+use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
@@ -20,13 +22,13 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class LoggingInterceptor
 {
-    private \Ecotone\Messaging\Handler\Logger\LoggingService $loggingService;
+    private ?\Ecotone\Messaging\Handler\Logger\LoggingService $loggingService;
 
     /**
      * LoggingInterceptor constructor.
      * @param LoggingService $loggingService
      */
-    public function __construct(LoggingService $loggingService)
+    public function __construct(?LoggingService $loggingService)
     {
         $this->loggingService = $loggingService;
     }
@@ -66,12 +68,17 @@ class LoggingInterceptor
      * @throws TypeDefinitionException
      * @throws \Throwable
      */
-    public function logException(MethodInvocation $methodInvocation, Message $message, LogError $log)
+    public function logException(MethodInvocation $methodInvocation, Message $message, LogError $log, ReferenceSearchService $referenceSearchService)
     {
+        $loggingService = new LoggingService(
+            $referenceSearchService->get(ConversionService::REFERENCE_NAME),
+            $referenceSearchService->get(LoggingHandlerBuilder::LOGGER_REFERENCE)
+        );
+
         try {
             $returnValue = $methodInvocation->proceed();
         }catch (\Throwable $exception) {
-            $this->loggingService->logException(LoggingLevel::create($log->logLevel, $log->logFullMessage), $exception, $message);
+            $loggingService->logException(LoggingLevel::create($log->logLevel, $log->logFullMessage), $exception, $message);
 
             throw $exception;
         }

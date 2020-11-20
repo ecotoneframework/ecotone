@@ -98,7 +98,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 $beforeSendInterceptor    = $interceptorInterface->getMethodAnnotation($beforeSendAnnotation);
                 $beforeSendInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
-                    InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
+                    $interceptorInterface,
                     self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface),
                     $beforeSendInterceptor->precedence,
                     $beforeSendInterceptor->pointcut
@@ -111,7 +111,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 $beforeInterceptor     = $interceptorInterface->getMethodAnnotation($beforeAnnotation);
                 $preCallInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
-                    InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
+                    $interceptorInterface,
                     self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface),
                     $beforeInterceptor->precedence,
                     $beforeInterceptor->pointcut
@@ -123,7 +123,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 $afterInterceptor       = $interceptorInterface->getMethodAnnotation($afterAnnotation);
                 $postCallInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
-                    InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()),
+                    $interceptorInterface,
                     self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface),
                     $afterInterceptor->precedence,
                     $afterInterceptor->pointcut

@@ -6,8 +6,7 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -15,48 +14,42 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 /**
  * Class Interceptor
  * @package Ecotone\Messaging\Config
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodInterceptor implements InterceptorWithPointCut
 {
     private string $interceptorName;
-    private \Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel $messageHandler;
+    private MessageHandlerBuilderWithOutputChannel $messageHandler;
     private int $precedence;
-    private \Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut $pointcut;
-    private \Ecotone\Messaging\Handler\InterfaceToCall $interceptorInterfaceToCall;
+    private Pointcut $pointcut;
+    private InterfaceToCall $interceptorInterfaceToCall;
 
-    /**
-     * Interceptor constructor.
-     * @param string $interceptorName
-     * @param InterfaceToCall $interceptorInterfaceToCall
-     * @param MessageHandlerBuilderWithOutputChannel $messageHandler
-     * @param int $precedence
-     * @param Pointcut $pointcut
-     */
+
     private function __construct(string $interceptorName, InterfaceToCall $interceptorInterfaceToCall, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, Pointcut $pointcut)
     {
-        $this->messageHandler = $messageHandler;
-        $this->precedence = $precedence;
-        $this->pointcut = $pointcut;
-        $this->interceptorName = $interceptorName;
+        $this->messageHandler             = $messageHandler;
+        $this->precedence                 = $precedence;
+        $this->pointcut                   = $this->initializePointcut($interceptorInterfaceToCall, $pointcut, $messageHandler instanceof MessageHandlerBuilderWithParameterConverters ? $messageHandler->getParameterConverters() : []);
+        $this->interceptorName            = $interceptorName;
         $this->interceptorInterfaceToCall = $interceptorInterfaceToCall;
     }
 
     /**
-     * @param string $interceptorName
-     * @param InterfaceToCall $interceptorInterfaceToCall
+     * @param string                                 $interceptorName
+     * @param InterfaceToCall                        $interceptorInterfaceToCall
      * @param MessageHandlerBuilderWithOutputChannel $messageHandler
-     * @param int $precedence
-     * @param string $pointcut
+     * @param int                                    $precedence
+     * @param string                                 $pointcut
      */
-    public static function create(string $interceptorName, InterfaceToCall $interceptorInterfaceToCall, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, string $pointcut): \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor
+    public static function create(string $interceptorName, InterfaceToCall $interceptorInterfaceToCall, MessageHandlerBuilderWithOutputChannel $messageHandler, int $precedence, string $pointcut): MethodInterceptor
     {
         return new self($interceptorName, $interceptorInterfaceToCall, $messageHandler, $precedence, Pointcut::createWith($pointcut));
     }
 
     /**
      * @param InterfaceToCall $interfaceToCall
-     * @param object[] $endpointAnnotations
+     * @param object[]        $endpointAnnotations
+     *
      * @return bool
      * @throws TypeDefinitionException
      * @throws MessagingException
@@ -76,14 +69,15 @@ class MethodInterceptor implements InterceptorWithPointCut
 
     /**
      * @param InterfaceToCall $interceptedInterface
-     * @param array $endpointAnnotations
+     * @param array           $endpointAnnotations
+     *
      * @return static
      * @throws MessagingException
      * @throws InvalidArgumentException
      */
     public function addInterceptedInterfaceToCall(InterfaceToCall $interceptedInterface, array $endpointAnnotations): self
     {
-        $clone = clone $this;
+        $clone                     = clone $this;
         $interceptedMessageHandler = clone $clone->messageHandler;
 
         if ($interceptedMessageHandler instanceof MessageHandlerBuilderWithParameterConverters) {
@@ -140,5 +134,17 @@ class MethodInterceptor implements InterceptorWithPointCut
     public function getMessageHandler(): MessageHandlerBuilderWithOutputChannel
     {
         return $this->messageHandler;
+    }
+
+    /**
+     * @var ParameterConverterBuilder[] $parameterConverters
+     */
+    private function initializePointcut(InterfaceToCall $interfaceToCall, Pointcut $pointcut, array $parameterConverters): Pointcut
+    {
+        if (!$pointcut->isEmpty()) {
+            return $pointcut;
+        }
+
+        return Pointcut::initializeFrom($interfaceToCall, $parameterConverters);
     }
 }

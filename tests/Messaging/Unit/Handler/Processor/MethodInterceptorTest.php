@@ -3,6 +3,7 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -11,6 +12,8 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConve
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeOne;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorWithServicesExample;
 use Test\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
 use Test\Ecotone\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
@@ -40,7 +43,7 @@ class MethodInterceptorTest extends TestCase
         );
     }
 
-    public function __test_adding_reference_parameter_converters()
+    public function test_adding_reference_parameter_converters()
     {
         $methodInterceptor = MethodInterceptor::create(ServiceActivatorInterceptorWithServicesExample::class, InterfaceToCall::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingBefore"), ServiceActivatorBuilder::create(ServiceActivatorInterceptorWithServicesExample::class, "doSomethingBefore"), 1, "");
 
@@ -53,6 +56,16 @@ class MethodInterceptorTest extends TestCase
             $methodInterceptor->addInterceptedInterfaceToCall(InterfaceToCall::create(CalculatorInterceptor::class, "multiplyBefore"), [])
                 ->getInterceptingObject()
                 ->getParameterConverters()
+        );
+    }
+
+    public function test_resolving_pointcut_automatically()
+    {
+        $this->assertEquals(
+            MethodInterceptor::create(AroundInterceptorExample::class, InterfaceToCall::create(AroundInterceptorExample::class, "withNonAnnotationClass"), ServiceActivatorBuilder::create(AroundInterceptorExample::class, "withNonAnnotationClass"), 1,
+                "(" . AttributeOne::class . ")"),
+            MethodInterceptor::create(AroundInterceptorExample::class, InterfaceToCall::create(AroundInterceptorExample::class, "withNonAnnotationClass"), ServiceActivatorBuilder::create(AroundInterceptorExample::class, "withNonAnnotationClass"), 1,
+                "")
         );
     }
 }

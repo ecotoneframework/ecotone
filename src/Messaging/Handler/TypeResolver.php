@@ -153,25 +153,19 @@ class TypeResolver
         return $analyzedClass;
     }
 
-    /**
-     * @param \ReflectionClass $reflectionClass
-     * @param \ReflectionMethod $methodReflection
-     * @return string
-     * @throws \ReflectionException
-     */
-    private function getDocComment(\ReflectionClass $reflectionClass, \ReflectionMethod $methodReflection): string
+    private function getDocComment(\ReflectionClass $analyzedClass, \ReflectionMethod $methodReflection): string
     {
         $docComment = $methodReflection->getDocComment();
-        if (!$docComment || $this->isIgnoringDocblockTypeHints($methodReflection)) {
+        if (!$docComment || $this->isIgnoringDocblockTypeHints($analyzedClass, $methodReflection)) {
             return "";
         }
 
         return $docComment;
     }
 
-    private function isIgnoringDocblockTypeHints(\ReflectionMethod $methodReflection) : bool
+    private function isIgnoringDocblockTypeHints(\ReflectionClass $analyzedClass, \ReflectionMethod $methodReflection) : bool
     {
-        return (bool)$methodReflection->getAttributes(IgnoreDocblockTypeHint::class);
+        return (bool)$methodReflection->getAttributes(IgnoreDocblockTypeHint::class) || (bool)$analyzedClass->getAttributes(IgnoreDocblockTypeHint::class);
     }
 
     private function expandParameterTypeHint(string $parameterTypeHint, \ReflectionClass $thisClass, \ReflectionClass $analyzedClass, \ReflectionClass $declaringClass): string

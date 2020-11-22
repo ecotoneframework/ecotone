@@ -123,26 +123,28 @@ class TypeDescriptorTest extends TestCase
         );
     }
 
-    /**
-     * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function test_throwing_exception_on_incompatible_class_type_hint_and_array_doc_block()
+    public function test_when_parameter_is_array_accepting_only_array_like_type_from_docblock()
     {
-        $this->expectException(TypeDefinitionException::class);
-
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY,  \stdClass::class);
+        $this->assertEquals(
+            "array<stdClass>",
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, "\stdClass|array<\stdClass>|int")->toString()
+        );
     }
 
-    /**
-     * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function test_throwing_exception_on_incompatible_array_type_hint_and_class_doc_block()
+    public function test_when_parameter_is_union_with_array_accepting_only_array_like_type_from_docblock()
     {
-        $this->expectException(TypeDefinitionException::class);
+        $this->assertEquals(
+            "array<stdClass>|stdClass",
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY . "|" . \stdClass::class, "string|array<\stdClass>|int")->toString()
+        );
+    }
 
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, \stdClass::class);
+    public function test_ignoring_docblock_if_iterable_or_array_when_declaration_is_array()
+    {
+        $this->assertEquals(
+            TypeDescriptor::ARRAY,
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, "array|iterable")->toString()
+        );
     }
 
     /**

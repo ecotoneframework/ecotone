@@ -31,8 +31,6 @@ class UnionTypeDescriptor implements Type
 
     private function initialize(array $typeDescriptors) : void
     {
-        Assert::notNullAndEmpty($typeDescriptors, "Can not create union type with no types defined");
-
         foreach ($typeDescriptors as $typeDescriptor) {
             foreach ($typeDescriptors as $typeToCompare) {
                 if (
@@ -54,7 +52,7 @@ class UnionTypeDescriptor implements Type
      */
     public static function createWith(array $types): Type
     {
-        Assert::allInstanceOfType($types, TypeDescriptor::class);
+        $types = array_unique($types);
 
         if (count($types) === 1) {
             return array_values($types)[0];
@@ -112,7 +110,7 @@ class UnionTypeDescriptor implements Type
     /**
      * @return TypeDescriptor[]
      */
-    public function getUnionTypes(): ?array
+    public function getUnionTypes(): array
     {
         return $this->typeDescriptors;
     }

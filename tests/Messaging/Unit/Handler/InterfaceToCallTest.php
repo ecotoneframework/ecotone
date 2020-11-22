@@ -23,6 +23,7 @@ use Test\Ecotone\Messaging\Fixture\Conversion\ExampleTestAnnotation;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\LazyUser;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Permission;
+use Test\Ecotone\Messaging\Fixture\Conversion\IgnoreDocblockClassLevel;
 use Test\Ecotone\Messaging\Fixture\Conversion\InCorrectInterfaceExample;
 use Test\Ecotone\Messaging\Fixture\Conversion\OnlineShop;
 use Test\Ecotone\Messaging\Fixture\Conversion\Password;
@@ -115,6 +116,30 @@ class InterfaceToCallTest extends TestCase
 
         $this->assertEquals(
             TypeDescriptor::create("array"),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
+    public function test_retrieving_union_return_type()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            User::class, "withUnionArrayReturnType"
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create("array|string|int"),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
+    public function test_array_union_type_and_docblock()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            User::class, "withUnionArrayReturnTypeWithDocblock"
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create("\stdClass[]|int"),
             $interfaceToCall->getReturnType()
         );
     }
@@ -263,7 +288,7 @@ class InterfaceToCallTest extends TestCase
      * @throws MessagingException
      * @throws InvalidArgumentException
      */
-    public function test_ignoring_docblock_type_hint()
+    public function test_ignoring_docblock_type_hint_on_method_level()
     {
         $interfaceToCall = InterfaceToCall::create(
             User::class, "ignoreDocblockTypeHint"
@@ -272,6 +297,18 @@ class InterfaceToCallTest extends TestCase
         $this->assertEquals(
             InterfaceParameter::createNotNullable("data", TypeDescriptor::createArrayType()),
             $interfaceToCall->getParameterWithName("data")
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::createArrayType(),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
+    public function test_ignoring_docblock_type_hint_on_class_level()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            IgnoreDocblockClassLevel::class, "doSomething"
         );
 
         $this->assertEquals(
@@ -537,12 +574,5 @@ class InterfaceToCallTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Asynchronous::class));
-    }
-
-    public function test_throwing_when_doc_block_has_return_value_and_declaration_has_void()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        InterfaceToCall::create(InCorrectInterfaceExample::class, "voidWithReturnValue");
     }
 }

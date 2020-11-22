@@ -16,123 +16,135 @@ final class TypeDescriptor implements Type
     const COLLECTION_TYPE_REGEX = "/[a-zA-Z0-9]*<([\\a-zA-Z0-9,\s]*)>/";
 
     //    scalar types
-    const INTEGER = "int";
+    const         INTEGER           = "int";
     private const INTEGER_LONG_NAME = "integer";
-    const FLOAT = "float";
-    private const DOUBLE = "double";
-    const BOOL = "bool";
-    private const BOOL_LONG_NAME = "boolean";
-    private const BOOL_FALSE_NAME = "false";
-    const STRING = "string";
+    const         FLOAT             = "float";
+    private const DOUBLE            = "double";
+    const         BOOL              = "bool";
+    private const BOOL_LONG_NAME    = "boolean";
+    private const BOOL_FALSE_NAME   = "false";
+    const         STRING            = "string";
 
 //    compound types
-    const ARRAY = "array";
-    const ITERABLE = "iterable";
-    const CALLABLE = "callable";
-    const OBJECT = "object";
+    const ARRAY                     = "array";
+    const         ITERABLE          = "iterable";
+    const CALLABLE                  = "callable";
+    const         OBJECT            = "object";
 
 //    resource
     const RESOURCE = "resource";
 
     const ANYTHING = "anything";
-    const VOID = "void";
+    const VOID     = "void";
 
     const MIXED = "mixed";
-    const NULL = "null";
+    const NULL  = "null";
 
     private string $type;
 
     private static function resolveCollectionTypes(string $foundCollectionTypes): array
     {
         $collectionTypes = explode(",", $foundCollectionTypes);
-        $collectionTypes = array_map(function (string $type) {
-            return self::removeSlashPrefix($type);
-        }, $collectionTypes);
+        $collectionTypes = array_map(
+            function (string $type) {
+                return self::removeSlashPrefix($type);
+            }, $collectionTypes
+        );
 
-        return array_filter($collectionTypes, function (string $type) {
+        return array_filter(
+            $collectionTypes, function (string $type) {
             return $type !== self::MIXED;
-        });
+        }
+        );
     }
 
     /**
      * @return bool
      */
-    public function isCompoundType() : bool
+    public function isCompoundType(): bool
     {
         return in_array($this->type, [self::ARRAY, self::ITERABLE, self::CALLABLE, self::OBJECT]);
     }
 
     /**
      * @param string $type
+     *
      * @return bool
      */
-    public static function isItTypeOfScalar(string $type) : bool
+    public static function isItTypeOfScalar(string $type): bool
     {
         return in_array($type, [self::INTEGER, self::FLOAT, self::BOOL, self::STRING, self::INTEGER_LONG_NAME, self::DOUBLE, self::BOOL_LONG_NAME]);
     }
 
     /**
      * @param string $type
+     *
      * @return bool
      */
-    public static function isItTypeOfPrimitive(string $type) : bool
+    public static function isItTypeOfPrimitive(string $type): bool
     {
         return self::isItTypeOfCompoundType($type) || self::isItTypeOfScalar($type) || $type === self::RESOURCE;
     }
 
     /**
      * @param string $type
+     *
      * @return bool
      */
-    public static function isItTypeOfCollection(string $type) : bool
+    public static function isItTypeOfCollection(string $type): bool
     {
         return (bool)preg_match(self::COLLECTION_TYPE_REGEX, $type);
     }
 
     /**
      * @param string $type
+     *
      * @return bool
      */
-    public static function isItTypeOfResource(string $type) : bool
+    public static function isItTypeOfResource(string $type): bool
     {
         return $type == self::RESOURCE;
     }
 
     /**
      * @param string $typeToCompare
+     *
      * @return bool
      */
-    public static function isItTypeOfVoid(string $typeToCompare) : bool
+    public static function isItTypeOfVoid(string $typeToCompare): bool
     {
         return $typeToCompare === self::VOID;
     }
 
     /**
      * @param string $type
+     *
      * @return bool
      */
-    public static function isMixedType(string $type) : bool
+    public static function isMixedType(string $type): bool
     {
         return $type === self::MIXED;
     }
 
     /**
      * @param string $type
+     *
      * @return bool
      */
-    public static function isNull(string $type) : bool
+    public static function isNull(string $type): bool
     {
         return $type === self::NULL;
     }
 
     /**
      * @param TypeDescriptor $toCompare
+     *
      * @return bool
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \ReflectionException
      */
-    public function isCompatibleWith(Type $toCompare) : bool
+    public function isCompatibleWith(Type $toCompare): bool
     {
         if ($toCompare instanceof UnionTypeDescriptor) {
             foreach ($toCompare->getUnionTypes() as $unionType) {
@@ -173,7 +185,7 @@ final class TypeDescriptor implements Type
         }
 
         if ($this->isCollection() && $toCompare->isCollection()) {
-            $thisGenericTypes = $this->resolveGenericTypes();
+            $thisGenericTypes     = $this->resolveGenericTypes();
             $comparedGenericTypes = $toCompare->resolveGenericTypes();
 
             if (count($thisGenericTypes) !== count($comparedGenericTypes)) {
@@ -198,7 +210,7 @@ final class TypeDescriptor implements Type
                     return false;
                 }
 
-                $thisClass = new \ReflectionClass($this->getTypeHint());
+                $thisClass      = new \ReflectionClass($this->getTypeHint());
                 $toCompareClass = new \ReflectionClass($toCompare->getTypeHint());
 
                 if ($thisClass->isInterface() && !$toCompareClass->isInterface()) {
@@ -227,11 +239,36 @@ final class TypeDescriptor implements Type
 
     /**
      * @param string $typeHint
+     *
      * @return bool
      */
-    public static function isItTypeOfExistingClassOrInterface(string $typeHint) : bool
+    public static function isItTypeOfExistingClassOrInterface(string $typeHint): bool
     {
         return class_exists($typeHint) || interface_exists($typeHint);
+    }
+
+    private static function initialize(?string $typeHint, ?string $docBlockTypeDescription) : Type
+    {
+        $resolvedType = [];
+        foreach (self::resolveType($typeHint)->getUnionTypes() as $declarationType) {
+            if ($declarationType->isIterable() && !$declarationType->isCollection() && $docBlockTypeDescription) {
+                $docblockType = self::resolveType($docBlockTypeDescription);
+                if (!$docblockType->isCollection()) {
+                    $resolvedType[] = $declarationType;
+                    continue;
+                }
+
+                foreach ($docblockType->getUnionTypes() as $type) {
+                    if ($type->isIterable()) {
+                        $resolvedType[] = $type;
+                    }
+                }
+            }else {
+                $resolvedType[] = $declarationType;
+            }
+        }
+
+        return UnionTypeDescriptor::createWith($resolvedType);
     }
 
     /**
@@ -240,7 +277,7 @@ final class TypeDescriptor implements Type
      * @return bool
      * @throws \ReflectionException
      */
-    public static function isInternalClassOrInterface(string $typeHint) : bool
+    public static function isInternalClassOrInterface(string $typeHint): bool
     {
         if (!self::isItTypeOfExistingClassOrInterface($typeHint)) {
             return false;
@@ -251,16 +288,19 @@ final class TypeDescriptor implements Type
 
     /**
      * @param Type $toCompare
+     *
      * @return bool
      */
-    public function equals(Type $toCompare) : bool
+    public function equals(Type $toCompare): bool
     {
         return $this->toString() === $toCompare->toString();
     }
 
     /**
      * TypeHint constructor.
+     *
      * @param string $type
+     *
      * @throws \Ecotone\Messaging\MessagingException
      */
     private function __construct(string $type)
@@ -270,35 +310,36 @@ final class TypeDescriptor implements Type
 
     /**
      * @param $variable
+     *
      * @return TypeDescriptor
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createFromVariable($variable) : self
+    public static function createFromVariable($variable): self
     {
         $type = strtolower(gettype($variable));
 
         if ($type === self::DOUBLE) {
             $type = self::FLOAT;
-        }else if ($type === self::INTEGER_LONG_NAME) {
+        } else if ($type === self::INTEGER_LONG_NAME) {
             $type = self::INTEGER;
-        }else if ($type === self::BOOL_LONG_NAME) {
+        } else if ($type === self::BOOL_LONG_NAME) {
             $type = self::BOOL;
-        }else if ($type === self::ARRAY) {
+        } else if ($type === self::ARRAY) {
             $type = self::ARRAY;
-        }else if ($type === self::ITERABLE) {
+        } else if ($type === self::ITERABLE) {
             $type = self::ITERABLE;
-        }else if (is_callable($variable)){
+        } else if (is_callable($variable)) {
             $type = self::CALLABLE;
-        }else if ($type === self::OBJECT) {
+        } else if ($type === self::OBJECT) {
             $type = get_class($variable);
-        }else if ($type === self::STRING) {
+        } else if ($type === self::STRING) {
             $type = self::STRING;
-        }else if ($type === self::RESOURCE){
+        } else if ($type === self::RESOURCE) {
             $type = self::RESOURCE;
-        }else if ($type === self::NULL) {
+        } else if ($type === self::NULL) {
             $type = self::NULL;
-        }else {
+        } else {
             $type = self::ANYTHING;
         }
 
@@ -312,7 +353,7 @@ final class TypeDescriptor implements Type
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function resolveGenericTypes() : array
+    public function resolveGenericTypes(): array
     {
         if (!$this->isCollection()) {
             throw InvalidArgumentException::create("Can't resolve collection type on non collection");
@@ -320,40 +361,37 @@ final class TypeDescriptor implements Type
 
         preg_match(self::COLLECTION_TYPE_REGEX, $this->type, $match);
 
-        return array_map(function(string $type){
-            return TypeDescriptor::create($type);
-        }, self::resolveCollectionTypes($match[1]));
+        return array_map(
+            function (string $type) {
+                return TypeDescriptor::create($type);
+            }, self::resolveCollectionTypes($match[1])
+        );
     }
 
-    /**
-     * @param string $type
-     * @param string|null $docBlockTypeDescription
-     * @return Type
-     * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public static function createWithDocBlock(?string $type, ?string $docBlockTypeDescription) : Type
+    public static function createWithDocBlock(?string $type, ?string $docBlockTypeDescription): Type
     {
         return self::initialize($type, $docBlockTypeDescription);
     }
 
     /**
      * @param string $className
+     *
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createCollection(string $className) : \Ecotone\Messaging\Handler\TypeDescriptor
+    public static function createCollection(string $className): \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self("array<{$className}>");
     }
 
     /**
      * @param string $type
+     *
      * @return Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function create(?string $type) : Type
+    public static function create(?string $type): Type
     {
         return self::initialize($type, "");
     }
@@ -362,7 +400,7 @@ final class TypeDescriptor implements Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createAnythingType() : \Ecotone\Messaging\Handler\TypeDescriptor
+    public static function createAnythingType(): \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::ANYTHING);
     }
@@ -371,7 +409,7 @@ final class TypeDescriptor implements Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createBooleanType() : \Ecotone\Messaging\Handler\TypeDescriptor
+    public static function createBooleanType(): \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::BOOL);
     }
@@ -380,7 +418,7 @@ final class TypeDescriptor implements Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createIntegerType() : \Ecotone\Messaging\Handler\TypeDescriptor
+    public static function createIntegerType(): \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::INTEGER);
     }
@@ -389,7 +427,7 @@ final class TypeDescriptor implements Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createArrayType() : \Ecotone\Messaging\Handler\TypeDescriptor
+    public static function createArrayType(): \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::ARRAY);
     }
@@ -400,7 +438,7 @@ final class TypeDescriptor implements Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createIterable() : \Ecotone\Messaging\Handler\TypeDescriptor
+    public static function createIterable(): \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::ITERABLE);
     }
@@ -409,7 +447,7 @@ final class TypeDescriptor implements Type
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createStringType() : \Ecotone\Messaging\Handler\TypeDescriptor
+    public static function createStringType(): \Ecotone\Messaging\Handler\TypeDescriptor
     {
         return new self(self::STRING);
     }
@@ -417,16 +455,17 @@ final class TypeDescriptor implements Type
     /**
      * @return string
      */
-    public function getTypeHint() : string
+    public function getTypeHint(): string
     {
         return $this->type;
     }
 
     /**
      * @param string $interfaceName
+     *
      * @return bool
      */
-    public function isClassOfType(string $interfaceName) : bool
+    public function isClassOfType(string $interfaceName): bool
     {
         return self::isItTypeOfExistingClassOrInterface($this->type) && ($this->type === $interfaceName || $this->type === "\\" . $interfaceName || is_subclass_of($this->type, $interfaceName));
     }
@@ -434,7 +473,7 @@ final class TypeDescriptor implements Type
     /**
      * @return bool
      */
-    public function isIterable() : bool
+    public function isIterable(): bool
     {
         return $this->type === self::ARRAY || $this->type === self::ITERABLE || $this->isCollection();
     }
@@ -442,6 +481,14 @@ final class TypeDescriptor implements Type
     public function isMessage(): bool
     {
         return $this->type === Message::class;
+    }
+
+    /**
+     * @return TypeDescriptor[]
+     */
+    public function getUnionTypes(): array
+    {
+        return [$this];
     }
 
     /**
@@ -542,7 +589,7 @@ final class TypeDescriptor implements Type
     {
         return interface_exists($this->type);
     }
-    
+
     public function isAbstractClass() : bool
     {
         if (!$this->isClassOrInterface()) {
@@ -572,25 +619,6 @@ final class TypeDescriptor implements Type
     public function isResource(): bool
     {
         return $this->type === self::RESOURCE;
-    }
-
-    private static function initialize(?string $typeHint, ?string $docBlockTypeDescription) : Type
-    {
-        $declarationType = self::resolveType($typeHint);
-
-        if ($declarationType->isIterable() && !$declarationType->isCollection()) {
-            $docblockType = self::resolveType($docBlockTypeDescription);
-            if ($docblockType->isAnything()) {
-                return $declarationType;
-            }
-
-            if ($declarationType->isIterable() && !$docblockType->isIterable()) {
-                throw TypeDefinitionException::create("Declaration type hint `{$typeHint}` which is iterable is not compatible with DocBlock type {$docblockType}. Fix your DocBlock type hint.");
-            }
-            $declarationType = $docblockType;
-        }
-
-        return $declarationType;
     }
 
 

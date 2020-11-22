@@ -116,4 +116,23 @@ interface User
      * @return mixed[]
      */
     public function mixedArrayCollection(array $data) : array;
+
+    public function withUnionArrayReturnType() : array|int|string;
+
+    /**
+     * @return \stdClass[]
+     */
+    public function withUnionArrayReturnTypeWithDocblock() : array|int;
+
+    public function withUnionParameterType(array|int|string $param) : void;
+
+    /**
+     * @var \stdClass[] $param
+     */
+    public function withUnionParameterTypeWithDocblock(array|int|string $param) : void;
+
+    /**
+     * @var \stdClass[]|\stdClass $param
+     */
+    public function withUnionParameterTypeWithUnionDocblockType(array|int|string $param) : void;
 }

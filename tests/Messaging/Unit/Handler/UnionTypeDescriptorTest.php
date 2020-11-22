@@ -85,6 +85,16 @@ class UnionTypeDescriptorTest extends TestCase
         );
     }
 
+    public function test_ignoring_duplicated_types()
+    {
+        $this->assertEquals(
+            TypeDescriptor::create(TypeDescriptor::ARRAY),
+            UnionTypeDescriptor::createWith([
+                TypeDescriptor::create(TypeDescriptor::ARRAY), TypeDescriptor::create(TypeDescriptor::ARRAY)
+            ])
+        );
+    }
+
     public function test_if_is_iterable()
     {
         $this->assertTrue(
@@ -258,12 +268,5 @@ class UnionTypeDescriptorTest extends TestCase
             TypeDescriptor::createStringType(),
             UnionTypeDescriptor::createWith([TypeDescriptor::createStringType()])
         );
-    }
-
-    public function test_creating_without_any_type_result_in_exception()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        UnionTypeDescriptor::createWith([]);
     }
 }

@@ -48,6 +48,11 @@ interface Type
      */
     public function isIterable(): bool;
 
+    /**
+     * @return TypeDescriptor[]
+     */
+    public function getUnionTypes(): array;
+
     public function isMessage(): bool;
 
     /**

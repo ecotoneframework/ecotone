@@ -53,14 +53,6 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return "requiredConsumersModule";
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         foreach ($this->consumerIds as $consumerId) {

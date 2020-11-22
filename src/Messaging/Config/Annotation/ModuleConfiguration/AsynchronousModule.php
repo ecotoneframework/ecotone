@@ -112,12 +112,4 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
             }
         }
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return "converterModule";
-    }
 }

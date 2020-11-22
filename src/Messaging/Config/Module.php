@@ -11,11 +11,6 @@ namespace Ecotone\Messaging\Config;
 interface Module
 {
     /**
-     * @return string
-     */
-    public function getName(): string;
-
-    /**
      * In here you can register all message handlers, gateways, message channels
      *
      * @param Configuration                $configuration

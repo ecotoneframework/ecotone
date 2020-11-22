@@ -39,12 +39,4 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
     {
         return ServiceActivator::class;
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
 }

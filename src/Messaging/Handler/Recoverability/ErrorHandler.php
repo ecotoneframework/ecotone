@@ -7,6 +7,7 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 class ErrorHandler
@@ -27,7 +28,7 @@ class ErrorHandler
         $this->hasDeadLetterOutput = $hasDeadLetterOutput;
     }
 
-    public function handle(Message $errorMessage): ?Message
+    public function handle(ErrorMessage $errorMessage): ?Message
     {
         /** @var MessagingException $messagingException */
         $messagingException = $errorMessage->getPayload();
@@ -35,7 +36,6 @@ class ErrorHandler
         $cause = $messagingException->getCause() ? $messagingException->getCause() : $messagingException;
         $retryNumber = $failedMessage->getHeaders()->containsKey(self::ECOTONE_RETRY_HEADER) ? $failedMessage->getHeaders()->get(self::ECOTONE_RETRY_HEADER) + 1 : 1;
 
-//        @TODO handle it differently with router. As this requires $errorMessage to contain objects
         if (!$failedMessage->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL)) {
             throw $cause;
         }

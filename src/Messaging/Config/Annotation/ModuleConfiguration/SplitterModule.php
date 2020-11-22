@@ -42,12 +42,4 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
     {
         return Splitter::class;
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
 }

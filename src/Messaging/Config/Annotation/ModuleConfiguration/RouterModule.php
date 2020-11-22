@@ -35,12 +35,4 @@ class RouterModule extends MessageHandlerRegisterConfiguration
     {
         return Router::class;
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
 }

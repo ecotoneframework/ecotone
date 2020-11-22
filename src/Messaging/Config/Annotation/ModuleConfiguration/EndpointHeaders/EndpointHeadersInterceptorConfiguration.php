@@ -34,14 +34,6 @@ class EndpointHeadersInterceptorConfiguration extends NoExternalConfigurationMod
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return "endpointHeadersModule";
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         $interfaceToCall = InterfaceToCall::create(EndpointHeadersInterceptor::class, "addMetadata");

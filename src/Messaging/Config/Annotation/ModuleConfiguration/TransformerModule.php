@@ -41,12 +41,4 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
     {
         return Transformer::class;
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
 }

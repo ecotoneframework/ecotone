@@ -116,15 +116,12 @@ class ErrorHandlerTest extends TestCase
         $errorHandler = new ErrorHandler($retryTemplate, true);
 
         $resultMessage = $errorHandler->handle(
-            MessageBuilder::withPayload(
-                MessageHandlingException::fromOtherException(
-                    new InvalidArgumentException("causation"),
-                    MessageBuilder::withPayload("payload")
-                        ->setHeader(MessageHeaders::POLLED_CHANNEL, $consumedChannel)
-                        ->setHeader(ErrorHandler::ECOTONE_RETRY_HEADER, 2)
-                        ->build()
-                ))
-                ->build()
+            $this->createFailedMessage(
+                MessageBuilder::withPayload("payload")
+                    ->setHeader(MessageHeaders::POLLED_CHANNEL, $consumedChannel)
+                    ->setHeader(ErrorHandler::ECOTONE_RETRY_HEADER, 2)
+                    ->build(),
+                new InvalidArgumentException("causation"))
         );
 
         $this->assertEquals("causation", $resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_MESSAGE));

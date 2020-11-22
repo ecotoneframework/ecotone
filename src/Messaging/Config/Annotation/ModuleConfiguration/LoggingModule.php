@@ -38,14 +38,6 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return "loggingModule";
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         $configuration->registerBeforeMethodInterceptor(

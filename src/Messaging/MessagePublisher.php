@@ -5,17 +5,11 @@ namespace Ecotone\Messaging;
 
 use Ecotone\Messaging\Conversion\MediaType;
 
-/**
- * Interface AmqpPublisher
- * @package Ecotone\Amqp
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
 interface MessagePublisher
 {
-
     public function send(string $data, string $sourceMediaType = MediaType::TEXT_PLAIN) : void;
 
-    public function sendWithMetadata(string $data, array $metadata, string $sourceMediaType = MediaType::TEXT_PLAIN) : void;
+    public function sendWithMetadata(string $data, string $sourceMediaType = MediaType::TEXT_PLAIN, array $metadata = []) : void;
 
     /**
      * @param object|array $data

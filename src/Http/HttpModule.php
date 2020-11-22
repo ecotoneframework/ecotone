@@ -25,14 +25,6 @@ class HttpModule extends NoExternalConfigurationModule
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return "httpModule";
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         $moduleReferenceSearchService->store("psrHttpMessageConverter", PsrHttpMessageConverter::create());

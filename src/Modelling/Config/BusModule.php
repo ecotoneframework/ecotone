@@ -145,11 +145,6 @@ class BusModule extends NoExternalConfigurationModule implements AnnotationModul
         ]);
     }
 
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
-
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         foreach ($this->gateways as $gateway) {

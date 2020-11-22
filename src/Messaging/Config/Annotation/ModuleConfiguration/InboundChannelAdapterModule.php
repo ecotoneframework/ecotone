@@ -36,12 +36,4 @@ class InboundChannelAdapterModule extends ConsumerRegisterConfiguration
             ->withEndpointId($annotation->getEndpointId())
             ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames());
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return "inboundChannelAdapterModule";
-    }
 }

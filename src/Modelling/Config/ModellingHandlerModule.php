@@ -212,14 +212,6 @@ class ModellingHandlerModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return self::CQRS_MODULE;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getRelatedReferences(): array
     {
         return [];

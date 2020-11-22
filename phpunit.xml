@@ -21,7 +21,6 @@
         timeoutForMediumTests="10"
         timeoutForLargeTests="60"
         verbose="false"
-        bootstrap="tests/TestBootstrap.php"
 >
     <testsuites>
         <testsuite name="Unit Tests">

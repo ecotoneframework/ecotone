@@ -237,7 +237,7 @@ final class MessagingSystemConfiguration implements Configuration
         return self::prepareWithModuleRetrievingService(
             $rootPathToSearchConfigurationFor,
             new AnnotationModuleRetrievingService(
-                AnnotationFinderFactory::createFromWhatIsAvailable(
+                AnnotationFinderFactory::createForAttributes(
                     realpath($rootPathToSearchConfigurationFor),
                     $applicationConfiguration->getNamespaces(),
                     $applicationConfiguration->getEnvironment(),
@@ -814,10 +814,10 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($modules as $module) {
             $this->requireReferences($module->getRelatedReferences());
 
-            $moduleExtensions[$module->getName()] = [];
+            $moduleExtensions[get_class($module)] = [];
             foreach ($extensionObjects as $extensionObject) {
                 if ($module->canHandle($extensionObject)) {
-                    $moduleExtensions[$module->getName()][] = $extensionObject;
+                    $moduleExtensions[get_class($module)][] = $extensionObject;
                 }
             }
         }
@@ -825,7 +825,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($modules as $module) {
             $module->prepare(
                 $this,
-                $moduleExtensions[$module->getName()],
+                $moduleExtensions[get_class($module)],
                 $moduleReferenceSearchService
             );
         }

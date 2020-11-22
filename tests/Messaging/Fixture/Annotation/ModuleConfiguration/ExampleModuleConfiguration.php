@@ -63,14 +63,6 @@ class ExampleModuleConfiguration implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return "exampleModule";
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         $this->extensionObjects = $extensionObjects;

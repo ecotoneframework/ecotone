@@ -80,12 +80,4 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
             $configuration->registerConverter($converterBuilder);
         }
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return "converterModule";
-    }
 }

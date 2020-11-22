@@ -36,14 +36,6 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
         /** @var ErrorHandlerConfiguration $extensionObject */

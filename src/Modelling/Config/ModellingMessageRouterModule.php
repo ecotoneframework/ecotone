@@ -312,14 +312,6 @@ class ModellingMessageRouterModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function canHandle($extensionObject): bool
     {
         return false;

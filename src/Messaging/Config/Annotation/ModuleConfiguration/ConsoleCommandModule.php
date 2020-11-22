@@ -72,7 +72,7 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
         return new static($messageHandlerBuilders, $oneTimeConfigurations);
     }
 
-    public static function prepareConsoleCommand(AnnotatedMethod $annotatedMethod, string $className, string $methodName, string $commandName): array
+    public static function prepareConsoleCommand(?AnnotatedMethod $annotatedMethod, string $className, string $methodName, string $commandName): array
     {
         $parameterConverters = [];
         $parameters          = [];
@@ -96,7 +96,7 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
         }
 
         $inputChannel                = "ecotone.channel." . $commandName;
-        if ($classReflection->getConstructor() && $classReflection->getConstructor()->getParameters()) {
+        if ($annotatedMethod && $classReflection->getConstructor() && $classReflection->getConstructor()->getParameters()) {
             $serviceActivatorBuilder     = ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotatedMethod), $methodName);
         }else {
             $serviceActivatorBuilder     = ServiceActivatorBuilder::createWithDirectReference(new $className(), $methodName);
@@ -124,13 +124,5 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
     public function canHandle($extensionObject) : bool
     {
         return false;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return "oneTimeCommandModule";
     }
 }

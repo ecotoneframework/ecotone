@@ -178,12 +178,4 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     {
         return false;
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getName(): string
-    {
-        return self::MODULE_NAME;
-    }
 }

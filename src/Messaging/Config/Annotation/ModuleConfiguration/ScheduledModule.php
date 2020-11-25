@@ -14,7 +14,7 @@ use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 
 #[ModuleAnnotation]
-class InboundChannelAdapterModule extends ConsumerRegisterConfiguration
+class ScheduledModule extends ConsumerRegisterConfiguration
 {
     /**
      * @inheritDoc

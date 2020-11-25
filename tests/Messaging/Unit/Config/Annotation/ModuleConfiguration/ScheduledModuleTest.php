@@ -5,26 +5,21 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\InboundChannelAdapterModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ScheduledModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
-use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\InboundChannelAdapterExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\SchedulerExample;
 
-/**
- * Class InboundChannelAdapterModuleTest
- * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
-class InboundChannelAdapterModuleTest extends AnnotationConfigurationTest
+class ScheduledModuleTest extends AnnotationConfigurationTest
 {
     /**
      */
     public function test_creating_inbound_channel_adapter_builder_from_annotation()
     {
-        $annotationConfiguration = InboundChannelAdapterModule::create(
+        $annotationConfiguration = ScheduledModule::create(
             InMemoryAnnotationFinder::createFrom([
-                InboundChannelAdapterExample::class
+                SchedulerExample::class
             ])
         );
 
@@ -35,7 +30,7 @@ class InboundChannelAdapterModuleTest extends AnnotationConfigurationTest
             $configuration,
             $this->createMessagingSystemConfiguration()
                 ->registerConsumer(
-                    InboundChannelAdapterBuilder::create("requestChannel", InboundChannelAdapterExample::class, "doRun")
+                    InboundChannelAdapterBuilder::create("requestChannel", SchedulerExample::class, "doRun")
                         ->withEndpointId("run")
                         ->withRequiredInterceptorNames(["some"])
                 )

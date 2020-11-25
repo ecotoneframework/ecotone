@@ -6,7 +6,7 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChann
 use Ecotone\Messaging\Annotation\Scheduled;
 use Ecotone\Messaging\Annotation\MessageEndpoint;
 
-class InboundChannelAdapterExample
+class SchedulerExample
 {
     #[Scheduled("requestChannel", "run", ["some"])]
     public function doRun() : array

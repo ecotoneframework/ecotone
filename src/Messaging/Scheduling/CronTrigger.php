@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
-use Cron\CronExpression;
+use Ecotone\Messaging\Scheduling\CronIntegration\CronExpression;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
@@ -15,12 +15,6 @@ class CronTrigger implements Trigger
 {
     private ?string $cronExpression;
 
-    /**
-     * CronTrigger constructor.
-     * @param string $cronExpression
-     * @throws InvalidArgumentException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
     private function __construct(string $cronExpression)
     {
         $this->initialize($cronExpression);

@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Ecotone\AnnotationFinder\AnnotationFinderFactory;
 use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
@@ -213,22 +211,8 @@ final class MessagingSystemConfiguration implements Configuration
         return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), ApplicationConfiguration::createWithDefaults());
     }
 
-    /**
-     * @param string                        $rootPathToSearchConfigurationFor
-     * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param ApplicationConfiguration      $applicationConfiguration
-     *
-     * @return Configuration
-     * @throws AnnotationException
-     * @throws ConfigurationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
     public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration): Configuration
     {
-        self::registerAnnotationAutoloader($rootPathToSearchConfigurationFor);
-
         $cachedVersion = self::getCachedVersion($applicationConfiguration);
         if ($cachedVersion) {
             return $cachedVersion;
@@ -303,22 +287,6 @@ final class MessagingSystemConfiguration implements Configuration
             Assert::isFalse(is_file($applicationConfiguration->getCacheDirectoryPath()), "Cache directory is file, should be directory");
 
             self::deleteFiles($applicationConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR, false);
-        }
-    }
-
-    /**
-     * @param string|null $rootPathToSearchConfigurationFor
-     *
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     */
-    private static function registerAnnotationAutoloader(?string $rootPathToSearchConfigurationFor): void
-    {
-        if ($rootPathToSearchConfigurationFor) {
-            $path = $rootPathToSearchConfigurationFor . '/vendor/autoload.php';
-            Assert::isTrue(file_exists($path), "Can't find autoload file on {$path}. Is autoload generated correctly?");
-            $loader = require $path;
-            AnnotationRegistry::registerLoader(array($loader, "loadClass"));
         }
     }
 
@@ -744,21 +712,8 @@ final class MessagingSystemConfiguration implements Configuration
         return $this;
     }
 
-    /**
-     * Initialize messaging system from current configuration
-     *
-     * @param ReferenceSearchService $referenceSearchService
-     *
-     * @return ConfiguredMessagingSystem
-     * @throws AnnotationException
-     * @throws ConfigurationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService): ConfiguredMessagingSystem
     {
-        self::registerAnnotationAutoloader($this->rootPathToSearchConfigurationFor);
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall, $this->isLazyConfiguration, $referenceSearchService);
         if (!$this->isLazyConfiguration) {
             $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry, $this->applicationConfiguration);

@@ -6,16 +6,15 @@ use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyConfiguration;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
-use Ecotone\Messaging\Handler\Logger\EchoLogger;
 use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
+use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
-use ProxyManager\Configuration;
 use Psr\Log\NullLogger;
 
 /**
  * Class InMemoryReferenceSearchService
  * @package Ecotone\Messaging\Handler
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryReferenceSearchService implements ReferenceSearchService
 {
@@ -23,14 +22,10 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      * @var object[]
      */
     private ?array $objectsToResolve = null;
-    private ?\Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService = null;
+    private ?ReferenceSearchService $referenceSearchService = null;
 
     /**
-     * InMemoryReferenceSearchService constructor.
-     * @param array|object[] $objectsToResolve
-     * @param ReferenceSearchService|null $referenceSearchService
-     * @param bool $withDefaults
-     * @throws \Ecotone\Messaging\MessagingException
+     * @param array|object[]              $objectsToResolve
      */
     private function __construct(array $objectsToResolve, ?ReferenceSearchService $referenceSearchService, bool $withDefaults)
     {
@@ -58,38 +53,41 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
 
     /**
      * @param array|object[] $objects
+     *
      * @return InMemoryReferenceSearchService
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
-    public static function createWith(array $objects) : self
+    public static function createWith(array $objects): self
     {
         return new self($objects, null, true);
     }
 
     /**
      * @return InMemoryReferenceSearchService
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([], null, true);
     }
 
     /**
      * @param ReferenceSearchService $referenceSearchService
-     * @param array $objects
+     * @param array                  $objects
+     *
      * @return InMemoryReferenceSearchService
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
-    public static function createWithReferenceService(ReferenceSearchService $referenceSearchService, array $objects) : self
+    public static function createWithReferenceService(ReferenceSearchService $referenceSearchService, array $objects): self
     {
         return new self($objects, $referenceSearchService, true);
     }
 
     /**
      * @param string $referenceName
-     * @param $object
-     * @throws \Ecotone\Messaging\MessagingException
+     * @param        $object
+     *
+     * @throws MessagingException
      */
     public function registerReferencedObject(string $referenceName, $object): void
     {
@@ -101,7 +99,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     /**
      * @inheritDoc
      */
-    public function get(string $reference) : object
+    public function get(string $reference): object
     {
         if (array_key_exists($reference, $this->objectsToResolve)) {
             return $this->objectsToResolve[$reference];
@@ -129,9 +127,10 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
 
     /**
      * @param array|object[] $objects
-     * @throws \Ecotone\Messaging\MessagingException
+     *
+     * @throws MessagingException
      */
-    private function initialize(array $objects) : void
+    private function initialize(array $objects): void
     {
         foreach ($objects as $object) {
             Assert::isObject($object, "Passed reference is not an object");

@@ -10,9 +10,9 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
  * @package Test\Ecotone\Messaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class SymfonyExpressionEvaluationAdapter implements \Ecotone\Messaging\Handler\ExpressionEvaluationService
+class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService
 {
-    private \Symfony\Component\ExpressionLanguage\ExpressionLanguage $language;
+    private ExpressionLanguage $language;
 
     /**
      * SymfonyExpressionEvaluationAdapter constructor.
@@ -21,7 +21,8 @@ class SymfonyExpressionEvaluationAdapter implements \Ecotone\Messaging\Handler\E
      */
     private function __construct(ExpressionLanguage $expressionLanguage)
     {
-        $expressionLanguage->register('extract', function ($str) {
+        $expressionLanguage->register(
+            'extract', function ($str) {
             return $str;
         }, function ($arguments, array $payload, string $expression, bool $unique = true) use ($expressionLanguage) {
             $extractedValues = [];
@@ -34,9 +35,11 @@ class SymfonyExpressionEvaluationAdapter implements \Ecotone\Messaging\Handler\E
             }
 
             return array_unique($extractedValues);
-        });
+        }
+        );
 
-        $expressionLanguage->register('each', function ($str) {
+        $expressionLanguage->register(
+            'each', function ($str) {
             return $str;
         }, function ($arguments, array $payload, string $expression) use ($expressionLanguage) {
             $transformedElements = [];
@@ -45,53 +48,53 @@ class SymfonyExpressionEvaluationAdapter implements \Ecotone\Messaging\Handler\E
             }
 
             return $transformedElements;
-        });
+        }
+        );
 
-        $expressionLanguage->register('createArray', function ($str) {
+        $expressionLanguage->register(
+            'createArray', function ($str) {
             return $str;
         }, function ($arguments, string $key, $value) use ($expressionLanguage) {
             return [
                 $key => $value
             ];
-        });
+        }
+        );
 
-        $expressionLanguage->register('isArray', function ($str) {
+        $expressionLanguage->register(
+            'isArray', function ($str) {
             return $str;
         }, function ($arguments, $value) use ($expressionLanguage) {
             return is_array($value);
-        });
+        }
+        );
 
-        $expressionLanguage->register('isset', function ($str) {
+        $expressionLanguage->register(
+            'isset', function ($str) {
             return $str;
         }, function ($arguments, array $array, string $key) use ($expressionLanguage) {
             return isset($array[$key]);
-        });
+        }
+        );
 
-        $expressionLanguage->register('reference', function ($str) {
+        $expressionLanguage->register(
+            'reference', function ($str) {
             return $str;
         }, function ($arguments, string $referenceName) use ($expressionLanguage) {
             return $expressionLanguage->evaluate("referenceService.get('{$referenceName}')", $arguments);
-        });
+        }
+        );
 
         $this->language = $expressionLanguage;
     }
 
-    /**
-     * @return SymfonyExpressionEvaluationAdapter
-     */
-    public static function create() : self
+    public static function create(): ExpressionEvaluationService
     {
-        return new self(new ExpressionLanguage());
-    }
+        if (!class_exists(ExpressionLanguage::class)) {
+            return new StubExpressionEvaluationAdapter();
+        }
 
-    /**
-     * @param ExpressionLanguage $expressionLanguage
-     *
-     * @return SymfonyExpressionEvaluationAdapter
-     */
-    public static function createWithExternalExpressionLanguage(ExpressionLanguage $expressionLanguage) : self
-    {
-        return new self($expressionLanguage);
+        return new self(new ExpressionLanguage());
     }
 
     /**

@@ -91,7 +91,7 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
         return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
     }
 
-    public static function prepareConsoleCommandForDirectObject(object $directObject, string $methodName, string $commandName)
+    public static function prepareConsoleCommandForDirectObject(object $directObject, string $methodName, string $commandName, bool $discoverableByConsoleCommandAttribute = true)
     {
         $className = get_class($directObject);
         $parameterConverters = [];
@@ -102,7 +102,7 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
         $inputChannel                = "ecotone.channel." . $commandName;
         $messageHandlerBuilder       = ServiceActivatorBuilder::createWithDirectReference($directObject, $methodName)
             ->withEndpointId("ecotone.endpoint." . $commandName)
-            ->withEndpointAnnotations([new ConsoleCommand($commandName)])
+            ->withEndpointAnnotations($discoverableByConsoleCommandAttribute ? [new ConsoleCommand($commandName)] : [])
             ->withInputChannelName($inputChannel)
             ->withMethodParameterConverters($parameterConverters);
         $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters);

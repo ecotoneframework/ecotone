@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Messaging\Annotation\ConsoleCommand;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ScheduledModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
@@ -33,29 +34,6 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\Ref
  */
 class ConsoleCommandModuleTest extends AnnotationConfigurationTest
 {
-    public function test_creating_no_parameter_command()
-    {
-        $annotationConfiguration = ConsoleCommandModule::create(
-            InMemoryAnnotationFinder::createFrom([
-                NoParameterOneTimeCommandExample::class
-            ])
-        );
-
-        $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
-
-        $this->assertEquals(
-            $configuration,
-            $this->createMessagingSystemConfiguration()
-                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", []))
-                ->registerMessageHandler(
-                    ServiceActivatorBuilder::createWithDirectReference(new NoParameterOneTimeCommandExample(), "execute")
-                        ->withEndpointId("ecotone.endpoint.doSomething")
-                        ->withInputChannelName("ecotone.channel.doSomething")
-                )
-        );
-    }
-
     public function test_registering_reference_based_command()
     {
         $annotationConfiguration = ConsoleCommandModule::create(
@@ -74,6 +52,7 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::create("consoleCommand", "execute")
                         ->withEndpointId("ecotone.endpoint.doSomething")
+                        ->withEndpointAnnotations([new ConsoleCommand("doSomething")])
                         ->withInputChannelName("ecotone.channel.doSomething")
                 )
         );
@@ -95,8 +74,9 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", []))
                 ->registerMessageHandler(
-                    ServiceActivatorBuilder::createWithDirectReference(new OneTimeWithResultExample(), "execute")
+                    ServiceActivatorBuilder::create(OneTimeWithResultExample::class, "execute")
                         ->withEndpointId("ecotone.endpoint.doSomething")
+                        ->withEndpointAnnotations([new ConsoleCommand("doSomething")])
                         ->withInputChannelName("ecotone.channel.doSomething")
                 )
         );
@@ -118,12 +98,13 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name"), ConsoleCommandParameter::create("surname")]))
                 ->registerMessageHandler(
-                    ServiceActivatorBuilder::createWithDirectReference(new ParametersOneTimeCommandExample(), "execute")
+                    ServiceActivatorBuilder::create(ParametersOneTimeCommandExample::class, "execute")
                         ->withMethodParameterConverters([
                             HeaderBuilder::create("name", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "name"),
                             HeaderBuilder::create("surname", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "surname")
                         ])
                         ->withEndpointId("ecotone.endpoint.doSomething")
+                        ->withEndpointAnnotations([new ConsoleCommand("doSomething")])
                         ->withInputChannelName("ecotone.channel.doSomething")
                 )
         );
@@ -145,12 +126,13 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name"), ConsoleCommandParameter::createWithDefaultValue("surname", "cash")]))
                 ->registerMessageHandler(
-                    ServiceActivatorBuilder::createWithDirectReference(new DefaultParametersOneTimeCommandExample(), "execute")
+                    ServiceActivatorBuilder::create(DefaultParametersOneTimeCommandExample::class, "execute")
                         ->withMethodParameterConverters([
                             HeaderBuilder::create("name", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "name"),
                             HeaderBuilder::create("surname", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "surname")
                         ])
                         ->withEndpointId("ecotone.endpoint.doSomething")
+                        ->withEndpointAnnotations([new ConsoleCommand("doSomething")])
                         ->withInputChannelName("ecotone.channel.doSomething")
                 )
         );
@@ -172,13 +154,14 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name"), ConsoleCommandParameter::create("surname")]))
                 ->registerMessageHandler(
-                    ServiceActivatorBuilder::createWithDirectReference(new ParametersWithReferenceOneTimeCommandExample(), "execute")
+                    ServiceActivatorBuilder::create(ParametersWithReferenceOneTimeCommandExample::class, "execute")
                         ->withMethodParameterConverters([
                             HeaderBuilder::create("name", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "name"),
                             HeaderBuilder::create("surname", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "surname"),
                             ReferenceBuilder::create("object", \stdClass::class)
                         ])
                         ->withEndpointId("ecotone.endpoint.doSomething")
+                        ->withEndpointAnnotations([new ConsoleCommand("doSomething")])
                         ->withInputChannelName("ecotone.channel.doSomething")
                 )
         );

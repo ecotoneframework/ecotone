@@ -72,12 +72,46 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
         return new static($messageHandlerBuilders, $oneTimeConfigurations);
     }
 
-    public static function prepareConsoleCommand(?AnnotatedMethod $annotatedMethod, string $className, string $methodName, string $commandName): array
+    public static function prepareConsoleCommand(AnnotatedMethod $annotatedMethod, string $className, string $methodName, string $commandName): array
     {
         $parameterConverters = [];
         $parameters          = [];
-        $classReflection     = new \ReflectionClass($className);
 
+        list($parameterConverters, $parameters) = self::prepareParameter($className, $methodName, $parameterConverters, $parameters);
+
+        $inputChannel                = "ecotone.channel." . $commandName;
+
+        $messageHandlerBuilder       = ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotatedMethod), $methodName)
+            ->withEndpointId("ecotone.endpoint." . $commandName)
+            ->withEndpointAnnotations([$annotatedMethod->getAnnotationForMethod()])
+            ->withInputChannelName($inputChannel)
+            ->withMethodParameterConverters($parameterConverters);
+        $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters);
+
+        return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
+    }
+
+    public static function prepareConsoleCommandForDirectObject(object $directObject, string $methodName, string $commandName)
+    {
+        $className = get_class($directObject);
+        $parameterConverters = [];
+        $parameters          = [];
+
+        list($parameterConverters, $parameters) = self::prepareParameter($className, $methodName, $parameterConverters, $parameters);
+
+        $inputChannel                = "ecotone.channel." . $commandName;
+        $messageHandlerBuilder       = ServiceActivatorBuilder::createWithDirectReference($directObject, $methodName)
+            ->withEndpointId("ecotone.endpoint." . $commandName)
+            ->withEndpointAnnotations([new ConsoleCommand($commandName)])
+            ->withInputChannelName($inputChannel)
+            ->withMethodParameterConverters($parameterConverters);
+        $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters);
+
+        return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
+    }
+
+    private static function prepareParameter(bool|string $className, string $methodName, array $parameterConverters, array $parameters): array
+    {
         $interfaceToCall = InterfaceToCall::create($className, $methodName);
 
         if ($interfaceToCall->canReturnValue() && !$interfaceToCall->getReturnType()->equals(TypeDescriptor::create(ConsoleCommandResultSet::class))) {
@@ -95,20 +129,7 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
             }
         }
 
-        $inputChannel                = "ecotone.channel." . $commandName;
-        if ($annotatedMethod && $classReflection->getConstructor() && $classReflection->getConstructor()->getParameters()) {
-            $serviceActivatorBuilder     = ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotatedMethod), $methodName);
-        }else {
-            $serviceActivatorBuilder     = ServiceActivatorBuilder::createWithDirectReference(new $className(), $methodName);
-        }
-
-        $messageHandlerBuilder       = $serviceActivatorBuilder
-            ->withEndpointId("ecotone.endpoint." . $commandName)
-            ->withInputChannelName($inputChannel)
-            ->withMethodParameterConverters($parameterConverters);
-        $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters);
-
-        return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
+        return array($parameterConverters, $parameters);
     }
 
     public function prepare(Configuration $configuration,array $extensionObjects,ModuleReferenceSearchService $moduleReferenceSearchService) : void

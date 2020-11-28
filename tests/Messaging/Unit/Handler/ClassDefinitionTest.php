@@ -11,11 +11,16 @@ use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ClassPropertyDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\CollectionOfClassesFromDifferentNamespaceUsingGroupAlias;
+use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\Details\Description;
+use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\Details\ProductName;
 use Test\Ecotone\Messaging\Fixture\Conversion\PrivateRocketDetails\PrivateDetails;
 use Test\Ecotone\Messaging\Fixture\Conversion\Product;
 use Test\Ecotone\Messaging\Fixture\Conversion\PublicRocketDetails\PublicDetails;
 use Test\Ecotone\Messaging\Fixture\Conversion\Rocket;
 use Test\Ecotone\Messaging\Fixture\Conversion\User;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\ArrayTypeWithDocblockProperty;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\ArrayTypeWithInlineDocblockProperty;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\DifferentTypeAndDocblockProperty;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
@@ -84,6 +89,40 @@ class ClassDefinitionTest extends TestCase
         $this->assertEquals(
             ClassPropertyDefinition::createPrivate("unknown", TypeDescriptor::createAnythingType(), true, false, []),
             $classDefinition->getProperty("unknown")
+        );
+    }
+
+    public function test_retrieving_type_from_docblock_when_array()
+    {
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(ArrayTypeWithDocblockProperty::class));
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("data", TypeDescriptor::createCollection(\stdClass::class), false, false, []),
+            $classDefinition->getProperty("data")
+        );
+    }
+
+    public function test_retrieving_type_from_inline_docblock_when_array()
+    {
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(ArrayTypeWithInlineDocblockProperty::class));
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("data", TypeDescriptor::createCollection(ExtraObject::class), false, false, []),
+            $classDefinition->getProperty("data")
+        );
+    }
+
+    public function test_retrieving_type_from_docblock_using_group_statement()
+    {
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(CollectionOfClassesFromDifferentNamespaceUsingGroupAlias::class));
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPublic("productDescriptions", TypeDescriptor::createCollection(Description::class), false, false, []),
+            $classDefinition->getProperty("productDescriptions")
+        );
+        $this->assertEquals(
+            ClassPropertyDefinition::createPublic("productNames", TypeDescriptor::createCollection(ProductName::class), false, false, []),
+            $classDefinition->getProperty("productNames")
         );
     }
 

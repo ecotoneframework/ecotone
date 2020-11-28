@@ -17,8 +17,9 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class TypeResolver
 {
-    private const COLLECTION_TYPE_REGEX = "/[a-zA-Z0-9]*<([^<]*)>/";
-    private const CODE_USE_STATEMENTS_REGEX = '/^[^\S\r\na-zA-Z0-9]*use[\s]*([^;\n]*)[\s]*;$/m';
+    private const COLLECTION_TYPE_REGEX       = "/[a-zA-Z0-9]*<([^<]*)>/";
+    private const SINGLE_USE_STATEMENTS_REGEX = '/^[^\S\r\na-zA-Z0-9]*use[\s]*([^;\n\}]*)[\s]*;$/m';
+    private const GROUP_USE_STATEMENTS_REGEX = '/^[^\S\r\n]*use[[\s]*([^;\n]*)[\s]*{([a-zA-Z0-9\s\n\r,]*)};$/m';
 
     private const METHOD_DOC_BLOCK_TYPE_HINT_REGEX = '~@param[\s]*([^\n\$\s]*)[\s]*\$([a-zA-Z0-9]*)~';
     private const METHOD_RETURN_TYPE_HINT_REGEX = '~@return[\s]*([^\n\s]*)~';
@@ -172,7 +173,8 @@ class TypeResolver
     {
         $multipleTypeHints = explode("|", $parameterTypeHint);
         $multipleTypeHints = is_array($multipleTypeHints) ? $multipleTypeHints : [$multipleTypeHints];
-        $statements = $this->getClassUseStatements($analyzedClass);
+        $classContents = file_get_contents($analyzedClass->getFileName());
+        $statements = array_merge($this->getSingleUseStatements($classContents), $this->getGroupUseStatements($classContents));
 
         if (!$parameterTypeHint) {
             return TypeDescriptor::ANYTHING;
@@ -209,32 +211,34 @@ class TypeResolver
         return implode("|", $fullNames);
     }
 
-    /**
-     * @param \ReflectionClass $interfaceReflection
-     * @return array
-     */
-    private function getClassUseStatements(\ReflectionClass $interfaceReflection): array
+    private function getGroupUseStatements(string $classContents) : array
     {
-        $code = file_get_contents($interfaceReflection->getFileName());
-        preg_match_all(self::CODE_USE_STATEMENTS_REGEX, $code, $foundUseStatements);
+        $foundClasses = [];
+        preg_match_all(self::GROUP_USE_STATEMENTS_REGEX, $classContents, $foundGroupUseStatements);
+        for ($useStatementIndex = 0; $useStatementIndex < count($foundGroupUseStatements[0]); $useStatementIndex++) {
+            foreach (explode(',', $foundGroupUseStatements[2][$useStatementIndex]) as $singleUseStatement) {
+                $foundClasses[] = trim($foundGroupUseStatements[1][$useStatementIndex]) . trim($singleUseStatement);
+            }
+        }
+
+        $useStatementAssosciative = [];
+        foreach ($foundClasses as $foundClass) {
+            list($classNameAlias, $className) = $this->getClassNameAndAlias($foundClass);
+            $useStatementAssosciative[$classNameAlias] = $className;
+        }
+
+        return $useStatementAssosciative;
+    }
+
+    private function getSingleUseStatements(string $classContents): array
+    {
+        preg_match_all(self::SINGLE_USE_STATEMENTS_REGEX, $classContents, $foundUseStatements);
 
         $useStatements = [];
         $matchAmount = count($foundUseStatements[0]);
         for ($matchIndex = 0; $matchIndex < $matchAmount; $matchIndex++) {
             $className = $foundUseStatements[1][$matchIndex];
-            $classNameAlias = null;
-            if (($alias = explode(" as ", $className)) && $this->hasUseStatementAlias($alias)) {
-                $className = $alias[0];
-                $classNameAlias = $alias[1];
-            }
-
-            $splittedClassName = explode("\\", $className);
-            if ($className[0] !== "\\") {
-                $className = "\\" . $className;
-            }
-            if (!$classNameAlias) {
-                $classNameAlias = end($splittedClassName);
-            }
+            list($classNameAlias, $className) = $this->getClassNameAndAlias($className);
 
             $useStatements[$classNameAlias] = $className;
         }
@@ -552,5 +556,24 @@ class TypeResolver
         }
 
         return $returnTypeName;
+    }
+
+    private function getClassNameAndAlias(mixed $className): array
+    {
+        $classNameAlias = null;
+        if (($alias = explode(" as ", $className)) && $this->hasUseStatementAlias($alias)) {
+            $className      = $alias[0];
+            $classNameAlias = $alias[1];
+        }
+
+        $splittedClassName = explode("\\", $className);
+        if ($className[0] !== "\\") {
+            $className = "\\" . $className;
+        }
+        if (!$classNameAlias) {
+            $classNameAlias = end($splittedClassName);
+        }
+
+        return array($classNameAlias, $className);
     }
 }

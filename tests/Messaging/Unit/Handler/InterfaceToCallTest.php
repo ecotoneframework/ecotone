@@ -23,6 +23,7 @@ use Test\Ecotone\Messaging\Fixture\Conversion\ExampleTestAnnotation;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\LazyUser;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Permission;
+use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\CollectionOfClassesFromDifferentNamespaceUsingGroupAlias;
 use Test\Ecotone\Messaging\Fixture\Conversion\IgnoreDocblockClassLevel;
 use Test\Ecotone\Messaging\Fixture\Conversion\InCorrectInterfaceExample;
 use Test\Ecotone\Messaging\Fixture\Conversion\OnlineShop;
@@ -421,27 +422,6 @@ class InterfaceToCallTest extends TestCase
         );
     }
 
-    /**
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     * @throws InvalidArgumentException
-     */
-    public function test_choosing_unknown_type_if_mixed_type_hint_in_doc_block()
-    {
-        $interfaceToCall = InterfaceToCall::create(
-            User::class, "changeAddress"
-        );
-
-        $this->assertEquals(
-            InterfaceParameter::createNullable("address", TypeDescriptor::create(TypeDescriptor::ANYTHING)),
-            $interfaceToCall->getParameterWithName("address")
-        );
-    }
-
-    /**
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
     public function test_choosing_declaring_class_if_use_this_or_self_or_static()
     {
         $this->assertEquals(

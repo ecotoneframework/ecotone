@@ -176,6 +176,20 @@ class ModellingHandlerModule implements AnnotationModule
         return null;
     }
 
+    public static function getEventPayloadClasses(AnnotatedFinding $registration): array
+    {
+        $type = TypeDescriptor::create(ModellingHandlerModule::getMessagePayloadTypeFor($registration));
+        if ($type->isClassOrInterface() && !$type->isClassOfType(TypeDescriptor::create(Message::class))) {
+            if ($type->isUnionType()) {
+                return array_map(fn (TypeDescriptor $type) => $type->toString(), $type->getUnionTypes());
+            }
+
+            return [$type->toString()];
+        }
+
+        return [];
+    }
+
     public static function hasMessageNameDefined(AnnotatedFinding $registration): bool
     {
         /** @var InputOutputEndpointAnnotation $annotationForMethod */
@@ -188,6 +202,27 @@ class ModellingHandlerModule implements AnnotationModule
         }
 
         return $inputChannelName ? true : false;
+    }
+
+    public static function getNamedMessageChannelForEventHandler(AnnotatedFinding $registration): string
+    {
+        /** @var InputOutputEndpointAnnotation $annotationForMethod */
+        $annotationForMethod = $registration->getAnnotationForMethod();
+
+        $inputChannelName = null;
+        if ($annotationForMethod instanceof EventHandler) {
+            $inputChannelName = $annotationForMethod->getListenTo();
+        }
+
+        if (!$inputChannelName) {
+            $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
+            if ($interfaceToCall->hasNoParameters()) {
+                throw ConfigurationException::create("Missing command class or input channel for {$registration}.");
+            }
+            $inputChannelName = $interfaceToCall->getFirstParameterTypeHint();
+        }
+
+        return $inputChannelName;
     }
 
     public static function getNamedMessageChannelFor(AnnotatedFinding $registration): string
@@ -205,6 +240,9 @@ class ModellingHandlerModule implements AnnotationModule
             $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
             if ($interfaceToCall->hasNoParameters()) {
                 throw ConfigurationException::create("Missing command class or input channel for {$registration}.");
+            }
+            if ($interfaceToCall->getFirstParameter()->getTypeDescriptor()->isUnionType()) {
+                throw ConfigurationException::create("Query and Command handlers can not be registered with union Command type in {$registration}");
             }
             $inputChannelName = $interfaceToCall->getFirstParameterTypeHint();
         }
@@ -242,7 +280,7 @@ class ModellingHandlerModule implements AnnotationModule
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {
-            $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getNamedMessageChannelFor($registration)][] = $registration;
+            $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getNamedMessageChannelForEventHandler($registration)][] = $registration;
         }
 
         foreach ($aggregateCommandOrEventHandlers as $channelNameRegistrations) {
@@ -256,13 +294,13 @@ class ModellingHandlerModule implements AnnotationModule
         }
 
         foreach ($this->serviceCommandHandlersRegistrations as $registration) {
-            $this->registerServiceHandler($configuration, $registration);
+            $this->registerServiceHandler(self::getNamedMessageChannelFor($registration), $configuration, $registration);
         }
         foreach ($this->serviceQueryHandlerRegistrations as $registration) {
-            $this->registerServiceHandler($configuration, $registration);
+            $this->registerServiceHandler(self::getNamedMessageChannelFor($registration), $configuration, $registration);
         }
         foreach ($this->serviceEventHandlers as $registration) {
-            $this->registerServiceHandler($configuration, $registration);
+            $this->registerServiceHandler(self::getNamedMessageChannelForEventHandler($registration), $configuration, $registration);
         }
     }
 
@@ -409,11 +447,10 @@ class ModellingHandlerModule implements AnnotationModule
         );
     }
 
-    private function registerServiceHandler(Configuration $configuration, AnnotatedFinding $registration): void
+    private function registerServiceHandler(string $inputChannelName, Configuration $configuration, AnnotatedFinding $registration): void
     {
         /** @var QueryHandler|CommandHandler|EventHandler $methodAnnotation */
         $methodAnnotation                    = $registration->getAnnotationForMethod();
-        $inputChannelName                    = self::getNamedMessageChannelFor($registration);
         $endpointInputChannel                = self::getHandlerChannel($registration);
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
 

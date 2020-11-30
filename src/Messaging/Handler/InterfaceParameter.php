@@ -101,12 +101,9 @@ final class InterfaceParameter
         return $this->doesAllowNull;
     }
 
-    /**
-     * @return string
-     */
     public function getTypeHint() : string
     {
-        return $this->typeDescriptor->getTypeHint();
+        return $this->typeDescriptor->toString();
     }
 
     public function getAnnotations(): array

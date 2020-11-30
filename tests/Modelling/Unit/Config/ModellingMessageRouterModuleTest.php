@@ -40,8 +40,10 @@ use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCo
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelNameAndObject;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoInputChannelName;
+use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithUnionType;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithListenToRegex;
+use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\EventHandlerForUnionType;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenTo;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenToAndObject;
@@ -56,6 +58,7 @@ use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryH
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannel;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndIgnoreMessage;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndObject;
+use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 
 /**
  * Class AggregateMessageRouterModuleTest
@@ -74,6 +77,17 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         ];
 
         $this->assertRouting($annotatedClasses, $mapping, $mapping, [], [], [], []);
+    }
+
+    public function test_registering_service_command_handler_for_union_type()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $this->prepareModule(
+            InMemoryAnnotationFinder::createFrom([
+                CommandHandlerWithUnionType::class
+            ])
+        );
     }
 
     private function assertRouting(array $annotatedClasses, array $commandObjectMapping, array $commandMapping, array $queryObjectMapping, array $queryMapping, array $eventObjectMapping, array $eventNameMapping): void
@@ -350,6 +364,13 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         ];
 
         $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]]);
+    }
+
+    public function test_union_registering_service_event_handler()
+    {
+        $annotatedClasses = [EventHandlerForUnionType::class];
+
+        $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class . "|" . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . "|" . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]], [stdClass::class => [stdClass::class . "|" . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . "|" . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]]);
     }
 
     public function test_registering_aggregate_event_handler()

@@ -9,6 +9,7 @@ use Ecotone\AnnotationFinder\Annotation\Environment;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\ConfigurationException;
+use Ecotone\Messaging\Support\Assert;
 use InvalidArgumentException;
 use function json_decode;
 
@@ -20,7 +21,7 @@ use function json_decode;
 class FileSystemAnnotationFinder implements AnnotationFinder
 {
     const         FRAMEWORK_NAMESPACE   = 'Ecotone';
-    private const FILE_EXTENSION        = '.php';
+    private const FILE_EXTENSION        = 'php';
     const         CLASS_NAMESPACE_REGEX = "#namespace[\s]*([^\n\s\(\)\[\]\{\}\$]*);#";
 
     /**
@@ -368,8 +369,10 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
         foreach ($files as $key => $value) {
             $fullPath = realpath($dir . DIRECTORY_SEPARATOR . $value);
+            Assert::isTrue($fullPath !== false, "Can't parse contents of " . $dir . DIRECTORY_SEPARATOR . $value);
+
             if (!is_dir($fullPath)) {
-                if (pathinfo($fullPath, PATHINFO_EXTENSION) === "php") {
+                if (pathinfo($fullPath, PATHINFO_EXTENSION) === self::FILE_EXTENSION) {
                     $results[] = $fullPath;
                 }
             } else if ($value != "." && $value != "..") {

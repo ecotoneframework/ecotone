@@ -12,9 +12,6 @@ use Ecotone\Modelling\Annotation\AggregateEvents;
  */
 trait WithAggregateEvents
 {
-    /**
-     * @var object[]|null
-     */
     private $recordedEvents = null;
 
     /**

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext;
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
@@ -18,19 +18,19 @@ class ApplicationContextExample
     const HTTP_INPUT_CHANNEL  = "httpEntry";
     const HTTP_OUTPUT_CHANNEL = "httpOutput";
 
-    #[ApplicationContext]
+    #[ServiceContext]
     public function gateway(): GatewayBuilder
     {
         return GatewayProxyBuilder::create("some-ref", GatewayExample::class, "doSomething", self::HTTP_INPUT_CHANNEL);
     }
 
-    #[ApplicationContext]
+    #[ServiceContext]
     public function httpEntryChannel(): MessageChannelBuilder
     {
         return SimpleMessageChannelBuilder::createDirectMessageChannel(self::HTTP_INPUT_CHANNEL);
     }
 
-    #[ApplicationContext]
+    #[ServiceContext]
     public function enricherHttpEntry(): MessageHandlerBuilder
     {
         return TransformerBuilder::createHeaderEnricher(
@@ -43,13 +43,13 @@ class ApplicationContextExample
             ->withEndpointId("some-id");
     }
 
-    #[ApplicationContext]
+    #[ServiceContext]
     public function withChannelInterceptors()
     {
         return SimpleChannelInterceptorBuilder::create(self::HTTP_INPUT_CHANNEL, "ref");
     }
 
-    #[ApplicationContext]
+    #[ServiceContext]
     public function withStdClassConverterByExtension(): stdClass
     {
         return new stdClass();

@@ -3,7 +3,7 @@
 namespace Ecotone\Messaging\Annotation;
 
 #[\Attribute(\Attribute::TARGET_METHOD)]
-class ApplicationContext
+class ServiceContext
 {
 
 }

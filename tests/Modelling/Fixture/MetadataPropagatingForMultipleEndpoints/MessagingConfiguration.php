@@ -3,13 +3,13 @@
 
 namespace Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class MessagingConfiguration
 {
-    #[ApplicationContext]
+    #[ServiceContext]
     public function asyncChannel()
     {
         return [

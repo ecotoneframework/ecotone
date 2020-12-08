@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Module;
@@ -37,7 +37,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
      */
     public function findAllExtensionObjects(): array
     {
-        $extensionObjectsRegistrations = $this->annotationRegistrationService->findAnnotatedMethods(ApplicationContext::class);
+        $extensionObjectsRegistrations = $this->annotationRegistrationService->findAnnotatedMethods(ServiceContext::class);
         $extensionObjects              = [];
 
         $classes = [];

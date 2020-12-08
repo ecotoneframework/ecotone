@@ -33,7 +33,7 @@ class OrderService
     #[EventHandler]
     public function notify(OrderWasPlaced $event, array $headers, CommandBus $commandBus) : void
     {
-        $commandBus->sendWithRoutingAndMetadata("sendNotification", [], MediaType::APPLICATION_X_PHP_ARRAY, $this->notifyWithCustomHeaders);
+        $commandBus->sendWithRouting("sendNotification", [], MediaType::APPLICATION_X_PHP_ARRAY, $this->notifyWithCustomHeaders);
     }
 
     #[CommandHandler("setCustomNotificationHeaders")]

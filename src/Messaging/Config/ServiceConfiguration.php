@@ -9,12 +9,14 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
-class ApplicationConfiguration
+class ServiceConfiguration
 {
+    public const DEFAULT_SERVICE_NAME = "ecotoneService";
     const DEFAULT_ENVIRONMENT              = "dev";
     const DEFAULT_FAIL_FAST                = true;
     const DEFAULT_SERIALIZATION_MEDIA_TYPE = MediaType::APPLICATION_X_PHP_SERIALIZED;
 
+    private string $serviceName = self::DEFAULT_SERVICE_NAME;
     private bool $failFast = self::DEFAULT_FAIL_FAST;
     private ?string $cacheDirectoryPath = null;
     private string $environment = self::DEFAULT_ENVIRONMENT;
@@ -45,7 +47,7 @@ class ApplicationConfiguration
     /**
      * @param self[] $applicationConfigurations
      *
-     * @return ApplicationConfiguration
+     * @return ServiceConfiguration
      */
     public function mergeWith(array $applicationConfigurations): self
     {
@@ -92,6 +94,14 @@ class ApplicationConfiguration
     {
         $clone           = clone $this;
         $clone->failFast = $failFast;
+
+        return $clone;
+    }
+
+    public function withServiceName(string $serviceName) : self
+    {
+        $clone           = clone $this;
+        $clone->serviceName = $serviceName;
 
         return $clone;
     }
@@ -169,6 +179,11 @@ class ApplicationConfiguration
     public function getConnectionRetryTemplate(): ?RetryTemplateBuilder
     {
         return $this->connectionRetryTemplate;
+    }
+
+    public function getServiceName(): string
+    {
+        return $this->serviceName;
     }
 
     public function withConsumerMemoryLimit(int $memoryLimitInMegabytes): self

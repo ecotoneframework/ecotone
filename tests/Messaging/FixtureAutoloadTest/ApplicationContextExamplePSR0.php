@@ -2,11 +2,11 @@
 
 namespace FixtureAutoloadTest;
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 
 class ApplicationContextExamplePSR0
 {
-    #[ApplicationContext]
+    #[ServiceContext]
     public function doSomething()
     {
 

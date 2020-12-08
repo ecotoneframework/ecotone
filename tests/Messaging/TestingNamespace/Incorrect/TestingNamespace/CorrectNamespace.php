@@ -4,11 +4,11 @@
 namespace Incorrect\TestingNamespace;
 
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 
 class CorrectNamespace
 {
-    #[ApplicationContext]
+    #[ServiceContext]
     public function someExtension() : array
     {
         return [];

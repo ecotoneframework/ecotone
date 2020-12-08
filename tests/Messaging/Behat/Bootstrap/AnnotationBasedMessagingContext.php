@@ -7,7 +7,7 @@ use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
-use Ecotone\Messaging\Config\ApplicationConfiguration;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
@@ -215,7 +215,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
         $objects["logger"] = new NullLogger();
         $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "ecotone_testing_behat_cache";
 
-        $applicationConfiguration = ApplicationConfiguration::createWithDefaults()
+        $applicationConfiguration = ServiceConfiguration::createWithDefaults()
             ->withEnvironment("test")
             ->withCacheDirectoryPath($cacheDirectoryPath)
             ->withNamespaces([$namespace]);

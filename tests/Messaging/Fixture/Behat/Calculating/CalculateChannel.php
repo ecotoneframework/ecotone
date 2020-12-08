@@ -3,12 +3,12 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 
 class CalculateChannel
 {
-    #[ApplicationContext]
+    #[ServiceContext]
     public function configuration(): array
     {
         return [

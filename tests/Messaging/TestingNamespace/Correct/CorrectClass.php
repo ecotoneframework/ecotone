@@ -3,11 +3,11 @@
 
 namespace TestingNamespace\Correct;
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 
 class CorrectClass
 {
-    #[ApplicationContext]
+    #[ServiceContext]
     public function someExtension() : array
     {
         return [];

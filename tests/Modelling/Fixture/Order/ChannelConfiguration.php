@@ -3,13 +3,13 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Order;
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class ChannelConfiguration
 {
-    #[ApplicationContext]
+    #[ServiceContext]
     public function registerAsyncChannel() : array
     {
         return [

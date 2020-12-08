@@ -2,13 +2,13 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Presend;
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class PresendConfiguration
 {
-    #[ApplicationContext]
+    #[ServiceContext]
     public function shopBuyConfiguration()
     {
         return [

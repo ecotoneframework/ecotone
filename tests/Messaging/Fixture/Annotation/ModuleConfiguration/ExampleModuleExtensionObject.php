@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration;
 
-use Ecotone\Messaging\Annotation\ApplicationContext;
+use Ecotone\Messaging\Annotation\ServiceContext;
 
 class ExampleModuleExtensionObject
 {
-    #[ApplicationContext]
+    #[ServiceContext]
     public function extensionObject() : \stdClass
     {
         return new \stdClass();

@@ -104,7 +104,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     {
         $aggregateRepository = $this->getAggregateRepository($referenceSearchService);
 
-        $eventBus = GatewayProxyBuilder::create("", EventBus::class, "publishWithMetadata", BusModule::EVENT_CHANNEL_NAME_BY_OBJECT)
+        $eventBus = GatewayProxyBuilder::create("", EventBus::class, "publish", BusModule::EVENT_CHANNEL_NAME_BY_OBJECT)
             ->withParameterConverters(
                 [
                     GatewayPayloadBuilder::create("event"),

@@ -185,7 +185,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iNotifyAboutOrderWithInformation(string $logData)
     {
-        AnnotationBasedMessagingContext::getEventBus()->publishWithRouting(
+        AnnotationBasedMessagingContext::getEventBus()->publishWithRoutingWithMetadata(
             "order.was_created",
             [
                 "loggerId" => 1,
@@ -214,7 +214,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iPlaceOrderWithMetadata(string $headerName, $value)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->sendWithRoutingAndMetadata(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "placeOrder",
             [],
             MediaType::APPLICATION_X_PHP_ARRAY,
@@ -261,7 +261,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iOverrideHeaderWith(string $headerName, $value)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->sendWithRoutingAndMetadata(
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             "setCustomNotificationHeaders",
             [],
             MediaType::APPLICATION_X_PHP_ARRAY,
@@ -275,7 +275,7 @@ class DomainContext extends TestCase implements Context
     public function nextCommandFailsWith(string $headerName, $headerValue)
     {
         try {
-            AnnotationBasedMessagingContext::getCommandBus()->sendWithRoutingAndMetadata(
+            AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
                 "failAction",
                 [],
                 MediaType::APPLICATION_X_PHP_ARRAY,

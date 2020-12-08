@@ -90,16 +90,8 @@ class BusModule extends NoExternalConfigurationModule implements AnnotationModul
     {
         return new self([
             GatewayProxyBuilder::create(CommandBus::class, CommandBus::class, "send", self::COMMAND_CHANNEL_NAME_BY_OBJECT)
-                ->withParameterConverters([GatewayPayloadBuilder::create("command")]),
-            GatewayProxyBuilder::create(CommandBus::class, CommandBus::class, "sendWithMetadata", self::COMMAND_CHANNEL_NAME_BY_OBJECT)
                 ->withParameterConverters([GatewayPayloadBuilder::create("command"), GatewayHeadersBuilder::create("metadata")]),
             GatewayProxyBuilder::create(CommandBus::class, CommandBus::class, "sendWithRouting", self::COMMAND_CHANNEL_NAME_BY_NAME)
-                ->withParameterConverters([
-                    GatewayPayloadBuilder::create("command"),
-                    GatewayHeaderBuilder::create("routingKey", self::COMMAND_CHANNEL_NAME_BY_NAME),
-                    GatewayHeaderBuilder::create("commandMediaType", MessageHeaders::CONTENT_TYPE)
-                ]),
-            GatewayProxyBuilder::create(CommandBus::class, CommandBus::class, "sendWithRoutingAndMetadata", self::COMMAND_CHANNEL_NAME_BY_NAME)
                 ->withParameterConverters([
                     GatewayPayloadBuilder::create("command"),
                     GatewayHeadersBuilder::create("metadata"),
@@ -108,16 +100,8 @@ class BusModule extends NoExternalConfigurationModule implements AnnotationModul
                 ]),
 
             GatewayProxyBuilder::create(QueryBus::class, QueryBus::class, "send", self::QUERY_CHANNEL_NAME_BY_OBJECT)
-                ->withParameterConverters([GatewayPayloadBuilder::create("query")]),
-            GatewayProxyBuilder::create(QueryBus::class, QueryBus::class, "sendWithMetadata", self::QUERY_CHANNEL_NAME_BY_OBJECT)
                 ->withParameterConverters([GatewayPayloadBuilder::create("query"), GatewayHeadersBuilder::create("metadata")]),
             GatewayProxyBuilder::create(QueryBus::class, QueryBus::class, "sendWithRouting", self::QUERY_CHANNEL_NAME_BY_NAME)
-                ->withParameterConverters([
-                    GatewayPayloadBuilder::create("query"),
-                    GatewayHeaderBuilder::create("routingKey", self::QUERY_CHANNEL_NAME_BY_NAME),
-                    GatewayHeaderBuilder::create("queryMediaType", MessageHeaders::CONTENT_TYPE)
-                ]),
-            GatewayProxyBuilder::create(QueryBus::class, QueryBus::class, "sendWithRoutingAndMetadata", self::QUERY_CHANNEL_NAME_BY_NAME)
                 ->withParameterConverters([
                     GatewayPayloadBuilder::create("query"),
                     GatewayHeadersBuilder::create("metadata"),
@@ -126,16 +110,8 @@ class BusModule extends NoExternalConfigurationModule implements AnnotationModul
                 ]),
 
             GatewayProxyBuilder::create(EventBus::class, EventBus::class, "publish", self::EVENT_CHANNEL_NAME_BY_OBJECT)
-                ->withParameterConverters([GatewayPayloadBuilder::create("event")]),
-            GatewayProxyBuilder::create(EventBus::class, EventBus::class, "publishWithMetadata", self::EVENT_CHANNEL_NAME_BY_OBJECT)
                 ->withParameterConverters([GatewayPayloadBuilder::create("event"), GatewayHeadersBuilder::create("metadata")]),
             GatewayProxyBuilder::create(EventBus::class, EventBus::class, "publishWithRouting", self::EVENT_CHANNEL_NAME_BY_NAME)
-                ->withParameterConverters([
-                    GatewayPayloadBuilder::create("event"),
-                    GatewayHeaderBuilder::create("routingKey", self::EVENT_CHANNEL_NAME_BY_NAME),
-                    GatewayHeaderBuilder::create("eventMediaType", MessageHeaders::CONTENT_TYPE)
-                ]),
-            GatewayProxyBuilder::create(EventBus::class, EventBus::class, "publishWithRoutingAndMetadata", self::EVENT_CHANNEL_NAME_BY_NAME)
                 ->withParameterConverters([
                     GatewayPayloadBuilder::create("event"),
                     GatewayHeadersBuilder::create("metadata"),

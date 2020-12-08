@@ -7,7 +7,7 @@ namespace Ecotone\Lite;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
-use Ecotone\Messaging\Config\ApplicationConfiguration;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
@@ -30,10 +30,10 @@ class EcotoneLiteConfiguration
 {
     public static function create(string $rootProjectDirectoryPath, ContainerInterface $container) : ConfiguredMessagingSystem
     {
-        return self::createWithConfiguration($rootProjectDirectoryPath, $container, ApplicationConfiguration::createWithDefaults());
+        return self::createWithConfiguration($rootProjectDirectoryPath, $container, ServiceConfiguration::createWithDefaults());
     }
 
-    public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface $container, ApplicationConfiguration $applicationConfiguration): ConfiguredMessagingSystem
+    public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface $container, ServiceConfiguration $applicationConfiguration): ConfiguredMessagingSystem
     {
         $applicationConfiguration = $applicationConfiguration->withNamespaces(array_merge(
             $applicationConfiguration->getNamespaces(),

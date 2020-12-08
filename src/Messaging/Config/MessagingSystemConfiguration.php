@@ -130,7 +130,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private array $gatewayClassesToGenerateProxies = [];
     private ?string $rootPathToSearchConfigurationFor;
-    private \Ecotone\Messaging\Config\ApplicationConfiguration $applicationConfiguration;
+    private \Ecotone\Messaging\Config\ServiceConfiguration $applicationConfiguration;
     /**
      * @var string[]
      */
@@ -149,7 +149,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @param ModuleRetrievingService       $moduleConfigurationRetrievingService
      * @param object[]                      $extensionObjects
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param ApplicationConfiguration      $applicationConfiguration
+     * @param ServiceConfiguration          $applicationConfiguration
      *
      * @throws AnnotationException
      * @throws ConfigurationException
@@ -157,11 +157,11 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReflectionException
      */
-    private function __construct(?string $rootPathToSearchConfigurationFor, ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration)
+    private function __construct(?string $rootPathToSearchConfigurationFor, ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ServiceConfiguration $applicationConfiguration)
     {
         $extensionApplicationConfiguration = [];
         foreach ($extensionObjects as $extensionObject) {
-            if ($extensionObject instanceof ApplicationConfiguration) {
+            if ($extensionObject instanceof ServiceConfiguration) {
                 $extensionApplicationConfiguration[] = $extensionObject;
             }
         }
@@ -190,28 +190,19 @@ final class MessagingSystemConfiguration implements Configuration
                 return false;
             }
 
-            return !($extensionObject instanceof ApplicationConfiguration);
+            return !($extensionObject instanceof ServiceConfiguration);
         }
         );
         $extensionObjects[] = $applicationConfiguration;
         $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $applicationConfiguration);
     }
 
-    /**
-     * @param ModuleRetrievingService $moduleConfigurationRetrievingService
-     *
-     * @throws AnnotationException
-     * @throws ConfigurationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
     public static function prepareWithDefaults(ModuleRetrievingService $moduleConfigurationRetrievingService): \Ecotone\Messaging\Config\MessagingSystemConfiguration
     {
-        return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), ApplicationConfiguration::createWithDefaults());
+        return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), ServiceConfiguration::createWithDefaults());
     }
 
-    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration): Configuration
+    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ServiceConfiguration $applicationConfiguration): Configuration
     {
         $cachedVersion = self::getCachedVersion($applicationConfiguration);
         if ($cachedVersion) {
@@ -237,7 +228,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @param string|null                   $rootProjectDirectoryPath
      * @param ModuleRetrievingService       $moduleConfigurationRetrievingService
      * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param ApplicationConfiguration      $applicationConfiguration
+     * @param ServiceConfiguration          $applicationConfiguration
      *
      * @throws AnnotationException
      * @throws ConfigurationException
@@ -245,7 +236,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReflectionException
      */
-    public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ApplicationConfiguration $applicationConfiguration): \Ecotone\Messaging\Config\MessagingSystemConfiguration
+    public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ServiceConfiguration $applicationConfiguration): \Ecotone\Messaging\Config\MessagingSystemConfiguration
     {
         $cacheDirectoryPath = $applicationConfiguration->getCacheDirectoryPath();
 
@@ -271,12 +262,12 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @param ApplicationConfiguration $applicationConfiguration
+     * @param ServiceConfiguration $applicationConfiguration
      *
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public static function cleanCache(ApplicationConfiguration $applicationConfiguration): void
+    public static function cleanCache(ServiceConfiguration $applicationConfiguration): void
     {
         if ($applicationConfiguration->getCacheDirectoryPath()) {
             if (!is_dir($applicationConfiguration->getCacheDirectoryPath())) {
@@ -290,7 +281,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
     }
 
-    private static function getCachedVersion(ApplicationConfiguration $applicationConfiguration): ?MessagingSystemConfiguration
+    private static function getCachedVersion(ServiceConfiguration $applicationConfiguration): ?MessagingSystemConfiguration
     {
         if (!$applicationConfiguration->getCacheDirectoryPath()) {
             return null;
@@ -758,7 +749,7 @@ final class MessagingSystemConfiguration implements Configuration
         );
     }
 
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ProxyFactory $proxyFactory, ApplicationConfiguration $applicationConfiguration): void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ProxyFactory $proxyFactory, ServiceConfiguration $applicationConfiguration): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
         $moduleReferenceSearchService->store(ProxyFactory::REFERENCE_NAME, $proxyFactory);
@@ -807,8 +798,8 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @param InterfaceToCallRegistry  $interfaceToCallRegistry
-     * @param ApplicationConfiguration $applicationConfiguration
+     * @param InterfaceToCallRegistry $interfaceToCallRegistry
+     * @param ServiceConfiguration    $applicationConfiguration
      *
      * @throws AnnotationException
      * @throws ConfigurationException
@@ -816,7 +807,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReflectionException
      */
-    private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry, ApplicationConfiguration $applicationConfiguration): void
+    private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry, ServiceConfiguration $applicationConfiguration): void
     {
         $pollableEndpointAnnotations = [new AsynchronousRunningEndpoint()];
         foreach ($this->channelAdapters as $channelAdapter) {
@@ -1189,7 +1180,7 @@ final class MessagingSystemConfiguration implements Configuration
                 [
                     ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
                     InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry,
-                    ApplicationConfiguration::class => $this->applicationConfiguration
+                    ServiceConfiguration::class => $this->applicationConfiguration
                 ]
             )
         );

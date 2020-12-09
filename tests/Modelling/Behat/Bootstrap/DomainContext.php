@@ -185,7 +185,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iNotifyAboutOrderWithInformation(string $logData)
     {
-        AnnotationBasedMessagingContext::getEventBus()->publishWithRoutingWithMetadata(
+        AnnotationBasedMessagingContext::getEventBus()->publishWithRouting(
             "order.was_created",
             [
                 "loggerId" => 1,

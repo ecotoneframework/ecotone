@@ -18,7 +18,7 @@ class StorageEventBus implements EventBus
         return new self();
     }
 
-    public function publish(object $event, array $metadata)
+    public function publish(object $event, array $metadata = [])
     {
         $this->calls[] = [$event, $metadata];
     }

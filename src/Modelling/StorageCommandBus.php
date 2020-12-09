@@ -18,7 +18,7 @@ class StorageCommandBus implements CommandBus
         return new self();
     }
 
-    public function send(object $command, array $metadata)
+    public function send(object $command, array $metadata = [])
     {
         $this->calls[] = [$command, $metadata];
     }

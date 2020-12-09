@@ -14,13 +14,15 @@ class DistributedMessageHandlerTest extends TestCase
     {
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
-        $distributedMessageHandler = new DistributedMessageHandler($commandBus, $eventBus);
+        $distributedMessageHandler = new DistributedMessageHandler();
 
         $distributedMessageHandler->handle(
             "some", ["token" => 1],
             "event",
             "order.was_placed",
-            MediaType::TEXT_PLAIN
+            MediaType::TEXT_PLAIN,
+            $commandBus,
+            $eventBus
         );
 
         $this->assertEquals(
@@ -35,13 +37,15 @@ class DistributedMessageHandlerTest extends TestCase
     {
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
-        $distributedMessageHandler = new DistributedMessageHandler($commandBus, $eventBus);
+        $distributedMessageHandler = new DistributedMessageHandler();
 
         $distributedMessageHandler->handle(
             "some", ["token" => 1],
             "command",
             "order.place_order",
-            MediaType::TEXT_PLAIN
+            MediaType::TEXT_PLAIN,
+            $commandBus,
+            $eventBus
         );
 
         $this->assertEquals(

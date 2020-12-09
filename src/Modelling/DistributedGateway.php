@@ -2,7 +2,7 @@
 
 namespace Ecotone\Modelling;
 
-interface DistributeGateway
+interface DistributedGateway
 {
     const DISTRIBUTED_CHANNEL              = "ecotone.distributed.invoke";
     const DISTRIBUTED_ROUTING_KEY          = "ecotone.distributed.routingKey";

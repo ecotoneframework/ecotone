@@ -9,7 +9,7 @@ interface EventBus
     /**
      * @return mixed
      */
-    public function publish(object $event, array $metadata);
+    public function publish(object $event, array $metadata = []);
 
     /**
      * @return mixed

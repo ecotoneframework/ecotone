@@ -10,7 +10,7 @@ interface CommandBus
     /**
      * @return mixed
      */
-    public function send(object $command, array $metadata);
+    public function send(object $command, array $metadata = []);
 
     /**
      * @return mixed

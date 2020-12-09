@@ -9,7 +9,7 @@ interface QueryBus
     /**
      * @return mixed
      */
-    public function send(object $query, array $metadata);
+    public function send(object $query, array $metadata = []);
 
     /**
      * @return mixed

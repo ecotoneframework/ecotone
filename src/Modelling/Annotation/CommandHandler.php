@@ -15,9 +15,9 @@ class CommandHandler extends InputOutputEndpointAnnotation
     public bool $dropMessageOnNotFound = false;
     public array $identifierMetadataMapping = [];
 
-    public function __construct(string $inputChannelName = "", string $endpointId = "", string $outputChannelName = "", bool $dropMessageOnNotFound = false, $identifierMetadataMapping = [], array $requiredInterceptorNames = [])
+    public function __construct(string $routingKey = "", string $endpointId = "", string $outputChannelName = "", bool $dropMessageOnNotFound = false, $identifierMetadataMapping = [], array $requiredInterceptorNames = [])
     {
-        parent::__construct($inputChannelName, $endpointId, $outputChannelName, $requiredInterceptorNames);
+        parent::__construct($routingKey, $endpointId, $outputChannelName, $requiredInterceptorNames);
 
         $this->dropMessageOnNotFound = $dropMessageOnNotFound;
         $this->identifierMetadataMapping = $identifierMetadataMapping;

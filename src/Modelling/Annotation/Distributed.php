@@ -3,17 +3,19 @@
 
 namespace Ecotone\Modelling\Annotation;
 
+use Ecotone\Modelling\DistributedBus;
+
 #[\Attribute]
 class Distributed
 {
-    private ?string $distributionReference;
+    private string $distributionReference;
 
-    public function __construct(string $distributionReference = null)
+    public function __construct(string $distributionReference = DistributedBus::class)
     {
         $this->distributionReference = $distributionReference;
     }
 
-    public function getDistributionReference(): ?string
+    public function getDistributionReference(): string
     {
         return $this->distributionReference;
     }

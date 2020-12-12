@@ -59,21 +59,20 @@ class EventBusRouter
     }
 
     /**
-     * @param string|null $name
+     * @param string|null $routedName
      *
      * @return array
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function routeByName(?string $name) : array
+    public function routeByName(?string $routedName) : array
     {
-        if (is_null($name)) {
+        if (is_null($routedName)) {
             throw ConfigurationException::create("Lack of routing key for sending via EventBus");
         }
 
         $resultChannels = [];
         foreach ($this->channelMapping as $listenFor => $destinationChannels) {
-            $listenFor = str_replace("\\", "\\\\", $listenFor);
-            if (preg_match("#^" . str_replace("*", ".*", $listenFor) . "$#", $name)) {
+            if (self::doesListenForRoutedName($listenFor, $routedName)) {
                 $resultChannels = array_merge($resultChannels, $destinationChannels);
             }
         }
@@ -84,5 +83,15 @@ class EventBusRouter
     public static function isRegexBasedRoute(string $channelName) : bool
     {
         return preg_match("#\*#", $channelName);
+    }
+
+    public static function doesListenForRoutedName(string $listenFor, string $routedName): bool
+    {
+        $listenFor = str_replace("\\", "\\\\", $listenFor);
+        if (preg_match("#^" . str_replace("*", ".*", $listenFor) . "$#", $routedName)) {
+            return true;
+        }
+
+        return false;
     }
 }

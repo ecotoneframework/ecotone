@@ -50,20 +50,26 @@ class ModellingHandlerModule implements AnnotationModule
     /**
      * @var AnnotatedFinding[]
      */
-    private array $aggregateCommandHandlerRegistrations;
+    private array $aggregateCommandHandlers;
     /**
      * @var AnnotatedFinding[]
      */
-    private array $serviceCommandHandlersRegistrations;
+    private array $serviceCommandHandlers;
     /**
      * @var AnnotatedFinding[]
      */
-    private array $aggregateQueryHandlerRegistrations;
+    private array $aggregateQueryHandlers;
     /**
      * @var AnnotatedFinding[]
      */
-    private array $serviceQueryHandlerRegistrations;
+    private array $serviceQueryHandlers;
+    /**
+     * @var AnnotatedFinding[]
+     */
     private array $aggregateEventHandlers;
+    /**
+     * @var AnnotatedFinding[]
+     */
     private array $serviceEventHandlers;
     /**
      * @var string[]
@@ -81,11 +87,11 @@ class ModellingHandlerModule implements AnnotationModule
         array $aggregateRepositoryReferenceNames
     )
     {
-        $this->parameterConverterAnnotationFactory  = $parameterConverterAnnotationFactory;
-        $this->aggregateCommandHandlerRegistrations = $aggregateCommandHandlerRegistrations;
-        $this->aggregateQueryHandlerRegistrations   = $aggregateQueryHandlerRegistrations;
-        $this->serviceCommandHandlersRegistrations  = $serviceCommandHandlersRegistrations;
-        $this->serviceQueryHandlerRegistrations     = $serviceQueryHandlerRegistrations;
+        $this->parameterConverterAnnotationFactory = $parameterConverterAnnotationFactory;
+        $this->aggregateCommandHandlers            = $aggregateCommandHandlerRegistrations;
+        $this->aggregateQueryHandlers              = $aggregateQueryHandlerRegistrations;
+        $this->serviceCommandHandlers  = $serviceCommandHandlersRegistrations;
+        $this->serviceQueryHandlers     = $serviceQueryHandlerRegistrations;
         $this->aggregateEventHandlers               = $aggregateEventHandlers;
         $this->serviceEventHandlers                 = $serviceEventHandlers;
         $this->aggregateRepositoryReferenceNames    = $aggregateRepositoryReferenceNames;
@@ -275,7 +281,7 @@ class ModellingHandlerModule implements AnnotationModule
         $configuration->requireReferences($this->aggregateRepositoryReferenceNames);
 
         $aggregateCommandOrEventHandlers = [];
-        foreach ($this->aggregateCommandHandlerRegistrations as $registration) {
+        foreach ($this->aggregateCommandHandlers as $registration) {
             $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getNamedMessageChannelFor($registration)][] = $registration;
         }
 
@@ -289,14 +295,14 @@ class ModellingHandlerModule implements AnnotationModule
             }
         }
 
-        foreach ($this->aggregateQueryHandlerRegistrations as $registration) {
+        foreach ($this->aggregateQueryHandlers as $registration) {
             $this->registerAggregateQueryHandler($registration, $parameterConverterAnnotationFactory, $configuration);
         }
 
-        foreach ($this->serviceCommandHandlersRegistrations as $registration) {
+        foreach ($this->serviceCommandHandlers as $registration) {
             $this->registerServiceHandler(self::getNamedMessageChannelFor($registration), $configuration, $registration);
         }
-        foreach ($this->serviceQueryHandlerRegistrations as $registration) {
+        foreach ($this->serviceQueryHandlers as $registration) {
             $this->registerServiceHandler(self::getNamedMessageChannelFor($registration), $configuration, $registration);
         }
         foreach ($this->serviceEventHandlers as $registration) {

@@ -5,6 +5,9 @@ namespace Test\Ecotone\Modelling\Behat\Bootstrap;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\DistributedBus;
+use Ecotone\Modelling\DistributionEntrypoint;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext;
@@ -12,6 +15,8 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\ChangeShippingAddres
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
+use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
+use Test\Ecotone\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PlaceOrder;
 
@@ -322,6 +327,36 @@ class DomainContext extends TestCase implements Context
                 "item" => $item
             ],
             MediaType::APPLICATION_X_PHP_ARRAY
+        );
+    }
+
+    /**
+     * @When I doing distributed order :order
+     */
+    public function iDoingDistributedOrder(string $order)
+    {
+        AnnotationBasedMessagingContext::getGateway(DistributionEntrypoint::class)->distribute(
+            $order, [], "command", ShoppingCenter::SHOPPING_BUY, MediaType::TEXT_PLAIN
+        );
+    }
+
+    /**
+     * @Then there should be :amount good ordered
+     */
+    public function thereShouldBeGoodOrdered(int $amount)
+    {
+        $this->assertEquals($amount, AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
+            ShoppingCenter::COUNT_BOUGHT_GOODS, []
+        ));
+    }
+
+    /**
+     * @When :order was order
+     */
+    public function wasOrder(string $order)
+    {
+        AnnotationBasedMessagingContext::getGateway(DistributionEntrypoint::class)->distribute(
+            $order, [], "event", ShoppingRecord::ORDER_WAS_MADE, MediaType::TEXT_PLAIN
         );
     }
 }

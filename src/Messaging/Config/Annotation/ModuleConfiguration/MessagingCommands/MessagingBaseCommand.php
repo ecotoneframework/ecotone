@@ -9,13 +9,13 @@ class MessagingBaseCommand
 {
     public function runAsynchronousEndpoint(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem) : void
     {
-        $configuredMessagingSystem->runSeparatelyRunningEndpointBy($consumerName);
+        $configuredMessagingSystem->runAsynchronouslyRunningEndpoint($consumerName);
     }
 
     public function listAsynchronousEndpoints(ConfiguredMessagingSystem $configuredMessagingSystem) : ConsoleCommandResultSet
     {
         $consumers = [];
-        foreach ($configuredMessagingSystem->getListOfSeparatelyRunningConsumers() as $consumerName) {
+        foreach ($configuredMessagingSystem->getListOfAsynchronouslyRunningConsumers() as $consumerName) {
             $consumers[] = [$consumerName];
         }
 

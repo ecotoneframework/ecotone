@@ -100,6 +100,10 @@ class ServiceConfiguration
 
     public function withServiceName(string $serviceName) : self
     {
+        if (!preg_match("#[a-z0-9_]#", $serviceName)) {
+            throw ConfigurationException::create("Service name can only be used with lower case letter, numbers and underline, given: `{$serviceName}`");
+        }
+
         $clone           = clone $this;
         $clone->serviceName = $serviceName;
 

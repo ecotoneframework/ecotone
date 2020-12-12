@@ -21,6 +21,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Annotation\Distributed;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\NotUniqueHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;
@@ -63,21 +64,24 @@ class ModellingMessageRouterModule implements AnnotationModule
 
         return new self(
             $messageHeadersPropagator,
-            BusRouterBuilder::createCommandBusByObject($messageHeadersPropagator, self::getCommandBusByObjectMapping($annotationRegistrationService)),
-            BusRouterBuilder::createCommandBusByName($messageHeadersPropagator, self::getCommandBusByNamesMapping($annotationRegistrationService)),
+            BusRouterBuilder::createCommandBusByObject($messageHeadersPropagator, self::getCommandBusByObjectMapping($annotationRegistrationService, false)),
+            BusRouterBuilder::createCommandBusByName($messageHeadersPropagator, self::getCommandBusByNamesMapping($annotationRegistrationService, false)),
             BusRouterBuilder::createQueryBusByObject($messageHeadersPropagator, self::getQueryBusByObjectsMapping($annotationRegistrationService)),
             BusRouterBuilder::createQueryBusByName($messageHeadersPropagator, self::getQueryBusByNamesMapping($annotationRegistrationService)),
-            BusRouterBuilder::createEventBusByObject($messageHeadersPropagator, self::getEventBusByObjectsMapping($annotationRegistrationService)),
-            BusRouterBuilder::createEventBusByName($messageHeadersPropagator, self::getEventBusByNamesMapping($annotationRegistrationService))
+            BusRouterBuilder::createEventBusByObject($messageHeadersPropagator, self::getEventBusByObjectsMapping($annotationRegistrationService, false)),
+            BusRouterBuilder::createEventBusByName($messageHeadersPropagator, self::getEventBusByNamesMapping($annotationRegistrationService, false))
         );
     }
 
-    public static function getCommandBusByObjectMapping(AnnotationFinder $annotationRegistrationService): array
+    public static function getCommandBusByObjectMapping(AnnotationFinder $annotationRegistrationService, bool $hasToBeDistributed): array
     {
         $uniqueChannels        = [];
         $objectCommandHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, CommandHandler::class) as $registration) {
             if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
+            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) && !$registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
@@ -93,6 +97,9 @@ class ModellingMessageRouterModule implements AnnotationModule
                 continue;
             }
             if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
+            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) && !$registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
@@ -109,11 +116,15 @@ class ModellingMessageRouterModule implements AnnotationModule
         return $objectCommandHandlers;
     }
 
-    public static function getCommandBusByNamesMapping(AnnotationFinder $annotationRegistrationService): array
+    public static function getCommandBusByNamesMapping(AnnotationFinder $annotationRegistrationService, bool $hasToBeDistributed): array
     {
         $uniqueChannels       = [];
         $namedCommandHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, CommandHandler::class) as $registration) {
+            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) && !$registration->hasClassAnnotation(Distributed::class))) {
+                continue;
+            }
+
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
             if ($namedChannel) {
                 $namedCommandHandlers[$namedChannel][] = $namedChannel;
@@ -125,6 +136,10 @@ class ModellingMessageRouterModule implements AnnotationModule
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }
+            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) && !$registration->hasClassAnnotation(Distributed::class))) {
+                continue;
+            }
+
             $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
             if ($namedChannel) {
                 $namedCommandHandlers[$namedChannel][] = $namedChannel;
@@ -201,11 +216,14 @@ class ModellingMessageRouterModule implements AnnotationModule
         return $namedQueryHandlers;
     }
 
-    public static function getEventBusByObjectsMapping(AnnotationFinder $annotationRegistrationService): array
+    public static function getEventBusByObjectsMapping(AnnotationFinder $annotationRegistrationService, bool $hasToBeDistributed): array
     {
         $objectEventHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, EventHandler::class) as $registration) {
             if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
+            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) || !$registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
@@ -224,6 +242,9 @@ class ModellingMessageRouterModule implements AnnotationModule
             if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
                 continue;
             }
+            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) || !$registration->hasClassAnnotation(Distributed::class))) {
+                continue;
+            }
 
             $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration);
             $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
@@ -238,7 +259,7 @@ class ModellingMessageRouterModule implements AnnotationModule
         return $objectEventHandlers;
     }
 
-    public static function getEventBusByNamesMapping(AnnotationFinder $annotationRegistrationService): array
+    public static function getEventBusByNamesMapping(AnnotationFinder $annotationRegistrationService, bool $hasToBeDistributed): array
     {
         $namedEventHandlers = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(EventHandler::class) as $registration) {
@@ -247,6 +268,10 @@ class ModellingMessageRouterModule implements AnnotationModule
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }
+            if ($hasToBeDistributed && !$registration->hasMethodAnnotation(Distributed::class)) {
+                continue;
+            }
+
             $chanelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
 
             if ($annotation->getListenTo()) {
@@ -269,6 +294,9 @@ class ModellingMessageRouterModule implements AnnotationModule
             $channelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
             if (EventBusRouter::isRegexBasedRoute($channelName)) {
                 throw ConfigurationException::create("Can not registered regex listen to channel for aggregates in {$registration}");
+            }
+            if ($hasToBeDistributed && !$registration->hasMethodAnnotation(Distributed::class)) {
+                continue;
             }
 
             $namedEventHandlers[$channelName][] = $channelName;

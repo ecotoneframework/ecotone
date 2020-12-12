@@ -38,10 +38,10 @@ interface ConfiguredMessagingSystem
     /**
      * @param string $endpointId
      */
-    public function runSeparatelyRunningEndpointBy(string $endpointId) : void;
+    public function runAsynchronouslyRunningEndpoint(string $endpointId) : void;
 
     /**
      * @return array|string[]
      */
-    public function getListOfSeparatelyRunningConsumers() : array;
+    public function getListOfAsynchronouslyRunningConsumers() : array;
 }

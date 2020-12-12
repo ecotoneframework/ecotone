@@ -86,10 +86,6 @@ class MessageHeaders
      */
     const CONSUMER_ENDPOINT_ID = "consumerEndpointId";
     /**
-     * Consumed channel
-     */
-    const POLLED_CHANNEL = "polledChannel";
-    /**
      * Consumed channel name
      */
     const POLLED_CHANNEL_NAME = "polledChannelName";
@@ -151,7 +147,6 @@ class MessageHeaders
             self::DUPLICATE_MESSAGE,
             self::TIME_TO_LIVE,
             self::DELIVERY_DELAY,
-            self::POLLED_CHANNEL,
             self::POLLED_CHANNEL_NAME,
             self::REPLY_CONTENT_TYPE,
             self::CONSUMER_ENDPOINT_ID

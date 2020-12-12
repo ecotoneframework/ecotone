@@ -102,6 +102,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             $gatewayReferences[$gateway->getReferenceName()] = $gateway->getGateway();
             $referenceSearchService->registerReferencedObject($gateway->getReferenceName(), $gatewayReferences[$gateway->getReferenceName()]);
         }
+        $referenceSearchService->registerReferencedObject(ChannelResolver::class, $channelResolver);
         $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $consumerFactories, $pollingMetadataConfigurations);
         $consumers = [];
 
@@ -212,7 +213,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function runSeparatelyRunningEndpointBy(string $endpointId): void
+    public function runAsynchronouslyRunningEndpoint(string $endpointId): void
     {
         foreach ($this->consumers as $consumer) {
             if ($consumer->getConsumerName() === $endpointId) {
@@ -266,7 +267,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     /**
      * @inheritDoc
      */
-    public function getListOfSeparatelyRunningConsumers(): array
+    public function getListOfAsynchronouslyRunningConsumers(): array
     {
         $list = [];
 

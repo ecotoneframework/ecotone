@@ -120,3 +120,13 @@ Feature: activating as aggregate order entity
     Then basket should contains "milk"
     When I add to basket "cheese"
     Then basket should contains "cheese"
+
+  Scenario: command handler distribution
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\DistributedCommandHandler"
+    When I doing distributed order "pizza"
+    Then there should be 1 good ordered
+
+  Scenario: event handler distribution
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\DistributedEventHandler"
+    When "pizza" was order
+    Then there should be 1 good ordered

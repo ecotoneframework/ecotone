@@ -167,7 +167,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
                 )
                     ->setResolutionRequired(false)
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional("name", BusModule::EVENT_CHANNEL_NAME_BY_NAME)
+                        HeaderBuilder::createOptional("routedName", BusModule::EVENT_CHANNEL_NAME_BY_NAME)
                     ])
                     ->build($channelResolver, $referenceSearchService);
             }

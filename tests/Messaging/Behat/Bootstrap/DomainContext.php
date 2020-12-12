@@ -368,7 +368,7 @@ class DomainContext implements Context
      */
     public function handlesMessage(string $consumerName)
     {
-        $this->messagingSystem->runSeparatelyRunningEndpointBy($consumerName);
+        $this->messagingSystem->runAsynchronouslyRunningEndpoint($consumerName);
     }
 
     /**

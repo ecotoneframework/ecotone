@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Recoverability;
 
+use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
@@ -28,7 +29,7 @@ class ErrorHandler
         $this->hasDeadLetterOutput = $hasDeadLetterOutput;
     }
 
-    public function handle(ErrorMessage $errorMessage): ?Message
+    public function handle(ErrorMessage $errorMessage, ChannelResolver $channelResolver): ?Message
     {
         /** @var MessagingException $messagingException */
         $messagingException = $errorMessage->getPayload();
@@ -36,11 +37,11 @@ class ErrorHandler
         $cause = $messagingException->getCause() ? $messagingException->getCause() : $messagingException;
         $retryNumber = $failedMessage->getHeaders()->containsKey(self::ECOTONE_RETRY_HEADER) ? $failedMessage->getHeaders()->get(self::ECOTONE_RETRY_HEADER) + 1 : 1;
 
-        if (!$failedMessage->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL)) {
+        if (!$failedMessage->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL_NAME)) {
             throw $cause;
         }
         /** @var MessageChannel $messageChannel */
-        $messageChannel = $failedMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL);
+        $messageChannel = $channelResolver->resolve($failedMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME));
 
         $messageBuilder = MessageBuilder::fromMessage($failedMessage);
         if ($messageBuilder->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
@@ -50,8 +51,7 @@ class ErrorHandler
         $messageBuilder->removeHeaders([
             MessageHeaders::DELIVERY_DELAY,
             MessageHeaders::TIME_TO_LIVE,
-            MessageHeaders::CONSUMER_ACK_HEADER_LOCATION,
-            MessageHeaders::POLLED_CHANNEL
+            MessageHeaders::CONSUMER_ACK_HEADER_LOCATION
         ]);
 
         if ($this->shouldBeSendToDeadLetter($retryNumber)) {

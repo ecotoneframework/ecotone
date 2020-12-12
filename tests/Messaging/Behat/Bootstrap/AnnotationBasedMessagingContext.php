@@ -41,6 +41,8 @@ use Test\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
+use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
+use Test\Ecotone\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\AddExecutorId\AddExecutorId;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\AddNotificationTimestamp\AddNotificationTimestamp;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\LoggerRepository;
@@ -206,6 +208,20 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 ];
                 break;
             }
+            case "Test\Ecotone\Modelling\Fixture\DistributedCommandHandler":
+            {
+                $objects = [
+                    new ShoppingCenter()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\DistributedEventHandler":
+            {
+                $objects = [
+                    new ShoppingRecord()
+                ];
+                break;
+            }
             default:
             {
                 throw new \InvalidArgumentException("Namespace not registered ". $namespace);
@@ -273,7 +289,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iCalculateUsingInboundChannelAdapter()
     {
-        self::$messagingSystem->runSeparatelyRunningEndpointBy("inboundCalculator");
+        self::$messagingSystem->runAsynchronouslyRunningEndpoint("inboundCalculator");
     }
 
     /**
@@ -346,7 +362,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iCallPollableEndpoint(string $endpointId)
     {
-        self::$messagingSystem->runSeparatelyRunningEndpointBy($endpointId);
+        self::$messagingSystem->runAsynchronouslyRunningEndpoint($endpointId);
     }
 
     /**
@@ -415,7 +431,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iActiveReceiver($receiverName)
     {
-        self::$messagingSystem->runSeparatelyRunningEndpointBy($receiverName);
+        self::$messagingSystem->runAsynchronouslyRunningEndpoint($receiverName);
     }
 
     /**

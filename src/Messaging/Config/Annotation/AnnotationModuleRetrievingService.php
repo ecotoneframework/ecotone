@@ -4,11 +4,19 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Annotation\Parameter\ConfigurationVariable;
 use Ecotone\Messaging\Annotation\ServiceContext;
 use Ecotone\Messaging\Annotation\ModuleAnnotation;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Module;
 use Ecotone\Messaging\Config\ModuleRetrievingService;
+use Ecotone\Messaging\ConfigurationVariableService;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ConfigurationVariableBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 use ReflectionClass;
 
 class AnnotationModuleRetrievingService implements ModuleRetrievingService
@@ -18,10 +26,12 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
      * @var Module[]
      */
     private array $registeredModules = [];
+    private ConfigurationVariableService $variableConfigurationService;
 
-    public function __construct(AnnotationFinder $annotationRegistrationService)
+    public function __construct(AnnotationFinder $annotationRegistrationService, ConfigurationVariableService $variableConfigurationService)
     {
         $this->annotationRegistrationService = $annotationRegistrationService;
+        $this->variableConfigurationService = $variableConfigurationService;
     }
 
     /**
@@ -40,30 +50,42 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
         $extensionObjectsRegistrations = $this->annotationRegistrationService->findAnnotatedMethods(ServiceContext::class);
         $extensionObjects              = [];
 
-        $classes = [];
         foreach ($extensionObjectsRegistrations as $annotationRegistration) {
-            if (!array_key_exists($annotationRegistration->getClassName(), $classes)) {
-                $classToInstantiate = $annotationRegistration->getClassName();
-                $reflectionClass    = new ReflectionClass($annotationRegistration->getClassName());
-                if ($reflectionClass->hasMethod("__construct") && $reflectionClass->getMethod("__construct")->getParameters()) {
-                    throw ConfigurationException::create("{$annotationRegistration} should not contains any constructor parameters");
-                }
-                if ($reflectionClass->getMethod($annotationRegistration->getMethodName())->getParameters()) {
-                    throw ConfigurationException::create("{$annotationRegistration} should not contains any parameters");
-                }
-
-                $classes[$annotationRegistration->getClassName()] = new $classToInstantiate();
+            $reflectionClass    = new ReflectionClass($annotationRegistration->getClassName());
+            $interfaceToCall = InterfaceToCall::create(
+                $annotationRegistration->getClassName(),
+                $annotationRegistration->getMethodName()
+            );
+            if ($reflectionClass->hasMethod("__construct") && $reflectionClass->getMethod("__construct")->getParameters()) {
+                throw ConfigurationException::create("{$annotationRegistration} should not contains any constructor parameters");
             }
+            $newInstance = $reflectionClass->newInstance();
 
-            $classToRun               = $classes[$annotationRegistration->getClassName()];
-            $extensionObjectToResolve = $classToRun->{$annotationRegistration->getMethodName()}();
+            $parameters = [];
+            foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+                $variableName = null;
+                if ($interfaceParameter->hasAnnotation(ConfigurationVariable::class)) {
+                    /** @var ConfigurationVariable $variable */
+                    $variable = $interfaceParameter->getAnnotationsOfType(ConfigurationVariable::class)[0];
+
+                    $variableName = $variable->getName();
+                }
+
+                $parameters[] = ConfigurationVariableBuilder::createFrom($variableName, $interfaceParameter);
+            }
+            $methodInvoker = MethodInvoker::createWith($interfaceToCall, $newInstance, $parameters, InMemoryReferenceSearchService::createWith([ConfigurationVariableService::REFERENCE_NAME => $this->variableConfigurationService]));
+            $extensionObjectToResolve = $methodInvoker->processMessage(MessageBuilder::withPayload("stub")->build());
 
             if (!is_array($extensionObjectToResolve)) {
+                Assert::isObject($extensionObjectToResolve, "Incorrect configuration given in {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()}. Configuration returned by ServiceContext must be object or array of objects.");
+
                 $extensionObjects[] = $extensionObjectToResolve;
                 continue;
             }
 
             foreach ($extensionObjectToResolve as $singleMessagingComponent) {
+                Assert::isObject($singleMessagingComponent, "Incorrect configuration given in {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()}. Configuration returned by ServiceContext must be object or array of objects.");
+
                 $extensionObjects[] = $singleMessagingComponent;
             }
         }

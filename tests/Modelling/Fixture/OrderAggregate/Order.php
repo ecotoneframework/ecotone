@@ -26,7 +26,7 @@ class Order
     private function __construct(string $orderId)
     {
         $this->orderId = $orderId;
-        $this->record(new OrderWasPlaced($orderId));
+        $this->recordThat(new OrderWasPlaced($orderId));
     }
 
     #[CommandHandler("order.register", "orderReceiver")]
@@ -39,7 +39,7 @@ class Order
     public function notify(OrderWasPlaced $order) : void
     {
         $this->isNotifiedCount++;
-        $this->record(new OrderWasNotified($this->orderId));
+        $this->recordThat(new OrderWasNotified($this->orderId));
     }
 
     #[QueryHandler("order.getOrder")]

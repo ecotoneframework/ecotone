@@ -14,10 +14,7 @@ trait WithAggregateEvents
 {
     private ?array $recordedEvents = null;
 
-    /**
-     * @param object $event
-     */
-    public function record(object $event) : void
+    public function recordThat(object $event) : void
     {
         if (!$this->recordedEvents) {
             $this->recordedEvents = [];

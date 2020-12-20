@@ -8,11 +8,6 @@ use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
-/**
- * Class AllHeadersBuilder
- * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
- */
 class AllHeadersBuilder implements ParameterConverterBuilder
 {
     private string $parameterName;

@@ -25,7 +25,7 @@ class Appointment
         $this->appointmentId = $command->getAppointmentId();
         $this->duration = $command->getDuration();
 
-        $this->record(new AppointmentWasCreatedEvent($command->getAppointmentId()));
+        $this->recordThat(new AppointmentWasCreatedEvent($command->getAppointmentId()));
     }
 
     #[CommandHandler]

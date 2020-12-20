@@ -111,6 +111,33 @@ final class InterfaceParameter
         return $this->annotations;
     }
 
+    public function hasAnnotation(string $type) : bool
+    {
+        foreach ($this->annotations as $annotation) {
+            if ($annotation instanceof $type) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getAnnotationsOfType(string $type) : array
+    {
+        $foundAnnotations = [];
+
+        foreach ($this->annotations as $annotation) {
+            if ($annotation instanceof $type) {
+                $foundAnnotations[] = $annotation;
+            }
+        }
+
+        return $foundAnnotations;
+    }
+
     /**
      * @return mixed|null
      */

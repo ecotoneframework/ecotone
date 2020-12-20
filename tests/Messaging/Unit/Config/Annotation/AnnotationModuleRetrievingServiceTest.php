@@ -4,6 +4,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithConstructorParameters;
 use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithMethodParameters;
 use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\StdClassExtensionApplicationContext;
@@ -11,6 +12,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleC
 use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionObject;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
+use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionWithVariableConfiguration;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
@@ -28,7 +30,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
     {
         $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             ExampleModuleConfiguration::class
-        ]));
+        ]), InMemoryConfigurationVariableService::createEmpty());
 
         $this->assertEquals(
             [
@@ -42,7 +44,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
     {
         $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             StdClassExtensionApplicationContext::class
-        ]));
+        ]), InMemoryConfigurationVariableService::createEmpty());
 
         $this->assertEquals(
             [
@@ -58,46 +60,37 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
 
         $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             ApplicationContextWithConstructorParameters::class
-        ]));
+        ]), InMemoryConfigurationVariableService::createEmpty());
 
-        $this->assertEquals(
-            [
-                new \stdClass()
-            ],
-            $annotationModuleRetrievingServie->findAllExtensionObjects()
-        );
+        $annotationModuleRetrievingServie->findAllExtensionObjects();
     }
 
-    public function test_throwing_exception_if_application_context_has_method_parameters()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
-            ApplicationContextWithMethodParameters::class
-        ]));
-
-        $this->assertEquals(
-            [
-                new \stdClass()
-            ],
-            $annotationModuleRetrievingServie->findAllExtensionObjects()
-        );
-    }
-
-    /**
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws \ReflectionException
-     */
     public function test_creating_module_extension()
     {
         $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             ExampleModuleExtensionObject::class
-        ]));
+        ]), InMemoryConfigurationVariableService::createEmpty());
 
         $this->assertEquals(
             [
                 new \stdClass()
             ],
+            $annotationModuleRetrievingServie->findAllExtensionObjects()
+        );
+    }
+
+    public function test_creating_with_variable_configuration_service()
+    {
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
+            ExampleModuleExtensionWithVariableConfiguration::class
+        ]), InMemoryConfigurationVariableService::create(["name" => "johny", "lastName" => "bravo"]));
+
+        $stdClass = new \stdClass();
+        $stdClass->name = "johny";
+        $stdClass->surname = "bravo";
+
+        $this->assertEquals(
+            [$stdClass],
             $annotationModuleRetrievingServie->findAllExtensionObjects()
         );
     }
@@ -110,7 +103,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
     {
         $annotationModuleRetrievingService = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
             ExampleModuleExtensionObject::class, ExampleModuleConfiguration::class
-        ]));
+        ]), InMemoryConfigurationVariableService::createEmpty());
 
         $this->assertEquals(
             [

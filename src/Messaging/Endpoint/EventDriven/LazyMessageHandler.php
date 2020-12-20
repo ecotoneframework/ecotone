@@ -19,14 +19,8 @@ class LazyMessageHandler implements MessageHandler
     private \Ecotone\Messaging\Handler\MessageHandlerBuilder $messageHandlerBuilder;
     private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
     private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
-    private ?\Ecotone\Messaging\MessageHandler $initializedMessageHandler;
+    private ?\Ecotone\Messaging\MessageHandler $initializedMessageHandler = null;
 
-    /**
-     * LazyMessageHandler constructor.
-     * @param MessageHandlerBuilder $messageHandlerBuilder
-     * @param ChannelResolver $channelResolver
-     * @param ReferenceSearchService $referenceSearchService
-     */
     public function __construct(MessageHandlerBuilder $messageHandlerBuilder, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService)
     {
         $this->messageHandlerBuilder = $messageHandlerBuilder;

@@ -43,7 +43,7 @@ class Order implements VersionAggregate
         $this->amount = $createOrderCommand->getAmount();
         $this->shippingAddress = $createOrderCommand->getShippingAddress();
 
-        $this->record(new Notification());
+        $this->recordThat(new Notification());
     }
 
     #[CommandHandler]
@@ -68,7 +68,7 @@ class Order implements VersionAggregate
     {
         $this->shippingAddress = $command->getShippingAddress();
 
-        $this->record(new Notification());
+        $this->recordThat(new Notification());
     }
 
 

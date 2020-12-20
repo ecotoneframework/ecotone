@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\Messaging\Annotation\Parameter\ConfigurationVariable;
 use Ecotone\Messaging\Annotation\Parameter\Header;
 use Ecotone\Messaging\Annotation\Parameter\Headers;
 use Ecotone\Messaging\Annotation\Parameter\Payload;
@@ -11,6 +12,7 @@ use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ConfigurationVariableBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
@@ -92,6 +94,8 @@ class ParameterConverterAnnotationFactory
                 return ReferenceBuilder::create($interfaceParameter->getName(), $annotation->getReferenceName() ? $annotation->getReferenceName() : $interfaceParameter->getTypeHint());
             } else if ($annotation instanceof Headers) {
                 return AllHeadersBuilder::createWith($interfaceParameter->getName());
+            }else if ($annotation instanceof ConfigurationVariable) {
+                return ConfigurationVariableBuilder::createFrom($annotation->getName(), $interfaceParameter);
             }
         }
 

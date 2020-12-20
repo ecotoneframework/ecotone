@@ -6,6 +6,7 @@ use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ConfigurationVariableBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
@@ -50,6 +51,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
                             MessageConverterBuilder::create("message"),
                             ReferenceBuilder::create("object", \stdClass::class),
                             HeaderExpressionBuilder::create("name", "token", "value", false),
+                            ConfigurationVariableBuilder::create("environment", "env", true, null)
                         ])
                         ->withRequiredReply(true)
                         ->withRequiredInterceptorNames(["someReference"])

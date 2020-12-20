@@ -16,6 +16,11 @@ class ConfigurationVariableBuilder implements ParameterConverterBuilder
 {
     private function __construct(private string $parameterName, private string $variableName, private bool $isRequired, private mixed $defaultValue) {}
 
+    public static function create(string $parameterName, string $variableName, bool $isRequired, mixed $defaultValue) : self
+    {
+        return new self($parameterName, $variableName, $isRequired, $defaultValue);
+    }
+
     public static function createFrom(?string $variableName, InterfaceParameter $interfaceParameter) : self
     {
         return new self($interfaceParameter->getName(), $variableName ?? $interfaceParameter->getName(), !$interfaceParameter->doesAllowNulls() && !$interfaceParameter->hasDefaultValue(), $interfaceParameter->hasDefaultValue() ? $interfaceParameter->getDefaultValue() : null);

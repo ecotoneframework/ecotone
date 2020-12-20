@@ -8,6 +8,7 @@ use Ecotone\Messaging\Annotation\Parameter\Reference;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ConfigurationVariableBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
@@ -27,7 +28,6 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
         $referenceAnnotation = new Reference("object");
-        $allHeadersAnnotation = new Headers();
 
         $relatedClassName = ServiceActivatorWithAllConfigurationDefined::class;
         $methodName = "sendMessage";
@@ -41,7 +41,8 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                     $referenceAnnotation->getReferenceName(),
                     \stdClass::class
                 ),
-                HeaderExpressionBuilder::create("name", "token", "value", false)
+                HeaderExpressionBuilder::create("name", "token", "value", false),
+                ConfigurationVariableBuilder::create("environment", "env", true, null)
             ],
             $parameterConverterAnnotationFactory->createParameterWithDefaults(
                 InterfaceToCall::create($relatedClassName, $methodName),

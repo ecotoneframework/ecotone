@@ -11,6 +11,7 @@ use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
 use Ecotone\Messaging\Config\BeforeSend\BeforeSendChannelInterceptorBuilder;
+use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\ConverterBuilder;
@@ -202,7 +203,7 @@ final class MessagingSystemConfiguration implements Configuration
         return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), ServiceConfiguration::createWithDefaults());
     }
 
-    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ServiceConfiguration $applicationConfiguration): Configuration
+    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration): Configuration
     {
         $cachedVersion = self::getCachedVersion($applicationConfiguration);
         if ($cachedVersion) {
@@ -217,7 +218,8 @@ final class MessagingSystemConfiguration implements Configuration
                     $applicationConfiguration->getNamespaces(),
                     $applicationConfiguration->getEnvironment(),
                     $applicationConfiguration->getLoadedCatalog()
-                )
+                ),
+                $configurationVariableService
             ),
             $referenceTypeFromNameResolver,
             $applicationConfiguration

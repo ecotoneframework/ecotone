@@ -240,7 +240,8 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
             __DIR__ . "/../../../../",
             InMemoryPSRContainer::createFromObjects($objects),
-            $applicationConfiguration
+            $applicationConfiguration,
+            []
         );
     }
 

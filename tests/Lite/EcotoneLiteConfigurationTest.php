@@ -20,8 +20,8 @@ class EcotoneLiteConfigurationTest extends TestCase
     {
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
                                         ->withCacheDirectoryPath("/tmp/" . Uuid::uuid4()->toString());
-        $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration);
-        $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration);
+        $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration, []);
+        $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration, []);
 
         $this->assertEquals($configuration1, $configuration2);
     }

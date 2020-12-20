@@ -15,6 +15,7 @@ use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\StubConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\Logger\EchoLogger;
+use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -30,10 +31,10 @@ class EcotoneLiteConfiguration
 {
     public static function create(string $rootProjectDirectoryPath, ContainerInterface $container) : ConfiguredMessagingSystem
     {
-        return self::createWithConfiguration($rootProjectDirectoryPath, $container, ServiceConfiguration::createWithDefaults());
+        return self::createWithConfiguration($rootProjectDirectoryPath, $container, ServiceConfiguration::createWithDefaults(), []);
     }
 
-    public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface $container, ServiceConfiguration $applicationConfiguration): ConfiguredMessagingSystem
+    public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface $container, ServiceConfiguration $applicationConfiguration, array $configurationVariables): ConfiguredMessagingSystem
     {
         $applicationConfiguration = $applicationConfiguration->withNamespaces(array_merge(
             $applicationConfiguration->getNamespaces(),
@@ -43,6 +44,7 @@ class EcotoneLiteConfiguration
         return MessagingSystemConfiguration::prepare(
             realpath($rootProjectDirectoryPath),
             new TypeResolver($container),
+            InMemoryConfigurationVariableService::create($configurationVariables),
             $applicationConfiguration
         )->buildMessagingSystemFromConfiguration(new PsrContainerReferenceSearchService($container, ["logger" => new EchoLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()]));
     }

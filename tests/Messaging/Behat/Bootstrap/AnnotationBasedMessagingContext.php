@@ -236,7 +236,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             ->withCacheDirectoryPath($cacheDirectoryPath)
             ->withNamespaces([$namespace]);
 
-        MessagingSystemConfiguration::cleanCache($applicationConfiguration);
+        MessagingSystemConfiguration::cleanCache($cacheDirectoryPath);
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
             __DIR__ . "/../../../../",
             InMemoryPSRContainer::createFromObjects($objects),

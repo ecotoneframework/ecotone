@@ -226,18 +226,6 @@ final class MessagingSystemConfiguration implements Configuration
         );
     }
 
-    /**
-     * @param string|null                   $rootProjectDirectoryPath
-     * @param ModuleRetrievingService       $moduleConfigurationRetrievingService
-     * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param ServiceConfiguration          $applicationConfiguration
-     *
-     * @throws AnnotationException
-     * @throws ConfigurationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
-     */
     public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ServiceConfiguration $applicationConfiguration): \Ecotone\Messaging\Config\MessagingSystemConfiguration
     {
         $cacheDirectoryPath = $applicationConfiguration->getCacheDirectoryPath();
@@ -245,12 +233,6 @@ final class MessagingSystemConfiguration implements Configuration
         $cachedVersion = self::getCachedVersion($applicationConfiguration);
         if ($cachedVersion) {
             return $cachedVersion;
-        }
-
-        if ($cacheDirectoryPath) {
-            @mkdir($cacheDirectoryPath, 0777, true);
-            Assert::isTrue(is_writable($cacheDirectoryPath), "Not enough permissions to write into cache directory {$cacheDirectoryPath}");
-            self::cleanCache($applicationConfiguration);
         }
 
         $messagingSystemConfiguration = new self($rootProjectDirectoryPath, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $applicationConfiguration);
@@ -263,23 +245,17 @@ final class MessagingSystemConfiguration implements Configuration
         return $messagingSystemConfiguration;
     }
 
-    /**
-     * @param ServiceConfiguration $applicationConfiguration
-     *
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     */
-    public static function cleanCache(ServiceConfiguration $applicationConfiguration): void
+    public static function cleanCache(string $cacheDirectoryPath): void
     {
-        if ($applicationConfiguration->getCacheDirectoryPath()) {
-            if (!is_dir($applicationConfiguration->getCacheDirectoryPath())) {
-                @mkdir($applicationConfiguration->getCacheDirectoryPath(), 0777, true);
+        if ($cacheDirectoryPath) {
+            if (!is_dir($cacheDirectoryPath)) {
+                @mkdir($cacheDirectoryPath, 0775, true);
             }
-            Assert::isTrue(is_writable($applicationConfiguration->getCacheDirectoryPath()), "Not enough permissions to write into cache directory {$applicationConfiguration->getCacheDirectoryPath()}");
+            Assert::isTrue(is_writable($cacheDirectoryPath), "Not enough permissions to write into cache directory {$cacheDirectoryPath}");
 
-            Assert::isFalse(is_file($applicationConfiguration->getCacheDirectoryPath()), "Cache directory is file, should be directory");
+            Assert::isFalse(is_file($cacheDirectoryPath), "Cache directory is file, should be directory");
 
-            self::deleteFiles($applicationConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR, false);
+            self::deleteFiles($cacheDirectoryPath . DIRECTORY_SEPARATOR, false);
         }
     }
 

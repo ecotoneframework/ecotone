@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Behat\Bootstrap;
 
+use Behat\Gherkin\Node\TableNode;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -358,5 +359,16 @@ class DomainContext extends TestCase implements Context
         AnnotationBasedMessagingContext::getGateway(DistributionEntrypoint::class)->distribute(
             $order, [], "event", ShoppingRecord::ORDER_WAS_MADE, MediaType::TEXT_PLAIN
         );
+    }
+
+    /**
+     * @Then basket metadata should contains metadata:
+     */
+    public function basketMetadataShouldContainsMetadata(TableNode $table)
+    {
+        $result = AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("basket.get", []);
+        foreach ($table->getHash() as $node) {
+            $this->assertEquals($node['value'], $result[$node['name']]);
+        }
     }
 }

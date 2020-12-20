@@ -53,6 +53,7 @@ use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddVat\AddVatServic
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ProductExchanger;
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ShopRepository;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\AddCurrentUserId;
+use Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\AddMetadataService;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\BasketRepository;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
@@ -199,6 +200,14 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 ];
                 break;
             }
+            case "Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes":
+            {
+                $objects = [
+                    new AddMetadataService(),
+                    \Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\BasketRepository::createEmpty()
+                ];
+                break;
+            }
             case "Test\Ecotone\Messaging\Fixture\Behat\Calculating":
             {
                 $objects = [
@@ -236,7 +245,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             ->withCacheDirectoryPath($cacheDirectoryPath)
             ->withNamespaces([$namespace]);
 
-        MessagingSystemConfiguration::cleanCache($cacheDirectoryPath);
+        MessagingSystemConfiguration::cleanCache($applicationConfiguration->getCacheDirectoryPath());
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
             __DIR__ . "/../../../../",
             InMemoryPSRContainer::createFromObjects($objects),

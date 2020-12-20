@@ -235,6 +235,9 @@ final class MessagingSystemConfiguration implements Configuration
             return $cachedVersion;
         }
 
+        if ($cacheDirectoryPath) {
+            self::prepareCacheDirectory($cacheDirectoryPath);
+        }
         $messagingSystemConfiguration = new self($rootProjectDirectoryPath, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $applicationConfiguration);
 
         if ($cacheDirectoryPath) {
@@ -248,13 +251,7 @@ final class MessagingSystemConfiguration implements Configuration
     public static function cleanCache(string $cacheDirectoryPath): void
     {
         if ($cacheDirectoryPath) {
-            if (!is_dir($cacheDirectoryPath)) {
-                @mkdir($cacheDirectoryPath, 0775, true);
-            }
-            Assert::isTrue(is_writable($cacheDirectoryPath), "Not enough permissions to write into cache directory {$cacheDirectoryPath}");
-
-            Assert::isFalse(is_file($cacheDirectoryPath), "Cache directory is file, should be directory");
-
+            self::prepareCacheDirectory($cacheDirectoryPath);
             self::deleteFiles($cacheDirectoryPath . DIRECTORY_SEPARATOR, false);
         }
     }
@@ -320,6 +317,16 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         return array_unique($requiredReferences);
+    }
+
+    private static function prepareCacheDirectory(string $cacheDirectoryPath): void
+    {
+        if (!is_dir($cacheDirectoryPath)) {
+            @mkdir($cacheDirectoryPath, 0775, true);
+        }
+        Assert::isTrue(is_writable($cacheDirectoryPath), "Not enough permissions to write into cache directory {$cacheDirectoryPath}");
+
+        Assert::isFalse(is_file($cacheDirectoryPath), "Cache directory is file, should be directory");
     }
 
     /**

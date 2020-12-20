@@ -121,6 +121,20 @@ Feature: activating as aggregate order entity
     When I add to basket "cheese"
     Then basket should contains "cheese"
 
+  Scenario: Handle presend interceptor for aggregate
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes"
+    And current user id 123
+    When I add to basket "milk"
+    Then basket metadata should contains metadata:
+      | name           | value      |
+      | isRegistration | true       |
+      | handlerInfo    | basket.add |
+    When I add to basket "cheese"
+    Then basket metadata should contains metadata:
+      | name           | value      |
+      | isRegistration | false      |
+      | handlerInfo    | basket.add |
+
   Scenario: command handler distribution
     Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\DistributedCommandHandler"
     When I doing distributed order "pizza"

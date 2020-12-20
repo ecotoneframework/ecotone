@@ -135,11 +135,11 @@ final class MethodInvoker implements MessageProcessor
             }
 
             if ($missingParametersAmount >= 2 && $interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()) {
-                if (!$ignorePayload && !self::hasPayloadConverter($passedMethodParameterConverters)) {
+                if (!$ignorePayload && !self::hasPayloadConverter($passedMethodParameterConverters) && !$interfaceToCall->getFirstParameter()->isAnnotation()) {
                     $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter());
                 }
                 $passedMethodParameterConverters[] = AllHeadersBuilder::createWith($interfaceToCall->getSecondParameter()->getName());
-            } elseif (!$ignorePayload && !self::hasPayloadConverter($passedMethodParameterConverters)) {
+            } elseif (!$ignorePayload && !self::hasPayloadConverter($passedMethodParameterConverters) && !$interfaceToCall->getFirstParameter()->isAnnotation()) {
                 $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter());
             }
 

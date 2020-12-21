@@ -6,7 +6,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 use Ecotone\Messaging\Annotation\InputOutputEndpointAnnotation;
 use Ramsey\Uuid\Uuid;
 
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[\Attribute(\Attribute::TARGET_METHOD|\Attribute::IS_REPEATABLE)]
 class CommandHandler extends InputOutputEndpointAnnotation
 {
     /**

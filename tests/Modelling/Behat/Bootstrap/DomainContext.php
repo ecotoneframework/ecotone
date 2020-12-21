@@ -371,4 +371,16 @@ class DomainContext extends TestCase implements Context
             $this->assertEquals($node['value'], $result[$node['name']]);
         }
     }
+
+    /**
+     * @When I remove last item from basket
+     */
+    public function iRemoveLastItemFromBasket()
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
+            "basket.removeLast",
+            [],
+            MediaType::APPLICATION_X_PHP_ARRAY
+        );
+    }
 }

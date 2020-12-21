@@ -55,6 +55,7 @@ use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ShopRepository;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\AddCurrentUserId;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\AddMetadataService;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\BasketRepository;
+use Test\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod\Basket;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\LoggingService;
@@ -228,6 +229,13 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             {
                 $objects = [
                     new ShoppingRecord()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod":
+            {
+                $objects = [
+                    new Basket()
                 ];
                 break;
             }

@@ -144,3 +144,11 @@ Feature: activating as aggregate order entity
     Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\DistributedEventHandler"
     When "pizza" was order
     Then there should be 1 good ordered
+
+  Scenario: Handle multiple handler at the same method
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod"
+    When I add to basket "milk"
+    Then basket should contains "milk"
+    When I add to basket "cheese"
+    And I remove last item from basket
+    Then basket should contains "milk"

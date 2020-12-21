@@ -8,7 +8,7 @@ use Ecotone\Messaging\Annotation\IdentifiedAnnotation;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ramsey\Uuid\Uuid;
 
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[\Attribute(\Attribute::TARGET_METHOD|\Attribute::IS_REPEATABLE)]
 class EventHandler extends IdentifiedAnnotation
 {
     public string $listenTo;

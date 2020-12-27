@@ -19,7 +19,7 @@ class JsonToArrayConverter implements Converter
      */
     public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
     {
-        return \json_decode($source, true);
+        return \json_decode($source, true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**

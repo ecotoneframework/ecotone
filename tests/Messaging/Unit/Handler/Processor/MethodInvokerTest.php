@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverter;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
@@ -19,6 +20,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocationException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -222,11 +224,6 @@ class MethodInvokerTest extends MessagingTest
         );
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws ReferenceNotFoundException
-     * @throws MessagingException
-     */
     public function test_invoking_with_payload_conversion()
     {
         $referenceSearchService = InMemoryReferenceSearchService::createWith([
@@ -343,6 +340,65 @@ class MethodInvokerTest extends MessagingTest
         );
 
         $this->assertEquals("some", $result->getPayload());
+    }
+
+    public function test_invoking_with_conversion_and_union_type_resolving_type_from_type_header_with_different_media_type()
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createWith([
+            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
+                new JsonToArrayConverter()
+            ])
+        ]);
+        $interfaceToCall = InterfaceToCall::create(new ServiceExpectingOneArgument(), 'withUnionParameterWithArray');
+
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                $interfaceToCall,
+                MethodInvoker::createWith($interfaceToCall, new ServiceExpectingOneArgument(), [
+                    PayloadBuilder::create('value')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
+
+        $data      = '["893a660c-0208-4140-8be6-95fb2dcd2fdd"]';
+        $replyMessage = $methodInvocation->processMessage(
+            MessageBuilder::withPayload($data)
+                ->setHeader(MessageHeaders::TYPE_ID, TypeDescriptor::ARRAY)
+                ->setContentType(MediaType::createApplicationJson())
+                ->build()
+        );
+
+        $this->assertEquals(
+            ["893a660c-0208-4140-8be6-95fb2dcd2fdd"],
+            $replyMessage->getPayload()
+        );
+    }
+
+    public function test_throwing_exception_if_deserializing_to_union_without_type_header()
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createWith([
+            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
+                new JsonToArrayConverter()
+            ])
+        ]);
+        $interfaceToCall = InterfaceToCall::create(new ServiceExpectingOneArgument(), 'withUnionParameterWithArray');
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                $interfaceToCall,
+                MethodInvoker::createWith($interfaceToCall, new ServiceExpectingOneArgument(), [
+                    PayloadBuilder::create('value')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
+
+        $methodInvocation->processMessage(
+            MessageBuilder::withPayload('["893a660c-0208-4140-8be6-95fb2dcd2fdd"]')
+                ->setContentType(MediaType::createApplicationJson())
+                ->build()
+        );
     }
 
     public function test_invoking_with_header_conversion_for_union_type_parameter()

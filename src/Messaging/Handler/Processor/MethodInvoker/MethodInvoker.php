@@ -283,7 +283,7 @@ final class MethodInvoker implements MessageProcessor
 
             if (!($sourceTypeDescriptor->isCompatibleWith($parameterType))) {
                 $convertedData = null;
-                if (!$parameterType->isCompoundObjectType() && !$parameterType->isAnything() && $this->canConvertParameter(
+                if (!$parameterType->isCompoundObjectType() && !$parameterType->isAnything() && !$parameterType->isUnionType() && $this->canConvertParameter(
                     $sourceTypeDescriptor,
                     $currentParameterMediaType,
                     $parameterType,
@@ -291,24 +291,24 @@ final class MethodInvoker implements MessageProcessor
                 )) {
                     $convertedData = $this->doConversion($data, $sourceTypeDescriptor, $currentParameterMediaType, $parameterType, $parameterMediaType);
                 } else if ($message->getHeaders()->containsKey(MessageHeaders::TYPE_ID)) {
-                    $typeDescriptor = TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID));
-                    if ($typeDescriptor->isCompatibleWith($parameterType)
-                        &&
-                        $this->canConvertParameter(
+                    $resolvedTargetParameterType = $parameterType->isUnionType() && $message->getHeaders()->containsKey(MessageHeaders::TYPE_ID) ? TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID)) : $parameterType;
+                    if ($this->canConvertParameter(
                             $sourceTypeDescriptor,
                             $currentParameterMediaType,
-                            $typeDescriptor,
+                            $resolvedTargetParameterType,
                             $parameterMediaType
                         )
                     ) {
-                        $convertedData = $this->doConversion($data, $sourceTypeDescriptor, $currentParameterMediaType, $typeDescriptor, $parameterMediaType);
+                        $convertedData = $this->doConversion($data, $sourceTypeDescriptor, $currentParameterMediaType, $resolvedTargetParameterType, $parameterMediaType);
                     }
                 }
 
                 if (!is_null($convertedData)) {
                     $data = $convertedData;
                 }else {
-                    if (!$currentParameterMediaType->isCompatibleWith($parameterMediaType) && !$sourceTypeDescriptor->isCompatibleWith($parameterType)) {
+                    if ($parameterType->isUnionType()) {
+                        throw InvalidArgumentException::create("Can not call {$this->interfaceToCall} lack of information which type should be used to deserialization. Consider adding __TYPE__ header to indicate which union type it should be resolved to.");
+                    }elseif (!$currentParameterMediaType->isCompatibleWith($parameterMediaType) && !$sourceTypeDescriptor->isCompatibleWith($parameterType)) {
                         throw InvalidArgumentException::create("Can not call {$this->interfaceToCall}. Lack of Media Type Converter for {$currentParameterMediaType}:{$sourceTypeDescriptor} to {$parameterMediaType}:{$parameterType}");
                     }
                 }

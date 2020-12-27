@@ -70,6 +70,11 @@ class ServiceExpectingOneArgument
         return $value;
     }
 
+    public function withUnionParameterWithArray(\stdClass|array $value)
+    {
+        return $value;
+    }
+
     /**
      * @inheritDoc
      */

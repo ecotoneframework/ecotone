@@ -50,7 +50,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Exception
      */
-    public function __test_chaining_with_single_message_handler()
+    public function test_chaining_with_single_message_handler()
     {
         $replyChannel = QueueChannel::create();
         $requestPayload = "some";
@@ -70,7 +70,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_chaining_with_two_message_handlers()
+    public function test_chaining_with_two_message_handlers()
     {
         $replyChannel = QueueChannel::create();
         $requestPayload = "some";
@@ -103,7 +103,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_with_chain_handler_at_the_end()
+    public function test_with_chain_handler_at_the_end()
     {
         $replyChannel = QueueChannel::create();
         $requestPayload = 0;
@@ -130,7 +130,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
-    public function __test_chaining_payload_transformers()
+    public function test_chaining_payload_transformers()
     {
         $replyChannel = QueueChannel::create();
         $requestPayload = "x";
@@ -154,7 +154,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_chaining_with_other_chain_inside()
+    public function test_chaining_with_other_chain_inside()
     {
         $replyChannel = QueueChannel::create();
         $requestPayload = "x";
@@ -180,7 +180,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_chaining_with_other_chain_at_the_beginning_of_flow()
+    public function test_chaining_with_other_chain_at_the_beginning_of_flow()
     {
         $replyChannel = QueueChannel::create();
         $requestPayload = ["some" => "bla"];
@@ -214,7 +214,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_passing_through_internal_output_channel_at_the_end_of_the_stack()
+    public function test_passing_through_internal_output_channel_at_the_end_of_the_stack()
     {
         $internalOutputChannelName = "internalOutputChannelName";
         $externalOutputChannelName = "externalOutputChannelName";
@@ -244,7 +244,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $this->assertEquals(10, $externalOutputChannel->receive()->getPayload());
     }
 
-    public function __test_having_chain_in_chain_with_default_around_interceptors_before_calling_any_chained_handler()
+    public function test_having_chain_in_chain_with_default_around_interceptors_before_calling_any_chained_handler()
     {
         $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObject(
             CalculatingServiceInterceptorExample::create(1), "resultAfterCalling",
@@ -276,7 +276,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $this->assertEquals(10, $replyChannel->receive()->getPayload());
     }
 
-    public function __test_having_chain_in_chain_with_around_interceptors()
+    public function test_having_chain_in_chain_with_around_interceptors()
     {
         $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObject(
             CalculatingServiceInterceptorExample::create(1), "sumAfterCalling",
@@ -308,7 +308,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $this->assertEquals(13, $replyChannel->receive()->getPayload());
     }
 
-    public function __test_having_chain_with_output_channel_and_around_interceptor()
+    public function test_having_chain_with_output_channel_and_around_interceptor()
     {
         $internalOutputChannelName = "internalOutputChannelName";
         $internalOutputChannel = DirectChannel::create();
@@ -343,7 +343,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $this->assertEquals(16, $replyChannel->receive()->getPayload());
     }
 
-    public function __test_chaining_multiple_handlers_with_output_channel()
+    public function test_chaining_multiple_handlers_with_output_channel()
     {
         $outputChannelName = "outputChannelName";
         $outputChannel = QueueChannel::create();
@@ -373,7 +373,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_chaining_with_three_levels()
+    public function test_chaining_with_three_levels()
     {
         $replyChannel = QueueChannel::create();
         $requestPayload = "x";
@@ -410,7 +410,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_chaining_multiple_handlers()
+    public function test_chaining_multiple_handlers()
     {
         $replyChannel = QueueChannel::create();
         $requestPayload = 1;
@@ -466,7 +466,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
-    public function __test_passing_references_objects_to_top_handler()
+    public function test_passing_references_objects_to_top_handler()
     {
         $chainBuilder = ChainMessageHandlerBuilder::create()
                         ->chain(TransformerBuilder::create("some", "method"));
@@ -478,7 +478,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Exception
      */
-    public function __test_chaining_with_router_at_the_end()
+    public function test_chaining_with_router_at_the_end()
     {
         $outputChannelName = "outputChannel";
         $outputChannel = QueueChannel::create();
@@ -537,7 +537,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
     /**
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __test_throwing_exception_if_configured_output_channel_and_output_handler()
+    public function test_throwing_exception_if_configured_output_channel_and_output_handler()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -577,7 +577,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         );
     }
 
-    public function __test_converting_to_string()
+    public function test_converting_to_string()
     {
         $inputChannelName = 'inputChannel';
         $endpointName = "someName";

@@ -33,6 +33,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInte
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\Order;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderProcessor;
+use Test\Ecotone\Messaging\Fixture\Converter\StringToUuidClassConverter;
 use Test\Ecotone\Messaging\Fixture\Handler\ExampleService;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\AroundInterceptorObjectBuilderExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
@@ -340,6 +341,38 @@ class MethodInvokerTest extends MessagingTest
         );
 
         $this->assertEquals("some", $result->getPayload());
+    }
+
+    public function test_invoking_with_conversion_based_on_type_id_when_declaration_is_interface()
+    {
+        $referenceSearchService = InMemoryReferenceSearchService::createWith([
+            AutoCollectionConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
+                new StringToUuidClassConverter()
+            ])
+        ]);
+        $interfaceToCall = InterfaceToCall::create(new ServiceExpectingOneArgument(), 'withInterface');
+
+        $methodInvocation =
+            WrapWithMessageBuildProcessor::createWith(
+                $interfaceToCall,
+                MethodInvoker::createWith($interfaceToCall, new ServiceExpectingOneArgument(), [
+                    PayloadBuilder::create('value')
+                ], $referenceSearchService),
+                $referenceSearchService
+            );
+
+        $data      = '893a660c-0208-4140-8be6-95fb2dcd2fdd';
+        $replyMessage = $methodInvocation->processMessage(
+            MessageBuilder::withPayload($data)
+                ->setHeader(MessageHeaders::TYPE_ID, Uuid::class)
+                ->setContentType(MediaType::createApplicationXPHP())
+                ->build()
+        );
+
+        $this->assertEquals(
+            Uuid::fromString("893a660c-0208-4140-8be6-95fb2dcd2fdd"),
+            $replyMessage->getPayload()
+        );
     }
 
     public function test_invoking_with_conversion_and_union_type_resolving_type_from_type_header_with_different_media_type()

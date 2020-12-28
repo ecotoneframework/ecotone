@@ -283,7 +283,7 @@ final class MethodInvoker implements MessageProcessor
 
             if (!($sourceTypeDescriptor->isCompatibleWith($parameterType))) {
                 $convertedData = null;
-                if (!$parameterType->isCompoundObjectType() && !$parameterType->isAnything() && !$parameterType->isUnionType() && $this->canConvertParameter(
+                if (!$parameterType->isCompoundObjectType() && !$parameterType->isInterface() && !$parameterType->isAnything() && !$parameterType->isUnionType() && $this->canConvertParameter(
                     $sourceTypeDescriptor,
                     $currentParameterMediaType,
                     $parameterType,
@@ -291,7 +291,7 @@ final class MethodInvoker implements MessageProcessor
                 )) {
                     $convertedData = $this->doConversion($data, $sourceTypeDescriptor, $currentParameterMediaType, $parameterType, $parameterMediaType);
                 } else if ($message->getHeaders()->containsKey(MessageHeaders::TYPE_ID)) {
-                    $resolvedTargetParameterType = $parameterType->isUnionType() && $message->getHeaders()->containsKey(MessageHeaders::TYPE_ID) ? TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID)) : $parameterType;
+                    $resolvedTargetParameterType = $message->getHeaders()->containsKey(MessageHeaders::TYPE_ID) ? TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID)) : $parameterType;
                     if ($this->canConvertParameter(
                             $sourceTypeDescriptor,
                             $currentParameterMediaType,

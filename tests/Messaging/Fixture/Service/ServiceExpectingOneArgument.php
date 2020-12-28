@@ -75,6 +75,11 @@ class ServiceExpectingOneArgument
         return $value;
     }
 
+    public function withInterface(UuidInterface $value)
+    {
+        return $value;
+    }
+
     /**
      * @inheritDoc
      */

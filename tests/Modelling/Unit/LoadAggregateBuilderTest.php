@@ -27,6 +27,10 @@ use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\IncorrectEvent
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\IncorrectEventTypeReturned\IncorrectEventTypeReturnedExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoFactoryMethodAggregateExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NonStaticFactoryMethodExample;
+use Test\Ecotone\Modelling\Fixture\Renter\Appointment;
+use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepositoryBuilder;
+use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
+use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
 use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
@@ -34,6 +38,76 @@ use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
 
 class LoadAggregateBuilderTest extends TestCase
 {
+    public function test_enriching_command_with_aggregate_if_found()
+    {
+        $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
+            "getAppointmentId",
+            null,
+            LoadAggregateMode::createThrowOnNotFound()
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $appointment = Appointment::create(new CreateAppointmentCommand(123, 1000));
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => AppointmentStandardRepository::createWith([
+                    $appointment
+                ]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload([])
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ["appointmentId" => 123])
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            $appointment,
+            $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
+        );
+    }
+
+    public function test_enriching_command_with_aggregate_if_found_using_repository_builder()
+    {
+        $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
+            "getAppointmentId",
+            null,
+            LoadAggregateMode::createThrowOnNotFound()
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $appointment = Appointment::create(new CreateAppointmentCommand(123, 1000));
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => AppointmentRepositoryBuilder::createWith([
+                    $appointment
+                ]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload([])
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ["appointmentId" => 123])
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            $appointment,
+            $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
+        );
+    }
+
     public function test_throwing_exception_if_no_id_found_in_command()
     {
         $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(

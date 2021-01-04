@@ -105,7 +105,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $aggregateRepository = $this->getAggregateRepository($referenceSearchService);
+        $aggregateRepository = LoadAggregateServiceBuilder::getAggregateRepository($this->interfaceToCall->getInterfaceName(), $this->aggregateRepositoryReferenceNames, $channelResolver, $referenceSearchService);
         $isEventSourced = $aggregateRepository instanceof EventSourcedRepository;
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
 
@@ -117,21 +117,6 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
             ->withOutputMessageChannel($this->outputMessageChannelName);
 
         return $handler->build($channelResolver, $referenceSearchService);
-    }
-
-    private function getAggregateRepository(ReferenceSearchService $referenceSearchService): ?object
-    {
-        $aggregateRepository = null;
-        foreach ($this->aggregateRepositoryReferenceNames as $aggregateRepositoryName) {
-            /** @var StandardRepository|EventSourcedRepository $aggregateRepository */
-            $aggregateRepositoryToCheck = $referenceSearchService->get($aggregateRepositoryName);
-            if ($aggregateRepositoryToCheck->canHandle($this->interfaceToCall->getInterfaceName())) {
-                $aggregateRepository = $aggregateRepositoryToCheck;
-                break;
-            }
-        }
-        Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$this->interfaceToCall}");
-        return $aggregateRepository;
     }
 
     /**

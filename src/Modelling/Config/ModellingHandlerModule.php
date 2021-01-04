@@ -37,8 +37,10 @@ use Ecotone\Modelling\Annotation\Repository;
 use Ecotone\Modelling\CallAggregateServiceBuilder;
 use Ecotone\Modelling\LoadAggregateMode;
 use Ecotone\Modelling\LoadAggregateServiceBuilder;
+use Ecotone\Modelling\RepositoryBuilder;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use InvalidArgumentException;
+use Ramsey\Uuid\Uuid;
 use ReflectionMethod;
 
 #[ModuleAnnotation]
@@ -269,7 +271,7 @@ class ModellingHandlerModule implements AnnotationModule
      */
     public function canHandle($extensionObject): bool
     {
-        return false;
+        return $extensionObject instanceof RepositoryBuilder;
     }
 
     /**
@@ -279,6 +281,11 @@ class ModellingHandlerModule implements AnnotationModule
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
         $configuration->requireReferences($this->aggregateRepositoryReferenceNames);
+        foreach ($moduleExtensions as $aggregateRepositoryBuilder) {
+            $referenceId = Uuid::uuid4()->toString();
+            $moduleReferenceSearchService->store($referenceId, $aggregateRepositoryBuilder);
+            $this->aggregateRepositoryReferenceNames[$referenceId] = $aggregateRepositoryBuilder;
+        }
 
         $aggregateCommandOrEventHandlers = [];
         foreach ($this->aggregateCommandHandlers as $registration) {

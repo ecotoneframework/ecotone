@@ -15,13 +15,22 @@ class AppointmentStandardRepository implements StandardRepository
      */
     private $appointments = [];
 
-    private function __construct()
+    private function __construct(array $appointments)
     {
+        /** @var Appointment $appointment */
+        foreach ($appointments as $appointment) {
+            $this->appointments[$appointment->getAppointmentId()] = $appointment;
+        }
     }
 
     public static function createEmpty() : self
     {
-        return new self();
+        return new self([]);
+    }
+
+    public static function createWith(array $appointments) : self
+    {
+        return new self($appointments);
     }
 
     /**
@@ -38,7 +47,7 @@ class AppointmentStandardRepository implements StandardRepository
     public function findBy(string $aggregateClassName, array $identifiers) : ?object
     {
         foreach ($this->appointments as $appointment) {
-            if ($appointment->getAppointmentId() === $identifiers['appointmentId']) {
+            if ($appointment->getAppointmentId() == $identifiers['appointmentId']) {
                 return $appointment;
             }
         }

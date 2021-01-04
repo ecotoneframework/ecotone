@@ -52,7 +52,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
 
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $aggregateRepository = $this->getAggregateRepository($referenceSearchService);
+        $aggregateRepository = self::getAggregateRepository($this->aggregateClassName, $this->aggregateRepositoryReferenceNames, $channelResolver, $referenceSearchService);
         if ($aggregateRepository instanceof EventSourcedRepository && !$this->eventSourcedFactoryMethod) {
             $repositoryClass = get_class($aggregateRepository);
             throw InvalidArgumentException::create("Based on your repository {$repositoryClass}, you want to create Event Sourced Aggregate. You must define static method marked with #[AggregateFactory] for aggregate recreation from events");
@@ -143,18 +143,22 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
     }
 
-    private function getAggregateRepository(ReferenceSearchService $referenceSearchService): ?object
+    public static function getAggregateRepository(string $aggregateClassName, array $aggregateRepositoryNames, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): EventSourcedRepository|StandardRepository
     {
         $aggregateRepository = null;
-        foreach ($this->aggregateRepositoryReferenceNames as $aggregateRepositoryName) {
+        foreach ($aggregateRepositoryNames as $aggregateRepositoryName) {
             /** @var StandardRepository|EventSourcedRepository $aggregateRepository */
             $aggregateRepositoryToCheck = $referenceSearchService->get($aggregateRepositoryName);
-            if ($aggregateRepositoryToCheck->canHandle($this->aggregateClassName)) {
+            if ($aggregateRepositoryToCheck->canHandle($aggregateClassName)) {
+                if ($aggregateRepositoryToCheck instanceof RepositoryBuilder) {
+                    $aggregateRepositoryToCheck = $aggregateRepositoryToCheck->build($channelResolver, $referenceSearchService);
+                }
+
                 $aggregateRepository = $aggregateRepositoryToCheck;
                 break;
             }
         }
-        Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$this->aggregateClassName}:{$this->methodName}");
+        Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$aggregateClassName}");
 
         return $aggregateRepository;
     }

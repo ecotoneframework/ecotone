@@ -90,7 +90,7 @@ class SaveAggregateBuilderTest extends TestCase
                 function () {
                     return true;
                 }
-            ), 2
+            ), 1
             );
 
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
@@ -117,6 +117,7 @@ class SaveAggregateBuilderTest extends TestCase
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload($commandToRun)
                 ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $order)
+                ->setHeader(AggregateMessage::TARGET_VERSION, 1)
                 ->setReplyChannel(NullableMessageChannel::create())
                 ->build()
         );

@@ -44,37 +44,21 @@ class AutoCollectionConversionService implements ConversionService
         return new self([]);
     }
 
-    /**
-     * @param mixed $source
-     * @param Type $sourceType
-     * @param MediaType $sourceMediaType
-     * @param Type $targetType
-     * @param MediaType $targetMediaType
-     * @return mixed
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
+    public function convert($source, Type $sourcePHPType, MediaType $sourceMediaType, Type $targetPHPType, MediaType $targetMediaType)
     {
-        Assert::isFalse($sourceType->isUnionType(), "Can't convert from Union source type {$sourceMediaType}:{$sourceType} to {$targetMediaType}:{$targetType}");
+        Assert::isFalse($sourcePHPType->isUnionType(), "Can't convert from Union source type {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType}");
         if (is_null($source)) {
             return $source;
         }
 
-        $targetType = $this->getTargetType($sourceType, $sourceMediaType, $targetType, $targetMediaType);
-        Assert::isObject($targetType, "Converter was not found for {$sourceMediaType}:{$sourceType} to {$targetMediaType}:{$targetType};");
-        $converter = $this->getConverter($sourceType, $sourceMediaType, $targetType, $targetMediaType);
-        Assert::isObject($converter, "Converter was not found for {$sourceMediaType}:{$sourceType} to {$targetMediaType}:{$targetType};");
+        $targetPHPType = $this->getTargetType($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
+        Assert::isObject($targetPHPType, "Converter was not found for {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType};");
+        $converter = $this->getConverter($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
+        Assert::isObject($converter, "Converter was not found for {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType};");
 
-        return $converter->convert($source, $sourceType, $sourceMediaType, $targetType, $targetMediaType);
+        return $converter->convert($source, $sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
     }
 
-    /**
-     * @param Type $sourceType
-     * @param Type $targetType
-     * @param MediaType $sourceMediaType
-     * @param MediaType $targetMediaType
-     * @return bool
-     */
     public function canConvert(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType) : bool
     {
         return (bool)$this->getConverter($sourceType, $sourceMediaType, $targetType, $targetMediaType);

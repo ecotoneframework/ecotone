@@ -45,7 +45,6 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      * @var string[]
      */
     private array $aggregateRepositoryReferenceNames = [];
-    private ?array $versionMapping;
     private array $aggregateIdentifierMapping;
     private ?string $aggregateMethodWithEvents;
 
@@ -121,7 +120,6 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->getPropertyReaderAccessor(),
                 $eventBus,
                 $this->aggregateMethodWithEvents,
-                $this->versionMapping,
                 $this->aggregateIdentifierMapping
             ),
             "save"
@@ -160,7 +158,6 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $interfaceToCall = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $methodName);
 
         $aggregateMethodWithEvents    = null;
-        $aggregateVersionPropertyName = null;
 
         $aggregateEventsAnnotation = TypeDescriptor::create(AggregateEvents::class);
         foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
@@ -173,23 +170,13 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         }
 
         $aggregateIdentifierAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
-        $versionAnnotation             = TypeDescriptor::create(Version::class);
         $aggregateIdentifiers          = [];
         foreach ($aggregateClassDefinition->getProperties() as $property) {
-            if ($property->hasAnnotation($versionAnnotation)) {
-                $aggregateVersionPropertyName = $property->getName();
-            }
             if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
                 $aggregateIdentifiers[$property->getName()] = null;
             }
         }
 
-        $aggregateVersionMapping = null;
-        if (!$aggregateVersionMapping && $aggregateVersionPropertyName) {
-            $aggregateVersionMapping[$aggregateVersionPropertyName] = $aggregateVersionPropertyName;
-        }
-
-        $this->versionMapping             = $aggregateVersionMapping;
         $this->interfaceToCall            = $interfaceToCall;
         $this->aggregateMethodWithEvents  = $aggregateMethodWithEvents;
         $this->aggregateIdentifierMapping = $aggregateIdentifiers;

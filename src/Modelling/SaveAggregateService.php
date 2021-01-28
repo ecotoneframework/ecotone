@@ -33,17 +33,15 @@ class SaveAggregateService
     private object $eventBus;
     private ?string $eventRetrievingMethod;
     private PropertyEditorAccessor $propertyEditorAccessor;
-    private ?array $versionMapping;
     private array $aggregateIdentifierMapping;
     private InterfaceToCall $aggregateInterface;
 
-    public function __construct(InterfaceToCall $aggregateInterface, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $eventMethod, ?array $versionMapping, array $aggregateIdentifierMapping)
+    public function __construct(InterfaceToCall $aggregateInterface, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $eventMethod, array $aggregateIdentifierMapping)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->eventBus = $eventBus;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
-        $this->versionMapping = $versionMapping;
         $this->eventRetrievingMethod = $eventMethod;
         $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
         $this->aggregateInterface = $aggregateInterface;
@@ -67,23 +65,9 @@ class SaveAggregateService
             }
         }
 
-        $nextVersion = null;
-        if ($this->versionMapping) {
-            $aggregatePropertyName = reset($this->versionMapping);
-            $nextVersion = $this->propertyReaderAccessor->getPropertyValue(
-                PropertyPath::createWith($aggregatePropertyName),
-                $aggregate
-            );
-            $nextVersion = is_null($nextVersion) ? 1 : $nextVersion + 1;
-
-            $this->propertyEditorAccessor->enrichDataWith(
-                PropertyPath::createWith($aggregatePropertyName),
-                $aggregate,
-                $nextVersion,
-                $message,
-                null
-            );
-        }
+        $versionBeforeHandling = $message->getHeaders()->containsKey(AggregateMessage::TARGET_VERSION)
+            ? $message->getHeaders()->get(AggregateMessage::TARGET_VERSION)
+            : null;
 
         $aggregateIds = [];
         foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
@@ -104,13 +88,6 @@ class SaveAggregateService
                     ->setPayload($aggregateIds)
                     ->build();
         }
-        $version = null;
-        if ($nextVersion && $message->getHeaders()->containsKey(AggregateMessage::TARGET_VERSION)) {
-            $expectedVersion = $message->getHeaders()->get(AggregateMessage::TARGET_VERSION);
-            if ($expectedVersion && ($nextVersion != $expectedVersion + 1)) {
-                throw AggregateVersionMismatchException::create("Aggregate version is different");
-            }
-        }
 
         unset($metadata[MessageHeaders::REPLY_CHANNEL], );
         unset($metadata[AggregateMessage::AGGREGATE_ID]);
@@ -125,9 +102,9 @@ class SaveAggregateService
         unset($metadata[MessageHeaders::REPLY_CHANNEL]);
 
         if ($this->aggregateRepository instanceof EventSourcedRepository) {
-            $this->aggregateRepository->save($aggregateIds, $this->aggregateInterface->getInterfaceName(), $events, $metadata, $nextVersion);
+            $this->aggregateRepository->save($aggregateIds, $this->aggregateInterface->getInterfaceName(), $events, $metadata, $versionBeforeHandling);
         }else {
-            $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $nextVersion);
+            $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $versionBeforeHandling);
         }
 
         foreach ($events as $event) {

@@ -30,7 +30,7 @@ interface EventSourcedRepository
      * @param string $aggregateClassName
      * @param array $events
      * @param array $metadata
-     * @param int|null $expectedVersion if optimistic locking in enabled current version + 1
+     * @param int|null $expectedVersion expected version before command handling, 0 in case there was no aggregate, null in case @Version is not provided
      */
     public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, ?int $expectedVersion): void;
 }

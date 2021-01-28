@@ -34,9 +34,9 @@ class InMemoryConversionService implements ConversionService
         return new self([]);
     }
 
-    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
+    public function convert($source, Type $sourcePHPType, MediaType $sourceMediaType, Type $targetPHPType, MediaType $targetMediaType)
     {
-        $result = $this->getConversionResult($sourceType, $sourceMediaType, $targetType, $targetMediaType);
+        $result = $this->getConversionResult($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
 
         if (is_null($result)) {
             throw new \InvalidArgumentException("Calling convert and conversion not possible");

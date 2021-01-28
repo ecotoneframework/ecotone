@@ -12,18 +12,18 @@ use Ecotone\Messaging\Handler\Type;
  */
 interface ConversionService
 {
-    const REFERENCE_NAME = "conversionService";
+    const REFERENCE_NAME = self::class;
 
     /**
      * @param mixed $source
-     * @param Type $sourceType
+     * @param Type $sourcePHPType
      * @param MediaType $sourceMediaType
-     * @param Type $targetType
+     * @param Type $targetPHPType
      * @param MediaType $targetMediaType
      *
      * @return mixed
      */
-    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType);
+    public function convert($source, Type $sourcePHPType, MediaType $sourceMediaType, Type $targetPHPType, MediaType $targetMediaType);
 
     /**
      * @param Type $sourceType

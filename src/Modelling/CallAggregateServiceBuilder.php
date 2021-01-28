@@ -4,6 +4,9 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
+use Ecotone\Messaging\Handler\Enricher\PropertyPath;
+use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -17,6 +20,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Annotation\AggregateFactory;
+use Ecotone\Modelling\Annotation\Version;
 
 class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
@@ -39,6 +43,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     private array $aggregateRepositoryReferenceNames = [];
     private bool $isVoidMethod;
     private ?string $eventSourcedFactoryMethod;
+    private ?array $aggregateVersionMapping;
 
     private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName, bool $isCommandHandler)
     {
@@ -62,6 +67,19 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 break;
             }
         }
+
+        $aggregateVersionPropertyName = null;
+        $versionAnnotation             = TypeDescriptor::create(Version::class);
+        foreach ($aggregateClassDefinition->getProperties() as $property) {
+            if ($property->hasAnnotation($versionAnnotation)) {
+                $aggregateVersionPropertyName = $property->getName();
+            }
+        }
+        $aggregateVersionMapping = null;
+        if (!$aggregateVersionMapping && $aggregateVersionPropertyName) {
+            $aggregateVersionMapping[$aggregateVersionPropertyName] = $aggregateVersionPropertyName;
+        }
+        $this->aggregateVersionMapping             = $aggregateVersionMapping;
 
         $this->interfaceToCall = $interfaceToCall;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
@@ -110,7 +128,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
 
         $handler = ServiceActivatorBuilder::createWithDirectReference(
-            new CallAggregateService($this->interfaceToCall, $isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod),
+            new CallAggregateService($this->interfaceToCall, $isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod, $this->aggregateVersionMapping),
             "call"
         )
             ->withPassThroughMessageOnVoidInterface($this->isVoidMethod)

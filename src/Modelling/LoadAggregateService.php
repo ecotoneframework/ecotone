@@ -24,17 +24,17 @@ class LoadAggregateService
     private string $aggregateClassName;
     private string $aggregateMethod;
     private PropertyReaderAccessor $propertyReaderAccessor;
-    private ?array $expectedVersionMapping;
+    private ?array $commandVersionMapping;
     private ?string $eventSourcedFactoryMethod;
     private LoadAggregateMode $loadAggregateMode;
 
-    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, ?array $expectedVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, ?string $eventSourcedFactoryMethod, LoadAggregateMode $loadAggregateMode)
+    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, ?array $commandVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, ?string $eventSourcedFactoryMethod, LoadAggregateMode $loadAggregateMode)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->aggregateClassName = $aggregateClassName;
         $this->aggregateMethod = $aggregateMethod;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
-        $this->expectedVersionMapping = $expectedVersionMapping;
+        $this->commandVersionMapping = $commandVersionMapping;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
         $this->loadAggregateMode = $loadAggregateMode;
     }
@@ -60,10 +60,10 @@ class LoadAggregateService
             }
         }
 
-        $expectedVersion = $this->expectedVersionMapping
+        $expectedVersion = $this->commandVersionMapping
             ? (
-                $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith(array_key_first($this->expectedVersionMapping)), $message->getPayload())
-                ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith(array_key_first($this->expectedVersionMapping)), $message->getPayload())
+                $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith(array_key_first($this->commandVersionMapping)), $message->getPayload())
+                ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith(array_key_first($this->commandVersionMapping)), $message->getPayload())
                 : null
             )
             : null;
@@ -86,7 +86,7 @@ class LoadAggregateService
         if ($aggregate) {
             $messageBuilder = $messageBuilder->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate);
         }
-        if (!is_null($this->expectedVersionMapping)) {
+        if (!is_null($this->commandVersionMapping)) {
             $messageBuilder = $messageBuilder->setHeader(AggregateMessage::TARGET_VERSION, $expectedVersion);
         }
 

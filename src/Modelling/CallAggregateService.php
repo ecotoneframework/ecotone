@@ -3,6 +3,7 @@
 namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -37,13 +38,18 @@ class CallAggregateService
     private ?string $eventSourcedFactoryMethod;
     private bool $isFactoryMethod;
     private InterfaceToCall $aggregateInterface;
-    private ?array $aggregateVersionMapping;
     /**
      * @var PropertyReaderAccessor
      */
     private PropertyReaderAccessor $propertyReaderAccessor;
+    /**
+     * @var PropertyEditorAccessor
+     */
+    private PropertyEditorAccessor $propertyEditorAccessor;
+    private ?array $aggregateVersionMapping;
+    private bool $isAggregateVersionAutomaticallyIncreased;
 
-    public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, PropertyReaderAccessor $propertyReaderAccessor, bool $isCommand, bool $isFactoryMethod, ?string $eventSourcedFactoryMethod, ?array $versionMapping)
+    public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, PropertyReaderAccessor $propertyReaderAccessor, PropertyEditorAccessor $propertyEditorAccessor, bool $isCommand, bool $isFactoryMethod, ?string $eventSourcedFactoryMethod, ?array $aggregateVersionMapping, bool $isAggregateVersionAutomaticallyIncreased)
     {
         Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
         Assert::allInstanceOfType($aroundMethodInterceptors, AroundInterceptorReference::class);
@@ -57,8 +63,10 @@ class CallAggregateService
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
         $this->isFactoryMethod = $isFactoryMethod;
         $this->aggregateInterface = $interfaceToCall;
-        $this->aggregateVersionMapping = $versionMapping;
+        $this->aggregateVersionMapping = $aggregateVersionMapping;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
+        $this->propertyEditorAccessor = $propertyEditorAccessor;
+        $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
     }
 
     public function call(Message $message): ?Message
@@ -69,26 +77,24 @@ class CallAggregateService
             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
             : null;
 
-
-        if (!$message->getHeaders()->containsKey(AggregateMessage::TARGET_VERSION)) {
-            $versionBeforeHandling = null;
-            if ($this->aggregateVersionMapping) {
+        $versionBeforeHandling = $message->getHeaders()->containsKey(AggregateMessage::TARGET_VERSION)
+            ? $message->getHeaders()->get(AggregateMessage::TARGET_VERSION)
+            : null;
+        if (is_null($versionBeforeHandling) && $this->aggregateVersionMapping) {
+            if ($this->isFactoryMethod) {
                 $versionBeforeHandling = 0;
-
-                if ($aggregate) {
-                    $aggregatePropertyName = reset($this->aggregateVersionMapping);
-                    $versionBeforeHandling = $this->propertyReaderAccessor->getPropertyValue(
-                        PropertyPath::createWith($aggregatePropertyName),
-                        $aggregate
-                    );
-                    $versionBeforeHandling = is_null($versionBeforeHandling) ? 0 : $versionBeforeHandling + 1;
-                }
+            }else {
+                $aggregatePropertyName = reset($this->aggregateVersionMapping);
+                $versionBeforeHandling = $this->propertyReaderAccessor->getPropertyValue(
+                    PropertyPath::createWith($aggregatePropertyName),
+                    $aggregate
+                );
+                $versionBeforeHandling = is_null($versionBeforeHandling) ? 0 : $versionBeforeHandling;
             }
 
             $resultMessage = $resultMessage
                 ->setHeader(AggregateMessage::TARGET_VERSION, $versionBeforeHandling);
         }
-
 
         $methodInvoker = MethodInvoker::createWith(
             $this->aggregateInterface,
@@ -104,15 +110,12 @@ class CallAggregateService
 
         if ($this->isFactoryMethod) {
             if ($this->isEventSourced) {
-                $resultMessage = $resultMessage
-                    ->setHeader(
-                        AggregateMessage::AGGREGATE_OBJECT,
-                        call_user_func([$this->aggregateInterface->getInterfaceType()->toString(), $this->eventSourcedFactoryMethod], $result)
-                    );
+                $aggregate = call_user_func([$this->aggregateInterface->getInterfaceType()->toString(), $this->eventSourcedFactoryMethod], $result);
             }else {
-                $resultMessage = $resultMessage
-                    ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $result);
+                $aggregate = $result;
             }
+
+            $resultMessage = $resultMessage->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate);
         }
 
         if (!is_null($result)) {

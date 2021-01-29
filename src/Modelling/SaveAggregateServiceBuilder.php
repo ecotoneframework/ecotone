@@ -22,7 +22,7 @@ use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Annotation\AggregateEvents;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
-use Ecotone\Modelling\Annotation\Version;
+use Ecotone\Modelling\Annotation\AggregateVersion;
 use Ecotone\Modelling\Config\BusModule;
 
 /**
@@ -46,6 +46,8 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      */
     private array $aggregateRepositoryReferenceNames = [];
     private array $aggregateIdentifierMapping;
+    private ?array $aggregateVersionMapping;
+    private bool $isAggregateVersionAutomaticallyIncreased = true;
     private ?string $aggregateMethodWithEvents;
 
     private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName)
@@ -120,7 +122,9 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->getPropertyReaderAccessor(),
                 $eventBus,
                 $this->aggregateMethodWithEvents,
-                $this->aggregateIdentifierMapping
+                $this->aggregateIdentifierMapping,
+                $this->aggregateVersionMapping,
+                $this->isAggregateVersionAutomaticallyIncreased
             ),
             "save"
         )
@@ -176,6 +180,22 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $aggregateIdentifiers[$property->getName()] = null;
             }
         }
+
+        $aggregateVersionPropertyName = null;
+        $versionAnnotation             = TypeDescriptor::create(AggregateVersion::class);
+        foreach ($aggregateClassDefinition->getProperties() as $property) {
+            if ($property->hasAnnotation($versionAnnotation)) {
+                $aggregateVersionPropertyName = $property->getName();
+                /** @var AggregateVersion $annotation */
+                $annotation = $property->getAnnotation($versionAnnotation);
+                $this->isAggregateVersionAutomaticallyIncreased = $annotation->isAutoIncreased();
+            }
+        }
+        $aggregateVersionMapping = null;
+        if (!$aggregateVersionMapping && $aggregateVersionPropertyName) {
+            $aggregateVersionMapping[$aggregateVersionPropertyName] = $aggregateVersionPropertyName;
+        }
+        $this->aggregateVersionMapping             = $aggregateVersionMapping;
 
         $this->interfaceToCall            = $interfaceToCall;
         $this->aggregateMethodWithEvents  = $aggregateMethodWithEvents;

@@ -35,8 +35,10 @@ class SaveAggregateService
     private PropertyEditorAccessor $propertyEditorAccessor;
     private array $aggregateIdentifierMapping;
     private InterfaceToCall $aggregateInterface;
+    private ?array $aggregateVersionMapping;
+    private bool $isAggregateVersionAutomaticallyIncreased;
 
-    public function __construct(InterfaceToCall $aggregateInterface, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $eventMethod, array $aggregateIdentifierMapping)
+    public function __construct(InterfaceToCall $aggregateInterface, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $eventMethod, array $aggregateIdentifierMapping, ?array $aggregateVersionMapping, bool $isAggregateVersionAutomaticallyIncreased)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
@@ -45,14 +47,17 @@ class SaveAggregateService
         $this->eventRetrievingMethod = $eventMethod;
         $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
         $this->aggregateInterface = $aggregateInterface;
+        $this->aggregateVersionMapping = $aggregateVersionMapping;
+        $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
     }
 
     public function save(Message $message, array $metadata) : \Ecotone\Messaging\Message
     {
         $aggregate = $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
+        $isEventSourced = $this->aggregateRepository instanceof EventSourcedRepository;
         $events = [];
 
-        if ($this->aggregateRepository instanceof EventSourcedRepository) {
+        if ($isEventSourced) {
             $events = $message->getPayload();
             Assert::isIterable($events, "Return value Event Sourced Aggregate {$this->aggregateInterface} must return iterable events");
         }elseif ($this->eventRetrievingMethod) {
@@ -68,6 +73,19 @@ class SaveAggregateService
         $versionBeforeHandling = $message->getHeaders()->containsKey(AggregateMessage::TARGET_VERSION)
             ? $message->getHeaders()->get(AggregateMessage::TARGET_VERSION)
             : null;
+
+        if ($this->aggregateVersionMapping && $this->isAggregateVersionAutomaticallyIncreased && !$isEventSourced) {
+            $aggregatePropertyName = reset($this->aggregateVersionMapping);
+// @TODO prepare test for calling when no automatic increased is enabled
+
+            $this->propertyEditorAccessor->enrichDataWith(
+                PropertyPath::createWith($aggregatePropertyName),
+                $aggregate,
+                $versionBeforeHandling + 1,
+                $message,
+                null
+            );
+        }
 
         $aggregateIds = [];
         foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
@@ -101,7 +119,7 @@ class SaveAggregateService
         unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_OBJECT]);
         unset($metadata[MessageHeaders::REPLY_CHANNEL]);
 
-        if ($this->aggregateRepository instanceof EventSourcedRepository) {
+        if ($isEventSourced) {
             $this->aggregateRepository->save($aggregateIds, $this->aggregateInterface->getInterfaceName(), $events, $metadata, $versionBeforeHandling);
         }else {
             $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $versionBeforeHandling);

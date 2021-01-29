@@ -59,7 +59,7 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     /**
      * @inheritDoc
      */
-    public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, ?int $expectedVersion): void
+    public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, ?int $versionBeforeHandling): void
     {
         $key = $this->getKey($identifiers);
 

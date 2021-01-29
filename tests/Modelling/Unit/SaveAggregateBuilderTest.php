@@ -23,6 +23,7 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\MultiplyAmountCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderWithManualVersioning;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\NoIdDefinedAfterCallingFactoryExample;
 
 /**
@@ -67,12 +68,11 @@ class SaveAggregateBuilderTest extends TestCase
         $this->assertEquals($order, $inMemoryStandardRepository->findBy(Order::class, ["orderId" => 1]));
     }
 
-    public function test_calling_save_method_with_next_version()
+    public function test_calling_save_method_with_automatic_increasing_version()
     {
-        $order = Order::createWith(CreateOrderCommand::createWith(1, 1, "Poland"));
+        $commandToRun = CreateOrderCommand::createWith(1, 1, "Poland");
+        $order = Order::createWith($commandToRun);
         $order->increaseAggregateVersion();
-
-        $commandToRun = MultiplyAmountCommand::create(1, 1, 10);
 
         $orderRepository = $this->createMock(StandardRepository::class);
         $orderRepository->method("canHandle")
@@ -82,11 +82,14 @@ class SaveAggregateBuilderTest extends TestCase
             ->with(Order::class, ["orderId" => 1])
             ->willReturn($order);
 
-        $order->multiplyOrder($commandToRun);
+        $newVersionOrder = clone $order;
+        $newVersionOrder->increaseAggregateVersion();;
+        $newVersionOrder->getRecordedEvents();
+
         $orderRepository->expects($this->once())
             ->method("save")
             ->with(
-                ["orderId" => 1], $order, $this->callback(
+                ["orderId" => 1], $newVersionOrder, $this->callback(
                 function () {
                     return true;
                 }
@@ -95,6 +98,63 @@ class SaveAggregateBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
+            "multiplyOrder"
+        )
+            ->withAggregateRepositoryFactories(["orderRepository"])
+            ->withInputChannelName("inputChannel");
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
+                ]
+            ),
+            InMemoryReferenceSearchService::createWith(
+                [
+                    "orderRepository" => $orderRepository,
+                    ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                ]
+            )
+        );
+
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload($commandToRun)
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $order)
+                ->setHeader(AggregateMessage::TARGET_VERSION, 1)
+                ->setReplyChannel(NullableMessageChannel::create())
+                ->build()
+        );
+    }
+
+    public function test_calling_save_method_with_manual_increasing_version()
+    {
+        $commandToRun = CreateOrderCommand::createWith(1, 1, "Poland");
+        $order = OrderWithManualVersioning::createWith($commandToRun);
+        $order->increaseAggregateVersion();
+
+        $orderRepository = $this->createMock(StandardRepository::class);
+        $orderRepository->method("canHandle")
+            ->with(OrderWithManualVersioning::class)
+            ->willReturn(true);
+        $orderRepository->method("findBy")
+            ->with(OrderWithManualVersioning::class, ["orderId" => 1])
+            ->willReturn($order);
+
+        $newVersionOrder = clone $order;
+        $newVersionOrder->getRecordedEvents();
+
+        $orderRepository->expects($this->once())
+            ->method("save")
+            ->with(
+                ["orderId" => 1], $newVersionOrder, $this->callback(
+                function () {
+                    return true;
+                }
+            ), 1
+            );
+
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(OrderWithManualVersioning::class)),
             "multiplyOrder"
         )
             ->withAggregateRepositoryFactories(["orderRepository"])

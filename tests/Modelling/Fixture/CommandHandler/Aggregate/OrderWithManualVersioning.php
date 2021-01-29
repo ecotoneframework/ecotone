@@ -10,8 +10,7 @@ use Ecotone\Modelling\Annotation\QueryHandler;
 use Ecotone\Modelling\Annotation\AggregateVersion;
 use Ecotone\Modelling\WithAggregateEvents;
 
-#[Aggregate]
-class Order implements VersionAggregate
+class OrderWithManualVersioning implements VersionAggregate
 {
     use WithAggregateEvents;
 
@@ -25,7 +24,7 @@ class Order implements VersionAggregate
      * @var string
      */
     private $shippingAddress;
-    #[AggregateVersion]
+    #[AggregateVersion(false)]
     private $version;
     /**
      * @var string|null
@@ -46,13 +45,11 @@ class Order implements VersionAggregate
         $this->recordThat(new Notification());
     }
 
-    #[CommandHandler]
     public static function createWith(CreateOrderCommand $command) : self
     {
         return new self($command);
     }
 
-    #[CommandHandler]
     public function increaseAmount(CreateOrderCommand $command) : void
     {
         $this->amount += $command->getAmount();
@@ -63,7 +60,6 @@ class Order implements VersionAggregate
         $this->amount += $command->getAmount();
     }
 
-    #[CommandHandler]
     public function changeShippingAddress(ChangeShippingAddressCommand $command) : void
     {
         $this->shippingAddress = $command->getShippingAddress();
@@ -72,7 +68,6 @@ class Order implements VersionAggregate
     }
 
 
-    #[CommandHandler]
     public function multiplyOrder(MultiplyAmountCommand $command) : void
     {
         $this->amount *= $command->getAmount();
@@ -111,7 +106,6 @@ class Order implements VersionAggregate
         return $this->amount;
     }
 
-    #[QueryHandler("get_order_amount_channel")]
     public function getAmountWithQuery(GetOrderAmountQuery $query) : int
     {
         return $this->amount;
@@ -122,14 +116,11 @@ class Order implements VersionAggregate
         return $this->version == $version;
     }
 
-    #[QueryHandler(endpointId: "getShipping")]
     public function getShippingAddress(GetShippingAddressQuery $query): string
     {
         return $this->shippingAddress;
     }
 
-    #[QueryHandler("getVersion")]
-    #[IgnorePayload]
     public function getVersion(): ?int
     {
         return $this->version;

@@ -76,7 +76,6 @@ class SaveAggregateService
 
         if ($this->aggregateVersionMapping && $this->isAggregateVersionAutomaticallyIncreased && !$isEventSourced) {
             $aggregatePropertyName = reset($this->aggregateVersionMapping);
-// @TODO prepare test for calling when no automatic increased is enabled
 
             $this->propertyEditorAccessor->enrichDataWith(
                 PropertyPath::createWith($aggregatePropertyName),

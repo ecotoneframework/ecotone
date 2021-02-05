@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
 use DateTimeInterface;
-use Ecotone\Messaging\Annotation\Asynchronous;
-use Ecotone\Messaging\Annotation\ClassReference;
-use Ecotone\Messaging\Annotation\Converter;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\ClassReference;
+use Ecotone\Messaging\Attribute\Converter;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\TypeDefinitionException;

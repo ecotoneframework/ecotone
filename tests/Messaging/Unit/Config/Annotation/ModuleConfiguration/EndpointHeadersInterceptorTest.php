@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\Messaging\Annotation\Endpoint\AddHeader;
-use Ecotone\Messaging\Annotation\Endpoint\Delayed;
-use Ecotone\Messaging\Annotation\Endpoint\Priority;
-use Ecotone\Messaging\Annotation\Endpoint\ExpireAfter;
-use Ecotone\Messaging\Annotation\Endpoint\RemoveHeader;
+use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
+use Ecotone\Messaging\Attribute\Endpoint\Delayed;
+use Ecotone\Messaging\Attribute\Endpoint\Priority;
+use Ecotone\Messaging\Attribute\Endpoint\ExpireAfter;
+use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders\EndpointHeadersInterceptor;
 use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;

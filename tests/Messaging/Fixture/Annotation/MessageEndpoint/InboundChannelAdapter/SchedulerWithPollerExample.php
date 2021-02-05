@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter;
 
-use Ecotone\Messaging\Annotation\Poller;
-use Ecotone\Messaging\Annotation\Scheduled;
+use Ecotone\Messaging\Attribute\Poller;
+use Ecotone\Messaging\Attribute\Scheduled;
 
 class SchedulerWithPollerExample
 {

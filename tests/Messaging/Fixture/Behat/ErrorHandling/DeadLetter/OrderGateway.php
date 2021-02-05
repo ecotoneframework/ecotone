@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter;
 
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\MessageGateway;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
+use Ecotone\Messaging\Attribute\MessageGateway;
 
 interface OrderGateway
 {

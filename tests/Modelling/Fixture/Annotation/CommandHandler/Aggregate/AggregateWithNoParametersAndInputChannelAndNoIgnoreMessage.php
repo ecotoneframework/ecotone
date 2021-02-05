@@ -1,8 +1,8 @@
 <?php
 
 namespace Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate;
-use Ecotone\Messaging\Annotation\MessageToParameter\MessageToPayloadParameterAnnotation;
-use Ecotone\Messaging\Annotation\Parameter\Reference;
+use Ecotone\Messaging\Attribute\MessageToParameter\MessageToPayloadParameterAnnotation;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;

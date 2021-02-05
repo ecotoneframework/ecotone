@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
-use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
-use Ecotone\Messaging\Annotation\ClassReference;
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Messaging\Attribute\ClassReference;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Ecotone\Messaging\Annotation\Interceptor\Around;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;

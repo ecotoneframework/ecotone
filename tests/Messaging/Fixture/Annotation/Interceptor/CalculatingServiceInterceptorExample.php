@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
 
-use Ecotone\Messaging\Annotation\ClassReference;
-use Ecotone\Messaging\Annotation\Interceptor\Around;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
-use Ecotone\Messaging\Annotation\Parameter\Reference;
+use Ecotone\Messaging\Attribute\ClassReference;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 #[ClassReference("calculatingService")]

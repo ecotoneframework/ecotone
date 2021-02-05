@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
 
-use Ecotone\Messaging\Annotation\ServiceContext;
+use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 

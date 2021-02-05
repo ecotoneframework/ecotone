@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
 
-use Ecotone\Messaging\Annotation\Parameter\Headers;
-use Ecotone\Messaging\Annotation\Parameter\Reference;
+use Ecotone\Messaging\Attribute\Parameter\Headers;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;

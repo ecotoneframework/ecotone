@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
-use Ecotone\Messaging\Annotation\IgnoreDocblockTypeHint;
+use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Permission as AdminPermission;
 

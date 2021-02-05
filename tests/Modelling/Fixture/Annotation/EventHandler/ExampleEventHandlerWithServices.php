@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Annotation\EventHandler;
 
-use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Annotation\EventHandler;
 
 class ExampleEventHandlerWithServices

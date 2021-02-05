@@ -2,13 +2,13 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
 
-use Ecotone\Messaging\Annotation\ClassReference;
-use Ecotone\Messaging\Annotation\Interceptor\After;
-use Ecotone\Messaging\Annotation\Interceptor\Before;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
-use Ecotone\Messaging\Annotation\Interceptor\ServiceActivatorInterceptor;
-use Ecotone\Messaging\Annotation\Parameter\Header;
-use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Attribute\ClassReference;
+use Ecotone\Messaging\Attribute\Interceptor\After;
+use Ecotone\Messaging\Attribute\Interceptor\Before;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\Interceptor\ServiceActivatorInterceptor;
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Attribute\Parameter\Payload;
 
 #[ClassReference("someMethodInterceptor")]
 class ServiceActivatorInterceptorExample

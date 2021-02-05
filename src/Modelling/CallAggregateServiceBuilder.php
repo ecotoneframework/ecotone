@@ -91,7 +91,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
             /** @var EventSourcedAggregate $annotation */
             $annotation = $interfaceToCall->getClassAnnotation($eventSourcedAggregateAnnotation);
             $hasInternalEventRecorder = $annotation->hasInternalEventRecorder();
-            
+
             if ($hasInternalEventRecorder) {
                 Assert::isTrue($aggregateMethodWithEvents, "{$interfaceToCall} has defined to use internal event recorder. Method with attribute " . AggregateEvents::class . " must be defined.");
             }else {

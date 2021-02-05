@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter;
 
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Message;
 
 class ErrorReceiver

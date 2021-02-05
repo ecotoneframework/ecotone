@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Doctrine\Common\Annotations\AnnotationException;
-use Ecotone\Messaging\Annotation\ClassReference;
+use Ecotone\Messaging\Attribute\ClassReference;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;

@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
-use Ecotone\Messaging\Annotation\Interceptor\Around;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Message;
 
 class CallWithPassThroughInterceptorExample extends BaseInterceptorExample

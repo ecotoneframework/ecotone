@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod;
 
-use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;

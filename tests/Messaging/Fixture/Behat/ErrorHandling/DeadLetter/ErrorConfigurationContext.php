@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter;
 
-use Ecotone\Messaging\Annotation\ServiceContext;
+use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;

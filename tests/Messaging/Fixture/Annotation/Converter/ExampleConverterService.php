@@ -2,10 +2,10 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Converter;
 
-use Ecotone\Messaging\Annotation\ClassReference;
-use Ecotone\Messaging\Annotation\Converter;
-use Ecotone\Messaging\Annotation\ConverterClass;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Attribute\ClassReference;
+use Ecotone\Messaging\Attribute\Converter;
+use Ecotone\Messaging\Attribute\ConverterClass;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
 
 #[ClassReference("exampleConverterService")]
 class ExampleConverterService

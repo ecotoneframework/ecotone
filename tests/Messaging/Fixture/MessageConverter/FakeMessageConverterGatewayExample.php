@@ -2,10 +2,10 @@
 
 namespace Test\Ecotone\Messaging\Fixture\MessageConverter;
 
-use Ecotone\Messaging\Annotation\MessageGateway;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\Parameter\Header;
-use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Attribute\MessageGateway;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Attribute\Parameter\Payload;
 
 interface FakeMessageConverterGatewayExample
 {

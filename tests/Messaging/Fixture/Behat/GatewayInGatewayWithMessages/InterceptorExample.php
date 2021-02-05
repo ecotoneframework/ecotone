@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
 
-use Ecotone\Messaging\Annotation\Interceptor\After;
-use Ecotone\Messaging\Annotation\Interceptor\Around;
-use Ecotone\Messaging\Annotation\Interceptor\Before;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\Interceptor\After;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Attribute\Interceptor\Before;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;

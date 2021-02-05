@@ -4,12 +4,12 @@
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Annotation\Endpoint\AddHeader;
-use Ecotone\Messaging\Annotation\Endpoint\Delayed;
-use Ecotone\Messaging\Annotation\Endpoint\Priority;
-use Ecotone\Messaging\Annotation\Endpoint\ExpireAfter;
-use Ecotone\Messaging\Annotation\Endpoint\RemoveHeader;
-use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
+use Ecotone\Messaging\Attribute\Endpoint\Delayed;
+use Ecotone\Messaging\Attribute\Endpoint\Priority;
+use Ecotone\Messaging\Attribute\Endpoint\ExpireAfter;
+use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;

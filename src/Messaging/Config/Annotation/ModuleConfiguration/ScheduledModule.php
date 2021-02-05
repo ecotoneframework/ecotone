@@ -6,8 +6,8 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
-use Ecotone\Messaging\Annotation\ModuleAnnotation;
-use Ecotone\Messaging\Annotation\Scheduled;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\Scheduled;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;

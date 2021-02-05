@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 
-use Ecotone\Messaging\Annotation\Parameter\Headers;
+use Ecotone\Messaging\Attribute\Parameter\Headers;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;

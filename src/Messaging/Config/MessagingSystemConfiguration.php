@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinderFactory;
-use Ecotone\Messaging\Annotation\AsynchronousRunningEndpoint;
-use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Messaging\Attribute\WithRequiredReferenceNameList;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;

@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
 
-use Ecotone\Messaging\Annotation\Asynchronous;
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;

@@ -3,9 +3,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Async;
 
-use Ecotone\Messaging\Annotation\Asynchronous;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 
 #[Asynchronous(channelName: "asyncChannel2")]
 class AsyncClassExample

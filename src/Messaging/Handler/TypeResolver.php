@@ -5,7 +5,7 @@ namespace Ecotone\Messaging\Handler;
 use Doctrine\Common\Annotations\Annotation;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Annotation\IgnoreDocblockTypeHint;
+use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 

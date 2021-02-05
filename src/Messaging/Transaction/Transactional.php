@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Transaction;
 
-use Ecotone\Messaging\Annotation\WithRequiredReferenceNameList;
+use Ecotone\Messaging\Attribute\WithRequiredReferenceNameList;
 
 #[\Attribute]
 class Transactional implements WithRequiredReferenceNameList

@@ -3,8 +3,8 @@
 namespace Ecotone\Modelling\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Target;
-use Ecotone\Messaging\Annotation\EndpointAnnotation;
-use Ecotone\Messaging\Annotation\IdentifiedAnnotation;
+use Ecotone\Messaging\Attribute\EndpointAnnotation;
+use Ecotone\Messaging\Attribute\IdentifiedAnnotation;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ramsey\Uuid\Uuid;
 

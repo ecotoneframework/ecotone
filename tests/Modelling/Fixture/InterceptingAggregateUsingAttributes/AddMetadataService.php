@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 
-use Ecotone\Messaging\Annotation\Interceptor\Around;
-use Ecotone\Messaging\Annotation\Interceptor\Before;
-use Ecotone\Messaging\Annotation\Parameter\Headers;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Attribute\Interceptor\Before;
+use Ecotone\Messaging\Attribute\Parameter\Headers;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
 class AddMetadataService

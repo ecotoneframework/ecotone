@@ -3,8 +3,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin;
 
-use Ecotone\Messaging\Annotation\Interceptor\After;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\Interceptor\After;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 
 class AddFranchiseMargin
 {

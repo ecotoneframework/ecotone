@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Config\Annotation;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Annotation\ClassReference;
+use Ecotone\Messaging\Attribute\ClassReference;
 
 class AnnotatedDefinitionReference
 {

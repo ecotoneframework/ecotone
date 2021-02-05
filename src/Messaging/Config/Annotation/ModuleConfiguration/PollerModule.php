@@ -4,10 +4,10 @@
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Annotation\ChannelAdapter;
-use Ecotone\Messaging\Annotation\EndpointAnnotation;
-use Ecotone\Messaging\Annotation\ModuleAnnotation;
-use Ecotone\Messaging\Annotation\Poller;
+use Ecotone\Messaging\Attribute\ChannelAdapter;
+use Ecotone\Messaging\Attribute\EndpointAnnotation;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\Poller;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;

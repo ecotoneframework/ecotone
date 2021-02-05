@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId;
 
-use Ecotone\Messaging\Annotation\Interceptor\Before;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\Interceptor\Before;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 
 class AddUserIdService
 {

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithLogger;
 
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogError;

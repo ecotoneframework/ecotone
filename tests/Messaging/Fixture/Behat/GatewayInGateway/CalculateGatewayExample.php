@@ -3,8 +3,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway;
 
-use Ecotone\Messaging\Annotation\MessageGateway;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Attribute\MessageGateway;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
 
 interface CalculateGatewayExample
 {

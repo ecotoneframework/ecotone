@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Presend;
 
-use Ecotone\Messaging\Annotation\Asynchronous;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Annotation\CommandHandler;
 
 class Shop

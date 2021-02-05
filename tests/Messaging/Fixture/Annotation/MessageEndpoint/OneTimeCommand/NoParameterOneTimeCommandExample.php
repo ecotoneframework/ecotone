@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand;
 
-use Ecotone\Messaging\Annotation\ConsoleCommand;
+use Ecotone\Messaging\Attribute\ConsoleCommand;
 
 class NoParameterOneTimeCommandExample
 {

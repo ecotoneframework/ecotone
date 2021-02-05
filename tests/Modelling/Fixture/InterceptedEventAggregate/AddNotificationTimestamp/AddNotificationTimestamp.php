@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp;
 
-use Ecotone\Messaging\Annotation\Interceptor\After;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Attribute\Interceptor\After;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 

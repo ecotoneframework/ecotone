@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Presend;
 
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
-use Ecotone\Messaging\Annotation\Interceptor\Presend;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\Interceptor\Presend;
 
 class MultiplyCoins
 {

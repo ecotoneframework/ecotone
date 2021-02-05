@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Incorrect\TestingNamespace\Wrong;
 
-use Ecotone\Messaging\Annotation\ServiceContext;
+use Ecotone\Messaging\Attribute\ServiceContext;
 
 class ClassWithIncorrectNamespaceAndClassName
 {

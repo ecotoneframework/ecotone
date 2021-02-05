@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Order;
 
-use Ecotone\Messaging\Annotation\Asynchronous;
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
 use Ecotone\Modelling\Annotation\QueryHandler;

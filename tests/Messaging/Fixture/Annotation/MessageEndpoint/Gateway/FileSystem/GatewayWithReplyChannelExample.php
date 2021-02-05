@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\FileSystem;
 
-use Ecotone\Messaging\Annotation\MessageGateway;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\Parameter\Payload;
+use Ecotone\Messaging\Attribute\MessageGateway;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
+use Ecotone\Messaging\Attribute\Parameter\Payload;
 
 interface GatewayWithReplyChannelExample
 {

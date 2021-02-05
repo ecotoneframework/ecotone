@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Annotation\ClassReference;
-use Ecotone\Messaging\Annotation\Converter;
-use Ecotone\Messaging\Annotation\MediaTypeConverter;
-use Ecotone\Messaging\Annotation\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\ClassReference;
+use Ecotone\Messaging\Attribute\Converter;
+use Ecotone\Messaging\Attribute\MediaTypeConverter;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;

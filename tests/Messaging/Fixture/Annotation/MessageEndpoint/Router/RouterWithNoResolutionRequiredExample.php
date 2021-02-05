@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Router;
 
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\Parameter\Payload;
-use Ecotone\Messaging\Annotation\Router;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
+use Ecotone\Messaging\Attribute\Parameter\Payload;
+use Ecotone\Messaging\Attribute\Router;
 
 class RouterWithNoResolutionRequiredExample
 {

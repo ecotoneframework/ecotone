@@ -4,7 +4,7 @@
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 
-use Ecotone\Messaging\Annotation\Parameter\ConfigurationVariable;
+use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;

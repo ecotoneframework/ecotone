@@ -2,7 +2,7 @@
 
 namespace FixtureAutoloadTest;
 
-use Ecotone\Messaging\Annotation\ServiceContext;
+use Ecotone\Messaging\Attribute\ServiceContext;
 
 class ApplicationContextExamplePSR0
 {

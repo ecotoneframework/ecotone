@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\Messaging\Annotation\Parameter\ConfigurationVariable;
-use Ecotone\Messaging\Annotation\Parameter\Header;
-use Ecotone\Messaging\Annotation\Parameter\Headers;
-use Ecotone\Messaging\Annotation\Parameter\Payload;
-use Ecotone\Messaging\Annotation\Parameter\Reference;
+use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Attribute\Parameter\Headers;
+use Ecotone\Messaging\Attribute\Parameter\Payload;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;

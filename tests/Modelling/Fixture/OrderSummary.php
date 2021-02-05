@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture;
 
-use Ecotone\Messaging\Annotation\MessageEndpoint;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Annotation\IgnorePayload;
 use Ecotone\Modelling\Annotation\QueryHandler;
 

@@ -3,10 +3,10 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId;
 
-use Ecotone\Messaging\Annotation\Interceptor\Before;
-use Ecotone\Messaging\Annotation\Interceptor\MethodInterceptor;
-use Ecotone\Messaging\Annotation\MessageEndpoint;
-use Ecotone\Messaging\Annotation\ServiceActivator;
+use Ecotone\Messaging\Attribute\Interceptor\Before;
+use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
+use Ecotone\Messaging\Attribute\MessageEndpoint;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 

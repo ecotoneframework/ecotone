@@ -3,7 +3,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
-use Ecotone\Messaging\Annotation\IgnoreDocblockTypeHint;
+use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
 
 #[IgnoreDocblockTypeHint]
 interface IgnoreDocblockClassLevel

@@ -3,9 +3,9 @@
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
-use Ecotone\Messaging\Annotation\ModuleAnnotation;
-use Ecotone\Messaging\Annotation\Splitter;
-use Ecotone\Messaging\Annotation\Transformer;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\Splitter;
+use Ecotone\Messaging\Attribute\Transformer;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;

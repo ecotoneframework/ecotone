@@ -6,7 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Ecotone\Messaging\Config\Annotation\AutoloadFileNamespaceParser;
 use Ecotone\Messaging\Config\Annotation\FileSystemAnnotationRegistrationService;
-use Ecotone\Modelling\Annotation\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ClassPropertyDefinition;

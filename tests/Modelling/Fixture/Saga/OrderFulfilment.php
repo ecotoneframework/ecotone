@@ -2,10 +2,10 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Saga;
 
-use Ecotone\Modelling\Annotation\Aggregate;
-use Ecotone\Modelling\Annotation\AggregateIdentifier;
-use Ecotone\Modelling\Annotation\CommandHandler;
-use Ecotone\Modelling\Annotation\EventHandler;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
 use Test\Ecotone\Modelling\Fixture\Saga\OrderWasPlacedEvent;
 use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 

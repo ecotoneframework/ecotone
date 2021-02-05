@@ -4,7 +4,7 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregate;
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Attribute\Interceptor\Before;
-use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
 
 class AddCurrentUserId
 {

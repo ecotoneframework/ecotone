@@ -4,7 +4,7 @@
 namespace Test\Ecotone\Modelling\Fixture\Annotation\EventHandler;
 
 
-use Ecotone\Modelling\Annotation\EventHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
 
 class EventHandlerForUnionType
 {

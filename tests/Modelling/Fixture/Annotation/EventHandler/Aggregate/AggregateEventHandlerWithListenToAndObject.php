@@ -3,8 +3,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate;
 
-use Ecotone\Modelling\Annotation\Aggregate;
-use Ecotone\Modelling\Annotation\EventHandler;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\EventHandler;
 use stdClass;
 
 #[Aggregate]

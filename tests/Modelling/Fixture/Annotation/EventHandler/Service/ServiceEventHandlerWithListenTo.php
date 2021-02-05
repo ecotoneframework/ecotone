@@ -4,9 +4,9 @@
 namespace Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
-use Ecotone\Modelling\Annotation\Aggregate;
-use Ecotone\Modelling\Annotation\EventHandler;
-use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 class ServiceEventHandlerWithListenTo
 {

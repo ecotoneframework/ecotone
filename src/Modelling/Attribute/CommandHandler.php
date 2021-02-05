@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Modelling\Annotation;
+namespace Ecotone\Modelling\Attribute;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 use Ecotone\Messaging\Attribute\InputOutputEndpointAnnotation;

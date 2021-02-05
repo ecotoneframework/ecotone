@@ -3,7 +3,7 @@
 namespace Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
-use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
 
 class AggregateCommandHandlerWithInputChannelName
 {

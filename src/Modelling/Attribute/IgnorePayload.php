@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Modelling\Annotation;
+namespace Ecotone\Modelling\Attribute;
 
 #[\Attribute(\Attribute::TARGET_METHOD)]
 class IgnorePayload

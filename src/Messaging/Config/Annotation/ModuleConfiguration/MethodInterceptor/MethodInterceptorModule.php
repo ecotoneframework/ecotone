@@ -23,7 +23,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Modelling\Annotation\IgnorePayload;
+use Ecotone\Modelling\Attribute\IgnorePayload;
 
 #[ModuleAnnotation]
 class MethodInterceptorModule extends NoExternalConfigurationModule implements AnnotationModule

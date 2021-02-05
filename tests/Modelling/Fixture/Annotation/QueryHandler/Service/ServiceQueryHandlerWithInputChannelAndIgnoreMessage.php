@@ -4,8 +4,8 @@
 namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
-use Ecotone\Modelling\Annotation\IgnorePayload;
-use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\Attribute\IgnorePayload;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 class ServiceQueryHandlerWithInputChannelAndIgnoreMessage
 {

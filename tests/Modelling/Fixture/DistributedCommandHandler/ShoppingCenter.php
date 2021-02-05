@@ -4,9 +4,9 @@
 namespace Test\Ecotone\Modelling\Fixture\DistributedCommandHandler;
 
 
-use Ecotone\Modelling\Annotation\CommandHandler;
-use Ecotone\Modelling\Annotation\Distributed;
-use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\Distributed;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 class ShoppingCenter
 {

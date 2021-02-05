@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Test\Ecotone\Modelling\Fixture\Renter;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
-use Ecotone\Modelling\Annotation\EventHandler;
-use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 class RentCalendar
 {

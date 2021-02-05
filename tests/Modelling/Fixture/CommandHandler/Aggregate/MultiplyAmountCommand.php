@@ -1,8 +1,8 @@
 <?php
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
-use Ecotone\Modelling\Annotation\TargetAggregateVersion;
-use Ecotone\Modelling\Annotation\TargetAggregateIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateVersion;
+use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Class MultiplyAmountCommand

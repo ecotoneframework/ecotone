@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Modelling\Annotation;
+namespace Ecotone\Modelling\Attribute;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class EventSourcedAggregate extends Aggregate

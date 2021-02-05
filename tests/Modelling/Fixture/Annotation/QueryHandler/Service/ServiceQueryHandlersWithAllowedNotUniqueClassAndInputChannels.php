@@ -4,9 +4,9 @@
 namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
-use Ecotone\Modelling\Annotation\CommandHandler;
-use Ecotone\Modelling\Annotation\NotUniqueHandler;
-use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\NotUniqueHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 class ServiceQueryHandlersWithAllowedNotUniqueClassAndInputChannels
 {

@@ -19,10 +19,10 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Annotation\AggregateEvents;
-use Ecotone\Modelling\Annotation\AggregateFactory;
-use Ecotone\Modelling\Annotation\AggregateVersion;
-use Ecotone\Modelling\Annotation\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\AggregateEvents;
+use Ecotone\Modelling\Attribute\AggregateFactory;
+use Ecotone\Modelling\Attribute\AggregateVersion;
+use Ecotone\Modelling\Attribute\EventSourcedAggregate;
 
 class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {

@@ -2,7 +2,7 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Modelling\Annotation\AggregateVersion;
+use Ecotone\Modelling\Attribute\AggregateVersion;
 
 trait WithVersioning
 {

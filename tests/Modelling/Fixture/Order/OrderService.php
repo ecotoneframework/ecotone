@@ -4,9 +4,9 @@
 namespace Test\Ecotone\Modelling\Fixture\Order;
 
 use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Modelling\Annotation\CommandHandler;
-use Ecotone\Modelling\Annotation\EventHandler;
-use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\EventBus;
 
 #[Asynchronous("orders")]

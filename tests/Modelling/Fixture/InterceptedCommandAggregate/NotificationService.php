@@ -5,8 +5,8 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Modelling\Annotation\EventHandler;
-use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 class NotificationService
 {

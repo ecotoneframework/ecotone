@@ -15,7 +15,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Modelling\Annotation\IgnorePayload;
+use Ecotone\Modelling\Attribute\IgnorePayload;
 
 /**
  * Class BaseAnnotationConfiguration

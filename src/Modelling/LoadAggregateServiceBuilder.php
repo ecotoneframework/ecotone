@@ -16,9 +16,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\Annotation\AggregateEvents;
-use Ecotone\Modelling\Annotation\AggregateFactory;
-use Ecotone\Modelling\Annotation\TargetAggregateVersion;
+use Ecotone\Modelling\Attribute\AggregateEvents;
+use Ecotone\Modelling\Attribute\AggregateFactory;
+use Ecotone\Modelling\Attribute\TargetAggregateVersion;
 
 class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
 {

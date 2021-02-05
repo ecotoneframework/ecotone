@@ -5,7 +5,7 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Presend;
 
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\MessageEndpoint;
-use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
 
 class Shop
 {

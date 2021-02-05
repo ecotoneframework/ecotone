@@ -1,9 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Modelling\Annotation;
+namespace Ecotone\Modelling\Attribute;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class Repository
+class Aggregate
 {
+
 }

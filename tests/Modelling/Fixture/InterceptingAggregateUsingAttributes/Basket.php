@@ -4,10 +4,10 @@
 namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 
 use Ecotone\Messaging\Attribute\Parameter\Headers;
-use Ecotone\Modelling\Annotation\Aggregate;
-use Ecotone\Modelling\Annotation\AggregateIdentifier;
-use Ecotone\Modelling\Annotation\CommandHandler;
-use Ecotone\Modelling\Annotation\QueryHandler;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
 class Basket

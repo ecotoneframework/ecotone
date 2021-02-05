@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
-use Ecotone\Modelling\Annotation\Aggregate;
-use Ecotone\Modelling\Annotation\AggregateIdentifier;
-use Ecotone\Modelling\Annotation\CommandHandler;
-use Ecotone\Modelling\Annotation\IgnorePayload;
-use Ecotone\Modelling\Annotation\QueryHandler;
-use Ecotone\Modelling\Annotation\AggregateVersion;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\IgnorePayload;
+use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\WithAggregateEvents;
 
 #[Aggregate]

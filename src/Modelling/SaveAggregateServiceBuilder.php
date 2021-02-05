@@ -20,9 +20,9 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Annotation\AggregateEvents;
-use Ecotone\Modelling\Annotation\AggregateIdentifier;
-use Ecotone\Modelling\Annotation\AggregateVersion;
+use Ecotone\Modelling\Attribute\AggregateEvents;
+use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Config\BusModule;
 
 /**

@@ -4,8 +4,8 @@
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
-use Ecotone\Modelling\Annotation\CommandHandler;
-use Ecotone\Modelling\Annotation\NotUniqueHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\NotUniqueHandler;
 
 class MultiMethodServiceCommandHandlerExample
 {

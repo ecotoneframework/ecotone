@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Property\Extra;
 
-use Ecotone\Modelling\Annotation\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\AggregateIdentifier;
 
 trait PrivatePropertyTrait
 {

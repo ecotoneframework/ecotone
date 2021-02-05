@@ -3,7 +3,7 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Modelling\Annotation\AggregateEvents;
+use Ecotone\Modelling\Attribute\AggregateEvents;
 
 /**
  * Class WithAggregateEvents

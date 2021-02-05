@@ -7,10 +7,11 @@ use Ecotone\Modelling\Annotation\AggregateFactory;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
 use Ecotone\Modelling\Annotation\EventHandler;
+use Ecotone\Modelling\Annotation\EventSourcedAggregate;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\ValidateExecutor;
 
-#[Aggregate]
+#[EventSourcedAggregate]
 #[ValidateExecutor]
 class Logger
 {

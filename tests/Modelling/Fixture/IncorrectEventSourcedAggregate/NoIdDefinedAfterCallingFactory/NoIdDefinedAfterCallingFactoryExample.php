@@ -8,8 +8,9 @@ use Ecotone\Modelling\Annotation\Aggregate;
 use Ecotone\Modelling\Annotation\AggregateFactory;
 use Ecotone\Modelling\Annotation\AggregateIdentifier;
 use Ecotone\Modelling\Annotation\CommandHandler;
+use Ecotone\Modelling\Annotation\EventSourcedAggregate;
 
-#[Aggregate]
+#[EventSourcedAggregate]
 class NoIdDefinedAfterCallingFactoryExample
 {
     #[AggregateIdentifier]

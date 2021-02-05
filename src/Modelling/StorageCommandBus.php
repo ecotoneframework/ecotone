@@ -18,14 +18,18 @@ class StorageCommandBus implements CommandBus
         return new self();
     }
 
-    public function send(object $command, array $metadata = [])
+    public function send(object $command, array $metadata = []) : mixed
     {
         $this->calls[] = [$command, $metadata];
+
+        return null;
     }
 
-    public function sendWithRouting(string $routingKey, $command, string $commandMediaType = MediaType::APPLICATION_X_PHP, array $metadata = [])
+    public function sendWithRouting(string $routingKey, mixed $command, string $commandMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []) : mixed
     {
         $this->calls[] = [$routingKey, $command, $commandMediaType, $metadata];
+
+        return null;
     }
 
     public function getCalls() : array

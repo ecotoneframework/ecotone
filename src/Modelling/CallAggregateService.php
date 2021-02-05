@@ -48,18 +48,19 @@ class CallAggregateService
     private PropertyEditorAccessor $propertyEditorAccessor;
     private ?array $aggregateVersionMapping;
     private bool $isAggregateVersionAutomaticallyIncreased;
+    private ?string $aggregateMethodWithEvents;
 
-    public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, PropertyReaderAccessor $propertyReaderAccessor, PropertyEditorAccessor $propertyEditorAccessor, bool $isCommand, bool $isFactoryMethod, ?string $eventSourcedFactoryMethod, ?array $aggregateVersionMapping, bool $isAggregateVersionAutomaticallyIncreased)
+    public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, PropertyReaderAccessor $propertyReaderAccessor, PropertyEditorAccessor $propertyEditorAccessor, bool $isCommand, bool $isFactoryMethod, ?string $eventSourcedFactoryMethod, ?array $aggregateVersionMapping, bool $isAggregateVersionAutomaticallyIncreased, ?string $aggregateMethodWithEvents)
     {
         Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
         Assert::allInstanceOfType($aroundMethodInterceptors, AroundInterceptorReference::class);
 
         $this->parameterConverterBuilders = $parameterConverterBuilders;
-        $this->channelResolver            = $channelResolver;
-        $this->referenceSearchService     = $referenceSearchService;
-        $this->aroundMethodInterceptors   = $aroundMethodInterceptors;
-        $this->isCommandHandler           = $isCommand;
-        $this->isEventSourced             = $isEventSourced;
+        $this->channelResolver = $channelResolver;
+        $this->referenceSearchService = $referenceSearchService;
+        $this->aroundMethodInterceptors = $aroundMethodInterceptors;
+        $this->isCommandHandler = $isCommand;
+        $this->isEventSourced = $isEventSourced;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
         $this->isFactoryMethod = $isFactoryMethod;
         $this->aggregateInterface = $interfaceToCall;
@@ -67,6 +68,7 @@ class CallAggregateService
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
         $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
+        $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
     }
 
     public function call(Message $message): ?Message
@@ -83,7 +85,7 @@ class CallAggregateService
         if (is_null($versionBeforeHandling) && $this->aggregateVersionMapping) {
             if ($this->isFactoryMethod) {
                 $versionBeforeHandling = 0;
-            }else {
+            } else {
                 $aggregatePropertyName = reset($this->aggregateVersionMapping);
                 $versionBeforeHandling = $this->propertyReaderAccessor->getPropertyValue(
                     PropertyPath::createWith($aggregatePropertyName),
@@ -106,16 +108,23 @@ class CallAggregateService
             []
         );
 
-        $result        = $methodInvoker->processMessage($message);
+        $result = $methodInvoker->processMessage($message);
 
         if ($this->isFactoryMethod) {
+            if ($this->isEventSourcedWithInteralEventRecorded()) {
+                $result = call_user_func([$result, $this->aggregateMethodWithEvents]);
+            }
+
             if ($this->isEventSourced) {
                 $aggregate = call_user_func([$this->aggregateInterface->getInterfaceType()->toString(), $this->eventSourcedFactoryMethod], $result);
-            }else {
+            } else {
+                Assert::isSubclassOf($result, $this->aggregateInterface->getInterfaceName(), "{$this->aggregateInterface} should return instance aggregate");
                 $aggregate = $result;
             }
 
             $resultMessage = $resultMessage->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate);
+        }elseif ($this->isCommandHandler && $this->isEventSourcedWithInteralEventRecorded()) {
+            $result = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);;
         }
 
         if (!is_null($result)) {
@@ -129,5 +138,13 @@ class CallAggregateService
         }
 
         return null;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isEventSourcedWithInteralEventRecorded(): bool
+    {
+        return $this->isEventSourced && $this->aggregateMethodWithEvents;
     }
 }

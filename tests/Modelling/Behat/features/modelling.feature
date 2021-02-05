@@ -152,3 +152,10 @@ Feature: activating as aggregate order entity
     When I add to basket "cheese"
     And I remove last item from basket
     Then basket should contains "milk"
+
+  Scenario: Handle aggregate with internal event recorder
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder"
+    When I register job with id 1
+    Then job with id of 1 should be "in progress"
+    When I finish job with id 1
+    Then job with id of 1 should be "finished"

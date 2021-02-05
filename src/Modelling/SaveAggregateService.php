@@ -31,20 +31,20 @@ class SaveAggregateService
      * @var NonProxyGateway|EventBus
      */
     private object $eventBus;
-    private ?string $eventRetrievingMethod;
+    private ?string $aggregateMethodWithEvents;
     private PropertyEditorAccessor $propertyEditorAccessor;
     private array $aggregateIdentifierMapping;
     private InterfaceToCall $aggregateInterface;
     private ?array $aggregateVersionMapping;
     private bool $isAggregateVersionAutomaticallyIncreased;
 
-    public function __construct(InterfaceToCall $aggregateInterface, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $eventMethod, array $aggregateIdentifierMapping, ?array $aggregateVersionMapping, bool $isAggregateVersionAutomaticallyIncreased)
+    public function __construct(InterfaceToCall $aggregateInterface, object $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, ?array $aggregateVersionMapping, bool $isAggregateVersionAutomaticallyIncreased)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->eventBus = $eventBus;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
-        $this->eventRetrievingMethod = $eventMethod;
+        $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
         $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
         $this->aggregateInterface = $aggregateInterface;
         $this->aggregateVersionMapping = $aggregateVersionMapping;
@@ -60,8 +60,8 @@ class SaveAggregateService
         if ($isEventSourced) {
             $events = $message->getPayload();
             Assert::isIterable($events, "Return value Event Sourced Aggregate {$this->aggregateInterface} must return iterable events");
-        }elseif ($this->eventRetrievingMethod) {
-            $events = call_user_func([$aggregate, $this->eventRetrievingMethod]);
+        }elseif ($this->aggregateMethodWithEvents) {
+            $events = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);
         }
         foreach ($events as $event) {
             if (!is_object($event)) {

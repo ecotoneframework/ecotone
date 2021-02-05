@@ -2,12 +2,10 @@
 
 namespace Test\Ecotone\Modelling\Behat\Bootstrap;
 
-use Behat\Gherkin\Node\TableNode;
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
+use Behat\Behat\Tester\Exception\PendingException;
+use Behat\Gherkin\Node\TableNode;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\DistributionEntrypoint;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -18,6 +16,8 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
 use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
 use Test\Ecotone\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
+use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\FinishJob;
+use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\StartJob;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PlaceOrder;
 
@@ -382,5 +382,34 @@ class DomainContext extends TestCase implements Context
             [],
             MediaType::APPLICATION_X_PHP_ARRAY
         );
+    }
+
+    /**
+     * @When I register job with id :id
+     */
+    public function iRegisterJobWithId(int $id)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->send(new StartJob($id));
+    }
+
+    /**
+     * @Then job with id of :id should be :status
+     */
+    public function jobWithIdOfShouldBe(int $id, string $status)
+    {
+        $this->assertEquals(
+            $status == "in progress",
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("job.isInProgress", [
+                "id" => $id
+            ])
+        );
+    }
+
+    /**
+     * @When I finish job with id :id
+     */
+    public function iFinishJobWithId(int $id)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->send(new FinishJob($id));
     }
 }

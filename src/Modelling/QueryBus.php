@@ -6,14 +6,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 
 interface QueryBus
 {
-    /**
-     * @return mixed
-     */
-    public function send(object $query, array $metadata = []);
+    public function send(object $query, array $metadata = []) : mixed;
 
-    /**
-     * @return mixed
-     * @var mixed $query
-     */
-    public function sendWithRouting(string $routingKey, $query, string $queryMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []);
+    public function sendWithRouting(string $routingKey, mixed $query, string $queryMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []) : mixed;
 }

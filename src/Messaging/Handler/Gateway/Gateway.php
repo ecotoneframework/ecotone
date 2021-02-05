@@ -3,21 +3,16 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\NonProxyGateway;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Precedence;
-use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MethodArgument;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -25,9 +20,14 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageConverter\MessageConverter;
 use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Precedence;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\QueryBus;
+use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\Job;
 use Throwable;
 
 /**
@@ -38,17 +38,17 @@ use Throwable;
  */
 class Gateway implements NonProxyGateway
 {
-    private \Ecotone\Messaging\Handler\Gateway\MethodCallToMessageConverter $methodCallToMessageConverter;
+    private MethodCallToMessageConverter $methodCallToMessageConverter;
     /**
      * @var MessageConverter[]
      */
     private array $messageConverters;
-    private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
-    private ?\Ecotone\Messaging\PollableChannel $replyChannel;
-    private ?\Ecotone\Messaging\MessageChannel $errorChannel;
+    private InterfaceToCall $interfaceToCall;
+    private ?PollableChannel $replyChannel;
+    private ?MessageChannel $errorChannel;
     private int $replyMilliSecondsTimeout;
-    private \Ecotone\Messaging\MessageChannel $gatewayRequestChannel;
-    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
+    private MessageChannel $gatewayRequestChannel;
+    private ReferenceSearchService $referenceSearchService;
     private iterable $aroundInterceptors;
     /**
      * @var InputOutputMessageHandlerBuilder[]
@@ -59,7 +59,7 @@ class Gateway implements NonProxyGateway
      */
     private iterable $sortedAfterInterceptors = [];
     private iterable $endpointAnnotations;
-    private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
+    private ChannelResolver $channelResolver;
 
     /**
      * GatewayProxy constructor.
@@ -119,7 +119,7 @@ class Gateway implements NonProxyGateway
                 $parameter = $parameters[$index];
                 if (!isset($methodArgumentValues[$index]) && $parameter->hasDefaultValue()) {
                     $methodValue = $parameter->getDefaultValue();
-                }else {
+                } else {
                     if (!isset($methodArgumentValues[$index])) {
                         throw InvalidArgumentException::create("Missing argument {$parameter->getName()} for calling {$this->interfaceToCall}");
                     }
@@ -180,7 +180,7 @@ class Gateway implements NonProxyGateway
     }
 
 
-    private function buildHandler(?MediaType $replyContentType) : MessageHandler
+    private function buildHandler(?MediaType $replyContentType): MessageHandler
     {
         $gatewayInternalHandler = new GatewayInternalHandler(
             $this->interfaceToCall,

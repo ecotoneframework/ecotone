@@ -18,12 +18,12 @@ class StorageEventBus implements EventBus
         return new self();
     }
 
-    public function publish(object $event, array $metadata = [])
+    public function publish(object $event, array $metadata = []) : void
     {
         $this->calls[] = [$event, $metadata];
     }
 
-    public function publishWithRouting(string $routingKey, $event, string $eventMediaType = MediaType::APPLICATION_X_PHP, array $metadata = [])
+    public function publishWithRouting(string $routingKey, mixed $event, string $eventMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []) : void
     {
         $this->calls[] = [$routingKey, $event, $eventMediaType, $metadata];
     }

@@ -7,16 +7,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 
 interface CommandBus
 {
-    /**
-     * @return mixed
-     */
-    public function send(object $command, array $metadata = []);
+    public function send(object $command, array $metadata = []) : mixed;
 
-    /**
-     * @return mixed
-     * @var mixed $command
-     */
-    public function sendWithRouting(
-        string $routingKey, $command, string $commandMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []
-    );
+    public function sendWithRouting(string $routingKey, mixed $command, string $commandMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []) : mixed;
 }

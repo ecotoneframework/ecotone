@@ -7,11 +7,9 @@ use Behat\Behat\Context\Context;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
-use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
@@ -43,6 +41,7 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepo
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
 use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
 use Test\Ecotone\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
+use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\JobRepository;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\AddExecutorId\AddExecutorId;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\AddNotificationTimestamp\AddNotificationTimestamp;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\LoggerRepository;
@@ -53,8 +52,8 @@ use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddVat\AddVatServic
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ProductExchanger;
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ShopRepository;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\AddCurrentUserId;
-use Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\AddMetadataService;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\BasketRepository;
+use Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\AddMetadataService;
 use Test\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod\Basket;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
@@ -236,6 +235,13 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             {
                 $objects = [
                     new Basket()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder":
+            {
+                $objects = [
+                    new JobRepository()
                 ];
                 break;
             }

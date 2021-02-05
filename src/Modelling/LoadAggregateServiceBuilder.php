@@ -55,7 +55,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
         $aggregateRepository = self::getAggregateRepository($this->aggregateClassName, $this->aggregateRepositoryReferenceNames, $channelResolver, $referenceSearchService);
         if ($aggregateRepository instanceof EventSourcedRepository && !$this->eventSourcedFactoryMethod) {
             $repositoryClass = get_class($aggregateRepository);
-            throw InvalidArgumentException::create("Based on your repository {$repositoryClass}, you want to create Event Sourced Aggregate. You must define static method marked with #[AggregateFactory] for aggregate recreation from events");
+            throw InvalidArgumentException::create("Based on your repository {$repositoryClass}, you want to create Event Sourced Aggregate. You must define static method with attribute " . AggregateFactory::class . " for aggregate recreation from events");
         }
 
         return ServiceActivatorBuilder::createWithDirectReference(

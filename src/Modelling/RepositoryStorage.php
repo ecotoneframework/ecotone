@@ -6,6 +6,7 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\EventSourcedAggregate;
@@ -76,7 +77,14 @@ class RepositoryStorage
     private function returnRepository(EventSourcedRepository|StandardRepository|RepositoryBuilder $repository) : EventSourcedRepository|StandardRepository
     {
         if ($repository instanceof RepositoryBuilder) {
-            return $repository->build($this->channelResolver, $this->referenceSearchService);
+            $repository = $repository->build($this->channelResolver, $this->referenceSearchService);
+        }
+
+        if ($this->isEventSourcedAggregate) {
+            Assert::isTrue($this->isEventSourced($repository), "Registered standard repository for event sourced aggregate " . $this->aggregateClassName);
+        }
+        if (!$this->isEventSourcedAggregate) {
+            Assert::isTrue(!$this->isEventSourced($repository), "Registered event sourced repository for standard aggregate " . $this->aggregateClassName);
         }
 
         return $repository;

@@ -48,6 +48,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     private ?string $aggregateMethodWithEvents;
     private ?array $aggregateVersionMapping;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
+    private bool $isEventSourced = false;
 
     private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName, bool $isCommandHandler)
     {
@@ -88,6 +89,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $eventSourcedAggregateAnnotation = TypeDescriptor::create(EventSourcedAggregate::class);
         $hasInternalEventRecorder = null;
         if ($interfaceToCall->hasClassAnnotation($eventSourcedAggregateAnnotation)) {
+            $this->isEventSourced = true;
             /** @var EventSourcedAggregate $annotation */
             $annotation = $interfaceToCall->getClassAnnotation($eventSourcedAggregateAnnotation);
             $hasInternalEventRecorder = $annotation->hasInternalEventRecorder();
@@ -157,11 +159,10 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         $aggregateRepository = LoadAggregateServiceBuilder::getAggregateRepository($this->interfaceToCall->getInterfaceName(), $this->aggregateRepositoryReferenceNames, $channelResolver, $referenceSearchService);
-        $isEventSourced = $aggregateRepository instanceof EventSourcedRepository;
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
 
         $handler = ServiceActivatorBuilder::createWithDirectReference(
-            new CallAggregateService($this->interfaceToCall, $isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod, $this->aggregateVersionMapping, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),
+            new CallAggregateService($this->interfaceToCall, $this->isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod, $this->aggregateVersionMapping, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),
             "call"
         )
             ->withPassThroughMessageOnVoidInterface($this->isVoidMethod)

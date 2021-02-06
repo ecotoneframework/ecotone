@@ -134,6 +134,20 @@ class RepositoryStorageTest extends TestCase
         );
     }
 
+    public function test_throwing_exception_if_repository_handling_different_type()
+    {
+        $repositoryStorage = new RepositoryStorage(
+            Article::class, false, InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
+            1 => InMemoryEventSourcedRepository::createEmpty(),
+            2 => InMemoryEventSourcedRepository::createEmpty()
+        ]), [1, 2]
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $repositoryStorage->getRepository();
+    }
+
     public function test_throwing_exception_if_aggregate_was_not_found_when_multiple_of_same_type_are_registered()
     {
         $repository = InMemoryArticleStandardRepository::createWith([Article::createWith(PublishArticleCommand::createWith("test", "title", "test"))]);

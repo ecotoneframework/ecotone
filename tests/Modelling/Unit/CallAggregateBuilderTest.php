@@ -159,7 +159,7 @@ class CallAggregateBuilderTest extends TestCase
         );
     }
 
-    public function test_calling_factory_method_for_event_sourced_aggregate()
+    public function __test_calling_factory_method_for_event_sourced_aggregate()
     {
         $commandToRun = new StartTicketCommand(1);
 

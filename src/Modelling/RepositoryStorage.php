@@ -85,7 +85,7 @@ class RepositoryStorage
     private function isEventSourced(EventSourcedRepository|StandardRepository|RepositoryBuilder $repository): bool
     {
         if ($repository instanceof RepositoryBuilder) {
-
+            return $repository->isEventSourced();
         }
 
         return $repository instanceof EventSourcedRepository;

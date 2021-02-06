@@ -21,7 +21,7 @@ use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 
 class RepositoryStorageTest extends TestCase
 {
-    public function __test_returning_default_standard_repository_if_there_is_one()
+    public function test_returning_default_standard_repository_if_there_is_one()
     {
         $repository = InMemoryStandardRepository::createEmpty();
 
@@ -37,7 +37,7 @@ class RepositoryStorageTest extends TestCase
         );
     }
 
-    public function __test_returning_default_event_sourced_repository_if_there_is_one()
+    public function test_returning_default_event_sourced_repository_if_there_is_one()
     {
         $repository = InMemoryEventSourcedRepository::createEmpty();
 
@@ -53,7 +53,7 @@ class RepositoryStorageTest extends TestCase
         );
     }
 
-    public function __test_throwing_exception_if_only_event_soured_repository_available_for_standard_aggregate()
+    public function test_throwing_exception_if_only_event_soured_repository_available_for_standard_aggregate()
     {
         $repository = InMemoryEventSourcedRepository::createEmpty();
 
@@ -68,7 +68,7 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage->getRepository();
     }
 
-    public function __test_throwing_exception_if_only_standard_repository_available_for_event_sourced_aggregate()
+    public function test_throwing_exception_if_only_standard_repository_available_for_event_sourced_aggregate()
     {
         $repository = InMemoryStandardRepository::createEmpty();
 
@@ -83,7 +83,7 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage->getRepository();
     }
 
-    public function __test_returning_standard_repository_in_case_there_are_two_types()
+    public function test_returning_standard_repository_in_case_there_are_two_types()
     {
         $repository = InMemoryStandardRepository::createEmpty();
 
@@ -100,7 +100,7 @@ class RepositoryStorageTest extends TestCase
         );
     }
 
-    public function __test_returning_event_sourced_repository_in_case_there_are_two_types()
+    public function test_returning_event_sourced_repository_in_case_there_are_two_types()
     {
         $repository = InMemoryEventSourcedRepository::createEmpty();
 

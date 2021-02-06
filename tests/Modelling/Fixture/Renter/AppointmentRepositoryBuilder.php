@@ -40,6 +40,11 @@ class AppointmentRepositoryBuilder implements RepositoryBuilder
         return $aggregateClassName === Appointment::class;
     }
 
+    public function isEventSourced(): bool
+    {
+        return false;
+    }
+
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): EventSourcedRepository|StandardRepository
     {
         return AppointmentStandardRepository::createWith($this->appointments);

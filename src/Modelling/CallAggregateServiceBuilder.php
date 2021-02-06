@@ -86,8 +86,8 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         }
         $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
 
-        $eventSourcedAggregateAnnotation = TypeDescriptor::create(EventSourcedAggregate::class);
         $hasInternalEventRecorder = null;
+        $eventSourcedAggregateAnnotation = TypeDescriptor::create(EventSourcedAggregate::class);
         if ($interfaceToCall->hasClassAnnotation($eventSourcedAggregateAnnotation)) {
             $this->isEventSourced = true;
             /** @var EventSourcedAggregate $annotation */
@@ -158,7 +158,6 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $aggregateRepository = LoadAggregateServiceBuilder::getAggregateRepository($this->interfaceToCall->getInterfaceName(), $this->aggregateRepositoryReferenceNames, $channelResolver, $referenceSearchService);
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
 
         $handler = ServiceActivatorBuilder::createWithDirectReference(

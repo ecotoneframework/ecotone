@@ -18,6 +18,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateFactory;
+use Ecotone\Modelling\Attribute\EventSourcedAggregate;
 use Ecotone\Modelling\Attribute\TargetAggregateVersion;
 
 class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
@@ -29,6 +30,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
     private ?string $handledMessageClassName;
     private ?string $eventSourcedFactoryMethod;
     private LoadAggregateMode $loadAggregateMode;
+    private bool $isEventSourced;
 
     private function __construct(ClassDefinition $aggregateClassName, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode)
     {
@@ -52,16 +54,29 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
 
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $aggregateRepository = self::getAggregateRepository($this->aggregateClassName, $this->aggregateRepositoryReferenceNames, $channelResolver, $referenceSearchService);
-        if ($aggregateRepository instanceof EventSourcedRepository && !$this->eventSourcedFactoryMethod) {
-            $repositoryClass = get_class($aggregateRepository);
-            throw InvalidArgumentException::create("Based on your repository {$repositoryClass}, you want to create Event Sourced Aggregate. You must define static method with attribute " . AggregateFactory::class . " for aggregate recreation from events");
+        if ($this->isEventSourced && !$this->eventSourcedFactoryMethod) {
+            throw InvalidArgumentException::create("Your aggregate {$this->aggregateClassName}, is event sourced. You must define static method with attribute " . AggregateFactory::class . " for aggregate recreation from events");
         }
+        $aggregateRepository = $this->isEventSourced
+            ? LazyEventSourcedRepository::create(
+                $this->aggregateClassName,
+                $this->isEventSourced,
+                $channelResolver,
+                $referenceSearchService,
+                $this->aggregateRepositoryReferenceNames
+            ) : LazyStandardRepository::create(
+                $this->aggregateClassName,
+                $this->isEventSourced,
+                $channelResolver,
+                $referenceSearchService,
+                $this->aggregateRepositoryReferenceNames
+            );
 
         return ServiceActivatorBuilder::createWithDirectReference(
             new LoadAggregateService(
                 $aggregateRepository,
                 $this->aggregateClassName,
+                $this->isEventSourced,
                 $this->methodName,
                 $this->versionMapping,
                 new PropertyReaderAccessor(),
@@ -115,6 +130,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
             }
         }
 
+        $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcedAggregate::class));
         $aggregateVersionMapping = null;
         if ($handledMessageClassName) {
             $targetAggregateVersion            = TypeDescriptor::create(TargetAggregateVersion::class);

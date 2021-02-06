@@ -159,7 +159,7 @@ class CallAggregateBuilderTest extends TestCase
         );
     }
 
-    public function __test_calling_factory_method_for_event_sourced_aggregate()
+    public function test_calling_factory_method_for_event_sourced_aggregate()
     {
         $commandToRun = new StartTicketCommand(1);
 
@@ -171,7 +171,7 @@ class CallAggregateBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
 
-        $queueChannel = QueueChannel::create();
+        $replyChannel = QueueChannel::create();
         $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createEmpty();
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
@@ -182,11 +182,11 @@ class CallAggregateBuilderTest extends TestCase
             ])
         );
 
-        $aggregateCommandHandler->handle(MessageBuilder::withPayload($commandToRun)->setReplyChannel($queueChannel)->build());
+        $aggregateCommandHandler->handle(MessageBuilder::withPayload($commandToRun)->setReplyChannel($replyChannel)->build());
 
         $this->assertEquals(
             [new TicketWasStartedEvent(1)],
-            $queueChannel->receive()->getPayload()
+            $replyChannel->receive()->getPayload()
         );
     }
 

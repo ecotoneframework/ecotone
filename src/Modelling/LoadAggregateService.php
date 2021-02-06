@@ -20,15 +20,16 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class LoadAggregateService
 {
-    private object $aggregateRepository;
+    private StandardRepository|EventSourcedRepository $aggregateRepository;
     private string $aggregateClassName;
     private string $aggregateMethod;
     private PropertyReaderAccessor $propertyReaderAccessor;
     private ?array $commandVersionMapping;
     private ?string $eventSourcedFactoryMethod;
     private LoadAggregateMode $loadAggregateMode;
+    private bool $isEventSourced;
 
-    public function __construct(object $aggregateRepository, string $aggregateClassName, string $aggregateMethod, ?array $commandVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, ?string $eventSourcedFactoryMethod, LoadAggregateMode $loadAggregateMode)
+    public function __construct(StandardRepository|EventSourcedRepository $aggregateRepository, string $aggregateClassName, bool $isEventSourced, string $aggregateMethod, ?array $commandVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, ?string $eventSourcedFactoryMethod, LoadAggregateMode $loadAggregateMode)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->aggregateClassName = $aggregateClassName;
@@ -37,6 +38,7 @@ class LoadAggregateService
         $this->commandVersionMapping = $commandVersionMapping;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
         $this->loadAggregateMode = $loadAggregateMode;
+        $this->isEventSourced = $isEventSourced;
     }
 
     /**
@@ -69,7 +71,7 @@ class LoadAggregateService
             : null;
 
         $aggregate = $this->aggregateRepository->findBy($this->aggregateClassName, $aggregateIdentifiers);
-        if ($this->aggregateRepository instanceof EventSourcedRepository && !is_null($aggregate)) {
+        if ($this->isEventSourced && !is_null($aggregate)) {
             Assert::isIterable($aggregate, "Event Sourced Repository must return iterable events for findBy method");
             $aggregate = call_user_func([$this->aggregateClassName, $this->eventSourcedFactoryMethod], $aggregate);
         }

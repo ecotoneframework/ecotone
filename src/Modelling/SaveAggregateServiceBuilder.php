@@ -23,6 +23,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateVersion;
+use Ecotone\Modelling\Attribute\EventSourcedAggregate;
 use Ecotone\Modelling\Config\BusModule;
 
 /**
@@ -49,6 +50,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     private ?array $aggregateVersionMapping;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
     private ?string $aggregateMethodWithEvents;
+    private bool $isEventSourced = false;
 
     private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName)
     {
@@ -103,7 +105,20 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $aggregateRepository = LoadAggregateServiceBuilder::getAggregateRepository($this->interfaceToCall->getInterfaceName(), $this->aggregateRepositoryReferenceNames, $channelResolver, $referenceSearchService);
+        $aggregateRepository = $this->isEventSourced
+            ? LazyEventSourcedRepository::create(
+                $this->interfaceToCall->getInterfaceName(),
+                $this->isEventSourced,
+                $channelResolver,
+                $referenceSearchService,
+                $this->aggregateRepositoryReferenceNames
+            ) : LazyStandardRepository::create(
+                $this->interfaceToCall->getInterfaceName(),
+                $this->isEventSourced,
+                $channelResolver,
+                $referenceSearchService,
+                $this->aggregateRepositoryReferenceNames
+            );
 
         $eventBus = GatewayProxyBuilder::create("", EventBus::class, "publish", BusModule::EVENT_CHANNEL_NAME_BY_OBJECT)
             ->withParameterConverters(
@@ -117,6 +132,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         return ServiceActivatorBuilder::createWithDirectReference(
             new SaveAggregateService(
                 $this->interfaceToCall,
+                $this->isEventSourced,
                 $aggregateRepository,
                 PropertyEditorAccessor::create($referenceSearchService),
                 $this->getPropertyReaderAccessor(),
@@ -173,6 +189,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
             }
         }
 
+        $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcedAggregate::class));
         $aggregateIdentifierAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
         $aggregateIdentifiers          = [];
         foreach ($aggregateClassDefinition->getProperties() as $property) {

@@ -8,8 +8,9 @@ use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\AggregateVersion;
+use Ecotone\Modelling\Attribute\EventSourcedAggregate;
 
-#[Aggregate]
+#[EventSourcedAggregate]
 class Ticket
 {
     #[AggregateIdentifier]

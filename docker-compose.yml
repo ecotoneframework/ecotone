@@ -2,7 +2,7 @@ version: "3"
 
 services:
   app:
-    image: simplycodedsoftware/ci:7.4
+    image: simplycodedsoftware/php:8.0
     volumes:
       - "$PWD:/data/app"
     user: 1000:1000

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\AnnotationFinder\Annotation;
+namespace Ecotone\AnnotationFinder\Attribute;
 
 use Doctrine\Common\Annotations\Annotation\Target;
 

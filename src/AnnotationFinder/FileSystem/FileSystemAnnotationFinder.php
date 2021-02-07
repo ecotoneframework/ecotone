@@ -5,9 +5,9 @@ namespace Ecotone\AnnotationFinder\FileSystem;
 
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedMethod;
-use Ecotone\AnnotationFinder\Annotation\Environment;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
+use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\Messaging\Support\Assert;
 use InvalidArgumentException;

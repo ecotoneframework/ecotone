@@ -8,21 +8,11 @@ use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Psr\Container\ContainerInterface;
 
-/**
- * Class PsrContainerReferenceSearchService
- * @package Ecotone\Lite
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
 class PsrContainerReferenceSearchService implements ReferenceSearchService
 {
-    private \Psr\Container\ContainerInterface $container;
+    private ContainerInterface $container;
     private array $defaults;
 
-    /**
-     * PsrContainerReferenceSearchService constructor.
-     * @param ContainerInterface $container
-     * @param array $defaults
-     */
     public function __construct(ContainerInterface $container, array $defaults = [])
     {
         $this->container = $container;
@@ -32,7 +22,7 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
     /**
      * @inheritDoc
      */
-    public function get(string $reference) : object
+    public function get(string $reference): object
     {
         if (!$this->container->has($reference)) {
             if (array_key_exists($reference, $this->defaults)) {

@@ -29,23 +29,31 @@ use ReflectionException;
  */
 class EcotoneLiteConfiguration
 {
-    public static function create(string $rootProjectDirectoryPath, ContainerInterface $container) : ConfiguredMessagingSystem
+    public static function create(string $rootProjectDirectoryPath, ContainerInterface|GatewayAwareContainer $container) : ConfiguredMessagingSystem
     {
         return self::createWithConfiguration($rootProjectDirectoryPath, $container, ServiceConfiguration::createWithDefaults(), []);
     }
 
-    public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface $container, ServiceConfiguration $applicationConfiguration, array $configurationVariables): ConfiguredMessagingSystem
+    public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface|GatewayAwareContainer $container, ServiceConfiguration $serviceConfiguration, array $configurationVariables): ConfiguredMessagingSystem
     {
-        $applicationConfiguration = $applicationConfiguration->withNamespaces(array_merge(
-            $applicationConfiguration->getNamespaces(),
+        $serviceConfiguration = $serviceConfiguration->withNamespaces(array_merge(
+            $serviceConfiguration->getNamespaces(),
             [FileSystemAnnotationFinder::FRAMEWORK_NAMESPACE]
         ));
 
-        return MessagingSystemConfiguration::prepare(
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepare(
             realpath($rootProjectDirectoryPath),
             new TypeResolver($container),
             InMemoryConfigurationVariableService::create($configurationVariables),
-            $applicationConfiguration
+            $serviceConfiguration
         )->buildMessagingSystemFromConfiguration(new PsrContainerReferenceSearchService($container, ["logger" => new EchoLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()]));
+
+        if ($container instanceof GatewayAwareContainer) {
+            foreach ($configuredMessagingSystem->getGatewayList() as $gatewayReference) {
+                $container->addGateway($gatewayReference->getReferenceName(), $gatewayReference->getGateway());
+            }
+        }
+
+        return $configuredMessagingSystem;
     }
 }

@@ -8,6 +8,9 @@ use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use Test\Ecotone\Messaging\Fixture\Behat\Presend\CoinGateway;
+use Test\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
+use Test\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
 
 /**
  * Class EcotoneLiteConfigurationTest
@@ -24,5 +27,20 @@ class EcotoneLiteConfigurationTest extends TestCase
         $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration, []);
 
         $this->assertEquals($configuration1, $configuration2);
+    }
+
+    public function test_registering_with_gateway_aware_container()
+    {
+        $container = InMemoryPSRContainer::createFromObjects([
+            new MultiplyCoins(), new Shop()
+        ]);
+        $serviceConfiguration = ServiceConfiguration::createWithDefaults()
+                                ->withNamespaces(["Test\Ecotone\Messaging\Fixture\Behat\Presend"]);
+        $configuration = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", $container, $serviceConfiguration, []);
+
+        $this->assertEquals(
+            $configuration->getGatewayByName(CoinGateway::class),
+            $container->get(CoinGateway::class)
+        );
     }
 }

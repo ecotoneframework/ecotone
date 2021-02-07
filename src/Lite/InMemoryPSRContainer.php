@@ -11,7 +11,7 @@ use Psr\Container\ContainerInterface;
  * @package Ecotone\Lite
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InMemoryPSRContainer implements ContainerInterface
+class InMemoryPSRContainer implements GatewayAwareContainer
 {
     private array $objects;
 
@@ -53,6 +53,11 @@ class InMemoryPSRContainer implements ContainerInterface
     public static function createEmpty() : self
     {
         return self::createFromAssociativeArray([]);
+    }
+
+    public function addGateway(string $referenceName, object $gateway): void
+    {
+        $this->objects[$referenceName] = $gateway;
     }
 
     /**

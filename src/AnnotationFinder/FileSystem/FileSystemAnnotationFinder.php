@@ -53,7 +53,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             /** @var Environment $environment */
             $environment = $this->getAnnotationForClass($classNameWithEnvironment, Environment::class);
 
-            if (!in_array($environmentName, $environment->names)) {
+            if (!in_array($environmentName, $environment->getNames())) {
                 $key = array_search($classNameWithEnvironment, $this->registeredClasses);
                 if ($key !== false) {
                     unset($this->registeredClasses[$key]);
@@ -92,11 +92,11 @@ class FileSystemAnnotationFinder implements AnnotationFinder
                 );
 
                 if ($methodAnnotations) {
-                    if (!in_array($environmentName, $methodAnnotations[0]->names)) {
+                    if (!in_array($environmentName, $methodAnnotations[0]->getNames())) {
                         $this->bannedEnvironmentClassMethods[$className][$method] = true;
                     }
                 } else if ($classAnnotations) {
-                    if (!in_array($environmentName, $classAnnotations[0]->names)) {
+                    if (!in_array($environmentName, $classAnnotations[0]->getNames())) {
                         $this->bannedEnvironmentClassMethods[$className][$method] = true;
                     }
                 }

@@ -97,14 +97,10 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
     public function test_retrieving_for_specific_environment()
     {
         $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\Environment", "dev");
-        $devEnvironment                          = new Environment();
-        $devEnvironment->names                   = ["dev"];
-        $prodDevEnvironment                      = new Environment();
-        $prodDevEnvironment->names               = ["prod", "dev"];
-        $prodEnvironment                         = new Environment();
-        $prodEnvironment->names                  = ["prod"];
-        $allEnvironment                          = new Environment();
-        $allEnvironment->names                   = ["dev", "prod", "test"];
+        $devEnvironment                          = new Environment(["dev"]);
+        $prodDevEnvironment                      = new Environment(["prod", "dev"]);
+        $prodEnvironment                         = new Environment(["prod"]);
+        $allEnvironment                          = new Environment(["dev", "prod", "test"]);
         $methodAnnotation                        = new Extension();
         $System                      = new System();
 

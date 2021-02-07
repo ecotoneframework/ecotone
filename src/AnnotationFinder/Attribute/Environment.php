@@ -2,26 +2,21 @@
 
 namespace Ecotone\AnnotationFinder\Attribute;
 
-use Doctrine\Common\Annotations\Annotation\Target;
-
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
-/**
- * @Annotation
- * @Target({"CLASS", "METHOD"})
- */
 class Environment
 {
     /**
      * @var string[]
      */
-    public array $names = [];
+    private array $names = [];
 
-    public function __construct(array $environments = [])
+    public function __construct(array $environments)
     {
-        if (isset($environments['value'])) {
-            $environments = $environments['value'];
-        }
-
         $this->names = $environments;
+    }
+
+    public function getNames(): array
+    {
+        return $this->names;
     }
 }

@@ -6,6 +6,7 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -18,6 +19,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateFactory;
+use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcedAggregate;
 use Ecotone\Modelling\Attribute\TargetAggregateVersion;
 
@@ -25,12 +27,14 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
 {
     private string $aggregateClassName;
     private string $methodName;
-    private ?string $aggregateMessageVersionPropertyName;
+    private ?string $messageVersionPropertyName;
+    private ?string $aggregateVersionPropertyName = null;
     private array $aggregateRepositoryReferenceNames;
     private ?string $handledMessageClassName;
     private ?string $eventSourcedFactoryMethod;
     private LoadAggregateMode $loadAggregateMode;
     private bool $isEventSourced;
+    private bool $isAggregateVersionAutomaticallyIncreased = true;
 
     private function __construct(ClassDefinition $aggregateClassName, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode)
     {
@@ -78,8 +82,11 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
                 $this->aggregateClassName,
                 $this->isEventSourced,
                 $this->methodName,
-                $this->aggregateMessageVersionPropertyName,
+                $this->messageVersionPropertyName,
+                $this->aggregateVersionPropertyName,
+                $this->isAggregateVersionAutomaticallyIncreased,
                 new PropertyReaderAccessor(),
+                PropertyEditorAccessor::create($referenceSearchService),
                 $this->eventSourcedFactoryMethod,
                 $this->loadAggregateMode
             ),
@@ -151,7 +158,17 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
             }
         }
 
-        $this->aggregateMessageVersionPropertyName = $aggregateMessageVersionPropertyName;
+        $versionAnnotation             = TypeDescriptor::create(AggregateVersion::class);
+        foreach ($aggregateClassDefinition->getProperties() as $property) {
+            if ($property->hasAnnotation($versionAnnotation)) {
+                /** @var AggregateVersion $annotation */
+                $annotation = $property->getAnnotation($versionAnnotation);
+                $this->aggregateVersionPropertyName = $property->getName();
+                $this->isAggregateVersionAutomaticallyIncreased = $annotation->isAutoIncreased();
+            }
+        }
+
+        $this->messageVersionPropertyName = $aggregateMessageVersionPropertyName;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
     }
 

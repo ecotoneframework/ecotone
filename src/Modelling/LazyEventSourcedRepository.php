@@ -26,12 +26,12 @@ class LazyEventSourcedRepository implements EventSourcedRepository
         return $this->repositoryStorage->getRepository()->canHandle($aggregateClassName);
     }
 
-    public function findBy(string $aggregateClassName, array $identifiers): ?array
+    public function findBy(string $aggregateClassName, array $identifiers): EventStream
     {
         return $this->repositoryStorage->getRepository()->findBy($aggregateClassName, $identifiers);
     }
 
-    public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, ?int $versionBeforeHandling): void
+    public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, int $versionBeforeHandling): void
     {
         $this->repositoryStorage->getRepository()->save($identifiers, $aggregateClassName, $events, $metadata, $versionBeforeHandling);
     }

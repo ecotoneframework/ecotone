@@ -7,12 +7,15 @@ use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\WithVersioning;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSavingLogs\ValidateExecutor;
 
 #[EventSourcedAggregate]
 #[ValidateExecutor]
 class Logger
 {
+    use WithVersioning;
+
     #[AggregateIdentifier]
     private string $loggerId;
 

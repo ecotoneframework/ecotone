@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -11,6 +12,7 @@ use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use PHPStan\Rules\Properties\PropertyDescriptor;
 
 /**
  * Class LoadAggregateService
@@ -24,31 +26,29 @@ class LoadAggregateService
     private string $aggregateClassName;
     private string $aggregateMethod;
     private PropertyReaderAccessor $propertyReaderAccessor;
-    private ?string $messageVersionMapping;
+    private ?string $messageMessageVersionPropertyName;
     private ?string $eventSourcedFactoryMethod;
     private LoadAggregateMode $loadAggregateMode;
     private bool $isEventSourced;
+    private bool $isAggregateVersionAutomaticallyIncreased;
+    private PropertyEditorAccessor $propertyEditorAccessor;
+    private ?string $aggregateVersionPropertyName;
 
-    public function __construct(StandardRepository|EventSourcedRepository $aggregateRepository, string $aggregateClassName, bool $isEventSourced, string $aggregateMethod, ?string $messageVersionMapping, PropertyReaderAccessor $propertyReaderAccessor, ?string $eventSourcedFactoryMethod, LoadAggregateMode $loadAggregateMode)
+    public function __construct(StandardRepository|EventSourcedRepository $aggregateRepository, string $aggregateClassName, bool $isEventSourced, string $aggregateMethod, ?string $messageVersionPropertyName, ?string $aggregateVersionPropertyName, bool $isAggregateVersionAutomaticallyIncreased, PropertyReaderAccessor $propertyReaderAccessor, PropertyEditorAccessor $propertyEditorAccessor, ?string $eventSourcedFactoryMethod, LoadAggregateMode $loadAggregateMode)
     {
         $this->aggregateRepository          = $aggregateRepository;
         $this->aggregateClassName = $aggregateClassName;
         $this->aggregateMethod = $aggregateMethod;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
-        $this->messageVersionMapping = $messageVersionMapping;
+        $this->messageMessageVersionPropertyName = $messageVersionPropertyName;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
         $this->loadAggregateMode = $loadAggregateMode;
         $this->isEventSourced = $isEventSourced;
+        $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
+        $this->propertyEditorAccessor = $propertyEditorAccessor;
+        $this->aggregateVersionPropertyName = $aggregateVersionPropertyName;
     }
 
-    /**
-     * @param Message $message
-     *
-     * @return Message
-     * @throws AggregateNotFoundException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
     public function load(Message $message) : ?Message
     {
         $aggregateIdentifiers = $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID);
@@ -62,18 +62,23 @@ class LoadAggregateService
             }
         }
 
-        $expectedVersion = $this->messageVersionMapping
+        $expectedVersion = $this->messageMessageVersionPropertyName
             ? (
-                $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($this->messageVersionMapping), $message->getPayload())
-                ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($this->messageVersionMapping), $message->getPayload())
+                $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($this->messageMessageVersionPropertyName), $message->getPayload())
+                ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($this->messageMessageVersionPropertyName), $message->getPayload())
                 : null
             )
             : null;
 
         $aggregate = $this->aggregateRepository->findBy($this->aggregateClassName, $aggregateIdentifiers);
-        if ($this->isEventSourced && !is_null($aggregate)) {
-            Assert::isIterable($aggregate, "Event Sourced Repository must return iterable events for findBy method");
-            $aggregate = call_user_func([$this->aggregateClassName, $this->eventSourcedFactoryMethod], $aggregate);
+        $aggregateVersion = null;
+        if ($this->isEventSourced) {
+            if (!$aggregate->getEvents()) {
+                $aggregate = null;
+            }else {
+                $aggregateVersion = $aggregate->getAggregateVersion();
+                $aggregate = call_user_func([$this->aggregateClassName, $this->eventSourcedFactoryMethod], $aggregate->getEvents());
+            }
         }
 
         if (!$aggregate && $this->loadAggregateMode->isDroppingMessageOnNotFound()) {
@@ -86,9 +91,12 @@ class LoadAggregateService
 
         $messageBuilder = MessageBuilder::fromMessage($message);
         if ($aggregate) {
+            if (!is_null($aggregateVersion) && $this->isAggregateVersionAutomaticallyIncreased) {
+                $this->propertyEditorAccessor->enrichDataWith(PropertyPath::createWith($this->aggregateVersionPropertyName), $aggregate, $aggregateVersion, $message, null);
+            }
             $messageBuilder = $messageBuilder->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate);
         }
-        if (!is_null($this->messageVersionMapping)) {
+        if (!is_null($this->messageMessageVersionPropertyName)) {
             $messageBuilder = $messageBuilder->setHeader(AggregateMessage::TARGET_VERSION, $expectedVersion);
         }
 

@@ -113,6 +113,10 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         }
         $this->aggregateVersionProperty             = $aggregateVersionPropertyName;
 
+        if ($this->isEventSourced) {
+            Assert::isTrue((bool)$this->aggregateVersionProperty, "{$interfaceToCall->getInterfaceName()} is event sourced aggregate. Event Sourced aggregates are required to define version property. Make use of " . WithVersioning::class . " or implement your own.");
+        }
+
         $this->interfaceToCall = $interfaceToCall;
     }
 

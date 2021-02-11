@@ -10,27 +10,12 @@ namespace Ecotone\Modelling;
  */
 interface EventSourcedRepository
 {
-    /**
-     * @param string $aggregateClassName
-     *
-     * @return bool
-     */
     public function canHandle(string $aggregateClassName): bool;
 
-    /**
-     * @param string $aggregateClassName
-     * @param array  $identifiers
-     *
-     * @return array|null returns null if event stream was not found or events otherwise
-     */
-    public function findBy(string $aggregateClassName, array $identifiers) : ?array;
+    public function findBy(string $aggregateClassName, array $identifiers) : EventStream;
 
     /**
-     * @param array $identifiers
-     * @param string $aggregateClassName
-     * @param array $events
-     * @param array $metadata
-     * @param int|null $versionBeforeHandling expected version before command handling, 0 in case there was no aggregate, null in case @Version is not provided
+     * @param int $versionBeforeHandling expected version before command handling, 0 in case there was no aggregate
      */
-    public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, ?int $versionBeforeHandling): void;
+    public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, int $versionBeforeHandling): void;
 }

@@ -9,10 +9,13 @@ use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\WithVersioning;
 
 #[EventSourcedAggregate]
 class Ticket
 {
+    use WithVersioning;
+
     #[AggregateIdentifier]
     private $ticketId;
     /**
@@ -74,5 +77,10 @@ class Ticket
     private function applyWorkerWasAssigned(WorkerWasAssignedEvent $event): void
     {
         $this->workerId = $event->getAssignedWorkerId();
+    }
+
+    public function getVersion(): int
+    {
+        return $this->version;
     }
 }

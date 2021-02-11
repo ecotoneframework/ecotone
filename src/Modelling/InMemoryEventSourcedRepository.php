@@ -29,7 +29,7 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     {
         $self = static::createEmpty();
 
-        $self->save($identifiers, $aggregateClassName, $events, [], null);
+        $self->save($identifiers, $aggregateClassName, $events, [], count($events));
 
         return $self;
     }
@@ -45,21 +45,23 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     /**
      * @inheritDoc
      */
-    public function findBy(string $aggregateClassName, array $identifiers): ?array
+    public function findBy(string $aggregateClassName, array $identifiers): EventStream
     {
         $key = $this->getKey($identifiers);
 
         if (isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
-            return $this->eventsPerAggregate[$aggregateClassName][$key];
+            $events = $this->eventsPerAggregate[$aggregateClassName][$key];
+
+            return EventStream::createWith(count($events), $events);
         }
 
-        return null;
+        return EventStream::createEmpty();
     }
 
     /**
      * @inheritDoc
      */
-    public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, ?int $versionBeforeHandling): void
+    public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, int $versionBeforeHandling): void
     {
         $key = $this->getKey($identifiers);
 

@@ -46,7 +46,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     private bool $isVoidMethod;
     private ?string $eventSourcedFactoryMethod;
     private ?string $aggregateMethodWithEvents;
-    private ?string $aggregateMessageVersionMapping;
+    private ?string $aggregateVersionProperty;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
     private bool $isEventSourced = false;
 
@@ -111,7 +111,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->isAggregateVersionAutomaticallyIncreased = $annotation->isAutoIncreased();
             }
         }
-        $this->aggregateMessageVersionMapping             = $aggregateVersionPropertyName;
+        $this->aggregateVersionProperty             = $aggregateVersionPropertyName;
 
         $this->interfaceToCall = $interfaceToCall;
     }
@@ -157,7 +157,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
 
         $handler = ServiceActivatorBuilder::createWithDirectReference(
-            new CallAggregateService($this->interfaceToCall, $this->isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod, $this->aggregateMessageVersionMapping, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),
+            new CallAggregateService($this->interfaceToCall, $this->isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod, $this->aggregateVersionProperty, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),
             "call"
         )
             ->withPassThroughMessageOnVoidInterface($this->isVoidMethod)

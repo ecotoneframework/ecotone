@@ -46,11 +46,11 @@ class CallAggregateService
      * @var PropertyEditorAccessor
      */
     private PropertyEditorAccessor $propertyEditorAccessor;
-    private ?string $aggregateMessageVersionMapping;
+    private ?string $aggregateVersionProperty;
     private bool $isAggregateVersionAutomaticallyIncreased;
     private ?string $aggregateMethodWithEvents;
 
-    public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, PropertyReaderAccessor $propertyReaderAccessor, PropertyEditorAccessor $propertyEditorAccessor, bool $isCommand, bool $isFactoryMethod, ?string $eventSourcedFactoryMethod, ?string $aggregateMessageVersionMapping, bool $isAggregateVersionAutomaticallyIncreased, ?string $aggregateMethodWithEvents)
+    public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, PropertyReaderAccessor $propertyReaderAccessor, PropertyEditorAccessor $propertyEditorAccessor, bool $isCommand, bool $isFactoryMethod, ?string $eventSourcedFactoryMethod, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased, ?string $aggregateMethodWithEvents)
     {
         Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
         Assert::allInstanceOfType($aroundMethodInterceptors, AroundInterceptorReference::class);
@@ -64,7 +64,7 @@ class CallAggregateService
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
         $this->isFactoryMethod = $isFactoryMethod;
         $this->aggregateInterface = $interfaceToCall;
-        $this->aggregateMessageVersionMapping = $aggregateMessageVersionMapping;
+        $this->aggregateVersionProperty = $aggregateVersionProperty;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
         $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
@@ -82,12 +82,12 @@ class CallAggregateService
         $versionBeforeHandling = $message->getHeaders()->containsKey(AggregateMessage::TARGET_VERSION)
             ? $message->getHeaders()->get(AggregateMessage::TARGET_VERSION)
             : null;
-        if (is_null($versionBeforeHandling) && $this->aggregateMessageVersionMapping) {
+        if (is_null($versionBeforeHandling) && $this->aggregateVersionProperty) {
             if ($this->isFactoryMethod) {
                 $versionBeforeHandling = 0;
             } else {
                 $versionBeforeHandling = $this->propertyReaderAccessor->getPropertyValue(
-                    PropertyPath::createWith($this->aggregateMessageVersionMapping),
+                    PropertyPath::createWith($this->aggregateVersionProperty),
                     $aggregate
                 );
                 $versionBeforeHandling = is_null($versionBeforeHandling) ? 0 : $versionBeforeHandling;

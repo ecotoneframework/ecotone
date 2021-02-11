@@ -25,7 +25,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
 {
     private string $aggregateClassName;
     private string $methodName;
-    private ?array $versionMapping;
+    private ?string $aggregateMessageVersionPropertyName;
     private array $aggregateRepositoryReferenceNames;
     private ?string $handledMessageClassName;
     private ?string $eventSourcedFactoryMethod;
@@ -78,7 +78,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
                 $this->aggregateClassName,
                 $this->isEventSourced,
                 $this->methodName,
-                $this->versionMapping,
+                $this->aggregateMessageVersionPropertyName,
                 new PropertyReaderAccessor(),
                 $this->eventSourcedFactoryMethod,
                 $this->loadAggregateMode
@@ -114,7 +114,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
     private function initialize(ClassDefinition $aggregateClassDefinition, ?ClassDefinition $handledMessageClassName): void
     {
         $aggregateMethodWithEvents          = null;
-        $aggregateVersionPropertyName       = null;
+        $aggregateMessageVersionPropertyName       = null;
 
         $aggregateFactoryAnnotation = TypeDescriptor::create(AggregateFactory::class);
         foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
@@ -131,12 +131,12 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
         }
 
         $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcedAggregate::class));
-        $aggregateVersionMapping = null;
+        $aggregateMessageVersionPropertyName = null;
         if ($handledMessageClassName) {
             $targetAggregateVersion            = TypeDescriptor::create(TargetAggregateVersion::class);
             foreach ($handledMessageClassName->getProperties() as $property) {
                 if ($property->hasAnnotation($targetAggregateVersion)) {
-                    $aggregateVersionMapping[$property->getName()] = $aggregateVersionPropertyName;
+                    $aggregateMessageVersionPropertyName = $property->getName();
                 }
             }
         }
@@ -151,11 +151,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
             }
         }
 
-        if (!$aggregateVersionMapping && $aggregateVersionPropertyName) {
-            $aggregateVersionMapping[$aggregateVersionPropertyName] = $aggregateVersionPropertyName;
-        }
-
-        $this->versionMapping = $aggregateVersionMapping;
+        $this->aggregateMessageVersionPropertyName = $aggregateMessageVersionPropertyName;
         $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
     }
 

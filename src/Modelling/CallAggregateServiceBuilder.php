@@ -46,7 +46,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     private bool $isVoidMethod;
     private ?string $eventSourcedFactoryMethod;
     private ?string $aggregateMethodWithEvents;
-    private ?array $aggregateVersionMapping;
+    private ?string $aggregateMessageVersionMapping;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
     private bool $isEventSourced = false;
 
@@ -111,11 +111,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->isAggregateVersionAutomaticallyIncreased = $annotation->isAutoIncreased();
             }
         }
-        $aggregateVersionMapping = null;
-        if (!$aggregateVersionMapping && $aggregateVersionPropertyName) {
-            $aggregateVersionMapping[$aggregateVersionPropertyName] = $aggregateVersionPropertyName;
-        }
-        $this->aggregateVersionMapping             = $aggregateVersionMapping;
+        $this->aggregateMessageVersionMapping             = $aggregateVersionPropertyName;
 
         $this->interfaceToCall = $interfaceToCall;
     }
@@ -161,7 +157,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
 
         $handler = ServiceActivatorBuilder::createWithDirectReference(
-            new CallAggregateService($this->interfaceToCall, $this->isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod, $this->aggregateVersionMapping, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),
+            new CallAggregateService($this->interfaceToCall, $this->isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod, $this->aggregateMessageVersionMapping, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),
             "call"
         )
             ->withPassThroughMessageOnVoidInterface($this->isVoidMethod)

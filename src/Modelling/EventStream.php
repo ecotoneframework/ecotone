@@ -8,15 +8,15 @@ class EventStream
 {
     private int $aggregateVersion;
     /** @var array|null returns null if event stream was not found or events otherwise  */
-    private ?array $events;
+    private ?iterable $events;
 
-    private function __construct(int $aggregateVersion, ?array $events)
+    private function __construct(int $aggregateVersion, ?iterable $events)
     {
         $this->aggregateVersion = $aggregateVersion;
         $this->events = $events;
     }
 
-    public static function createWith(int $aggregateVersion, ?array $events) : static
+    public static function createWith(int $aggregateVersion, ?iterable $events) : static
     {
         return new static($aggregateVersion, $events);
     }
@@ -31,7 +31,7 @@ class EventStream
         return $this->aggregateVersion;
     }
 
-    public function getEvents(): ?array
+    public function getEvents(): ?iterable
     {
         return $this->events;
     }

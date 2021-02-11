@@ -39,7 +39,7 @@ class InMemoryConversionService implements ConversionService
         $result = $this->getConversionResult($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
 
         if (is_null($result)) {
-            throw new \InvalidArgumentException("Calling convert and conversion not possible");
+            throw new \InvalidArgumentException("Lack of converter for conversion from {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType}");
         }
 
         return $result;

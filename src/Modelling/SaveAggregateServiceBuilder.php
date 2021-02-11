@@ -47,7 +47,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      */
     private array $aggregateRepositoryReferenceNames = [];
     private array $aggregateIdentifierMapping;
-    private ?array $aggregateVersionMapping;
+    private ?string $aggregateVersionProperty;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
     private ?string $aggregateMethodWithEvents;
     private bool $isEventSourced = false;
@@ -139,7 +139,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $eventBus,
                 $this->aggregateMethodWithEvents,
                 $this->aggregateIdentifierMapping,
-                $this->aggregateVersionMapping,
+                $this->aggregateVersionProperty,
                 $this->isAggregateVersionAutomaticallyIncreased
             ),
             "save"
@@ -208,11 +208,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->isAggregateVersionAutomaticallyIncreased = $annotation->isAutoIncreased();
             }
         }
-        $aggregateVersionMapping = null;
-        if (!$aggregateVersionMapping && $aggregateVersionPropertyName) {
-            $aggregateVersionMapping[$aggregateVersionPropertyName] = $aggregateVersionPropertyName;
-        }
-        $this->aggregateVersionMapping             = $aggregateVersionMapping;
+        $this->aggregateVersionProperty  = $aggregateVersionPropertyName;
 
         $this->interfaceToCall            = $interfaceToCall;
         $this->aggregateMethodWithEvents  = $aggregateMethodWithEvents;

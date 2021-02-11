@@ -32,11 +32,11 @@ class SaveAggregateService
     private PropertyEditorAccessor $propertyEditorAccessor;
     private array $aggregateIdentifierMapping;
     private InterfaceToCall $aggregateInterface;
-    private ?array $aggregateVersionMapping;
+    private ?string $aggregateVersionProperty;
     private bool $isAggregateVersionAutomaticallyIncreased;
     private bool $isEventSourced;
 
-    public function __construct(InterfaceToCall $aggregateInterface, bool $isEventSourced, StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, ?array $aggregateVersionMapping, bool $isAggregateVersionAutomaticallyIncreased)
+    public function __construct(InterfaceToCall $aggregateInterface, bool $isEventSourced, StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
@@ -45,7 +45,7 @@ class SaveAggregateService
         $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
         $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
         $this->aggregateInterface = $aggregateInterface;
-        $this->aggregateVersionMapping = $aggregateVersionMapping;
+        $this->aggregateVersionProperty = $aggregateVersionProperty;
         $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
         $this->isEventSourced = $isEventSourced;
     }
@@ -72,11 +72,9 @@ class SaveAggregateService
             ? $message->getHeaders()->get(AggregateMessage::TARGET_VERSION)
             : null;
 
-        if ($this->aggregateVersionMapping && $this->isAggregateVersionAutomaticallyIncreased && !$this->isEventSourced) {
-            $aggregatePropertyName = reset($this->aggregateVersionMapping);
-
+        if ($this->aggregateVersionProperty && $this->isAggregateVersionAutomaticallyIncreased && !$this->isEventSourced) {
             $this->propertyEditorAccessor->enrichDataWith(
-                PropertyPath::createWith($aggregatePropertyName),
+                PropertyPath::createWith($this->aggregateVersionProperty),
                 $aggregate,
                 $versionBeforeHandling + 1,
                 $message,

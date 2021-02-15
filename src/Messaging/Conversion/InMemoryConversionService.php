@@ -16,10 +16,11 @@ class InMemoryConversionService implements ConversionService
         $this->convertTo = $convertTo;
     }
 
-    public static function createWithConversion(string $sourceMediaType, string $sourceType, string $targetMediaType, string $targetType, $conversionResult) : self
+    public static function createWithConversion(mixed $dataToConvert, string $sourceMediaType, string $sourceType, string $targetMediaType, string $targetType, $conversionResult) : self
     {
         return new self([
             [
+                "dataToConvert" => $dataToConvert,
                 "sourceMediaType" => MediaType::parseMediaType($sourceMediaType),
                 "sourceType" => TypeDescriptor::create($sourceType),
                 "targetMediaType" => MediaType::parseMediaType($targetMediaType),
@@ -29,6 +30,21 @@ class InMemoryConversionService implements ConversionService
         ]);
     }
 
+    public function registerConversion(mixed $dataToConvert, string $sourceMediaType, string $sourceType, string $targetMediaType, string $targetType, $conversionResult) : static
+    {
+        $this->convertTo[] =
+            [
+                "dataToConvert" => $dataToConvert,
+                "sourceMediaType" => MediaType::parseMediaType($sourceMediaType),
+                "sourceType" => TypeDescriptor::create($sourceType),
+                "targetMediaType" => MediaType::parseMediaType($targetMediaType),
+                "targetType" => TypeDescriptor::create($targetType),
+                "result" => $conversionResult
+            ];
+
+        return $this;
+    }
+
     public static function createWithoutConversion() : self
     {
         return new self([]);
@@ -36,7 +52,7 @@ class InMemoryConversionService implements ConversionService
 
     public function convert($source, Type $sourcePHPType, MediaType $sourceMediaType, Type $targetPHPType, MediaType $targetMediaType)
     {
-        $result = $this->getConversionResult($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
+        $result = $this->getConversionResult($source, $sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
 
         if (is_null($result)) {
             throw new \InvalidArgumentException("Lack of converter for conversion from {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType}");
@@ -47,16 +63,28 @@ class InMemoryConversionService implements ConversionService
 
     public function canConvert(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
-        return !is_null($this->getConversionResult($sourceType, $sourceMediaType, $targetType, $targetMediaType));
+        foreach ($this->convertTo as $conversion) {
+            if (
+                $sourceMediaType->isCompatibleWith($conversion["sourceMediaType"]) && $sourceType->isCompatibleWith($conversion["sourceType"])
+                &&
+                $targetMediaType->isCompatibleWith($conversion["targetMediaType"]) && $targetType->isCompatibleWith($conversion["targetType"])
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    private function getConversionResult(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
+    private function getConversionResult(mixed $dataToConvert, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
         foreach ($this->convertTo as $conversion) {
             if (
                 $sourceMediaType->isCompatibleWith($conversion["sourceMediaType"]) && $sourceType->isCompatibleWith($conversion["sourceType"])
                 &&
                 $targetMediaType->isCompatibleWith($conversion["targetMediaType"]) && $targetType->isCompatibleWith($conversion["targetType"])
+                &&
+                $dataToConvert == $conversion["dataToConvert"]
             ) {
                 return $conversion["result"];
             }

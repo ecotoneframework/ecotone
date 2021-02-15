@@ -117,6 +117,7 @@ class DefaultHeaderMapperTest extends TestCase
             [],
             ["personId"],
             InMemoryConversionService::createWithConversion(
+                Uuid::fromString($personId),
                 MediaType::APPLICATION_X_PHP,
                 UuidInterface::class,
                 MediaType::APPLICATION_JSON,

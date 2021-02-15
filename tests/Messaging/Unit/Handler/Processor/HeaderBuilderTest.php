@@ -66,6 +66,7 @@ class HeaderBuilderTest extends TestCase
         $converter = HeaderBuilder::create("x", "personId");
         $converter = $converter->build(InMemoryReferenceSearchService::createWith([
             ConversionService::REFERENCE_NAME => InMemoryConversionService::createWithConversion(
+                $personId,
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 MediaType::APPLICATION_X_PHP,
@@ -93,6 +94,7 @@ class HeaderBuilderTest extends TestCase
         $converter = HeaderBuilder::create("x", "personId");
         $converter = $converter->build(InMemoryReferenceSearchService::createWith([
             ConversionService::REFERENCE_NAME => InMemoryConversionService::createWithConversion(
+                $personId,
                 MediaType::APPLICATION_X_PHP,
                 TypeDescriptor::STRING,
                 MediaType::APPLICATION_X_PHP,

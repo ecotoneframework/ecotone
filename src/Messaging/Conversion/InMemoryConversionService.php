@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Conversion;
 
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\TicketWasRegistered;
 
 class InMemoryConversionService implements ConversionService
 {
@@ -28,6 +29,11 @@ class InMemoryConversionService implements ConversionService
                 "result" => $conversionResult
             ]
         ]);
+    }
+
+    public function registerInPHPConversion(mixed $dataToConvert, mixed $conversionResult) : static
+    {
+        return $this->registerConversion($dataToConvert, MediaType::APPLICATION_X_PHP, TypeDescriptor::createFromVariable($dataToConvert), MediaType::APPLICATION_X_PHP, TypeDescriptor::createFromVariable($conversionResult), $conversionResult);
     }
 
     public function registerConversion(mixed $dataToConvert, string $sourceMediaType, string $sourceType, string $targetMediaType, string $targetType, $conversionResult) : static

@@ -88,13 +88,8 @@ class ExampleModuleConfiguration implements AnnotationModule
         return $extensionObject instanceof stdClass;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function afterConfigure(ReferenceSearchService $referenceSearchService): void
+    public function getModuleExtensions(array $serviceExtensions): array
     {
-        // TODO: Implement registerWithin() method.
+        return [];
     }
-
-
 }

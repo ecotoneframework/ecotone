@@ -34,4 +34,6 @@ interface Module
      * @return RequiredReference[]|OptionalReference[]|string[]
      */
     public function getRelatedReferences(): array;
+
+    public function getModuleExtensions(array $serviceExtensions) : array;
 }

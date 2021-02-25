@@ -734,7 +734,7 @@ final class MessagingSystemConfiguration implements Configuration
         );
     }
 
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ProxyFactory $proxyFactory, ServiceConfiguration $applicationConfiguration): void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ProxyFactory $proxyFactory, ServiceConfiguration $applicationConfiguration): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
         $moduleReferenceSearchService->store(ProxyFactory::REFERENCE_NAME, $proxyFactory);
@@ -742,6 +742,10 @@ final class MessagingSystemConfiguration implements Configuration
         $modules          = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
         $moduleExtensions = [];
 
+        $extensionObjects = $serviceExtensions;
+        foreach ($modules as $module) {
+            $extensionObjects = array_merge($extensionObjects, $module->getModuleExtensions($serviceExtensions));
+        }
         foreach ($modules as $module) {
             $this->requireReferences($module->getRelatedReferences());
 

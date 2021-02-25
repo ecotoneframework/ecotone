@@ -24,7 +24,7 @@ class RepositoryStorage
         $this->aggregateClassName = $aggregateClassName;
         $this->isEventSourcedAggregate = $isEventSourcedAggregate;
         $this->referenceSearchService = $referenceSearchService;
-        $this->aggregateRepositoryReferenceNames = $aggregateRepositoryReferenceNames;
+        $this->aggregateRepositoryReferenceNames = array_values($aggregateRepositoryReferenceNames);
         $this->channelResolver = $channelResolver;
     }
 

@@ -114,7 +114,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $this->aggregateVersionProperty             = $aggregateVersionPropertyName;
 
         if ($this->isEventSourced) {
-            Assert::isTrue((bool)$this->aggregateVersionProperty, "{$interfaceToCall->getInterfaceName()} is event sourced aggregate. Event Sourced aggregates are required to define version property. Make use of " . WithVersioning::class . " or implement your own.");
+            Assert::isTrue((bool)$this->aggregateVersionProperty, "{$interfaceToCall->getInterfaceName()} is event sourced aggregate. Event Sourced aggregates are required to define version property. Make use of " . WithAggregateVersioning::class . " or implement your own.");
         }
 
         $this->interfaceToCall = $interfaceToCall;
@@ -159,6 +159,9 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
+        if (!$this->isEventSourced) {
+            Assert::isTrue($this->interfaceToCall->getReturnType()->isClassNotInterface(), "Factory method {$this->interfaceToCall} for standard aggregate should return object. Did you wanted to register Event Sourced Aggregate?");
+        }
 
         $handler = ServiceActivatorBuilder::createWithDirectReference(
             new CallAggregateService($this->interfaceToCall, $this->isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod, $this->aggregateVersionProperty, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),

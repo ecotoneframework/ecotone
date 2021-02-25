@@ -274,6 +274,11 @@ class ModellingHandlerModule implements AnnotationModule
         return $extensionObject instanceof RepositoryBuilder;
     }
 
+    public function getModuleExtensions(array $serviceExtensions): array
+    {
+        return [];
+    }
+
     /**
      * @inheritDoc
      */
@@ -284,7 +289,7 @@ class ModellingHandlerModule implements AnnotationModule
         foreach ($moduleExtensions as $aggregateRepositoryBuilder) {
             $referenceId = Uuid::uuid4()->toString();
             $moduleReferenceSearchService->store($referenceId, $aggregateRepositoryBuilder);
-            $this->aggregateRepositoryReferenceNames[$referenceId] = $aggregateRepositoryBuilder;
+            $this->aggregateRepositoryReferenceNames[$referenceId] = $referenceId;
         }
 
         $aggregateCommandOrEventHandlers = [];

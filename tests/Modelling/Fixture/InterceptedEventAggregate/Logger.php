@@ -9,7 +9,7 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\EventSourcedAggregate;
 use Ecotone\Modelling\WithAggregateEvents;
-use Ecotone\Modelling\WithVersioning;
+use Ecotone\Modelling\WithAggregateVersioning;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\ValidateExecutor;
 
@@ -17,7 +17,7 @@ use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavin
 #[ValidateExecutor]
 class Logger
 {
-    use WithVersioning;
+    use WithAggregateVersioning;
 
     #[AggregateIdentifier]
     private string $loggerId;

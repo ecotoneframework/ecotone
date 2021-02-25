@@ -9,12 +9,12 @@ use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcedAggregate;
-use Ecotone\Modelling\WithVersioning;
+use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcedAggregate]
 class Ticket
 {
-    use WithVersioning;
+    use WithAggregateVersioning;
 
     #[AggregateIdentifier]
     private $ticketId;

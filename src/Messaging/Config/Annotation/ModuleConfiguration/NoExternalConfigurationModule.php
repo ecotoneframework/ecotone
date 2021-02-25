@@ -21,4 +21,9 @@ abstract class NoExternalConfigurationModule implements AnnotationModule
     {
         return [];
     }
+
+    public function getModuleExtensions(array $serviceExtensions): array
+    {
+        return [];
+    }
 }

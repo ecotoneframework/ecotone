@@ -9,13 +9,13 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcedAggregate;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\WithAggregateEvents;
-use Ecotone\Modelling\WithVersioning;
+use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcedAggregate(true)]
 class Job
 {
     use WithAggregateEvents;
-    use WithVersioning;
+    use WithAggregateVersioning;
 
     #[AggregateIdentifier]
     private string $id;

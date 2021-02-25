@@ -411,6 +411,11 @@ class ModellingMessageRouterModule implements AnnotationModule
         return false;
     }
 
+    public function getModuleExtensions(array $serviceExtensions): array
+    {
+        return [];
+    }
+
     /**
      * @inheritDoc
      */

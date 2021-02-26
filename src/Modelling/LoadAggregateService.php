@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\EventSourcing\Event;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
@@ -77,7 +78,7 @@ class LoadAggregateService
                 $aggregate = null;
             }else {
                 $aggregateVersion = $aggregate->getAggregateVersion();
-                $aggregate = call_user_func([$this->aggregateClassName, $this->eventSourcedFactoryMethod], $aggregate->getEvents());
+                $aggregate = call_user_func([$this->aggregateClassName, $this->eventSourcedFactoryMethod], array_map(fn(Event $event) : object => $event->getEvent(), $aggregate->getEvents()));
             }
         }
 

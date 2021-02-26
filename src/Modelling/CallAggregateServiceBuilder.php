@@ -159,7 +159,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
-        if (!$this->isEventSourced) {
+        if (!$this->isEventSourced && $isFactoryMethod) {
             Assert::isTrue($this->interfaceToCall->getReturnType()->isClassNotInterface(), "Factory method {$this->interfaceToCall} for standard aggregate should return object. Did you wanted to register Event Sourced Aggregate?");
         }
 

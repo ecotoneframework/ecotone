@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling;
 
+use Ecotone\EventSourcing\Event;
+
 /**
  * Class InMemoryEventSourcedRepository
  * @package Ecotone\Modelling
@@ -52,7 +54,7 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
         if (isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
             $events = $this->eventsPerAggregate[$aggregateClassName][$key];
 
-            return EventStream::createWith(count($events), $events);
+            return EventStream::createWith(count($events), array_map(fn(object $event) : Event => Event::create($event), $events));
         }
 
         return EventStream::createEmpty();

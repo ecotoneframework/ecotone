@@ -5,6 +5,7 @@ namespace Ecotone\Modelling\Config;
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -32,7 +33,7 @@ use Ecotone\Modelling\QueryBus;
 use ReflectionMethod;
 
 #[ModuleAnnotation]
-class ModellingMessageRouterModule implements AnnotationModule
+class BusRoutingModule implements AnnotationModule
 {
     const MODULE_NAME = self::class;
 
@@ -226,6 +227,9 @@ class ModellingMessageRouterModule implements AnnotationModule
             if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) || !$registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
+            if ($registration->hasClassAnnotation(Projection::class)) {
+                continue;
+            }
 
             $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration);
             $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
@@ -240,6 +244,9 @@ class ModellingMessageRouterModule implements AnnotationModule
                 continue;
             }
             if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+                continue;
+            }
+            if ($registration->hasClassAnnotation(Projection::class)) {
                 continue;
             }
             if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) || !$registration->hasClassAnnotation(Distributed::class))) {
@@ -268,6 +275,9 @@ class ModellingMessageRouterModule implements AnnotationModule
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }
+            if ($registration->hasClassAnnotation(Projection::class)) {
+                continue;
+            }
             if ($hasToBeDistributed && !$registration->hasMethodAnnotation(Distributed::class)) {
                 continue;
             }
@@ -294,6 +304,9 @@ class ModellingMessageRouterModule implements AnnotationModule
             $channelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
             if (EventBusRouter::isRegexBasedRoute($channelName)) {
                 throw ConfigurationException::create("Can not registered regex listen to channel for aggregates in {$registration}");
+            }
+            if ($registration->hasClassAnnotation(Projection::class)) {
+                continue;
             }
             if ($hasToBeDistributed && !$registration->hasMethodAnnotation(Distributed::class)) {
                 continue;

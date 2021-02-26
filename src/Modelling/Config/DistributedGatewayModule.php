@@ -46,8 +46,8 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
     public static function getDistributedCommandHandlerRoutingKeys(AnnotationFinder $annotationFinder) : array
     {
         $routingKeys = array_merge(
-            ModellingMessageRouterModule::getCommandBusByNamesMapping($annotationFinder, true),
-            ModellingMessageRouterModule::getCommandBusByObjectMapping($annotationFinder, true)
+            BusRoutingModule::getCommandBusByNamesMapping($annotationFinder, true),
+            BusRoutingModule::getCommandBusByObjectMapping($annotationFinder, true)
         );
 
         return array_keys($routingKeys);
@@ -56,8 +56,8 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
     public static function getDistributedEventHandlerRoutingKeys(AnnotationFinder $annotationFinder) : array
     {
         $routingKeys = array_merge(
-            ModellingMessageRouterModule::getEventBusByNamesMapping($annotationFinder, true),
-            ModellingMessageRouterModule::getEventBusByObjectsMapping($annotationFinder, true)
+            BusRoutingModule::getEventBusByNamesMapping($annotationFinder, true),
+            BusRoutingModule::getEventBusByObjectsMapping($annotationFinder, true)
         );
 
         return array_keys($routingKeys);

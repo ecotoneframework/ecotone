@@ -22,7 +22,7 @@ use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\BusRouterBuilder;
-use Ecotone\Modelling\Config\ModellingMessageRouterModule;
+use Ecotone\Modelling\Config\BusRoutingModule;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
 use Ecotone\Modelling\QueryBus;
@@ -44,6 +44,7 @@ use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHand
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithListenToRegex;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\EventHandlerForUnionType;
+use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ProjectionEventHandlerExample;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenTo;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenToAndObject;
@@ -65,7 +66,7 @@ use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
  * @package Test\Ecotone\Modelling\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ModellingMessageRouterModuleTest extends MessagingTest
+class BusRoutingModuleTest extends MessagingTest
 {
     public function test_registering_service_command_handler_with_endpoint_id()
     {
@@ -131,7 +132,7 @@ class ModellingMessageRouterModuleTest extends MessagingTest
 
     private function prepareModule(AnnotationFinder $annotationRegistrationService): Configuration
     {
-        $module = ModellingMessageRouterModule::create($annotationRegistrationService);
+        $module = BusRoutingModule::create($annotationRegistrationService);
 
         $extendedConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
         $module->prepare(
@@ -364,6 +365,15 @@ class ModellingMessageRouterModuleTest extends MessagingTest
         ];
 
         $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]]);
+    }
+
+    public function test_not_routing_to_projection_event_handlers_for_event_bus()
+    {
+        $annotatedClasses = [
+            ProjectionEventHandlerExample::class
+        ];
+
+        $this->assertRouting($annotatedClasses, [], [], [], [], [], []);
     }
 
     public function test_union_registering_service_event_handler()

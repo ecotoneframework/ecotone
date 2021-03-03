@@ -3,16 +3,51 @@
 
 namespace Ecotone\EventSourcing\Attribute;
 
+use Ecotone\EventSourcing\EventStore;
+use Ecotone\Messaging\Support\Assert;
+use Enqueue\Dbal\DbalConnectionFactory;
+
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class Projection
 {
     private string $name;
     private array $fromStreams;
+    private array $options;
+    private array|string $fromCategories;
+    private bool $fromAll;
+    private string $eventStoreReferenceName;
+    private string $projectionConnectionReferenceName;
 
-    public function __construct(string $name, string|array $fromStreams)
+    public function __construct(string $name, string|array $fromStreams = [], string|array $fromCategories = [], bool $fromAll = false, array $options = [], string $eventStoreReferenceName = EventStore::class, string $projectionConnectionReferenceName = DbalConnectionFactory::class)
     {
+        $fromStreams = is_string($fromStreams) ? [$fromStreams] : $fromStreams;
+        $fromCategories = is_string($fromCategories) ? [$fromCategories] : $fromCategories;
+        $countDefined = (int)$fromStreams + (int)$fromCategories + (int)$fromAll;
+        Assert::isTrue($countDefined === 1, "Projection should be defined only with one of `fromStreams`, `fromCategories` or `fromALl`");
+
         $this->name = $name;
-        $this->fromStreams = is_string($fromStreams) ? [$fromStreams] : $fromStreams;
+        $this->fromStreams = $fromStreams;
+        $this->options = $options;
+        $this->fromStreams = $fromStreams;
+        $this->fromCategories = $fromCategories;
+        $this->fromAll = $fromAll;
+        $this->eventStoreReferenceName = $eventStoreReferenceName;
+        $this->projectionConnectionReferenceName = $projectionConnectionReferenceName;
+    }
+
+    public function getEventStoreReferenceName(): string
+    {
+        return $this->eventStoreReferenceName;
+    }
+
+    public function getProjectionConnectionReferenceName(): string
+    {
+        return $this->projectionConnectionReferenceName;
+    }
+
+    public function getOptions(): array
+    {
+        return $this->options;
     }
 
     public function getName(): string
@@ -23,5 +58,15 @@ class Projection
     public function getFromStreams(): array
     {
         return $this->fromStreams;
+    }
+
+    public function getFromCategories(): array|string
+    {
+        return $this->fromCategories;
+    }
+
+    public function isFromAll(): bool
+    {
+        return $this->fromAll;
     }
 }

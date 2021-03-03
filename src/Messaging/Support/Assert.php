@@ -48,16 +48,16 @@ class Assert
         }
     }
 
-    /**
-     * @param array $array
-     * @param string|int $requiredKey
-     * @param string $exceptionMessage
-     * @throws InvalidArgumentException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
     public static function keyExists(array $array, $requiredKey, string $exceptionMessage) : void
     {
         if (!isset($array[$requiredKey])) {
+            throw InvalidArgumentException::create($exceptionMessage);
+        }
+    }
+
+    public static function keyNotExists(array $array, $key, string $exceptionMessage) : void
+    {
+        if (isset($array[$key])) {
             throw InvalidArgumentException::create($exceptionMessage);
         }
     }

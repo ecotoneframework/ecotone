@@ -225,7 +225,7 @@ class ModellingHandlerModule implements AnnotationModule
         if (!$inputChannelName) {
             $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
             if ($interfaceToCall->hasNoParameters()) {
-                throw ConfigurationException::create("Missing command class or input channel for {$registration}.");
+                throw ConfigurationException::create("Missing command class or listen routing for {$registration}.");
             }
             $inputChannelName = $interfaceToCall->getFirstParameterTypeHint();
         }

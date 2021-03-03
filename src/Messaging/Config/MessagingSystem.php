@@ -6,12 +6,15 @@ use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\PollableChannelInterceptorAdapter;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\ConsumerEndpointFactory;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\CombinedGatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
@@ -42,16 +45,21 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @var NonProxyCombinedGateway[]
      */
     private array $nonProxyCombinedGateways;
+    /**
+     * @var ConsoleCommandConfiguration[]
+     */
+    private array $consoleCommands;
 
     /**
      * Application constructor.
      * @param iterable|ConsumerLifecycle[] $consumers
      * @param GatewayReference[]|array $gateways
      * @param NonProxyCombinedGateway[]|array $nonProxyCombinedGateways
+     * @param ConsoleCommandConfiguration[] $consoleCommands
      * @param ChannelResolver $channelResolver
      * @throws MessagingException
      */
-    private function __construct(iterable $consumers, array $gateways, array $nonProxyCombinedGateways, ChannelResolver $channelResolver)
+    private function __construct(iterable $consumers, array $gateways, array $nonProxyCombinedGateways, ChannelResolver $channelResolver, array $consoleCommands)
     {
         Assert::allInstanceOfType($consumers, ConsumerLifecycle::class);
         Assert::allInstanceOfType($gateways, GatewayReference::class);
@@ -62,6 +70,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         $this->nonProxyCombinedGateways = $nonProxyCombinedGateways;
 
         $this->initialize();
+        $this->consoleCommands = $consoleCommands;
     }
 
     private function initialize(): void
@@ -83,6 +92,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @param MessageHandlerBuilder[] $messageHandlerBuilders
      * @param ChannelAdapterConsumerBuilder[] $channelAdapterConsumerBuilders
      * @param bool $isLazyConfiguration
+     * @param ConsoleCommandConfiguration[] $consoleCommands
      * @throws MessagingException
      */
     public static function createFrom(
@@ -90,7 +100,8 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         array $messageChannelBuilders, array $messageChannelInterceptors,
         array $gatewayBuilders, array $consumerFactories,
         array $pollingMetadataConfigurations, array $messageHandlerBuilders, array $channelAdapterConsumerBuilders,
-        bool $isLazyConfiguration
+        bool $isLazyConfiguration,
+        array $consoleCommands
     ): \Ecotone\Messaging\Config\MessagingSystem
     {
         $channelResolver = self::createChannelResolver($messageChannelInterceptors, $messageChannelBuilders, $referenceSearchService);
@@ -114,7 +125,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             $consumers[] = $channelAdapter->build($channelResolver, $referenceSearchService, array_key_exists($channelAdapter->getEndpointId(), $pollingMetadataConfigurations) ? $pollingMetadataConfigurations[$channelAdapter->getEndpointId()] : PollingMetadata::create($channelAdapter->getEndpointId()));
         }
 
-        return MessagingSystem::create($consumers, $gateways, $nonProxyGateways, $channelResolver);
+        return MessagingSystem::create($consumers, $gateways, $nonProxyGateways, $channelResolver, $consoleCommands);
     }
 
     /**
@@ -203,9 +214,9 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @throws MessagingException
      * @internal
      */
-    public static function create(iterable $consumers, array $gateways, array $nonProxyCombinedGateways, ChannelResolver $channelResolver): self
+    public static function create(iterable $consumers, array $gateways, array $nonProxyCombinedGateways, ChannelResolver $channelResolver, array $consoleCommands): self
     {
-        return new self($consumers, $gateways, $nonProxyCombinedGateways, $channelResolver);
+        return new self($consumers, $gateways, $nonProxyCombinedGateways, $channelResolver, $consoleCommands);
     }
 
     /**
@@ -248,6 +259,35 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         return $this->nonProxyCombinedGateways[$gatewayReferenceName];
     }
 
+    public function runConsoleCommand(string $commandName, array $parameters): mixed
+    {
+        $consoleCommandConfiguration = null;
+        foreach ($this->consoleCommands as $consoleCommand) {
+            if ($consoleCommand->getName() === $commandName) {
+                $consoleCommandConfiguration = $consoleCommand;
+            }
+        }
+        Assert::notNull($consoleCommandConfiguration, "Trying to run not existing console command {$commandName}");
+        /** @var ConsoleCommandRunner $gateway */
+        $gateway = $this->getGatewayByName(ConsoleCommandRunner::class);
+
+        $arguments = [];
+        foreach ($parameters as $argumentName => $value) {
+            $arguments[$this->getParameterHeaderName($argumentName)] = $value;
+        }
+        foreach ($consoleCommandConfiguration->getParameters() as $commandParameter) {
+            if (!array_key_exists($this->getParameterHeaderName($commandParameter->getName()), $arguments)) {
+                if (!$commandParameter->hasDefaultValue()) {
+                    throw InvalidArgumentException::create("Missing argument with name {$commandParameter->getName()} for console command {$commandName}");
+                }
+
+                $arguments[$this->getParameterHeaderName($commandParameter->getName())] = $commandParameter->getDefaultValue();
+            }
+        }
+
+        return $gateway->execute([], $arguments, $consoleCommandConfiguration->getChannelName());
+    }
+
     /**
      * @inheritDoc
      */
@@ -278,5 +318,14 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         }
 
         return $list;
+    }
+
+    /**
+     * @param int|string $argumentName
+     * @return string
+     */
+    private function getParameterHeaderName(int|string $argumentName): string
+    {
+        return ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . $argumentName;
     }
 }

@@ -11,6 +11,8 @@ use Ecotone\Messaging\Channel\PublishSubscribeChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
+use Ecotone\Messaging\Config\ConsoleCommandParameter;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
@@ -24,6 +26,8 @@ use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -1822,5 +1826,51 @@ class MessagingSystemConfigurationTest extends MessagingTest
         MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("some"))
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("some"));
+    }
+
+    public function test_calling_console_command()
+    {
+        $consoleCommandName = "someName";
+        $channelName = "console.request";
+        $queueChannel = QueueChannel::create();
+        $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
+            ConsoleCommandParameter::create("id"),
+            ConsoleCommandParameter::createWithDefaultValue("token", 123)
+        ]);
+
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(ConsoleCommandRunner::class, ConsoleCommandRunner::class, "execute", $channelName))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $queueChannel))
+            ->registerConsoleCommand($consoleCommand)
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $configuredMessagingSystem->runConsoleCommand($consoleCommandName, ["id" => 1]);
+
+        $headers = $queueChannel->receive()->getHeaders()->headers();
+        $this->assertEquals(1, $headers["ecotone.oneTimeCommand.id"]);
+        $this->assertEquals(123, $headers["ecotone.oneTimeCommand.token"]);
+    }
+
+    public function test_calling_console_command_overriding_default_parameter()
+    {
+        $consoleCommandName = "someName";
+        $channelName = "console.request";
+        $queueChannel = QueueChannel::create();
+        $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
+            ConsoleCommandParameter::create("id"),
+            ConsoleCommandParameter::createWithDefaultValue("token", 123)
+        ]);
+
+        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(ConsoleCommandRunner::class, ConsoleCommandRunner::class, "execute", $channelName))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $queueChannel))
+            ->registerConsoleCommand($consoleCommand)
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $configuredMessagingSystem->runConsoleCommand($consoleCommandName, ["id" => 1, "token" => 1000]);
+
+        $headers = $queueChannel->receive()->getHeaders()->headers();
+        $this->assertEquals(1, $headers["ecotone.oneTimeCommand.id"]);
+        $this->assertEquals(1000, $headers["ecotone.oneTimeCommand.token"]);
     }
 }

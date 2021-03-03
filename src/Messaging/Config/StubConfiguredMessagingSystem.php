@@ -37,4 +37,9 @@ class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
     {
         throw new \InvalidArgumentException("Calling stub messaging system");
     }
+
+    public function runConsoleCommand(string $commandName, array $parameters): mixed
+    {
+        return null;
+    }
 }

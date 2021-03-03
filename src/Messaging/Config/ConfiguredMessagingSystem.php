@@ -23,6 +23,8 @@ interface ConfiguredMessagingSystem
      */
     public function getNonProxyGatewayByName(string $gatewayReferenceName): \Ecotone\Messaging\Config\NonProxyCombinedGateway;
 
+    public function runConsoleCommand(string $commandName, array $parameters) : mixed;
+
     /**
      * @return GatewayReference[]
      */

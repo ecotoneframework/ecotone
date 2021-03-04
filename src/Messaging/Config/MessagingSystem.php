@@ -235,7 +235,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             }
         }
 
-        throw InvalidArgumentException::create("There is no pollable consumer with name {$endpointId} to run");
+        throw InvalidArgumentException::create("There is nothing registered with name `{$endpointId}`. You can reverify the name using `ecotone:list` console command.");
     }
 
     /**
@@ -268,8 +268,8 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             }
         }
         Assert::notNull($consoleCommandConfiguration, "Trying to run not existing console command {$commandName}");
-        /** @var ConsoleCommandRunner $gateway */
-        $gateway = $this->getGatewayByName(ConsoleCommandRunner::class);
+        /** @var MessagingEntrypoint $gateway */
+        $gateway = $this->getGatewayByName(MessagingEntrypoint::class);
 
         $arguments = [];
         foreach ($parameters as $argumentName => $value) {
@@ -285,7 +285,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             }
         }
 
-        return $gateway->execute([], $arguments, $consoleCommandConfiguration->getChannelName());
+        return $gateway->sendWithHeaders([], $arguments, $consoleCommandConfiguration->getChannelName());
     }
 
     /**

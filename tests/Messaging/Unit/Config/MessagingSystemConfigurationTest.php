@@ -1831,7 +1831,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     public function test_calling_console_command()
     {
         $consoleCommandName = "someName";
-        $channelName = "console.request";
+        $channelName = MessagingEntrypoint::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
             ConsoleCommandParameter::create("id"),
@@ -1839,7 +1839,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
-            ->registerGatewayBuilder(GatewayProxyBuilder::create(ConsoleCommandRunner::class, ConsoleCommandRunner::class, "execute", $channelName))
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(MessagingEntrypoint::class, MessagingEntrypoint::class, "sendWithHeaders", $channelName))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $queueChannel))
             ->registerConsoleCommand($consoleCommand)
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
@@ -1854,7 +1854,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     public function test_calling_console_command_overriding_default_parameter()
     {
         $consoleCommandName = "someName";
-        $channelName = "console.request";
+        $channelName = MessagingEntrypoint::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
             ConsoleCommandParameter::create("id"),
@@ -1862,7 +1862,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
-            ->registerGatewayBuilder(GatewayProxyBuilder::create(ConsoleCommandRunner::class, ConsoleCommandRunner::class, "execute", $channelName))
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(MessagingEntrypoint::class, MessagingEntrypoint::class, "sendWithHeaders", $channelName))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $queueChannel))
             ->registerConsoleCommand($consoleCommand)
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());

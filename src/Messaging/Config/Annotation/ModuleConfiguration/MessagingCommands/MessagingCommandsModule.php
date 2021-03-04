@@ -10,10 +10,16 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 #[ModuleAnnotation]
-class MessagingCommands extends NoExternalConfigurationModule implements AnnotationModule
+class MessagingCommandsModule extends NoExternalConfigurationModule implements AnnotationModule
 {
+    const ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR = "ecotone.consoleCommand.execute";
+    const ECOTONE_CONSOLE_COMMAND_NAME = "ecotone.consoleCommand.name";
+
     public static function create(AnnotationFinder $annotationRegistrationService): static
     {
         return new self();
@@ -21,8 +27,17 @@ class MessagingCommands extends NoExternalConfigurationModule implements Annotat
 
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
     {
-        $this->registerOneTimeCommand("runAsynchronousEndpoint", "ecotone:run", $configuration);
-        $this->registerOneTimeCommand("listAsynchronousEndpoints", "ecotone:list", $configuration);
+        $configuration->registerMessageHandler(
+            ServiceActivatorBuilder::createWithDirectReference(new MessagingBaseCommand(), "executeConsoleCommand")
+                ->withMethodParameterConverters([
+                    HeaderBuilder::create("commandName", self::ECOTONE_CONSOLE_COMMAND_NAME),
+                    PayloadBuilder::create("parameters")
+                ])
+                ->withInputChannelName(self::ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR)
+        );
+
+        $this->registerConsoleCommand("runAsynchronousEndpointCommand", "ecotone:run", $configuration);
+        $this->registerConsoleCommand("listAsynchronousEndpointsCommand", "ecotone:list", $configuration);
     }
 
     public function canHandle($extensionObject): bool
@@ -30,7 +45,7 @@ class MessagingCommands extends NoExternalConfigurationModule implements Annotat
         return false;
     }
 
-    private function registerOneTimeCommand(string $methodName, string $commandName, Configuration $configuration): void
+    private function registerConsoleCommand(string $methodName, string $commandName, Configuration $configuration): void
     {
         list($messageHandlerBuilder, $oneTimeCommandConfiguration) = ConsoleCommandModule::prepareConsoleCommandForDirectObject(
             new MessagingBaseCommand(), $methodName, $commandName, false

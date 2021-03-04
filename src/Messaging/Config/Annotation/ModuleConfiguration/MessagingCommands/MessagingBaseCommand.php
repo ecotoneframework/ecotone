@@ -7,12 +7,17 @@ use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 
 class MessagingBaseCommand
 {
-    public function runAsynchronousEndpoint(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem) : void
+    public function executeConsoleCommand(string $commandName, array $parameters, ConfiguredMessagingSystem $configuredMessagingSystem) : void
+    {
+        $configuredMessagingSystem->runConsoleCommand($commandName, $parameters);
+    }
+
+    public function runAsynchronousEndpointCommand(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem) : void
     {
         $configuredMessagingSystem->runAsynchronouslyRunningEndpoint($consumerName);
     }
 
-    public function listAsynchronousEndpoints(ConfiguredMessagingSystem $configuredMessagingSystem) : ConsoleCommandResultSet
+    public function listAsynchronousEndpointsCommand(ConfiguredMessagingSystem $configuredMessagingSystem) : ConsoleCommandResultSet
     {
         $consumers = [];
         foreach ($configuredMessagingSystem->getListOfAsynchronouslyRunningConsumers() as $consumerName) {

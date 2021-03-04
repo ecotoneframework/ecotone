@@ -38,6 +38,8 @@
         "symfony/expression-language": "^3.0|^4.0|^5.0"
     },
     "extra": {
-        "branch-version": "1.x"
+        "branch-alias": {
+            "dev-feature/php8": "1.0.x-dev"
+        }
     }
 }

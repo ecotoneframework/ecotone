@@ -235,7 +235,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             }
         }
 
-        throw InvalidArgumentException::create("There is nothing registered with name `{$endpointId}`. You can reverify the name using `ecotone:list` console command.");
+        throw InvalidArgumentException::create("Can't run `{$endpointId}` as it does not exists. Please verify, if the name is correct using `ecotone:list`.");
     }
 
     /**
@@ -272,7 +272,12 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         $gateway = $this->getGatewayByName(MessagingEntrypoint::class);
 
         $arguments = [];
+
         foreach ($parameters as $argumentName => $value) {
+            if (!$this->hasParameterWithGivenName($consoleCommandConfiguration, $argumentName)) {
+                continue;
+            }
+
             $arguments[$consoleCommandConfiguration->getHeaderNameForParameterName($argumentName)] = $value;
         }
         foreach ($consoleCommandConfiguration->getParameters() as $commandParameter) {
@@ -318,5 +323,21 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         }
 
         return $list;
+    }
+
+    /**
+     * @param ConsoleCommandConfiguration|null $consoleCommandConfiguration
+     * @param int|string $argumentName
+     * @return bool
+     */
+    private function hasParameterWithGivenName(?ConsoleCommandConfiguration $consoleCommandConfiguration, int|string $argumentName): bool
+    {
+        foreach ($consoleCommandConfiguration->getParameters() as $commandParameter) {
+            if ($commandParameter->getName() === $argumentName) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

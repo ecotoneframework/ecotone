@@ -9,6 +9,8 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
+use Ecotone\EventSourcing\Attribute\EventSourcedEvent;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use InvalidArgumentException;
 use function json_decode;
@@ -163,6 +165,18 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         }
 
         return $registrations;
+    }
+
+    public function getAttributeForClass(string $className, string $attributeClassName): object
+    {
+        $attributes = $this->getAnnotationsForClass($className);
+        foreach ($attributes as $attributeToVerify) {
+            if (TypeDescriptor::createFromVariable($attributeToVerify)->isCompatibleWith(TypeDescriptor::create($attributeClassName))) {
+                return $attributeToVerify;
+            }
+        }
+
+        throw \Ecotone\Messaging\Support\InvalidArgumentException::create("Can't find attribute {$attributeClassName} for {$className}");
     }
 
     /**

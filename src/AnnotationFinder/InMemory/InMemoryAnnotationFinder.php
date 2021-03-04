@@ -12,6 +12,8 @@ use Ecotone\AnnotationFinder\AnnotationResolver\CombinedResolver;
 use Ecotone\AnnotationFinder\AnnotationResolver\DoctrineAnnotationResolver;
 use Ecotone\AnnotationFinder\AnnotationResolver\OnlyAvailableResolver;
 use Ecotone\AnnotationFinder\TypeResolver;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 class InMemoryAnnotationFinder implements AnnotationFinder
 {
@@ -216,6 +218,18 @@ class InMemoryAnnotationFinder implements AnnotationFinder
         }
 
         return $registrations;
+    }
+
+    public function getAttributeForClass(string $className, string $attributeClassName): object
+    {
+        $attributes = $this->getAnnotationsForClass($className);
+        foreach ($attributes as $attributeToVerify) {
+            if (TypeDescriptor::create($attributeToVerify)->isCompatibleWith(TypeDescriptor::create($attributeClassName))) {
+                return $attributeToVerify;
+            }
+        }
+
+        throw \Ecotone\Messaging\Support\InvalidArgumentException::create("Can't find attribute {$attributeClassName} for {$className}");
     }
 
     /**

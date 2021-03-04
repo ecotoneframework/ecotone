@@ -260,16 +260,17 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         $classes      = [];
         $composerPath = rtrim(realpath($rootProjectDir), "/") . "/composer.json";
         if ($catalogToLoad && !file_exists($composerPath)) {
-            throw new InvalidArgumentException("Can't load src, composer.json not found in {$composerPath}");
+            throw new InvalidArgumentException("Ecotone requires psr-4 or psr-0 compatible autoload. Can't load src, composer.json not found in {$composerPath}");
         }
+        $catalogRelatedNamespaces = [];
         if ($catalogToLoad) {
             $composerJsonDecoded = json_decode(file_get_contents($composerPath), true);
 
             if (isset($composerJsonDecoded['autoload'])) {
-                $namespacesToUse = array_merge($namespacesToUse, $autoloadNamespaceParser->getNamespacesForGivenCatalog($composerJsonDecoded['autoload'], $catalogToLoad));
+                $catalogRelatedNamespaces = array_merge($catalogRelatedNamespaces, $autoloadNamespaceParser->getNamespacesForGivenCatalog($composerJsonDecoded['autoload'], $catalogToLoad));
             }
             if (isset($composerJsonDecoded['autoload-dev'])) {
-                $namespacesToUse = array_merge($namespacesToUse, $autoloadNamespaceParser->getNamespacesForGivenCatalog($composerJsonDecoded['autoload-dev'], $catalogToLoad));
+                $catalogRelatedNamespaces = array_merge($catalogRelatedNamespaces, $autoloadNamespaceParser->getNamespacesForGivenCatalog($composerJsonDecoded['autoload-dev'], $catalogToLoad));
             }
         }
 
@@ -279,12 +280,14 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             }, $namespacesToUse
         );
 
-        if ((!$namespacesToUse || $namespacesToUse === [FileSystemAnnotationFinder::FRAMEWORK_NAMESPACE]) && $catalogToLoad) {
+        if (!$catalogRelatedNamespaces && $catalogToLoad) {
             throw ConfigurationException::create("Ecotone cannot resolve namespaces in {$rootProjectDir}/$catalogToLoad. Please provide namespaces manually via configuration. If you do not know how to do it, read Modules section related to your framework at https://docs.ecotone.tech");
         }
 
         $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
+        $paths[] = $catalogToLoad;
 
+        $namespacesToUse = array_merge($namespacesToUse, $catalogRelatedNamespaces);
         foreach ($paths as $path) {
             $files = $this->getDirContents($path);
 

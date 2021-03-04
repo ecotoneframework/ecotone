@@ -1231,9 +1231,9 @@ final class MessagingSystemConfiguration implements Configuration
         return $this->consoleCommands;
     }
 
-    public function registerConsoleCommand(ConsoleCommandConfiguration $oneTimeCommandConfiguration): Configuration
+    public function registerConsoleCommand(ConsoleCommandConfiguration $consoleCommandConfiguration): Configuration
     {
-        $this->consoleCommands[] = $oneTimeCommandConfiguration;
+        $this->consoleCommands[] = $consoleCommandConfiguration;
 
         return $this;
     }

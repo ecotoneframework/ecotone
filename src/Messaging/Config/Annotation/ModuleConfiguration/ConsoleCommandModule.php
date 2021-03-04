@@ -122,10 +122,11 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
             if ($interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
                 $parameterConverters[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeDescriptor()->toString());
             } else {
-                $parameterConverters[] = HeaderBuilder::create($interfaceParameter->getName(), self::ECOTONE_COMMAND_PARAMETER_PREFIX . $interfaceParameter->getName());
+                $headerName = self::ECOTONE_COMMAND_PARAMETER_PREFIX . $interfaceParameter->getName();
+                $parameterConverters[] = HeaderBuilder::create($interfaceParameter->getName(), $headerName);
                 $parameters[]          = $interfaceParameter->hasDefaultValue()
-                    ? ConsoleCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $interfaceParameter->getDefaultValue())
-                    : ConsoleCommandParameter::create($interfaceParameter->getName());
+                    ? ConsoleCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $headerName, $interfaceParameter->getDefaultValue())
+                    : ConsoleCommandParameter::create($interfaceParameter->getName(), $headerName);
             }
         }
 

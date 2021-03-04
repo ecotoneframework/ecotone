@@ -1828,14 +1828,14 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("some"));
     }
 
-    public function test_calling_console_command()
+    public function test_calling_console_command_with_default()
     {
         $consoleCommandName = "someName";
         $channelName = MessagingEntrypoint::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
-            ConsoleCommandParameter::create("id"),
-            ConsoleCommandParameter::createWithDefaultValue("token", 123)
+            ConsoleCommandParameter::create("id", "header.id"),
+            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", 123)
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
@@ -1847,8 +1847,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $configuredMessagingSystem->runConsoleCommand($consoleCommandName, ["id" => 1]);
 
         $headers = $queueChannel->receive()->getHeaders()->headers();
-        $this->assertEquals(1, $headers["ecotone.oneTimeCommand.id"]);
-        $this->assertEquals(123, $headers["ecotone.oneTimeCommand.token"]);
+        $this->assertEquals(1, $headers["header.id"]);
+        $this->assertEquals(123, $headers["header.token"]);
     }
 
     public function test_calling_console_command_overriding_default_parameter()
@@ -1857,8 +1857,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelName = MessagingEntrypoint::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
-            ConsoleCommandParameter::create("id"),
-            ConsoleCommandParameter::createWithDefaultValue("token", 123)
+            ConsoleCommandParameter::create("id", "header.id"),
+            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", 123)
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
@@ -1870,7 +1870,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $configuredMessagingSystem->runConsoleCommand($consoleCommandName, ["id" => 1, "token" => 1000]);
 
         $headers = $queueChannel->receive()->getHeaders()->headers();
-        $this->assertEquals(1, $headers["ecotone.oneTimeCommand.id"]);
-        $this->assertEquals(1000, $headers["ecotone.oneTimeCommand.token"]);
+        $this->assertEquals(1, $headers["header.id"]);
+        $this->assertEquals(1000, $headers["header.token"]);
     }
 }

@@ -273,15 +273,15 @@ final class MessagingSystem implements ConfiguredMessagingSystem
 
         $arguments = [];
         foreach ($parameters as $argumentName => $value) {
-            $arguments[$this->getParameterHeaderName($argumentName)] = $value;
+            $arguments[$consoleCommandConfiguration->getHeaderNameForParameterName($argumentName)] = $value;
         }
         foreach ($consoleCommandConfiguration->getParameters() as $commandParameter) {
-            if (!array_key_exists($this->getParameterHeaderName($commandParameter->getName()), $arguments)) {
+            if (!array_key_exists($consoleCommandConfiguration->getHeaderNameForParameterName($commandParameter->getName()), $arguments)) {
                 if (!$commandParameter->hasDefaultValue()) {
                     throw InvalidArgumentException::create("Missing argument with name {$commandParameter->getName()} for console command {$commandName}");
                 }
 
-                $arguments[$this->getParameterHeaderName($commandParameter->getName())] = $commandParameter->getDefaultValue();
+                $arguments[$consoleCommandConfiguration->getHeaderNameForParameterName($commandParameter->getName())] = $commandParameter->getDefaultValue();
             }
         }
 
@@ -318,14 +318,5 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         }
 
         return $list;
-    }
-
-    /**
-     * @param int|string $argumentName
-     * @return string
-     */
-    private function getParameterHeaderName(int|string $argumentName): string
-    {
-        return ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . $argumentName;
     }
 }

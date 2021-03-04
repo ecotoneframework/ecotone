@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Messaging\Support\InvalidArgumentException;
+
 class ConsoleCommandConfiguration
 {
     private string $name;
@@ -19,6 +21,17 @@ class ConsoleCommandConfiguration
         $this->name               = $name;
         $this->channelName = $channelName;
         $this->parameterNames = $parameterNames;
+    }
+
+    public function getHeaderNameForParameterName(string $parameterName) : string
+    {
+        foreach ($this->parameterNames as $consoleCommandParameter) {
+            if ($consoleCommandParameter->getName() == $parameterName) {
+                return $consoleCommandParameter->getMessageHeaderName();
+            }
+        }
+
+        throw InvalidArgumentException::create("Can't find console parameter with name {$parameterName}");
     }
 
     /**

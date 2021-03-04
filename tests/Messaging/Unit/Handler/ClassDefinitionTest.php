@@ -14,6 +14,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\CollectionOfClassesFromDifferentNamespaceUsingGroupAlias;
 use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\Details\Description;
 use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\Details\ProductName;
+use Test\Ecotone\Messaging\Fixture\Conversion\InCorrectArrayDocblock;
 use Test\Ecotone\Messaging\Fixture\Conversion\PrivateRocketDetails\PrivateDetails;
 use Test\Ecotone\Messaging\Fixture\Conversion\Product;
 use Test\Ecotone\Messaging\Fixture\Conversion\PublicRocketDetails\PublicDetails;
@@ -191,6 +192,16 @@ class ClassDefinitionTest extends TestCase
         $this->assertEquals(
             ClassPropertyDefinition::createPrivate("owners", TypeDescriptor::create("array<Test\Ecotone\Messaging\Fixture\Conversion\Admin>"), false, false, []),
             $classDefinition->getProperty("owners")
+        );
+    }
+
+    public function test_ignoring_docblock_when_is_incorrect()
+    {
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(InCorrectArrayDocblock::class));
+
+        $this->assertEquals(
+            ClassPropertyDefinition::createPrivate("incorrectProperty", TypeDescriptor::createArrayType(), false, false, []),
+            $classDefinition->getProperty("incorrectProperty")
         );
     }
 }

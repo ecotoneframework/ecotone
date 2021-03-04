@@ -60,11 +60,12 @@ class TypeDescriptorTest extends TestCase
      * @throws TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function test_throwing_exception_if_doc_block_type_is_incorrect()
+    public function test_returning_base_type_when_docblock_is_incorrect()
     {
-        $this->expectException(TypeDefinitionException::class);
-
-        TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY,  "array<bla>");
+        $this->assertEquals(
+            TypeDescriptor::createArrayType(),
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY,  "array<bla>")
+        );
     }
 
     /**

@@ -252,16 +252,21 @@ final class TypeDescriptor implements Type
         $resolvedType = [];
         foreach (self::resolveType($typeHint)->getUnionTypes() as $declarationType) {
             if ($declarationType->isIterable() && !$declarationType->isCollection() && $docBlockTypeDescription) {
-                $docblockType = self::resolveType($docBlockTypeDescription);
-                if (!$docblockType->isCollection()) {
-                    $resolvedType[] = $declarationType;
-                    continue;
-                }
+                try {
+                    $docblockType = self::resolveType($docBlockTypeDescription);
 
-                foreach ($docblockType->getUnionTypes() as $type) {
-                    if ($type->isIterable()) {
-                        $resolvedType[] = $type;
+                    if (!$docblockType->isCollection()) {
+                        $resolvedType[] = $declarationType;
+                        continue;
                     }
+
+                    foreach ($docblockType->getUnionTypes() as $type) {
+                        if ($type->isIterable()) {
+                            $resolvedType[] = $type;
+                        }
+                    }
+                }catch (TypeDefinitionException $exception) {
+                    $resolvedType[] = $declarationType;
                 }
             }else {
                 $resolvedType[] = $declarationType;

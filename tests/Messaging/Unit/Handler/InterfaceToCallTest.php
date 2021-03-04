@@ -25,6 +25,7 @@ use Test\Ecotone\Messaging\Fixture\Conversion\Extra\LazyUser;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Permission;
 use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\CollectionOfClassesFromDifferentNamespaceUsingGroupAlias;
 use Test\Ecotone\Messaging\Fixture\Conversion\IgnoreDocblockClassLevel;
+use Test\Ecotone\Messaging\Fixture\Conversion\InCorrectArrayDocblock;
 use Test\Ecotone\Messaging\Fixture\Conversion\InCorrectInterfaceExample;
 use Test\Ecotone\Messaging\Fixture\Conversion\OnlineShop;
 use Test\Ecotone\Messaging\Fixture\Conversion\Password;
@@ -454,6 +455,22 @@ class InterfaceToCallTest extends TestCase
         $this->assertEquals(
             TypeDescriptor::create(TwoStepPassword::class),
             (InterfaceToCall::create(SuperAdmin::class, "getPassword"))->getReturnType()
+        );
+    }
+
+    public function test_ignoring_parameter_docblock_type_hint_if_incorrect()
+    {
+        $this->assertEquals(
+            TypeDescriptor::createArrayType(),
+            (InterfaceToCall::create(InCorrectArrayDocblock::class, "incorrectParameter"))->getParameterWithName("data")->getTypeDescriptor()
+        );
+    }
+
+    public function test_ignoring_return_type_docblock_type_hint_if_incorrect()
+    {
+        $this->assertEquals(
+            TypeDescriptor::createArrayType(),
+            (InterfaceToCall::create(InCorrectArrayDocblock::class, "incorrectReturnType"))->getReturnType()
         );
     }
 

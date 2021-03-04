@@ -427,7 +427,7 @@ class TypeResolver
                 $this->expandParameterTypeHint($matchedDocBlockParameterTypes[1][0], $thisClass, $analyzedClass, $declaringClass)
             );
         }catch (TypeDefinitionException $typeDefinitionException) {
-            throw TypeDefinitionException::create("There is problem with type of property {$reflectionProperty->getName()} in class {$analyzedClass->getName()}: {$typeDefinitionException}");
+            return null;
         }
 
         return $typeDescriptor;

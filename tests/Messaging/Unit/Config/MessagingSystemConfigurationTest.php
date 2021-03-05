@@ -133,7 +133,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $message = MessageBuilder::withPayload("a")->build();
         $pollableChannel->send($message);
 
-        $messagingSystem->runAsynchronouslyRunningEndpoint($messagingSystem->getListOfAsynchronouslyRunningConsumers()[0]);
+        $messagingSystem->run($messagingSystem->list()[0]);
 
         $this->assertTrue($messageHandler->wasCalled());
     }
@@ -149,7 +149,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $this->expectException(InvalidArgumentException::class);
 
-        $messagingSystem->runAsynchronouslyRunningEndpoint("some");
+        $messagingSystem->run("some");
     }
 
     public function test_adding_optional_references()
@@ -247,7 +247,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $channel->send($message);
         $this->assertNull($calculatingService->getLastResult());
-        $configuredMessagingSystem->runAsynchronouslyRunningEndpoint("asyncChannel");
+        $configuredMessagingSystem->run("asyncChannel");
         $this->assertEquals(2, $calculatingService->getLastResult());
     }
 
@@ -282,7 +282,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         $channel->send($message);
         $this->assertNull($calculatingService->getLastResult());
-        $configuredMessagingSystem->runAsynchronouslyRunningEndpoint("asyncChannel");
+        $configuredMessagingSystem->run("asyncChannel");
         $this->assertEquals(3, $calculatingService->getLastResult());
     }
 
@@ -1002,7 +1002,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem->getMessageChannelByName($inputMessageChannelName)
             ->send(MessageBuilder::withPayload("some")->build());
 
-        $messagingSystem->runAsynchronouslyRunningEndpoint($endpointName);
+        $messagingSystem->run($endpointName);
 
         $this->assertNotNull($errorChannel->receive());
     }
@@ -1034,7 +1034,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem->getMessageChannelByName($inputMessageChannelName)
             ->send(MessageBuilder::withPayload("some")->build());
 
-        $messagingSystem->runAsynchronouslyRunningEndpoint($endpointName);
+        $messagingSystem->run($endpointName);
 
         $this->assertNotNull($errorChannel->receive());
     }
@@ -1070,7 +1070,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $messagingSystem->getMessageChannelByName($inputMessageChannelName)
             ->send(MessageBuilder::withPayload("some")->build());
 
-        $messagingSystem->runAsynchronouslyRunningEndpoint($endpointName);
+        $messagingSystem->run($endpointName);
     }
 
     public function test_throwing_exception_if_registering_inbound_channel_adapter_with_same_names()
@@ -1162,7 +1162,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             )
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $messagingSystem->runAsynchronouslyRunningEndpoint($endpointName);
+        $messagingSystem->run($endpointName);
 
         $this->assertEquals(42, $lastServiceFromChain->getLastResult());
     }
@@ -1216,7 +1216,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             )
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $messagingSystem->runAsynchronouslyRunningEndpoint($endpointName);
+        $messagingSystem->run($endpointName);
 
         $this->assertEquals(3, $interceptingHandler->getCallCount());
     }

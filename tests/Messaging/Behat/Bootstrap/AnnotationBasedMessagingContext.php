@@ -313,7 +313,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iCalculateUsingInboundChannelAdapter()
     {
-        self::$messagingSystem->runAsynchronouslyRunningEndpoint("inboundCalculator");
+        self::$messagingSystem->run("inboundCalculator");
     }
 
     /**
@@ -386,7 +386,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iCallPollableEndpoint(string $endpointId)
     {
-        self::$messagingSystem->runAsynchronouslyRunningEndpoint($endpointId);
+        self::$messagingSystem->run($endpointId);
     }
 
     /**
@@ -455,7 +455,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iActiveReceiver($receiverName)
     {
-        self::$messagingSystem->runAsynchronouslyRunningEndpoint($receiverName);
+        self::$messagingSystem->run($receiverName);
     }
 
     /**

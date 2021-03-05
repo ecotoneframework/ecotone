@@ -224,7 +224,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function runAsynchronouslyRunningEndpoint(string $endpointId): void
+    public function run(string $endpointId): void
     {
         foreach ($this->consumers as $consumer) {
             if ($consumer->getConsumerName() === $endpointId) {
@@ -312,7 +312,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     /**
      * @inheritDoc
      */
-    public function getListOfAsynchronouslyRunningConsumers(): array
+    public function list(): array
     {
         $list = [];
 

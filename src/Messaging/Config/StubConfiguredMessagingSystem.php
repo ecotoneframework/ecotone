@@ -28,12 +28,12 @@ class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
         throw new \InvalidArgumentException("Calling stub messaging system");
     }
 
-    public function runAsynchronouslyRunningEndpoint(string $endpointId): void
+    public function run(string $endpointId): void
     {
         throw new \InvalidArgumentException("Calling stub messaging system");
     }
 
-    public function getListOfAsynchronouslyRunningConsumers(): array
+    public function list(): array
     {
         throw new \InvalidArgumentException("Calling stub messaging system");
     }

@@ -37,13 +37,10 @@ interface ConfiguredMessagingSystem
      */
     public function getMessageChannelByName(string $channelName) : MessageChannel;
 
-    /**
-     * @param string $endpointId
-     */
-    public function runAsynchronouslyRunningEndpoint(string $endpointId) : void;
+    public function run(string $endpointId) : void;
 
     /**
-     * @return array|string[]
+     * @return string[]
      */
-    public function getListOfAsynchronouslyRunningConsumers() : array;
+    public function list() : array;
 }

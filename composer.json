@@ -1,7 +1,7 @@
 {
     "name": "ecotone/ecotone",
     "license": "MIT",
-    "homepage": "https://docs.ecotone.tech/",
+    "homepage": "https://docs.ecotone.tech",
     "type": "library",
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -11,8 +11,8 @@
             "email": "dgafka.mail@gmail.com"
         }
     ],
-    "keywords": ["ddd","cqrs","messaging","eip", "distributed architecture","ecotone", "ddd and cqrs on top of eip"],
-    "description": "Ecotone provides support for well known Enterprise Integration Patterns (EIP), to enable message driven architecture in PHP. On top of that follow an architectural pattern which is based on the principles of Domain-Driven Design (DDD) and Command Query Responsibility Segregation (CQRS) and provides you with the necessary building blocks to follow these principles",
+    "keywords": ["ddd","cqrs","event sourcing","messaging","eip", "distributed architecture","ecotone", "service bus", "service-bus", "es", "php"],
+    "description": "Ecotone Framework is Service Bus Implementation. It enables message driven architecture and DDD, CQRS, Event Sourcing in PHP",
     "autoload": {
         "psr-4": {
             "Ecotone\\": "src"

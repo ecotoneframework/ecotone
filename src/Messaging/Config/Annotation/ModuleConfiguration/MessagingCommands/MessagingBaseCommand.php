@@ -7,9 +7,9 @@ use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 
 class MessagingBaseCommand
 {
-    public function executeConsoleCommand(string $commandName, array $parameters, ConfiguredMessagingSystem $configuredMessagingSystem) : void
+    public function executeConsoleCommand(string $commandName, array $parameters, ConfiguredMessagingSystem $configuredMessagingSystem) : mixed
     {
-        $configuredMessagingSystem->runConsoleCommand($commandName, $parameters);
+        return $configuredMessagingSystem->runConsoleCommand($commandName, $parameters);
     }
 
     public function runAsynchronousEndpointCommand(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem) : void

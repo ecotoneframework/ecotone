@@ -99,6 +99,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
             }else {
                 Assert::isTrue(!$aggregateMethodWithEvents, "{$interfaceToCall} has defined " . AggregateEvents::class . " attribute for a method. However aggregate has not defined internal event recorder. You may change it in " . EventSourcedAggregate::class . " attribute.");
             }
+            Assert::notNull($this->eventSourcedFactoryMethod, "Event Sourced Aggregate must have method annotated with " . AggregateFactory::class . " in order to rebuild the aggregate.");
         }
 
         $aggregateVersionPropertyName = null;

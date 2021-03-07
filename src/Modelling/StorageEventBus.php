@@ -23,7 +23,7 @@ class StorageEventBus implements EventBus
         $this->calls[] = [$event, $metadata];
     }
 
-    public function publishWithRouting(string $routingKey, mixed $event, string $eventMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []) : void
+    public function publishWithRouting(string $routingKey, mixed $event = [], string $eventMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []) : void
     {
         $this->calls[] = [$routingKey, $event, $eventMediaType, $metadata];
     }

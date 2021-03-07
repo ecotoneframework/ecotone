@@ -282,7 +282,9 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         }
 
         $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
-        $paths[] = $catalogToLoad;
+        if ($catalogToLoad) {
+            $paths[] = $rootProjectDir . DIRECTORY_SEPARATOR . $catalogToLoad;
+        }
 
         $namespacesToUse = array_merge($namespacesToUse, $catalogRelatedNamespaces);
         foreach ($paths as $path) {

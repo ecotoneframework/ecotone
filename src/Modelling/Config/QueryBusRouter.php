@@ -35,7 +35,7 @@ class QueryBusRouter
 
         $className = get_class($object);
         if (!array_key_exists($className, $this->channelMapping)) {
-            throw DestinationResolutionException::create("Can't send query to {$className}. No Query Handler defined for it. Have you forgot to add @QueryHandler to method?");
+            throw DestinationResolutionException::create("Can't send query to {$className}. No Query Handler defined for it. Have you forgot to add #[QueryHandler] to method?");
         }
 
         return $this->channelMapping[$className];
@@ -48,7 +48,7 @@ class QueryBusRouter
         }
 
         if (!array_key_exists($name, $this->channelMapping)) {
-            throw DestinationResolutionException::create("Can't send query to {$name}. No Query Handler defined for it. Have you forgot to add @QueryHandler to method?");
+            throw DestinationResolutionException::create("Can't send query to {$name}. No Query Handler defined for it. Have you forgot to add #[QueryHandler] to method?");
         }
 
         return $this->channelMapping[$name];

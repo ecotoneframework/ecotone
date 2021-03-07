@@ -757,12 +757,6 @@ final class MessagingSystemConfiguration implements Configuration
     public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ServiceConfiguration $applicationConfiguration): MessagingSystemConfiguration
     {
         $cacheDirectoryPath = $applicationConfiguration->getCacheDirectoryPath();
-
-        $cachedVersion = self::getCachedVersion($applicationConfiguration);
-        if ($cachedVersion) {
-            return $cachedVersion;
-        }
-
         if ($cacheDirectoryPath) {
             self::prepareCacheDirectory($cacheDirectoryPath);
         }

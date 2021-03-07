@@ -264,7 +264,8 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             __DIR__ . "/../../../../",
             InMemoryPSRContainer::createFromObjects($objects),
             $applicationConfiguration,
-            []
+            [],
+            false
         );
     }
 

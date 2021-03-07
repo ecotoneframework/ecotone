@@ -715,11 +715,13 @@ final class MessagingSystemConfiguration implements Configuration
         return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), ServiceConfiguration::createWithDefaults());
     }
 
-    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration): Configuration
+    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration, bool $useCachedVersion): Configuration
     {
-        $cachedVersion = self::getCachedVersion($applicationConfiguration);
-        if ($cachedVersion) {
-            return $cachedVersion;
+        if ($useCachedVersion) {
+            $cachedVersion = self::getCachedVersion($applicationConfiguration);
+            if ($cachedVersion) {
+                return $cachedVersion;
+            }
         }
 
         return self::prepareWithModuleRetrievingService(

@@ -23,8 +23,8 @@ class EcotoneLiteConfigurationTest extends TestCase
     {
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
                                         ->withCacheDirectoryPath("/tmp/" . Uuid::uuid4()->toString());
-        $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration, []);
-        $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration, []);
+        $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true);
+        $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true);
 
         $this->assertEquals($configuration1, $configuration2);
     }
@@ -36,7 +36,7 @@ class EcotoneLiteConfigurationTest extends TestCase
         ]);
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
                                 ->withNamespaces(["Test\Ecotone\Messaging\Fixture\Behat\Presend"]);
-        $configuration = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", $container, $serviceConfiguration, []);
+        $configuration = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", $container, $serviceConfiguration, [], false);
 
         $this->assertEquals(
             $configuration->getGatewayByName(CoinGateway::class),

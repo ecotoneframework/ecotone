@@ -31,10 +31,10 @@ class EcotoneLiteConfiguration
 {
     public static function create(string $rootProjectDirectoryPath, ContainerInterface|GatewayAwareContainer $container) : ConfiguredMessagingSystem
     {
-        return self::createWithConfiguration($rootProjectDirectoryPath, $container, ServiceConfiguration::createWithDefaults(), []);
+        return self::createWithConfiguration($rootProjectDirectoryPath, $container, ServiceConfiguration::createWithDefaults(), [], false);
     }
 
-    public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface|GatewayAwareContainer $container, ServiceConfiguration $serviceConfiguration, array $configurationVariables): ConfiguredMessagingSystem
+    public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface|GatewayAwareContainer $container, ServiceConfiguration $serviceConfiguration, array $configurationVariables, bool $useCachedVersion): ConfiguredMessagingSystem
     {
         $serviceConfiguration = $serviceConfiguration->withNamespaces(array_merge(
             $serviceConfiguration->getNamespaces(),
@@ -45,7 +45,8 @@ class EcotoneLiteConfiguration
             realpath($rootProjectDirectoryPath),
             new TypeResolver($container),
             InMemoryConfigurationVariableService::create($configurationVariables),
-            $serviceConfiguration
+            $serviceConfiguration,
+            $useCachedVersion
         )->buildMessagingSystemFromConfiguration(new PsrContainerReferenceSearchService($container, ["logger" => new EchoLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()]));
 
         if ($container instanceof GatewayAwareContainer) {

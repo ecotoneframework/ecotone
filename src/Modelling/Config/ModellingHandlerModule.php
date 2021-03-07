@@ -247,7 +247,7 @@ class ModellingHandlerModule implements AnnotationModule
         if (!$inputChannelName) {
             $interfaceToCall = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
             if ($interfaceToCall->hasNoParameters()) {
-                throw ConfigurationException::create("Missing command class or input channel for {$registration}.");
+                throw ConfigurationException::create("Missing class type hint or routing key for {$registration}.");
             }
             if ($interfaceToCall->getFirstParameter()->getTypeDescriptor()->isUnionType()) {
                 throw ConfigurationException::create("Query and Command handlers can not be registered with union Command type in {$registration}");

@@ -21,6 +21,14 @@ The quickstart [page](https://docs.ecotone.tech/quick-start) of the
 Use [issue tracking system](https://github.com/ecotoneframework/ecotone/issues) for new feature request and bugs. 
 Please verify that it's not already reported by someone else.
 
+## Contact
+
+If you want to talk or ask question about Ecotone
+
+- [**Twitter**](https://twitter.com/EcotonePHP)
+- **ecotoneframework@gmail.com**
+- [**Gitter**](https://gitter.im/EcotonePHP/community)
+
 ## Support Ecotone
 
 If you want to help building and improving Ecotone consider becoming a sponsor:

@@ -21,6 +21,7 @@ use Ecotone\Messaging\Endpoint\AcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\Interceptor\ConnectionExceptionRetryInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
@@ -37,6 +38,7 @@ use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -99,6 +101,9 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             InterfaceToCall::create(ChainForwardPublisher::class, "forward"),
             InterfaceToCall::create(BeforeSendGateway::class, "execute"),
             InterfaceToCall::create(AcknowledgeConfirmationInterceptor::class, "ack"),
+            InterfaceToCall::create(InboundGatewayEntrypoint::class, "executeEntrypoint"),
+            InterfaceToCall::create(InboundChannelAdapterEntrypoint::class, "executeEntrypoint"),
+            InterfaceToCall::create(LoggingInterceptor::class, "logException")
         ]);
         $configuration
             ->registerInternalGateway(TypeDescriptor::create(InboundGatewayEntrypoint::class))

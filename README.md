@@ -6,8 +6,7 @@
 [![Latest Stable Version](https://poser.pugx.org/ecotone/ecotone/v/stable)](https://packagist.org/packages/ecotone/ecotone)
 [![Coverage Status](https://coveralls.io/repos/github/ecotoneframework/ecotone/badge.svg?branch=master)](https://coveralls.io/github/ecotoneframework/ecotone?branch=master)
 
-`Ecotone Framework` is Service Bus Implementation for PHP.  
-`Ecotone` enables true  `message driven architecture` in PHP, using Enterprise Integration Patterns (EIP). On top of that follow an architectural patterns which are based on the principles of `Domain-Driven Design (DDD)`, `Command Query Responsibility Segregation (CQRS)` and `Event Sourcing (ES)`.
+`Ecotone` is `Service Bus` Implementation, which enables `message driven architecture` with `DDD`, `CQRS`, `Event Sourcing` in `PHP`
 
 Ecotone provides PHP with `Command Bus`, `Query Bus`, `Event Bus`, `Interceptors`, `Aggregates`, `Sagas`, `Event Sourcing` built on solutions that are message driven at the fundamental levels, and using integration with well known and stable solutions like `Enqueue for asynchronous communication` and `Prooph for Event Sourcing`.
 

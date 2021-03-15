@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
@@ -81,6 +83,11 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
     public function getRequiredReferenceNames(): array
     {
         return $this->referenceName ? [$this->referenceName] : [];
+    }
+
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    {
+        return [];
     }
 
     /**

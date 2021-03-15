@@ -27,6 +27,7 @@ use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
@@ -94,9 +95,10 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             InterfaceToCall::create(LimitExecutionAmountInterceptor::class, "postSend"),
             InterfaceToCall::create(LimitMemoryUsageInterceptor::class, "postSend"),
             InterfaceToCall::create(SignalInterceptor::class, "postSend"),
+            InterfaceToCall::create(TimeLimitInterceptor::class, "postSend"),
             InterfaceToCall::create(ChainForwardPublisher::class, "forward"),
             InterfaceToCall::create(BeforeSendGateway::class, "execute"),
-            InterfaceToCall::create(AcknowledgeConfirmationInterceptor::class, "ack")
+            InterfaceToCall::create(AcknowledgeConfirmationInterceptor::class, "ack"),
         ]);
         $configuration
             ->registerInternalGateway(TypeDescriptor::create(InboundGatewayEntrypoint::class))

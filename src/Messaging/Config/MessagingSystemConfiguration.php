@@ -336,6 +336,14 @@ final class MessagingSystemConfiguration implements Configuration
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->messageHandlerBuilders);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->gatewayBuilders);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->channelAdapters);
+        foreach ($this->channelBuilders as $channelBuilder) {
+            $channelBuilder->resolveRelatedInterfaces($interfaceToCallRegistry);
+        }
+        foreach ($this->channelInterceptorBuilders as $channelInterceptorForName) {
+            foreach ($channelInterceptorForName as $channelInterceptorBuilder) {
+                $channelInterceptorBuilder->resolveRelatedInterfaces($interfaceToCallRegistry);
+            }
+        }
 
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $this->addDefaultPollingConfiguration($messageHandlerBuilder->getEndpointId());
@@ -718,6 +726,7 @@ final class MessagingSystemConfiguration implements Configuration
     public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration, bool $useCachedVersion): Configuration
     {
         if ($useCachedVersion) {
+            Assert::isTrue((bool)$applicationConfiguration->getCacheDirectoryPath(), "Can't make use of cached version of messaging if no cache path is defined");
             $cachedVersion = self::getCachedVersion($applicationConfiguration);
             if ($cachedVersion) {
                 return $cachedVersion;

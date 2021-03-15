@@ -255,8 +255,9 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
         $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "ecotone_testing_behat_cache";
 
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
-            ->withEnvironment("test")
+            ->withEnvironment("prod")
             ->withCacheDirectoryPath($cacheDirectoryPath)
+            ->withFailFast(false)
             ->withNamespaces([$namespace]);
 
         MessagingSystemConfiguration::cleanCache($applicationConfiguration->getCacheDirectoryPath());
@@ -265,7 +266,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             InMemoryPSRContainer::createFromObjects($objects),
             $applicationConfiguration,
             [],
-            false
+            true
         );
     }
 

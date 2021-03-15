@@ -8,6 +8,8 @@ use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ramsey\Uuid\Uuid;
@@ -42,6 +44,14 @@ class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
     public function getRequiredReferenceNames(): array
     {
         return [];
+    }
+
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    {
+        return array_merge(
+            $this->gateway->resolveRelatedInterfaces($interfaceToCallRegistry),
+            $this->methodInterceptor->getMessageHandler()->resolveRelatedInterfaces($interfaceToCallRegistry)
+        );
     }
 
     /**

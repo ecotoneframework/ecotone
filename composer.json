@@ -11,8 +11,8 @@
             "email": "dgafka.mail@gmail.com"
         }
     ],
-    "keywords": ["ddd","cqrs","event sourcing","messaging","eip", "distributed architecture","ecotone", "service bus", "service-bus", "es", "php"],
-    "description": "Ecotone Framework is Service Bus Implementation. It enables message driven architecture and DDD, CQRS, Event Sourcing in PHP",
+    "keywords": ["ddd","cqrs","EventSourcing","ecotone", "service-bus"],
+    "description": "Ecotone is Service Bus Implementation, which enables message driven architecture with DDD, CQRS, Event Sourcing in PHP",
     "autoload": {
         "psr-4": {
             "Ecotone\\": "src"

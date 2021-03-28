@@ -34,3 +34,7 @@ If you want to help building and improving Ecotone consider becoming a sponsor:
 
 - [Github](https://github.com/sponsors/dgafka)
 - [Patreon](https://www.patreon.com/dgafka)
+
+## Tags
+
+PHP DDD CQRS Event Sourcing Symfony Laravel Service Bus

@@ -4,7 +4,7 @@
 namespace Ecotone\Modelling;
 
 
-use Ecotone\EventSourcing\Event;
+use Ecotone\Modelling\Event;
 use Ecotone\Messaging\Support\Assert;
 
 class EventStream

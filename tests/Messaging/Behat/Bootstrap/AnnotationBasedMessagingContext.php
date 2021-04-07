@@ -34,6 +34,8 @@ use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExampl
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\InterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\CalculateGatewayExampleWithMessages;
+use Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledExample;
+use Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\CoinGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
@@ -142,6 +144,14 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     $objects = [
                         MultiplyCoins::class => new MultiplyCoins(),
                         Shop::class => new Shop(),
+                        LoggingService::class => new LoggingService()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled":
+                {
+                    $objects = [
+                        InterceptedScheduledExample::class => new InterceptedScheduledExample(),
                         LoggingService::class => new LoggingService()
                     ];
                     break;
@@ -555,5 +565,19 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
         $coinGateway = self::$messagingSystem->getGatewayByName(CoinGateway::class);
 
         $coinGateway->store($amount);
+    }
+
+    /**
+     * @Then result from scheduled endpoint should be :expectedAmount
+     */
+    public function resultFromScheduledEndpointShouldBe(int $expectedAmount)
+    {
+        /** @var InterceptedScheduledGateway $gateway */
+        $gateway = self::$messagingSystem->getGatewayByName(InterceptedScheduledGateway::class);
+
+        Assert::assertEquals(
+            $expectedAmount,
+            $gateway->getInterceptedData()
+        );
     }
 }

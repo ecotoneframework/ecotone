@@ -21,6 +21,10 @@ interface Precedence
      * Errors are send to error channel at this precedence
      */
     const ERROR_CHANNEL_PRECEDENCE = -1000000;
+
+    const SYSTEM_PRECEDENCE_BEFORE = -1001;
+    const SYSTEM_PRECEDENCE_AFTER = 1001;
+
     /**
      * Endpoint headers like delivery delay, priority, time to live
      */

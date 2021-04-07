@@ -367,15 +367,6 @@ class BusRoutingModuleTest extends MessagingTest
         $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]]);
     }
 
-    public function test_not_routing_to_projection_event_handlers_for_event_bus()
-    {
-        $annotatedClasses = [
-            ProjectionEventHandlerExample::class
-        ];
-
-        $this->assertRouting($annotatedClasses, [], [], [], [], [], []);
-    }
-
     public function test_union_registering_service_event_handler()
     {
         $annotatedClasses = [EventHandlerForUnionType::class];

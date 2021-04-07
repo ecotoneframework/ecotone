@@ -155,3 +155,8 @@ Feature: Service activator
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\Presend"
     When I store 100 coins
     Then result should be 200 in "shop" channel
+
+  Scenario: Handle intercepted scheduled endpoint in recursion
+    Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled"
+    When I call pollable endpoint "scheduled.handler"
+    Then result from scheduled endpoint should be 160

@@ -227,9 +227,6 @@ class BusRoutingModule implements AnnotationModule
             if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) || !$registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
-            if ($registration->hasClassAnnotation(Projection::class)) {
-                continue;
-            }
 
             $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration);
             $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
@@ -246,9 +243,7 @@ class BusRoutingModule implements AnnotationModule
             if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
                 continue;
             }
-            if ($registration->hasClassAnnotation(Projection::class)) {
-                continue;
-            }
+
             if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) || !$registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
@@ -273,9 +268,6 @@ class BusRoutingModule implements AnnotationModule
             /** @var EventHandler $annotation */
             $annotation = $registration->getAnnotationForMethod();
             if ($registration->hasClassAnnotation(Aggregate::class)) {
-                continue;
-            }
-            if ($registration->hasClassAnnotation(Projection::class)) {
                 continue;
             }
             if ($hasToBeDistributed && !$registration->hasMethodAnnotation(Distributed::class)) {
@@ -304,9 +296,6 @@ class BusRoutingModule implements AnnotationModule
             $channelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
             if (EventBusRouter::isRegexBasedRoute($channelName)) {
                 throw ConfigurationException::create("Can not registered regex listen to channel for aggregates in {$registration}");
-            }
-            if ($registration->hasClassAnnotation(Projection::class)) {
-                continue;
             }
             if ($hasToBeDistributed && !$registration->hasMethodAnnotation(Distributed::class)) {
                 continue;

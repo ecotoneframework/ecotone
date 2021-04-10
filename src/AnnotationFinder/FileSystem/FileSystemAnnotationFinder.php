@@ -329,11 +329,9 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             if (strpos($namespace, $namespaceToUse) === 0) {
                 $namespaceSuffix = str_replace($namespaceToUse, "", $namespace);
 
-                if ($namespaceSuffix === "") {
+                if ($namespaceSuffix === "" || $namespaceSuffix[0] === "\\") {
                     return true;
                 }
-
-                return $namespaceSuffix[0] === "\\";
             }
         }
 

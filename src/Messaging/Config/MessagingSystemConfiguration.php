@@ -10,6 +10,7 @@ use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\BeforeSend\BeforeSendChannelInterceptorBuilder;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
@@ -439,7 +440,7 @@ final class MessagingSystemConfiguration implements Configuration
             foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {
                 if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
                     $originalInputChannelName = $messageHandlerBuilder->getInputMessageChannelName();
-                    $targetChannelName = $originalInputChannelName . ".async";
+                    $targetChannelName        = AsynchronousModule::getSynchronousChannelName($originalInputChannelName);
                     $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withInputChannelName($targetChannelName);
 
                     $this->messageHandlerBuilders[$targetChannelName] = (

@@ -93,15 +93,15 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
         return new self($registeredAsyncEndpoints);
     }
 
-    public function getSynchronousChannelFor(string $originalInputChannelName): string
+    public function getSynchronousChannelFor(string $handlerChannelName, string $endpointId): ?string
     {
         foreach ($this->asyncEndpoints as $channelName => $endpointNames) {
-            if ($channelName === $originalInputChannelName) {
-                return self::getSynchronousChannelName($originalInputChannelName);
+            if (in_array($endpointId, $endpointNames)) {
+                return self::getSynchronousChannelName($handlerChannelName);
             }
         }
 
-        return $originalInputChannelName;
+        return $handlerChannelName;
     }
 
     public static function getSynchronousChannelName(string $originalInputChannelName): string

@@ -63,6 +63,13 @@ class PollingMetadata
         return new self($endpointId);
     }
 
+    public function withTestingSetup(): self
+    {
+        return $this
+            ->setExecutionAmountLimit(1)
+            ->setExecutionTimeLimitInMilliseconds(1);
+    }
+
     /**
      * @param PollingMetadata $pollingMetadata
      * @return PollingMetadata

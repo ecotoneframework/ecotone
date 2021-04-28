@@ -9,7 +9,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 
 class RepositoryStorage
 {
@@ -34,7 +34,7 @@ class RepositoryStorage
             /** @var EventSourcedRepository|StandardRepository|RepositoryBuilder $repository */
             $repository = $this->referenceSearchService->get($this->aggregateRepositoryReferenceNames[0]);
             if ($this->isEventSourced($repository) && !$this->isEventSourcedAggregate) {
-                throw InvalidArgumentException::create("There is only one repository registered. For event sourcing usage, however aggregate {$this->aggregateClassName} is not event sourced. If it should be event sourced change attribute to " . EventSourcedAggregate::class);
+                throw InvalidArgumentException::create("There is only one repository registered. For event sourcing usage, however aggregate {$this->aggregateClassName} is not event sourced. If it should be event sourced change attribute to " . EventSourcingAggregate::class);
             } else if (!$this->isEventSourced($repository) && $this->isEventSourcedAggregate) {
                 throw InvalidArgumentException::create("There is only one repository registered. For standard aggregate usage, however aggregate {$this->aggregateClassName} is event sourced. If it should be standard change attribute to " . Aggregate::class);
             }

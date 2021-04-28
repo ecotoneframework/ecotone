@@ -22,7 +22,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateVersion;
-use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 
 class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
@@ -44,7 +44,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      */
     private array $aggregateRepositoryReferenceNames = [];
     private bool $isVoidMethod;
-    private ?string $eventSourcedFactoryMethod;
+    private EventSourcingHandlerExecutor $eventSourcingHandlerExecutor;
     private ?string $aggregateMethodWithEvents;
     private ?string $aggregateVersionProperty;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
@@ -62,18 +62,6 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $interfaceToCall = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $methodName);
         $this->isVoidMethod = $interfaceToCall->getReturnType()->isVoid();
 
-        $eventSourcedFactoryMethod = null;
-        $aggregateFactoryAnnotation = TypeDescriptor::create(AggregateFactory::class);
-        foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
-            $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
-
-            if ($methodToCheck->hasMethodAnnotation($aggregateFactoryAnnotation)) {
-                $eventSourcedFactoryMethod = $method;
-                break;
-            }
-        }
-        $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
-
         $aggregateMethodWithEvents    = null;
         $aggregateEventsAnnotation = TypeDescriptor::create(AggregateEvents::class);
         foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
@@ -86,20 +74,9 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         }
         $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
 
-        $hasInternalEventRecorder = null;
-        $eventSourcedAggregateAnnotation = TypeDescriptor::create(EventSourcedAggregate::class);
+        $eventSourcedAggregateAnnotation = TypeDescriptor::create(EventSourcingAggregate::class);
         if ($interfaceToCall->hasClassAnnotation($eventSourcedAggregateAnnotation)) {
             $this->isEventSourced = true;
-            /** @var EventSourcedAggregate $annotation */
-            $annotation = $interfaceToCall->getClassAnnotation($eventSourcedAggregateAnnotation);
-            $hasInternalEventRecorder = $annotation->hasInternalEventRecorder();
-
-            if ($hasInternalEventRecorder) {
-                Assert::isTrue($aggregateMethodWithEvents, "{$interfaceToCall} has defined to use internal event recorder. Method with attribute " . AggregateEvents::class . " must be defined.");
-            }else {
-                Assert::isTrue(!$aggregateMethodWithEvents, "{$interfaceToCall} has defined " . AggregateEvents::class . " attribute for a method. However aggregate has not defined internal event recorder. You may change it in " . EventSourcedAggregate::class . " attribute.");
-            }
-            Assert::notNull($this->eventSourcedFactoryMethod, "Event Sourced Aggregate must have method annotated with " . AggregateFactory::class . " in order to rebuild the aggregate.");
         }
 
         $aggregateVersionPropertyName = null;
@@ -119,6 +96,11 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         }
 
         $this->interfaceToCall = $interfaceToCall;
+        $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutor::createFor($aggregateClassDefinition, $this->isEventSourced);
+        $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
+        if (!$this->isEventSourced && $isFactoryMethod) {
+            Assert::isTrue($this->interfaceToCall->getReturnType()->isClassNotInterface(), "Factory method {$this->interfaceToCall} for standard aggregate should return object. Did you wanted to register Event Sourced Aggregate?");
+        }
     }
 
     public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, bool $isCommandHandler): self
@@ -159,13 +141,8 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
-        if (!$this->isEventSourced && $isFactoryMethod) {
-            Assert::isTrue($this->interfaceToCall->getReturnType()->isClassNotInterface(), "Factory method {$this->interfaceToCall} for standard aggregate should return object. Did you wanted to register Event Sourced Aggregate?");
-        }
-
         $handler = ServiceActivatorBuilder::createWithDirectReference(
-            new CallAggregateService($this->interfaceToCall, $this->isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $isFactoryMethod, $this->eventSourcedFactoryMethod, $this->aggregateVersionProperty, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),
+            new CallAggregateService($this->interfaceToCall, $this->isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $this->interfaceToCall->isStaticallyCalled(), $this->eventSourcingHandlerExecutor, $this->aggregateVersionProperty, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),
             "call"
         )
             ->withPassThroughMessageOnVoidInterface($this->isVoidMethod)

@@ -8,9 +8,10 @@ use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingHandler;
 
-#[EventSourcedAggregate]
+#[EventSourcingAggregate]
 class IncorrectEventTypeReturnedExample
 {
     #[AggregateIdentifier]
@@ -22,12 +23,8 @@ class IncorrectEventTypeReturnedExample
         return [["id" => 1]];
     }
 
-    #[AggregateFactory]
-    public static function factory(array $events) : self
+    #[EventSourcingHandler]
+    public static function factory(\stdClass $event) : void
     {
-        $noIdDefinedAfterCallingFactoryExample = new self();
-        $noIdDefinedAfterCallingFactoryExample->id = 1;
-
-        return $noIdDefinedAfterCallingFactoryExample;
     }
 }

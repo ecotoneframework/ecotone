@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory;
 
-use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 
-#[EventSourcedAggregate]
+#[EventSourcingAggregate]
 class CreateNoIdDefinedAggregate
 {
 

@@ -214,9 +214,11 @@ class CallAggregateBuilderTest extends TestCase
             ])
         );
 
+        $ticket = new Ticket();
+        $ticket->onTicketWasStarted(new TicketWasStartedEvent($ticketId));
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload($commandToRun)
-                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, Ticket::createFrom([new TicketWasStartedEvent($ticketId)]))
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $ticket)
                 ->setReplyChannel($queueChannel)->build()
         );
 

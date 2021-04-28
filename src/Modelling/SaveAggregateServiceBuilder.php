@@ -23,7 +23,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateVersion;
-use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Config\BusModule;
 
 /**
@@ -189,7 +189,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
             }
         }
 
-        $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcedAggregate::class));
+        $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class));
         $aggregateIdentifierAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
         $aggregateIdentifiers          = [];
         foreach ($aggregateClassDefinition->getProperties() as $property) {

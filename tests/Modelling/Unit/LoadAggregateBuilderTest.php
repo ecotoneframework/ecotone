@@ -22,11 +22,14 @@ use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
-use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\FactoryMethodWithWrongParameterCountExample;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithReturnType;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithWrongParameterCountExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\IncorrectEventTypeReturned\CreateIncorrectEventTypeReturnedAggregate;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\IncorrectEventTypeReturned\IncorrectEventTypeReturnedExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoFactoryMethodAggregateExample;
-use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NonStaticFactoryMethodExample;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\StaticEventSourcingHandlerMethodExample;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\WithConstructorHavingParameters;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\WithPrivateConstructor;
 use Test\Ecotone\Modelling\Fixture\Renter\Appointment;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepositoryBuilder;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
@@ -170,7 +173,7 @@ class LoadAggregateBuilderTest extends TestCase
         );
     }
 
-    public function test_throwing_exception_if_no_factory_method_defined_for_event_sourced_aggregate()
+    public function test_throwing_exception_if_no_event_sourcing_handler_defined_for_event_sourced_aggregate()
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -197,7 +200,7 @@ class LoadAggregateBuilderTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(FactoryMethodWithWrongParameterCountExample::class)),
+            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingHandlerMethodWithWrongParameterCountExample::class)),
             "doSomething",
             null,
             LoadAggregateMode::createThrowOnNotFound()
@@ -206,12 +209,54 @@ class LoadAggregateBuilderTest extends TestCase
             ->withInputChannelName("inputChannel");
     }
 
-    public function test_throwing_exception_if_factory_method_for_event_sourced_aggregate_is_not_static()
+    public function test_throwing_exception_if_construct_having_parameters()
     {
         $this->expectException(InvalidArgumentException::class);
 
         LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(NonStaticFactoryMethodExample::class)),
+            ClassDefinition::createFor(TypeDescriptor::create(WithConstructorHavingParameters::class)),
+            "doSomething",
+            null,
+            LoadAggregateMode::createThrowOnNotFound()
+        )
+            ->withAggregateRepositoryFactories(["repository"])
+            ->withInputChannelName("inputChannel");
+    }
+
+    public function test_throwing_exception_if_construct_is_private()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        LoadAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(WithPrivateConstructor::class)),
+            "doSomething",
+            null,
+            LoadAggregateMode::createThrowOnNotFound()
+        )
+            ->withAggregateRepositoryFactories(["repository"])
+            ->withInputChannelName("inputChannel");
+    }
+
+    public function test_throwing_exception_if_event_sourcing_handler_is_non_void()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        LoadAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingHandlerMethodWithReturnType::class)),
+            "doSomething",
+            null,
+            LoadAggregateMode::createThrowOnNotFound()
+        )
+            ->withAggregateRepositoryFactories(["repository"])
+            ->withInputChannelName("inputChannel");
+    }
+
+    public function test_throwing_exception_if_event_sourcing_handler_is_static()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        LoadAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(StaticEventSourcingHandlerMethodExample::class)),
             "doSomething",
             null,
             LoadAggregateMode::createThrowOnNotFound()

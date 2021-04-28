@@ -3,25 +3,20 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Ticket;
 
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\AggregateVersion;
-use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\WithAggregateVersioning;
 
-#[EventSourcedAggregate]
+#[EventSourcingAggregate]
 class Ticket
 {
     use WithAggregateVersioning;
 
     #[AggregateIdentifier]
     private $ticketId;
-    /**
-     * @var string
-     */
-    private $workerId;
+    private ?string $workerId = null;
 
     #[CommandHandler]
     public static function start(StartTicketCommand $command): array
@@ -29,32 +24,16 @@ class Ticket
         return [new TicketWasStartedEvent($command->getTicketId())];
     }
 
-    #[AggregateFactory]
-    public static function createFrom(array $events): self
-    {
-        $self = new self();
-
-        foreach ($events as $event) {
-            switch (get_class($event)) {
-                case TicketWasStartedEvent::class:
-                    {
-                        $self->applyTicketWasStarted($event);
-                        break;
-                    }
-                case WorkerWasAssignedEvent::class:
-                    {
-                        $self->applyWorkerWasAssigned($event);
-                        break;
-                    }
-            }
-        }
-
-        return $self;
-    }
-
-    private function applyTicketWasStarted(TicketWasStartedEvent $event): void
+    #[EventSourcingHandler]
+    public function onTicketWasStarted(TicketWasStartedEvent $event): void
     {
         $this->ticketId = $event->getTicketId();
+    }
+
+    #[EventSourcingHandler]
+    public function onWorkerWasAssigned(WorkerWasAssignedEvent $event): void
+    {
+        $this->workerId = $event->getAssignedWorkerId();
     }
 
     #[CommandHandler]
@@ -69,14 +48,8 @@ class Ticket
         }
 
         $event = new WorkerWasAssignedEvent($this->ticketId, $command->getWorkerId());
-        $this->applyWorkerWasAssigned($event);
 
         return [$event];
-    }
-
-    private function applyWorkerWasAssigned(WorkerWasAssignedEvent $event): void
-    {
-        $this->workerId = $event->getAssignedWorkerId();
     }
 
     public function getVersion(): int

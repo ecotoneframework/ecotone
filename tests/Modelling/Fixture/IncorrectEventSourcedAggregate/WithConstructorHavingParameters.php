@@ -7,17 +7,23 @@ use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingHandler;
 
-#[EventSourcedAggregate]
-class NonStaticFactoryMethodExample
+#[EventSourcingAggregate]
+class WithConstructorHavingParameters
 {
     #[AggregateIdentifier]
     private string $id;
 
+    public function __construct(\stdClass $class)
+    {
+
+    }
+
     #[CommandHandler]
     public function doSomething() : void {}
 
-    #[AggregateFactory]
-    public function factory(iterable $events){}
+    #[EventSourcingHandler]
+    public function factory(\stdClass $event){}
 }

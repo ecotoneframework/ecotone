@@ -1562,6 +1562,19 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("order.register"));
     }
 
+    public function test_throwing_exception_if_registering_message_channel_name_with_same_name_as_endpoint_id()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("order.register"))
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(new OrderService(), "order")
+                    ->withInputChannelName("some")
+                    ->withEndpointId("order.register")
+            );
+    }
+
     public function test_throwing_exception_if_registering_endpoint_with_id_same_as_default_message_channel()
     {
         $this->expectException(ConfigurationException::class);

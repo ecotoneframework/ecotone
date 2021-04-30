@@ -435,6 +435,10 @@ final class MessagingSystemConfiguration implements Configuration
         $asynchronousChannels = [];
 
         foreach ($this->asynchronousEndpoints as $targetEndpointId => $asynchronousMessageChannel) {
+            if (!isset($this->channelBuilders[$asynchronousMessageChannel]) && !isset($this->defaultChannelBuilders[$asynchronousMessageChannel])) {
+                throw ConfigurationException::create("Registered asynchronous endpoint `{$targetEndpointId}`, however channel configuration for `{$asynchronousMessageChannel}` was not provided.");
+            }
+
             $foundEndpoint = false;
             $asynchronousChannels[] = $asynchronousMessageChannel;
             foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {

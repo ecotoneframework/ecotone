@@ -223,6 +223,23 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
     }
 
+    public function test_throwing_exception_if_registering_asynchronous_for_not_existing_channel()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "result")
+                    ->withEndpointId("endpointId")
+                    ->withInputChannelName("inputChannel")
+            )
+            ->registerAsynchronousEndpoint("asyncChannel", "endpointId")
+            ->registerPollingMetadata(PollingMetadata::create("asyncChannel")->setExecutionAmountLimit(1))
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+    }
+
     public function test_registering_asynchronous_endpoint()
     {
         $calculatingService = CalculatingService::create(1);
@@ -458,6 +475,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     ->withInputChannelName("inputChannel")
             )
             ->registerAsynchronousEndpoint("fakeAsyncChannel", "endpointId")
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createDirectMessageChannel("fakeAsyncChannel"))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
         $message = MessageBuilder::withPayload(2)

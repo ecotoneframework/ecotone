@@ -11,6 +11,7 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\ConsumerEndpointFactory;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
@@ -207,7 +208,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         return [$gateways, $nonProxyCombinedGateways];
     }
 
-    private static function getPollingMetadata(string $endpointId, array $pollingMetadataConfigurations): mixed
+    private static function getPollingMetadata(string $endpointId, array $pollingMetadataConfigurations): PollingMetadata
     {
         return array_key_exists($endpointId, $pollingMetadataConfigurations) ? $pollingMetadataConfigurations[$endpointId] : PollingMetadata::create($endpointId);
     }
@@ -217,8 +218,11 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function run(string $endpointId): void
+    public function run(string $endpointId, ?ExecutionPollingMetadata $executionPollingMetadata = null): void
     {
+        $pollingMetadata = self::getPollingMetadata($endpointId, $this->pollingMetadataConfigurations)
+                            ->applyExecutionPollingMetadata($executionPollingMetadata);
+
         if (array_key_exists($endpointId, $this->pollingConsumerBuilders)) {
             /** @var MessageHandlerConsumerBuilder $consumerBuilder */
             $consumerBuilder = $this->pollingConsumerBuilders[$endpointId][self::POLLING_CONSUMER_BUILDER];
@@ -227,13 +231,13 @@ final class MessagingSystem implements ConfiguredMessagingSystem
                 $this->channelResolver,
                 $this->referenceSearchService,
                 $this->pollingConsumerBuilders[$endpointId][self::POLLING_CONSUMER_HANDLER],
-                self::getPollingMetadata($endpointId, $this->pollingMetadataConfigurations)
+                $pollingMetadata
             )->run();
         }else if (array_key_exists($endpointId, $this->inboundChannelAdapterBuilders)) {
             $this->inboundChannelAdapterBuilders[$endpointId]->build(
                 $this->channelResolver,
                 $this->referenceSearchService,
-                self::getPollingMetadata($endpointId, $this->pollingMetadataConfigurations)
+                $pollingMetadata
             )->run();
         }else {
             throw InvalidArgumentException::create("Can't run `{$endpointId}` as it does not exists. Please verify, if the name is correct using `ecotone:list`.");

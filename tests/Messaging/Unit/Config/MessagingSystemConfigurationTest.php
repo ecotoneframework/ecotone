@@ -21,6 +21,7 @@ use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\OptionalReference;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
@@ -114,10 +115,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
-    /**
-     * @throws NoConsumerFactoryForBuilderException
-     * @throws MessagingException
-     */
     public function test_running_pollable_consumer()
     {
         $messageChannelName = "pollableChannel";
@@ -133,6 +130,25 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $pollableChannel->send(MessageBuilder::withPayload("a")->build());
 
         $messagingSystem->run($messagingSystem->list()[0]);
+
+        $this->assertTrue($messageHandler->wasCalled());
+    }
+
+    public function test_running_overriding_polling_metadata()
+    {
+        $messageChannelName = "pollableChannel";
+        $pollableChannel = QueueChannel::create();
+        $messageHandler = NoReturnMessageHandler::create();
+
+        $messagingSystem = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName)->withEndpointId("executor"))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::create($messageChannelName, $pollableChannel))
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $pollableChannel->send(MessageBuilder::withPayload("a")->build());
+
+        $messagingSystem->run("executor", ExecutionPollingMetadata::createWithDefaults()->withExecutionTimeLimitInMilliseconds(1));
 
         $this->assertTrue($messageHandler->wasCalled());
     }

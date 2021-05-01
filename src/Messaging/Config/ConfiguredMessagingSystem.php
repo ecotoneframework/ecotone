@@ -2,6 +2,7 @@
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageChannel;
 
 /**
@@ -37,7 +38,7 @@ interface ConfiguredMessagingSystem
      */
     public function getMessageChannelByName(string $channelName) : MessageChannel;
 
-    public function run(string $endpointId) : void;
+    public function run(string $endpointId, ?ExecutionPollingMetadata $executionPollingMetadata = null) : void;
 
     /**
      * @return string[]

@@ -201,6 +201,29 @@ class PollingConsumerBuilderTest extends MessagingTest
         $this->assertTrue($acknowledgementCallback->isRequeued());
     }
 
+    public function test_throwing_exception_and_requeuing_when_stop_on_error_defined()
+    {
+        $acknowledgementCallback = NullAcknowledgementCallback::create();
+        $message = MessageBuilder::withPayload("some")
+            ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, "amqpAcker")
+            ->setHeader("amqpAcker", $acknowledgementCallback)
+            ->build();
+
+        $inputChannelName = "inputChannel";
+        $inputChannel = QueueChannel::create();
+        $messageHandler = DataReturningService::createExceptionalServiceActivatorBuilder()
+            ->withEndpointId("some-id")
+            ->withInputChannelName($inputChannelName);
+
+        $pollingConsumer = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
+
+        $inputChannel->send($message);
+
+        $pollingConsumer->run();
+
+        $this->assertTrue($acknowledgementCallback->isRequeued());
+    }
+
     public function test_acking_on_gateway_failure_when_error_channel_defined()
     {
         $acknowledgementCallback = NullAcknowledgementCallback::create();
@@ -216,7 +239,16 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->withEndpointId("some-id")
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $this->createPollingConsumerWithErrorChannel($inputChannelName, $inputChannel, $messageHandler, $errorChannel);
+        $pollingConsumer = $this->createPollingConsumerWithCustomConfiguration(
+            [
+                $inputChannelName => $inputChannel,
+                "errorChannel" => $errorChannel
+            ],
+            $messageHandler,
+            PollingMetadata::create("some")
+                ->setExecutionAmountLimit(1)
+                ->setErrorChannelName("errorChannel")
+        );
 
         $inputChannel->send($message);
 
@@ -224,6 +256,74 @@ class PollingConsumerBuilderTest extends MessagingTest
 
         $this->assertNotNull($errorChannel);
         $this->assertTrue($acknowledgementCallback->isAcked());
+    }
+
+    public function test_throwing_exception_and_requeing_when_stop_on_failure_defined()
+    {
+        $acknowledgementCallback = NullAcknowledgementCallback::create();
+        $message = MessageBuilder::withPayload("some")
+            ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, "amqpAcker")
+            ->setHeader("amqpAcker", $acknowledgementCallback)
+            ->build();
+
+        $inputChannelName = "inputChannel";
+        $inputChannel = QueueChannel::create();
+        $messageHandler = DataReturningService::createExceptionalServiceActivatorBuilder()
+            ->withEndpointId("some-id")
+            ->withInputChannelName($inputChannelName);
+
+        $pollingConsumer = $this->createPollingConsumerWithCustomConfiguration(
+            [
+                $inputChannelName => $inputChannel
+            ],
+            $messageHandler,
+            PollingMetadata::create("some")
+                ->setStopOnError(true)
+                ->setExecutionAmountLimit(1)
+        );
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $inputChannel->send($message);
+        $pollingConsumer->run();
+
+        $this->assertTrue($acknowledgementCallback->isRequeued());
+    }
+
+    public function test_throwing_exception_and_requeing_when_stop_on_failure_defined_and_error_channel()
+    {
+        $acknowledgementCallback = NullAcknowledgementCallback::create();
+        $message = MessageBuilder::withPayload("some")
+            ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, "amqpAcker")
+            ->setHeader("amqpAcker", $acknowledgementCallback)
+            ->build();
+
+        $inputChannelName = "inputChannel";
+        $inputChannel = QueueChannel::create();
+        $errorChannel = QueueChannel::create();
+        $messageHandler = DataReturningService::createExceptionalServiceActivatorBuilder()
+            ->withEndpointId("some-id")
+            ->withInputChannelName($inputChannelName);
+
+        $pollingConsumer = $this->createPollingConsumerWithCustomConfiguration(
+            [
+                $inputChannelName => $inputChannel,
+                "errorChannel" => $errorChannel
+            ],
+            $messageHandler,
+            PollingMetadata::create("some")
+                ->setStopOnError(true)
+                ->setExecutionAmountLimit(1)
+                ->setErrorChannelName("errorChannel")
+        );
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $inputChannel->send($message);
+        $pollingConsumer->run();
+
+        $this->assertTrue($acknowledgementCallback->isRequeued());
+        $this->assertNull($errorChannel->receive());
     }
 
     private function createPollingConsumer(string $inputChannelName, QueueChannel $inputChannel, $messageHandler): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
@@ -239,18 +339,13 @@ class PollingConsumerBuilderTest extends MessagingTest
         );
     }
 
-    private function createPollingConsumerWithErrorChannel(string $inputChannelName, QueueChannel $inputChannel, $messageHandler, MessageChannel $errorChannel): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
+    private function createPollingConsumerWithCustomConfiguration(array $channels, $messageHandler, PollingMetadata  $pollingMetadata): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
     {
         return (new PollingConsumerBuilder())->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                $inputChannelName => $inputChannel,
-                "errorChannel" => $errorChannel
-            ]),
+            InMemoryChannelResolver::createFromAssociativeArray($channels),
             InMemoryReferenceSearchService::createEmpty(),
             $messageHandler,
-            PollingMetadata::create("some")
-                ->setExecutionAmountLimit(1)
-                ->setErrorChannelName("errorChannel")
+            $pollingMetadata
         );
     }
 }

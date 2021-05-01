@@ -54,7 +54,6 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             $this->requestChannelName
         );
 
-        $this->entrypointGateway->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptor());
         $this->entrypointGateway->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject(
             new LoggingInterceptor(null),
             "logException",
@@ -148,6 +147,8 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     {
         Assert::notNullAndEmpty($messageHandlerBuilder->getEndpointId(), "Message Endpoint name can't be empty for {$messageHandlerBuilder}");
         Assert::notNull($pollingMetadata, "No polling meta data defined for polling endpoint {$messageHandlerBuilder}");
+
+        $this->entrypointGateway->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptor($pollingMetadata));
 
         $messageHandler = $messageHandlerBuilder->build($channelResolver, $referenceSearchService);
         $connectionChannel = DirectChannel::create();

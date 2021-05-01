@@ -20,20 +20,13 @@ use Ecotone\Messaging\Precedence;
  */
 class InterceptedConsumer implements ConsumerLifecycle
 {
-    private \Ecotone\Messaging\Endpoint\ConsumerLifecycle $interceptedConsumer;
-    private iterable $consumerInterceptors;
     private bool $shouldBeRunning = true;
 
     /**
-     * ContinuouslyRunningConsumer constructor.
-     * @param ConsumerLifecycle $consumerLifecycle
+     * @param ConsumerLifecycle $interceptedConsumer
      * @param ConsumerInterceptor[] $consumerInterceptors
      */
-    public function __construct(ConsumerLifecycle $consumerLifecycle, iterable $consumerInterceptors)
-    {
-        $this->interceptedConsumer = $consumerLifecycle;
-        $this->consumerInterceptors = $consumerInterceptors;
-    }
+    public function __construct(private ConsumerLifecycle $interceptedConsumer, private array $consumerInterceptors) {}
 
     /**
      * @inheritDoc

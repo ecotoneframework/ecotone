@@ -43,6 +43,7 @@ class PollingMetadata
     private bool $withSignalInterceptors = false;
     private string $triggerReferenceName = "";
     private string $taskExecutorName = "";
+    private bool $stopOnError = false;
 
     /**
      * PollingMetadata constructor.
@@ -77,6 +78,19 @@ class PollingMetadata
     public static function createFrom(PollingMetadata $pollingMetadata) : self
     {
         return clone $pollingMetadata;
+    }
+
+    public function setStopOnError(bool $stopOnError): self
+    {
+        $copy = $this->createCopy();
+        $copy->stopOnError = $stopOnError;
+
+        return $copy;
+    }
+
+    public function isStoppedOnError(): bool
+    {
+        return $this->stopOnError;
     }
 
     /**
@@ -294,7 +308,7 @@ class PollingMetadata
      */
     public function getErrorChannelName(): string
     {
-        return $this->errorChannelName;
+        return $this->stopOnError ? "" : $this->errorChannelName;
     }
 
     /**

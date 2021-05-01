@@ -19,9 +19,11 @@ use Throwable;
  */
 class AcknowledgeConfirmationInterceptor
 {
-    public static function createAroundInterceptor() : AroundInterceptorReference
+    private function __construct(private bool $shouldStopOnError){}
+
+    public static function createAroundInterceptor(PollingMetadata $pollingMetadata) : AroundInterceptorReference
     {
-        return AroundInterceptorReference::createWithDirectObject(new self(), "ack", Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, "", []);
+        return AroundInterceptorReference::createWithDirectObject(new self($pollingMetadata->isStoppedOnError()), "ack", Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, "", []);
     }
 
     /**
@@ -46,9 +48,13 @@ class AcknowledgeConfirmationInterceptor
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->accept();
             }
-        } catch (Throwable $e) {
+        } catch (Throwable $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->requeue();
+            }
+
+            if ($this->shouldStopOnError) {
+                throw $exception;
             }
         }
 

@@ -130,8 +130,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $message = MessageBuilder::withPayload("a")->build();
-        $pollableChannel->send($message);
+        $pollableChannel->send(MessageBuilder::withPayload("a")->build());
 
         $messagingSystem->run($messagingSystem->list()[0]);
 

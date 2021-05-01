@@ -39,6 +39,11 @@ class EventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
         );
     }
 
+    public function isPollingConsumer(): bool
+    {
+        return false;
+    }
+
     /**
      * @inheritDoc
      */

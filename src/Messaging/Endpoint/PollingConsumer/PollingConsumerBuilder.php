@@ -64,6 +64,11 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
         ));
     }
 
+    public function isPollingConsumer(): bool
+    {
+        return true;
+    }
+
     /**
      * @inheritDoc
      */

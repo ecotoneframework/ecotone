@@ -38,6 +38,11 @@ class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumer
         return $relatedMessageChannel instanceof SimpleMessageChannelBuilder && $relatedMessageChannel->isPollable();
     }
 
+    public function isPollingConsumer(): bool
+    {
+        return true;
+    }
+
     /**
      * @inheritDoc
      */

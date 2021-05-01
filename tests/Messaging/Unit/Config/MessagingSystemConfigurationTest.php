@@ -1865,8 +1865,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelName = MessagingEntrypoint::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
-            ConsoleCommandParameter::create("id", "header.id"),
-            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", 123)
+            ConsoleCommandParameter::create("id", "header.id", false),
+            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", false,123)
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
@@ -1888,8 +1888,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelName = MessagingEntrypoint::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
-            ConsoleCommandParameter::create("id", "header.id"),
-            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", 123)
+            ConsoleCommandParameter::create("id", "header.id", false),
+            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", false, 123)
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())

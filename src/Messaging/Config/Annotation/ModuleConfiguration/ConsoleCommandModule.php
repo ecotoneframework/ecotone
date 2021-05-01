@@ -125,8 +125,8 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
                 $headerName = self::ECOTONE_COMMAND_PARAMETER_PREFIX . $interfaceParameter->getName();
                 $parameterConverters[] = HeaderBuilder::create($interfaceParameter->getName(), $headerName);
                 $parameters[]          = $interfaceParameter->hasDefaultValue()
-                    ? ConsoleCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $headerName, $interfaceParameter->getDefaultValue())
-                    : ConsoleCommandParameter::create($interfaceParameter->getName(), $headerName);
+                    ? ConsoleCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $headerName, $interfaceParameter->getTypeDescriptor()->isBoolean(), $interfaceParameter->getDefaultValue())
+                    : ConsoleCommandParameter::create($interfaceParameter->getName(), $headerName, $interfaceParameter->getTypeDescriptor()->isBoolean());
             }
         }
 

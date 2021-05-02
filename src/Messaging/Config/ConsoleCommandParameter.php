@@ -10,17 +10,11 @@ class ConsoleCommandParameter
 
     public static function create(string $name, string $messageHeaderName, bool $isOption) : self
     {
-        Assert::isFalse($isOption, "Console parameter with name `{$name}` is option (boolean), so it should have default value.");
-
         return new self($name, $messageHeaderName, $isOption, null, false);
     }
 
     public static function createWithDefaultValue(string $name, string $messageHeaderName, bool $isOption, $defaultValue) : self
     {
-        if ($isOption && !is_bool($defaultValue)) {
-            throw ConfigurationException::create("Console command parameter `{$name}` is option however the default value is not boolean");
-        }
-
         return new self($name, $messageHeaderName, $isOption, $defaultValue,true);
     }
 

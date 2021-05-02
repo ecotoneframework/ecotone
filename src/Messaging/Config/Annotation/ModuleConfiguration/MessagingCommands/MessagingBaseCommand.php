@@ -2,6 +2,7 @@
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands;
 
+use Ecotone\Messaging\Attribute\ConsoleParameterOption;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
@@ -13,7 +14,7 @@ class MessagingBaseCommand
         return $configuredMessagingSystem->runConsoleCommand($commandName, $parameters);
     }
 
-    public function runAsynchronousEndpointCommand(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem, ?string $handledMessageLimit = null, ?int $executionTimeLimit = null, ?int $memoryLimit = null, ?string $cron = null, bool $stopOnFailure = false) : void
+    public function runAsynchronousEndpointCommand(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem, #[ConsoleParameterOption] ?string $handledMessageLimit = null, #[ConsoleParameterOption] ?int $executionTimeLimit = null, #[ConsoleParameterOption] ?int $memoryLimit = null, #[ConsoleParameterOption] ?string $cron = null, #[ConsoleParameterOption] bool $stopOnFailure = false) : void
     {
         $pollingMetadata = ExecutionPollingMetadata::createWithDefaults();
         if ($stopOnFailure) {

@@ -68,7 +68,7 @@ class EventSourcingHandlerExecutor
                     throw InvalidArgumentException::create("{$methodToCheck} is Event Sourcing Handler and should not be have only one parameter type hinted for handled event.");
                 }
                 if (!$methodToCheck->hasReturnTypeVoid()) {
-                    throw InvalidArgumentException::create("{$methodToCheck} is Event Sourcing Handler and should void return type");
+                    throw InvalidArgumentException::create("{$methodToCheck} is Event Sourcing Handler and should return void return type");
                 }
 
                 $eventSourcingHandlerMethods[$method] = $methodToCheck;

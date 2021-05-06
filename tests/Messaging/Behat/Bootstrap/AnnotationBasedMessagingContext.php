@@ -57,6 +57,8 @@ use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\AddCurrentUserId;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\BasketRepository;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\AddMetadataService;
 use Test\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod\Basket;
+use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestBookRepository;
+use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\LoggingService;
@@ -136,6 +138,14 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                         AddUserIdService::class => new AddUserIdService(),
                         OrderErrorHandler::class => new OrderErrorHandler(),
                         LoggingService::class => new LoggingService()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Modelling\Fixture\NamedEvent":
+                {
+                    $objects = [
+                        new GuestViewer(),
+                        GuestBookRepository::createEmpty()
                     ];
                     break;
                 }

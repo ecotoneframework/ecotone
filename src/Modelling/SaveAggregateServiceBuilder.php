@@ -7,6 +7,7 @@ use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
@@ -19,6 +20,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
@@ -120,13 +122,22 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->aggregateRepositoryReferenceNames
             );
 
-        $eventBus = GatewayProxyBuilder::create("", EventBus::class, "publish", BusModule::EVENT_CHANNEL_NAME_BY_OBJECT)
+        $objectEventBus = GatewayProxyBuilder::create("", EventBus::class, "publish", BusModule::EVENT_CHANNEL_NAME_BY_OBJECT)
             ->withParameterConverters(
                 [
                     GatewayPayloadBuilder::create("event"),
                     GatewayHeadersBuilder::create("metadata")
                 ]
             )
+            ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+
+        $namedEventBus = GatewayProxyBuilder::create("", EventBus::class, "publishWithRouting", BusModule::EVENT_CHANNEL_NAME_BY_NAME)
+            ->withParameterConverters([
+                GatewayPayloadBuilder::create("event"),
+                GatewayHeadersBuilder::create("metadata"),
+                GatewayHeaderBuilder::create("routingKey", BusModule::EVENT_CHANNEL_NAME_BY_NAME),
+                GatewayHeaderBuilder::create("eventMediaType", MessageHeaders::CONTENT_TYPE)
+            ])
             ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
 
         return ServiceActivatorBuilder::createWithDirectReference(
@@ -136,7 +147,8 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $aggregateRepository,
                 PropertyEditorAccessor::create($referenceSearchService),
                 $this->getPropertyReaderAccessor(),
-                $eventBus,
+                $objectEventBus,
+                $namedEventBus,
                 $this->aggregateMethodWithEvents,
                 $this->aggregateIdentifierMapping,
                 $this->aggregateVersionProperty,

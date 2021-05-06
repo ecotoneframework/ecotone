@@ -159,3 +159,10 @@ Feature: activating as aggregate order entity
     Then job with id of 1 should be "in progress"
     When I finish job with id 1
     Then job with id of 1 should be "finished"
+
+  Scenario: Handle publish named events from aggregate
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\NamedEvent"
+    When I register guest book with id 1
+    And I add guest "Frank" to book 1
+    Then view guest list of book 1 then
+      | Frank |

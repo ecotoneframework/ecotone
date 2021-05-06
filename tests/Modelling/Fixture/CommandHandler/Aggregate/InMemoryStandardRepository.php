@@ -39,7 +39,7 @@ class InMemoryStandardRepository implements StandardRepository
      */
     public static function createWith(array $aggregates): self
     {
-        return new self($aggregates);
+        return new static($aggregates);
     }
 
     /**
@@ -47,7 +47,7 @@ class InMemoryStandardRepository implements StandardRepository
      */
     public static function createEmpty(): self
     {
-        return new self([]);
+        return new static([]);
     }
 
     /**

@@ -149,6 +149,25 @@ class ClassDefinition
         return $this->classAnnotations;
     }
 
+    public function getSingleClassAnnotation(TypeDescriptor $annotationType) : object
+    {
+        $foundAnnotations = [];
+        foreach ($this->classAnnotations as $classAnnotation) {
+            if (TypeDescriptor::createFromVariable($classAnnotation)->equals($annotationType)) {
+                $foundAnnotations[] = $classAnnotation;
+            }
+        }
+
+        if (count($foundAnnotations) < 1) {
+            throw InvalidArgumentException::create("Attribute {$annotationType} was not found for {$this}");
+        }
+        if (count($foundAnnotations) > 1) {
+            throw InvalidArgumentException::create("Looking for single attribute {$annotationType}, however found more than one");
+        }
+
+        return $foundAnnotations[0];
+    }
+
     public function isAnnotation() : bool
     {
         return $this->isAnnotation;

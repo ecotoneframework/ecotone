@@ -26,8 +26,8 @@ class AutoloadFileNamespaceParser implements AutoloadNamespaceParser
                 }
 
                 foreach ($paths as $path) {
-                    if (substr($path, 0, 3) === $catalogToLoad && (in_array(substr($path, 4, 1), ["/", false]))) {
-                        $namespaces[] = $autoloadNamespace;
+                    if (substr($path, 0, strlen($catalogToLoad)) === $catalogToLoad) {
+                        $namespaces[] = ltrim(rtrim($autoloadNamespace, "\\"), "\\");
                     }
                 }
             }
@@ -39,8 +39,8 @@ class AutoloadFileNamespaceParser implements AutoloadNamespaceParser
                 }
 
                 foreach ($paths as $path) {
-                    if (substr($path, 0, 3) === $catalogToLoad && (in_array(substr($path, 4, 1), ["/", false]))) {
-                        $namespaces[] = $autoloadNamespace;
+                    if (substr($path, 0, strlen($catalogToLoad)) === $catalogToLoad) {
+                        $namespaces[] = ltrim(rtrim($autoloadNamespace, "\\"), "\\");
                     }
                 }
             }

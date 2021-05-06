@@ -276,7 +276,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         $namespacesToUse = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
         $catalogRelatedNamespaces = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $catalogRelatedNamespaces);
 
-        if (!$catalogRelatedNamespaces && $catalogToLoad) {
+        if (!$catalogRelatedNamespaces && $catalogToLoad && ($namespacesToUse == ["Ecotone"] || $namespacesToUse == [])) {
             throw ConfigurationException::create("Ecotone cannot resolve namespaces in {$rootProjectDir}/$catalogToLoad. Please provide namespaces manually via configuration. If you do not know how to do it, read Modules section related to your framework at https://docs.ecotone.tech");
         }
 

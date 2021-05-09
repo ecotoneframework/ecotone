@@ -128,10 +128,6 @@ class DefaultHeaderMapper implements HeaderMapper
             }
         }
 
-        if (isset($targetHeaders[self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT])) {
-            $targetHeaders[self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT] = \json_encode($targetHeaders[self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT]);
-        }
-
         return $targetHeaders;
     }
 
@@ -171,42 +167,37 @@ class DefaultHeaderMapper implements HeaderMapper
 
     private function convertToStoreableFormat(string $mappedHeader, mixed $value, array $convertedHeaders) : array
     {
-        if ($mappedHeader === self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT) {
-            return $convertedHeaders;
-        }
-
         if ($this->isScalarType($value)) {
             $convertedHeaders[$mappedHeader] = $value;
         } else if (
-            $this->conversionService->canConvert(
-                TypeDescriptor::createFromVariable($value),
-                MediaType::createApplicationXPHP(),
-                TypeDescriptor::createStringType(),
-                MediaType::createApplicationXPHP()
-            )
+        $this->conversionService->canConvert(
+            TypeDescriptor::createFromVariable($value),
+            MediaType::createApplicationXPHP(),
+            TypeDescriptor::createStringType(),
+            MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
+        )
         ) {
             $convertedHeaders[$mappedHeader] =  $this->conversionService->convert(
                 $value,
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
                 TypeDescriptor::createStringType(),
-                MediaType::createApplicationXPHP()
+                MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
             );
         } else if (
             $this->conversionService->canConvert(
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
                 TypeDescriptor::createStringType(),
-                MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
+                MediaType::createApplicationXPHP()
             )
         ) {
-            $convertedHeaders[self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT][] = $mappedHeader;
             $convertedHeaders[$mappedHeader] =  $this->conversionService->convert(
                 $value,
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
                 TypeDescriptor::createStringType(),
-                MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
+                MediaType::createApplicationXPHP()
             );
         }
 

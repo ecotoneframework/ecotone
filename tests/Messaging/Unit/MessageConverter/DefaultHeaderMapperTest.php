@@ -127,23 +127,8 @@ class DefaultHeaderMapperTest extends TestCase
         );
 
         $this->assertEquals(
-            ["personId" => $personId, DefaultHeaderMapper::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT => '["personId"]'],
-            $defaultHeaderMapper->mapFromMessageHeaders(["personId" => Uuid::fromString($personId)])
-        );
-    }
-
-    public function test_ignoring_if_headers_contains_list_of_converted_headers()
-    {
-        $personId            = "7660d93e-cdf9-43b4-be59-98a60b233c35";
-        $defaultHeaderMapper = DefaultHeaderMapper::createWith(
-            [],
-            ["*"],
-            InMemoryConversionService::createWithoutConversion()
-        );
-
-        $this->assertEquals(
             ["personId" => $personId],
-            $defaultHeaderMapper->mapFromMessageHeaders(["personId" => $personId, DefaultHeaderMapper::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT => '["personId"]'])
+            $defaultHeaderMapper->mapFromMessageHeaders(["personId" => Uuid::fromString($personId)])
         );
     }
 

@@ -71,17 +71,16 @@ class HeaderBuilderTest extends TestCase
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 MediaType::APPLICATION_X_PHP,
-                Uuid::class,
+                UuidInterface::class,
                 Uuid::fromString($personId)
             )
         ]));
 
         $headerResult = $converter->getArgumentFrom(
             InterfaceToCall::create(ServiceWithUuidArgument::class, "execute"),
-            InterfaceParameter::createNotNullable("x", TypeDescriptor::createWithDocBlock(Uuid::class, "")),
+            InterfaceParameter::createNotNullable("x", TypeDescriptor::createWithDocBlock(UuidInterface::class, "")),
             MessageBuilder::withPayload("a")
                 ->setHeader("personId",  $personId)
-                ->setHeader(DefaultHeaderMapper::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT, '["personId"]')
                 ->build(),
             []
         );

@@ -110,7 +110,7 @@ class DefaultHeaderMapperTest extends TestCase
         );
     }
 
-    public function test_mapping_with_convertable_object_from_message_headers()
+    public function test_mapping_headers_with_json_conversion()
     {
         $personId            = "7660d93e-cdf9-43b4-be59-98a60b233c35";
         $defaultHeaderMapper = DefaultHeaderMapper::createWith(
@@ -127,8 +127,48 @@ class DefaultHeaderMapperTest extends TestCase
         );
 
         $this->assertEquals(
-            ["personId" => $personId],
+            ["personId" => $personId, DefaultHeaderMapper::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT => '["personId"]'],
             $defaultHeaderMapper->mapFromMessageHeaders(["personId" => Uuid::fromString($personId)])
+        );
+    }
+
+    public function test_ignoring_if_headers_contains_list_of_converted_headers()
+    {
+        $personId            = "7660d93e-cdf9-43b4-be59-98a60b233c35";
+        $defaultHeaderMapper = DefaultHeaderMapper::createWith(
+            [],
+            ["*"],
+            InMemoryConversionService::createWithoutConversion()
+        );
+
+        $this->assertEquals(
+            ["personId" => $personId],
+            $defaultHeaderMapper->mapFromMessageHeaders(["personId" => $personId, DefaultHeaderMapper::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT => '["personId"]'])
+        );
+    }
+
+    public function test_converting_between_php_compound_to_php_scalar_as_first_choose()
+    {
+        $convertedData            = "7660d93e-cdf9-43b4-be59-98a60b233c35";
+        $dataToConvert = Uuid::fromString($convertedData);
+        $defaultHeaderMapper = DefaultHeaderMapper::createWith(
+            [],
+            ["personId"],
+            InMemoryConversionService::createWithoutConversion()
+                ->registerInPHPConversion($dataToConvert, $convertedData)
+                ->registerConversion(
+                    $dataToConvert,
+                    MediaType::APPLICATION_X_PHP,
+                    UuidInterface::class,
+                    MediaType::APPLICATION_JSON,
+                    TypeDescriptor::STRING,
+                    $convertedData
+                )
+        );
+
+        $this->assertEquals(
+            ["personId" => $convertedData],
+            $defaultHeaderMapper->mapFromMessageHeaders(["personId" => $dataToConvert])
         );
     }
 }

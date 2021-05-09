@@ -16,6 +16,8 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 class DefaultHeaderMapper implements HeaderMapper
 {
     const DEFAULT_HEADER_CONVERSION_MEDIA_TYPE = MediaType::APPLICATION_JSON;
+    const CONVERTED_HEADERS_TO_DIFFERENT_FORMAT = "ecotone.convertedKeys";
+
     /**
      * @var string[]
      */
@@ -114,24 +116,20 @@ class DefaultHeaderMapper implements HeaderMapper
             }
 
             if (array_key_exists($mappedHeader, $convertedSourceHeaders)) {
-                $value = $this->extractValue($convertedSourceHeaders[$mappedHeader]);
-
-                if (!is_null($value)) {
-                    $targetHeaders[$mappedHeader] = $value;
-                }
+                $targetHeaders = $this->convertToStoreableFormat($mappedHeader, $convertedSourceHeaders[$mappedHeader], $targetHeaders);
 
                 continue;
             }
 
             foreach ($convertedSourceHeaders as $sourceHeaderName => $value) {
                 if (preg_match("#{$mappedHeader}#", $sourceHeaderName)) {
-                    $value = $this->extractValue($value);
-
-                    if (!is_null($value)) {
-                        $targetHeaders[$sourceHeaderName] = $value;
-                    }
+                    $targetHeaders = $this->convertToStoreableFormat($sourceHeaderName, $value, $targetHeaders);
                 }
             }
+        }
+
+        if (isset($targetHeaders[self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT])) {
+            $targetHeaders[self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT] = \json_encode($targetHeaders[self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT]);
         }
 
         return $targetHeaders;
@@ -171,10 +169,29 @@ class DefaultHeaderMapper implements HeaderMapper
         return $finalMappingHeaders;
     }
 
-    private function extractValue($value)
+    private function convertToStoreableFormat(string $mappedHeader, mixed $value, array $convertedHeaders) : array
     {
+        if ($mappedHeader === self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT) {
+            return $convertedHeaders;
+        }
+
         if ($this->isScalarType($value)) {
-            return $value;
+            $convertedHeaders[$mappedHeader] = $value;
+        } else if (
+            $this->conversionService->canConvert(
+                TypeDescriptor::createFromVariable($value),
+                MediaType::createApplicationXPHP(),
+                TypeDescriptor::createStringType(),
+                MediaType::createApplicationXPHP()
+            )
+        ) {
+            $convertedHeaders[$mappedHeader] =  $this->conversionService->convert(
+                $value,
+                TypeDescriptor::createFromVariable($value),
+                MediaType::createApplicationXPHP(),
+                TypeDescriptor::createStringType(),
+                MediaType::createApplicationXPHP()
+            );
         } else if (
             $this->conversionService->canConvert(
                 TypeDescriptor::createFromVariable($value),
@@ -183,7 +200,8 @@ class DefaultHeaderMapper implements HeaderMapper
                 MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
             )
         ) {
-            return $this->conversionService->convert(
+            $convertedHeaders[self::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT][] = $mappedHeader;
+            $convertedHeaders[$mappedHeader] =  $this->conversionService->convert(
                 $value,
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
@@ -192,6 +210,6 @@ class DefaultHeaderMapper implements HeaderMapper
             );
         }
 
-        return null;
+        return $convertedHeaders;
     }
 }

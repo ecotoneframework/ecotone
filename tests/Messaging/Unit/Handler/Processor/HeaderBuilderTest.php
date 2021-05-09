@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -80,6 +81,7 @@ class HeaderBuilderTest extends TestCase
             InterfaceParameter::createNotNullable("x", TypeDescriptor::createWithDocBlock(Uuid::class, "")),
             MessageBuilder::withPayload("a")
                 ->setHeader("personId",  $personId)
+                ->setHeader(DefaultHeaderMapper::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT, '["personId"]')
                 ->build(),
             []
         );

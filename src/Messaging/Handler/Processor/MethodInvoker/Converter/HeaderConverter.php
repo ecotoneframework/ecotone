@@ -55,12 +55,15 @@ class HeaderConverter implements ParameterConverter
         }
 
         $headerValue = $message->getHeaders()->get($this->headerName);
+        $convertedHeadersToDifferentFormat = $message->getHeaders()->containsKey(DefaultHeaderMapper::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT)
+                                    ? \json_decode($message->getHeaders()->get(DefaultHeaderMapper::CONVERTED_HEADERS_TO_DIFFERENT_FORMAT), true, 512, JSON_THROW_ON_ERROR)
+                                    : [];
+
         if (!TypeDescriptor::createFromVariable($headerValue)->isCompatibleWith($relatedParameter->getTypeDescriptor())) {
-            if ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter)) {
-                $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter);
-            }
-            if ($this->canConvertTo($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter)) {
+            if (in_array($this->headerName, $convertedHeadersToDifferentFormat) && $this->canConvertTo($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter)) {
                 $headerValue = $this->doConversion($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter);
+            }else if ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter)) {
+                $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter);
             }
         }
 

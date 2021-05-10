@@ -10,6 +10,7 @@ use Ecotone\Messaging\Config\NamedMessageChannel;
 use Ecotone\Messaging\Conversion\ArrayToJson\ArrayToJsonConverter;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
@@ -52,6 +53,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInte
 use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MessageReturningGateway;
+use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MixedReturningGateway;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\StringReturningGateway;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\UuidReturningGateway;
 use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
@@ -1213,6 +1215,43 @@ class GatewayProxyBuilderTest extends MessagingTest
         $message = $gateway->executeNoParameter();
         $this->assertEquals([1,2,3], $message->getPayload());
         $this->assertEquals($expectedMediaType, $message->getHeaders()->getContentType()->toString());
+    }
+
+    public function test_returning_with_specific_content_type_based_on_invoked_interface_return_type_when_array()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(
+            DataReturningService::createServiceActivatorWithReturnMessage([new \stdClass(), new \stdClass()], [
+                    MessageHeaders::CONTENT_TYPE => MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::createCollection(stdClass::class)->toString())
+            ])
+        );
+
+        $expectedMediaType = MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY)->toString();
+        /** @var MessageReturningGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', MixedReturningGateway::class, 'executeNoParameter', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $expectedMediaType)
+            ])
+            ->build(
+                InMemoryReferenceSearchService::createWith([
+                    ConversionService::REFERENCE_NAME =>
+                        InMemoryConversionService::createWithoutConversion()
+                            ->registerConversion(
+                                [new \stdClass(), new \stdClass()],
+                                MediaType::APPLICATION_X_PHP,
+                                TypeDescriptor::createCollection(\stdClass::class)->toString(),
+                                MediaType::APPLICATION_X_PHP_ARRAY,
+                                TypeDescriptor::ARRAY,
+                                [1, 1]
+                            )
+                    ]),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        $this->assertEquals([1,1], $gateway->executeNoParameter());
     }
 
     public function test_converting_from_reply_header_type_to_expected_one()

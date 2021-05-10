@@ -5,34 +5,45 @@ namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageConverter\MessageConverter;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 class ConversionInterceptor
 {
-    private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
-    private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
-    private ?\Ecotone\Messaging\Conversion\MediaType $replyContentType;
-
-
-    public function __construct(ConversionService $conversionService, InterfaceToCall $interfaceToCall, ?MediaType $replyContentType)
-    {
-        $this->interfaceToCall = $interfaceToCall;
-        $this->conversionService = $conversionService;
-        $this->replyContentType = $replyContentType;
-    }
+    /**
+     * @param MessageConverter[] $messageConverters
+     */
+    public function __construct(
+        private ConversionService $conversionService,
+        private InterfaceToCall $interfaceToCall,
+        private ?MediaType $replyContentType,
+        private array $messageConverters
+    ) {}
 
     public function convert(MethodInvocation $methodInvocation)
     {
         /** @var Message $result */
         $result = $methodInvocation->proceed();
 
-        if (is_null($result)) {
+        if (is_null($result) || !$this->interfaceToCall->canReturnValue()) {
             return null;
+        }
+
+        foreach ($this->messageConverters as $messageConverter) {
+            $reply = $messageConverter->fromMessage(
+                $result,
+                $this->interfaceToCall->getReturnType()
+            );
+
+            if ($reply) {
+                return $reply;
+            }
         }
 
         $isMessage = $result instanceof Message;
@@ -57,7 +68,15 @@ class ConversionInterceptor
                 }
             }
 
-            return $result;
+            if ($result instanceof Future) {
+                return $result;
+            }
+
+            if ($this->interfaceToCall->doesItReturnMessage()) {
+                return $result;
+            }
+
+            return $result->getPayload();
         }
 
         if (!$sourceMediaType->isCompatibleWith($this->replyContentType) || ($this->replyContentType->hasTypeParameter() && $this->replyContentType->getTypeParameter()->isIterable())) {
@@ -80,7 +99,7 @@ class ConversionInterceptor
             );
         }
 
-        if ($result instanceof Message) {
+        if ($this->interfaceToCall->doesItReturnMessage()) {
             return MessageBuilder::fromMessage($result)
                         ->setContentType($this->replyContentType)
                         ->setPayload($data)

@@ -27,7 +27,6 @@ class GatewayInternalHandler
     private ?\Ecotone\Messaging\PollableChannel $replyChannel;
     private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
     private int $replyMilliSecondsTimeout;
-    private array $messageConverters;
 
     /**
      * GatewayInternalHandler constructor.
@@ -35,17 +34,15 @@ class GatewayInternalHandler
      * @param MessageChannel $requestChannel
      * @param MessageChannel|null $errorChannel
      * @param PollableChannel|null $replyChannel
-     * @param MessageConverter[] $messageConverters
      * @param int $replyMilliSecondsTimeout
      */
-    public function __construct(InterfaceToCall $interfaceToCall, MessageChannel $requestChannel, ?MessageChannel $errorChannel, ?PollableChannel $replyChannel, array $messageConverters, int $replyMilliSecondsTimeout)
+    public function __construct(InterfaceToCall $interfaceToCall, MessageChannel $requestChannel, ?MessageChannel $errorChannel, ?PollableChannel $replyChannel, int $replyMilliSecondsTimeout)
     {
         $this->interfaceToCall = $interfaceToCall;
         $this->requestChannel = $requestChannel;
         $this->errorChannel = $errorChannel;
         $this->replyChannel = $replyChannel;
         $this->replyMilliSecondsTimeout = $replyMilliSecondsTimeout;
-        $this->messageConverters = $messageConverters;
     }
 
     /**
@@ -83,7 +80,6 @@ class GatewayInternalHandler
             $replyMessage = $replyCallable();
         }
 
-        $reply = null;
         if ($replyMessage) {
             if ($this->interfaceToCall->getReturnType()->equals(TypeDescriptor::create(Message::class))) {
                 if  ($previousReplyChannel) {
@@ -94,24 +90,9 @@ class GatewayInternalHandler
 
                 return $replyMessage;
             }
-
-            foreach ($this->messageConverters as $messageConverter) {
-                $reply = $messageConverter->fromMessage(
-                    $replyMessage,
-                    $this->interfaceToCall->getReturnType()
-                );
-
-                if ($reply) {
-                    break;
-                }
-            }
-
-            if (!$reply) {
-                $reply = $replyMessage ? $replyMessage->getPayload() : null;
-            }
         }
 
-        return $reply;
+        return $replyMessage;
     }
 
     /**

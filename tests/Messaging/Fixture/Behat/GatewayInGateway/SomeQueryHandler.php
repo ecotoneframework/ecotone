@@ -37,7 +37,8 @@ class SomeQueryHandler
     #[QueryHandler(SomeQueryHandler::SUM_AND_MULTIPLY)]
     public function sumAndMultiply(int $amount, QueryBus $queryBus)
     {
-        return $this->callQueryBus(self::MULTIPLY, $queryBus, $this->callQueryBus(self::SUM, $queryBus, $amount));
+        $sum = $this->callQueryBus(self::SUM, $queryBus, $amount);
+        return $this->callQueryBus(self::MULTIPLY, $queryBus, $sum);
     }
 
     private function callQueryBus(string $action, QueryBus $queryBus, int $sum)

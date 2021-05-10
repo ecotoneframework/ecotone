@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
@@ -12,6 +13,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -106,10 +108,20 @@ class CallAggregateService
         );
 
         $result = $methodInvoker->processMessage($message);
+        $resultType = TypeDescriptor::createFromVariable($result);
+        if ($resultType->isIterable() && $this->aggregateInterface->getReturnType()->isCollection()) {
+            $interfaceReturnType = $this->aggregateInterface->getReturnType();
+            if ($interfaceReturnType->isUnionType()) {
+                $resultType = TypeDescriptor::createCollection(TypeDescriptor::OBJECT);
+            }else {
+                $resultType = $interfaceReturnType;
+            }
+        }
 
         if ($this->isFactoryMethod) {
             if ($this->isEventSourcedWithInteralEventRecorded()) {
                 $result = call_user_func([$result, $this->aggregateMethodWithEvents]);
+                $resultType = TypeDescriptor::createCollection(TypeDescriptor::OBJECT);
             }
 
             if ($this->isEventSourced) {
@@ -121,11 +133,13 @@ class CallAggregateService
 
             $resultMessage = $resultMessage->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate);
         }elseif ($this->isCommandHandler && $this->isEventSourcedWithInteralEventRecorded()) {
-            $result = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);;
+            $result = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);
+            $resultType = TypeDescriptor::createCollection(TypeDescriptor::OBJECT);
         }
 
         if (!is_null($result)) {
             $resultMessage = $resultMessage
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($resultType->toString()))
                 ->setPayload($result);
         }
 

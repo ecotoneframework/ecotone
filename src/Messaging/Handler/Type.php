@@ -102,10 +102,9 @@ interface Type
      */
     public function isAnything(): bool;
 
-    /**
-     * @return bool
-     */
     public function isInterface(): bool;
+
+    public function isAbstractClass(): bool;
 
     /**
      * @return bool

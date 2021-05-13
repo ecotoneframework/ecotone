@@ -279,7 +279,7 @@ final class MethodInvoker implements MessageProcessor
 
             if (!($sourceTypeDescriptor->isCompatibleWith($parameterType))) {
                 $convertedData = null;
-                if (!$parameterType->isCompoundObjectType() && !$parameterType->isInterface() && !$parameterType->isAnything() && !$parameterType->isUnionType() && $this->canConvertParameter(
+                if (!$parameterType->isCompoundObjectType() && !$parameterType->isAbstractClass() && !$parameterType->isInterface() && !$parameterType->isAnything() && !$parameterType->isUnionType() && $this->canConvertParameter(
                     $sourceTypeDescriptor,
                     $currentParameterMediaType,
                     $parameterType,

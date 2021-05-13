@@ -291,6 +291,17 @@ class UnionTypeDescriptor implements Type
         return false;
     }
 
+    public function isAbstractClass() : bool
+    {
+        foreach ($this->typeDescriptors as $typeDescriptor) {
+            if ($typeDescriptor->isAbstractClass()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @inheritDoc
      */

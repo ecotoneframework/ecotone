@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
@@ -75,8 +76,11 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
     /**
      * @var ParameterConverterBuilder[] $parameterConverters
      */
-    public static function createWithDirectObject(object $referenceObject, string $methodName, int $precedence, string $pointcut, array $parameterConverters): self
+    public static function createWithDirectObjectAndResolveConverters(object $referenceObject, string $methodName, int $precedence, string $pointcut): self
     {
+        $parameterAnnotationResolver = ParameterConverterAnnotationFactory::create();
+        $parameterConverters = $parameterAnnotationResolver->createParameterConverters(InterfaceToCall::create($referenceObject, $methodName));
+
         $aroundInterceptorReference               = new self($precedence, get_class($referenceObject), "", $methodName, Pointcut::createWith($pointcut), $parameterConverters);
         $aroundInterceptorReference->directObject = $referenceObject;
 
@@ -102,7 +106,7 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
         );
         if ($interceptorsReferences) {
             foreach ($interceptorsReferences as $interceptorsReferenceName) {
-                $interceptingService = $interceptorsReferenceName->buildAroundInterceptor($channelResolver, $referenceSearchService);
+                $interceptingService = $interceptorsReferenceName->buildAroundInterceptor($referenceSearchService);
 
                 $aroundMethodInterceptors[] = $interceptingService;
             }
@@ -138,9 +142,9 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
         return $this->precedence;
     }
 
-    public function buildAroundInterceptor(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
+    public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
     {
-        $referenceToCall = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
+        $referenceToCall = $this->directObject ?: $referenceSearchService->get($this->referenceName);
 
         $builtConverters = [];
         foreach ($this->parameterConverters as $parameterConverter) {

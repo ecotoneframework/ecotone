@@ -1168,11 +1168,10 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
             )
             ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::createWithDirectObject(
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     CalculatingServiceInterceptorExample::create(1), "sumAfterCalling",
                     1,
-                    ConsumerContinuouslyWorkingService::class,
-                    []
+                    ConsumerContinuouslyWorkingService::class
                 )
             )
             ->registerAfterMethodInterceptor(
@@ -1231,11 +1230,10 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
             )
             ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::createWithDirectObject(
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $interceptingHandler, "handle",
                     1,
-                    ConsumerContinuouslyWorkingService::class,
-                    []
+                    ConsumerContinuouslyWorkingService::class
                 )
             )
             ->registerAfterMethodInterceptor(
@@ -1278,10 +1276,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     )
                 )
                 ->registerAroundMethodInterceptor(
-                    AroundInterceptorReference::createWithDirectObject(
+                    AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                         CalculatingServiceInterceptorExample::create(2), "sum",
-                        1, CalculatingService::class,
-                        []
+                        1, CalculatingService::class
                     )
                 )
                 ->registerAfterMethodInterceptor(
@@ -1732,11 +1729,10 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     )
                 )
                 ->registerAroundMethodInterceptor(
-                    AroundInterceptorReference::createWithDirectObject(
+                    AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                         $aroundInterceptor, "handle",
                         1,
-                        ServiceInterfaceCalculatingService::class,
-                        []
+                        ServiceInterfaceCalculatingService::class
                     )
                 )
                 ->registerAfterMethodInterceptor(
@@ -1802,10 +1798,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     )
                 )
                 ->registerAroundMethodInterceptor(
-                    AroundInterceptorReference::createWithDirectObject(
+                    AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                         $aroundInterceptor, "handle",
-                        1, "",
-                        []
+                        1, ""
                     )
                 )
                 ->registerAfterMethodInterceptor(

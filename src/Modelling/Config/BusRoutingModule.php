@@ -387,12 +387,11 @@ class BusRoutingModule implements AnnotationModule
                 )
             )
             ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::createWithDirectObject(
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $this->messageHeadersPropagator,
                     "storeHeaders",
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class,
-                    []
+                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class
                 )
             )
             ->registerMessageHandler($this->commandBusByObject)

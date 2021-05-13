@@ -23,7 +23,7 @@ class AcknowledgeConfirmationInterceptor
 
     public static function createAroundInterceptor(PollingMetadata $pollingMetadata) : AroundInterceptorReference
     {
-        return AroundInterceptorReference::createWithDirectObject(new self($pollingMetadata->isStoppedOnError()), "ack", Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, "", []);
+        return AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new self($pollingMetadata->isStoppedOnError()), "ack", Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, "");
     }
 
     /**

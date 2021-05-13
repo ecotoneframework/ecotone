@@ -109,12 +109,7 @@ final class MethodInvoker implements MessageProcessor
     }
 
     /**
-     * @param InterfaceToCall $interfaceToCall
      * @param ParameterConverterBuilder[] $passedMethodParameterConverters
-     * @param bool $shouldBeBuild
-     * @param array $endpointAnnotations
-     * @param InterfaceToCall|null $interceptedInterface
-     * @param bool $ignorePayload
      * @return ParameterConverterBuilder[]|ParameterConverter[]
      * @throws InvalidArgumentException
      * @throws MessagingException

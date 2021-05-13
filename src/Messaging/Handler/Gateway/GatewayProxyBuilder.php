@@ -356,7 +356,7 @@ class GatewayProxyBuilder implements GatewayBuilder
 
     public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver) : NonProxyGateway
     {
-        $this->validateInterceptorsCorrectness($channelResolver, $referenceSearchService);
+        $this->validateInterceptorsCorrectness($referenceSearchService);
         Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName} which is not correct interface");
 
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
@@ -381,12 +381,11 @@ class GatewayProxyBuilder implements GatewayBuilder
         $errorChannel = $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null;
         $aroundInterceptors = $this->aroundInterceptors;
         if ($errorChannel) {
-            $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObject(
+            $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                 new ErrorChannelInterceptor($errorChannel),
                 "handle",
                 Precedence::ERROR_CHANNEL_PRECEDENCE,
-                $this->interfaceName,
-                []
+                $this->interfaceName
             );
         }
 
@@ -448,10 +447,10 @@ class GatewayProxyBuilder implements GatewayBuilder
         );
     }
 
-    private function validateInterceptorsCorrectness(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): void
+    private function validateInterceptorsCorrectness(ReferenceSearchService $referenceSearchService): void
     {
         foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
-            $aroundInterceptorReference->buildAroundInterceptor($channelResolver, $referenceSearchService);
+            $aroundInterceptorReference->buildAroundInterceptor($referenceSearchService);
         }
     }
 

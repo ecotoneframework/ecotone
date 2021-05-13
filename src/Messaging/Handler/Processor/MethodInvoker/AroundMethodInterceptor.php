@@ -42,7 +42,7 @@ class AroundMethodInterceptor
     /**
      * @var ParameterConverter[] $parameterConverters
      */
-    public static function createWith($referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService, array $parameterConverters): self
+    public static function createWith(object $referenceToCall, string $methodName, ReferenceSearchService $referenceSearchService, array $parameterConverters): self
     {
         /** @var InterfaceToCallRegistry $interfaceRegistry */
         $interfaceRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);

@@ -54,12 +54,11 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
             $this->requestChannelName
         );
 
-        $this->entrypointGateway->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject(
+        $this->entrypointGateway->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
             new LoggingInterceptor(null),
             "logException",
             Precedence::EXCEPTION_LOGGING_PRECEDENCE,
-            "",
-            []
+            ""
         ));
     }
 

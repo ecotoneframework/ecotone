@@ -246,11 +246,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     public function test_having_chain_in_chain_with_default_around_interceptors_before_calling_any_chained_handler()
     {
-        $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObject(
+        $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
             CalculatingServiceInterceptorExample::create(1), "resultAfterCalling",
             1,
-            ConsumerContinuouslyWorkingService::class,
-            []
+            ConsumerContinuouslyWorkingService::class
         );
 
         $chainHandler               = ChainMessageHandlerBuilder::create()
@@ -278,11 +277,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     public function test_having_chain_in_chain_with_around_interceptors()
     {
-        $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObject(
+        $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
             CalculatingServiceInterceptorExample::create(1), "sumAfterCalling",
             1,
-            ConsumerContinuouslyWorkingService::class,
-            []
+            ConsumerContinuouslyWorkingService::class
         );
 
         $chainHandler               = ChainMessageHandlerBuilder::create()
@@ -314,11 +312,10 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $internalOutputChannel = DirectChannel::create();
         $internalOutputChannel->subscribe(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "sum")->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty()));
 
-        $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObject(
+        $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
             CalculatingServiceInterceptorExample::create(10), "sumAfterCalling",
             1,
-            ConsumerContinuouslyWorkingService::class,
-            []
+            ConsumerContinuouslyWorkingService::class
         );
 
         $chainHandler               = ChainMessageHandlerBuilder::create()

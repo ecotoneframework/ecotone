@@ -195,7 +195,7 @@ class Gateway implements NonProxyGateway
             ->withPossibilityToReplaceArgumentsInAroundInterceptors(false)
             ->withEndpointAnnotations($this->endpointAnnotations);
         $aroundInterceptorReferences = $this->aroundInterceptors;
-        $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObject(
+        $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
             new ConversionInterceptor(
                 $this->referenceSearchService->get(ConversionService::REFERENCE_NAME),
                 $this->interfaceToCall,
@@ -204,8 +204,7 @@ class Gateway implements NonProxyGateway
             ),
             "convert",
             Precedence::GATEWAY_REPLY_CONVERSION_PRECEDENCE,
-            $this->interfaceToCall->getInterfaceName(),
-            []
+            $this->interfaceToCall->getInterfaceName()
         );
         foreach ($aroundInterceptorReferences as $aroundInterceptorReference) {
             $gatewayInternalHandler = $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference);

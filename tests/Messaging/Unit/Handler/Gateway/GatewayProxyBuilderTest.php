@@ -50,6 +50,7 @@ use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleStdClassConverter;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExceptionalConverter;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\ServiceWithSingleArgumentDefinedByConverter;
 use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MessageReturningGateway;
@@ -67,6 +68,7 @@ use Test\Ecotone\Messaging\Fixture\MessageConverter\FakeMessageConverterGatewayE
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyStdClass;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceive;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
@@ -789,7 +791,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObject(CalculatingServiceInterceptorExample::create(1), "sum", 1, ServiceInterfaceCalculatingService::class, [])
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(CalculatingServiceInterceptorExample::create(1), "sum", 1, ServiceInterfaceCalculatingService::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -819,7 +821,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayMethodExample::class, 'invoke', $requestChannelName)
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObject($transactionInterceptor, "transactional", 1, Transactional::class, [])
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters($transactionInterceptor, "transactional", 1, Transactional::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -851,7 +853,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayClassExample::class, 'invoke', $requestChannelName)
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObject( $transactionInterceptor, "transactional", 1, Transactional::class, [])
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters( $transactionInterceptor, "transactional", 1, Transactional::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -883,7 +885,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayClassAndMethodExample::class, 'invoke', $requestChannelName)
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObject( $transactionInterceptor, "transactional", 1, Transactional::class, [])
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters( $transactionInterceptor, "transactional", 1, Transactional::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -916,7 +918,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayClassAndMethodExample::class, 'invoke', $requestChannelName)
             ->withEndpointAnnotations([Transactional::createWith(["transactionFactory0"])])
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObject( $transactionInterceptor, "transactional", 1, Transactional::class, [])
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters( $transactionInterceptor, "transactional", 1, Transactional::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(

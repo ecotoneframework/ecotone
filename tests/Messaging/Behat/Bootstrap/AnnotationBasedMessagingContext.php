@@ -116,6 +116,14 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
+            case "Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway":
+                {
+                    $objects = [
+                        \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample::class => new \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample(),
+                        \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler::class => new \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler()
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages":
                 {
                     $objects = [
@@ -434,14 +442,6 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
         $errorOrder = $orderGateway->getIncorrectOrder();
         Assert::assertNotNull($errorOrder, "Expected error order {$order}, but found none");
         Assert::assertEquals($order, $errorOrder, "Expected error order {$order} got {$errorOrder}");
-    }
-
-    /**
-     * @When I call with :beginningValue I should receive :result
-     */
-    public function iCallWithIShouldReceive(int $beginningValue, int $result)
-    {
-        Assert::assertEquals($result, self::getGateway(CalculateGatewayExample::class)->calculate($beginningValue));
     }
 
     public static function getGateway(string $name)

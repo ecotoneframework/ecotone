@@ -82,24 +82,24 @@ class AroundMethodInterceptor
                 }
             }
 
-            if (!$resolvedArgument && $parameter->canBePassedIn($messagePayloadType)) {
+            if (is_null($resolvedArgument) && $parameter->canBePassedIn($messagePayloadType)) {
                 $resolvedArgument = $requestMessage->getPayload();
             }
 
-            if (!$resolvedArgument && $parameter->canBePassedIn($methodInvocationType)) {
+            if (is_null($resolvedArgument) && $parameter->canBePassedIn($methodInvocationType)) {
                 $hasMethodInvocation = true;
                 $resolvedArgument    = $methodInvocation;
             }
 
-            if (!$resolvedArgument && $parameter->canBePassedIn($interceptedInstanceType)) {
+            if (is_null($resolvedArgument) && $parameter->canBePassedIn($interceptedInstanceType)) {
                 $resolvedArgument = is_string($methodInvocation->getObjectToInvokeOn()) ? null : $methodInvocation->getObjectToInvokeOn();
             }
 
-            if (!$resolvedArgument && $parameter->canBePassedIn($messageType)) {
+            if (is_null($resolvedArgument) && $parameter->canBePassedIn($messageType)) {
                 $resolvedArgument = $requestMessage;
             }
 
-            if (!$resolvedArgument) {
+            if (is_null($resolvedArgument)) {
                 if ($methodInvocation->getInterceptedInterface()->hasClassAnnotation($parameter->getTypeDescriptor())) {
                     $resolvedArgument = $methodInvocation->getInterceptedInterface()->getClassAnnotation($parameter->getTypeDescriptor());
                 }
@@ -113,7 +113,7 @@ class AroundMethodInterceptor
                 }
             }
 
-            if (!$resolvedArgument) {
+            if (is_null($resolvedArgument)) {
                 if ($parameter->canBePassedIn($referenceSearchServiceTypeDescriptor)) {
                     $resolvedArgument = $this->referenceSearchService;
                 }
@@ -125,11 +125,11 @@ class AroundMethodInterceptor
                 }
             }
 
-            if (!$resolvedArgument && $parameter->getTypeDescriptor()->isNonCollectionArray()) {
+            if (is_null($resolvedArgument) && $parameter->getTypeDescriptor()->isNonCollectionArray()) {
                 $resolvedArgument = $requestMessage->getHeaders()->headers();
             }
 
-            if (!$resolvedArgument && !$parameter->doesAllowNulls()) {
+            if (is_null($resolvedArgument) && !$parameter->doesAllowNulls()) {
                 throw MethodInvocationException::create("{$this->interceptorInterfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`. It can be that the value is null in this scenario (for example type hinting for Aggregate, when calling Aggregate Factory Method), however the interface does not allow for nulls.");
             }
 

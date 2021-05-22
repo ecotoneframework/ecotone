@@ -294,11 +294,15 @@ class ModellingHandlerModule implements AnnotationModule
 
         $aggregateCommandOrEventHandlers = [];
         foreach ($this->aggregateCommandHandlers as $registration) {
-            $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getNamedMessageChannelFor($registration)][] = $registration;
+            $channelName = self::getNamedMessageChannelFor($registration);
+            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($channelName));
+            $aggregateCommandOrEventHandlers[$registration->getClassName()][$channelName][] = $registration;
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {
-            $aggregateCommandOrEventHandlers[$registration->getClassName()][self::getNamedMessageChannelForEventHandler($registration)][] = $registration;
+            $channelName = self::getNamedMessageChannelForEventHandler($registration);
+            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($channelName));
+            $aggregateCommandOrEventHandlers[$registration->getClassName()][$channelName][] = $registration;
         }
 
         foreach ($aggregateCommandOrEventHandlers as $channelNameRegistrations) {
@@ -325,11 +329,11 @@ class ModellingHandlerModule implements AnnotationModule
     /**
      * @var AnnotatedDefinition[] $registrations
      */
-    private function registerAggregateCommandHandler(Configuration $configuration, array $aggregateRepositoryReferenceNames, array $registrations, string $inputChannelName): void
+    private function registerAggregateCommandHandler(Configuration $configuration, array $aggregateRepositoryReferenceNames, array $registrations, string $messageChannelName): void
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
 
-        $registration = $registrations[0];
+        $registration = reset($registrations);
 
         $aggregateClassDefinition = ClassDefinition::createFor(TypeDescriptor::create($registration->getClassName()));
         if (count($registrations) > 2) {
@@ -343,34 +347,34 @@ class ModellingHandlerModule implements AnnotationModule
         foreach ($registrations as $registration) {
             $channel = self::getHandlerChannel($registration);
             if ((new ReflectionMethod($registration->getClassName(), $registration->getMethodName()))->isStatic()) {
-                Assert::null($factoryChannel, "Trying to register factory method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$inputChannelName}");
+                Assert::null($factoryChannel, "Trying to register factory method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$messageChannelName}");
                 $factoryChannel                   = $channel;
                 $factoryHandledPayloadType        = self::getPayloadClassIfAny($registration);
                 $factoryHandledPayloadType        = $factoryHandledPayloadType ? ClassDefinition::createFor(TypeDescriptor::create($factoryHandledPayloadType)) : null;
                 $factoryIdentifierMetadataMapping = $registration->getAnnotationForMethod()->identifierMetadataMapping;
             } else {
-                Assert::null($actionChannel, "Trying to register action method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$inputChannelName}");
+                Assert::null($actionChannel, "Trying to register action method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$messageChannelName}");
                 $actionChannel = $channel;
             }
         }
 
-        $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputChannelName));
         $hasFactoryAndActionRedirect = count($registrations) === 2;
         if ($hasFactoryAndActionRedirect) {
-            $inputChannelNameRouter = $inputChannelName . ".route";
+            $messageChannelNameRouter = Uuid::uuid4()->toString();
             $configuration->registerMessageHandler(
                 ChainMessageHandlerBuilder::create()
-                    ->withInputChannelName($inputChannelName)
+                    ->withInputChannelName($messageChannelName)
                     ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $factoryIdentifierMetadataMapping, $factoryHandledPayloadType))
                     ->chainInterceptedHandler(
                         LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $factoryHandledPayloadType, LoadAggregateMode::createContinueOnNotFound())
                             ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
                     )
-                    ->withOutputMessageChannel($inputChannelNameRouter)
+                    ->withOutputMessageChannel($messageChannelNameRouter)
             );
+
             $configuration->registerMessageHandler(
                 RouterBuilder::createHeaderMappingRouter(AggregateMessage::AGGREGATE_OBJECT_EXISTS, [true => $actionChannel, false => $factoryChannel])
-                    ->withInputChannelName($inputChannelNameRouter)
+                    ->withInputChannelName($messageChannelNameRouter)
             );
         }
 
@@ -386,7 +390,14 @@ class ModellingHandlerModule implements AnnotationModule
             $parameterConverters   = $parameterConverterAnnotationFactory->createParameterWithDefaults($relatedClassInterface, (bool)$relatedClassInterface->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)));
             $connectionChannel     = $hasFactoryAndActionRedirect
                 ? ($isFactoryMethod ? $factoryChannel : $actionChannel)
-                : $inputChannelName;
+                : self::getHandlerChannel($registration);
+            if (!$hasFactoryAndActionRedirect) {
+                $configuration->registerMessageHandler(
+                    BridgeBuilder::create()
+                        ->withInputChannelName($messageChannelName)
+                        ->withOutputMessageChannel($connectionChannel)
+                );
+            }
 
             $saveChannel  = $connectionChannel . "save";
             $chainHandler = ChainMessageHandlerBuilder::create()

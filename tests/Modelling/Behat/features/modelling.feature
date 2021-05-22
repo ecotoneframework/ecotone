@@ -166,3 +166,25 @@ Feature: activating as aggregate order entity
     And I add guest "Frank" to book 1
     Then view guest list of book 1 then
       | Frank |
+
+  Scenario: Handle two sagas handling same events
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\TwoSagas"
+    When order with id 5 was placed
+    Then bookkeeping status for order 5 should be "awaitingPayment"
+    And shipment status for order 5 should be "awaitingPayment"
+    When order with id 5 was paid
+    Then bookkeeping status for order 5 should be "paid"
+    And shipment status for order 5 should be "shipped"
+
+  Scenario: Handle two asynchronous sagas handling same events
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas"
+    When order with id 5 was placed
+    And I active receiver "asynchronous_channel"
+    And I active receiver "asynchronous_channel"
+    Then bookkeeping status for order 5 should be "awaitingPayment"
+    And shipment status for order 5 should be "awaitingPayment"
+    When order with id 5 was paid
+    And I active receiver "asynchronous_channel"
+    And I active receiver "asynchronous_channel"
+    Then bookkeeping status for order 5 should be "paid"
+    And shipment status for order 5 should be "shipped"

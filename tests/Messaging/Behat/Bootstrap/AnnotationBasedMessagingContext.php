@@ -67,6 +67,7 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
+use Test\Ecotone\Modelling\Fixture\TwoSagas\TwoSagasRepository;
 
 class AnnotationBasedMessagingContext extends TestCase implements Context
 {
@@ -270,6 +271,20 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             {
                 $objects = [
                     new JobRepository()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\TwoSagas":
+            {
+                $objects = [
+                    TwoSagasRepository::createEmpty()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas":
+            {
+                $objects = [
+                    \Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\TwoSagasRepository::createEmpty()
                 ];
                 break;
             }

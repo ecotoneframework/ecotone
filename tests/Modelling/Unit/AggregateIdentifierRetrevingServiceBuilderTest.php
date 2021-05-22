@@ -25,7 +25,7 @@ use Test\Ecotone\Modelling\Fixture\Blog\RepublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
-use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
+use Test\Ecotone\Modelling\Fixture\Saga\OrderWasPaid;
 
 class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
 {
@@ -35,7 +35,7 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
             ["orderId" => "paymentId"],
-            ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class))
+            ClassDefinition::createFor(TypeDescriptor::create(OrderWasPaid::class))
         );
 
         $orderId                 = 1000;
@@ -48,7 +48,7 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         );
 
         $replyChannel = QueueChannel::create();
-        $command = PaymentWasDoneEvent::create();
+        $command = OrderWasPaid::create();
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload($command)
                 ->setHeader($headerName, $orderId)
@@ -65,7 +65,7 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
             ["some" => "paymentId", "orderId" => "x"],
-            ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class))
+            ClassDefinition::createFor(TypeDescriptor::create(OrderWasPaid::class))
         );
     }
 

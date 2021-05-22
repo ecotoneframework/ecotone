@@ -35,7 +35,6 @@ use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepositoryBuilder;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
-use Test\Ecotone\Modelling\Fixture\Saga\OrderWasPaid;
 use Test\Ecotone\Modelling\Fixture\Ticket\AssignWorkerCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
 use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;

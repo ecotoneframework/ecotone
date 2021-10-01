@@ -17,17 +17,17 @@ use Ramsey\Uuid\Uuid;
 class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
 {
     private string $inputChannelName;
-    private \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor $methodInterceptor;
-    private \Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder $gateway;
+    private MethodInterceptor $methodInterceptor;
+    private GatewayProxyBuilder $gateway;
     private string $internalRequestChannelName;
 
     public function __construct(string $inputChannelName, MethodInterceptor $methodInterceptor)
     {
-        $this->inputChannelName = $inputChannelName;
+        $this->inputChannelName  = $inputChannelName;
         $this->methodInterceptor = $methodInterceptor;
 
         $this->internalRequestChannelName = Uuid::uuid4()->toString();
-        $this->gateway = GatewayProxyBuilder::create(BeforeSendGateway::class, BeforeSendGateway::class, "execute", $this->internalRequestChannelName);
+        $this->gateway                    = GatewayProxyBuilder::create(BeforeSendGateway::class, BeforeSendGateway::class, "execute", $this->internalRequestChannelName);
     }
 
     /**
@@ -75,9 +75,13 @@ class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
         $directChannel = DirectChannel::create();
         $directChannel->subscribe($messageHandler);
         /** @var BeforeSendGateway $gateway */
-        $gateway = $this->gateway->buildWithoutProxyObject($referenceSearchService, InMemoryChannelResolver::createFromAssociativeArray([
-            $this->internalRequestChannelName => $directChannel
-        ]));
+        $gateway = $this->gateway->buildWithoutProxyObject(
+            $referenceSearchService, InMemoryChannelResolver::createFromAssociativeArray(
+            [
+                $this->internalRequestChannelName => $directChannel
+            ]
+        )
+        );
 
         return new BeforeSendChannelInterceptor($gateway);
     }

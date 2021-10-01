@@ -59,6 +59,8 @@ use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryH
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannel;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndIgnoreMessage;
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndObject;
+use Test\Ecotone\Modelling\Fixture\Handler\ServiceWithCommandAndQueryHandlersUnderSameClass;
+use Test\Ecotone\Modelling\Fixture\Handler\ServiceWithCommandAndQueryHandlersUnderSameName;
 use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 
 /**
@@ -112,12 +114,11 @@ class BusRoutingModuleTest extends MessagingTest
                     )
                 )
                 ->registerAroundMethodInterceptor(
-                    AroundInterceptorReference::createWithDirectObject(
+                    AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                         new MessageHeadersPropagator(),
                         "storeHeaders",
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class,
-                        []
+                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class
                     )
                 )
                 ->registerMessageHandler(BusRouterBuilder::createCommandBusByObject($messagePropagator, $commandObjectMapping))
@@ -161,6 +162,28 @@ class BusRoutingModuleTest extends MessagingTest
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
                 ServiceQueryHandlersWithNotUniqueClass::class
+            ])
+        );
+    }
+
+    public function test_throwing_exception_when_query_and_command_are_non_unique_by_class_name()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $this->prepareModule(
+            InMemoryAnnotationFinder::createFrom([
+                ServiceWithCommandAndQueryHandlersUnderSameClass::class
+            ])
+        );
+    }
+
+    public function test_throwing_exception_when_query_and_command_are_non_unique_by_name()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $this->prepareModule(
+            InMemoryAnnotationFinder::createFrom([
+                ServiceWithCommandAndQueryHandlersUnderSameName::class
             ])
         );
     }
@@ -365,15 +388,6 @@ class BusRoutingModuleTest extends MessagingTest
         ];
 
         $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]]);
-    }
-
-    public function test_not_routing_to_projection_event_handlers_for_event_bus()
-    {
-        $annotatedClasses = [
-            ProjectionEventHandlerExample::class
-        ];
-
-        $this->assertRouting($annotatedClasses, [], [], [], [], [], []);
     }
 
     public function test_union_registering_service_event_handler()

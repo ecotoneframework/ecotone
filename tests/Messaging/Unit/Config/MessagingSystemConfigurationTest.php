@@ -21,6 +21,7 @@ use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\OptionalReference;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
@@ -114,10 +115,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
-    /**
-     * @throws NoConsumerFactoryForBuilderException
-     * @throws MessagingException
-     */
     public function test_running_pollable_consumer()
     {
         $messageChannelName = "pollableChannel";
@@ -130,10 +127,28 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $message = MessageBuilder::withPayload("a")->build();
-        $pollableChannel->send($message);
+        $pollableChannel->send(MessageBuilder::withPayload("a")->build());
 
         $messagingSystem->run($messagingSystem->list()[0]);
+
+        $this->assertTrue($messageHandler->wasCalled());
+    }
+
+    public function test_running_overriding_polling_metadata()
+    {
+        $messageChannelName = "pollableChannel";
+        $pollableChannel = QueueChannel::create();
+        $messageHandler = NoReturnMessageHandler::create();
+
+        $messagingSystem = $this->createMessagingSystemConfiguration()
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName)->withEndpointId("executor"))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::create($messageChannelName, $pollableChannel))
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $pollableChannel->send(MessageBuilder::withPayload("a")->build());
+
+        $messagingSystem->run("executor", ExecutionPollingMetadata::createWithDefaults()->withExecutionTimeLimitInMilliseconds(1));
 
         $this->assertTrue($messageHandler->wasCalled());
     }
@@ -220,6 +235,23 @@ class MessagingSystemConfigurationTest extends MessagingTest
 
         MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
             ->registerAsynchronousEndpoint("asyncChannel", "endpointId")
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+    }
+
+    public function test_throwing_exception_if_registering_asynchronous_for_not_existing_channel()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), "result")
+                    ->withEndpointId("endpointId")
+                    ->withInputChannelName("inputChannel")
+            )
+            ->registerAsynchronousEndpoint("asyncChannel", "endpointId")
+            ->registerPollingMetadata(PollingMetadata::create("asyncChannel")->setExecutionAmountLimit(1))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
     }
 
@@ -458,6 +490,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     ->withInputChannelName("inputChannel")
             )
             ->registerAsynchronousEndpoint("fakeAsyncChannel", "endpointId")
+            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createDirectMessageChannel("fakeAsyncChannel"))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
         $message = MessageBuilder::withPayload(2)
@@ -1135,11 +1168,10 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
             )
             ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::createWithDirectObject(
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     CalculatingServiceInterceptorExample::create(1), "sumAfterCalling",
                     1,
-                    ConsumerContinuouslyWorkingService::class,
-                    []
+                    ConsumerContinuouslyWorkingService::class
                 )
             )
             ->registerAfterMethodInterceptor(
@@ -1198,11 +1230,10 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 )
             )
             ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::createWithDirectObject(
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $interceptingHandler, "handle",
                     1,
-                    ConsumerContinuouslyWorkingService::class,
-                    []
+                    ConsumerContinuouslyWorkingService::class
                 )
             )
             ->registerAfterMethodInterceptor(
@@ -1245,10 +1276,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     )
                 )
                 ->registerAroundMethodInterceptor(
-                    AroundInterceptorReference::createWithDirectObject(
+                    AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                         CalculatingServiceInterceptorExample::create(2), "sum",
-                        1, CalculatingService::class,
-                        []
+                        1, CalculatingService::class
                     )
                 )
                 ->registerAfterMethodInterceptor(
@@ -1562,6 +1592,19 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("order.register"));
     }
 
+    public function test_throwing_exception_if_registering_message_channel_name_with_same_name_as_endpoint_id()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel("order.register"))
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(new OrderService(), "order")
+                    ->withInputChannelName("some")
+                    ->withEndpointId("order.register")
+            );
+    }
+
     public function test_throwing_exception_if_registering_endpoint_with_id_same_as_default_message_channel()
     {
         $this->expectException(ConfigurationException::class);
@@ -1686,11 +1729,10 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     )
                 )
                 ->registerAroundMethodInterceptor(
-                    AroundInterceptorReference::createWithDirectObject(
+                    AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                         $aroundInterceptor, "handle",
                         1,
-                        ServiceInterfaceCalculatingService::class,
-                        []
+                        ServiceInterfaceCalculatingService::class
                     )
                 )
                 ->registerAfterMethodInterceptor(
@@ -1756,10 +1798,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     )
                 )
                 ->registerAroundMethodInterceptor(
-                    AroundInterceptorReference::createWithDirectObject(
+                    AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                         $aroundInterceptor, "handle",
-                        1, "",
-                        []
+                        1, ""
                     )
                 )
                 ->registerAfterMethodInterceptor(
@@ -1834,8 +1875,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelName = MessagingEntrypoint::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
-            ConsoleCommandParameter::create("id", "header.id"),
-            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", 123)
+            ConsoleCommandParameter::create("id", "header.id", false),
+            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", false,123)
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
@@ -1857,8 +1898,8 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $channelName = MessagingEntrypoint::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
-            ConsoleCommandParameter::create("id", "header.id"),
-            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", 123)
+            ConsoleCommandParameter::create("id", "header.id", false),
+            ConsoleCommandParameter::createWithDefaultValue("token", "header.token", false, 123)
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())

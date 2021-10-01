@@ -6,8 +6,6 @@ use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
-use Test\Ecotone\Modelling\Fixture\Saga\OrderWasPlacedEvent;
-use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 
 #[Aggregate]
 class OrderFulfilment

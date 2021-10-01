@@ -5,12 +5,7 @@ namespace Ecotone\Messaging\Endpoint;
 
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
-/**
- * Class PollingMetadata
- * @package Ecotone\Messaging\Endpoint\PollingConsumer
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
-class PollingMetadata
+final class PollingMetadata
 {
     const DEFAULT_MAX_MESSAGES_PER_POLL = 1;
 
@@ -21,6 +16,7 @@ class PollingMetadata
     const DEFAULT_HANDLED_MESSAGE_LIMIT = 0;
     const DEFAULT_EXECUTION_LIMIT = 0;
     const DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS = 0;
+    const DEFAULT_STOP_ON_ERROR = false;
 
     private string $endpointId;
     private string $cron = "";
@@ -43,6 +39,7 @@ class PollingMetadata
     private bool $withSignalInterceptors = false;
     private string $triggerReferenceName = "";
     private string $taskExecutorName = "";
+    private bool $stopOnError = self::DEFAULT_STOP_ON_ERROR;
 
     /**
      * PollingMetadata constructor.
@@ -63,6 +60,13 @@ class PollingMetadata
         return new self($endpointId);
     }
 
+    public function withTestingSetup(): self
+    {
+        return $this
+            ->setExecutionAmountLimit(1)
+            ->setExecutionTimeLimitInMilliseconds(1);
+    }
+
     /**
      * @param PollingMetadata $pollingMetadata
      * @return PollingMetadata
@@ -70,6 +74,19 @@ class PollingMetadata
     public static function createFrom(PollingMetadata $pollingMetadata) : self
     {
         return clone $pollingMetadata;
+    }
+
+    public function setStopOnError(bool $stopOnError): self
+    {
+        $copy = $this->createCopy();
+        $copy->stopOnError = $stopOnError;
+
+        return $copy;
+    }
+
+    public function isStoppedOnError(): bool
+    {
+        return $this->stopOnError;
     }
 
     /**
@@ -92,6 +109,33 @@ class PollingMetadata
     {
         $copy = $this->createCopy();
         $copy->errorChannelName = $errorChannelName;
+
+        return $copy;
+    }
+
+    public function applyExecutionPollingMetadata(?ExecutionPollingMetadata $executionPollingMetadata) : self
+    {
+        if (!$executionPollingMetadata) {
+            return $this;
+        }
+
+        $copy = $this->createCopy();
+
+        if (!is_null($executionPollingMetadata->getStopOnError())) {
+            $copy = $copy->setStopOnError($executionPollingMetadata->getStopOnError());
+        }
+        if (!is_null($executionPollingMetadata->getHandledMessageLimit())) {
+            $copy = $copy->setHandledMessageLimit($executionPollingMetadata->getHandledMessageLimit());
+        }
+        if (!is_null($executionPollingMetadata->getExecutionTimeLimitInMilliseconds())) {
+            $copy = $copy->setExecutionTimeLimitInMilliseconds($executionPollingMetadata->getExecutionTimeLimitInMilliseconds());
+        }
+        if (!is_null($executionPollingMetadata->getMemoryLimitInMegabytes())) {
+            $copy = $copy->setMemoryLimitInMegaBytes($executionPollingMetadata->getMemoryLimitInMegabytes());
+        }
+        if (!is_null($executionPollingMetadata->getCron())) {
+            $copy = $copy->setCron($executionPollingMetadata->getCron());
+        }
 
         return $copy;
     }
@@ -287,7 +331,7 @@ class PollingMetadata
      */
     public function getErrorChannelName(): string
     {
-        return $this->errorChannelName;
+        return $this->stopOnError ? "" : $this->errorChannelName;
     }
 
     /**

@@ -24,6 +24,9 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
+use Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate\CreateStorage;
+use Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate\SmallBox;
+use Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate\Storage;
 use Test\Ecotone\Modelling\Fixture\Ticket\AssignWorkerCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\StartTicketCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
@@ -92,6 +95,72 @@ class CallAggregateBuilderTest extends TestCase
         $this->assertEquals(
             $orderAmount,
             $replyChannel->receive()->getPayload()
+        );
+    }
+
+    public function test_providing_correct_result_type_for_reply_message_when_result_is_collection()
+    {
+        $aggregateId = 1;
+        $aggregate = Storage::create(new CreateStorage($aggregateId, [SmallBox::create(1)], []));
+
+        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
+            "getSmallBoxes",
+            false
+        )
+            ->withAggregateRepositoryFactories([InMemoryStandardRepository::class]);
+
+        $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createWith([
+                InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateQueryHandler->handle(
+            MessageBuilder::withPayload(["storageId" => $aggregateId])
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate)
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::createCollection(SmallBox::class),
+            $replyChannel->receive()->getHeaders()->getContentType()->getTypeParameter()
+        );
+    }
+
+    public function test_providing_correct_result_type_for_reply_message_when_result_is_collection_of_unions()
+    {
+        $aggregateId = 1;
+        $aggregate = Storage::create(new CreateStorage($aggregateId, [SmallBox::create(1)], []));
+
+        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
+            "getBigBoxes",
+            false
+        )
+            ->withAggregateRepositoryFactories([InMemoryStandardRepository::class]);
+
+        $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createWith([
+                InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateQueryHandler->handle(
+            MessageBuilder::withPayload(["storageId" => $aggregateId])
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate)
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::createCollection(TypeDescriptor::OBJECT),
+            $replyChannel->receive()->getHeaders()->getContentType()->getTypeParameter()
         );
     }
 
@@ -214,9 +283,11 @@ class CallAggregateBuilderTest extends TestCase
             ])
         );
 
+        $ticket = new Ticket();
+        $ticket->onTicketWasStarted(new TicketWasStartedEvent($ticketId));
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload($commandToRun)
-                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, Ticket::createFrom([new TicketWasStartedEvent($ticketId)]))
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $ticket)
                 ->setReplyChannel($queueChannel)->build()
         );
 

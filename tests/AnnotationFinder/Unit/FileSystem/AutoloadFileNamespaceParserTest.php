@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  * @package Test\Ecotone\AnnotationFinder\Unit\Unit\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class FileAutoloadParserTest extends TestCase
+class AutoloadFileNamespaceParserTest extends TestCase
 {
     public function test_retrieve_when_psr_4_namespace_is_equal_to_required()
     {
@@ -96,6 +96,22 @@ class FileAutoloadParserTest extends TestCase
                 [
                     "psr-4" => ["Ecotone\One" => "src"],
                     "psr-0" => ["Ecotone\Two" => "src"]
+                ],
+                "src"
+            )
+        );
+    }
+
+    public function test_retrieving_src_catalog_with_namespace_suffix()
+    {
+        $getUsedPathsFromAutoload = new AutoloadFileNamespaceParser();
+
+        $this->assertEquals(
+            ["Ecotone\One", "Ecotone\Two"],
+            $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
+                [
+                    "psr-4" => ["Ecotone\\One\\" => "src/Ecotone"],
+                    "psr-0" => ["Ecotone\\Two\\" => "src/Ecotone"]
                 ],
                 "src"
             )

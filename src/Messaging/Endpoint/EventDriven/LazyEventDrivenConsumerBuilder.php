@@ -31,6 +31,11 @@ class LazyEventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
         );
     }
 
+    public function isPollingConsumer(): bool
+    {
+        return false;
+    }
+
     /**
      * @inheritDoc
      */

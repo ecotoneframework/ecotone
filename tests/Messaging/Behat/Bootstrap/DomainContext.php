@@ -27,6 +27,8 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\MessagingException;
 use Test\Ecotone\Messaging\Fixture\Behat\Booking\BookingService;
+use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample;
+use Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\Order;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderingService;
@@ -38,10 +40,7 @@ use Test\Ecotone\Messaging\Fixture\Behat\Shopping\ShoppingService;
  */
 class DomainContext implements Context
 {
-    /**
-     * @var MessagingSystemConfiguration
-     */
-    private $messagingSystemConfiguration;
+    private MessagingSystemConfiguration $messagingSystemConfiguration;
     private ?\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem;
     private ?\Ecotone\Messaging\Handler\InMemoryReferenceSearchService $inMemoryReferenceSearchService;
     private ?\Ecotone\Messaging\Future $future;
@@ -392,5 +391,13 @@ class DomainContext implements Context
     {
         $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
         $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
+    }
+
+    /**
+     * @When I call :gatewayName with :beginningValue I should receive :result
+     */
+    public function iCallWithIShouldReceive(string $gatewayName, int $beginningValue, int $result)
+    {
+        Assert::assertEquals($result, AnnotationBasedMessagingContext::getGateway($gatewayName)->calculate($beginningValue));
     }
 }

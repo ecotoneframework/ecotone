@@ -145,7 +145,11 @@ Feature: Service activator
 
   Scenario: Application handling gateways inside gateways
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway"
-    When I call with 2 I should receive 76
+    When I call "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample" with 2 I should receive 76
+
+  Scenario: Application handling interceptors for gateway
+    Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway"
+    When I call "Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\CalculateGatewayExample" with 2 I should receive 10
 
   Scenario: Application handling gateways inside gateways using only messages
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages"
@@ -155,3 +159,8 @@ Feature: Service activator
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\Presend"
     When I store 100 coins
     Then result should be 200 in "shop" channel
+
+  Scenario: Handle intercepted scheduled endpoint in recursion
+    Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled"
+    When I call pollable endpoint "scheduled.handler"
+    Then result from scheduled endpoint should be 160

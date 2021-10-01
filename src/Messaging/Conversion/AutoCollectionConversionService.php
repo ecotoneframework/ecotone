@@ -52,7 +52,6 @@ class AutoCollectionConversionService implements ConversionService
         }
 
         $targetPHPType = $this->getTargetType($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
-        Assert::isObject($targetPHPType, "Converter was not found for {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType};");
         $converter = $this->getConverter($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
         Assert::isObject($converter, "Converter was not found for {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType};");
 
@@ -87,7 +86,7 @@ class AutoCollectionConversionService implements ConversionService
         return null;
     }
 
-    private function getTargetType(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType) : ?TypeDescriptor
+    private function getTargetType(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType) : TypeDescriptor
     {
         foreach ($this->converters as $converter) {
             /** @var TypeDescriptor[] $targetTypesToCheck */
@@ -109,7 +108,7 @@ class AutoCollectionConversionService implements ConversionService
             }
         }
 
-        return null;
+        return $targetType->isUnionType() ? $targetType->getUnionTypes()[0] : $targetType;
     }
 
     /**

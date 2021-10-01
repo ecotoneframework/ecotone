@@ -59,12 +59,11 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
             )
         );
         $configuration->registerAroundMethodInterceptor(
-            AroundInterceptorReference::createWithDirectObject(
+            AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                 new LoggingInterceptor(null),
                 "logException",
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
-                LogError::class,
-                []
+                LogError::class
             )
         );
     }

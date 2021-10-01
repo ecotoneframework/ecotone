@@ -20,7 +20,8 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateVersion;
-use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\Attribute\TargetAggregateVersion;
 
 class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
@@ -31,7 +32,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
     private ?string $aggregateVersionPropertyName = null;
     private array $aggregateRepositoryReferenceNames;
     private ?string $handledMessageClassName;
-    private ?string $eventSourcedFactoryMethod;
+    private EventSourcingHandlerExecutor $eventSourcingHandlerExecutor;
     private LoadAggregateMode $loadAggregateMode;
     private bool $isEventSourced;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
@@ -58,9 +59,6 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
 
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        if ($this->isEventSourced && !$this->eventSourcedFactoryMethod) {
-            throw InvalidArgumentException::create("Your aggregate {$this->aggregateClassName}, is event sourced. You must define static method with attribute " . AggregateFactory::class . " for aggregate recreation from events");
-        }
         $aggregateRepository = $this->isEventSourced
             ? LazyEventSourcedRepository::create(
                 $this->aggregateClassName,
@@ -87,7 +85,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
                 $this->isAggregateVersionAutomaticallyIncreased,
                 new PropertyReaderAccessor(),
                 PropertyEditorAccessor::create($referenceSearchService),
-                $this->eventSourcedFactoryMethod,
+                $this->eventSourcingHandlerExecutor,
                 $this->loadAggregateMode
             ),
             "load"
@@ -120,24 +118,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
 
     private function initialize(ClassDefinition $aggregateClassDefinition, ?ClassDefinition $handledMessageClassName): void
     {
-        $aggregateMethodWithEvents          = null;
-        $aggregateMessageVersionPropertyName       = null;
-
-        $aggregateFactoryAnnotation = TypeDescriptor::create(AggregateFactory::class);
-        foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
-            $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
-
-            if ($methodToCheck->hasMethodAnnotation($aggregateFactoryAnnotation)) {
-                $factoryMethodInterface = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
-                Assert::isTrue($factoryMethodInterface->hasSingleParameter(), "Event sourced factory method {$aggregateClassDefinition}:{$method} should contain only one iterable parameter");
-                Assert::isTrue($factoryMethodInterface->isStaticallyCalled(), "Event sourced factory method {$aggregateClassDefinition}:{$method} should be static");
-                Assert::isTrue($factoryMethodInterface->getFirstParameter()->getTypeDescriptor()->isIterable(), "Event sourced factory method {$aggregateClassDefinition}:{$method} should type hint for array or iterable");
-
-                break;
-            }
-        }
-
-        $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcedAggregate::class));
+        $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class));
         $aggregateMessageVersionPropertyName = null;
         if ($handledMessageClassName) {
             $targetAggregateVersion            = TypeDescriptor::create(TargetAggregateVersion::class);
@@ -147,17 +128,6 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
                 }
             }
         }
-        $eventSourcedFactoryMethod = null;
-        $aggregateFactoryAnnotation = TypeDescriptor::create(AggregateFactory::class);
-        foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
-            $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
-
-            if ($methodToCheck->hasMethodAnnotation($aggregateFactoryAnnotation)) {
-                $eventSourcedFactoryMethod = $method;
-                break;
-            }
-        }
-
         $versionAnnotation             = TypeDescriptor::create(AggregateVersion::class);
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($versionAnnotation)) {
@@ -169,26 +139,6 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
         }
 
         $this->messageVersionPropertyName = $aggregateMessageVersionPropertyName;
-        $this->eventSourcedFactoryMethod = $eventSourcedFactoryMethod;
-    }
-
-    public static function getAggregateRepository(string $aggregateClassName, array $aggregateRepositoryNames, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): EventSourcedRepository|StandardRepository
-    {
-        $aggregateRepository = null;
-        foreach ($aggregateRepositoryNames as $aggregateRepositoryName) {
-            /** @var StandardRepository|EventSourcedRepository $aggregateRepository */
-            $aggregateRepositoryToCheck = $referenceSearchService->get($aggregateRepositoryName);
-            if ($aggregateRepositoryToCheck->canHandle($aggregateClassName)) {
-                if ($aggregateRepositoryToCheck instanceof RepositoryBuilder) {
-                    $aggregateRepositoryToCheck = $aggregateRepositoryToCheck->build($channelResolver, $referenceSearchService);
-                }
-
-                $aggregateRepository = $aggregateRepositoryToCheck;
-                break;
-            }
-        }
-        Assert::notNull($aggregateRepository, "Aggregate Repository not found for {$aggregateClassName}");
-
-        return $aggregateRepository;
+        $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutor::createFor($aggregateClassDefinition, $this->isEventSourced);
     }
 }

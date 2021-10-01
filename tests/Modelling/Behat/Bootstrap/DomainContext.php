@@ -20,6 +20,13 @@ use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorde
 use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\StartJob;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PlaceOrder;
+use Test\Ecotone\Modelling\Fixture\NamedEvent\AddGuest;
+use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
+use Test\Ecotone\Modelling\Fixture\NamedEvent\RegisterBook;
+use Test\Ecotone\Modelling\Fixture\TwoSagas\Bookkeeping;
+use Test\Ecotone\Modelling\Fixture\TwoSagas\OrderWasPaid;
+use Test\Ecotone\Modelling\Fixture\TwoSagas\OrderWasPlaced;
+use Test\Ecotone\Modelling\Fixture\TwoSagas\Shipment;
 
 /**
  * Defines application features from the specific context.
@@ -411,6 +418,73 @@ class DomainContext extends TestCase implements Context
     public function iFinishJobWithId(int $id)
     {
         AnnotationBasedMessagingContext::getCommandBus()->send(new FinishJob($id));
+    }
+
+    /**
+     * @When I register guest book with id :bookId
+     */
+    public function iRegisterGuestBookWithId(string $bookId)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->send(new RegisterBook($bookId));
+    }
+
+    /**
+     * @When I add guest :name to book :bookId
+     */
+    public function iAddGuestToBook(string $name, string $bookId)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->send(new AddGuest($bookId, $name));
+    }
+
+    /**
+     * @Then view guest list of book :bookId then
+     */
+    public function viewGuestListOfBookThen(string $bookId, TableNode $table)
+    {
+        $this->assertEquals(
+            array_map(fn(array $data) => $data[0], $table->getRows()),
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(GuestViewer::BOOK_GET_GUESTS, $bookId)
+        );
+    }
+
+    /**
+     * @When order with id :id was placed
+     */
+    public function orderWithIdWasPlaced(int $id)
+    {
+        AnnotationBasedMessagingContext::getEventBus()->publish(new OrderWasPlaced($id));
+        AnnotationBasedMessagingContext::getEventBus()->publish(new \Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\OrderWasPlaced($id));
+    }
+
+    /**
+     * @Then bookkeeping status for order :orderId should be :status
+     */
+    public function bookkeepingStatusForOrderShouldBe(int $orderId, string $status)
+    {
+        $this->assertEquals(
+            $status,
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(Bookkeeping::GET_BOOKING_STATUS, ["orderId" => $orderId])
+        );
+    }
+
+    /**
+     * @Then shipment status for order :orderId should be :status
+     */
+    public function shipmentStatusForOrderShouldBe(int $orderId, string $status)
+    {
+        $this->assertEquals(
+            $status,
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(Shipment::GET_SHIPMENT_STATUS, ["orderId" => $orderId])
+        );
+    }
+
+    /**
+     * @When order with id :orderId was paid
+     */
+    public function orderWithIdWasPaid(int $orderId)
+    {
+        AnnotationBasedMessagingContext::getEventBus()->publish(new OrderWasPaid($orderId));
+        AnnotationBasedMessagingContext::getEventBus()->publish(new \Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\OrderWasPaid($orderId));
     }
 
     /**

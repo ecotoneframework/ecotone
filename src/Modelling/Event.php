@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\EventSourcing;
+namespace Ecotone\Modelling;
 
 
 use Ecotone\Messaging\MessageHeaders;

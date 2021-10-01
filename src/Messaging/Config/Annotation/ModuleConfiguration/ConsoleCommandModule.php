@@ -9,6 +9,7 @@ use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotatedMethod;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Messaging\Attribute\ConsoleParameterOption;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\ConsoleCommand;
 use Ecotone\Messaging\Attribute\Scheduled;
@@ -125,8 +126,8 @@ class ConsoleCommandModule extends NoExternalConfigurationModule implements Anno
                 $headerName = self::ECOTONE_COMMAND_PARAMETER_PREFIX . $interfaceParameter->getName();
                 $parameterConverters[] = HeaderBuilder::create($interfaceParameter->getName(), $headerName);
                 $parameters[]          = $interfaceParameter->hasDefaultValue()
-                    ? ConsoleCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $headerName, $interfaceParameter->getDefaultValue())
-                    : ConsoleCommandParameter::create($interfaceParameter->getName(), $headerName);
+                    ? ConsoleCommandParameter::createWithDefaultValue($interfaceParameter->getName(), $headerName, $interfaceParameter->hasAnnotation(ConsoleParameterOption::class), $interfaceParameter->getDefaultValue())
+                    : ConsoleCommandParameter::create($interfaceParameter->getName(), $headerName, $interfaceParameter->getTypeDescriptor()->isBoolean());
             }
         }
 

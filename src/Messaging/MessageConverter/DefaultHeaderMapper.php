@@ -16,6 +16,8 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 class DefaultHeaderMapper implements HeaderMapper
 {
     const DEFAULT_HEADER_CONVERSION_MEDIA_TYPE = MediaType::APPLICATION_JSON;
+    const CONVERTED_HEADERS_TO_DIFFERENT_FORMAT = "ecotone.convertedKeys";
+
     /**
      * @var string[]
      */
@@ -114,22 +116,14 @@ class DefaultHeaderMapper implements HeaderMapper
             }
 
             if (array_key_exists($mappedHeader, $convertedSourceHeaders)) {
-                $value = $this->extractValue($convertedSourceHeaders[$mappedHeader]);
-
-                if (!is_null($value)) {
-                    $targetHeaders[$mappedHeader] = $value;
-                }
+                $targetHeaders = $this->convertToStoreableFormat($mappedHeader, $convertedSourceHeaders[$mappedHeader], $targetHeaders);
 
                 continue;
             }
 
             foreach ($convertedSourceHeaders as $sourceHeaderName => $value) {
                 if (preg_match("#{$mappedHeader}#", $sourceHeaderName)) {
-                    $value = $this->extractValue($value);
-
-                    if (!is_null($value)) {
-                        $targetHeaders[$sourceHeaderName] = $value;
-                    }
+                    $targetHeaders = $this->convertToStoreableFormat($sourceHeaderName, $value, $targetHeaders);
                 }
             }
         }
@@ -171,27 +165,42 @@ class DefaultHeaderMapper implements HeaderMapper
         return $finalMappingHeaders;
     }
 
-    private function extractValue($value)
+    private function convertToStoreableFormat(string $mappedHeader, mixed $value, array $convertedHeaders) : array
     {
         if ($this->isScalarType($value)) {
-            return $value;
+            $convertedHeaders[$mappedHeader] = $value;
         } else if (
-            $this->conversionService->canConvert(
-                TypeDescriptor::createFromVariable($value),
-                MediaType::createApplicationXPHP(),
-                TypeDescriptor::createStringType(),
-                MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
-            )
+        $this->conversionService->canConvert(
+            TypeDescriptor::createFromVariable($value),
+            MediaType::createApplicationXPHP(),
+            TypeDescriptor::createStringType(),
+            MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
+        )
         ) {
-            return $this->conversionService->convert(
+            $convertedHeaders[$mappedHeader] =  $this->conversionService->convert(
                 $value,
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
                 TypeDescriptor::createStringType(),
                 MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
             );
+        } else if (
+            $this->conversionService->canConvert(
+                TypeDescriptor::createFromVariable($value),
+                MediaType::createApplicationXPHP(),
+                TypeDescriptor::createStringType(),
+                MediaType::createApplicationXPHP()
+            )
+        ) {
+            $convertedHeaders[$mappedHeader] =  $this->conversionService->convert(
+                $value,
+                TypeDescriptor::createFromVariable($value),
+                MediaType::createApplicationXPHP(),
+                TypeDescriptor::createStringType(),
+                MediaType::createApplicationXPHP()
+            );
         }
 
-        return null;
+        return $convertedHeaders;
     }
 }

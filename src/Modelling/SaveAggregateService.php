@@ -2,6 +2,8 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
@@ -13,6 +15,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Attribute\NamedEvent;
 use Ecotone\Modelling\Config\BusModule;
 
 /**
@@ -27,7 +30,11 @@ class SaveAggregateService
     /**
      * @var NonProxyGateway|EventBus
      */
-    private object $eventBus;
+    private object $objectEventBus;
+    /**
+     * @var NonProxyGateway|EventBus
+     */
+    private NonProxyGateway $namedEventBus;
     private ?string $aggregateMethodWithEvents;
     private PropertyEditorAccessor $propertyEditorAccessor;
     private array $aggregateIdentifierMapping;
@@ -36,11 +43,11 @@ class SaveAggregateService
     private bool $isAggregateVersionAutomaticallyIncreased;
     private bool $isEventSourced;
 
-    public function __construct(InterfaceToCall $aggregateInterface, bool $isEventSourced, StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $eventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased)
+    public function __construct(InterfaceToCall $aggregateInterface, bool $isEventSourced, StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $objectEventBus, NonProxyGateway $namedEventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
-        $this->eventBus = $eventBus;
+        $this->objectEventBus = $objectEventBus;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
         $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
         $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
@@ -48,6 +55,7 @@ class SaveAggregateService
         $this->aggregateVersionProperty = $aggregateVersionProperty;
         $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
         $this->isEventSourced = $isEventSourced;
+        $this->namedEventBus = $namedEventBus;
     }
 
     public function save(Message $message, array $metadata) : \Ecotone\Messaging\Message
@@ -121,7 +129,16 @@ class SaveAggregateService
         }
 
         foreach ($events as $event) {
-            $this->eventBus->execute([$event, $metadata]);
+            $this->objectEventBus->execute([$event, $metadata]);
+
+            $eventDefinition = ClassDefinition::createFor(TypeDescriptor::createFromVariable($event));
+            $namedEvent = TypeDescriptor::create(NamedEvent::class);
+            if ($eventDefinition->hasClassAnnotation($namedEvent)) {
+                /** @var NamedEvent $namedEvent */
+                $namedEvent = $eventDefinition->getSingleClassAnnotation($namedEvent);
+
+                $this->namedEventBus->execute([$namedEvent->getName(), $event, MediaType::APPLICATION_X_PHP, $metadata]);
+            }
         }
 
         return MessageBuilder::fromMessage($message)

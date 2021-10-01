@@ -187,6 +187,6 @@ final class InterfaceParameter
 
     public function __toString()
     {
-        return $this->name . " " . $this->typeDescriptor->toString();
+        return $this->name;
     }
 }

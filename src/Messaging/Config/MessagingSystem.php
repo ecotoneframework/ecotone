@@ -11,7 +11,11 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\ConsumerEndpointFactory;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
@@ -35,59 +39,43 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 final class MessagingSystem implements ConfiguredMessagingSystem
 {
-    private iterable $consumers;
-    private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
-    /**
-     * @var GatewayReference[]
-     */
-    private array $gatewayReferences;
-    /**
-     * @var NonProxyCombinedGateway[]
-     */
-    private array $nonProxyCombinedGateways;
-    /**
-     * @var ConsoleCommandConfiguration[]
-     */
-    private array $consoleCommands;
+    const POLLING_CONSUMER_BUILDER = "builder";
+    const POLLING_CONSUMER_HANDLER = "handler";
 
     /**
      * Application constructor.
-     * @param iterable|ConsumerLifecycle[] $consumers
-     * @param GatewayReference[]|array $gateways
+     * @param ConsumerLifecycle[] $eventDrivenConsumers
+     * @param MessageHandlerBuilder[] $pollingConsumerBuilders
+     * @param InboundChannelAdapterBuilder[] $inboundChannelAdapterBuilders
+     * @param GatewayReference[]|array $gatewayReferences
      * @param NonProxyCombinedGateway[]|array $nonProxyCombinedGateways
      * @param ConsoleCommandConfiguration[] $consoleCommands
      * @param ChannelResolver $channelResolver
-     * @throws MessagingException
+     * @param PollingMetadata[] $pollingMetadataConfigurations
      */
-    private function __construct(iterable $consumers, array $gateways, array $nonProxyCombinedGateways, ChannelResolver $channelResolver, array $consoleCommands)
+    private function __construct(
+        private array $eventDrivenConsumers,
+        private array $pollingConsumerBuilders,
+        private array $inboundChannelAdapterBuilders,
+        private array $gatewayReferences,
+        private array $nonProxyCombinedGateways,
+        private ChannelResolver $channelResolver,
+        private ReferenceSearchService $referenceSearchService,
+        private array $pollingMetadataConfigurations,
+        private array $consoleCommands
+    )
     {
-        Assert::allInstanceOfType($consumers, ConsumerLifecycle::class);
-        Assert::allInstanceOfType($gateways, GatewayReference::class);
-
-        $this->consumers = $consumers;
-        $this->channelResolver = $channelResolver;
-        $this->gatewayReferences = $gateways;
-        $this->nonProxyCombinedGateways = $nonProxyCombinedGateways;
-
-        $this->initialize();
-        $this->consoleCommands = $consoleCommands;
-    }
-
-    private function initialize(): void
-    {
-        foreach ($this->consumers as $consumer) {
-            if (!$consumer->isRunningInSeparateThread()) {
-                $consumer->run();
-            }
+        foreach ($eventDrivenConsumers as $consumer) {
+            $consumer->run();
         }
     }
 
     /**
      * @param ReferenceSearchService $referenceSearchService
      * @param MessageChannelBuilder[] $messageChannelBuilders
-     * @param MessageChannelBuilder[] $messageChannelInterceptors
-     * @param GatewayBuilder[] $gatewayBuilders
-     * @param ConsumerLifecycleBuilder[] $consumerFactories
+     * @param ChannelInterceptorBuilder[] $messageChannelInterceptors
+     * @param GatewayProxyBuilder[][] $gatewayBuilders
+     * @param MessageHandlerConsumerBuilder[] $messageHandlerConsumerFactories
      * @param PollingMetadata[] $pollingMetadataConfigurations
      * @param MessageHandlerBuilder[] $messageHandlerBuilders
      * @param ChannelAdapterConsumerBuilder[] $channelAdapterConsumerBuilders
@@ -98,7 +86,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     public static function createFrom(
         ReferenceSearchService $referenceSearchService,
         array $messageChannelBuilders, array $messageChannelInterceptors,
-        array $gatewayBuilders, array $consumerFactories,
+        array $gatewayBuilders, array $messageHandlerConsumerFactories,
         array $pollingMetadataConfigurations, array $messageHandlerBuilders, array $channelAdapterConsumerBuilders,
         bool $isLazyConfiguration,
         array $consoleCommands
@@ -114,18 +102,33 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             $referenceSearchService->registerReferencedObject($gateway->getReferenceName(), $gatewayReferences[$gateway->getReferenceName()]);
         }
         $referenceSearchService->registerReferencedObject(ChannelResolver::class, $channelResolver);
-        $consumerEndpointFactory = new ConsumerEndpointFactory($channelResolver, $referenceSearchService, $consumerFactories, $pollingMetadataConfigurations);
-        $consumers = [];
 
+        $eventDrivenConsumers = [];
+        $pollingConsumerBuilders = [];
         foreach ($messageHandlerBuilders as $messageHandlerBuilder) {
-            $consumers[] = $consumerEndpointFactory->createForMessageHandler($messageHandlerBuilder, $messageChannelBuilders);
+            Assert::keyExists($messageChannelBuilders, $messageHandlerBuilder->getInputMessageChannelName(), "Missing channel with name {$messageHandlerBuilder->getInputMessageChannelName()} for {$messageHandlerBuilder}");
+            $messageChannel = $messageChannelBuilders[$messageHandlerBuilder->getInputMessageChannelName()];
+            foreach ($messageHandlerConsumerFactories as $messageHandlerConsumerBuilder) {
+                if ($messageHandlerConsumerBuilder->isSupporting($messageHandlerBuilder, $messageChannel)) {
+                    if ($messageHandlerConsumerBuilder->isPollingConsumer()) {
+                        $pollingConsumerBuilders[$messageHandlerBuilder->getEndpointId()] = [
+                            self::POLLING_CONSUMER_BUILDER => $messageHandlerConsumerBuilder,
+                            self::POLLING_CONSUMER_HANDLER => $messageHandlerBuilder
+                        ];
+                    }else {
+                        $eventDrivenConsumers[] = $messageHandlerConsumerBuilder->build($channelResolver, $referenceSearchService, $messageHandlerBuilder, self::getPollingMetadata($messageHandlerBuilder->getEndpointId(), $pollingMetadataConfigurations));
+                    }
+                }
+            }
         }
 
+        $inboundChannelAdapterBuilders = [];
         foreach ($channelAdapterConsumerBuilders as $channelAdapter) {
-            $consumers[] = $channelAdapter->build($channelResolver, $referenceSearchService, array_key_exists($channelAdapter->getEndpointId(), $pollingMetadataConfigurations) ? $pollingMetadataConfigurations[$channelAdapter->getEndpointId()] : PollingMetadata::create($channelAdapter->getEndpointId()));
+            $endpointId = $channelAdapter->getEndpointId();
+            $inboundChannelAdapterBuilders[$endpointId] = $channelAdapter;
         }
 
-        return MessagingSystem::create($consumers, $gateways, $nonProxyGateways, $channelResolver, $consoleCommands);
+        return new self($eventDrivenConsumers, $pollingConsumerBuilders, $inboundChannelAdapterBuilders, $gateways, $nonProxyGateways, $channelResolver, $referenceSearchService, $pollingMetadataConfigurations, $consoleCommands);
     }
 
     /**
@@ -205,18 +208,9 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         return [$gateways, $nonProxyCombinedGateways];
     }
 
-    /**
-     * @param iterable $consumers
-     * @param GatewayReference[]|array $gateways
-     * @param NonProxyCombinedGateway[]|array $nonProxyCombinedGateways
-     * @param ChannelResolver $channelResolver
-     * @return MessagingSystem
-     * @throws MessagingException
-     * @internal
-     */
-    public static function create(iterable $consumers, array $gateways, array $nonProxyCombinedGateways, ChannelResolver $channelResolver, array $consoleCommands): self
+    private static function getPollingMetadata(string $endpointId, array $pollingMetadataConfigurations): PollingMetadata
     {
-        return new self($consumers, $gateways, $nonProxyCombinedGateways, $channelResolver, $consoleCommands);
+        return array_key_exists($endpointId, $pollingMetadataConfigurations) ? $pollingMetadataConfigurations[$endpointId] : PollingMetadata::create($endpointId);
     }
 
     /**
@@ -224,18 +218,30 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function run(string $endpointId): void
+    public function run(string $endpointId, ?ExecutionPollingMetadata $executionPollingMetadata = null): void
     {
-        foreach ($this->consumers as $consumer) {
-            if ($consumer->getConsumerName() === $endpointId) {
-                Assert::isTrue($consumer->isRunningInSeparateThread(), "Can't run event driven consumer with name {$endpointId} in separate thread");
+        $pollingMetadata = self::getPollingMetadata($endpointId, $this->pollingMetadataConfigurations)
+                            ->applyExecutionPollingMetadata($executionPollingMetadata);
 
-                $consumer->run();
-                return;
-            }
+        if (array_key_exists($endpointId, $this->pollingConsumerBuilders)) {
+            /** @var MessageHandlerConsumerBuilder $consumerBuilder */
+            $consumerBuilder = $this->pollingConsumerBuilders[$endpointId][self::POLLING_CONSUMER_BUILDER];
+
+            $consumerBuilder->build(
+                $this->channelResolver,
+                $this->referenceSearchService,
+                $this->pollingConsumerBuilders[$endpointId][self::POLLING_CONSUMER_HANDLER],
+                $pollingMetadata
+            )->run();
+        }else if (array_key_exists($endpointId, $this->inboundChannelAdapterBuilders)) {
+            $this->inboundChannelAdapterBuilders[$endpointId]->build(
+                $this->channelResolver,
+                $this->referenceSearchService,
+                $pollingMetadata
+            )->run();
+        }else {
+            throw InvalidArgumentException::create("Can't run `{$endpointId}` as it does not exists. Please verify, if the name is correct using `ecotone:list`.");
         }
-
-        throw InvalidArgumentException::create("Can't run `{$endpointId}` as it does not exists. Please verify, if the name is correct using `ecotone:list`.");
     }
 
     /**
@@ -314,15 +320,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      */
     public function list(): array
     {
-        $list = [];
-
-        foreach ($this->consumers as $consumer) {
-            if ($consumer->isRunningInSeparateThread()) {
-                $list[] = $consumer->getConsumerName();
-            }
-        }
-
-        return $list;
+        return array_merge(array_keys($this->pollingConsumerBuilders), array_keys($this->inboundChannelAdapterBuilders));
     }
 
     /**

@@ -6,12 +6,13 @@ namespace Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventR
 use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventSourcedAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\WithAggregateEvents;
 use Ecotone\Modelling\WithAggregateVersioning;
 
-#[EventSourcedAggregate(true)]
+#[EventSourcingAggregate(true)]
 class Job
 {
     use WithAggregateEvents;
@@ -20,8 +21,6 @@ class Job
     #[AggregateIdentifier]
     private string $id;
     private bool $isInProgress;
-
-    private function __construct() {}
 
     #[CommandHandler]
     public static function start(StartJob $command) : self
@@ -44,33 +43,16 @@ class Job
         return $this->isInProgress;
     }
 
-    #[AggregateFactory]
-    public static function restore(array $events) : self
+    #[EventSourcingHandler]
+    public function whenJobWasStarted(JobWasStarted $event) : void
     {
-        $job = new static();
-
-        foreach ($events as $event) {
-            $job = match (get_class($event)) {
-                JobWasStarted::class => static::whenJobWasStarted($event, $job),
-                JobWasFinished::class => static::whenJobWasFinished($event, $job)
-            };
-        }
-
-        return $job;
+        $this->id = $event->getId();
+        $this->isInProgress = true;
     }
 
-    private static function whenJobWasStarted(JobWasStarted $event, self $job) : static
+    #[EventSourcingHandler]
+    public function whenJobWasFinished(JobWasFinished $event) : void
     {
-        $job->id = $event->getId();
-        $job->isInProgress = true;
-
-        return $job;
-    }
-
-    private static function whenJobWasFinished(JobWasFinished $event, self $job) : static
-    {
-        $job->isInProgress = false;
-
-        return $job;
+        $this->isInProgress = false;
     }
 }

@@ -47,7 +47,8 @@ class SaveAggregateBuilderTest extends TestCase
         $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray(
                 [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
+                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
                 ]
             ),
             InMemoryReferenceSearchService::createWith(
@@ -106,7 +107,8 @@ class SaveAggregateBuilderTest extends TestCase
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray(
                 [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
+                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
                 ]
             ),
             InMemoryReferenceSearchService::createWith(
@@ -163,7 +165,8 @@ class SaveAggregateBuilderTest extends TestCase
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray(
                 [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
+                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
                 ]
             ),
             InMemoryReferenceSearchService::createWith(
@@ -195,7 +198,8 @@ class SaveAggregateBuilderTest extends TestCase
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createFromAssociativeArray(
                 [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create()
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
+                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
                 ]
             ),
             InMemoryReferenceSearchService::createWith(

@@ -34,6 +34,8 @@ use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExampl
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\InterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\CalculateGatewayExampleWithMessages;
+use Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledExample;
+use Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\CoinGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
@@ -55,6 +57,8 @@ use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\AddCurrentUserId;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\BasketRepository;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\AddMetadataService;
 use Test\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod\Basket;
+use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestBookRepository;
+use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\LoggingService;
@@ -65,6 +69,7 @@ use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
 use Test\Ecotone\Modelling\Fixture\SimplifiedAggregate\IdGenerator;
 use Test\Ecotone\Modelling\Fixture\SimplifiedAggregate\SimplifiedAggregateRepository;
+use Test\Ecotone\Modelling\Fixture\TwoSagas\TwoSagasRepository;
 
 class AnnotationBasedMessagingContext extends TestCase implements Context
 {
@@ -114,6 +119,14 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
+            case "Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway":
+                {
+                    $objects = [
+                        \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample::class => new \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample(),
+                        \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler::class => new \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler()
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages":
                 {
                     $objects = [
@@ -139,11 +152,27 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
+            case "Test\Ecotone\Modelling\Fixture\NamedEvent":
+                {
+                    $objects = [
+                        new GuestViewer(),
+                        GuestBookRepository::createEmpty()
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Messaging\Fixture\Behat\Presend":
                 {
                     $objects = [
                         MultiplyCoins::class => new MultiplyCoins(),
                         Shop::class => new Shop(),
+                        LoggingService::class => new LoggingService()
+                    ];
+                    break;
+                }
+            case "Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled":
+                {
+                    $objects = [
+                        InterceptedScheduledExample::class => new InterceptedScheduledExample(),
                         LoggingService::class => new LoggingService()
                     ];
                     break;
@@ -252,6 +281,20 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 $objects = [
                     new IdGenerator(),
                     SimplifiedAggregateRepository::class => SimplifiedAggregateRepository::createEmpty()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\TwoSagas":
+            {
+                $objects = [
+                    TwoSagasRepository::createEmpty()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas":
+            {
+                $objects = [
+                    \Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\TwoSagasRepository::createEmpty()
                 ];
                 break;
             }
@@ -426,14 +469,6 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
         Assert::assertEquals($order, $errorOrder, "Expected error order {$order} got {$errorOrder}");
     }
 
-    /**
-     * @When I call with :beginningValue I should receive :result
-     */
-    public function iCallWithIShouldReceive(int $beginningValue, int $result)
-    {
-        Assert::assertEquals($result, self::getGateway(CalculateGatewayExample::class)->calculate($beginningValue));
-    }
-
     public static function getGateway(string $name)
     {
         return self::$messagingSystem->getGatewayByName($name);
@@ -565,5 +600,19 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
         $coinGateway = self::$messagingSystem->getGatewayByName(CoinGateway::class);
 
         $coinGateway->store($amount);
+    }
+
+    /**
+     * @Then result from scheduled endpoint should be :expectedAmount
+     */
+    public function resultFromScheduledEndpointShouldBe(int $expectedAmount)
+    {
+        /** @var InterceptedScheduledGateway $gateway */
+        $gateway = self::$messagingSystem->getGatewayByName(InterceptedScheduledGateway::class);
+
+        Assert::assertEquals(
+            $expectedAmount,
+            $gateway->getInterceptedData()
+        );
     }
 }

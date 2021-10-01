@@ -2,34 +2,30 @@
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Messaging\Support\Assert;
+
 class ConsoleCommandParameter
 {
-    private string $name;
-    private mixed $defaultValue;
-    private bool $hasDefaultValue;
-    private string $messageHeaderName;
+    private function __construct(private string $name, private string $messageHeaderName, private bool $isOption, private mixed $defaultValue, private bool $hasDefaultValue) {}
 
-    private function __construct(string $name, string $messageHeaderName, mixed $defaultValue, bool $hasDefaultValue)
+    public static function create(string $name, string $messageHeaderName, bool $isOption) : self
     {
-        $this->name            = $name;
-        $this->messageHeaderName = $messageHeaderName;
-        $this->defaultValue    = $defaultValue;
-        $this->hasDefaultValue = $hasDefaultValue;
+        return new self($name, $messageHeaderName, $isOption, null, false);
     }
 
-    public static function create(string $name, string $messageHeaderName) : self
+    public static function createWithDefaultValue(string $name, string $messageHeaderName, bool $isOption, $defaultValue) : self
     {
-        return new self($name, $messageHeaderName, null, false);
-    }
-
-    public static function createWithDefaultValue(string $name, string $messageHeaderName, $defaultValue) : self
-    {
-        return new self($name, $messageHeaderName, $defaultValue, true);
+        return new self($name, $messageHeaderName, $isOption, $defaultValue,true);
     }
 
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function isOption(): bool
+    {
+        return $this->isOption;
     }
 
     public function getMessageHeaderName(): string

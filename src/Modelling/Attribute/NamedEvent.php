@@ -1,18 +1,18 @@
 <?php
 
 
-namespace Ecotone\EventSourcing\Attribute;
+namespace Ecotone\Modelling\Attribute;
 
 use Ecotone\Messaging\Support\Assert;
 
-#[\Attribute(\Attribute::TARGET_CLASS)]
-class Stream
+#[\Attribute]
+class NamedEvent
 {
     private string $name;
 
     public function __construct(string $name)
     {
-        Assert::notNullAndEmpty($name, "Stream name can't be empty");
+        Assert::notNullAndEmpty($name, "Name for event should not be empty, otherwise remove attribute.");
 
         $this->name = $name;
     }

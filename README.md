@@ -27,6 +27,7 @@ If you want to talk or ask question about Ecotone
 - [**Twitter**](https://twitter.com/EcotonePHP)
 - **ecotoneframework@gmail.com**
 - [**Gitter**](https://gitter.im/EcotonePHP/community)
+- [**Reddit**](https://www.reddit.com/r/ecotone)
 
 ## Support Ecotone
 
@@ -34,3 +35,7 @@ If you want to help building and improving Ecotone consider becoming a sponsor:
 
 - [Github](https://github.com/sponsors/dgafka)
 - [Patreon](https://www.patreon.com/dgafka)
+
+## Tags
+
+PHP DDD CQRS Event Sourcing Symfony Laravel Service Bus

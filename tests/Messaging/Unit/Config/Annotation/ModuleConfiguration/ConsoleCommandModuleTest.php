@@ -96,7 +96,7 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $this->assertEquals(
             $configuration,
             $this->createMessagingSystemConfiguration()
-                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "name"), ConsoleCommandParameter::create("surname", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "surname")]))
+                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "name", false), ConsoleCommandParameter::create("surname", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "surname", false)]))
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::create(ParametersOneTimeCommandExample::class, "execute")
                         ->withMethodParameterConverters([
@@ -124,7 +124,7 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $this->assertEquals(
             $configuration,
             $this->createMessagingSystemConfiguration()
-                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "name"), ConsoleCommandParameter::createWithDefaultValue("surname", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "surname", "cash")]))
+                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "name", false), ConsoleCommandParameter::createWithDefaultValue("surname", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "surname", false, "cash")]))
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::create(DefaultParametersOneTimeCommandExample::class, "execute")
                         ->withMethodParameterConverters([
@@ -152,7 +152,7 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $this->assertEquals(
             $configuration,
             $this->createMessagingSystemConfiguration()
-                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "name"), ConsoleCommandParameter::create("surname",ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "surname")]))
+                ->registerConsoleCommand(ConsoleCommandConfiguration::create("ecotone.channel.doSomething", "doSomething", [ConsoleCommandParameter::create("name", ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "name", false), ConsoleCommandParameter::create("surname",ConsoleCommandModule::ECOTONE_COMMAND_PARAMETER_PREFIX . "surname", false)]))
                 ->registerMessageHandler(
                     ServiceActivatorBuilder::create(ParametersWithReferenceOneTimeCommandExample::class, "execute")
                         ->withMethodParameterConverters([

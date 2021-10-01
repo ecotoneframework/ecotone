@@ -4,7 +4,7 @@
 namespace Ecotone\Modelling\Attribute;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
-class EventSourcedAggregate extends Aggregate
+class EventSourcingAggregate extends Aggregate
 {
     const DEFAULT_INTERNAL_EVENT_RECORDER = false;
 

@@ -20,6 +20,8 @@ interface MessageHandlerConsumerBuilder
      */
     public function isSupporting(MessageHandlerBuilder $messageHandlerBuilder, MessageChannelBuilder $relatedMessageChannel): bool;
 
+    public function isPollingConsumer() : bool;
+
     /**
      * @param ChannelResolver $channelResolver
      * @param ReferenceSearchService $referenceSearchService

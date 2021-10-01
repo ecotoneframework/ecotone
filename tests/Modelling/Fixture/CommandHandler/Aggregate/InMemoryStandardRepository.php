@@ -29,7 +29,7 @@ class InMemoryStandardRepository implements StandardRepository
      */
     public function save(array $identifiers, object $aggregate, array $metadata, ?int $expectedVersion): void
     {
-        $this->aggregates[$aggregate->getId()] = $aggregate;
+        $this->aggregates[get_class($aggregate)][$aggregate->getId()] = $aggregate;
     }
 
     /**
@@ -39,7 +39,7 @@ class InMemoryStandardRepository implements StandardRepository
      */
     public static function createWith(array $aggregates): self
     {
-        return new self($aggregates);
+        return new static($aggregates);
     }
 
     /**
@@ -47,7 +47,7 @@ class InMemoryStandardRepository implements StandardRepository
      */
     public static function createEmpty(): self
     {
-        return new self([]);
+        return new static([]);
     }
 
     /**
@@ -64,11 +64,11 @@ class InMemoryStandardRepository implements StandardRepository
     public function findBy(string $aggregateClassName, array $identifiers): ?object
     {
         $aggregateId = $this->getAggregateId($identifiers);
-        if (!$aggregateId || !array_key_exists($aggregateId, $this->aggregates)) {
+        if (!$aggregateId || !isset($this->aggregates[$aggregateClassName][$aggregateId])) {
             return null;
         }
 
-        return $this->aggregates[$aggregateId];
+        return $this->aggregates[$aggregateClassName][$aggregateId];
     }
 
     /**

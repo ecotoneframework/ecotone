@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Endpoint;
 
+use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Transaction\Null\NullTransaction;
@@ -17,6 +19,7 @@ use Ecotone\Messaging\Transaction\Transactional;
 use Ecotone\Messaging\Transaction\TransactionInterceptor;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
+use Test\Ecotone\Messaging\Fixture\Handler\ExceptionalMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingNoArguments;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
@@ -153,7 +156,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             $requestChannelName, "someRef", "executeReturnWithInterceptor"
         )
             ->withEndpointId("test")
-            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject(new TransactionInterceptor(), "transactional", 1, "", []))
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new TransactionInterceptor(), "transactional", 1, ""))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $requestChannelName => $requestChannel
@@ -189,7 +192,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             $requestChannelName, "someRef", "executeReturn"
         )
             ->withEndpointId("test")
-            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject(new TransactionInterceptor(), "transactional", 1, "", []))
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new TransactionInterceptor(), "transactional", 1, ""))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $requestChannelName => $requestChannel
@@ -225,7 +228,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             $requestChannelName, "someRef", "executeReturnWithInterceptor"
         )
             ->withEndpointId("test")
-            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObject(new TransactionInterceptor(), "transactional", 1, "", []))
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new TransactionInterceptor(), "transactional", 1, ""))
             ->withEndpointAnnotations([Transactional::createWith(["transactionFactory0"])])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([

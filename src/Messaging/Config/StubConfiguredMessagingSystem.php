@@ -4,6 +4,7 @@
 namespace Ecotone\Messaging\Config;
 
 
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageChannel;
 
 class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
@@ -28,7 +29,7 @@ class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
         throw new \InvalidArgumentException("Calling stub messaging system");
     }
 
-    public function run(string $endpointId): void
+    public function run(string $endpointId, ?ExecutionPollingMetadata $executionPollingMetadata = null): void
     {
         throw new \InvalidArgumentException("Calling stub messaging system");
     }

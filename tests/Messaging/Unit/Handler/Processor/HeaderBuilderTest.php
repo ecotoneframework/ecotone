@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -70,14 +71,14 @@ class HeaderBuilderTest extends TestCase
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 MediaType::APPLICATION_X_PHP,
-                Uuid::class,
+                UuidInterface::class,
                 Uuid::fromString($personId)
             )
         ]));
 
         $headerResult = $converter->getArgumentFrom(
             InterfaceToCall::create(ServiceWithUuidArgument::class, "execute"),
-            InterfaceParameter::createNotNullable("x", TypeDescriptor::createWithDocBlock(Uuid::class, "")),
+            InterfaceParameter::createNotNullable("x", TypeDescriptor::createWithDocBlock(UuidInterface::class, "")),
             MessageBuilder::withPayload("a")
                 ->setHeader("personId",  $personId)
                 ->build(),

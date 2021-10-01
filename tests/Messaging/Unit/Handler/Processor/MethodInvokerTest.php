@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
+use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
@@ -13,9 +15,12 @@ use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ConfigurationVariableBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocationException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
@@ -30,6 +35,8 @@ use ReflectionException;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\AroundInterceptorWithCustomParameterConverters;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\ServiceWithSingleArgumentDefinedByConverter;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\Order;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderProcessor;
@@ -649,7 +656,7 @@ class MethodInvokerTest extends MessagingTest
             $interceptedService, [],
             InMemoryReferenceSearchService::createEmpty(), InMemoryChannelResolver::createEmpty(),
             [
-                AroundInterceptorReference::createWithDirectObject($interceptingService1, "callWithProceed", 0, "", [])
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters($interceptingService1, "callWithProceed", 0, "")
             ]
         );
 
@@ -926,7 +933,7 @@ class MethodInvokerTest extends MessagingTest
         $interceptedService = StubCallSavingService::createWithReturnType("some");
         $methodInvocation = MethodInvoker::createWith(
             InterfaceToCall::create($interceptedService, 'methodWithAnnotation'), $interceptedService , [], InMemoryReferenceSearchService::createEmpty(), InMemoryChannelResolver::createEmpty(),
-            [AroundInterceptorReference::createWithDirectObject(CallWithStdClassInterceptorExample::create(), "callWithStdClass", 0, "", [])],
+            [AroundInterceptorReference::createWithDirectObjectAndResolveConverters(CallWithStdClassInterceptorExample::create(), "callWithStdClass", 0, "")],
             [
                 new stdClass()
             ]

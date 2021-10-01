@@ -9,7 +9,6 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
-use Ecotone\EventSourcing\Attribute\EventSourcedEvent;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use InvalidArgumentException;
@@ -277,7 +276,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         $namespacesToUse = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
         $catalogRelatedNamespaces = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $catalogRelatedNamespaces);
 
-        if (!$catalogRelatedNamespaces && $catalogToLoad) {
+        if (!$catalogRelatedNamespaces && $catalogToLoad && ($namespacesToUse == ["Ecotone"] || $namespacesToUse == [])) {
             throw ConfigurationException::create("Ecotone cannot resolve namespaces in {$rootProjectDir}/$catalogToLoad. Please provide namespaces manually via configuration. If you do not know how to do it, read Modules section related to your framework at https://docs.ecotone.tech");
         }
 
@@ -329,11 +328,9 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             if (strpos($namespace, $namespaceToUse) === 0) {
                 $namespaceSuffix = str_replace($namespaceToUse, "", $namespace);
 
-                if ($namespaceSuffix === "") {
+                if ($namespaceSuffix === "" || $namespaceSuffix[0] === "\\") {
                     return true;
                 }
-
-                return $namespaceSuffix[0] === "\\";
             }
         }
 

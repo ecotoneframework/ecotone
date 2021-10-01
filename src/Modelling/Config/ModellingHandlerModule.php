@@ -8,6 +8,10 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\EndpointAnnotation;
 use Ecotone\Messaging\Attribute\InputOutputEndpointAnnotation;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Attribute\Parameter\Headers;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -160,6 +164,14 @@ class ModellingHandlerModule implements AnnotationModule
         $firstParameterType = $interfaceToCall->getFirstParameter()->getTypeDescriptor();
 
         if ($firstParameterType->isClassOrInterface() && !$firstParameterType->isClassOfType(TypeDescriptor::create(Message::class))) {
+            $reflectionParameter = new \ReflectionParameter([$registration->getClassName(), $registration->getMethodName()], 0);
+
+            foreach ($reflectionParameter->getAttributes() as $attribute) {
+                if (in_array($attribute->getName(), [ConfigurationVariable::class, Header::class, Headers::class, Reference::class])) {
+                    return TypeDescriptor::ARRAY;
+                }
+            }
+
             return $firstParameterType;
         }
 
@@ -177,6 +189,7 @@ class ModellingHandlerModule implements AnnotationModule
     public static function getPayloadClassIfAny(AnnotatedFinding $registration): ?string
     {
         $type = TypeDescriptor::create(ModellingHandlerModule::getMessagePayloadTypeFor($registration));
+
         if ($type->isClassOrInterface() && !$type->isClassOfType(TypeDescriptor::create(Message::class))) {
             return $type->toString();
         }

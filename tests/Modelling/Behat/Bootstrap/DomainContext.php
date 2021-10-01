@@ -412,4 +412,28 @@ class DomainContext extends TestCase implements Context
     {
         AnnotationBasedMessagingContext::getCommandBus()->send(new FinishJob($id));
     }
+
+    /**
+     * @When I register create aggregate
+     */
+    public function iRegisterCreateAggregate()
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("aggregate.create");
+    }
+
+    /**
+     * @When I enable aggregate
+     */
+    public function iEnableAggregate()
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("aggregate.enable", ["id" => 1]);
+    }
+
+    /**
+     * @Then it should be enabled
+     */
+    public function itShouldBeEnabled()
+    {
+        Assert::assertTrue(AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("aggregate.isEnabled", ["id" => 1]));
+    }
 }

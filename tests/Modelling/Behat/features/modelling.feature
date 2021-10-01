@@ -159,3 +159,9 @@ Feature: activating as aggregate order entity
     Then job with id of 1 should be "in progress"
     When I finish job with id 1
     Then job with id of 1 should be "finished"
+
+  Scenario: Handle simplified aggregate
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\SimplifiedAggregate"
+    When I register create aggregate
+    And I enable aggregate
+    Then it should be enabled

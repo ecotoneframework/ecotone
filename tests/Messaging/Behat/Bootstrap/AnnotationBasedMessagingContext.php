@@ -63,6 +63,8 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
+use Test\Ecotone\Modelling\Fixture\SimplifiedAggregate\IdGenerator;
+use Test\Ecotone\Modelling\Fixture\SimplifiedAggregate\SimplifiedAggregateRepository;
 
 class AnnotationBasedMessagingContext extends TestCase implements Context
 {
@@ -242,6 +244,14 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             {
                 $objects = [
                     new JobRepository()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\SimplifiedAggregate":
+            {
+                $objects = [
+                    new IdGenerator(),
+                    SimplifiedAggregateRepository::class => SimplifiedAggregateRepository::createEmpty()
                 ];
                 break;
             }

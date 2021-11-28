@@ -121,6 +121,7 @@ class SaveAggregateService
         unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_NAME]);
         unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_OBJECT]);
         unset($metadata[MessageHeaders::REPLY_CHANNEL]);
+        unset($metadata[MessageHeaders::CONTENT_TYPE]);
 
         if ($this->isEventSourced) {
             $this->aggregateRepository->save($aggregateIds, $this->aggregateInterface->getInterfaceName(), $events, $metadata, $versionBeforeHandling);

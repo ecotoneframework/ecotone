@@ -148,7 +148,12 @@ class ProxyFactory implements \Serializable
      */
     public function serialize(): string
     {
-        return serialize(["path" => $this->cacheDirectoryPath]);
+        return serialize($this->__serialize());
+    }
+
+    public function __serialize(): array
+    {
+        return ["path" => $this->cacheDirectoryPath];
     }
 
     /**
@@ -156,8 +161,12 @@ class ProxyFactory implements \Serializable
      */
     public function unserialize($serialized): void
     {
-        $serializedProxy = unserialize($serialized);
-        $path  = $serializedProxy['path'];
+        $this->__unserialize(unserialize($serialized));
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $path  = $data['path'];
         if (is_null($path)) {
             $cache = self::createNoCache();
         }else {

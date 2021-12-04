@@ -43,6 +43,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
             $consumerBuilders[] = static::createConsumerFrom($annotationRegistration);
         }
 
+        /** @phpstan-ignore-next-line */
         return new static($consumerBuilders);
     }
 

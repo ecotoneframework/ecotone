@@ -36,6 +36,7 @@ abstract class MessagingException extends \Exception
      */
     public static function create(string $message) : self
     {
+        /** @phpstan-ignore-next-line */
         return new static($message, static::errorCode());
     }
 
@@ -59,6 +60,7 @@ abstract class MessagingException extends \Exception
      */
     public static function createFromPreviousException(string $message, \Throwable $throwable) : self
     {
+        /** @phpstan-ignore-next-line */
         return new static($message, static::errorCode(), $throwable);
     }
 

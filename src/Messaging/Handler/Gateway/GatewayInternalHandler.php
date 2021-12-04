@@ -71,7 +71,7 @@ class GatewayInternalHandler
 
         $replyMessage = null;
         if ($this->interfaceToCall->canReturnValue() && $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
-            $replyCallable = $this->getReply($requestMessage, $requestMessage->getHeaders()->getReplyChannel());
+            $replyCallable = $this->getReply($requestMessage->getHeaders()->getReplyChannel());
 
             if ($this->interfaceToCall->doesItReturnFuture()) {
                 return FutureReplyReceiver::create($replyCallable);
@@ -96,13 +96,12 @@ class GatewayInternalHandler
     }
 
     /**
-     * @param Message $requestMessage
      * @param PollableChannel $replyChannel
      * @return callable
      */
-    private function getReply(Message $requestMessage, PollableChannel $replyChannel): callable
+    private function getReply(PollableChannel $replyChannel): callable
     {
-        return function () use ($requestMessage, $replyChannel) {
+        return function () use ($replyChannel) {
 
             $replyMessage = $this->replyMilliSecondsTimeout > 0 ? $replyChannel->receiveWithTimeout($this->replyMilliSecondsTimeout) : $replyChannel->receive();
 

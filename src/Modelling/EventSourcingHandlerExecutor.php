@@ -10,7 +10,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
 
-class EventSourcingHandlerExecutor
+final class EventSourcingHandlerExecutor
 {
     /**
      * @param InterfaceToCall[] $eventSourcingHandlerMethods

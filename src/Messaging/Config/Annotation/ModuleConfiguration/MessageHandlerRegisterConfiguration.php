@@ -53,6 +53,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
                 );
         }
 
+        /** @phpstan-ignore-next-line */
         return new static($messageHandlerBuilders);
     }
 

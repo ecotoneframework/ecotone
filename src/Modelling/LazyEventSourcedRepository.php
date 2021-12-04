@@ -18,6 +18,7 @@ class LazyEventSourcedRepository implements EventSourcedRepository
 
     public static function create(string $aggregateClassName, bool $isEventSourcedAggregate, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $aggregateRepositoryReferenceNames) : self
     {
+        /** @phpstan-ignore-next-line */
         return new static(new RepositoryStorage($aggregateClassName, $isEventSourcedAggregate, $channelResolver, $referenceSearchService, $aggregateRepositoryReferenceNames));
     }
 

@@ -11,7 +11,7 @@ use Ecotone\Messaging\MessageHeaders;
  * @package Ecotone\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class GenericMessage implements Message
+final class GenericMessage implements Message
 {
     /**
      * @var mixed

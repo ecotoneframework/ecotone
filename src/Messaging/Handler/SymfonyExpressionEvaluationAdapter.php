@@ -54,7 +54,7 @@ class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService
         $expressionLanguage->register(
             'createArray', function ($str) {
             return $str;
-        }, function ($arguments, string $key, $value) use ($expressionLanguage) {
+        }, function ($arguments, string $key, $value) {
             return [
                 $key => $value
             ];
@@ -64,7 +64,7 @@ class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService
         $expressionLanguage->register(
             'isArray', function ($str) {
             return $str;
-        }, function ($arguments, $value) use ($expressionLanguage) {
+        }, function ($arguments, $value) {
             return is_array($value);
         }
         );
@@ -72,7 +72,7 @@ class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService
         $expressionLanguage->register(
             'isset', function ($str) {
             return $str;
-        }, function ($arguments, array $array, string $key) use ($expressionLanguage) {
+        }, function ($arguments, array $array, string $key) {
             return isset($array[$key]);
         }
         );

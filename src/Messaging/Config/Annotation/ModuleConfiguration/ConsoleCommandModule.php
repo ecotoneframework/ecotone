@@ -33,7 +33,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 
 #[ModuleAnnotation]
-class ConsoleCommandModule extends NoExternalConfigurationModule implements AnnotationModule
+final class ConsoleCommandModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     const ECOTONE_COMMAND_PARAMETER_PREFIX = "ecotone.oneTimeCommand.";
 

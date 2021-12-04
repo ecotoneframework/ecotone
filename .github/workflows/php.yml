@@ -4,9 +4,18 @@ on:
   push:
 
 jobs:
-  build_and_test:
-    runs-on: ubuntu-latest
+  run:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ ubuntu-latest, windows-latest, macOS-latest ]
+        php-versions: [ '8.0', '8.1' ]
     steps:
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+
     - uses: actions/checkout@v2
     
     - name: Validate composer.json and composer.lock
@@ -17,9 +26,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
-          ${{ runner.os }}-php-
+          ${{ runner.os }}-php-${{ matrix.php-versions }}-
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
@@ -29,3 +38,6 @@ jobs:
 
     - name: Test Behat
       run: vendor/bin/behat
+
+    - name: Test PHPStan
+      run: vendor/bin/phpstan

@@ -72,6 +72,7 @@ class AttributeResolver implements AnnotationResolver
             }
         }while($parentClass = $parentClass->getParentClass());
 
+        /** @phpstan-ignore-next-line */
         ConfigurationException::create("Can't resolve property {$propertyName} for class {$className}");
     }
 }

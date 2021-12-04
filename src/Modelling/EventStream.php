@@ -7,7 +7,7 @@ namespace Ecotone\Modelling;
 use Ecotone\Modelling\Event;
 use Ecotone\Messaging\Support\Assert;
 
-class EventStream
+final class EventStream
 {
     private int $aggregateVersion;
     /** @var Event[]  */

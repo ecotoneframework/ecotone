@@ -314,6 +314,7 @@ class MessageHeaders
      */
     private static function createMessageHeadersWith(array $headers): MessageHeaders
     {
+        /** @phpstan-ignore-next-line */
         return new static(array_merge(
             [
                 self::MESSAGE_ID => Uuid::uuid4()->toString(),

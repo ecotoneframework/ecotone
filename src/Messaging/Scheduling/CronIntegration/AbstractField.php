@@ -127,7 +127,6 @@ abstract class AbstractField implements FieldInterface
         $step = $chunks[1] ?? 0;
 
         // No step or 0 steps aren't cool
-        /** @phpstan-ignore-next-line */
         if (null === $step || '0' === $step || 0 === $step) {
             return false;
         }

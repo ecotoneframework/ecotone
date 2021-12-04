@@ -9,6 +9,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
@@ -204,6 +205,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
                     ->build($channelResolver, $referenceSearchService);
             }
         }
+
+        throw InvalidArgumentException::create("Incorrect type {$this->type}");
     }
 
     /**

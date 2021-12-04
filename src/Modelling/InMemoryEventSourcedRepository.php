@@ -24,6 +24,7 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
 
     public static function createEmpty() : self
     {
+        /** @phpstan-ignore-next-line */
         return new static([], []);
     }
 

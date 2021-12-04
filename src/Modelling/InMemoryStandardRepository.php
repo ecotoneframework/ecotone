@@ -22,6 +22,7 @@ class InMemoryStandardRepository implements StandardRepository
 
     public static function createEmpty() : self
     {
+        /** @phpstan-ignore-next-line */
         return new static([], []);
     }
 

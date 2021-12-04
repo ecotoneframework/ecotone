@@ -2,9 +2,11 @@
     <img src="https://github.com/ecotoneframework/ecotone/blob/master/ecotone_small.png?raw=true">
 </a></p>
 
-[![License](https://poser.pugx.org/ecotone/ecotone/license)](https://packagist.org/packages/ecotone/ecotone)
+![Github Actions](https://github.com/ecotoneFramework/ecotone/actions/workflows/php.yml/badge.svg)
 [![Latest Stable Version](https://poser.pugx.org/ecotone/ecotone/v/stable)](https://packagist.org/packages/ecotone/ecotone)
-[![Coverage Status](https://coveralls.io/repos/github/ecotoneframework/ecotone/badge.svg?branch=master)](https://coveralls.io/github/ecotoneframework/ecotone?branch=master)
+[![License](http://poser.pugx.org/ecotone/ecotone/license)](https://packagist.org/packages/ecotone/ecotone)
+[![Total Downloads](http://poser.pugx.org/ecotone/ecotone/downloads)](https://packagist.org/packages/ecotone/ecotone)
+[![PHP Version Require](http://poser.pugx.org/ecotone/ecotone/require/php)](https://packagist.org/packages/ecotone/ecotone)
 
 `Ecotone` is `Service Bus` Implementation, which enables `message driven architecture` with `DDD`, `CQRS`, `Event Sourcing` in `PHP`
 

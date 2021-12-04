@@ -1,7 +1,6 @@
-name: PHP Composer
+name: Ecotone Framework
 
-on:
-  push:
+on: [push, pull_request]
 
 jobs:
   run:

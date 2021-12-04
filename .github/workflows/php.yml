@@ -24,3 +24,8 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
+    - name: Test PHPUnit
+      run: vendor/bin/phpunit
+
+    - name: Test Behat
+      run: vendor/bin/behat

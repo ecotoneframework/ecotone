@@ -20,10 +20,12 @@ use Ecotone\Modelling\LoadAggregateServiceBuilder;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
+use Test\Ecotone\Modelling\Fixture\Blog\ChangeArticleContentCommand;
 use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\Blog\RepublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\Basket;
 use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
 use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 
@@ -56,6 +58,62 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         );
 
         $this->assertEquals(["orderId" => $orderId], $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
+    }
+
+    public function test_providing_override_aggregate_identifier()
+    {
+        $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
+            ClassDefinition::createFor(TypeDescriptor::create(Basket::class)),
+            [],
+            null
+        );
+
+        $orderId                 = 1000;
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryStandardRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $command = PaymentWasDoneEvent::create();
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload($command)
+                ->setHeader(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER, $orderId)
+                ->setReplyChannel($replyChannel)->build()
+        );
+
+        $this->assertEquals(["userId" => $orderId], $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
+    }
+
+    public function test_providing_override_aggregate_identifier_as_array()
+    {
+        $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
+            ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
+            [],
+            ClassDefinition::createFor(TypeDescriptor::create(ChangeArticleContentCommand::class))
+        );
+
+        $aggregateIds                 = ["author" => 1000, "title" => "Some"];
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryStandardRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $command = PaymentWasDoneEvent::create();
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload($command)
+                ->setHeader(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER, $aggregateIds)
+                ->setReplyChannel($replyChannel)->build()
+        );
+
+        $this->assertEquals($aggregateIds, $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
     }
 
     public function test_throwing_exception_if_metadata_identifier_mapping_points_to_non_existing_aggregate_id()

@@ -40,7 +40,14 @@ class AggregateIdentifierRetrevingService
 
     public function convert(Message $message): Message
     {
-//        @TODO handle situation when payload is class and typeToConvert is array
+        if ($message->getHeaders()->containsKey(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)) {
+            $aggregateIds = $message->getHeaders()->get(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER);
+            $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [array_key_first($this->payloadIdentifierMapping) => $aggregateIds];
+
+            return MessageBuilder::fromMessage($message)
+                ->setHeader(AggregateMessage::AGGREGATE_ID, $aggregateIds)
+                ->build();
+        }
 
         $payload   = $message->getPayload();
         $mediaType = $message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE)

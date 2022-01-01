@@ -9,6 +9,7 @@ namespace Ecotone\Modelling;
  */
 interface AggregateMessage
 {
+    const OVERRIDE_AGGREGATE_IDENTIFIER = "aggregate.id";
     const AGGREGATE_OBJECT = "ecotone.modelling.aggregate";
     const AGGREGATE_OBJECT_EXISTS = "ecotone.modelling.aggregate_exists";
     const AGGREGATE_ID     = "ecotone.modelling.aggregate.id";

@@ -23,7 +23,7 @@ class ConfigurationVariableBuilder implements ParameterConverterBuilder
 
     public static function createFrom(?string $variableName, InterfaceParameter $interfaceParameter) : self
     {
-        return new self($interfaceParameter->getName(), $variableName ?? $interfaceParameter->getName(), !$interfaceParameter->doesAllowNulls() && !$interfaceParameter->hasDefaultValue(), $interfaceParameter->hasDefaultValue() ? $interfaceParameter->getDefaultValue() : null);
+        return new self($interfaceParameter->getName(), $variableName ?: $interfaceParameter->getName(), !$interfaceParameter->doesAllowNulls() && !$interfaceParameter->hasDefaultValue(), $interfaceParameter->hasDefaultValue() ? $interfaceParameter->getDefaultValue() : null);
     }
 
     public function getRequiredReferences(): array

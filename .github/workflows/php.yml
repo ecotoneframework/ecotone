@@ -9,7 +9,7 @@ jobs:
       matrix:
         operating-system: [ ubuntu-latest ]
 #        operating-system: [ ubuntu-latest, windows-latest, macOS-latest ]
-        php-versions: [ '8.0' ]
+        php-versions: [ '8.0', '8.1' ]
     steps:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2

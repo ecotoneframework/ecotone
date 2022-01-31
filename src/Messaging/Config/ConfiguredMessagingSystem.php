@@ -4,6 +4,10 @@ namespace Ecotone\Messaging\Config;
 
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageChannel;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\DistributedBus;
+use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\QueryBus;
 
 /**
  * Interface ConfiguredMessagingSystem
@@ -30,6 +34,11 @@ interface ConfiguredMessagingSystem
      * @return GatewayReference[]
      */
     public function getGatewayList() : iterable;
+
+    public function getCommandBus(): CommandBus;
+    public function getQueryBus(): QueryBus;
+    public function getEventBus(): EventBus;
+    public function getDistributedBus(): DistributedBus;
 
     /**
      * @param string $channelName

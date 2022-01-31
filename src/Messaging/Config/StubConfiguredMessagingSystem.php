@@ -6,6 +6,10 @@ namespace Ecotone\Messaging\Config;
 
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageChannel;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\DistributedBus;
+use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\QueryBus;
 
 class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
 {
@@ -20,6 +24,26 @@ class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
     }
 
     public function getGatewayList(): iterable
+    {
+        throw new \InvalidArgumentException("Calling stub messaging system");
+    }
+
+    public function getCommandBus(): CommandBus
+    {
+        throw new \InvalidArgumentException("Calling stub messaging system");
+    }
+
+    public function getQueryBus(): QueryBus
+    {
+        throw new \InvalidArgumentException("Calling stub messaging system");
+    }
+
+    public function getEventBus(): EventBus
+    {
+        throw new \InvalidArgumentException("Calling stub messaging system");
+    }
+
+    public function getDistributedBus(): DistributedBus
     {
         throw new \InvalidArgumentException("Calling stub messaging system");
     }

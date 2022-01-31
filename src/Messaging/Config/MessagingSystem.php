@@ -31,6 +31,10 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\DistributedBus;
+use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\QueryBus;
 
 /**
  * Class Application
@@ -305,6 +309,26 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     public function getGatewayList(): iterable
     {
         return $this->gatewayReferences;
+    }
+
+    public function getCommandBus(): CommandBus
+    {
+        return $this->getGatewayByName(CommandBus::class);
+    }
+
+    public function getQueryBus(): QueryBus
+    {
+        return $this->getGatewayByName(QueryBus::class);
+    }
+
+    public function getEventBus(): EventBus
+    {
+        return $this->getGatewayByName(EventBus::class);
+    }
+
+    public function getDistributedBus(): DistributedBus
+    {
+        return $this->getGatewayByName(DistributedBus::class);
     }
 
     /**

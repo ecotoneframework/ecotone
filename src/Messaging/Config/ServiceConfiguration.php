@@ -20,7 +20,7 @@ class ServiceConfiguration
     private bool $failFast = self::DEFAULT_FAIL_FAST;
     private ?string $cacheDirectoryPath = null;
     private string $environment = self::DEFAULT_ENVIRONMENT;
-    private string $loadCatalog = "";
+    private ?string $loadCatalog = "";
     /**
      * @var string[]
      */
@@ -143,6 +143,19 @@ class ServiceConfiguration
         return $clone;
     }
 
+    public function doNotLoadCatalog(): self
+    {
+        $clone              = clone $this;
+        $clone->loadCatalog = null;
+
+        return $clone;
+    }
+
+    public function isLoadingCatalogEnabled(): bool
+    {
+        return !is_null($this->loadCatalog);
+    }
+
     /**
      * @param string[] $namespaces
      */
@@ -255,7 +268,7 @@ class ServiceConfiguration
         return $this->failFast;
     }
 
-    public function getLoadedCatalog(): string
+    public function getLoadedCatalog(): ?string
     {
         return $this->loadCatalog;
     }

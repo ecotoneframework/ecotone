@@ -745,7 +745,7 @@ final class MessagingSystemConfiguration implements Configuration
                     realpath($rootPathToSearchConfigurationFor),
                     $applicationConfiguration->getNamespaces(),
                     $applicationConfiguration->getEnvironment(),
-                    $applicationConfiguration->getLoadedCatalog()
+                    $applicationConfiguration->getLoadedCatalog() ?? ""
                 ),
                 $configurationVariableService
             ),

@@ -10,6 +10,7 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
+use InvalidArgumentException;
 
 class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
 {
@@ -54,6 +55,11 @@ class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
     }
 
     public function run(string $endpointId, ?ExecutionPollingMetadata $executionPollingMetadata = null): void
+    {
+        throw new \InvalidArgumentException("Calling stub messaging system");
+    }
+
+    public function getServiceFromContainer(string $referenceName): object
     {
         throw new \InvalidArgumentException("Calling stub messaging system");
     }

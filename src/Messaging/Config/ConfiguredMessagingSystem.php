@@ -4,6 +4,7 @@ namespace Ecotone\Messaging\Config;
 
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessagePublisher;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
@@ -43,6 +44,8 @@ interface ConfiguredMessagingSystem
     public function getEventBus(): EventBus;
 
     public function getDistributedBus(): DistributedBus;
+
+    public function getMessagePublisher(string $referenceName = MessagePublisher::class): MessagePublisher;
 
     /**
      * @throws InvalidArgumentException if trying to find not existing service reference

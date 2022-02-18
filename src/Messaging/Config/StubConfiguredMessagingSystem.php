@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Config;
 
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessagePublisher;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
@@ -45,6 +46,11 @@ class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
     }
 
     public function getDistributedBus(): DistributedBus
+    {
+        throw new \InvalidArgumentException("Calling stub messaging system");
+    }
+
+    public function getMessagePublisher(string $referenceName = MessagePublisher::class): MessagePublisher
     {
         throw new \InvalidArgumentException("Calling stub messaging system");
     }

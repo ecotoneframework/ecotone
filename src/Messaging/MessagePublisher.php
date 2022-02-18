@@ -11,14 +11,7 @@ interface MessagePublisher
 
     public function sendWithMetadata(string $data, string $sourceMediaType = MediaType::TEXT_PLAIN, array $metadata = []) : void;
 
-    /**
-     * @param object|array $data
-     */
-    public function convertAndSend($data) : void;
+    public function convertAndSend(object|array $data) : void;
 
-    /**
-     * @param object|array $data
-     * @param array  $metadata
-     */
-    public function convertAndSendWithMetadata($data, array $metadata) : void;
+    public function convertAndSendWithMetadata(object|array $data, array $metadata) : void;
 }

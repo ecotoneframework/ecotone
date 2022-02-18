@@ -19,6 +19,7 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessagePublisher;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
@@ -328,6 +329,11 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     public function getDistributedBus(): DistributedBus
     {
         return $this->getGatewayByName(DistributedBus::class);
+    }
+
+    public function getMessagePublisher(string $referenceName = MessagePublisher::class): MessagePublisher
+    {
+        return $this->getGatewayByName($referenceName);
     }
 
     /**

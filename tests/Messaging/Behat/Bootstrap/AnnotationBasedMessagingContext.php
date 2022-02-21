@@ -67,6 +67,7 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
+use Test\Ecotone\Modelling\Fixture\RepositoryShortcut\Infrastructure\TwitterRepository;
 use Test\Ecotone\Modelling\Fixture\SimplifiedAggregate\IdGenerator;
 use Test\Ecotone\Modelling\Fixture\SimplifiedAggregate\SimplifiedAggregateRepository;
 use Test\Ecotone\Modelling\Fixture\TwoSagas\TwoSagasRepository;
@@ -295,6 +296,13 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             {
                 $objects = [
                     \Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\TwoSagasRepository::createEmpty()
+                ];
+                break;
+            }
+            case "Test\Ecotone\Modelling\Fixture\RepositoryShortcut":
+            {
+                $objects = [
+                    new TwitterRepository()
                 ];
                 break;
             }

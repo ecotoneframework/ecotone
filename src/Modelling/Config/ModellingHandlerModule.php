@@ -22,7 +22,10 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
@@ -39,6 +42,7 @@ use Ecotone\Modelling\Attribute\IgnorePayload;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\CallAggregateServiceBuilder;
+use Ecotone\Modelling\FetchAggregate;
 use Ecotone\Modelling\LoadAggregateMode;
 use Ecotone\Modelling\LoadAggregateServiceBuilder;
 use Ecotone\Modelling\RepositoryBuilder;
@@ -78,6 +82,10 @@ class ModellingHandlerModule implements AnnotationModule
      */
     private array $serviceEventHandlers;
     /**
+     * @var AnnotatedFinding[]
+     */
+    private array $gatewayRepositoryMethods;
+    /**
      * @var string[]
      */
     private array $aggregateRepositoryReferenceNames;
@@ -90,7 +98,8 @@ class ModellingHandlerModule implements AnnotationModule
         array $serviceQueryHandlerRegistrations,
         array $aggregateEventHandlers,
         array $serviceEventHandlers,
-        array $aggregateRepositoryReferenceNames
+        array $aggregateRepositoryReferenceNames,
+        array $gatewayRepositoryMethods
     )
     {
         $this->parameterConverterAnnotationFactory = $parameterConverterAnnotationFactory;
@@ -101,6 +110,7 @@ class ModellingHandlerModule implements AnnotationModule
         $this->aggregateEventHandlers               = $aggregateEventHandlers;
         $this->serviceEventHandlers                 = $serviceEventHandlers;
         $this->aggregateRepositoryReferenceNames    = $aggregateRepositoryReferenceNames;
+        $this->gatewayRepositoryMethods = $gatewayRepositoryMethods;
     }
 
     /**
@@ -149,7 +159,8 @@ class ModellingHandlerModule implements AnnotationModule
                 return !$annotatedFinding->hasClassAnnotation(Aggregate::class);
             }
             ),
-            $aggregateRepositoryReferenceNames
+            $aggregateRepositoryReferenceNames,
+            $annotationRegistrationService->findAnnotatedMethods(Repository::class)
         );
     }
 
@@ -303,6 +314,57 @@ class ModellingHandlerModule implements AnnotationModule
             $referenceId = Uuid::uuid4()->toString();
             $moduleReferenceSearchService->store($referenceId, $aggregateRepositoryBuilder);
             $this->aggregateRepositoryReferenceNames[$referenceId] = $referenceId;
+        }
+
+        foreach ($this->gatewayRepositoryMethods as $repositoryGateway) {
+            $interface = InterfaceToCall::create($repositoryGateway->getClassName(), $repositoryGateway->getMethodName());
+            Assert::isTrue($interface->getReturnType()->isClassNotInterface() || $interface->getReturnType()->isVoid(), "Repository should have return type of Aggregate class or void if is save method: " . $repositoryGateway);
+
+            $inputChannelName = $repositoryGateway->getClassName() . $repositoryGateway->getMethodName() . ($interface->getReturnType()->isVoid() ? ".save" : ".load" . ($interface->canItReturnNull() ? ".nullable" : ""));
+            $aggregateClassDefinition = ClassDefinition::createFor($interface->getReturnType()->isVoid() ? $interface->getFirstParameter()->getTypeDescriptor() : $interface->getReturnType());
+
+            if ($interface->getReturnType()->isVoid()) {
+                Assert::isTrue($interface->getInterfaceParameterAmount() === 1, "Saving repository should have only one parameter for aggregate: " . $repositoryGateway);
+                Assert::isTrue($interface->getFirstParameter()->getTypeDescriptor()->isClassNotInterface(), "Saving repository should type hint for related aggregate: " . $repositoryGateway);
+
+                /** @TODO do not require method name in save service */
+                $methodName = $aggregateClassDefinition->getPublicMethodNames() ? $aggregateClassDefinition->getPublicMethodNames()[0] : "__construct";
+                $configuration->registerMessageHandler(
+                    SaveAggregateServiceBuilder::create($aggregateClassDefinition, $methodName)
+                        ->withInputChannelName($inputChannelName)
+                        ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
+                );
+
+                $gatewayParameterConverters = [GatewayHeaderBuilder::create($interface->getFirstParameter()->getName(), AggregateMessage::AGGREGATE_OBJECT)];
+            }else {
+                Assert::isTrue($interface->getInterfaceParameterAmount() === 1, "Fetchting repository should have only one parameter for identifiers: " . $repositoryGateway);
+
+                $configuration->registerMessageHandler(ChainMessageHandlerBuilder::create()
+                    ->withInputChannelName($inputChannelName)
+                    ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], null))
+                    ->chain(
+                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $interface->getMethodName(), null, $interface->canItReturnNull() ? LoadAggregateMode::createContinueOnNotFound() : LoadAggregateMode::createThrowOnNotFound())
+                            ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
+                    )
+                    ->chain(
+                        ServiceActivatorBuilder::createWithDirectReference(new FetchAggregate(), "fetch")
+                            ->withMethodParameterConverters([
+                                HeaderBuilder::createOptional("aggregate", AggregateMessage::AGGREGATE_OBJECT)
+                            ])
+                    )
+                );
+
+                $gatewayParameterConverters = [GatewayHeaderBuilder::create($interface->getFirstParameter()->getName(), AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)];
+            }
+
+            $configuration->registerGatewayBuilder(
+                GatewayProxyBuilder::create(
+                    $repositoryGateway->getClassName(),
+                    $repositoryGateway->getClassName(),
+                    $repositoryGateway->getMethodName(),
+                    $inputChannelName
+                )->withParameterConverters($gatewayParameterConverters)
+            );
         }
 
         $aggregateCommandOrEventHandlers = [];

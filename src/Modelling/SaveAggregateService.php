@@ -38,12 +38,13 @@ class SaveAggregateService
     private ?string $aggregateMethodWithEvents;
     private PropertyEditorAccessor $propertyEditorAccessor;
     private array $aggregateIdentifierMapping;
-    private InterfaceToCall $aggregateInterface;
+    private InterfaceToCall|string $aggregateInterface;
     private ?string $aggregateVersionProperty;
     private bool $isAggregateVersionAutomaticallyIncreased;
     private bool $isEventSourced;
+    private bool $isFactoryMethod;
 
-    public function __construct(InterfaceToCall $aggregateInterface, bool $isEventSourced, StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $objectEventBus, NonProxyGateway $namedEventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased)
+    public function __construct(InterfaceToCall|string $aggregateInterface, bool $isFactoryMethod, bool $isEventSourced, StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $objectEventBus, NonProxyGateway $namedEventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
@@ -56,6 +57,7 @@ class SaveAggregateService
         $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
         $this->isEventSourced = $isEventSourced;
         $this->namedEventBus = $namedEventBus;
+        $this->isFactoryMethod = $isFactoryMethod;
     }
 
     public function save(Message $message, array $metadata) : \Ecotone\Messaging\Message
@@ -124,7 +126,7 @@ class SaveAggregateService
         unset($metadata[MessageHeaders::CONTENT_TYPE]);
 
         if ($this->isEventSourced) {
-            $this->aggregateRepository->save($aggregateIds, $this->aggregateInterface->getInterfaceName(), $events, $metadata, $versionBeforeHandling);
+            $this->aggregateRepository->save($aggregateIds, is_string($this->aggregateInterface) ? $this->aggregateInterface : $this->aggregateInterface->getInterfaceName(), $events, $metadata, $versionBeforeHandling);
         }else {
             $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $versionBeforeHandling);
         }
@@ -148,6 +150,6 @@ class SaveAggregateService
 
     private function isFactoryMethod(): bool
     {
-        return $this->aggregateInterface->isStaticallyCalled();
+        return $this->isFactoryMethod;
     }
 }

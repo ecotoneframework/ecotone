@@ -194,3 +194,11 @@ Feature: activating as aggregate order entity
     When I register create aggregate
     And I enable aggregate
     Then it should be enabled
+
+  Scenario: Handle repository shortcut
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\RepositoryShortcut"
+    And twit with id "123" does not exists
+    When I create twit with id "123" and content "bla"
+    Then twit with id "123" it should contains "bla"
+    When it change twit with id "123" to content "ha!"
+    Then twit with id "123" it should contains "ha!"

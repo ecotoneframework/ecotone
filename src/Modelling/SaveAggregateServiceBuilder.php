@@ -143,6 +143,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         return ServiceActivatorBuilder::createWithDirectReference(
             new SaveAggregateService(
                 $this->interfaceToCall,
+                $this->interfaceToCall->isStaticallyCalled(),
                 $this->isEventSourced,
                 $aggregateRepository,
                 PropertyEditorAccessor::create($referenceSearchService),

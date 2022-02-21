@@ -23,6 +23,9 @@ use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\AddGuest;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\RegisterBook;
+use Test\Ecotone\Modelling\Fixture\RepositoryShortcut\Twitter;
+use Test\Ecotone\Modelling\Fixture\RepositoryShortcut\TwitterRepository;
+use Test\Ecotone\Modelling\Fixture\RepositoryShortcut\TwitterService;
 use Test\Ecotone\Modelling\Fixture\TwoSagas\Bookkeeping;
 use Test\Ecotone\Modelling\Fixture\TwoSagas\OrderWasPaid;
 use Test\Ecotone\Modelling\Fixture\TwoSagas\OrderWasPlaced;
@@ -509,5 +512,53 @@ class DomainContext extends TestCase implements Context
     public function itShouldBeEnabled()
     {
         Assert::assertTrue(AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("aggregate.isEnabled", ["id" => 1]));
+    }
+
+    /**
+     * @Given twit with id :id does not exists
+     */
+    public function twitWithIdDoesNotExists(string $id)
+    {
+        /** @var TwitterRepository $twitterRepository */
+        $twitterRepository = AnnotationBasedMessagingContext::getGateway(TwitterRepository::class);
+
+        Assert::assertNull($twitterRepository->findTwitter($id));
+    }
+
+    /**
+     * @When I create twit with id :id and content :content
+     */
+    public function iCreateTwitWithIdAndContent(string $id, string $content)
+    {
+        /** @var TwitterRepository $twitterRepository */
+        $twitterRepository = AnnotationBasedMessagingContext::getGateway(TwitterRepository::class);
+
+        $twitterRepository->save(new Twitter($id, $content));
+    }
+
+    /**
+     * @Then twit with id :id it should contains :content
+     */
+    public function twitWithIdItShouldContains(string $id, string $content)
+    {
+        /** @var TwitterRepository $twitterRepository */
+        $twitterRepository = AnnotationBasedMessagingContext::getGateway(TwitterRepository::class);
+        $twitter = $twitterRepository->getTwitter($id);
+        Assert::assertEquals($content, $twitter->getContent());
+
+        /** @var TwitterService $twitterRepository */
+        $twitterService = AnnotationBasedMessagingContext::getGateway(TwitterService::class);
+        Assert::assertEquals($content, $twitterService->getContent($id));
+    }
+
+    /**
+     * @When it change twit with id :id to content :content
+     */
+    public function itChangeTwitWithIdToContent(string $id, string $content)
+    {
+        /** @var TwitterService $twitterRepository */
+        $twitterService = AnnotationBasedMessagingContext::getGateway(TwitterService::class);
+
+        $twitterService->changeContent($id, $content);
     }
 }

@@ -230,10 +230,19 @@ class InterfaceToCall
     public function getSecondParameter(): InterfaceParameter
     {
         if ($this->parameterAmount() < 2) {
-            throw InvalidArgumentException::create("Expecting {$this} to have at least one parameter, but got none");
+            throw InvalidArgumentException::create("Expecting {$this} to have at least two parameters");
         }
 
         return $this->getInterfaceParameters()[1];
+    }
+
+    public function getThirdParameter(): InterfaceParameter
+    {
+        if ($this->parameterAmount() < 3) {
+            throw InvalidArgumentException::create("Expecting {$this} to have at least three parameter");
+        }
+
+        return $this->getInterfaceParameters()[2];
     }
 
     /**

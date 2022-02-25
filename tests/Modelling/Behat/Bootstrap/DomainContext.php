@@ -18,6 +18,7 @@ use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
 use Test\Ecotone\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
 use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\FinishJob;
 use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\StartJob;
+use Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitWasCreated;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\AddGuest;
@@ -520,7 +521,7 @@ class DomainContext extends TestCase implements Context
     public function twitWithIdDoesNotExists(string $id)
     {
         /** @var TwitterRepository $twitterRepository */
-        $twitterRepository = AnnotationBasedMessagingContext::getGateway(TwitterRepository::class);
+        $twitterRepository = AnnotationBasedMessagingContext::getGateway(AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Test\Ecotone\Modelling\Fixture\RepositoryShortcut"] ? TwitterRepository::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository::class);
 
         Assert::assertNull($twitterRepository->findTwitter($id));
     }
@@ -530,10 +531,16 @@ class DomainContext extends TestCase implements Context
      */
     public function iCreateTwitWithIdAndContent(string $id, string $content)
     {
-        /** @var TwitterRepository $twitterRepository */
-        $twitterRepository = AnnotationBasedMessagingContext::getGateway(TwitterRepository::class);
+        $isStatefulAggregate = AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Test\Ecotone\Modelling\Fixture\RepositoryShortcut"];
 
-        $twitterRepository->save(new Twitter($id, $content));
+        /** @var TwitterRepository|\Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository $twitterRepository */
+        $twitterRepository = AnnotationBasedMessagingContext::getGateway($isStatefulAggregate ? TwitterRepository::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository::class);
+
+        if ($isStatefulAggregate) {
+            $twitterRepository->save(new Twitter($id, $content));
+        }else {
+            $twitterRepository->save($id, 0, [new TwitWasCreated($id, $content)]);
+        }
     }
 
     /**
@@ -541,13 +548,14 @@ class DomainContext extends TestCase implements Context
      */
     public function twitWithIdItShouldContains(string $id, string $content)
     {
+        $isForStatefulAggregate = AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Test\Ecotone\Modelling\Fixture\RepositoryShortcut"];
         /** @var TwitterRepository $twitterRepository */
-        $twitterRepository = AnnotationBasedMessagingContext::getGateway(TwitterRepository::class);
+        $twitterRepository = AnnotationBasedMessagingContext::getGateway($isForStatefulAggregate ? TwitterRepository::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository::class);
         $twitter = $twitterRepository->getTwitter($id);
         Assert::assertEquals($content, $twitter->getContent());
 
         /** @var TwitterService $twitterRepository */
-        $twitterService = AnnotationBasedMessagingContext::getGateway(TwitterService::class);
+        $twitterService = AnnotationBasedMessagingContext::getGateway($isForStatefulAggregate ? TwitterService::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterService::class);
         Assert::assertEquals($content, $twitterService->getContent($id));
     }
 
@@ -557,7 +565,7 @@ class DomainContext extends TestCase implements Context
     public function itChangeTwitWithIdToContent(string $id, string $content)
     {
         /** @var TwitterService $twitterRepository */
-        $twitterService = AnnotationBasedMessagingContext::getGateway(TwitterService::class);
+        $twitterService = AnnotationBasedMessagingContext::getGateway(AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Test\Ecotone\Modelling\Fixture\RepositoryShortcut"] ? TwitterService::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterService::class);
 
         $twitterService->changeContent($id, $content);
     }

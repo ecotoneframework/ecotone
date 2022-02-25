@@ -92,17 +92,21 @@ class SaveAggregateService
             );
         }
 
-        $aggregateIds = [];
-        foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
-            $id = $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
+        $aggregateIds = $message->getHeaders()->containsKey(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)
+                            ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID)
+                            : [];
+        if (!$aggregateIds) {
+            foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
+                $id = $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
                     ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
                     : null;
 
-            if (!$id) {
-                throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. Please provide implementation for #[AggregateFactory], which assigns identifier to the aggregate.");
-            }
+                if (!$id) {
+                    throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. Please set up #[EventSourcingHandler] that will assign the id after first event");
+                }
 
-            $aggregateIds[$aggregateIdName] = $id;
+                $aggregateIds[$aggregateIdName] = $id;
+            }
         }
 
         if ($this->isFactoryMethod()) {

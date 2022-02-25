@@ -24,6 +24,8 @@ use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
@@ -40,6 +42,7 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\IgnorePayload;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Modelling\Attribute\RelatedAggregate;
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\CallAggregateServiceBuilder;
 use Ecotone\Modelling\FetchAggregate;
@@ -321,26 +324,50 @@ class ModellingHandlerModule implements AnnotationModule
             Assert::isTrue($interface->getReturnType()->isClassNotInterface() || $interface->getReturnType()->isVoid(), "Repository should have return type of Aggregate class or void if is save method: " . $repositoryGateway);
 
             $inputChannelName = $repositoryGateway->getClassName() . $repositoryGateway->getMethodName() . ($interface->getReturnType()->isVoid() ? ".save" : ".load" . ($interface->canItReturnNull() ? ".nullable" : ""));
-            $aggregateClassDefinition = ClassDefinition::createFor($interface->getReturnType()->isVoid() ? $interface->getFirstParameter()->getTypeDescriptor() : $interface->getReturnType());
 
+            $chainMessageHandlerBuilder = ChainMessageHandlerBuilder::create()
+                                            ->withInputChannelName($inputChannelName);
             if ($interface->getReturnType()->isVoid()) {
-                Assert::isTrue($interface->getInterfaceParameterAmount() === 1, "Saving repository should have only one parameter for aggregate: " . $repositoryGateway);
-                Assert::isTrue($interface->getFirstParameter()->getTypeDescriptor()->isClassNotInterface(), "Saving repository should type hint for related aggregate: " . $repositoryGateway);
+                Assert::isTrue($interface->hasFirstParameter(), "Saving repository should have at least one parameter for aggregate: " . $repositoryGateway);
+
+                if ($interface->hasMethodAnnotation(TypeDescriptor::create(RelatedAggregate::class))) {
+                    Assert::isTrue($interface->hasSecondParameter(), "Saving repository should have first parameter as identifier and second as array of events in: " . $repositoryGateway);
+
+                    /** @var RelatedAggregate $relatedAggregate */
+                    $relatedAggregate = $interface->getMethodAnnotation(TypeDescriptor::create(RelatedAggregate::class));
+
+                    $aggregateClassDefinition = ClassDefinition::createFor(TypeDescriptor::create($relatedAggregate->getClassName()));
+
+                    $gatewayParameterConverters = [
+                        GatewayHeaderBuilder::create($interface->getFirstParameterName(), AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER),
+                        GatewayHeaderBuilder::create($interface->getSecondParameter()->getName(), AggregateMessage::TARGET_VERSION),
+                        GatewayPayloadBuilder::create($interface->getThirdParameter()),
+                        GatewayHeaderValueBuilder::create(AggregateMessage::AGGREGATE_OBJECT, $aggregateClassDefinition->getClassType()->toString())
+                    ];
+
+                    $chainMessageHandlerBuilder = $chainMessageHandlerBuilder
+                        ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], null));
+                }else {
+                    Assert::isTrue($interface->getFirstParameter()->getTypeDescriptor()->isClassNotInterface(), "Saving repository should type hint for Aggregate or if is Event Sourcing make use of RelatedAggregate attribute in: " . $repositoryGateway);
+                    $aggregateClassDefinition = ClassDefinition::createFor($interface->getFirstParameter()->getTypeDescriptor());
+
+                    $gatewayParameterConverters = [GatewayHeaderBuilder::create($interface->getFirstParameter()->getName(), AggregateMessage::AGGREGATE_OBJECT)];
+                }
+
 
                 /** @TODO do not require method name in save service */
                 $methodName = $aggregateClassDefinition->getPublicMethodNames() ? $aggregateClassDefinition->getPublicMethodNames()[0] : "__construct";
                 $configuration->registerMessageHandler(
-                    SaveAggregateServiceBuilder::create($aggregateClassDefinition, $methodName)
-                        ->withInputChannelName($inputChannelName)
-                        ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
+                    $chainMessageHandlerBuilder
+                        ->chain(SaveAggregateServiceBuilder::create($aggregateClassDefinition, $methodName)
+                            ->withInputChannelName($inputChannelName)
+                            ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames))
                 );
-
-                $gatewayParameterConverters = [GatewayHeaderBuilder::create($interface->getFirstParameter()->getName(), AggregateMessage::AGGREGATE_OBJECT)];
             }else {
-                Assert::isTrue($interface->getInterfaceParameterAmount() === 1, "Fetchting repository should have only one parameter for identifiers: " . $repositoryGateway);
+                Assert::isTrue($interface->hasFirstParameter(), "Fetchting repository should have at least one parameter for identifiers: " . $repositoryGateway);
+                $aggregateClassDefinition = ClassDefinition::createFor($interface->getReturnType());
 
-                $configuration->registerMessageHandler(ChainMessageHandlerBuilder::create()
-                    ->withInputChannelName($inputChannelName)
+                $configuration->registerMessageHandler($chainMessageHandlerBuilder
                     ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], null))
                     ->chain(
                         LoadAggregateServiceBuilder::create($aggregateClassDefinition, $interface->getMethodName(), null, $interface->canItReturnNull() ? LoadAggregateMode::createContinueOnNotFound() : LoadAggregateMode::createThrowOnNotFound())

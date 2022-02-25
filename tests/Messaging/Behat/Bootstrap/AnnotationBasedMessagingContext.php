@@ -76,6 +76,8 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
 {
     private static ?\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem;
 
+    private static array $loadedNamespaces = [];
+
     /**
      * @Given I active messaging for namespace :namespace
      * @param string $namespace
@@ -87,6 +89,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iActiveMessagingForNamespace(string $namespace)
     {
+        self::$loadedNamespaces = [$namespace];
         switch ($namespace) {
             case "Test\Ecotone\Modelling\Fixture\Renter":
                 {
@@ -306,6 +309,13 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 ];
                 break;
             }
+            case "Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut":
+            {
+                $objects = [
+                    new \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\Infrastructure\TwitterRepository()
+                ];
+                break;
+            }
             default:
             {
                 throw new \InvalidArgumentException("Namespace not registered ". $namespace);
@@ -329,6 +339,11 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             [],
             true
         );
+    }
+
+    public static function getLoadedNamespaces(): array
+    {
+        return self::$loadedNamespaces;
     }
 
     /**

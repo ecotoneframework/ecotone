@@ -202,3 +202,11 @@ Feature: activating as aggregate order entity
     Then twit with id "123" it should contains "bla"
     When it change twit with id "123" to content "ha!"
     Then twit with id "123" it should contains "ha!"
+
+  Scenario: Handle event sourcing repository shortcut
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut"
+    And twit with id "123" does not exists
+    When I create twit with id "123" and content "bla"
+    Then twit with id "123" it should contains "bla"
+    When it change twit with id "123" to content "ha!"
+    Then twit with id "123" it should contains "ha!"

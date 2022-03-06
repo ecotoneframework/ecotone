@@ -10,7 +10,7 @@ namespace Ecotone\Messaging;
 interface SubscribableChannel extends MessageChannel
 {
     /**
-     *  A {@link MessageChannel} that maintains a registry of subscribers and invokes
+     *  A {@link MessagingConfiguration} that maintains a registry of subscribers and invokes
      * them to handle {@link Message} sent through this channel.
      *
      * @param MessageHandler $messageHandler

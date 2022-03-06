@@ -210,34 +210,29 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         return array_key_exists($endpointId, $pollingMetadataConfigurations) ? $pollingMetadataConfigurations[$endpointId] : PollingMetadata::create($endpointId);
     }
 
-    /**
-     * @param string $endpointId
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     */
-    public function run(string $endpointId, ?ExecutionPollingMetadata $executionPollingMetadata = null): void
+    public function run(string $name, ?ExecutionPollingMetadata $executionPollingMetadata = null): void
     {
-        $pollingMetadata = self::getPollingMetadata($endpointId, $this->pollingMetadataConfigurations)
+        $pollingMetadata = self::getPollingMetadata($name, $this->pollingMetadataConfigurations)
             ->applyExecutionPollingMetadata($executionPollingMetadata);
 
-        if (array_key_exists($endpointId, $this->pollingConsumerBuilders)) {
+        if (array_key_exists($name, $this->pollingConsumerBuilders)) {
             /** @var MessageHandlerConsumerBuilder $consumerBuilder */
-            $consumerBuilder = $this->pollingConsumerBuilders[$endpointId][self::POLLING_CONSUMER_BUILDER];
+            $consumerBuilder = $this->pollingConsumerBuilders[$name][self::POLLING_CONSUMER_BUILDER];
 
             $consumerBuilder->build(
                 $this->channelResolver,
                 $this->referenceSearchService,
-                $this->pollingConsumerBuilders[$endpointId][self::POLLING_CONSUMER_HANDLER],
+                $this->pollingConsumerBuilders[$name][self::POLLING_CONSUMER_HANDLER],
                 $pollingMetadata
             )->run();
-        } else if (array_key_exists($endpointId, $this->inboundChannelAdapterBuilders)) {
-            $this->inboundChannelAdapterBuilders[$endpointId]->build(
+        } else if (array_key_exists($name, $this->inboundChannelAdapterBuilders)) {
+            $this->inboundChannelAdapterBuilders[$name]->build(
                 $this->channelResolver,
                 $this->referenceSearchService,
                 $pollingMetadata
             )->run();
         } else {
-            throw InvalidArgumentException::create("Can't run `{$endpointId}` as it does not exists. Please verify, if the name is correct using `ecotone:list`.");
+            throw InvalidArgumentException::create("Can't run `{$name}` as it does not exists. Please verify, if the name is correct using `ecotone:list`.");
         }
     }
 

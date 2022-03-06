@@ -59,7 +59,7 @@ interface ConfiguredMessagingSystem
      */
     public function getMessageChannelByName(string $channelName): MessageChannel;
 
-    public function run(string $endpointId, ?ExecutionPollingMetadata $executionPollingMetadata = null): void;
+    public function run(string $name, ?ExecutionPollingMetadata $executionPollingMetadata = null): void;
 
     /**
      * @return string[]

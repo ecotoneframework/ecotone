@@ -106,7 +106,8 @@ class BusModule extends NoExternalConfigurationModule implements AnnotationModul
                     GatewayPayloadBuilder::create("query"),
                     GatewayHeadersBuilder::create("metadata"),
                     GatewayHeaderBuilder::create("routingKey", self::QUERY_CHANNEL_NAME_BY_NAME),
-                    GatewayHeaderBuilder::create("queryMediaType", MessageHeaders::CONTENT_TYPE)
+                    GatewayHeaderBuilder::create("queryMediaType", MessageHeaders::CONTENT_TYPE),
+                    GatewayHeaderBuilder::create("expectedReturnedMediaType", MessageHeaders::REPLY_CONTENT_TYPE)
                 ]),
 
             GatewayProxyBuilder::create(EventBus::class, EventBus::class, "publish", self::EVENT_CHANNEL_NAME_BY_OBJECT)

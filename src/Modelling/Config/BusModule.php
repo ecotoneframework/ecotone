@@ -100,7 +100,11 @@ class BusModule extends NoExternalConfigurationModule implements AnnotationModul
                 ]),
 
             GatewayProxyBuilder::create(QueryBus::class, QueryBus::class, "send", self::QUERY_CHANNEL_NAME_BY_OBJECT)
-                ->withParameterConverters([GatewayPayloadBuilder::create("query"), GatewayHeadersBuilder::create("metadata")]),
+                ->withParameterConverters([
+                    GatewayPayloadBuilder::create("query"),
+                    GatewayHeadersBuilder::create("metadata"),
+                    GatewayHeaderBuilder::create("expectedReturnedMediaType", MessageHeaders::REPLY_CONTENT_TYPE)
+                ]),
             GatewayProxyBuilder::create(QueryBus::class, QueryBus::class, "sendWithRouting", self::QUERY_CHANNEL_NAME_BY_NAME)
                 ->withParameterConverters([
                     GatewayPayloadBuilder::create("query"),

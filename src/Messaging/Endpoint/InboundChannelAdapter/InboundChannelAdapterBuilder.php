@@ -3,20 +3,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
-use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
-use Ramsey\Uuid\Uuid;
-use Ecotone\Messaging\Channel\DirectChannel;
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
-use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
-use Ecotone\Messaging\Endpoint\InterceptedConsumer;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -24,12 +17,11 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Scheduling\CronTrigger;
+use Ecotone\Messaging\Scheduling\EpochBasedClock;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
-use Ecotone\Messaging\Scheduling\TaskExecutor;
-use Ecotone\Messaging\Scheduling\Trigger;
-use Ecotone\Messaging\Scheduling\EpochBasedClock;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -207,7 +199,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     {
         Assert::notNullAndEmpty($this->endpointId, "Endpoint Id for inbound channel adapter can't be empty");
 
-        $referenceService = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
+        $referenceService = $this->directObject ?: $referenceSearchService->get($this->referenceName);
         /** @var InterfaceToCall $interfaceToCall */
         $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($referenceService, $this->methodName);
 
@@ -228,8 +220,14 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
             throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not have any parameters");
         }
 
+        $methodName = $this->methodName;
         if ($interfaceToCall->hasReturnTypeVoid()) {
-            throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not be void");
+            if ($this->requestChannelName !== NullableMessageChannel::CHANNEL_NAME) {
+                throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not be void, if channel name is not nullChannel");
+            }
+
+            $referenceService = new PassThroughService($referenceService, $methodName);
+            $methodName = "execute";
         }
 
         $gateway = $this->gatewayExecutor
@@ -238,7 +236,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         $taskExecutor = new InboundChannelTaskExecutor(
             $gateway,
             $referenceService,
-            $this->methodName
+            $methodName
         );
 
         return new InboundChannelAdapter(

@@ -72,6 +72,30 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             );
     }
 
+    public function test_executing_with_no_parameters_when_null_channel_defined()
+    {
+        $inputChannelName = NullableMessageChannel::CHANNEL_NAME;
+        $service = ServiceExpectingNoArguments::create();
+
+        $inboundChannel = InboundChannelAdapterBuilder::create(
+            $inputChannelName, "someRef", "withoutReturnValue"
+        )
+            ->withEndpointId("test")
+            ->build(
+                InMemoryChannelResolver::createEmpty(),
+                InMemoryReferenceSearchService::createWith([
+                    "someRef" => $service
+                ]),
+                PollingMetadata::create("test")
+                    ->setHandledMessageLimit(1)
+            );
+
+        $inboundChannel->run();
+
+        $this->assertTrue($service->wasCalled());
+    }
+
+
     /**
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException

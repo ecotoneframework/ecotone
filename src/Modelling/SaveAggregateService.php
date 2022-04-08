@@ -95,7 +95,7 @@ class SaveAggregateService
         $aggregateIds = $message->getHeaders()->containsKey(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)
                             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID)
                             : [];
-        $aggregateIds = $this->getAggregateIds($aggregateIds, $aggregate);
+        $aggregateIds = $this->getAggregateIds($aggregateIds, $aggregate, $this->isEventSourced);
 
         unset($metadata[MessageHeaders::REPLY_CHANNEL], );
         unset($metadata[AggregateMessage::AGGREGATE_ID]);
@@ -116,7 +116,7 @@ class SaveAggregateService
             $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $versionBeforeHandling);
         }
 
-        $aggregateIds = $this->getAggregateIds($aggregateIds, $aggregate);
+        $aggregateIds = $this->getAggregateIds($aggregateIds, $aggregate, true);
         if ($this->isFactoryMethod()) {
             $message =
                 MessageBuilder::fromMessage($message)
@@ -146,7 +146,7 @@ class SaveAggregateService
         return $this->isFactoryMethod;
     }
 
-    private function getAggregateIds(array $aggregateIds, object|string $aggregate): array
+    private function getAggregateIds(array $aggregateIds, object|string $aggregate, bool $throwOnNoIdentifier): array
     {
         if (!$aggregateIds) {
             foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
@@ -155,7 +155,11 @@ class SaveAggregateService
                     : null;
 
                 if (!$id) {
-                    throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. Please set up #[EventSourcingHandler] that will assign the id after first event");
+                    if (!$throwOnNoIdentifier) {
+                        return $aggregateIds;
+                    }
+
+                    throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. If you're using Event Sourcing Aggregate, please set up #[EventSourcingHandler] that will assign the id after first event");
                 }
 
                 $aggregateIds[$aggregateIdName] = $id;

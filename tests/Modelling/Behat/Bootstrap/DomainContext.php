@@ -20,6 +20,7 @@ use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorde
 use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\StartJob;
 use Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitWasCreated;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
+use Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignation\CreateUser;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\AddGuest;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
@@ -568,5 +569,15 @@ class DomainContext extends TestCase implements Context
         $twitterService = AnnotationBasedMessagingContext::getGateway(AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Test\Ecotone\Modelling\Fixture\RepositoryShortcut"] ? TwitterService::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterService::class);
 
         $twitterService->changeContent($id, $content);
+    }
+
+    /**
+     * @When I create user then id should be assigned
+     */
+    public function iCreateUserThenIdShouldBeAssigned()
+    {
+        $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("user.create", new CreateUser("Johny"));
+
+        Assert::assertNotNull(array_pop($result));
     }
 }

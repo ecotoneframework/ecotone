@@ -210,3 +210,7 @@ Feature: activating as aggregate order entity
     Then twit with id "123" it should contains "bla"
     When it change twit with id "123" to content "ha!"
     Then twit with id "123" it should contains "ha!"
+
+  Scenario: Handle aggregate with generated id after it's saved
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignation"
+    When I create user then id should be assigned

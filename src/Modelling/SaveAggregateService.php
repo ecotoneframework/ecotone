@@ -95,26 +95,7 @@ class SaveAggregateService
         $aggregateIds = $message->getHeaders()->containsKey(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)
                             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID)
                             : [];
-        if (!$aggregateIds) {
-            foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
-                $id = $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
-                    ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
-                    : null;
-
-                if (!$id) {
-                    throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. Please set up #[EventSourcingHandler] that will assign the id after first event");
-                }
-
-                $aggregateIds[$aggregateIdName] = $id;
-            }
-        }
-
-        if ($this->isFactoryMethod()) {
-            $message =
-                MessageBuilder::fromMessage($message)
-                    ->setPayload($aggregateIds)
-                    ->build();
-        }
+        $aggregateIds = $this->getAggregateIds($aggregateIds, $aggregate);
 
         unset($metadata[MessageHeaders::REPLY_CHANNEL], );
         unset($metadata[AggregateMessage::AGGREGATE_ID]);
@@ -133,6 +114,14 @@ class SaveAggregateService
             $this->aggregateRepository->save($aggregateIds, is_string($this->aggregateInterface) ? $this->aggregateInterface : $this->aggregateInterface->getInterfaceName(), $events, $metadata, $versionBeforeHandling);
         }else {
             $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $versionBeforeHandling);
+        }
+
+        $aggregateIds = $this->getAggregateIds($aggregateIds, $aggregate);
+        if ($this->isFactoryMethod()) {
+            $message =
+                MessageBuilder::fromMessage($message)
+                    ->setPayload($aggregateIds)
+                    ->build();
         }
 
         foreach ($events as $event) {
@@ -155,5 +144,23 @@ class SaveAggregateService
     private function isFactoryMethod(): bool
     {
         return $this->isFactoryMethod;
+    }
+
+    private function getAggregateIds(array $aggregateIds, object|string $aggregate): array
+    {
+        if (!$aggregateIds) {
+            foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
+                $id = $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
+                    ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
+                    : null;
+
+                if (!$id) {
+                    throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. Please set up #[EventSourcingHandler] that will assign the id after first event");
+                }
+
+                $aggregateIds[$aggregateIdName] = $id;
+            }
+        }
+        return $aggregateIds;
     }
 }

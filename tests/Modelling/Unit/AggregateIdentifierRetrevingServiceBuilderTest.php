@@ -26,6 +26,7 @@ use Test\Ecotone\Modelling\Fixture\Blog\RepublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Handler\ReplyViaHeadersMessageHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\Basket;
+use Test\Ecotone\Modelling\Fixture\NoIdentifierAggregate\Product;
 use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
 use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 
@@ -116,6 +117,17 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $this->assertEquals($aggregateIds, $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
     }
 
+    public function test_throwing_exception_if_aggregate_has_no_identifiers_defined()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        AggregateIdentifierRetrevingServiceBuilder::createWith(
+            ClassDefinition::createFor(TypeDescriptor::create(Product::class)),
+            [],
+            null
+        );
+    }
+
     public function test_throwing_exception_if_metadata_identifier_mapping_points_to_non_existing_aggregate_id()
     {
         $this->expectException(InvalidArgumentException::class);
@@ -135,17 +147,6 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
             [],
             ClassDefinition::createFor(TypeDescriptor::create(RepublishArticleCommand::class))
-        );
-    }
-
-    public function test_throwing_exception_if_no_identifiers_defined_in_aggregate()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        AggregateIdentifierRetrevingServiceBuilder::createWith(
-            ClassDefinition::createFor(TypeDescriptor::create(ReplyViaHeadersMessageHandler::class)),
-            [],
-            ClassDefinition::createFor(TypeDescriptor::create(PublishArticleCommand::class))
         );
     }
 }

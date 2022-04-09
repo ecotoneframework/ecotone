@@ -100,12 +100,6 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
 
     private function initialize(ClassDefinition $aggregateClassDefinition, ?ClassDefinition $handledMessageClassNameDefinition, array $metadataIdentifierMapping): void
     {
-        foreach ($metadataIdentifierMapping as $propertyName => $mappingName) {
-            if (!$this->hasAccordingIdentifier($aggregateClassDefinition, $propertyName)) {
-                throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifier {$propertyName} and such meta data identifier mapping given.");
-            }
-        }
-
         $aggregatePayloadIdentifiersMapping = [];
 
         $aggregateIdentififerAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
@@ -117,6 +111,12 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
 
         if (empty($aggregatePayloadIdentifiersMapping)) {
             throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifiers defined. How you forgot to mark #[AggregateIdentifier]?");
+        }
+
+        foreach ($metadataIdentifierMapping as $propertyName => $mappingName) {
+            if (!$this->hasAccordingIdentifier($aggregateClassDefinition, $propertyName)) {
+                throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifier {$propertyName} for metadata identifier mapping.");
+            }
         }
 
         $messageProperties = [];

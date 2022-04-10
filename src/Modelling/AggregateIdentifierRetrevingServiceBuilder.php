@@ -18,6 +18,7 @@ use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
 use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
@@ -94,6 +95,20 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
                 return true;
             }
         }
+        $aggregateIdentifierMethod = TypeDescriptor::create(AggregateIdentifierMethod::class);
+
+        foreach ($aggregateClassName->getPublicMethodNames() as $method) {
+            $methodToCheck = InterfaceToCall::create($aggregateClassName->getClassType()->toString(), $method);
+
+            if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierMethod)) {
+                /** @var AggregateIdentifierMethod $attribute */
+                $attribute = $methodToCheck->getMethodAnnotation($aggregateIdentifierMethod);
+
+                if ($attribute->getIdentifierPropertyName() === $propertyName) {
+                    return true;
+                }
+            }
+        }
 
         return false;
     }
@@ -102,10 +117,21 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
     {
         $aggregatePayloadIdentifiersMapping = [];
 
-        $aggregateIdentififerAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
+        $aggregateIdentifierAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
+        $aggregateIdentifierMethod = TypeDescriptor::create(AggregateIdentifierMethod::class);
         foreach ($aggregateClassDefinition->getProperties() as $property) {
-            if ($property->hasAnnotation($aggregateIdentififerAnnotation)) {
+            if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
                 $aggregatePayloadIdentifiersMapping[$property->getName()] = null;
+            }
+
+            foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
+                $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
+
+                if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierMethod)) {
+                    /** @var AggregateIdentifierMethod $attribute */
+                    $attribute = $methodToCheck->getMethodAnnotation($aggregateIdentifierMethod);
+                    $aggregatePayloadIdentifiersMapping[$attribute->getIdentifierPropertyName()] = null;
+                }
             }
         }
 
@@ -128,7 +154,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
                     $annotation  = $property->getAnnotation($targetAggregateIdentifierAnnotation);
                     $mappingName = $annotation->identifierName ? $annotation->identifierName : $property->getName();
 
-                    if ($aggregateClassDefinition->hasProperty($mappingName) && $aggregateClassDefinition->getProperty($mappingName)->hasAnnotation($aggregateIdentififerAnnotation)) {
+                    if ($aggregateClassDefinition->hasProperty($mappingName) && $aggregateClassDefinition->getProperty($mappingName)->hasAnnotation($aggregateIdentifierAnnotation)) {
                         $aggregatePayloadIdentifiersMapping[$mappingName] = $property->getName();
                     }
                 }

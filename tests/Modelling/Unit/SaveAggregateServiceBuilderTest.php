@@ -13,7 +13,9 @@ use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Config\BusModule;
+use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\EventStream;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
@@ -25,13 +27,15 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\MultiplyAmountComman
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderWithManualVersioning;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\NoIdDefinedAfterCallingFactoryExample;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodWithParameters;
 
 /**
  * Class ServiceCallToAggregateAdapterTest
  * @package Test\Ecotone\Modelling
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class SaveAggregateBuilderTest extends TestCase
+class SaveAggregateServiceBuilderTest extends TestCase
 {
     public function test_saving_aggregate_method_with_only_command_as_parameter()
     {
@@ -218,5 +222,59 @@ class SaveAggregateBuilderTest extends TestCase
                 ->setReplyChannel(NullableMessageChannel::create())
                 ->build()
         );
+    }
+
+    public function test_ignoring_aggregate_identifier_from_public_method_when_repository_save_called_directly_with_id()
+    {
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
+            "create"
+        )
+            ->withAggregateRepositoryFactories(["repository"])
+            ->withInputChannelName("inputChannel");
+
+        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createEmpty();
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
+                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
+                ]
+            ),
+            InMemoryReferenceSearchService::createWith(
+                [
+                    "repository" => $inMemoryEventSourcedRepository
+                ]
+            )
+        );
+
+        $aggregateId = ["id" => 123];
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload([new \stdClass()])
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, PublicIdentifierGetMethodForEventSourcedAggregate::class)
+                ->setHeader(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER, 123)
+                ->setHeader(AggregateMessage::AGGREGATE_ID, $aggregateId)
+                ->setHeader(AggregateMessage::TARGET_VERSION, 0)
+                ->setReplyChannel(NullableMessageChannel::create())
+                ->build()
+        );
+
+        $this->assertEquals(
+            new \stdClass(),
+            $inMemoryEventSourcedRepository->findBy(PublicIdentifierGetMethodForEventSourcedAggregate::class, $aggregateId)->getEvents()[0]->getEvent()
+        );
+    }
+
+    public function test_throwing_exception_if_aggregate_identifier_getter_has_parameters()
+    {
+        $this->expectException(NoCorrectIdentifierDefinedException::class);
+
+        SaveAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodWithParameters::class)),
+            "create"
+        )
+            ->withAggregateRepositoryFactories(["repository"])
+            ->withInputChannelName("inputChannel");
     }
 }

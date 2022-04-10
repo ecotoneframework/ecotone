@@ -54,9 +54,7 @@ class LoadAggregateService
     public function load(Message $message) : ?Message
     {
         $aggregateIdentifiers = $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID);
-        $expectedVersion = null;
 
-        $aggregateOrEventStream = null;
         foreach ($aggregateIdentifiers as $identifierName => $aggregateIdentifier) {
             if (is_null($aggregateIdentifier)) {
                 $messageType = TypeDescriptor::createFromVariable($message->getPayload());

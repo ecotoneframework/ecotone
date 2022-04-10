@@ -6,6 +6,7 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\TableNode;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\DistributionEntrypoint;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -579,5 +580,24 @@ class DomainContext extends TestCase implements Context
         $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("user.create", new CreateUser("Johny"));
 
         Assert::assertNotNull(array_pop($result));
+    }
+
+    /**
+     * @When I create user with id :id and name :name
+     */
+    public function iCreateUserWithIdAndName(string $id, string $name)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->send(new \Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod\CreateUser($id, $name));
+    }
+
+    /**
+     * @Then there should be user with id :id and name :name
+     */
+    public function thereShouldBeUserWithIdAndName(string $id, string $name)
+    {
+        Assert::assertEquals(
+            $name,
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("user.getName", metadata: [AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => $id])
+        );
     }
 }

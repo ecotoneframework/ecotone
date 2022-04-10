@@ -4,8 +4,15 @@ namespace Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignation;
 
 class CreateUser
 {
-    public function __construct(public string $name)
-    {
+    private string $name;
 
+    public function __construct(string $name)
+    {
+        $this->name = $name;
+    }
+
+    public function name(): string
+    {
+        return $this->name;
     }
 }

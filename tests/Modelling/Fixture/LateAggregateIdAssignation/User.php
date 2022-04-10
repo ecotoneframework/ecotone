@@ -18,7 +18,7 @@ class User
     public static function create(CreateUser $command): self
     {
         $self = new self();
-        $self->name = $command->name;
+        $self->name = $command->name();
 
         return $self;
     }

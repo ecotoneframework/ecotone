@@ -5,7 +5,7 @@ namespace Ecotone\Modelling\Attribute;
 use Ecotone\Messaging\Attribute\Parameter\Header;
 use Ecotone\Modelling\AggregateMessage;
 
-#[\Attribute(\Attribute::TARGET_PROPERTY|\Attribute::TARGET_PARAMETER|\Attribute::TARGET_PARAMETER)]
+#[\Attribute(\Attribute::TARGET_PROPERTY|\Attribute::TARGET_PARAMETER)]
 class AggregateIdentifier extends Header
 {
     public function __construct()

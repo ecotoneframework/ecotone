@@ -214,3 +214,8 @@ Feature: activating as aggregate order entity
   Scenario: Handle aggregate with generated id after it's saved
     Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignation"
     When I create user then id should be assigned
+
+  Scenario: Handle aggregate with aggregate identifier as public method
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod"
+    When I create user with id 1 and name "johny"
+    Then there should be user with id 1 and name "johny"

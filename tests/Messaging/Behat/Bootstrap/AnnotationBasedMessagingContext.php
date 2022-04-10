@@ -324,6 +324,13 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 ];
                 break;
             }
+            case "Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod":
+            {
+                $objects = [
+                    new \Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod\UserRepository()
+                ];
+                break;
+            }
             default:
             {
                 throw new \InvalidArgumentException("Namespace not registered ". $namespace);

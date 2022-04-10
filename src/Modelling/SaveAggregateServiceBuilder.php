@@ -24,6 +24,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Config\BusModule;
@@ -49,6 +50,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      */
     private array $aggregateRepositoryReferenceNames = [];
     private array $aggregateIdentifierMapping;
+    private array $aggregateIdentifierGetMethods = [];
     private ?string $aggregateVersionProperty;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
     private ?string $aggregateMethodWithEvents;
@@ -152,6 +154,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $namedEventBus,
                 $this->aggregateMethodWithEvents,
                 $this->aggregateIdentifierMapping,
+                $this->aggregateIdentifierGetMethods,
                 $this->aggregateVersionProperty,
                 $this->isAggregateVersionAutomaticallyIncreased
             ),
@@ -191,20 +194,33 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $interfaceToCall = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $methodName);
 
         $aggregateMethodWithEvents    = null;
+        $aggregateIdentifiers          = [];
 
         $aggregateEventsAnnotation = TypeDescriptor::create(AggregateEvents::class);
+        $aggregateIdentifierGetMethodAttribute = TypeDescriptor::create(AggregateIdentifierMethod::class);
+        $aggregateIdentifierGetMethods = [];
+
         foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
             $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
 
             if ($methodToCheck->hasMethodAnnotation($aggregateEventsAnnotation)) {
                 $aggregateMethodWithEvents = $method;
-                break;
+            }
+            if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierGetMethodAttribute)) {
+                if (!$methodToCheck->hasNoParameters()) {
+                    throw NoCorrectIdentifierDefinedException::create($interfaceToCall . " should not have any parameters.");
+                }
+
+                /** @var AggregateIdentifierMethod $attribute */
+                $attribute = $methodToCheck->getMethodAnnotation($aggregateIdentifierGetMethodAttribute);
+                $aggregateIdentifiers[$attribute->getIdentifierPropertyName()] = null;
+                $aggregateIdentifierGetMethods[$attribute->getIdentifierPropertyName()] = $method;
             }
         }
 
         $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class));
+
         $aggregateIdentifierAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
-        $aggregateIdentifiers          = [];
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
                 $aggregateIdentifiers[$property->getName()] = null;
@@ -226,6 +242,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $this->interfaceToCall            = $interfaceToCall;
         $this->aggregateMethodWithEvents  = $aggregateMethodWithEvents;
         $this->aggregateIdentifierMapping = $aggregateIdentifiers;
+        $this->aggregateIdentifierGetMethods = $aggregateIdentifierGetMethods;
     }
 
     private function getPropertyReaderAccessor(): PropertyReaderAccessor

@@ -25,6 +25,7 @@ use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\Blog\RepublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\Basket;
 use Test\Ecotone\Modelling\Fixture\NoIdentifierAggregate\Product;
 use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
@@ -59,6 +60,35 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         );
 
         $this->assertEquals(["orderId" => $orderId], $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
+    }
+
+    public function test_loading_aggregate_by_metadata_with_public_method_identifier()
+    {
+        $headerName                            = "orderId";
+        $aggregateRetrevingServiceHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
+            ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
+            ["id" => "orderId"],
+            null
+        );
+
+        $orderId                 = 1000;
+        $aggregateRetrievingService = $aggregateRetrevingServiceHandler->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryStandardRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $command = PaymentWasDoneEvent::create();
+        $aggregateRetrievingService->handle(
+            MessageBuilder::withPayload($command)
+                ->setHeader($headerName, $orderId)
+                ->setReplyChannel($replyChannel)->build()
+        );
+
+        $this->assertEquals(["id" => $orderId], $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
     }
 
     public function test_providing_override_aggregate_identifier()

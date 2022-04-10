@@ -43,8 +43,9 @@ class SaveAggregateService
     private bool $isAggregateVersionAutomaticallyIncreased;
     private bool $isEventSourced;
     private bool $isFactoryMethod;
+    private array $aggregateIdentifierGetMethods;
 
-    public function __construct(InterfaceToCall|string $aggregateInterface, bool $isFactoryMethod, bool $isEventSourced, StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $objectEventBus, NonProxyGateway $namedEventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased)
+    public function __construct(InterfaceToCall|string $aggregateInterface, bool $isFactoryMethod, bool $isEventSourced, StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $objectEventBus, NonProxyGateway $namedEventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, array $aggregateIdentifierGetMethods, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased)
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
@@ -58,6 +59,7 @@ class SaveAggregateService
         $this->isEventSourced = $isEventSourced;
         $this->namedEventBus = $namedEventBus;
         $this->isFactoryMethod = $isFactoryMethod;
+        $this->aggregateIdentifierGetMethods = $aggregateIdentifierGetMethods;
     }
 
     public function save(Message $message, array $metadata) : \Ecotone\Messaging\Message
@@ -67,7 +69,7 @@ class SaveAggregateService
 
         if ($this->isEventSourced) {
             $events = $message->getPayload();
-            Assert::isIterable($events, "Return value Event Sourced Aggregate {$this->aggregateInterface} must return iterable events");
+            Assert::isIterable($events, "Return value Event Sourced Aggregate {$this->aggregateInterface} must return array of events");
         }elseif ($this->aggregateMethodWithEvents) {
             $events = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);
         }
@@ -150,6 +152,10 @@ class SaveAggregateService
     {
         if (!$aggregateIds) {
             foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
+                if (isset($this->aggregateIdentifierGetMethods[$aggregateIdName])) {
+                    $aggregateIds[$aggregateIdName] = call_user_func([$aggregate, $this->aggregateIdentifierGetMethods[$aggregateIdName]]);
+                }
+
                 $id = $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
                     ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
                     : null;

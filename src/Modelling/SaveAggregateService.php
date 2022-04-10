@@ -97,7 +97,7 @@ class SaveAggregateService
         $aggregateIds = $message->getHeaders()->containsKey(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)
                             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID)
                             : [];
-        $aggregateIds = $this->getAggregateIds($aggregateIds, $aggregate, $this->isEventSourced);
+        $aggregateIds = $aggregateIds ?: $this->getAggregateIds($aggregateIds, $aggregate, $this->isEventSourced);
 
         unset($metadata[MessageHeaders::REPLY_CHANNEL], );
         unset($metadata[AggregateMessage::AGGREGATE_ID]);
@@ -118,7 +118,7 @@ class SaveAggregateService
             $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $versionBeforeHandling);
         }
 
-        $aggregateIds = $this->getAggregateIds($aggregateIds, $aggregate, true);
+        $aggregateIds = $aggregateIds ?: $this->getAggregateIds($aggregateIds, $aggregate, true);
         if ($this->isFactoryMethod()) {
             if (count($aggregateIds) === 1) {
                 $aggregateIds = array_pop($aggregateIds);
@@ -152,35 +152,34 @@ class SaveAggregateService
         return $this->isFactoryMethod;
     }
 
-    private function getAggregateIds(array $aggregateIds, object|string $aggregate, bool $throwOnNoIdentifier): array
+    private function getAggregateIds(array $aggregateIds, object $aggregate, bool $throwOnNoIdentifier): array
     {
-        if (!$aggregateIds) {
-            foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
-                if (isset($this->aggregateIdentifierGetMethods[$aggregateIdName])) {
-                    $id = call_user_func([$aggregate, $this->aggregateIdentifierGetMethods[$aggregateIdName]]);
+        foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
+            if (isset($this->aggregateIdentifierGetMethods[$aggregateIdName])) {
+                $id = call_user_func([$aggregate, $this->aggregateIdentifierGetMethods[$aggregateIdName]]);
 
-                    if (!is_null($id)) {
-                        $aggregateIds[$aggregateIdName] = $id;
-                    }
+                if (!is_null($id)) {
+                    $aggregateIds[$aggregateIdName] = $id;
+                }
 
+                continue;
+            }
+
+            $id = $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
+                ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
+                : null;
+
+            if (!$id) {
+                if (!$throwOnNoIdentifier) {
                     continue;
                 }
 
-                $id = $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
-                    ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
-                    : null;
-
-                if (!$id) {
-                    if (!$throwOnNoIdentifier) {
-                        continue;
-                    }
-
-                    throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. If you're using Event Sourcing Aggregate, please set up #[EventSourcingHandler] that will assign the id after first event");
-                }
-
-                $aggregateIds[$aggregateIdName] = $id;
+                throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. If you're using Event Sourcing Aggregate, please set up #[EventSourcingHandler] that will assign the id after first event");
             }
+
+            $aggregateIds[$aggregateIdName] = $id;
         }
-        return $aggregateIds;
+
+        return AggregateId::resolveArrayOfIdentifiers(get_class($aggregate), $aggregateIds);
     }
 }

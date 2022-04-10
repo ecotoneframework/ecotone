@@ -29,7 +29,7 @@ class AggregateIdentifierRetrevingService
     private array $metadataIdentifierMapping;
     private PropertyReaderAccessor $propertyReaderAccessor;
 
-    public function __construct(ConversionService $conversionService, PropertyReaderAccessor $propertyReaderAccessor, TypeDescriptor $typeToConvertTo, array $metadataIdentifierMapping, array $payloadIdentifierMapping)
+    public function __construct(private string $aggregateClassName, ConversionService $conversionService, PropertyReaderAccessor $propertyReaderAccessor, TypeDescriptor $typeToConvertTo, array $metadataIdentifierMapping, array $payloadIdentifierMapping)
     {
         $this->conversionService         = $conversionService;
         $this->propertyReaderAccessor    = $propertyReaderAccessor;
@@ -45,7 +45,7 @@ class AggregateIdentifierRetrevingService
             $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [array_key_first($this->payloadIdentifierMapping) => $aggregateIds];
 
             return MessageBuilder::fromMessage($message)
-                ->setHeader(AggregateMessage::AGGREGATE_ID, $aggregateIds)
+                ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateId::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIds))
                 ->build();
         }
 
@@ -89,7 +89,7 @@ class AggregateIdentifierRetrevingService
         }
 
         return MessageBuilder::fromMessage($message)
-            ->setHeader(AggregateMessage::AGGREGATE_ID, $aggregateIdentifiers)
+            ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateId::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIdentifiers))
             ->build();
     }
 }

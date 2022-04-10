@@ -59,7 +59,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
         Assert::isSubclassOf($conversionService, ConversionService::class, "Have you forgot to register " . ConversionService::REFERENCE_NAME . "?");
 
         return ServiceActivatorBuilder::createWithDirectReference(
-            new AggregateIdentifierRetrevingService($conversionService, new PropertyReaderAccessor(), $this->typeToConvertTo, $this->metadataIdentifierMapping, $this->payloadIdentifierMapping), "convert")
+            new AggregateIdentifierRetrevingService($this->aggregateClassName->getClassType()->toString(), $conversionService, new PropertyReaderAccessor(), $this->typeToConvertTo, $this->metadataIdentifierMapping, $this->payloadIdentifierMapping), "convert")
                     ->withOutputMessageChannel($this->getOutputMessageChannelName())
                     ->build($channelResolver, $referenceSearchService);
     }

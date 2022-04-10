@@ -21,6 +21,8 @@ use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\StandardRepository;
 use PHPUnit\Framework\TestCase;
+use Test\Ecotone\Modelling\Fixture\Blog\Article;
+use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\MultiplyAmountCommand;
@@ -71,6 +73,42 @@ class SaveAggregateServiceBuilderTest extends TestCase
         );
 
         $this->assertEquals($order, $inMemoryStandardRepository->findBy(Order::class, ["orderId" => 1]));
+    }
+
+    public function test_returning_all_identifiers_assigned_during_aggregate_creation()
+    {
+        $publishArticle = PublishArticleCommand::createWith("johny", "Cat book", "Good content");
+
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
+            "createWith"
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $inMemoryStandardRepository = InMemoryStandardRepository::createEmpty();
+        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
+                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
+                ]
+            ),
+            InMemoryReferenceSearchService::createWith(
+                [
+                    "repository" => $inMemoryStandardRepository
+                ]
+            )
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload($publishArticle)
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, Article::createWith($publishArticle))
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $this->assertEquals(["author" => "johny", "title" => "Cat book"], $replyChannel->receive()->getPayload());
     }
 
     public function test_calling_save_method_with_automatic_increasing_version()

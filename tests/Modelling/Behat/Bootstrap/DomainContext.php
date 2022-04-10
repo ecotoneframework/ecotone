@@ -579,7 +579,7 @@ class DomainContext extends TestCase implements Context
     {
         $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("user.create", new CreateUser("Johny"));
 
-        Assert::assertNotNull(array_pop($result));
+        Assert::assertNotNull($result);
     }
 
     /**
@@ -608,6 +608,6 @@ class DomainContext extends TestCase implements Context
     {
         $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("user.create", new \Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\CreateUser("Johny"));
 
-        Assert::assertNotNull(array_pop($result));
+        Assert::assertNotNull($result);
     }
 }

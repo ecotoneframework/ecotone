@@ -120,6 +120,10 @@ class SaveAggregateService
 
         $aggregateIds = $this->getAggregateIds($aggregateIds, $aggregate, true);
         if ($this->isFactoryMethod()) {
+            if (count($aggregateIds) === 1) {
+                $aggregateIds = array_pop($aggregateIds);
+            }
+
             $message =
                 MessageBuilder::fromMessage($message)
                     ->setPayload($aggregateIds)

@@ -153,7 +153,13 @@ class SaveAggregateService
         if (!$aggregateIds) {
             foreach ($this->aggregateIdentifierMapping as $aggregateIdName => $aggregateIdValue) {
                 if (isset($this->aggregateIdentifierGetMethods[$aggregateIdName])) {
-                    $aggregateIds[$aggregateIdName] = call_user_func([$aggregate, $this->aggregateIdentifierGetMethods[$aggregateIdName]]);
+                    $id = call_user_func([$aggregate, $this->aggregateIdentifierGetMethods[$aggregateIdName]]);
+
+                    if (!is_null($id)) {
+                        $aggregateIds[$aggregateIdName] = $id;
+                    }
+
+                    continue;
                 }
 
                 $id = $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
@@ -162,7 +168,7 @@ class SaveAggregateService
 
                 if (!$id) {
                     if (!$throwOnNoIdentifier) {
-                        return $aggregateIds;
+                        continue;
                     }
 
                     throw NoCorrectIdentifierDefinedException::create("After calling {$this->aggregateInterface} has no identifier assigned. If you're using Event Sourcing Aggregate, please set up #[EventSourcingHandler] that will assign the id after first event");

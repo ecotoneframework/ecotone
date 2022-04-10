@@ -29,7 +29,7 @@ class InMemoryStandardRepository implements StandardRepository
      */
     public function save(array $identifiers, object $aggregate, array $metadata, ?int $expectedVersion): void
     {
-        $this->aggregates[get_class($aggregate)][$aggregate->getId()] = $aggregate;
+        $this->aggregates[get_class($aggregate)][array_pop($identifiers)] = $aggregate;
     }
 
     /**

@@ -324,6 +324,13 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 ];
                 break;
             }
+            case "Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod":
+            {
+                $objects = [
+                    new \Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\UserRepository()
+                ];
+                break;
+            }
             case "Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod":
             {
                 $objects = [

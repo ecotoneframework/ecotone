@@ -600,4 +600,14 @@ class DomainContext extends TestCase implements Context
             AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("user.getName", metadata: [AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => $id])
         );
     }
+
+    /**
+     * @When I create user then id should be assigned from public method
+     */
+    public function iCreateUserThenIdShouldBeAssignedFromPublicMethod()
+    {
+        $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("user.create", new \Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\CreateUser("Johny"));
+
+        Assert::assertNotNull(array_pop($result));
+    }
 }

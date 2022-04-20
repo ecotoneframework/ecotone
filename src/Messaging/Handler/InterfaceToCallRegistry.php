@@ -28,6 +28,7 @@ class InterfaceToCallRegistry
      */
     private array $interfacesToCall = [];
     private \Ecotone\Messaging\Config\ReferenceTypeFromNameResolver $referenceTypeFromNameResolver;
+    private ?self $preparedInterfaceToCallRegistry = null;
     private bool $isLocked;
 
     /**
@@ -56,6 +57,14 @@ class InterfaceToCallRegistry
     public static function createWith(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver): self
     {
         return new self($referenceTypeFromNameResolver, false);
+    }
+
+    public static function createWithBackedBy(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, self $interfaceToCallRegistry): self
+    {
+        $self = new self($referenceTypeFromNameResolver, false);
+        $self->preparedInterfaceToCallRegistry = $interfaceToCallRegistry;
+
+        return $self;
     }
 
     /**
@@ -126,7 +135,12 @@ class InterfaceToCallRegistry
             throw ConfigurationException::create("There is problem with configuration. Interface to call {$interfaceName}:{$methodName} was never registered via related interfaces.");
         }
 
-        $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName);
+        if ($this->preparedInterfaceToCallRegistry) {
+            $interfaceToCall = $this->preparedInterfaceToCallRegistry->getFor($interfaceName, $methodName);
+        }else {
+            $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName);
+        }
+
         $this->interfacesToCall[self::getName($interfaceName, $methodName)] = $interfaceToCall;
 
         return $interfaceToCall;

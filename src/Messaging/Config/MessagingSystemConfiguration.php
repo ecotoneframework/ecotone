@@ -229,7 +229,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         /** This $preparationInterfaceRegistry is only for preparation. We don't want to cache it, as most of the Interface may not be reused anymore. E.g. public method from Eloquent Model */
-        $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
+        $interfaceToCallRegistry = InterfaceToCallRegistry::createWithBackedBy($referenceTypeFromNameResolver, $preparationInterfaceRegistry);
 
         $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry, $applicationConfiguration);
         $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);

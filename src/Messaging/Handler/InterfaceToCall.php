@@ -35,16 +35,19 @@ class InterfaceToCall
      * @var object[]
      */
     private iterable $methodAnnotations;
-    private ClassDefinition $classDefinition;
+    /**
+     * @var object[]
+     */
+    private array $classAnnotations;
 
     /**
      * @param object[]        $methodAnnotations
      */
-    private function __construct(string $interfaceName, string $methodName, ClassDefinition $classDefinition, iterable $methodAnnotations = [])
+    private function __construct(string $interfaceName, string $methodName, array $classAnnotations, iterable $methodAnnotations = [])
     {
         $this->initialize($interfaceName, $methodName);
         $this->methodAnnotations = $methodAnnotations;
-        $this->classDefinition   = $classDefinition;
+        $this->classAnnotations = $classAnnotations;
     }
 
     public static function create(string|object $interfaceOrObjectName, string $methodName): self
@@ -56,7 +59,10 @@ class InterfaceToCall
 
         $annotationParser = InMemoryAnnotationFinder::createFrom([$interface]);
 
-        return new self($interface, $methodName, ClassDefinition::createUsingAnnotationParser(TypeDescriptor::create($interface), $annotationParser), $annotationParser->getAnnotationsForMethod($interface, $methodName));
+        $methodAnnotations = $annotationParser->getAnnotationsForMethod($interface, $methodName);
+        $classAnnotations = $annotationParser->getAnnotationsForClass($interface);
+
+        return new self($interface, $methodName, $classAnnotations, $methodAnnotations);
     }
 
     public function getInterfaceName(): ?string
@@ -77,15 +83,7 @@ class InterfaceToCall
      */
     public function getClassAnnotations(): iterable
     {
-        return $this->getClassDefinition()->getClassAnnotations();
-    }
-
-    /**
-     * @return ClassDefinition
-     */
-    public function getClassDefinition(): ClassDefinition
-    {
-        return $this->classDefinition;
+        return $this->classAnnotations;
     }
 
     /**

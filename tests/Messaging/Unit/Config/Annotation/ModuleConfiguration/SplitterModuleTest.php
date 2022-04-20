@@ -6,6 +6,7 @@ use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\SplitterModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
@@ -27,11 +28,11 @@ class SplitterModuleTest extends AnnotationConfigurationTest
     public function test_creating_transformer_builder()
     {
         $annotationConfiguration = SplitterModule::create(
-            InMemoryAnnotationFinder::createFrom([SplitterExample::class])
+            InMemoryAnnotationFinder::createFrom([SplitterExample::class]), InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $messageHandlerBuilder = SplitterBuilder::create(
             SplitterExample::class, "split"

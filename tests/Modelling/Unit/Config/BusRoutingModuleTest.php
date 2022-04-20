@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -133,13 +134,14 @@ class BusRoutingModuleTest extends MessagingTest
 
     private function prepareModule(AnnotationFinder $annotationRegistrationService): Configuration
     {
-        $module = BusRoutingModule::create($annotationRegistrationService);
+        $module = BusRoutingModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
 
         $extendedConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
         $module->prepare(
             $extendedConfiguration,
             [],
-            ModuleReferenceSearchService::createEmpty()
+            ModuleReferenceSearchService::createEmpty(),
+            InterfaceToCallRegistry::createEmpty()
         );
         return $extendedConfiguration;
     }

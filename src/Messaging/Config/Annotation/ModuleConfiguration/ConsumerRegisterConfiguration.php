@@ -12,6 +12,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 /**
  * Class BaseAnnotationConfiguration
@@ -36,7 +37,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): static
+    public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         $consumerBuilders = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(static::getConsumerAnnotation()) as $annotationRegistration) {
@@ -57,7 +58,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             $configuration->registerConsumer($messageHandlerBuilder);

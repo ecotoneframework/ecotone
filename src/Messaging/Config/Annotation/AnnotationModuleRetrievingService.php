@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\ModuleRetrievingService;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ConfigurationVariableBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Support\Assert;
@@ -28,7 +29,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
     private array $registeredModules = [];
     private ConfigurationVariableService $variableConfigurationService;
 
-    public function __construct(AnnotationFinder $annotationRegistrationService, ConfigurationVariableService $variableConfigurationService)
+    public function __construct(AnnotationFinder $annotationRegistrationService, private InterfaceToCallRegistry $interfaceToCallRegistry, ConfigurationVariableService $variableConfigurationService)
     {
         $this->annotationRegistrationService = $annotationRegistrationService;
         $this->variableConfigurationService = $variableConfigurationService;
@@ -110,7 +111,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
                 continue;
             }
 
-            $this->registeredModules[$moduleClassName] = ($moduleClassName)::create($this->annotationRegistrationService);
+            $this->registeredModules[$moduleClassName] = ($moduleClassName)::create($this->annotationRegistrationService, $this->interfaceToCallRegistry);
             $modules[]                                 = $this->registeredModules[$moduleClassName];
         }
 

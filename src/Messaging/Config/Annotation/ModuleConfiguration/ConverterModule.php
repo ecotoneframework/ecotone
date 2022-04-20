@@ -16,6 +16,7 @@ use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
 class ConverterModule extends NoExternalConfigurationModule implements AnnotationModule
@@ -38,7 +39,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): static
+    public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         $registrations = $annotationRegistrationService->findAnnotatedMethods(Converter::class);
 
@@ -74,7 +75,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->converterBuilders as $converterBuilder) {
             $configuration->registerConverter($converterBuilder);

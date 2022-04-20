@@ -51,7 +51,7 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): static
+    public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         return new self();
     }
@@ -59,7 +59,7 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ChannelInterceptorBuilder) {
@@ -92,18 +92,18 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
         $configuration->registerConverter(new DeserializingConverterBuilder());
 
         $configuration->registerRelatedInterfaces([
-            InterfaceToCall::create(LimitConsumedMessagesInterceptor::class, "postSend"),
-            InterfaceToCall::create(ConnectionExceptionRetryInterceptor::class, "postSend"),
-            InterfaceToCall::create(LimitExecutionAmountInterceptor::class, "postSend"),
-            InterfaceToCall::create(LimitMemoryUsageInterceptor::class, "postSend"),
-            InterfaceToCall::create(SignalInterceptor::class, "postSend"),
-            InterfaceToCall::create(TimeLimitInterceptor::class, "postSend"),
-            InterfaceToCall::create(ChainForwardPublisher::class, "forward"),
-            InterfaceToCall::create(BeforeSendGateway::class, "execute"),
-            InterfaceToCall::create(AcknowledgeConfirmationInterceptor::class, "ack"),
-            InterfaceToCall::create(InboundGatewayEntrypoint::class, "executeEntrypoint"),
-            InterfaceToCall::create(InboundChannelAdapterEntrypoint::class, "executeEntrypoint"),
-            InterfaceToCall::create(LoggingInterceptor::class, "logException")
+            $interfaceToCallRegistry->getFor(LimitConsumedMessagesInterceptor::class, "postSend"),
+            $interfaceToCallRegistry->getFor(ConnectionExceptionRetryInterceptor::class, "postSend"),
+            $interfaceToCallRegistry->getFor(LimitExecutionAmountInterceptor::class, "postSend"),
+            $interfaceToCallRegistry->getFor(LimitMemoryUsageInterceptor::class, "postSend"),
+            $interfaceToCallRegistry->getFor(SignalInterceptor::class, "postSend"),
+            $interfaceToCallRegistry->getFor(TimeLimitInterceptor::class, "postSend"),
+            $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, "forward"),
+            $interfaceToCallRegistry->getFor(BeforeSendGateway::class, "execute"),
+            $interfaceToCallRegistry->getFor(AcknowledgeConfirmationInterceptor::class, "ack"),
+            $interfaceToCallRegistry->getFor(InboundGatewayEntrypoint::class, "executeEntrypoint"),
+            $interfaceToCallRegistry->getFor(InboundChannelAdapterEntrypoint::class, "executeEntrypoint"),
+            $interfaceToCallRegistry->getFor(LoggingInterceptor::class, "logException")
         ]);
         $configuration
             ->registerInternalGateway(TypeDescriptor::create(InboundGatewayEntrypoint::class))

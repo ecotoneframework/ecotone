@@ -6,6 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use ReflectionException;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\LoggingModule;
@@ -31,9 +32,9 @@ class LoggingModuleTest extends AnnotationConfigurationTest
         $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
             ServiceActivatorWithPollerExample::class
         ]);
-        $annotationConfiguration = LoggingModule::create($annotationRegistrationService);
+        $annotationConfiguration = LoggingModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertTrue(true);
     }

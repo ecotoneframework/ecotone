@@ -24,6 +24,7 @@ use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
@@ -52,7 +53,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         $this->oneTimeCommandConfigurations = $oneTimeCommandConfigurations;
     }
 
-    public static function create(AnnotationFinder $annotationRegistrationService): static
+    public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         $messageHandlerBuilders    = [];
         $oneTimeConfigurations = [];
@@ -134,7 +135,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         return array($parameterConverters, $parameters);
     }
 
-    public function prepare(Configuration $configuration,array $extensionObjects,ModuleReferenceSearchService $moduleReferenceSearchService) : void
+    public function prepare(Configuration $configuration,array $extensionObjects,ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry) : void
     {
         foreach ($this->oneTimeCommandHandlers as $oneTimeCommand) {
             $configuration->registerMessageHandler($oneTimeCommand);

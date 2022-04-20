@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
 use Ecotone\Messaging\Config\ConsoleCommandParameter;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -39,11 +40,12 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration = ConsoleCommandModule::create(
             InMemoryAnnotationFinder::createFrom([
                 ReferenceBasedConsoleCommand::class
-            ])
+            ]),
+            InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $configuration,
@@ -63,11 +65,12 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration = ConsoleCommandModule::create(
             InMemoryAnnotationFinder::createFrom([
                 OneTimeWithResultExample::class
-            ])
+            ]),
+            InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $configuration,
@@ -87,11 +90,12 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration = ConsoleCommandModule::create(
             InMemoryAnnotationFinder::createFrom([
                 ParametersOneTimeCommandExample::class
-            ])
+            ]),
+            InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $configuration,
@@ -115,11 +119,12 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration = ConsoleCommandModule::create(
             InMemoryAnnotationFinder::createFrom([
                 DefaultParametersOneTimeCommandExample::class
-            ])
+            ]),
+            InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $configuration,
@@ -143,11 +148,12 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration = ConsoleCommandModule::create(
             InMemoryAnnotationFinder::createFrom([
                 ParametersWithReferenceOneTimeCommandExample::class
-            ])
+            ]),
+            InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $configuration,
@@ -174,7 +180,8 @@ class ConsoleCommandModuleTest extends AnnotationConfigurationTest
         ConsoleCommandModule::create(
             InMemoryAnnotationFinder::createFrom([
                 OneTimeWithIncorrectResultSet::class
-            ])
+            ]),
+            InterfaceToCallRegistry::createEmpty()
         );
     }
 }

@@ -123,15 +123,14 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
             if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
                 $aggregatePayloadIdentifiersMapping[$property->getName()] = null;
             }
+        }
+        foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
+            $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
 
-            foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
-                $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
-
-                if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierMethod)) {
-                    /** @var AggregateIdentifierMethod $attribute */
-                    $attribute = $methodToCheck->getMethodAnnotation($aggregateIdentifierMethod);
-                    $aggregatePayloadIdentifiersMapping[$attribute->getIdentifierPropertyName()] = null;
-                }
+            if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierMethod)) {
+                /** @var AggregateIdentifierMethod $attribute */
+                $attribute = $methodToCheck->getMethodAnnotation($aggregateIdentifierMethod);
+                $aggregatePayloadIdentifiersMapping[$attribute->getIdentifierPropertyName()] = null;
             }
         }
 

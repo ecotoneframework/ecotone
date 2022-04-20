@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Config\Annotation;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Config\Module;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 /**
  * Interface AnnotationConfiguration
@@ -13,5 +14,5 @@ use Ecotone\Messaging\Config\Module;
  */
 interface AnnotationModule extends Module
 {
-    public static function create(AnnotationFinder $annotationRegistrationService): static;
+    public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static;
 }

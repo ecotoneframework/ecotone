@@ -12,6 +12,7 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
@@ -38,32 +39,32 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
         $this->distributedCommandHandlerRoutingKeys = $distributedCommandHandlerRoutingKeys;
     }
 
-    public static function create(AnnotationFinder $annotationFinder): static
+    public static function create(AnnotationFinder $annotationFinder, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
-        return new self(self::getDistributedEventHandlerRoutingKeys($annotationFinder), self::getDistributedCommandHandlerRoutingKeys($annotationFinder));
+        return new self(self::getDistributedEventHandlerRoutingKeys($annotationFinder, $interfaceToCallRegistry), self::getDistributedCommandHandlerRoutingKeys($annotationFinder, $interfaceToCallRegistry));
     }
 
-    public static function getDistributedCommandHandlerRoutingKeys(AnnotationFinder $annotationFinder) : array
+    public static function getDistributedCommandHandlerRoutingKeys(AnnotationFinder $annotationFinder, InterfaceToCallRegistry $interfaceToCallRegistry) : array
     {
         $routingKeys = array_merge(
-            BusRoutingModule::getCommandBusByNamesMapping($annotationFinder, true),
-            BusRoutingModule::getCommandBusByObjectMapping($annotationFinder, true)
+            BusRoutingModule::getCommandBusByNamesMapping($annotationFinder, $interfaceToCallRegistry, true),
+            BusRoutingModule::getCommandBusByObjectMapping($annotationFinder, $interfaceToCallRegistry, true)
         );
 
         return array_keys($routingKeys);
     }
 
-    public static function getDistributedEventHandlerRoutingKeys(AnnotationFinder $annotationFinder) : array
+    public static function getDistributedEventHandlerRoutingKeys(AnnotationFinder $annotationFinder, InterfaceToCallRegistry $interfaceToCallRegistry) : array
     {
         $routingKeys = array_merge(
-            BusRoutingModule::getEventBusByNamesMapping($annotationFinder, true),
-            BusRoutingModule::getEventBusByObjectsMapping($annotationFinder, true)
+            BusRoutingModule::getEventBusByNamesMapping($annotationFinder, $interfaceToCallRegistry, true),
+            BusRoutingModule::getEventBusByObjectsMapping($annotationFinder, $interfaceToCallRegistry, true)
         );
 
         return array_keys($routingKeys);
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $configuration->registerGatewayBuilder(
             GatewayProxyBuilder::create(DistributionEntrypoint::class, DistributionEntrypoint::class, "distribute", DistributionEntrypoint::DISTRIBUTED_CHANNEL)

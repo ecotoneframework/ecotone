@@ -436,14 +436,15 @@ class InterfaceToCall
             $this->interfaceType = TypeDescriptor::create($interfaceName);
             $this->interfaceName = $this->interfaceType->toString();
             $this->methodName    = $methodName;
-            $reflectionClass     = new ReflectionClass($interfaceName);
-            if (!$reflectionClass->hasMethod($methodName)) {
+            try {
+                $reflectionClass = new \ReflectionClass($interfaceName);
+                $reflectionMethod = $reflectionClass->getMethod($methodName);
+            }catch (\ReflectionException) {
                 throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
             }
-            $reflectionMethod = new ReflectionMethod($interfaceName, $methodName);
 
-            $this->parameters = $typeResolver->getMethodParameters($interfaceName, $methodName);
-            $this->returnType = $typeResolver->getReturnType($interfaceName, $methodName);
+            $this->parameters = $typeResolver->getMethodParameters($reflectionClass, $methodName);
+            $this->returnType = $typeResolver->getReturnType($reflectionClass, $methodName);
 
             $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
             $this->isStaticallyCalled       = $reflectionMethod->isStatic();

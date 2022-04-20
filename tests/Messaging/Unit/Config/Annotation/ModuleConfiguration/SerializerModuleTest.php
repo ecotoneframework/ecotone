@@ -13,6 +13,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Gateway\Converter\Serializer;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
@@ -40,11 +41,11 @@ class SerializerModuleTest extends AnnotationConfigurationTest
             ->registerClassWithAnnotations(ExampleSingleConverterService::class);
         $configuration = $this->createMessagingSystemConfiguration();
 
-        $converterModule = ConverterModule::create($annotationRegistrationService);
-        $converterModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $converterModule = ConverterModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
+        $converterModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
-        $serializerModule = SerializerModule::create($annotationRegistrationService);
-        $serializerModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $serializerModule = SerializerModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
+        $serializerModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         $messagingSystem = $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
@@ -65,11 +66,11 @@ class SerializerModuleTest extends AnnotationConfigurationTest
             ->registerClassWithAnnotations(ExampleSingleConverterService::class);
         $configuration = $this->createMessagingSystemConfiguration();
 
-        $converterModule = ConverterModule::create($annotationRegistrationService);
-        $converterModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $converterModule = ConverterModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
+        $converterModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
-        $serializerModule = SerializerModule::create($annotationRegistrationService);
-        $serializerModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $serializerModule = SerializerModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
+        $serializerModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         $messagingSystem = $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([

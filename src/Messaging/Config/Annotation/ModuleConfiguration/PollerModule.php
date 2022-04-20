@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
 class PollerModule extends NoExternalConfigurationModule implements AnnotationModule
@@ -27,7 +28,7 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
         $this->pollingMetadata = $pollingMetadata;
     }
 
-    public static function create(AnnotationFinder $annotationRegistrationService): static
+    public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         $multiplePollingMetadata = [];
 
@@ -58,7 +59,7 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
         return new self($multiplePollingMetadata);
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->pollingMetadata as $metadata) {
             $configuration->registerPollingMetadata($metadata);

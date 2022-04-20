@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+
 /**
  * Interface ExternalConfiguration
  * @package Ecotone\Messaging\Config
@@ -13,13 +15,12 @@ interface Module
     /**
      * In here you can register all message handlers, gateways, message channels
      *
-     * @param Configuration                $configuration
      * @param object[]                     $extensionObjects
      * @param ModuleReferenceSearchService $moduleReferenceSearchService
      *
      * @return void
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void;
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void;
 
     /**
      * @param $extensionObject

@@ -10,6 +10,7 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\BookStoreGatewayExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
 
@@ -28,11 +29,11 @@ class GatewayModuleTest extends AnnotationConfigurationTest
     public function test_registering_gateway()
     {
         $annotationGatewayConfiguration = GatewayModule::create(
-            InMemoryAnnotationFinder::createFrom([BookStoreGatewayExample::class])
+            InMemoryAnnotationFinder::createFrom([BookStoreGatewayExample::class]), InterfaceToCallRegistry::createEmpty()
         );
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [],ModuleReferenceSearchService::createEmpty());
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [],ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
@@ -63,10 +64,10 @@ class GatewayModuleTest extends AnnotationConfigurationTest
      */
     public function test_registering_gateway_with_multiple_methods()
     {
-        $annotationGatewayConfiguration = GatewayModule::create(InMemoryAnnotationFinder::createFrom([MultipleMethodsGatewayExample::class]));
+        $annotationGatewayConfiguration = GatewayModule::create(InMemoryAnnotationFinder::createFrom([MultipleMethodsGatewayExample::class]), InterfaceToCallRegistry::createEmpty());
 
         $messagingSystemConfiguration = $this->createMessagingSystemConfiguration();
-        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationGatewayConfiguration->prepare($messagingSystemConfiguration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

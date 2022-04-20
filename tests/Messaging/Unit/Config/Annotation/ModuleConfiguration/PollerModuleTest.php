@@ -11,6 +11,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModu
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\SchedulerExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\SchedulerWithPollerExample;
 
@@ -21,11 +22,11 @@ class PollerModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration = PollerModule::create(
             InMemoryAnnotationFinder::createFrom([
                 SchedulerWithPollerExample::class
-            ])
+            ]), InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $configuration,

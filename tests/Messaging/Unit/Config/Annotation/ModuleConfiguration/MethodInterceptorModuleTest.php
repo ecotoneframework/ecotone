@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Precedence;
@@ -51,9 +52,9 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
             CalculatingServiceInterceptorExample::class
         ]);
-        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
+        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -79,9 +80,9 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
             AroundInterceptorWithCustomParameterConverters::class
         ]);
-        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
+        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -126,9 +127,9 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
             ServiceActivatorInterceptorExample::class
         ]);
-        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
+        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,
@@ -190,9 +191,9 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
         $annotationRegistrationService = InMemoryAnnotationFinder::createFrom([
             TransformerInterceptorExample::class
         ]);
-        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService);
+        $annotationConfiguration = MethodInterceptorModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $expectedConfiguration,

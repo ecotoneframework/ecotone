@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleMediaTypeConverter;
@@ -24,10 +25,11 @@ class ConverterModuleTest extends AnnotationConfigurationTest
     {
         $annotationConfiguration = ConverterModule::create(
             InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(ExampleConverterService::class)
+                ->registerClassWithAnnotations(ExampleConverterService::class),
+            InterfaceToCallRegistry::createEmpty()
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
@@ -48,10 +50,11 @@ class ConverterModuleTest extends AnnotationConfigurationTest
     {
         $annotationConfiguration = ConverterModule::create(
             InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(ExampleMediaTypeConverter::class)
+                ->registerClassWithAnnotations(ExampleMediaTypeConverter::class),
+            InterfaceToCallRegistry::createEmpty()
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()

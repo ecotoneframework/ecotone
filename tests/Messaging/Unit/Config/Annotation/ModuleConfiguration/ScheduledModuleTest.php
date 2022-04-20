@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ScheduledModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\SchedulerExample;
 
 class ScheduledModuleTest extends AnnotationConfigurationTest
@@ -20,11 +21,11 @@ class ScheduledModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration = ScheduledModule::create(
             InMemoryAnnotationFinder::createFrom([
                 SchedulerExample::class
-            ])
+            ]), InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $configuration,

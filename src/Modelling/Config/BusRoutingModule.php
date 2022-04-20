@@ -5,14 +5,13 @@ namespace Ecotone\Modelling\Config;
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -59,7 +58,7 @@ class BusRoutingModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public static function create(AnnotationFinder $annotationRegistrationService): static
+    public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         $messageHeadersPropagator = new MessageHeadersPropagator();
 
@@ -67,16 +66,16 @@ class BusRoutingModule implements AnnotationModule
         $uniqueNameChannels = [];
         return new self(
             $messageHeadersPropagator,
-            BusRouterBuilder::createCommandBusByObject($messageHeadersPropagator, self::getCommandBusByObjectMapping($annotationRegistrationService, false, $uniqueObjectChannels)),
-            BusRouterBuilder::createCommandBusByName($messageHeadersPropagator, self::getCommandBusByNamesMapping($annotationRegistrationService, false, $uniqueNameChannels)),
-            BusRouterBuilder::createQueryBusByObject($messageHeadersPropagator, self::getQueryBusByObjectsMapping($annotationRegistrationService, $uniqueObjectChannels)),
-            BusRouterBuilder::createQueryBusByName($messageHeadersPropagator, self::getQueryBusByNamesMapping($annotationRegistrationService, $uniqueNameChannels)),
-            BusRouterBuilder::createEventBusByObject($messageHeadersPropagator, self::getEventBusByObjectsMapping($annotationRegistrationService, false)),
-            BusRouterBuilder::createEventBusByName($messageHeadersPropagator, self::getEventBusByNamesMapping($annotationRegistrationService, false))
+            BusRouterBuilder::createCommandBusByObject($messageHeadersPropagator, self::getCommandBusByObjectMapping($annotationRegistrationService, $interfaceToCallRegistry, false, $uniqueObjectChannels)),
+            BusRouterBuilder::createCommandBusByName($messageHeadersPropagator, self::getCommandBusByNamesMapping($annotationRegistrationService, $interfaceToCallRegistry, false, $uniqueNameChannels)),
+            BusRouterBuilder::createQueryBusByObject($messageHeadersPropagator, self::getQueryBusByObjectsMapping($annotationRegistrationService, $interfaceToCallRegistry, $uniqueObjectChannels)),
+            BusRouterBuilder::createQueryBusByName($messageHeadersPropagator, self::getQueryBusByNamesMapping($annotationRegistrationService, $interfaceToCallRegistry, $uniqueNameChannels)),
+            BusRouterBuilder::createEventBusByObject($messageHeadersPropagator, self::getEventBusByObjectsMapping($annotationRegistrationService, $interfaceToCallRegistry, false)),
+            BusRouterBuilder::createEventBusByName($messageHeadersPropagator, self::getEventBusByNamesMapping($annotationRegistrationService, $interfaceToCallRegistry, false))
         );
     }
 
-    public static function getCommandBusByObjectMapping(AnnotationFinder $annotationRegistrationService, bool $hasToBeDistributed, array &$uniqueChannels = []): array
+    public static function getCommandBusByObjectMapping(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry, bool $hasToBeDistributed, array &$uniqueChannels = []): array
     {
         $objectCommandHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, CommandHandler::class) as $registration) {
@@ -87,9 +86,9 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
             if ($classChannel) {
-                $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
                 $objectCommandHandlers[$classChannel]   = array_unique($objectCommandHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][]        = $registration;
             }
@@ -105,9 +104,9 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
             if ($classChannel) {
-                $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
                 $objectCommandHandlers[$classChannel]   = array_unique($objectCommandHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][]        = $registration;
             }
@@ -118,7 +117,7 @@ class BusRoutingModule implements AnnotationModule
         return $objectCommandHandlers;
     }
 
-    public static function getCommandBusByNamesMapping(AnnotationFinder $annotationRegistrationService, bool $hasToBeDistributed, array &$uniqueChannels = []): array
+    public static function getCommandBusByNamesMapping(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry, bool $hasToBeDistributed, array &$uniqueChannels = []): array
     {
         $namedCommandHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, CommandHandler::class) as $registration) {
@@ -126,7 +125,7 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
             if ($namedChannel) {
                 $namedCommandHandlers[$namedChannel][] = $namedChannel;
                 $namedCommandHandlers[$namedChannel]   = array_unique($namedCommandHandlers[$namedChannel]);
@@ -141,7 +140,7 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
             if ($namedChannel) {
                 $namedCommandHandlers[$namedChannel][] = $namedChannel;
                 $namedCommandHandlers[$namedChannel]   = array_unique($namedCommandHandlers[$namedChannel]);
@@ -154,7 +153,7 @@ class BusRoutingModule implements AnnotationModule
         return $namedCommandHandlers;
     }
 
-    public static function getQueryBusByObjectsMapping(AnnotationFinder $annotationRegistrationService, array &$uniqueChannels = []): array
+    public static function getQueryBusByObjectsMapping(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry, array &$uniqueChannels = []): array
     {
         $objectQueryHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, QueryHandler::class) as $registration) {
@@ -162,9 +161,9 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
             if ($classChannel) {
-                $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
                 $objectQueryHandlers[$classChannel]   = array_unique($objectQueryHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][]      = $registration;
             }
@@ -177,9 +176,9 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration);
+            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
             if ($classChannel) {
-                $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+                $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
                 $objectQueryHandlers[$classChannel]   = array_unique($objectQueryHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][]      = $registration;
             }
@@ -190,11 +189,11 @@ class BusRoutingModule implements AnnotationModule
         return $objectQueryHandlers;
     }
 
-    public static function getQueryBusByNamesMapping(AnnotationFinder $annotationRegistrationService, array &$uniqueChannels = []): array
+    public static function getQueryBusByNamesMapping(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry, array &$uniqueChannels = []): array
     {
         $namedQueryHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, QueryHandler::class) as $registration) {
-            $namedChannel                        = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            $namedChannel                        = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
             $namedQueryHandlers[$namedChannel][] = $namedChannel;
             $namedQueryHandlers[$namedChannel]   = array_unique($namedQueryHandlers[$namedChannel]);
             $uniqueChannels[$namedChannel][]     = $registration;
@@ -204,7 +203,7 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $namedChannel                        = ModellingHandlerModule::getNamedMessageChannelFor($registration);
+            $namedChannel                        = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
             $namedQueryHandlers[$namedChannel][] = $namedChannel;
             $namedQueryHandlers[$namedChannel]   = array_unique($namedQueryHandlers[$namedChannel]);
             $uniqueChannels[$namedChannel][]     = $registration;
@@ -215,7 +214,7 @@ class BusRoutingModule implements AnnotationModule
         return $namedQueryHandlers;
     }
 
-    public static function getEventBusByObjectsMapping(AnnotationFinder $annotationRegistrationService, bool $hasToBeDistributed): array
+    public static function getEventBusByObjectsMapping(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry, bool $hasToBeDistributed): array
     {
         $objectEventHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, EventHandler::class) as $registration) {
@@ -226,8 +225,8 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration);
-            $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
+            $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration, $interfaceToCallRegistry);
+            $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
 
             foreach ($classChannels as $classChannel) {
                 $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
@@ -246,8 +245,8 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration);
-            $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
+            $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration, $interfaceToCallRegistry);
+            $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
             foreach ($classChannels as $classChannel) {
                 if (!EventBusRouter::isRegexBasedRoute($namedMessageChannelFor)) {
                     $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
@@ -259,7 +258,7 @@ class BusRoutingModule implements AnnotationModule
         return $objectEventHandlers;
     }
 
-    public static function getEventBusByNamesMapping(AnnotationFinder $annotationRegistrationService, bool $hasToBeDistributed): array
+    public static function getEventBusByNamesMapping(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry, bool $hasToBeDistributed): array
     {
         $namedEventHandlers = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(EventHandler::class) as $registration) {
@@ -272,7 +271,7 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $chanelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
+            $chanelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
 
             if ($annotation->getListenTo()) {
                 $namedEventHandlers[$chanelName][] = $chanelName;
@@ -291,7 +290,7 @@ class BusRoutingModule implements AnnotationModule
             }
         }
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, EventHandler::class) as $registration) {
-            $channelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration);
+            $channelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
             if (EventBusRouter::isRegexBasedRoute($channelName)) {
                 throw ConfigurationException::create("Can not registered regex listen to channel for aggregates in {$registration}");
             }
@@ -310,13 +309,6 @@ class BusRoutingModule implements AnnotationModule
     {
         return !isset($aggregateMethodUsage[$uniqueChannelName][$oppositeMethodType])
             || $aggregateMethodUsage[$uniqueChannelName][$oppositeMethodType]->getClassName() === $registration->getClassName();
-    }
-
-    private static function verifyInputChannel(AnnotatedFinding $annotationRegistration): void
-    {
-        if (!ModellingHandlerModule::getNamedMessageChannelFor($annotationRegistration) && !ModellingHandlerModule::getPayloadClassIfAny($annotationRegistration)) {
-            throw ConfigurationException::create("Handler {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()} has no input channel information. Configure inputChannelName or type hint first argument as class");
-        }
     }
 
     /**
@@ -369,13 +361,13 @@ class BusRoutingModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $configuration
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     MessageHeadersPropagator::class,
-                    InterfaceToCall::create(MessageHeadersPropagator::class, "propagateHeaders"),
+                    $interfaceToCallRegistry->getFor(MessageHeadersPropagator::class, "propagateHeaders"),
                     TransformerBuilder::createWithDirectObject($this->messageHeadersPropagator, "propagateHeaders")
                         ->withMethodParameterConverters(
                             [

@@ -7,6 +7,7 @@ use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
@@ -25,11 +26,11 @@ class TransformerModuleTest extends AnnotationConfigurationTest
     public function test_creating_transformer_builder()
     {
         $annotationConfiguration = TransformerModule::create(
-            InMemoryAnnotationFinder::createFrom([TransformerWithMethodParameterExample::class])
+            InMemoryAnnotationFinder::createFrom([TransformerWithMethodParameterExample::class]), InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $messageHandlerBuilder = TransformerBuilder::create(
             TransformerWithMethodParameterExample::class, "send"

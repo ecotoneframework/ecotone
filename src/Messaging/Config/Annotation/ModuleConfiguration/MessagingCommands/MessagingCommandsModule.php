@@ -10,6 +10,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -20,12 +21,12 @@ class MessagingCommandsModule extends NoExternalConfigurationModule implements A
     const ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR = "ecotone.consoleCommand.execute";
     const ECOTONE_CONSOLE_COMMAND_NAME = "ecotone.consoleCommand.name";
 
-    public static function create(AnnotationFinder $annotationRegistrationService): static
+    public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         return new self();
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService): void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $configuration->registerMessageHandler(
             ServiceActivatorBuilder::createWithDirectReference(new MessagingBaseCommand(), "executeConsoleCommand")

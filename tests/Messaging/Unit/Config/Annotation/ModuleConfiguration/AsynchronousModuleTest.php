@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use ReflectionException;
@@ -36,10 +37,11 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
     {
         $annotationConfiguration = AsynchronousModule::create(
             InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncMethodExample::class)
+                ->registerClassWithAnnotations(AsyncMethodExample::class),
+            InterfaceToCallRegistry::createEmpty()
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
@@ -58,10 +60,11 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
     {
         $annotationConfiguration = AsynchronousModule::create(
             InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncClassExample::class)
+                ->registerClassWithAnnotations(AsyncClassExample::class),
+            InterfaceToCallRegistry::createEmpty()
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
@@ -75,10 +78,11 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
     {
         $annotationConfiguration = AsynchronousModule::create(
             InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncEventHandlerExample::class)
+                ->registerClassWithAnnotations(AsyncEventHandlerExample::class),
+            InterfaceToCallRegistry::createEmpty()
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
@@ -91,10 +95,11 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
     {
         $annotationConfiguration = AsynchronousModule::create(
             InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncQueryHandlerExample::class)
+                ->registerClassWithAnnotations(AsyncQueryHandlerExample::class),
+            InterfaceToCallRegistry::createEmpty()
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration(),
@@ -114,7 +119,8 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
 
         AsynchronousModule::create(
             InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncEventHandlerWithoutIdExample::class)
+                ->registerClassWithAnnotations(AsyncEventHandlerWithoutIdExample::class),
+            InterfaceToCallRegistry::createEmpty()
         );
     }
 
@@ -124,7 +130,8 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
 
         AsynchronousModule::create(
             InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncCommandHandlerWithoutIdExample::class)
+                ->registerClassWithAnnotations(AsyncCommandHandlerWithoutIdExample::class),
+            InterfaceToCallRegistry::createEmpty()
         );
     }
 }

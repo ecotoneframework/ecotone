@@ -6,6 +6,7 @@ use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\RouterModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Router\RouterWithNoResolutionRequiredExample;
@@ -27,10 +28,10 @@ class RouterModuleTest extends AnnotationConfigurationTest
     public function test_creating_router_builder_from_annotation()
     {
         $annotationConfiguration = RouterModule::create(
-            InMemoryAnnotationFinder::createFrom([RouterWithNoResolutionRequiredExample::class])
+            InMemoryAnnotationFinder::createFrom([RouterWithNoResolutionRequiredExample::class]), InterfaceToCallRegistry::createEmpty()
         );
         $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty());
+        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
 
         $router = RouterBuilder::create(RouterWithNoResolutionRequiredExample::class, "route")

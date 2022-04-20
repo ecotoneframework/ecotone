@@ -48,17 +48,14 @@ class TypeResolver
     }
 
     /**
-     * @param string $interfaceName
      * @param string $methodName
      * @return InterfaceParameter[]
      * @throws TypeDefinitionException
      * @throws \ReflectionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function getMethodParameters(string $interfaceName, string $methodName): iterable
+    public function getMethodParameters(\ReflectionClass $analyzedClass, string $methodName): iterable
     {
-        $analyzedClass = new \ReflectionClass($interfaceName);
-
         $parameters = [];
         $reflectionMethod = $analyzedClass->getMethod($methodName);
         $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($analyzedClass, $analyzedClass, $methodName);
@@ -433,9 +430,8 @@ class TypeResolver
         return $typeDescriptor;
     }
 
-    public function getReturnType(string $interfaceName, string $methodName): Type
+    public function getReturnType(\ReflectionClass $analyzedClass, string $methodName): Type
     {
-        $analyzedClass = new \ReflectionClass($interfaceName);
         $reflectionMethod = $analyzedClass->getMethod($methodName);
 
         return TypeDescriptor::createWithDocBlock(

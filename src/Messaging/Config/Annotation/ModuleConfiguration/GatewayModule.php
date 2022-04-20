@@ -55,7 +55,7 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
             /** @var MessageGateway $annotation */
             $annotation      = $annotationRegistration->getAnnotationForMethod();
             $referenceName   = AnnotatedDefinitionReference::getReferenceFor($annotationRegistration);
-            $interfaceToCall = InterfaceToCall::create($annotationRegistration->getClassName(), $annotationRegistration->getMethodName());
+            $interfaceToCall = $interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName());
 
             $parameterConverters = [];
             foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {

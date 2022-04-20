@@ -46,7 +46,7 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
         $converterBuilders = [];
 
         foreach ($registrations as $registration) {
-            $interfaceToCall     = InterfaceToCall::create($registration->getClassName(), $registration->getMethodName());
+            $interfaceToCall     = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
             $converterBuilders[] = ReferenceServiceConverterBuilder::create(
                 AnnotatedDefinitionReference::getReferenceFor($registration),
                 $registration->getMethodName(),

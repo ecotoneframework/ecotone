@@ -65,7 +65,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
             $className    = $annotationRegistration->getClassName();
             $methodName               = $annotationRegistration->getMethodName();
 
-            list($messageHandlerBuilder, $oneTimeCommandConfiguration) = self::prepareConsoleCommand($annotationRegistration, $className, $methodName, $commandName);
+            list($messageHandlerBuilder, $oneTimeCommandConfiguration) = self::prepareConsoleCommand($interfaceToCallRegistry, $annotationRegistration, $className, $methodName, $commandName);
 
             $messageHandlerBuilders[] = $messageHandlerBuilder;
             $oneTimeConfigurations[]     = $oneTimeCommandConfiguration;
@@ -74,12 +74,12 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         return new static($messageHandlerBuilders, $oneTimeConfigurations);
     }
 
-    public static function prepareConsoleCommand(AnnotatedMethod $annotatedMethod, string $className, string $methodName, string $commandName): array
+    public static function prepareConsoleCommand(InterfaceToCallRegistry $interfaceToCallRegistry, AnnotatedMethod $annotatedMethod, string $className, string $methodName, string $commandName): array
     {
         $parameterConverters = [];
         $parameters          = [];
 
-        list($parameterConverters, $parameters) = self::prepareParameter($className, $methodName, $parameterConverters, $parameters);
+        list($parameterConverters, $parameters) = self::prepareParameter($interfaceToCallRegistry, $className, $methodName, $parameterConverters, $parameters);
 
         $inputChannel                = "ecotone.channel." . $commandName;
 
@@ -93,13 +93,13 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
     }
 
-    public static function prepareConsoleCommandForDirectObject(object $directObject, string $methodName, string $commandName, bool $discoverableByConsoleCommandAttribute = true)
+    public static function prepareConsoleCommandForDirectObject(object $directObject, string $methodName, string $commandName, bool $discoverableByConsoleCommandAttribute, InterfaceToCallRegistry $interfaceToCallRegistry)
     {
         $className = get_class($directObject);
         $parameterConverters = [];
         $parameters          = [];
 
-        list($parameterConverters, $parameters) = self::prepareParameter($className, $methodName, $parameterConverters, $parameters);
+        list($parameterConverters, $parameters) = self::prepareParameter($interfaceToCallRegistry, $className, $methodName, $parameterConverters, $parameters);
 
         $inputChannel                = "ecotone.channel." . $commandName;
         $messageHandlerBuilder       = ServiceActivatorBuilder::createWithDirectReference($directObject, $methodName)
@@ -112,9 +112,9 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
     }
 
-    private static function prepareParameter(bool|string $className, string $methodName, array $parameterConverters, array $parameters): array
+    private static function prepareParameter(InterfaceToCallRegistry $interfaceToCallRegistry, bool|string $className, string $methodName, array $parameterConverters, array $parameters): array
     {
-        $interfaceToCall = InterfaceToCall::create($className, $methodName);
+        $interfaceToCall = $interfaceToCallRegistry->getFor($className, $methodName);
 
         if ($interfaceToCall->canReturnValue() && !$interfaceToCall->getReturnType()->equals(TypeDescriptor::create(ConsoleCommandResultSet::class))) {
             throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must have void or " . ConsoleCommandResultSet::class . " return type");

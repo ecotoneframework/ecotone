@@ -37,7 +37,7 @@ class EndpointHeadersInterceptorConfiguration extends NoExternalConfigurationMod
      */
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $interfaceToCall = InterfaceToCall::create(EndpointHeadersInterceptor::class, "addMetadata");
+        $interfaceToCall = $interfaceToCallRegistry->getFor(EndpointHeadersInterceptor::class, "addMetadata");
         $configuration->registerBeforeSendInterceptor(
             MethodInterceptor::create(
                 EndpointHeadersInterceptor::class,

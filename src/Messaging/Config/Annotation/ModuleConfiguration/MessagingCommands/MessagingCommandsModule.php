@@ -37,8 +37,8 @@ class MessagingCommandsModule extends NoExternalConfigurationModule implements A
                 ->withInputChannelName(self::ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR)
         );
 
-        $this->registerConsoleCommand("runAsynchronousEndpointCommand", "ecotone:run", $configuration);
-        $this->registerConsoleCommand("listAsynchronousEndpointsCommand", "ecotone:list", $configuration);
+        $this->registerConsoleCommand("runAsynchronousEndpointCommand", "ecotone:run", $configuration, $interfaceToCallRegistry);
+        $this->registerConsoleCommand("listAsynchronousEndpointsCommand", "ecotone:list", $configuration, $interfaceToCallRegistry);
     }
 
     public function canHandle($extensionObject): bool
@@ -46,10 +46,10 @@ class MessagingCommandsModule extends NoExternalConfigurationModule implements A
         return false;
     }
 
-    private function registerConsoleCommand(string $methodName, string $commandName, Configuration $configuration): void
+    private function registerConsoleCommand(string $methodName, string $commandName, Configuration $configuration, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         list($messageHandlerBuilder, $oneTimeCommandConfiguration) = ConsoleCommandModule::prepareConsoleCommandForDirectObject(
-            new MessagingBaseCommand(), $methodName, $commandName, false
+            new MessagingBaseCommand(), $methodName, $commandName, false, $interfaceToCallRegistry
         );
         $configuration
             ->registerMessageHandler($messageHandlerBuilder)

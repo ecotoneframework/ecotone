@@ -79,7 +79,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $aroundInterceptors     = [];
         $postCallInterceptors   = [];
         foreach ($methodsInterceptors as $methodInterceptor) {
-            $interceptorInterface = InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName());
+            $interceptorInterface = $interfaceToCallRegistry->getFor($methodInterceptor->getClassName(), $methodInterceptor->getMethodName());
 
             if ($interceptorInterface->hasMethodAnnotation($aroundAnnotation)) {
                 /** @var Around $aroundInterceptor */
@@ -104,7 +104,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                     $beforeSendInterceptor->precedence,
                     $beforeSendInterceptor->pointcut
                 );
-                $relatedInterfaces[]      = InterfaceToCall::create($methodInterceptor->getClassName(), $methodInterceptor->getMethodName());
+                $relatedInterfaces[]      = $interfaceToCallRegistry->getFor($methodInterceptor->getClassName(), $methodInterceptor->getMethodName());
             }
 
             if ($interceptorInterface->hasMethodAnnotation($beforeAnnotation)) {

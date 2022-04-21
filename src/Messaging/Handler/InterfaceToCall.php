@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Handler;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Future;
@@ -35,7 +36,7 @@ class InterfaceToCall
     /**
      * @var object[]
      */
-    private iterable $methodAnnotations;
+    private array $methodAnnotations;
     /**
      * @var object[]
      */
@@ -44,11 +45,11 @@ class InterfaceToCall
     /**
      * @param object[]        $methodAnnotations
      */
-    private function __construct(string $interfaceName, string $methodName, array $classAnnotations, iterable $methodAnnotations = [])
+    private function __construct(string $interfaceName, string $methodName, array $classAnnotations, array $methodAnnotations, AnnotationResolver $annotationResolver)
     {
         $this->methodAnnotations = $methodAnnotations;
         $this->classAnnotations = $classAnnotations;
-        $this->initialize($interfaceName, $methodName);
+        $this->initialize($interfaceName, $methodName, $annotationResolver);
     }
 
     public static function create(string|object $interfaceOrObjectName, string $methodName): self
@@ -63,10 +64,10 @@ class InterfaceToCall
         $methodAnnotations = $annotationParser->getAnnotationsForMethod($interface, $methodName);
         $classAnnotations = $annotationParser->getAnnotationsForClass($interface);
 
-        return new self($interface, $methodName, $classAnnotations, $methodAnnotations);
+        return new self($interface, $methodName, $classAnnotations, $methodAnnotations, $annotationParser);
     }
 
-    public static function createWithAnnotationFinder(string|object $interfaceOrObjectName, string $methodName, AnnotationFinder $annotationParser): self
+    public static function createWithAnnotationFinder(string|object $interfaceOrObjectName, string $methodName, AnnotationResolver $annotationParser): self
     {
         $interface = $interfaceOrObjectName;
         if (is_object($interfaceOrObjectName)) {
@@ -76,7 +77,7 @@ class InterfaceToCall
         $methodAnnotations = $annotationParser->getAnnotationsForMethod($interface, $methodName);
         $classAnnotations = $annotationParser->getAnnotationsForClass($interface);
 
-        return new self($interface, $methodName, $classAnnotations, $methodAnnotations);
+        return new self($interface, $methodName, $classAnnotations, $methodAnnotations, $annotationParser);
     }
 
     public function getInterfaceName(): ?string
@@ -87,7 +88,7 @@ class InterfaceToCall
     /**
      * @return object[]
      */
-    public function getMethodAnnotations(): iterable
+    public function getMethodAnnotations(): array
     {
         return $this->methodAnnotations;
     }
@@ -433,15 +434,7 @@ class InterfaceToCall
         return count($this->getInterfaceParameters());
     }
 
-    /**
-     * @param string $interfaceName
-     * @param string $methodName
-     *
-     * @throws InvalidArgumentException
-     * @throws ReflectionException
-     * @throws MessagingException
-     */
-    private function initialize(string $interfaceName, string $methodName): void
+    private function initialize(string $interfaceName, string $methodName, AnnotationResolver $annotationResolver): void
     {
         try {
             $typeResolver        = TypeResolver::create();
@@ -455,7 +448,7 @@ class InterfaceToCall
                 throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
             }
 
-            $this->parameters = $typeResolver->getMethodParameters($reflectionClass, $methodName);
+            $this->parameters = $typeResolver->getMethodParameters($reflectionClass, $methodName, $annotationResolver);
             $this->returnType = $typeResolver->getReturnType($reflectionClass, $methodName);
 
             $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;

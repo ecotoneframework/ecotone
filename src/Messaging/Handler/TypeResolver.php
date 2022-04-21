@@ -47,14 +47,7 @@ class TypeResolver
         return new self($annotationParser);
     }
 
-    /**
-     * @param string $methodName
-     * @return InterfaceParameter[]
-     * @throws TypeDefinitionException
-     * @throws \ReflectionException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    public function getMethodParameters(\ReflectionClass $analyzedClass, string $methodName): iterable
+    public function getMethodParameters(\ReflectionClass $analyzedClass, string $methodName, AnnotationResolver $annotationResolver): iterable
     {
         $parameters = [];
         $reflectionMethod = $analyzedClass->getMethod($methodName);
@@ -66,7 +59,7 @@ class TypeResolver
             );
             $isAnnotation = false;
             if ($parameterType->isClassOrInterface() && !$parameterType->isCompoundObjectType() && !$parameterType->isUnionType()) {
-                $classDefinition = ClassDefinition::createUsingAnnotationParser($parameterType, $this->getAnnotationParser($parameterType));
+                $classDefinition = ClassDefinition::createUsingAnnotationParser($parameterType, $annotationResolver);
                 $isAnnotation = $classDefinition->isAnnotation();
             }
 

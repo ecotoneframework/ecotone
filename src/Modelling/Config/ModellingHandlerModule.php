@@ -337,7 +337,7 @@ class ModellingHandlerModule implements AnnotationModule
                     /** @var RelatedAggregate $relatedAggregate */
                     $relatedAggregate = $interface->getMethodAnnotation(TypeDescriptor::create(RelatedAggregate::class));
 
-                    $aggregateClassDefinition = ClassDefinition::createFor(TypeDescriptor::create($relatedAggregate->getClassName()));
+                    $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($relatedAggregate->getClassName()));
 
                     $gatewayParameterConverters = [
                         GatewayHeaderBuilder::create($interface->getFirstParameterName(), AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER),
@@ -350,7 +350,7 @@ class ModellingHandlerModule implements AnnotationModule
                         ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], null, $interfaceToCallRegistry));
                 }else {
                     Assert::isTrue($interface->getFirstParameter()->getTypeDescriptor()->isClassNotInterface(), "Saving repository should type hint for Aggregate or if is Event Sourcing make use of RelatedAggregate attribute in: " . $repositoryGateway);
-                    $aggregateClassDefinition = ClassDefinition::createFor($interface->getFirstParameter()->getTypeDescriptor());
+                    $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor($interface->getFirstParameter()->getTypeDescriptor());
 
                     $gatewayParameterConverters = [GatewayHeaderBuilder::create($interface->getFirstParameter()->getName(), AggregateMessage::AGGREGATE_OBJECT)];
                 }
@@ -366,7 +366,7 @@ class ModellingHandlerModule implements AnnotationModule
                 );
             }else {
                 Assert::isTrue($interface->hasFirstParameter(), "Fetchting repository should have at least one parameter for identifiers: " . $repositoryGateway);
-                $aggregateClassDefinition = ClassDefinition::createFor($interface->getReturnType());
+                $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor($interface->getReturnType());
 
                 $configuration->registerMessageHandler($chainMessageHandlerBuilder
                     ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], null, $interfaceToCallRegistry))
@@ -438,7 +438,7 @@ class ModellingHandlerModule implements AnnotationModule
 
         $registration = reset($registrations);
 
-        $aggregateClassDefinition = ClassDefinition::createFor(TypeDescriptor::create($registration->getClassName()));
+        $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($registration->getClassName()));
         if (count($registrations) > 2) {
             throw new InvalidArgumentException("Can't handle");
         }
@@ -453,7 +453,7 @@ class ModellingHandlerModule implements AnnotationModule
                 Assert::null($factoryChannel, "Trying to register factory method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$messageChannelName}");
                 $factoryChannel                   = $channel;
                 $factoryHandledPayloadType        = self::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
-                $factoryHandledPayloadType        = $factoryHandledPayloadType ? ClassDefinition::createFor(TypeDescriptor::create($factoryHandledPayloadType)) : null;
+                $factoryHandledPayloadType        = $factoryHandledPayloadType ? $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($factoryHandledPayloadType)) : null;
                 $factoryIdentifierMetadataMapping = $registration->getAnnotationForMethod()->identifierMetadataMapping;
             } else {
                 Assert::null($actionChannel, "Trying to register action method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$messageChannelName}");
@@ -511,7 +511,7 @@ class ModellingHandlerModule implements AnnotationModule
 
             if (!$isFactoryMethod) {
                 $handledPayloadType = self::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
-                $handledPayloadType = $handledPayloadType ? ClassDefinition::createFor(TypeDescriptor::create($handledPayloadType)) : null;
+                $handledPayloadType = $handledPayloadType ? $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($handledPayloadType)) : null;
                 $chainHandler       = $chainHandler
                     ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->getIdentifierMetadataMapping(), $handledPayloadType, $interfaceToCallRegistry))
                     ->chain(
@@ -546,9 +546,9 @@ class ModellingHandlerModule implements AnnotationModule
         $relatedClassInterface    = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
         $parameterConverters      = $parameterConverterAnnotationFactory->createParameterWithDefaults($relatedClassInterface, (bool)$relatedClassInterface->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)));
         $endpointChannelName      = self::getHandlerChannel($registration);
-        $aggregateClassDefinition = ClassDefinition::createFor(TypeDescriptor::create($registration->getClassName()));
+        $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($registration->getClassName()));
         $handledPayloadType       = self::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
-        $handledPayloadType       = $handledPayloadType ? ClassDefinition::createFor(TypeDescriptor::create($handledPayloadType)) : null;
+        $handledPayloadType       = $handledPayloadType ? $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($handledPayloadType)) : null;
 
 
         $inputChannelName = self::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);

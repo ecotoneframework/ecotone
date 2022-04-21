@@ -7,6 +7,7 @@ use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\NullableMessageChannel;
@@ -45,7 +46,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-            "changeShippingAddress"
+            "changeShippingAddress",
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["orderRepository"]);
 
@@ -81,7 +83,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
-            "createWith"
+            "createWith",
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"]);
 
@@ -141,7 +144,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-            "multiplyOrder"
+            "multiplyOrder",
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel");
@@ -199,7 +203,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(OrderWithManualVersioning::class)),
-            "multiplyOrder"
+            "multiplyOrder",
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel");
@@ -232,7 +237,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
     {
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(NoIdDefinedAfterCallingFactoryExample::class)),
-            "create"
+            "create",
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
@@ -266,7 +272,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
     {
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
-            "create"
+            "create",
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
@@ -310,7 +317,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodWithParameters::class)),
-            "create"
+            "create",
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");

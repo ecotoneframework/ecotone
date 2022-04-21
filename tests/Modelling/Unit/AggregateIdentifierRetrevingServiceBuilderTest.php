@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -39,7 +40,8 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
             ["orderId" => "paymentId"],
-            ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class))
+            ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
+            InterfaceToCallRegistry::createEmpty()
         );
 
         $orderId                 = 1000;
@@ -68,7 +70,8 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $aggregateRetrevingServiceHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
             ["id" => "orderId"],
-            null
+            null,
+            InterfaceToCallRegistry::createEmpty()
         );
 
         $orderId                 = 1000;
@@ -96,7 +99,8 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(Basket::class)),
             [],
-            null
+            null,
+            InterfaceToCallRegistry::createEmpty()
         );
 
         $orderId                 = 1000;
@@ -124,7 +128,8 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
             [],
-            ClassDefinition::createFor(TypeDescriptor::create(ChangeArticleContentCommand::class))
+            ClassDefinition::createFor(TypeDescriptor::create(ChangeArticleContentCommand::class)),
+            InterfaceToCallRegistry::createEmpty()
         );
 
         $aggregateIds                 = ["author" => 1000, "title" => "Some"];
@@ -154,7 +159,8 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(Product::class)),
             [],
-            null
+            null,
+            InterfaceToCallRegistry::createEmpty()
         );
     }
 
@@ -165,7 +171,8 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
             ["some" => "paymentId", "orderId" => "x"],
-            ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class))
+            ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
+            InterfaceToCallRegistry::createEmpty()
         );
     }
 
@@ -176,7 +183,8 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
             [],
-            ClassDefinition::createFor(TypeDescriptor::create(RepublishArticleCommand::class))
+            ClassDefinition::createFor(TypeDescriptor::create(RepublishArticleCommand::class)),
+            InterfaceToCallRegistry::createEmpty()
         );
     }
 }

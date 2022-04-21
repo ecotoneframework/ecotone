@@ -50,22 +50,22 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     private bool $isAggregateVersionAutomaticallyIncreased = true;
     private bool $isEventSourced = false;
 
-    private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName, bool $isCommandHandler)
+    private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName, bool $isCommandHandler, InterfaceToCallRegistry $interfaceToCallRegistry)
     {
         $this->isCommandHandler = $isCommandHandler;
 
-        $this->initialize($aggregateClassDefinition, $methodName);
+        $this->initialize($aggregateClassDefinition, $methodName, $interfaceToCallRegistry);
     }
 
-    private function initialize(ClassDefinition $aggregateClassDefinition, string $methodName): void
+    private function initialize(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $interfaceToCall = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $methodName);
+        $interfaceToCall = $interfaceToCallRegistry->getFor($aggregateClassDefinition->getClassType()->toString(), $methodName);
         $this->isVoidMethod = $interfaceToCall->getReturnType()->isVoid();
 
         $aggregateMethodWithEvents    = null;
         $aggregateEventsAnnotation = TypeDescriptor::create(AggregateEvents::class);
         foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
-            $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
+            $methodToCheck = $interfaceToCallRegistry->getFor($aggregateClassDefinition->getClassType()->toString(), $method);
 
             if ($methodToCheck->hasMethodAnnotation($aggregateEventsAnnotation)) {
                 $aggregateMethodWithEvents = $method;
@@ -96,16 +96,16 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         }
 
         $this->interfaceToCall = $interfaceToCall;
-        $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutor::createFor($aggregateClassDefinition, $this->isEventSourced);
+        $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutor::createFor($aggregateClassDefinition, $this->isEventSourced, $interfaceToCallRegistry);
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
         if (!$this->isEventSourced && $isFactoryMethod) {
             Assert::isTrue($this->interfaceToCall->getReturnType()->isClassNotInterface(), "Factory method {$this->interfaceToCall} for standard aggregate should return object. Did you wanted to register Event Sourced Aggregate?");
         }
     }
 
-    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, bool $isCommandHandler): self
+    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, bool $isCommandHandler, InterfaceToCallRegistry $interfaceToCallRegistry): self
     {
-        return new self($aggregateClassDefinition, $methodName, $isCommandHandler);
+        return new self($aggregateClassDefinition, $methodName, $isCommandHandler, $interfaceToCallRegistry);
     }
 
     /**

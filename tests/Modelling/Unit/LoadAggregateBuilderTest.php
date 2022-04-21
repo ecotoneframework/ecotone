@@ -7,6 +7,7 @@ use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\NullableMessageChannel;
@@ -47,7 +48,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
             "getAppointmentId",
             null,
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"]);
 
@@ -82,7 +84,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
             "assignWorker",
             ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"]);
 
@@ -116,7 +119,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
             "getAppointmentId",
             null,
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"]);
 
@@ -151,7 +155,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
             "doSomething",
             null,
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"]);
 
@@ -180,7 +185,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(NoFactoryMethodAggregateExample::class)),
             "doSomething",
             null,
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
@@ -202,7 +208,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(EventSourcingHandlerMethodWithWrongParameterCountExample::class)),
             "doSomething",
             null,
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
@@ -216,7 +223,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(WithConstructorHavingParameters::class)),
             "doSomething",
             null,
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
@@ -230,7 +238,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(WithPrivateConstructor::class)),
             "doSomething",
             null,
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
@@ -244,7 +253,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(EventSourcingHandlerMethodWithReturnType::class)),
             "doSomething",
             null,
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
@@ -258,7 +268,8 @@ class LoadAggregateBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(StaticEventSourcingHandlerMethodExample::class)),
             "doSomething",
             null,
-            LoadAggregateMode::createThrowOnNotFound()
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");

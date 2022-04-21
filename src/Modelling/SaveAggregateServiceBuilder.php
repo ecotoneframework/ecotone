@@ -56,14 +56,14 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     private ?string $aggregateMethodWithEvents;
     private bool $isEventSourced = false;
 
-    private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName)
+    private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry)
     {
-        $this->initialize($aggregateClassDefinition, $methodName);
+        $this->initialize($aggregateClassDefinition, $methodName, $interfaceToCallRegistry);
     }
 
-    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName): self
+    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry): self
     {
-        return new self($aggregateClassDefinition, $methodName);
+        return new self($aggregateClassDefinition, $methodName, $interfaceToCallRegistry);
     }
 
     /**
@@ -189,9 +189,9 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         return sprintf("Aggregate Handler - %s with name `%s` for input channel `%s`", (string)$this->interfaceToCall, $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 
-    private function initialize(ClassDefinition $aggregateClassDefinition, string $methodName): void
+    private function initialize(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $interfaceToCall = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $methodName);
+        $interfaceToCall = $interfaceToCallRegistry->getFor($aggregateClassDefinition->getClassType()->toString(), $methodName);
 
         $aggregateMethodWithEvents    = null;
         $aggregateIdentifiers          = [];
@@ -201,7 +201,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $aggregateIdentifierGetMethods = [];
 
         foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
-            $methodToCheck = InterfaceToCall::create($aggregateClassDefinition->getClassType()->toString(), $method);
+            $methodToCheck = $interfaceToCallRegistry->getFor($aggregateClassDefinition->getClassType()->toString(), $method);
 
             if ($methodToCheck->hasMethodAnnotation($aggregateEventsAnnotation)) {
                 $aggregateMethodWithEvents = $method;

@@ -37,19 +37,19 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
     private bool $isEventSourced;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
 
-    private function __construct(ClassDefinition $aggregateClassName, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode)
+    private function __construct(ClassDefinition $aggregateClassName, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode, InterfaceToCallRegistry $interfaceToCallRegistry)
     {
         $this->aggregateClassName      = $aggregateClassName;
         $this->methodName              = $methodName;
         $this->handledMessageClassName = $handledMessageClass;
         $this->loadAggregateMode = $loadAggregateMode;
 
-        $this->initialize($aggregateClassName, $handledMessageClass);
+        $this->initialize($aggregateClassName, $handledMessageClass, $interfaceToCallRegistry);
     }
 
-    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode): self
+    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode, InterfaceToCallRegistry $interfaceToCallRegistry): self
     {
-        return new self($aggregateClassDefinition, $methodName, $handledMessageClass, $loadAggregateMode);
+        return new self($aggregateClassDefinition, $methodName, $handledMessageClass, $loadAggregateMode, $interfaceToCallRegistry);
     }
 
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
@@ -116,7 +116,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
         return [];
     }
 
-    private function initialize(ClassDefinition $aggregateClassDefinition, ?ClassDefinition $handledMessageClassName): void
+    private function initialize(ClassDefinition $aggregateClassDefinition, ?ClassDefinition $handledMessageClassName, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class));
         $aggregateMessageVersionPropertyName = null;
@@ -139,6 +139,6 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
         }
 
         $this->messageVersionPropertyName = $aggregateMessageVersionPropertyName;
-        $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutor::createFor($aggregateClassDefinition, $this->isEventSourced);
+        $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutor::createFor($aggregateClassDefinition, $this->isEventSourced, $interfaceToCallRegistry);
     }
 }

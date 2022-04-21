@@ -6,6 +6,7 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
@@ -36,7 +37,7 @@ final class EventSourcingHandlerExecutor
         return $aggregate;
     }
 
-    public static function createFor(ClassDefinition $classDefinition, bool $isEventSourced) : static
+    public static function createFor(ClassDefinition $classDefinition, bool $isEventSourced, InterfaceToCallRegistry $interfaceToCallRegistry) : static
     {
         if (!$isEventSourced) {
             return new static($classDefinition->getClassType()->toString(), []);
@@ -58,7 +59,7 @@ final class EventSourcingHandlerExecutor
         $aggregateFactoryAnnotation = TypeDescriptor::create(EventSourcingHandler::class);
         $eventSourcingHandlerMethods = [];
         foreach ($classDefinition->getPublicMethodNames() as $method) {
-            $methodToCheck = InterfaceToCall::create($classDefinition->getClassType()->toString(), $method);
+            $methodToCheck = $interfaceToCallRegistry->getFor($classDefinition->getClassType()->toString(), $method);
 
             if ($methodToCheck->hasMethodAnnotation($aggregateFactoryAnnotation)) {
                 if ($methodToCheck->isStaticallyCalled()) {

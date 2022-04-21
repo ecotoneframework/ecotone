@@ -45,9 +45,9 @@ class InterfaceToCall
      */
     private function __construct(string $interfaceName, string $methodName, array $classAnnotations, iterable $methodAnnotations = [])
     {
-        $this->initialize($interfaceName, $methodName);
         $this->methodAnnotations = $methodAnnotations;
         $this->classAnnotations = $classAnnotations;
+        $this->initialize($interfaceName, $methodName);
     }
 
     public static function create(string|object $interfaceOrObjectName, string $methodName): self

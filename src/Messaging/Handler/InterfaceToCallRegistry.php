@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Doctrine\Common\Annotations\AnnotationException;
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
@@ -28,40 +29,30 @@ class InterfaceToCallRegistry
      */
     private array $interfacesToCall = [];
     private \Ecotone\Messaging\Config\ReferenceTypeFromNameResolver $referenceTypeFromNameResolver;
+    private ?AnnotationFinder $annotationFinder;
     private ?self $preparedInterfaceToCallRegistry = null;
     private bool $isLocked;
 
-    /**
-     * InterfaceToCallRegistry constructor.
-     * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param bool $isLocked
-     */
-    private function __construct(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, bool $isLocked)
+    private function __construct(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ?AnnotationFinder $annotationFinder, bool $isLocked)
     {
         $this->referenceTypeFromNameResolver = $referenceTypeFromNameResolver;
+        $this->annotationFinder = $annotationFinder;
         $this->isLocked = $isLocked;
     }
 
-    /**
-     * @return InterfaceToCallRegistry
-     */
     public static function createEmpty(): self
     {
-        return new self(InMemoryReferenceTypeFromNameResolver::createEmpty(), false);
+        return new self(InMemoryReferenceTypeFromNameResolver::createEmpty(), null, false);
     }
 
-    /**
-     * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @return InterfaceToCallRegistry
-     */
-    public static function createWith(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver): self
+    public static function createWith(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, AnnotationFinder $annotationFinder): self
     {
-        return new self($referenceTypeFromNameResolver, false);
+        return new self($referenceTypeFromNameResolver, $annotationFinder, false);
     }
 
     public static function createWithBackedBy(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, self $interfaceToCallRegistry): self
     {
-        $self = new self($referenceTypeFromNameResolver, false);
+        $self = new self($referenceTypeFromNameResolver,null, false);
         $self->preparedInterfaceToCallRegistry = $interfaceToCallRegistry;
 
         return $self;
@@ -75,7 +66,7 @@ class InterfaceToCallRegistry
      */
     public static function createWithInterfaces(iterable $interfacesToCall, bool $isLocked, ReferenceSearchService $referenceSearchService): self
     {
-        $self = new self(InMemoryReferenceTypeFromNameResolver::createFromReferenceSearchService($referenceSearchService), $isLocked);
+        $self = new self(InMemoryReferenceTypeFromNameResolver::createFromReferenceSearchService($referenceSearchService), null, $isLocked);
         foreach ($interfacesToCall as $interfaceToCall) {
             $self->interfacesToCall[self::getName($interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName())] = $interfaceToCall;
         }
@@ -138,7 +129,11 @@ class InterfaceToCallRegistry
         if ($this->preparedInterfaceToCallRegistry) {
             $interfaceToCall = $this->preparedInterfaceToCallRegistry->getFor($interfaceName, $methodName);
         }else {
-            $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName);
+            if ($this->annotationFinder) {
+                $interfaceToCall = InterfaceToCall::createWithAnnotationFinder($interfaceName, $methodName, $this->annotationFinder);
+            } else {
+                $interfaceToCall = InterfaceToCall::create($interfaceName, $methodName);
+            }
         }
 
         $this->interfacesToCall[self::getName($interfaceName, $methodName)] = $interfaceToCall;

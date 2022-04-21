@@ -156,7 +156,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @throws MessagingException
      * @throws ReflectionException
      */
-    private function __construct(?string $rootPathToSearchConfigurationFor, ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, InterfaceToCallRegistry $interfaceToCallRegistry, ServiceConfiguration $applicationConfiguration)
+    private function __construct(?string $rootPathToSearchConfigurationFor, ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $applicationConfiguration)
     {
         $extensionApplicationConfiguration = [];
         foreach ($extensionObjects as $extensionObject) {
@@ -193,7 +193,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
         );
         $extensionObjects[] = $applicationConfiguration;
-        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $interfaceToCallRegistry, $applicationConfiguration);
+        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $preparationInterfaceRegistry, $applicationConfiguration);
     }
 
     private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ProxyFactory $proxyFactory, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $applicationConfiguration): void
@@ -740,21 +740,23 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
-        $interfaceToCallRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver);
+        $annotationFinder = AnnotationFinderFactory::createForAttributes(
+            realpath($rootPathToSearchConfigurationFor),
+            $applicationConfiguration->getNamespaces(),
+            $applicationConfiguration->getEnvironment(),
+            $applicationConfiguration->getLoadedCatalog() ?? ""
+        );
+
+        $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver, $annotationFinder);
         return self::prepareWithModuleRetrievingService(
             $rootPathToSearchConfigurationFor,
             new AnnotationModuleRetrievingService(
-                AnnotationFinderFactory::createForAttributes(
-                    realpath($rootPathToSearchConfigurationFor),
-                    $applicationConfiguration->getNamespaces(),
-                    $applicationConfiguration->getEnvironment(),
-                    $applicationConfiguration->getLoadedCatalog() ?? ""
-                ),
-                $interfaceToCallRegistry,
+                $annotationFinder,
+                $preparationInterfaceRegistry,
                 $configurationVariableService
             ),
             $referenceTypeFromNameResolver,
-            $interfaceToCallRegistry,
+            $preparationInterfaceRegistry,
             $applicationConfiguration
         );
     }
@@ -773,13 +775,13 @@ final class MessagingSystemConfiguration implements Configuration
         return null;
     }
 
-    public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, InterfaceToCallRegistry $interfaceToCallRegistry, ServiceConfiguration $applicationConfiguration): MessagingSystemConfiguration
+    public static function prepareWithModuleRetrievingService(?string $rootProjectDirectoryPath, ModuleRetrievingService $moduleConfigurationRetrievingService, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $applicationConfiguration): MessagingSystemConfiguration
     {
         $cacheDirectoryPath = $applicationConfiguration->getCacheDirectoryPath();
         if ($cacheDirectoryPath) {
             self::prepareCacheDirectory($cacheDirectoryPath);
         }
-        $messagingSystemConfiguration = new self($rootProjectDirectoryPath, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $interfaceToCallRegistry, $applicationConfiguration);
+        $messagingSystemConfiguration = new self($rootProjectDirectoryPath, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $preparationInterfaceRegistry, $applicationConfiguration);
 
         if ($cacheDirectoryPath) {
             $serializedMessagingSystemConfiguration = serialize($messagingSystemConfiguration);

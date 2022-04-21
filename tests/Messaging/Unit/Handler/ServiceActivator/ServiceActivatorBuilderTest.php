@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\ServiceActivator;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
@@ -215,7 +216,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
                 InterfaceToCall::create(PassThroughService::class, "invoke")
             ],
             $serviceActivator->resolveRelatedInterfaces(
-                InterfaceToCallRegistry::createWith(InMemoryReferenceTypeFromNameResolver::createEmpty())
+                InterfaceToCallRegistry::createWith(InMemoryReferenceTypeFromNameResolver::createEmpty(), InMemoryAnnotationFinder::createFrom([CalculatingServiceInterceptorExample::class])),
             )
         );
     }
@@ -236,7 +237,8 @@ class ServiceActivatorBuilderTest extends MessagingTest
                 InterfaceToCallRegistry::createWith(
                     InMemoryReferenceTypeFromNameResolver::createFromAssociativeArray([
                         $objectToInvokeOnReference => CalculatingServiceInterceptorExample::class
-                    ])
+                    ]),
+                    InMemoryAnnotationFinder::createFrom([CalculatingServiceInterceptorExample::class])
                 )
             )
         );

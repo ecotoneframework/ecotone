@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Store\Document;
 
 use Ecotone\Messaging\MessagingException;
 
-class UnknownCollectionException extends MessagingException
+class DocumentException extends MessagingException
 {
     protected static function errorCode(): int
     {

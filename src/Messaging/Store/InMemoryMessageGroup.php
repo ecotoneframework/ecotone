@@ -2,8 +2,8 @@
 
 namespace Ecotone\Messaging\Store;
 
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Message;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class InMemoryMessageGroup
@@ -26,7 +26,7 @@ final class InMemoryMessageGroup implements MessageGroup
         $this->messages = $messages;
     }
 
-    public static function createEmpty() : \Ecotone\Messaging\Store\InMemoryMessageGroup
+    public static function createEmpty(): InMemoryMessageGroup
     {
         return new self(Uuid::uuid4()->toString(), []);
     }
@@ -34,7 +34,7 @@ final class InMemoryMessageGroup implements MessageGroup
     /**
      * @param string $groupId
      */
-    public static function createEmptyWithId(string $groupId) : \Ecotone\Messaging\Store\InMemoryMessageGroup
+    public static function createEmptyWithId(string $groupId): InMemoryMessageGroup
     {
         return new self($groupId, []);
     }
@@ -51,6 +51,16 @@ final class InMemoryMessageGroup implements MessageGroup
         }
 
         $this->messages[] = $messageToAdd;
+    }
+
+    /**
+     * @param Message $messageToRemove
+     * @param $message
+     * @return bool
+     */
+    private function areMessagesEqual(Message $messageToRemove, $message): bool
+    {
+        return $message == $messageToRemove;
     }
 
     /**
@@ -117,15 +127,5 @@ final class InMemoryMessageGroup implements MessageGroup
     public function clear(): void
     {
         $this->messages = [];
-    }
-
-    /**
-     * @param Message $messageToRemove
-     * @param $message
-     * @return bool
-     */
-    private function areMessagesEqual(Message $messageToRemove, $message): bool
-    {
-        return $message == $messageToRemove;
     }
 }

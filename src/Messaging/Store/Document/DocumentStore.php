@@ -4,40 +4,32 @@ namespace Ecotone\Messaging\Store\Document;
 
 interface DocumentStore
 {
-    /**
-     * @param string $collectionName
-     */
     public function dropCollection(string $collectionName): void;
 
     /**
-     * @throws UnknownCollectionException
+     * @throws DocumentException
      */
-    public function addDocument(string $collectionName, string $documentId, object|array $document): void;
-
-    /**
-     * @throws UnknownCollectionException
-     */
-    public function replaceDocument(string $collectionName, string $documentId, object|array $fullOrSubsetDocument): void;
+    public function addDocument(string $collectionName, string $documentId, object|array|string $document): void;
 
     /**
      * Same as replaceDoc except that doc is added to collection if it does not exist.
      *
-     * @throws UnknownCollectionException
+     * @throws DocumentException
      */
-    public function upsertDocument(string $collectionName, string $documentId, object|array $fullOrSubsetDocument): void;
+    public function upsertDocument(string $collectionName, string $documentId, object|array|string $document): void;
 
     /**
-     * @throws UnknownCollectionException
+     * @throws DocumentException
      */
     public function deleteDocument(string $collectionName, string $documentId): void;
 
     /**
-     * @throws UnknownCollectionException
+     * @throws DocumentException
      */
-    public function getDocument(string $collectionName, string $documentId): array|object;
+    public function getDocument(string $collectionName, string $documentId): array|object|string;
 
     /**
-     * @throws UnknownCollectionException
+     * @throws DocumentException
      */
-    public function countDocs(string $collectionName): int;
+    public function countDocuments(string $collectionName): int;
 }

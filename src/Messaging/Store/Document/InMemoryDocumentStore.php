@@ -26,6 +26,22 @@ final class InMemoryDocumentStore implements DocumentStore
         if (isset($this->collection[$collectionName][$documentId])) {
             throw DocumentException::create(sprintf("Collection %s already contains document with id %s", $collectionName, $documentId));
         }
+        if (is_string($document)) {
+            try {
+                \json_decode($document, flags: JSON_THROW_ON_ERROR);
+            }catch (\JsonException) {
+                throw DocumentException::create(sprintf("Trying to store document in %s collection with incorrect JSON: %s", $documentId, $collectionName, $document));
+            }
+        }
+
+        $this->collection[$collectionName][$documentId] = $document;
+    }
+
+    public function updateDocument(string $collectionName, string $documentId, object|array|string $document): void
+    {
+        if (!isset($this->collection[$collectionName][$documentId])) {
+            throw DocumentException::create(sprintf("Collection %s does not contains document with id %s", $collectionName, $documentId));
+        }
 
         $this->collection[$collectionName][$documentId] = $document;
     }

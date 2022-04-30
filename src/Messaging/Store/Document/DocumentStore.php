@@ -12,6 +12,11 @@ interface DocumentStore
     public function addDocument(string $collectionName, string $documentId, object|array|string $document): void;
 
     /**
+     * @throws DocumentException
+     */
+    public function updateDocument(string $collectionName, string $documentId, object|array|string $document): void;
+
+    /**
      * Same as replaceDoc except that doc is added to collection if it does not exist.
      *
      * @throws DocumentException

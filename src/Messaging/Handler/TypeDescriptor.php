@@ -331,7 +331,22 @@ final class TypeDescriptor implements Type
         } else if ($type === self::BOOL_LONG_NAME) {
             $type = self::BOOL;
         } else if ($type === self::ARRAY) {
-            $type = self::ARRAY;
+            if (empty($variable)) {
+                return new self(self::ARRAY);
+            }
+
+            $collectionType = TypeDescriptor::createFromVariable(reset($variable));
+            if (!$collectionType->isClassNotInterface()) {
+                return new self(self::ARRAY);
+            }
+
+            foreach ($variable as $type) {
+                if (!$collectionType->equals(TypeDescriptor::createFromVariable($type))) {
+                    return new self(self::ARRAY);
+                }
+            }
+
+            return self::createCollection($collectionType->toString());
         } else if ($type === self::ITERABLE) {
             $type = self::ITERABLE;
         } else if (is_callable($variable)) {

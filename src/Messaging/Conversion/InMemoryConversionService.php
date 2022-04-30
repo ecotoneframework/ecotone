@@ -27,6 +27,14 @@ class InMemoryConversionService implements ConversionService
                 "targetMediaType" => MediaType::parseMediaType($targetMediaType),
                 "targetType" => TypeDescriptor::create($targetType),
                 "result" => $conversionResult
+            ],
+            [
+                "dataToConvert" => $conversionResult,
+                "sourceMediaType" => MediaType::parseMediaType($targetMediaType),
+                "sourceType" => TypeDescriptor::create($targetType),
+                "targetMediaType" => MediaType::parseMediaType($sourceMediaType),
+                "targetType" => TypeDescriptor::create($sourceType),
+                "result" => $dataToConvert
             ]
         ]);
     }
@@ -58,6 +66,10 @@ class InMemoryConversionService implements ConversionService
 
     public function convert($source, Type $sourcePHPType, MediaType $sourceMediaType, Type $targetPHPType, MediaType $targetMediaType)
     {
+        if (!$this->canConvert($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType)) {
+            throw new \RuntimeException("Can't convert");
+        }
+
         $result = $this->getConversionResult($source, $sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
 
         if (is_null($result)) {

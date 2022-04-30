@@ -13,6 +13,7 @@ use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
+use Test\Ecotone\Messaging\Fixture\Dto\OrderExample;
 use Test\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 
 /**
@@ -585,6 +586,12 @@ class TypeDescriptorTest extends TestCase
         $this->assertEquals(TypeDescriptor::STRING, TypeDescriptor::createFromVariable("text"));
         $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([]));
         $this->assertEquals(\stdClass::class, TypeDescriptor::createFromVariable(new \stdClass()));
+        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([]));
+        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([1,2,3]));
+        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([new \stdClass(), 12]));
+        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([new \stdClass(), OrderExample::createFromId(1)]));
+        $this->assertEquals(TypeDescriptor::createCollection(\stdClass::class), TypeDescriptor::createFromVariable([new \stdClass()]));
+        $this->assertEquals(TypeDescriptor::createCollection(\stdClass::class), TypeDescriptor::createFromVariable([new \stdClass(),new \stdClass()]));
         $this->assertEquals(TypeDescriptor::RESOURCE, TypeDescriptor::createFromVariable(fopen('file', 'w+')));
         $this->assertEquals(TypeDescriptor::NULL, TypeDescriptor::createFromVariable(null));
         $this->assertEquals(TypeDescriptor::CALLABLE, TypeDescriptor::createFromVariable(function (){}));

@@ -45,6 +45,7 @@ use Ecotone\Modelling\Attribute\IgnorePayload;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\Attribute\RelatedAggregate;
 use Ecotone\Modelling\Attribute\Repository;
+use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\CallAggregateServiceBuilder;
 use Ecotone\Modelling\FetchAggregate;
 use Ecotone\Modelling\LoadAggregateMode;
@@ -299,7 +300,10 @@ class ModellingHandlerModule implements AnnotationModule
      */
     public function canHandle($extensionObject): bool
     {
-        return $extensionObject instanceof RepositoryBuilder;
+        return
+            $extensionObject instanceof RepositoryBuilder
+            ||
+            $extensionObject instanceof BaseEventSourcingConfiguration;
     }
 
     public function getModuleExtensions(array $serviceExtensions): array
@@ -315,9 +319,17 @@ class ModellingHandlerModule implements AnnotationModule
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
         $configuration->requireReferences($this->aggregateRepositoryReferenceNames);
         foreach ($moduleExtensions as $aggregateRepositoryBuilder) {
-            $referenceId = Uuid::uuid4()->toString();
-            $moduleReferenceSearchService->store($referenceId, $aggregateRepositoryBuilder);
-            $this->aggregateRepositoryReferenceNames[$referenceId] = $referenceId;
+            if ($aggregateRepositoryBuilder instanceof RepositoryBuilder) {
+                $referenceId = Uuid::uuid4()->toString();
+                $moduleReferenceSearchService->store($referenceId, $aggregateRepositoryBuilder);
+                $this->aggregateRepositoryReferenceNames[$referenceId] = $referenceId;
+            }
+        }
+        $baseEventSourcingConfiguration = new BaseEventSourcingConfiguration();
+        foreach ($moduleExtensions as $moduleExtension) {
+            if ($moduleExtension instanceof BaseEventSourcingConfiguration) {
+                $baseEventSourcingConfiguration = $moduleExtension;
+            }
         }
 
         foreach ($this->gatewayRepositoryMethods as $repositoryGateway) {
@@ -360,7 +372,7 @@ class ModellingHandlerModule implements AnnotationModule
                 $methodName = $aggregateClassDefinition->getPublicMethodNames() ? $aggregateClassDefinition->getPublicMethodNames()[0] : "__construct";
                 $configuration->registerMessageHandler(
                     $chainMessageHandlerBuilder
-                        ->chain(SaveAggregateServiceBuilder::create($aggregateClassDefinition, $methodName, $interfaceToCallRegistry)
+                        ->chain(SaveAggregateServiceBuilder::create($aggregateClassDefinition, $methodName, $interfaceToCallRegistry, $baseEventSourcingConfiguration->getSnapshotTriggerThreshold(), $baseEventSourcingConfiguration->getSnapshotsAggregateClasses(), $baseEventSourcingConfiguration->getDocumentStoreReference())
                             ->withInputChannelName($inputChannelName)
                             ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames))
                 );
@@ -410,7 +422,7 @@ class ModellingHandlerModule implements AnnotationModule
 
         foreach ($aggregateCommandOrEventHandlers as $channelNameRegistrations) {
             foreach ($channelNameRegistrations as $channelName => $registrations) {
-                $this->registerAggregateCommandHandler($configuration, $interfaceToCallRegistry, $this->aggregateRepositoryReferenceNames, $registrations, $channelName);
+                $this->registerAggregateCommandHandler($configuration, $interfaceToCallRegistry, $this->aggregateRepositoryReferenceNames, $registrations, $channelName, $baseEventSourcingConfiguration);
             }
         }
 
@@ -432,7 +444,7 @@ class ModellingHandlerModule implements AnnotationModule
     /**
      * @var AnnotatedDefinition[] $registrations
      */
-    private function registerAggregateCommandHandler(Configuration $configuration, InterfaceToCallRegistry $interfaceToCallRegistry, array $aggregateRepositoryReferenceNames, array $registrations, string $messageChannelName): void
+    private function registerAggregateCommandHandler(Configuration $configuration, InterfaceToCallRegistry $interfaceToCallRegistry, array $aggregateRepositoryReferenceNames, array $registrations, string $messageChannelName, BaseEventSourcingConfiguration $baseEventSourcingConfiguration): void
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
 
@@ -530,7 +542,7 @@ class ModellingHandlerModule implements AnnotationModule
 
             $configuration->registerMessageHandler($chainHandler);
             $configuration->registerMessageHandler(
-                SaveAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $interfaceToCallRegistry)
+                SaveAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $interfaceToCallRegistry, $baseEventSourcingConfiguration->getSnapshotTriggerThreshold(), $baseEventSourcingConfiguration->getSnapshotsAggregateClasses(), $baseEventSourcingConfiguration->getDocumentStoreReference())
                     ->withInputChannelName($saveChannel)
                     ->withOutputMessageChannel($annotation->getOutputChannelName())
                     ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)

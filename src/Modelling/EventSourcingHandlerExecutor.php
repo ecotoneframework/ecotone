@@ -25,6 +25,11 @@ final class EventSourcingHandlerExecutor
             if ($event instanceof Event) {
                 $event = $event->getEvent();
             }
+            if ($event instanceof SnapshotEvent) {
+                $aggregate = $event->getAggregate();
+
+                continue;
+            }
 
             $eventType = TypeDescriptor::createFromVariable($event);
             foreach ($this->eventSourcingHandlerMethods as $methodInterface) {

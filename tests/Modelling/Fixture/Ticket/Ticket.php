@@ -56,4 +56,9 @@ class Ticket
     {
         return $this->version;
     }
+
+    public function setVersion(int $version): void
+    {
+        $this->version = $version;
+    }
 }

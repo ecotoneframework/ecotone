@@ -34,7 +34,7 @@ use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
 use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
 use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 
-class CallAggregateBuilderTest extends TestCase
+class CallAggregateServiceBuilderTest extends TestCase
 {
     public function test_calling_existing_aggregate_method_with_command_class()
     {
@@ -294,15 +294,18 @@ class CallAggregateBuilderTest extends TestCase
 
         $ticket = new Ticket();
         $ticket->onTicketWasStarted(new TicketWasStartedEvent($ticketId));
+
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload($commandToRun)
-                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $ticket)
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, clone $ticket)
                 ->setReplyChannel($queueChannel)->build()
         );
 
-        $this->assertEquals(
-            [new WorkerWasAssignedEvent($ticketId, 100)],
-            $queueChannel->receive()->getPayload()
-        );
+        $workerWasAssignedEvent = new WorkerWasAssignedEvent($ticketId, 100);
+        $replyMessage = $queueChannel->receive();
+        $this->assertEquals([$workerWasAssignedEvent], $replyMessage->getPayload());
+
+        $ticket->onWorkerWasAssigned($workerWasAssignedEvent);
+        $this->assertEquals($ticket, $replyMessage->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT));
     }
 }

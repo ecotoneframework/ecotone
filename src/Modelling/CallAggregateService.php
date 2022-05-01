@@ -118,12 +118,12 @@ class CallAggregateService
             }
         }
 
-        if ($this->isFactoryMethod) {
-            if ($this->isEventSourcedWithInteralEventRecorded()) {
-                $result = call_user_func([$result, $this->aggregateMethodWithEvents]);
-                $resultType = TypeDescriptor::createCollection(TypeDescriptor::OBJECT);
-            }
+        if ($this->isCommandHandler && $this->isEventSourcedWithInteralEventRecorded()) {
+            $result = call_user_func([$this->isFactoryMethod ? $result : $aggregate, $this->aggregateMethodWithEvents]);
+            $resultType = TypeDescriptor::createCollection(TypeDescriptor::OBJECT);
+        }
 
+        if ($this->isFactoryMethod) {
             if ($this->isEventSourced) {
                 $aggregate = $this->eventSourcingHandlerExecutor->fill($result, null);
             } else {
@@ -132,9 +132,8 @@ class CallAggregateService
             }
 
             $resultMessage = $resultMessage->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate);
-        }elseif ($this->isCommandHandler && $this->isEventSourcedWithInteralEventRecorded()) {
-            $result = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);
-            $resultType = TypeDescriptor::createCollection(TypeDescriptor::OBJECT);
+        }elseif ($this->isCommandHandler && $this->isEventSourced) {
+            $resultMessage->setHeader(AggregateMessage::AGGREGATE_OBJECT, $this->eventSourcingHandlerExecutor->fill($result, $aggregate));
         }
 
         if (!is_null($result)) {

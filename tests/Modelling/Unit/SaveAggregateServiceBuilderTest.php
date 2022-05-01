@@ -11,6 +11,8 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Store\Document\DocumentStore;
+use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Config\BusModule;
@@ -19,6 +21,7 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\EventStream;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
+use Ecotone\Modelling\SaveAggregateService;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\StandardRepository;
 use PHPUnit\Framework\TestCase;
@@ -32,6 +35,9 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderWithManualVersi
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\NoIdDefinedAfterCallingFactoryExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodWithParameters;
+use Test\Ecotone\Modelling\Fixture\Ticket\StartTicketCommand;
+use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
+use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
 
 /**
  * Class ServiceCallToAggregateAdapterTest
@@ -47,7 +53,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
             "changeShippingAddress",
-            InterfaceToCallRegistry::createEmpty()
+            InterfaceToCallRegistry::createEmpty(),
+            SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
+            [],
+            DocumentStore::class
         )
             ->withAggregateRepositoryFactories(["orderRepository"]);
 
@@ -77,6 +86,135 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $this->assertEquals($order, $inMemoryStandardRepository->findBy(Order::class, ["orderId" => 1]));
     }
 
+    public function test_snapshoting_aggregate_after_single_event()
+    {
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+            "start",
+            InterfaceToCallRegistry::createEmpty(),
+            1,
+            [Ticket::class],
+            DocumentStore::class
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
+        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
+                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
+                ]
+            ),
+            InMemoryReferenceSearchService::createWith(
+                [
+                    "repository" => InMemoryEventSourcedRepository::createEmpty(),
+                    DocumentStore::class => $inMemoryDocumentStore
+                ]
+            )
+        );
+
+        $event = new TicketWasStartedEvent(1);
+        $ticket = new Ticket();
+        $ticket->onTicketWasStarted($event);
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload([$event])
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ["ticketId" => 1])
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $ticket)
+                ->setHeader(AggregateMessage::TARGET_VERSION, 0)
+                ->build()
+        );
+
+        $this->assertEquals(
+            $ticket,
+            $inMemoryDocumentStore->getDocument(SaveAggregateService::SNAPSHOT_COLLECTION, 1)
+        );
+    }
+
+    public function test_skipping_snapshot_if_aggregate_not_registered_for_snapshoting()
+    {
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+            "start",
+            InterfaceToCallRegistry::createEmpty(),
+            1,
+            [Order::class],
+            DocumentStore::class
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
+        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
+                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
+                ]
+            ),
+            InMemoryReferenceSearchService::createWith(
+                [
+                    "repository" => InMemoryEventSourcedRepository::createEmpty(),
+                    DocumentStore::class => $inMemoryDocumentStore
+                ]
+            )
+        );
+
+        $event = new TicketWasStartedEvent(1);
+        $ticket = new Ticket();
+        $ticket->onTicketWasStarted($event);
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload([$event])
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ["ticketId" => 1])
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $ticket)
+                ->setHeader(AggregateMessage::TARGET_VERSION, 0)
+                ->build()
+        );
+
+        $this->assertEquals(0, $inMemoryDocumentStore->countDocuments(SaveAggregateService::SNAPSHOT_COLLECTION));
+    }
+
+    public function test_skipping_snapshot_if_not_desired_version_yet()
+    {
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+            "start",
+            InterfaceToCallRegistry::createEmpty(),
+            2,
+            [Ticket::class],
+            DocumentStore::class
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
+        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
+                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
+                ]
+            ),
+            InMemoryReferenceSearchService::createWith(
+                [
+                    "repository" => InMemoryEventSourcedRepository::createEmpty(),
+                    DocumentStore::class => $inMemoryDocumentStore
+                ]
+            )
+        );
+
+        $event = new TicketWasStartedEvent(1);
+        $ticket = new Ticket();
+        $ticket->onTicketWasStarted($event);
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload([$event])
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ["ticketId" => 1])
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $ticket)
+                ->setHeader(AggregateMessage::TARGET_VERSION, 0)
+                ->build()
+        );
+
+        $this->assertEquals(0, $inMemoryDocumentStore->countDocuments(SaveAggregateService::SNAPSHOT_COLLECTION));
+    }
+
     public function test_returning_all_identifiers_assigned_during_aggregate_creation()
     {
         $publishArticle = PublishArticleCommand::createWith("johny", "Cat book", "Good content");
@@ -84,7 +222,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
             "createWith",
-            InterfaceToCallRegistry::createEmpty()
+            InterfaceToCallRegistry::createEmpty(),
+            SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
+            [],
+            DocumentStore::class
         )
             ->withAggregateRepositoryFactories(["repository"]);
 
@@ -145,7 +286,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
             "multiplyOrder",
-            InterfaceToCallRegistry::createEmpty()
+            InterfaceToCallRegistry::createEmpty(),
+            SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
+            [],
+            DocumentStore::class
         )
             ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel");
@@ -204,7 +348,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(OrderWithManualVersioning::class)),
             "multiplyOrder",
-            InterfaceToCallRegistry::createEmpty()
+            InterfaceToCallRegistry::createEmpty(),
+            SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
+            [],
+            DocumentStore::class
         )
             ->withAggregateRepositoryFactories(["orderRepository"])
             ->withInputChannelName("inputChannel");
@@ -238,7 +385,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(NoIdDefinedAfterCallingFactoryExample::class)),
             "create",
-            InterfaceToCallRegistry::createEmpty()
+            InterfaceToCallRegistry::createEmpty(),
+            SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
+            [],
+            DocumentStore::class
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
@@ -273,7 +423,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
             "create",
-            InterfaceToCallRegistry::createEmpty()
+            InterfaceToCallRegistry::createEmpty(),
+            SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
+            [],
+            DocumentStore::class
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");
@@ -297,7 +450,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $aggregateId = ["id" => 123];
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload([new \stdClass()])
-                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, PublicIdentifierGetMethodForEventSourcedAggregate::class)
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, new PublicIdentifierGetMethodForEventSourcedAggregate())
                 ->setHeader(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER, 123)
                 ->setHeader(AggregateMessage::AGGREGATE_ID, $aggregateId)
                 ->setHeader(AggregateMessage::TARGET_VERSION, 0)
@@ -318,7 +471,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
         SaveAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodWithParameters::class)),
             "create",
-            InterfaceToCallRegistry::createEmpty()
+            InterfaceToCallRegistry::createEmpty(),
+            SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
+            [],
+            DocumentStore::class
         )
             ->withAggregateRepositoryFactories(["repository"])
             ->withInputChannelName("inputChannel");

@@ -12,6 +12,8 @@ use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -25,6 +27,9 @@ use Ecotone\Modelling\Config\BusModule;
  */
 class SaveAggregateService
 {
+    const NO_SNAPSHOT_THRESHOLD = 0;
+    const SNAPSHOT_COLLECTION = "aggregate_snapshots";
+
     private StandardRepository|EventSourcedRepository $aggregateRepository;
     private PropertyReaderAccessor $propertyReaderAccessor;
     /**
@@ -45,7 +50,13 @@ class SaveAggregateService
     private bool $isFactoryMethod;
     private array $aggregateIdentifierGetMethods;
 
-    public function __construct(InterfaceToCall|string $aggregateInterface, bool $isFactoryMethod, bool $isEventSourced, StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor, PropertyReaderAccessor $propertyReaderAccessor, NonProxyGateway $objectEventBus, NonProxyGateway $namedEventBus, ?string $aggregateMethodWithEvents, array $aggregateIdentifierMapping, array $aggregateIdentifierGetMethods, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased)
+    public function __construct(
+        InterfaceToCall|string                    $aggregateInterface, bool $isFactoryMethod, bool $isEventSourced,
+        StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor,
+        PropertyReaderAccessor                    $propertyReaderAccessor, NonProxyGateway $objectEventBus, NonProxyGateway $namedEventBus,
+        ?string                                   $aggregateMethodWithEvents, array $aggregateIdentifierMapping, array $aggregateIdentifierGetMethods, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased,
+        private int                               $snapshotTriggerThreshold, private array $aggregateClassesToSnapshot, private DocumentStore $documentStore
+    )
     {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
@@ -84,7 +95,7 @@ class SaveAggregateService
             ? $message->getHeaders()->get(AggregateMessage::TARGET_VERSION)
             : null;
 
-        if ($this->aggregateVersionProperty && $this->isAggregateVersionAutomaticallyIncreased && !$this->isEventSourced) {
+        if ($this->aggregateVersionProperty && $this->isAggregateVersionAutomaticallyIncreased) {
             $this->propertyEditorAccessor->enrichDataWith(
                 PropertyPath::createWith($this->aggregateVersionProperty),
                 $aggregate,
@@ -113,6 +124,23 @@ class SaveAggregateService
         unset($metadata[MessageHeaders::CONTENT_TYPE]);
 
         if ($this->isEventSourced) {
+            if ($this->snapshotTriggerThreshold !== self::NO_SNAPSHOT_THRESHOLD && in_array(is_string($aggregate) ? $aggregate : $aggregate::class, $this->aggregateClassesToSnapshot)) {
+                if (!is_object($aggregate)) {
+                    throw MessagingException::create(sprintf("Can't use repository shortcuts together with snapshots for %s", $aggregate));
+                }
+
+                $version = $versionBeforeHandling;
+                foreach ($events as $event) {
+                    $version += 1;
+
+                    if ($version % $this->snapshotTriggerThreshold === 0) {
+                        Assert::isTrue(count($aggregateIds) === 1, "Snapshoting is possible only for aggregates having single identifiers");
+
+                        $this->documentStore->upsertDocument(self::SNAPSHOT_COLLECTION, array_pop($aggregateIds), $aggregate);
+                    }
+                }
+            }
+
             $this->aggregateRepository->save($aggregateIds, is_string($this->aggregateInterface) ? $this->aggregateInterface : $this->aggregateInterface->getInterfaceName(), $events, $metadata, $versionBeforeHandling);
         }else {
             $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $versionBeforeHandling);

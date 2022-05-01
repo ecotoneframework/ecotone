@@ -10,12 +10,14 @@ use Ecotone\Messaging\Support\Assert;
 final class EventStream
 {
     private int $aggregateVersion;
-    /** @var Event[]  */
+    /** @var Event[]|SnapshotEvent[]  */
     private array $events;
 
     private function __construct(int $aggregateVersion, array $events)
     {
-        Assert::allInstanceOfType($events, Event::class);
+        foreach ($events as $event) {
+            Assert::isTrue($event instanceof Event || $event instanceof SnapshotEvent, "Event is not type of Event or SnapshotEvent" . get_class($event));
+        }
 
         $this->aggregateVersion = $aggregateVersion;
         $this->events = $events;
@@ -23,7 +25,7 @@ final class EventStream
 
     /**
      * @param int $aggregateVersion
-     * @param Event[] $events
+     * @param Event[]|SnapshotEvent[] $events
      * @return static
      */
     public static function createWith(int $aggregateVersion, array $events) : static
@@ -42,7 +44,7 @@ final class EventStream
     }
 
     /**
-     * @return Event[]
+     * @return Event[]|SnapshotEvent[]
      */
     public function getEvents(): array
     {

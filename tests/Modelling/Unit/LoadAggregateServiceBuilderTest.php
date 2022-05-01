@@ -20,6 +20,7 @@ use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\LoadAggregateMode;
 use Ecotone\Modelling\LoadAggregateServiceBuilder;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
+use Ecotone\Modelling\SnapshotEvent;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
@@ -39,8 +40,9 @@ use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
 use Test\Ecotone\Modelling\Fixture\Ticket\AssignWorkerCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
 use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
+use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 
-class LoadAggregateBuilderTest extends TestCase
+class LoadAggregateServiceBuilderTest extends TestCase
 {
     public function test_enriching_command_with_aggregate_if_found()
     {
@@ -89,10 +91,11 @@ class LoadAggregateBuilderTest extends TestCase
         )
             ->withAggregateRepositoryFactories(["repository"]);
 
+        $ticketWasStartedEvent = new TicketWasStartedEvent(1);
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => 1], Ticket::class, [new TicketWasStartedEvent(1)]),
+                "repository" => InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => 1], Ticket::class, [$ticketWasStartedEvent]),
                 ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
             ])
         );
@@ -105,11 +108,57 @@ class LoadAggregateBuilderTest extends TestCase
                 ->build()
         );
 
-        /** @var Ticket $ticket */
-        $ticket = $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
+        $ticket = new Ticket();
+        $ticket->onTicketWasStarted($ticketWasStartedEvent);
+        $ticket->setVersion(1);
+
+        /** @var Ticket $reconstructedTicket */
+        $reconstructedTicket = $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
         $this->assertEquals(
-            1,
-            $ticket->getVersion()
+            $ticket,
+            $reconstructedTicket
+        );
+    }
+
+    public function test_setting_correct_aggregate_when_snapshot_is_used()
+    {
+        $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+            "assignWorker",
+            ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
+            LoadAggregateMode::createThrowOnNotFound(),
+            InterfaceToCallRegistry::createEmpty()
+        )
+            ->withAggregateRepositoryFactories(["repository"]);
+
+        $ticket = new Ticket();
+        $ticket->onTicketWasStarted(new TicketWasStartedEvent(1));
+        $extraEvent = new WorkerWasAssignedEvent(1, 100);
+
+        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createWith([
+                "repository" => InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => 1], Ticket::class, [new SnapshotEvent(clone $ticket), $extraEvent]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+            ])
+        );
+
+        $replyChannel = QueueChannel::create();
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload(new AssignWorkerCommand(1, 2))
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ["ticketId" => 1])
+                ->setReplyChannel($replyChannel)
+                ->build()
+        );
+
+        $ticket->onWorkerWasAssigned($extraEvent);
+        $ticket->setVersion(2);
+
+        /** @var Ticket $ticket */
+        $reconstructedTicket = $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
+        $this->assertEquals(
+            $ticket,
+            $reconstructedTicket
         );
     }
 

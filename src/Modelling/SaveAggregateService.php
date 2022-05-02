@@ -112,6 +112,7 @@ class SaveAggregateService
 
         unset($metadata[MessageHeaders::REPLY_CHANNEL], );
         unset($metadata[AggregateMessage::AGGREGATE_ID]);
+        unset($metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER]);
         unset($metadata[AggregateMessage::AGGREGATE_OBJECT]);
         unset($metadata[AggregateMessage::TARGET_VERSION]);
         unset($metadata[BusModule::COMMAND_CHANNEL_NAME_BY_NAME]);

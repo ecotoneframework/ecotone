@@ -34,6 +34,11 @@ final class DocumentStoreMessageChannel
         return $referenceName . "_getDocument";
     }
 
+    public static function getAllDocuments(string $referenceName): string
+    {
+        return $referenceName . "_getAllDocuments";
+    }
+
     public static function countDocuments(string $referenceName): string
     {
         return $referenceName . "_countDocuments";

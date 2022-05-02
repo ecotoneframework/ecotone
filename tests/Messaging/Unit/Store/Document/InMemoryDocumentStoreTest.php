@@ -89,6 +89,21 @@ class InMemoryDocumentStoreTest extends TestCase
         $this->assertEquals(0, $documentStore->countDocuments('users'));
     }
 
+    public function test_retrieving_whole_collection()
+    {
+        $documentStore = $this->getMemoryDocumentStore();
+
+        $this->assertEquals([],$documentStore->getAllDocuments('users'));
+
+        $documentStore->addDocument('users', '123', '{"name":"Johny"}');
+        $documentStore->addDocument('users', '124', '{"name":"Franco"}');
+
+        $this->assertEquals(
+            ['{"name":"Johny"}', '{"name":"Franco"}'],
+            $documentStore->getAllDocuments('users')
+        );
+    }
+
     public function test_replacing_document()
     {
         $documentStore = $this->getMemoryDocumentStore();

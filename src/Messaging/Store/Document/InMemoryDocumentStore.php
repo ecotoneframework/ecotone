@@ -65,6 +65,15 @@ final class InMemoryDocumentStore implements DocumentStore
         return $this->collection[$collectionName][$documentId];
     }
 
+    public function getAllDocuments(string $collectionName): array
+    {
+        if (!isset($this->collection[$collectionName])) {
+            return [];
+        }
+
+        return array_values($this->collection[$collectionName]);
+    }
+
     public function countDocuments(string $collectionName): int
     {
         if (!isset($this->collection[$collectionName])) {

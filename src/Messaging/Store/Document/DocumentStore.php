@@ -34,6 +34,11 @@ interface DocumentStore
     public function getDocument(string $collectionName, string $documentId): array|object|string;
 
     /**
+     * @return object[]|string[]|array
+     */
+    public function getAllDocuments(string $collectionName): array;
+
+    /**
      * @throws DocumentException
      */
     public function countDocuments(string $collectionName): int;

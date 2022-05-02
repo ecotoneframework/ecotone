@@ -136,7 +136,7 @@ class SaveAggregateService
                     if ($version % $this->snapshotTriggerThreshold === 0) {
                         Assert::isTrue(count($aggregateIds) === 1, "Snapshoting is possible only for aggregates having single identifiers");
 
-                        $this->documentStore->upsertDocument(self::SNAPSHOT_COLLECTION, array_pop($aggregateIds), $aggregate);
+                        $this->documentStore->upsertDocument(self::SNAPSHOT_COLLECTION, reset($aggregateIds), $aggregate);
                     }
                 }
             }
@@ -149,7 +149,7 @@ class SaveAggregateService
         $aggregateIds = $aggregateIds ?: $this->getAggregateIds($aggregateIds, $aggregate, true);
         if ($this->isFactoryMethod()) {
             if (count($aggregateIds) === 1) {
-                $aggregateIds = array_pop($aggregateIds);
+                $aggregateIds = reset($aggregateIds);
             }
 
             $message =

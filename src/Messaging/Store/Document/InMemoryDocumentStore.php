@@ -40,7 +40,7 @@ final class InMemoryDocumentStore implements DocumentStore
     public function updateDocument(string $collectionName, string $documentId, object|array|string $document): void
     {
         if (!isset($this->collection[$collectionName][$documentId])) {
-            throw DocumentException::create(sprintf("Collection %s does not contains document with id %s", $collectionName, $documentId));
+            throw DocumentNotFound::create(sprintf("Collection %s does not contains document with id %s", $collectionName, $documentId));
         }
 
         $this->collection[$collectionName][$documentId] = $document;
@@ -59,7 +59,7 @@ final class InMemoryDocumentStore implements DocumentStore
     public function getDocument(string $collectionName, string $documentId): array|object|string
     {
         if (!isset($this->collection[$collectionName][$documentId])) {
-            throw DocumentException::create(sprintf("Collection %s does not have document with id %s", $collectionName, $documentId));
+            throw DocumentNotFound::create(sprintf("Collection %s does not have document with id %s", $collectionName, $documentId));
         }
 
         return $this->collection[$collectionName][$documentId];

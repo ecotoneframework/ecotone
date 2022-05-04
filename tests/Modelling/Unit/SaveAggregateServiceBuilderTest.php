@@ -127,7 +127,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $this->assertEquals(
             $ticket,
-            $inMemoryDocumentStore->getDocument(SaveAggregateService::SNAPSHOT_COLLECTION, 1)
+            $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 1)
         );
     }
 
@@ -170,7 +170,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 ->build()
         );
 
-        $this->assertEquals(0, $inMemoryDocumentStore->countDocuments(SaveAggregateService::SNAPSHOT_COLLECTION));
+        $this->assertEquals(0, $inMemoryDocumentStore->countDocuments(SaveAggregateService::getSnapshotCollectionName(Ticket::class)));
     }
 
     public function test_skipping_snapshot_if_not_desired_version_yet()
@@ -212,7 +212,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 ->build()
         );
 
-        $this->assertEquals(0, $inMemoryDocumentStore->countDocuments(SaveAggregateService::SNAPSHOT_COLLECTION));
+        $this->assertEquals(0, $inMemoryDocumentStore->countDocuments(SaveAggregateService::getSnapshotCollectionName(Ticket::class)));
     }
 
     public function test_returning_all_identifiers_assigned_during_aggregate_creation()

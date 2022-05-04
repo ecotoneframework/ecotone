@@ -28,7 +28,7 @@ use Ecotone\Modelling\Config\BusModule;
 class SaveAggregateService
 {
     const NO_SNAPSHOT_THRESHOLD = 0;
-    const SNAPSHOT_COLLECTION = "aggregate_snapshots";
+    const SNAPSHOT_COLLECTION = "aggregate_snapshots_";
 
     private StandardRepository|EventSourcedRepository $aggregateRepository;
     private PropertyReaderAccessor $propertyReaderAccessor;
@@ -137,7 +137,7 @@ class SaveAggregateService
                     if ($version % $this->snapshotTriggerThreshold === 0) {
                         Assert::isTrue(count($aggregateIds) === 1, "Snapshoting is possible only for aggregates having single identifiers");
 
-                        $this->documentStore->upsertDocument(self::SNAPSHOT_COLLECTION, reset($aggregateIds), $aggregate);
+                        $this->documentStore->upsertDocument(self::getSnapshotCollectionName($aggregate::class), reset($aggregateIds), $aggregate);
                     }
                 }
             }
@@ -174,6 +174,11 @@ class SaveAggregateService
 
         return MessageBuilder::fromMessage($message)
                 ->build();
+    }
+
+    public static function getSnapshotCollectionName(string $aggregateClassname): string
+    {
+        return self::SNAPSHOT_COLLECTION . $aggregateClassname;
     }
 
     private function isFactoryMethod(): bool

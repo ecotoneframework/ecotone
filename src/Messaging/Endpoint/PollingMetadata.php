@@ -64,7 +64,8 @@ final class PollingMetadata
     {
         return $this
             ->setExecutionAmountLimit(1)
-            ->setExecutionTimeLimitInMilliseconds(1);
+            ->setExecutionTimeLimitInMilliseconds(1)
+            ->setStopOnError(true);
     }
 
     /**

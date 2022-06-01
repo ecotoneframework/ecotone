@@ -30,7 +30,7 @@ final class InMemoryDocumentStore implements DocumentStore
             try {
                 \json_decode($document, flags: JSON_THROW_ON_ERROR);
             }catch (\JsonException) {
-                throw DocumentException::create(sprintf("Trying to store document in %s collection with incorrect JSON: %s", $documentId, $collectionName, $document));
+                throw DocumentException::create(sprintf("Trying to store document in %s collection with incorrect JSON: %s", $documentId, $collectionName));
             }
         }
 

@@ -42,12 +42,12 @@
     "phpunit/phpunit": "^9.0.0",
     "behat/behat": "^3.3.1",
     "php-coveralls/php-coveralls": "^2.1.0",
-    "phpstan/phpstan": "^0.12",
+    "phpstan/phpstan": "^1.7",
     "symfony/expression-language": "^3.0|^4.0|^5.0"
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "1.22.6-dev"
+      "dev-master": "1.22.7-dev"
     }
   }
 }

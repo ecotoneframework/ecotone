@@ -7,6 +7,7 @@ use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\PropagateHeaders;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -375,7 +376,7 @@ class BusRoutingModule implements AnnotationModule
                             ]
                         ),
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
-                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class
+                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class
                 )
             )
             ->registerAroundMethodInterceptor(
@@ -383,7 +384,7 @@ class BusRoutingModule implements AnnotationModule
                     $this->messageHeadersPropagator,
                     "storeHeaders",
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class
+                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class
                 )
             )
             ->registerMessageHandler($this->commandBusByObject)

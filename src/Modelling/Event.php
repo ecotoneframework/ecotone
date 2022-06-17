@@ -11,7 +11,7 @@ use Ramsey\Uuid\Uuid;
 class Event
 {
     private string $eventType;
-    private array|object $event;
+    private array|object $payload;
     private array $metadata;
 
     private function __construct(string $eventType, array|object $event, array $metadata)
@@ -19,7 +19,7 @@ class Event
         Assert::notNull($event, "Event can not be null for " . $eventType);
 
         $this->eventType = $eventType;
-        $this->event = $event;
+        $this->payload = $event;
 
         if (!array_key_exists(MessageHeaders::MESSAGE_ID, $metadata)) {
             $metadata[MessageHeaders::MESSAGE_ID] = Uuid::uuid4()->toString();
@@ -46,9 +46,9 @@ class Event
         return $this->eventType;
     }
 
-    public function getEvent() : array|object
+    public function getPayload() : array|object
     {
-        return $this->event;
+        return $this->payload;
     }
 
     public function getMetadata(): array

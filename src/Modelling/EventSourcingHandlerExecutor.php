@@ -23,7 +23,7 @@ final class EventSourcingHandlerExecutor
         $aggregate = $existingAggregate ?? (new \ReflectionClass($this->aggregateClassName))->newInstance();
         foreach ($events as $event) {
             if ($event instanceof Event) {
-                $event = $event->getEvent();
+                $event = $event->getPayload();
             }
             if ($event instanceof SnapshotEvent) {
                 $aggregate = $event->getAggregate();

@@ -460,7 +460,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $this->assertEquals(
             new \stdClass(),
-            $inMemoryEventSourcedRepository->findBy(PublicIdentifierGetMethodForEventSourcedAggregate::class, $aggregateId)->getEvents()[0]->getEvent()
+            $inMemoryEventSourcedRepository->findBy(PublicIdentifierGetMethodForEventSourcedAggregate::class, $aggregateId)->getEvents()[0]->getPayload()
         );
     }
 

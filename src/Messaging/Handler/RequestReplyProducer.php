@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Messaging\Conversion\MediaType;
 use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
@@ -154,6 +155,7 @@ class RequestReplyProducer
                         $replyChannel->send(
                             MessageBuilder::fromMessage($message)
                                 ->setPayload($payload)
+                                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::createFromVariable($payload)->toString()))
                                 ->setHeaderIfAbsent(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationId)
                                 ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
                                 ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)

@@ -2,6 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Test\Ecotone\Messaging\Fixture\Handler\NoReplyMessageProducer;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
 use Test\Ecotone\Messaging\Fixture\Handler\FakeReplyMessageProducer;
@@ -317,6 +319,7 @@ class RequestReplyProducerTest extends MessagingTest
                 MessageBuilder::fromMessage($requestMessage)
                     ->setPayload($replyData[$sequenceNumber])
                     ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationHeader)
+                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::createFromVariable($replyData[$sequenceNumber])->toString()))
                     ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
                     ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
                     ->build(),

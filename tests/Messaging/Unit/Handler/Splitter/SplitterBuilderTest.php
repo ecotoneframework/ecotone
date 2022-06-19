@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Splitter;
 
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Test\Ecotone\Messaging\Fixture\Handler\Splitter\ServiceSplittingArrayPayload;
 use Test\Ecotone\Messaging\Fixture\Handler\Splitter\WrongSplittingService;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -109,6 +111,27 @@ class SplitterBuilderTest extends MessagingTest
 
         $this->assertNotNull($outputChannel->receive());
         $this->assertNotNull($outputChannel->receive());
+    }
+
+    public function test_splitting_will_set_new_content_type()
+    {
+        $splitter = SplitterBuilder::createMessagePayloadSplitter();
+
+        $splitter = $splitter->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createEmpty()
+        );
+
+        $outputChannel = QueueChannel::create();
+        $splitter->handle(
+            MessageBuilder::withPayload([1, 2])
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter("array<int>"))
+                ->setReplyChannel($outputChannel)
+                ->build()
+        );
+
+        $this->assertEquals(MediaType::createApplicationXPHPWithTypeParameter("int")->toString(), $outputChannel->receive()->getHeaders()->getContentType()->toString());
+        $this->assertEquals(MediaType::createApplicationXPHPWithTypeParameter("int")->toString(), $outputChannel->receive()->getHeaders()->getContentType()->toString());
     }
 
     public function test_converting_to_string()

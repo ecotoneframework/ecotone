@@ -30,7 +30,7 @@ class MessageSelectorExample
      */
     public function accept(Message $message) : bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -40,7 +40,7 @@ class MessageSelectorExample
      */
     public function refuse(Message $message) : bool
     {
-        return false;
+        return true;
     }
 
     /**

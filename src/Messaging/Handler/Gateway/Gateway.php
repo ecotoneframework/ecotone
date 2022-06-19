@@ -117,10 +117,10 @@ class Gateway implements NonProxyGateway
             $countArguments = count($parameters);
             for ($index = 0; $index < $countArguments; $index++) {
                 $parameter = $parameters[$index];
-                if (!isset($methodArgumentValues[$index]) && $parameter->hasDefaultValue()) {
+                if (!array_key_exists($index, $methodArgumentValues) && $parameter->hasDefaultValue()) {
                     $methodValue = $parameter->getDefaultValue();
                 } else {
-                    if (!isset($methodArgumentValues[$index])) {
+                    if (!array_key_exists($index, $methodArgumentValues)) {
                         throw InvalidArgumentException::create("Missing argument {$parameter->getName()} for calling {$this->interfaceToCall}");
                     }
                     $methodValue = $methodArgumentValues[$index];

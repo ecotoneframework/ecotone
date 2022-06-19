@@ -255,11 +255,6 @@ class TransformerBuilderTest extends MessagingTest
         );
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws \Exception
-     * @throws \Ecotone\Messaging\MessagingException
-     */
     public function test_transforming_with_header_enricher()
     {
         $payload = 'someBigPayload';
@@ -289,6 +284,40 @@ class TransformerBuilderTest extends MessagingTest
             MessageBuilder::withPayload($payload)
                 ->setHeader('token', $headerValue)
                 ->setHeader('correlation-id', 1)
+                ->build(),
+            $outputChannel->receive()
+        );
+    }
+
+    public function test_transforming_with_header_mapper()
+    {
+        $payload = 'someBigPayload';
+        $headerValue = 'abc';
+        $outputChannel = QueueChannel::create();
+        $inputChannelName = "input";
+        $outputChannelName = "output";
+        $transformer = TransformerBuilder::createHeaderMapper([
+            "token" => "secret"
+        ])
+            ->withOutputMessageChannel($outputChannelName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $inputChannelName => DirectChannel::create(),
+                    $outputChannelName => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createEmpty()
+            );
+
+        $transformer->handle(
+            MessageBuilder::withPayload($payload)
+                ->setHeader("token", $headerValue)
+                ->build()
+        );
+
+        $this->assertMessages(
+            MessageBuilder::withPayload($payload)
+                ->setHeader('token', $headerValue)
+                ->setHeader('secret', $headerValue)
                 ->build(),
             $outputChannel->receive()
         );

@@ -14,5 +14,7 @@ interface MessageReturningGateway
 
     public function executeWithMetadataWithDefault(string $data, array $metadata = []) : Message;
 
+    public function executeWithMetadataWithNull(string $data, ?array $metadata) : Message;
+
     public function executeNoParameter() : Message;
 }

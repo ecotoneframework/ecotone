@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -112,7 +113,7 @@ class BusRoutingModuleTest extends MessagingTest
                                 AllHeadersBuilder::createWith("headers")
                             ]),
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
-                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class
+                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class . "||" . MessagingEntrypointWithHeadersPropagation::class
                     )
                 )
                 ->registerAroundMethodInterceptor(
@@ -120,7 +121,7 @@ class BusRoutingModuleTest extends MessagingTest
                         new MessageHeadersPropagator(),
                         "storeHeaders",
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class
+                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class . "||" . MessagingEntrypointWithHeadersPropagation::class
                     )
                 )
                 ->registerMessageHandler(BusRouterBuilder::createCommandBusByObject($messagePropagator, $commandObjectMapping))

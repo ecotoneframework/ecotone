@@ -14,12 +14,12 @@ class Event
     private array|object $payload;
     private array $metadata;
 
-    private function __construct(string $eventType, array|object $event, array $metadata)
+    private function __construct(string $eventType, array|object $payload, array $metadata)
     {
-        Assert::notNull($event, "Event can not be null for " . $eventType);
+        Assert::notNull($payload, "Event can not be null for " . $eventType);
 
         $this->eventType = $eventType;
-        $this->payload = $event;
+        $this->payload = $payload;
 
         if (!array_key_exists(MessageHeaders::MESSAGE_ID, $metadata)) {
             $metadata[MessageHeaders::MESSAGE_ID] = Uuid::uuid4()->toString();

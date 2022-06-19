@@ -31,34 +31,35 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      * @var string[]
      */
     private array $requiredReferences = [];
-    private string $referenceName;
+    private string|object $referenceNameOrObject;
     private string $methodName;
     private ?string $discardChannelName = null;
     private bool $throwExceptionOnDiscard = false;
 
-    /**
-     * MessageFilterBuilder constructor.
-     *
-     * @param string $referenceName
-     * @param string $methodName
-     */
-    private function __construct(string $referenceName, string $methodName)
+    private function __construct(string|object $referenceName, string $methodName)
     {
-        $this->referenceName     = $referenceName;
+        $this->referenceNameOrObject     = $referenceName;
         $this->methodName        = $methodName;
 
         $this->initialize();
     }
 
-    /**
-     * @param string $referenceName
-     * @param string $methodName
-     *
-     * @return MessageFilterBuilder
-     */
     public static function createWithReferenceName(string $referenceName, string $methodName): self
     {
         return new self($referenceName, $methodName);
+    }
+
+    public static function createWithDirectObject(object $referenceObject, string $methodName): self
+    {
+        return new self($referenceObject, $methodName);
+    }
+
+    /**
+     * @param bool|null $defaultResultWhenHeaderIsMissing When no presented exception will be thrown on missing header
+     */
+    public static function createBoolHeaderFilter(string $headerName, ?bool $defaultResultWhenHeaderIsMissing = null): self
+    {
+        return new self(new BoolHeaderBasedFilter($headerName, $defaultResultWhenHeaderIsMissing), "filter");
     }
 
     /**
@@ -66,7 +67,9 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
-        return [$interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName)];
+        return is_string($this->referenceNameOrObject)
+                    ? [$interfaceToCallRegistry->getForReferenceName($this->referenceNameOrObject, $this->methodName)]
+                    : [$interfaceToCallRegistry->getFor($this->referenceNameOrObject, $this->methodName)];
     }
 
     /**
@@ -74,7 +77,9 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName);
+        return is_string($this->referenceNameOrObject)
+            ? $interfaceToCallRegistry->getForReferenceName($this->referenceNameOrObject, $this->methodName)
+            : $interfaceToCallRegistry->getFor($this->referenceNameOrObject, $this->methodName);
     }
 
     /**
@@ -132,12 +137,13 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
-        $messageSelector = $referenceSearchService->get($this->referenceName);
+        $messageSelector = is_object($this->referenceNameOrObject) ? $this->referenceNameOrObject : $referenceSearchService->get($this->referenceNameOrObject);
 
         /** @var InterfaceToCall $interfaceToCall */
         $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($messageSelector, $this->methodName);
         if (!$interfaceToCall->hasReturnValueBoolean()) {
-            throw InvalidArgumentException::create("Object with reference {$this->referenceName} should return bool for method {$this->methodName} while using Message Filter");
+            $class = get_class($messageSelector);
+            throw InvalidArgumentException::create("Object with reference {$class} should return bool for method {$this->methodName} while using Message Filter");
         }
 
         $discardChannel = $this->discardChannelName ? $channelResolver->resolve($this->discardChannelName) : null;
@@ -169,8 +175,8 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
 
     private function initialize() : void
     {
-        if ($this->referenceName) {
-            $this->requiredReferences[] = $this->referenceName;
+        if (is_string($this->referenceNameOrObject)) {
+            $this->requiredReferences[] = $this->referenceNameOrObject;
         }
     }
 
@@ -179,6 +185,6 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function __toString()
     {
-        return sprintf("Message filter - %s:%s with name `%s` for input channel `%s`", $this->referenceName, $this->methodName, $this->getEndpointId(), $this->inputMessageChannelName);
+        return sprintf("Message filter - %s:%s with name `%s` for input channel `%s`", $this->referenceNameOrObject, $this->methodName, $this->getEndpointId(), $this->inputMessageChannelName);
     }
 }

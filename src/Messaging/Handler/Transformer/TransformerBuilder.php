@@ -93,6 +93,18 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     }
 
     /**
+     * @param array|string[] $mappedHeaders ["secret" => "token"]
+     * @return TransformerBuilder
+     */
+    public static function createHeaderMapper(array $mappedHeaders) : self
+    {
+        $transformerBuilder = new self( "", "transform");
+        $transformerBuilder->setDirectObjectToInvoke(HeaderMapperTransformer::create($mappedHeaders));
+
+        return $transformerBuilder;
+    }
+
+    /**
      * @param object $referenceObject
      * @param string $methodName
      *

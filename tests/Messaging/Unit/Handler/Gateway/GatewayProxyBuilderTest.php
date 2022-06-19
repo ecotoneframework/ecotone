@@ -1457,6 +1457,33 @@ class GatewayProxyBuilderTest extends MessagingTest
         );
     }
 
+    public function test_executing_with_passed_null()
+    {
+        $requestChannelName = "request-channel";
+        $requestChannel = DirectChannel::create();
+        $replyData = "[1,2,3]";
+        $mediaType = MediaType::APPLICATION_JSON;
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage($replyData, [MessageHeaders::CONTENT_TYPE => $mediaType]));
+
+        /** @var NonProxyGateway $gateway */
+        $gateway = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeWithMetadataWithNull', $requestChannelName)
+            ->withParameterConverters([
+                GatewayHeaderBuilder::create("metadata", "someData")
+            ])
+            ->withReplyContentType($mediaType)
+            ->buildWithoutProxyObject(
+                InMemoryReferenceSearchService::createEmpty(),
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $requestChannelName => $requestChannel
+                ])
+            );
+
+        /** @var Message $replyMessage */
+        $replyMessage = $gateway->execute([["some"], null]);
+
+        $this->assertFalse($replyMessage->getHeaders()->containsKey("someData"));
+    }
+
     public function test_throwing_exception_when_there_is_not_enough_parameters_given()
     {
         $requestChannelName = "request-channel";

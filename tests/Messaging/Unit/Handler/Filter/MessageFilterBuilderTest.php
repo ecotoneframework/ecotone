@@ -4,6 +4,8 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Filter;
 
 use Ecotone\Messaging\Handler\Filter\MessageFilterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\InvalidMessageHeaderException;
+use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -26,7 +28,7 @@ class MessageFilterBuilderTest extends MessagingTest
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_forwarding_message_if_selector_returns_true()
+    public function test_forwarding_message_if_selector_returns_false()
     {
         $outputChannelName = "outputChannel";
         $outputChannel = QueueChannel::create();
@@ -57,12 +59,138 @@ class MessageFilterBuilderTest extends MessagingTest
      * @throws MessagingException
      * @throws \Exception
      */
-    public function test_discard_message_if_selector_returns_false()
+    public function test_discard_message_if_selector_returns_true()
     {
         $outputChannelName = "outputChannel";
         $outputChannel = QueueChannel::create();
 
         $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, "refuse")
+            ->withOutputMessageChannel($outputChannelName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $outputChannelName => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    MessageSelectorExample::class => MessageSelectorExample::create()
+                ])
+            );
+
+        $message = MessageBuilder::withPayload("some")->build();
+
+        $messageFilter->handle($message);
+
+        $this->assertNull($outputChannel->receive());
+    }
+
+    public function test_forwarding_message_by_bool_header_filter()
+    {
+        $outputChannelName = "outputChannel";
+        $outputChannel = QueueChannel::create();
+
+        $messageFilter = MessageFilterBuilder::createBoolHeaderFilter( "filterOut")
+            ->withOutputMessageChannel($outputChannelName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $outputChannelName => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    MessageSelectorExample::class => MessageSelectorExample::create()
+                ])
+            );
+
+        $message = MessageBuilder::withPayload("some")
+                    ->setHeader("filterOut", false)
+                    ->build();
+
+        $messageFilter->handle($message);
+
+        $this->assertMessages(
+            $message,
+            $outputChannel->receive()
+        );
+    }
+
+    public function test_discarding_message_by_bool_header_filter()
+    {
+        $outputChannelName = "outputChannel";
+        $outputChannel = QueueChannel::create();
+
+        $messageFilter = MessageFilterBuilder::createBoolHeaderFilter( "filterOut")
+            ->withOutputMessageChannel($outputChannelName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $outputChannelName => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    MessageSelectorExample::class => MessageSelectorExample::create()
+                ])
+            );
+
+        $message = MessageBuilder::withPayload("some")
+            ->setHeader("filterOut", true)
+            ->build();
+
+        $messageFilter->handle($message);
+
+        $this->assertNull($outputChannel->receive());
+    }
+
+    public function test_throwing_exception_when_bool_header_filter_and_no_header_presented()
+    {
+        $outputChannelName = "outputChannel";
+        $outputChannel = QueueChannel::create();
+
+        $messageFilter = MessageFilterBuilder::createBoolHeaderFilter( "filterOut")
+            ->withOutputMessageChannel($outputChannelName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $outputChannelName => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    MessageSelectorExample::class => MessageSelectorExample::create()
+                ])
+            );
+
+        $message = MessageBuilder::withPayload("some")->build();
+
+        $this->expectException(MessageHeaderDoesNotExistsException::class);
+
+        $messageFilter->handle($message);
+    }
+
+    public function test_forwarding_message_by_bool_header_filter_when_no_header_presented()
+    {
+        $outputChannelName = "outputChannel";
+        $outputChannel = QueueChannel::create();
+
+        $messageFilter = MessageFilterBuilder::createBoolHeaderFilter( "filterOut", false)
+            ->withOutputMessageChannel($outputChannelName)
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $outputChannelName => $outputChannel
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    MessageSelectorExample::class => MessageSelectorExample::create()
+                ])
+            );
+
+        $message = MessageBuilder::withPayload("some")
+            ->build();
+
+        $messageFilter->handle($message);
+
+        $this->assertMessages(
+            $message,
+            $outputChannel->receive()
+        );
+    }
+
+    public function test_discarding_message_by_bool_header_filter_when_no_header_presented()
+    {
+        $outputChannelName = "outputChannel";
+        $outputChannel = QueueChannel::create();
+
+        $messageFilter = MessageFilterBuilder::createBoolHeaderFilter( "filterOut", true)
             ->withOutputMessageChannel($outputChannelName)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -186,7 +314,7 @@ class MessageFilterBuilderTest extends MessagingTest
         $messageFilter = MessageFilterBuilder::createWithReferenceName( MessageSelectorExample::class, "accept")
             ->withOutputMessageChannel($outputChannelName)
             ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
-                CallWithEndingChainAndReturningInterceptorExample::createWithReturnType(false), "callWithEndingChainAndReturning",
+                CallWithEndingChainAndReturningInterceptorExample::createWithReturnType(true), "callWithEndingChainAndReturning",
                 1,
                 MessageSelectorExample::class
             ))

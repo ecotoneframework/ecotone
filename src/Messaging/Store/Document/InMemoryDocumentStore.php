@@ -58,8 +58,18 @@ final class InMemoryDocumentStore implements DocumentStore
 
     public function getDocument(string $collectionName, string $documentId): array|object|string
     {
-        if (!isset($this->collection[$collectionName][$documentId])) {
+        $document = $this->findDocument($collectionName, $documentId);
+        if (is_null($document)) {
             throw DocumentNotFound::create(sprintf("Collection %s does not have document with id %s", $collectionName, $documentId));
+        }
+
+        return $document;
+    }
+
+    public function findDocument(string $collectionName, string $documentId): array|object|string|null
+    {
+        if (!isset($this->collection[$collectionName][$documentId])) {
+            return null;
         }
 
         return $this->collection[$collectionName][$documentId];

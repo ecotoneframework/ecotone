@@ -34,6 +34,11 @@ final class DocumentStoreMessageChannel
         return $referenceName . "_getDocument";
     }
 
+    public static function findDocument(string $referenceName): string
+    {
+        return $referenceName . "_findDocument";
+    }
+
     public static function getAllDocuments(string $referenceName): string
     {
         return $referenceName . "_getAllDocuments";

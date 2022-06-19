@@ -34,6 +34,11 @@ interface DocumentStore
     public function getDocument(string $collectionName, string $documentId): array|object|string;
 
     /**
+     * Contrary to getDocument in case of not found document it will return null
+     */
+    public function findDocument(string $collectionName, string $documentId): array|object|string|null;
+
+    /**
      * @return object[]|string[]|array
      */
     public function getAllDocuments(string $collectionName): array;

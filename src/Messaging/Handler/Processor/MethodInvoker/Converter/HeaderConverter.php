@@ -57,8 +57,9 @@ class HeaderConverter implements ParameterConverter
 
         $headerValue = $message->getHeaders()->get($this->headerName);
 
-        if (!TypeDescriptor::createFromVariable($headerValue)->isCompatibleWith($relatedParameter->getTypeDescriptor())) {
-            if ($this->canConvertTo($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter)) {
+        $sourceValueType = TypeDescriptor::createFromVariable($headerValue);
+        if (!$sourceValueType->isCompatibleWith($relatedParameter->getTypeDescriptor())) {
+            if ($sourceValueType->isScalar() && $this->canConvertTo($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter)) {
                 $headerValue = $this->doConversion($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter);
             }else if ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter)) {
                 $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter);

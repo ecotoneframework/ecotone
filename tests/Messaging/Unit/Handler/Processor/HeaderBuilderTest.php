@@ -6,6 +6,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
+use Ecotone\Messaging\Support\Assert;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -87,6 +88,42 @@ class HeaderBuilderTest extends TestCase
 
         $this->assertInstanceOf(UuidInterface::class, $headerResult);
         $this->assertEquals(Uuid::fromString($personId), $headerResult);
+    }
+
+    public function test_choosing_php_conversion_when_non_scalar_payload()
+    {
+        $data = ["name" => "johny"];
+        $converter = HeaderBuilder::create("x", "personIds");
+        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
+            ConversionService::REFERENCE_NAME => InMemoryConversionService::createWithoutConversion()
+                ->registerConversion(
+                    $data,
+                    MediaType::APPLICATION_JSON,
+                    TypeDescriptor::ARRAY,
+                    MediaType::APPLICATION_X_PHP,
+                    \stdClass::class,
+                    '{"name":"johny"}'
+                )
+                ->registerConversion(
+                    $data,
+                    MediaType::APPLICATION_X_PHP_ARRAY,
+                    TypeDescriptor::ARRAY,
+                    MediaType::APPLICATION_X_PHP,
+                    \stdClass::class,
+                    new \stdClass()
+                )
+        ]));
+
+        $headerResult = $converter->getArgumentFrom(
+            InterfaceToCall::create(ServiceWithUuidArgument::class, "execute"),
+            InterfaceParameter::createNotNullable("x", TypeDescriptor::create(\stdClass::class)),
+            MessageBuilder::withPayload("a")
+                ->setHeader("personIds", $data)
+                ->build(),
+            []
+        );
+
+        $this->assertEquals(new \stdClass(), $headerResult);
     }
 
     public function test_calling_with_php_to_php_conversion()

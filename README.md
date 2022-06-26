@@ -15,7 +15,8 @@ Ecotone provides PHP with `Command Bus`, `Query Bus`, `Event Bus`, `Interceptors
 ## Getting started
 
 The quickstart [page](https://docs.ecotone.tech/quick-start) of the 
-[reference guide](https://docs.ecotone.tech) provides a starting point for using Ecotone.
+[reference guide](https://docs.ecotone.tech) provides a starting point for using Ecotone.  
+Read more on the [Blog](https://blog.ecotone.tech).
 
 ## Feature requests and issue reporting
 
@@ -29,14 +30,12 @@ If you want to talk or ask question about Ecotone
 - [**Twitter**](https://twitter.com/EcotonePHP)
 - **ecotoneframework@gmail.com**
 - [**Gitter**](https://gitter.im/EcotonePHP/community)
-- [**Reddit**](https://www.reddit.com/r/ecotone)
 
 ## Support Ecotone
 
 If you want to help building and improving Ecotone consider becoming a sponsor:
 
 - [Github](https://github.com/sponsors/dgafka)
-- [Patreon](https://www.patreon.com/dgafka)
 
 ## Tags
 

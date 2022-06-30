@@ -67,9 +67,11 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
     {
+        $messageFilter = $interfaceToCallRegistry->getFor(MessageFilter::class, "handle");
+
         return is_string($this->referenceNameOrObject)
-                    ? [$interfaceToCallRegistry->getForReferenceName($this->referenceNameOrObject, $this->methodName)]
-                    : [$interfaceToCallRegistry->getFor($this->referenceNameOrObject, $this->methodName)];
+                    ? [$interfaceToCallRegistry->getForReferenceName($this->referenceNameOrObject, $this->methodName), $messageFilter]
+                    : [$interfaceToCallRegistry->getFor($this->referenceNameOrObject, $this->methodName), $messageFilter];
     }
 
     /**

@@ -21,14 +21,14 @@ jobs:
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
     
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v2
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ matrix.stability }}-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ matrix.stability }}-
+#    - name: Cache Composer packages
+#      id: composer-cache
+#      uses: actions/cache@v2
+#      with:
+#        path: vendor
+#        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ matrix.stability }}-${{ hashFiles('**/composer.lock') }}
+#        restore-keys: |
+#          ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ matrix.stability }}-
 
     - name: Install dependencies
       run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction

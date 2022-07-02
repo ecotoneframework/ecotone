@@ -35,7 +35,7 @@
   "require": {
     "php": "^8.0",
     "psr/log": "^1.0|^2.0|^3.0",
-    "ramsey/uuid": "^5.0",
+    "ramsey/uuid": "^4.0",
     "friendsofphp/proxy-manager-lts": "^1.0"
   },
   "require-dev": {

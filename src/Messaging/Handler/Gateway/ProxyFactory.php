@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Gateway;
 
 use Closure;
-use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\MessagingException;
 use ProxyManager\Configuration;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
@@ -16,7 +13,6 @@ use ProxyManager\FileLocator\FileLocator;
 use ProxyManager\GeneratorStrategy\FileWriterGeneratorStrategy;
 use ProxyManager\Signature\ClassSignatureGenerator;
 use ProxyManager\Signature\SignatureGenerator;
-use ProxyManager\Version;
 use stdClass;
 
 /**

@@ -8,10 +8,10 @@ jobs:
     strategy:
       matrix:
         operating-system: [ ubuntu-latest ]
-#        operating-system: [ ubuntu-latest, windows-latest, macOS-latest ]
         php-versions: [ '8.0', '8.1' ]
+        stability: [prefer-lowest, prefer-stable]
     steps:
-    - name: Setup PHP
+    - name: PHP ${{ matrix.php-versions }} - ${{ matrix.stability }}
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php-versions }}
@@ -21,17 +21,17 @@ jobs:
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
     
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v2
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-${{ matrix.php-versions }}-
+#    - name: Cache Composer packages
+#      id: composer-cache
+#      uses: actions/cache@v2
+#      with:
+#        path: vendor
+#        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ matrix.stability }}-${{ hashFiles('**/composer.lock') }}
+#        restore-keys: |
+#          ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ matrix.stability }}-
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
     - name: Test PHPUnit
       run: vendor/bin/phpunit

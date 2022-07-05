@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
@@ -13,16 +13,16 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use ReflectionException;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncClassExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncCommandHandlerWithoutIdExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncEventHandlerExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncEventHandlerWithoutIdExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncMethodExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncQueryHandlerExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Async\AsyncClassExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Async\AsyncCommandHandlerWithoutIdExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Async\AsyncEventHandlerExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Async\AsyncEventHandlerWithoutIdExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Async\AsyncMethodExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Async\AsyncQueryHandlerExample;
 
 /**
  * Class ConverterModuleTest
- * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
+ * @package Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AsynchronousModuleTest extends AnnotationConfigurationTest

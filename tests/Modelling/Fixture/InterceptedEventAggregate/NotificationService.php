@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate;
+namespace Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
-use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
+use Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 
 class NotificationService
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId;
+namespace Ecotone\Tests\Modelling\Fixture\OrderAggregate\AddUserId;
 
 use Ecotone\Messaging\Attribute\Interceptor\Before;
 use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;

@@ -23,6 +23,11 @@
         "psr/log": "^1.0|^2.0|^3.0",
         "ramsey/uuid": "^4.0"
     },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.33-dev"
+        }
+    },
     "config": {
         "sort-packages": true
     }

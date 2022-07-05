@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\Renter;
+namespace Ecotone\Tests\Modelling\Fixture\Renter;
 
 
 use Ecotone\Messaging\Handler\ChannelResolver;

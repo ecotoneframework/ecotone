@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Gateway;
 
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
@@ -11,12 +11,12 @@ use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Ecotone\Tests\Messaging\Fixture\Service\CalculatingService;
+use Ecotone\Tests\Messaging\Unit\MessagingTest;
 
 /**
  * Class GatewayHeaderExpressionBuilderTest
- * @package Test\Ecotone\Messaging\Unit\Handler\Gateway
+ * @package Ecotone\Tests\Messaging\Unit\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayPayloadExpressionBuilderTest extends MessagingTest

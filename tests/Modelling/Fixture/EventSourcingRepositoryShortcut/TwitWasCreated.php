@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut;
+namespace Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut;
 
 class TwitWasCreated
 {

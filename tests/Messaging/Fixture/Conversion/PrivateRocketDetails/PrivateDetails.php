@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Conversion\PrivateRocketDetails;
+namespace Ecotone\Tests\Messaging\Fixture\Conversion\PrivateRocketDetails;
 
 
 class PrivateDetails

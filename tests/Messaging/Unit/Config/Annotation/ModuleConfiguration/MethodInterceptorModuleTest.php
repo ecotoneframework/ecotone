@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
@@ -22,15 +22,15 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\MessagingException;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\AroundInterceptorWithCustomParameterConverters;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorWithServicesExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\TransformerInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\AroundInterceptorWithCustomParameterConverters;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorWithServicesExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\TransformerInterceptorExample;
 
 /**
  * Class MethodInterceptorModuleTest
- * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
+ * @package Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodInterceptorModuleTest extends AnnotationConfigurationTest

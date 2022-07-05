@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Router;
+namespace Ecotone\Tests\Messaging\Fixture\Router;
 
 use Ecotone\Messaging\Message;
 
 /**
  * Class SingleChannelRouter
- * @package Test\Ecotone\Messaging\Fixture\Router
+ * @package Ecotone\Tests\Messaging\Fixture\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SingleChannelRouter

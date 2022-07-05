@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Annotation\Converter;
+namespace Ecotone\Tests\Messaging\Fixture\Annotation\Converter;
 
 use Ecotone\Messaging\Attribute\MediaTypeConverter;
 use Ecotone\Messaging\Attribute\MessageEndpoint;

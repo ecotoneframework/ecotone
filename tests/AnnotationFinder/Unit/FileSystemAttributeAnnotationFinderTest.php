@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\AnnotationFinder\Unit;
+namespace Ecotone\Tests\AnnotationFinder\Unit;
 
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedMethod;
@@ -12,21 +12,21 @@ use Ecotone\AnnotationFinder\FileSystem\AutoloadFileNamespaceParser;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\AnnotationFinder\FileSystem\InMemoryAutoloadNamespaceParser;
 use PHPUnit\Framework\TestCase;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\EndpointAnnotationExample;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\Extension;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndpoint;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeGatewayExample;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\System;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Environment\SystemContextWithClassEnvironment;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Environment\SystemContextWithMethodEnvironmentExample;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Environment\SystemContextWithMethodMultipleEnvironmentsExample;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Splitter\SplitterExample;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\SplitterOnMethod\SplitterOnMethodExample;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\NotExisting\NotExistingClassAttribute;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\NotExisting\NotExistingMethodAttribute;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\NotExisting\NotExistingPropertyAttribute;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\EndpointAnnotationExample;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\Extension;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndpoint;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeGatewayExample;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\System;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Environment\SystemContextWithClassEnvironment;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Environment\SystemContextWithMethodEnvironmentExample;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Environment\SystemContextWithMethodMultipleEnvironmentsExample;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Splitter\SplitterExample;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\SplitterOnMethod\SplitterOnMethodExample;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\NotExisting\NotExistingClassAttribute;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\NotExisting\NotExistingMethodAttribute;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\NotExisting\NotExistingPropertyAttribute;
 
 class FileSystemAttributeAnnotationFinderTest extends TestCase
 {
@@ -34,7 +34,7 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
 
     public function getAnnotationNamespacePrefix(): string
     {
-        return "Test\\Ecotone\\AnnotationFinder\\Fixture\\Usage\\Attribute";
+        return "Ecotone\\Tests\\AnnotationFinder\\Fixture\\Usage\\Attribute";
     }
 
     public function getAnnotationResolver(): AnnotationResolver

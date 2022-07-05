@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Unit;
+namespace Ecotone\Tests\Modelling\Unit;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -20,19 +20,19 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use PHPUnit\Framework\TestCase;
-use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
-use Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate\CreateStorage;
-use Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate\SmallBox;
-use Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate\Storage;
-use Test\Ecotone\Modelling\Fixture\Ticket\AssignWorkerCommand;
-use Test\Ecotone\Modelling\Fixture\Ticket\StartTicketCommand;
-use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
-use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
-use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
+use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\Order;
+use Ecotone\Tests\Modelling\Fixture\QueryHandlerAggregate\CreateStorage;
+use Ecotone\Tests\Modelling\Fixture\QueryHandlerAggregate\SmallBox;
+use Ecotone\Tests\Modelling\Fixture\QueryHandlerAggregate\Storage;
+use Ecotone\Tests\Modelling\Fixture\Ticket\AssignWorkerCommand;
+use Ecotone\Tests\Modelling\Fixture\Ticket\StartTicketCommand;
+use Ecotone\Tests\Modelling\Fixture\Ticket\Ticket;
+use Ecotone\Tests\Modelling\Fixture\Ticket\TicketWasStartedEvent;
+use Ecotone\Tests\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 
 class CallAggregateServiceBuilderTest extends TestCase
 {

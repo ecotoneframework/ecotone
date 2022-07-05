@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\Infrastructure;
+namespace Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut\Infrastructure;
 
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;

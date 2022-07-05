@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Unit\MessageHandling;
+namespace Ecotone\Tests\Modelling\Unit\MessageHandling;
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\StubMethodInvocation;
 use Ecotone\Messaging\Support\MessageBuilder;

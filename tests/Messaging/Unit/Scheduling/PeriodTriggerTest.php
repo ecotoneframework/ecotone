@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Scheduling;
+namespace Ecotone\Tests\Messaging\Unit\Scheduling;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SimpleTriggerContext;
@@ -9,7 +9,7 @@ use Ecotone\Messaging\Scheduling\StubUTCClock;
 
 /**
  * Class PeriodTriggerTest
- * @package Test\Ecotone\Messaging\Unit\Scheduling
+ * @package Ecotone\Tests\Messaging\Unit\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PeriodTriggerTest extends TestCase

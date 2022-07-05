@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\Booking;
+namespace Ecotone\Tests\Messaging\Fixture\Behat\Booking;
 
 /**
  * Interface BookingService
- * @package Test\Ecotone\Messaging\Fixture\Behat\Booking
+ * @package Ecotone\Tests\Messaging\Fixture\Behat\Booking
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface BookingService

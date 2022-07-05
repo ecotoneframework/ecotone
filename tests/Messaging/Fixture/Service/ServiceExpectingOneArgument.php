@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Service;
+namespace Ecotone\Tests\Messaging\Fixture\Service;
 
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class ServiceExpectingOneArgument
- * @package Test\Ecotone\Messaging\Fixture\Service
+ * @package Ecotone\Tests\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceExpectingOneArgument

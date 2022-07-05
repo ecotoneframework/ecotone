@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
+namespace Ecotone\Tests\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
 
 use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;

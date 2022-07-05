@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate;
+namespace Ecotone\Tests\Modelling\Fixture\QueryHandlerAggregate;
 
 class CreateStorage
 {

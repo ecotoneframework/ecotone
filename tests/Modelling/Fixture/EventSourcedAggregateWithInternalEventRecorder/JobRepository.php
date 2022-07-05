@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder;
+namespace Ecotone\Tests\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder;
 
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;

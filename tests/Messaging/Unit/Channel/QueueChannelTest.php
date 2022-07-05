@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Unit\Channel;
+namespace Ecotone\Tests\Messaging\Unit\Channel;
 
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Channel\QueueChannel;

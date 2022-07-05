@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas;
+namespace Ecotone\Tests\Modelling\Fixture\TwoAsynchronousSagas;
 
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Modelling\Attribute\Aggregate;

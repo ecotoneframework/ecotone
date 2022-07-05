@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin;
+namespace Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin;
 
 use Ecotone\Messaging\Attribute\Interceptor\After;
 use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator;
+namespace Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator;
 
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Attribute\ServiceActivator;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
+namespace Ecotone\Tests\Modelling\Fixture\OrderAggregate;
 
 use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;

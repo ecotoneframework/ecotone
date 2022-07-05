@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate;
+namespace Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate;
 
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;

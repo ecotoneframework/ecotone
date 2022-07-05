@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Conversion\PrivateRocketDetails;
+namespace Ecotone\Tests\Messaging\Fixture\Conversion\PrivateRocketDetails;
 
 
-use Test\Ecotone\Messaging\Fixture\Conversion\PublicRocketDetails\PublicRocketDetailsTrait;
+use Ecotone\Tests\Messaging\Fixture\Conversion\PublicRocketDetails\PublicRocketDetailsTrait;
 
 trait PrivateRocketDetailsTrait
 {

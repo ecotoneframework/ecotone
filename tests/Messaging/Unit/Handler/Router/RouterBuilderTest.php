@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Router;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Router;
 
-use Test\Ecotone\Messaging\Fixture\Router\MultipleChannelRouter;
-use Test\Ecotone\Messaging\Fixture\Router\Order;
-use Test\Ecotone\Messaging\Fixture\Router\SingleChannelRouter;
+use Ecotone\Tests\Messaging\Fixture\Router\MultipleChannelRouter;
+use Ecotone\Tests\Messaging\Fixture\Router\Order;
+use Ecotone\Tests\Messaging\Fixture\Router\SingleChannelRouter;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -15,7 +15,7 @@ use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Ecotone\Tests\Messaging\Unit\MessagingTest;
 
 /**
  * Class RouterBuilderTest

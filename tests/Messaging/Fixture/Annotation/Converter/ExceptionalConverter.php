@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Annotation\Converter;
+namespace Ecotone\Tests\Messaging\Fixture\Annotation\Converter;
 
 use Ecotone\Messaging\Attribute\MediaTypeConverter;
 use Ecotone\Messaging\Attribute\MessageEndpoint;
@@ -11,7 +11,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class ExampleMediaTypeConverter
- * @package Test\Ecotone\Messaging\Fixture\Annotation\Converter
+ * @package Ecotone\Tests\Messaging\Fixture\Annotation\Converter
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ExceptionalConverter implements Converter

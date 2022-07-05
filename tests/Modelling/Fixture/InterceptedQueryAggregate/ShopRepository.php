@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate;
+namespace Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate;
 
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\InMemoryStandardRepository;

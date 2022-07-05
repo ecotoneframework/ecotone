@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
+namespace Ecotone\Tests\Messaging\Fixture\Handler\Gateway;
 
 
 interface StringReturningGateway

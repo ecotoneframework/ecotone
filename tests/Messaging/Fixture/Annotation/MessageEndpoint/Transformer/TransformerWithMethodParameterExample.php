@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Transformer;
+namespace Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\Transformer;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\Parameter\Payload;

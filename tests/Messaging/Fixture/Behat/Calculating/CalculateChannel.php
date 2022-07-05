@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
+namespace Ecotone\Tests\Messaging\Fixture\Behat\Calculating;
 
 use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;

@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Transformer;
-use Test\Ecotone\Messaging\Fixture\Dto\OrderExample;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Transformer;
+use Ecotone\Tests\Messaging\Fixture\Dto\OrderExample;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
@@ -10,7 +10,7 @@ use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 
 /**
  * Class PropertyEditorAccessorTest
- * @package Test\Ecotone\Messaging\Unit\Handler\Transformer
+ * @package Ecotone\Tests\Messaging\Unit\Handler\Transformer
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PropertyReaderAccessorTest extends TestCase

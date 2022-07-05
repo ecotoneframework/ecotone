@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\MessageConverter;
+namespace Ecotone\Tests\Messaging\Fixture\MessageConverter;
 
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -13,7 +13,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class FakeMessageConverter
- * @package Test\Ecotone\Messaging\Fixture\MessageConverter
+ * @package Ecotone\Tests\Messaging\Fixture\MessageConverter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FakeMessageConverter implements MessageConverter

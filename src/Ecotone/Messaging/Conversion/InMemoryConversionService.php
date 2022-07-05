@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Conversion;
 
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\TicketWasRegistered;
+use Ecotone\Tests\EventSourcing\Fixture\Ticket\Event\TicketWasRegistered;
 
 class InMemoryConversionService implements ConversionService
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Gateway;
 
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use Test\Ecotone\Messaging\Fixture\Handler\Gateway\GatewayExecuteClass;
-use Test\Ecotone\Messaging\Fixture\Handler\Gateway\StringReturningGateway;
+use Ecotone\Tests\Messaging\Fixture\Handler\Gateway\GatewayExecuteClass;
+use Ecotone\Tests\Messaging\Fixture\Handler\Gateway\StringReturningGateway;
 
 class ProxyFactoryTest extends TestCase
 {

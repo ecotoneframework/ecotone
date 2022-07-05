@@ -1,20 +1,20 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Unit\Config;
+namespace Ecotone\Tests\Modelling\Unit\Config;
 
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Config\EventBusRouter;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
 use PHPUnit\Framework\TestCase;
-use Test\Ecotone\Messaging\Fixture\Conversion\AbstractSuperAdmin;
-use Test\Ecotone\Messaging\Fixture\Conversion\Admin;
-use Test\Ecotone\Messaging\Fixture\Conversion\Email;
-use Test\Ecotone\Messaging\Fixture\Conversion\SuperAdmin;
+use Ecotone\Tests\Messaging\Fixture\Conversion\AbstractSuperAdmin;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Admin;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Email;
+use Ecotone\Tests\Messaging\Fixture\Conversion\SuperAdmin;
 
 /**
  * Class EventBusRouterTest
- * @package Test\Ecotone\Modelling\Unit\Config
+ * @package Ecotone\Tests\Modelling\Unit\Config
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EventBusRouterTest extends TestCase

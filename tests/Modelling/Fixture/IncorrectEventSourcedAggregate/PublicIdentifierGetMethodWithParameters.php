@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate;
+namespace Ecotone\Tests\Modelling\Fixture\IncorrectEventSourcedAggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use stdClass;
-use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\CreateNoIdDefinedAggregate;
+use Ecotone\Tests\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\CreateNoIdDefinedAggregate;
 
 #[Aggregate]
 class PublicIdentifierGetMethodWithParameters

@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Handler;
+namespace Ecotone\Tests\Messaging\Fixture\Handler;
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
@@ -8,7 +8,7 @@ use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class DumbMessageHandler
- * @package Test\Ecotone\Messaging\Fixture\Handler
+ * @package Ecotone\Tests\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class NoReturnMessageHandler implements MessageHandler

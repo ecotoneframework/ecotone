@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Handler;
+namespace Ecotone\Tests\Messaging\Unit\Handler;
 
 use DateTimeInterface;
 use Ecotone\Messaging\Attribute\Asynchronous;
@@ -15,27 +15,27 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
-use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
-use Test\Ecotone\Messaging\Fixture\Conversion\AbstractSuperAdmin;
-use Test\Ecotone\Messaging\Fixture\Conversion\Admin;
-use Test\Ecotone\Messaging\Fixture\Conversion\Email;
-use Test\Ecotone\Messaging\Fixture\Conversion\ExampleTestAnnotation;
-use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite;
-use Test\Ecotone\Messaging\Fixture\Conversion\Extra\LazyUser;
-use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Permission;
-use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\CollectionOfClassesFromDifferentNamespaceUsingGroupAlias;
-use Test\Ecotone\Messaging\Fixture\Conversion\IgnoreDocblockClassLevel;
-use Test\Ecotone\Messaging\Fixture\Conversion\InCorrectArrayDocblock;
-use Test\Ecotone\Messaging\Fixture\Conversion\InCorrectInterfaceExample;
-use Test\Ecotone\Messaging\Fixture\Conversion\OnlineShop;
-use Test\Ecotone\Messaging\Fixture\Conversion\Password;
-use Test\Ecotone\Messaging\Fixture\Conversion\SuperAdmin;
-use Test\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword;
-use Test\Ecotone\Messaging\Fixture\Conversion\User;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
+use Ecotone\Tests\Messaging\Fixture\Conversion\AbstractSuperAdmin;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Admin;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Email;
+use Ecotone\Tests\Messaging\Fixture\Conversion\ExampleTestAnnotation;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Extra\Favourite;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Extra\LazyUser;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Extra\Permission;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Grouping\CollectionOfClassesFromDifferentNamespaceUsingGroupAlias;
+use Ecotone\Tests\Messaging\Fixture\Conversion\IgnoreDocblockClassLevel;
+use Ecotone\Tests\Messaging\Fixture\Conversion\InCorrectArrayDocblock;
+use Ecotone\Tests\Messaging\Fixture\Conversion\InCorrectInterfaceExample;
+use Ecotone\Tests\Messaging\Fixture\Conversion\OnlineShop;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Password;
+use Ecotone\Tests\Messaging\Fixture\Conversion\SuperAdmin;
+use Ecotone\Tests\Messaging\Fixture\Conversion\TwoStepPassword;
+use Ecotone\Tests\Messaging\Fixture\Conversion\User;
 
 /**
  * Class InterfaceToCallTest
- * @package Test\Ecotone\Messaging\Unit\Handler
+ * @package Ecotone\Tests\Messaging\Unit\Handler
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceToCallTest extends TestCase
@@ -100,7 +100,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<Ecotone\Tests\Messaging\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
@@ -157,7 +157,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("favourite", TypeDescriptor::create("\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite")),
+            InterfaceParameter::createNotNullable("favourite", TypeDescriptor::create("\Ecotone\Tests\Messaging\Fixture\Conversion\Extra\Favourite")),
             $interfaceToCall->getParameterWithName("favourite")
         );
     }
@@ -173,7 +173,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<\Ecotone\Tests\Messaging\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }
@@ -189,7 +189,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::createNotNullable("favourites", TypeDescriptor::create("array<\Ecotone\Tests\Messaging\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName("favourites")
         );
     }

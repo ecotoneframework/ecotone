@@ -1,14 +1,14 @@
 <?php
 
 
-namespace Test\Ecotone\AnnotationFinder\Unit\FileSystem;
+namespace Ecotone\Tests\AnnotationFinder\Unit\FileSystem;
 
 use Ecotone\AnnotationFinder\FileSystem\AutoloadFileNamespaceParser;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Class GetUsedPathsFromAutoloadTest
- * @package Test\Ecotone\AnnotationFinder\Unit\Unit\Config\Annotation
+ * @package Ecotone\Tests\AnnotationFinder\Unit\Unit\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AutoloadFileNamespaceParserTest extends TestCase

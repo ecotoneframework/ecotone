@@ -6,7 +6,7 @@
  * Time: 20:02
  */
 
-namespace Test\Ecotone\Messaging\Fixture\Handler;
+namespace Ecotone\Tests\Messaging\Fixture\Handler;
     
 
 use Ecotone\Messaging\Message;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Scheduling;
+namespace Ecotone\Tests\Messaging\Unit\Scheduling;
 
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Scheduling\CronTrigger;
@@ -11,7 +11,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class CronTriggerTest
- * @package Test\Ecotone\Messaging\Unit\Scheduling
+ * @package Ecotone\Tests\Messaging\Unit\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CronTriggerTest extends TestCase

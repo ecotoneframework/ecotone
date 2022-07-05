@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\NamedEvent;
+namespace Ecotone\Tests\Modelling\Fixture\NamedEvent;
 
 class AddGuest
 {

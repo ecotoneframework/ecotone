@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Router;
+namespace Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\Router;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\Parameter\Payload;

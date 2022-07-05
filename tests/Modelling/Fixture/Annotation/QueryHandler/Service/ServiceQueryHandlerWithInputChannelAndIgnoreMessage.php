@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service;
+namespace Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Service;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\IgnorePayload;

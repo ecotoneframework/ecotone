@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
+namespace Ecotone\Tests\Messaging\Fixture\Handler\Property;
 
 
 class DifferentTypeAndDocblockProperty

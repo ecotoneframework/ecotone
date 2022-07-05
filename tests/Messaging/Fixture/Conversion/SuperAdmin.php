@@ -1,14 +1,14 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Conversion;
+namespace Ecotone\Tests\Messaging\Fixture\Conversion;
 
-use Test\Ecotone\Messaging\Fixture\Conversion\Extra\GetFavouriteTrait;
-use Test\Ecotone\Messaging\Fixture\Conversion\Extra\GetUserTrait;
-use Test\Ecotone\Messaging\Fixture\Conversion\Password as AdminPassword;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Extra\GetFavouriteTrait;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Extra\GetUserTrait;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Password as AdminPassword;
 
 /**
  * Class SuperAdmin
- * @package Test\Ecotone\Messaging\Fixture\Conversion
+ * @package Ecotone\Tests\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SuperAdmin extends AbstractSuperAdmin implements Admin

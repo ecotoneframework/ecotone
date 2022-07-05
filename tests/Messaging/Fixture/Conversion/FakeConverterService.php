@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Conversion;
+namespace Ecotone\Tests\Messaging\Fixture\Conversion;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
@@ -9,7 +9,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class FakeConverterService
- * @package Test\Ecotone\Messaging\Fixture\Conversion
+ * @package Ecotone\Tests\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class FakeConverterService implements Converter

@@ -14,7 +14,7 @@ use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\MessageBasedQueryBusExample;
+use Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\MessageBasedQueryBusExample;
 
 /**
  * Class InterfaceToCallBuilder

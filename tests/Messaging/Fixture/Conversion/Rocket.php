@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Conversion;
+namespace Ecotone\Tests\Messaging\Fixture\Conversion;
 
-use Test\Ecotone\Messaging\Fixture\Conversion\PrivateRocketDetails\PrivateRocketDetailsTrait;
+use Ecotone\Tests\Messaging\Fixture\Conversion\PrivateRocketDetails\PrivateRocketDetailsTrait;
 
 class Rocket
 {

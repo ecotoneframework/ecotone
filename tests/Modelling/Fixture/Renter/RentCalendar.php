@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace Test\Ecotone\Modelling\Fixture\Renter;
+namespace Ecotone\Tests\Modelling\Fixture\Renter;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\EventHandler;

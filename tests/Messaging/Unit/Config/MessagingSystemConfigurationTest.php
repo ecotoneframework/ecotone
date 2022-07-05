@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Config;
+namespace Ecotone\Tests\Messaging\Unit\Config;
 
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
@@ -45,24 +45,24 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Exception;
 use stdClass;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\SingleMethodGatewayExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
-use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderService;
-use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
-use Test\Ecotone\Messaging\Fixture\Handler\DumbGatewayBuilder;
-use Test\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
-use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
-use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
-use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
-use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceWithoutReturnValue;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceWithReturnValue;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\SingleMethodGatewayExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
+use Ecotone\Tests\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderService;
+use Ecotone\Tests\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
+use Ecotone\Tests\Messaging\Fixture\Handler\DumbGatewayBuilder;
+use Ecotone\Tests\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
+use Ecotone\Tests\Messaging\Fixture\Handler\ExceptionMessageHandler;
+use Ecotone\Tests\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Handler\Processor\StubCallSavingService;
+use Ecotone\Tests\Messaging\Fixture\Service\CalculatingService;
+use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
+use Ecotone\Tests\Messaging\Fixture\Service\ServiceWithoutReturnValue;
+use Ecotone\Tests\Messaging\Fixture\Service\ServiceWithReturnValue;
+use Ecotone\Tests\Messaging\Unit\MessagingTest;
 
 /**
  * Class ApplicationTest

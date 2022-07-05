@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
+namespace Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
 
 use Ecotone\Messaging\Attribute\Interceptor\After;
 use Ecotone\Messaging\Attribute\Interceptor\Around;

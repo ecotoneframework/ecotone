@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext;
+namespace Ecotone\Tests\Messaging\Fixture\Annotation\ApplicationContext;
 
 use Ecotone\Messaging\Attribute\ServiceContext;
 use stdClass;

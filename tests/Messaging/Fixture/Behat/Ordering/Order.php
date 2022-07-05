@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\Ordering;
+namespace Ecotone\Tests\Messaging\Fixture\Behat\Ordering;
 
 /**
  * Class Order
- * @package Test\Ecotone\Messaging\Fixture\Behat\Ordering
+ * @package Ecotone\Tests\Messaging\Fixture\Behat\Ordering
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class Order

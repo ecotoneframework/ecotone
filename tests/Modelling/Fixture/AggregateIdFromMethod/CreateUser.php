@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod;
+namespace Ecotone\Tests\Modelling\Fixture\AggregateIdFromMethod;
 
 class CreateUser
 {

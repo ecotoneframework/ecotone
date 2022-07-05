@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas;
+namespace Ecotone\Tests\Modelling\Fixture\TwoAsynchronousSagas;
 
 
 class OrderWasPaid

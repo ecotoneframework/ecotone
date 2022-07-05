@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Conversion;
+namespace Ecotone\Tests\Messaging\Fixture\Conversion;
 
 #[\Attribute]
 class ExampleTestAnnotation

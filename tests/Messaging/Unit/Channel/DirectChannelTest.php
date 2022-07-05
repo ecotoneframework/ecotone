@@ -1,8 +1,8 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Unit\Channel;
+namespace Ecotone\Tests\Messaging\Unit\Channel;
 
-use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Ecotone\Tests\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\Dispatcher\UnicastingDispatcher;

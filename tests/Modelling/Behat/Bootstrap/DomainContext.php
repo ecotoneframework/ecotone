@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Behat\Bootstrap;
+namespace Ecotone\Tests\Modelling\Behat\Bootstrap;
 
 use Behat\Behat\Context\Context;
 use Behat\Behat\Tester\Exception\PendingException;
@@ -10,29 +10,29 @@ use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\DistributionEntrypoint;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
-use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
-use Test\Ecotone\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
-use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\FinishJob;
-use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\StartJob;
-use Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitWasCreated;
-use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
-use Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignation\CreateUser;
-use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PlaceOrder;
-use Test\Ecotone\Modelling\Fixture\NamedEvent\AddGuest;
-use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
-use Test\Ecotone\Modelling\Fixture\NamedEvent\RegisterBook;
-use Test\Ecotone\Modelling\Fixture\RepositoryShortcut\Twitter;
-use Test\Ecotone\Modelling\Fixture\RepositoryShortcut\TwitterRepository;
-use Test\Ecotone\Modelling\Fixture\RepositoryShortcut\TwitterService;
-use Test\Ecotone\Modelling\Fixture\TwoSagas\Bookkeeping;
-use Test\Ecotone\Modelling\Fixture\TwoSagas\OrderWasPaid;
-use Test\Ecotone\Modelling\Fixture\TwoSagas\OrderWasPlaced;
-use Test\Ecotone\Modelling\Fixture\TwoSagas\Shipment;
+use Ecotone\Tests\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\ChangeShippingAddressCommand;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
+use Ecotone\Tests\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
+use Ecotone\Tests\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
+use Ecotone\Tests\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\FinishJob;
+use Ecotone\Tests\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\StartJob;
+use Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitWasCreated;
+use Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
+use Ecotone\Tests\Modelling\Fixture\LateAggregateIdAssignation\CreateUser;
+use Ecotone\Tests\Modelling\Fixture\MetadataPropagating\PlaceOrder;
+use Ecotone\Tests\Modelling\Fixture\NamedEvent\AddGuest;
+use Ecotone\Tests\Modelling\Fixture\NamedEvent\GuestViewer;
+use Ecotone\Tests\Modelling\Fixture\NamedEvent\RegisterBook;
+use Ecotone\Tests\Modelling\Fixture\RepositoryShortcut\Twitter;
+use Ecotone\Tests\Modelling\Fixture\RepositoryShortcut\TwitterRepository;
+use Ecotone\Tests\Modelling\Fixture\RepositoryShortcut\TwitterService;
+use Ecotone\Tests\Modelling\Fixture\TwoSagas\Bookkeeping;
+use Ecotone\Tests\Modelling\Fixture\TwoSagas\OrderWasPaid;
+use Ecotone\Tests\Modelling\Fixture\TwoSagas\OrderWasPlaced;
+use Ecotone\Tests\Modelling\Fixture\TwoSagas\Shipment;
 
 /**
  * Defines application features from the specific context.
@@ -459,7 +459,7 @@ class DomainContext extends TestCase implements Context
     public function orderWithIdWasPlaced(int $id)
     {
         AnnotationBasedMessagingContext::getEventBus()->publish(new OrderWasPlaced($id));
-        AnnotationBasedMessagingContext::getEventBus()->publish(new \Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\OrderWasPlaced($id));
+        AnnotationBasedMessagingContext::getEventBus()->publish(new \Ecotone\Tests\Modelling\Fixture\TwoAsynchronousSagas\OrderWasPlaced($id));
     }
 
     /**
@@ -490,7 +490,7 @@ class DomainContext extends TestCase implements Context
     public function orderWithIdWasPaid(int $orderId)
     {
         AnnotationBasedMessagingContext::getEventBus()->publish(new OrderWasPaid($orderId));
-        AnnotationBasedMessagingContext::getEventBus()->publish(new \Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\OrderWasPaid($orderId));
+        AnnotationBasedMessagingContext::getEventBus()->publish(new \Ecotone\Tests\Modelling\Fixture\TwoAsynchronousSagas\OrderWasPaid($orderId));
     }
 
     /**
@@ -523,7 +523,7 @@ class DomainContext extends TestCase implements Context
     public function twitWithIdDoesNotExists(string $id)
     {
         /** @var TwitterRepository $twitterRepository */
-        $twitterRepository = AnnotationBasedMessagingContext::getGateway(AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Test\Ecotone\Modelling\Fixture\RepositoryShortcut"] ? TwitterRepository::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository::class);
+        $twitterRepository = AnnotationBasedMessagingContext::getGateway(AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Ecotone\Tests\Modelling\Fixture\RepositoryShortcut"] ? TwitterRepository::class : \Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository::class);
 
         Assert::assertNull($twitterRepository->findTwitter($id));
     }
@@ -533,10 +533,10 @@ class DomainContext extends TestCase implements Context
      */
     public function iCreateTwitWithIdAndContent(string $id, string $content)
     {
-        $isStatefulAggregate = AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Test\Ecotone\Modelling\Fixture\RepositoryShortcut"];
+        $isStatefulAggregate = AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Ecotone\Tests\Modelling\Fixture\RepositoryShortcut"];
 
-        /** @var TwitterRepository|\Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository $twitterRepository */
-        $twitterRepository = AnnotationBasedMessagingContext::getGateway($isStatefulAggregate ? TwitterRepository::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository::class);
+        /** @var TwitterRepository|\Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository $twitterRepository */
+        $twitterRepository = AnnotationBasedMessagingContext::getGateway($isStatefulAggregate ? TwitterRepository::class : \Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository::class);
 
         if ($isStatefulAggregate) {
             $twitterRepository->save(new Twitter($id, $content));
@@ -550,14 +550,14 @@ class DomainContext extends TestCase implements Context
      */
     public function twitWithIdItShouldContains(string $id, string $content)
     {
-        $isForStatefulAggregate = AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Test\Ecotone\Modelling\Fixture\RepositoryShortcut"];
+        $isForStatefulAggregate = AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Ecotone\Tests\Modelling\Fixture\RepositoryShortcut"];
         /** @var TwitterRepository $twitterRepository */
-        $twitterRepository = AnnotationBasedMessagingContext::getGateway($isForStatefulAggregate ? TwitterRepository::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository::class);
+        $twitterRepository = AnnotationBasedMessagingContext::getGateway($isForStatefulAggregate ? TwitterRepository::class : \Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterRepository::class);
         $twitter = $twitterRepository->getTwitter($id);
         Assert::assertEquals($content, $twitter->getContent());
 
         /** @var TwitterService $twitterRepository */
-        $twitterService = AnnotationBasedMessagingContext::getGateway($isForStatefulAggregate ? TwitterService::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterService::class);
+        $twitterService = AnnotationBasedMessagingContext::getGateway($isForStatefulAggregate ? TwitterService::class : \Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterService::class);
         Assert::assertEquals($content, $twitterService->getContent($id));
     }
 
@@ -567,7 +567,7 @@ class DomainContext extends TestCase implements Context
     public function itChangeTwitWithIdToContent(string $id, string $content)
     {
         /** @var TwitterService $twitterRepository */
-        $twitterService = AnnotationBasedMessagingContext::getGateway(AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Test\Ecotone\Modelling\Fixture\RepositoryShortcut"] ? TwitterService::class : \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterService::class);
+        $twitterService = AnnotationBasedMessagingContext::getGateway(AnnotationBasedMessagingContext::getLoadedNamespaces() == ["Ecotone\Tests\Modelling\Fixture\RepositoryShortcut"] ? TwitterService::class : \Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitterService::class);
 
         $twitterService->changeContent($id, $content);
     }
@@ -587,7 +587,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iCreateUserWithIdAndName(string $id, string $name)
     {
-        AnnotationBasedMessagingContext::getCommandBus()->send(new \Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod\CreateUser($id, $name));
+        AnnotationBasedMessagingContext::getCommandBus()->send(new \Ecotone\Tests\Modelling\Fixture\AggregateIdFromMethod\CreateUser($id, $name));
     }
 
     /**
@@ -606,7 +606,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iCreateUserThenIdShouldBeAssignedFromPublicMethod()
     {
-        $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("user.create", new \Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\CreateUser("Johny"));
+        $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("user.create", new \Ecotone\Tests\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\CreateUser("Johny"));
 
         Assert::assertNotNull($result);
     }

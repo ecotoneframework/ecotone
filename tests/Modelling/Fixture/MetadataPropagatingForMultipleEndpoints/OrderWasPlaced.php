@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
+namespace Ecotone\Tests\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
 
 
 class OrderWasPlaced

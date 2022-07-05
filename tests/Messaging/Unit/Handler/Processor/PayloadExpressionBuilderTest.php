@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Processor;
 
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
@@ -13,12 +13,12 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressio
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
-use Test\Ecotone\Messaging\Fixture\Service\CallableService;
+use Ecotone\Tests\Messaging\Fixture\Service\CalculatingService;
+use Ecotone\Tests\Messaging\Fixture\Service\CallableService;
 
 /**
  * Class ExpressionBuilderTest
- * @package Test\Ecotone\Messaging\Unit\Handler\Processor
+ * @package Ecotone\Tests\Messaging\Unit\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PayloadExpressionBuilderTest extends TestCase

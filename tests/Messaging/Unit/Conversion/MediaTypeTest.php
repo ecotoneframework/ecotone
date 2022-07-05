@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Conversion;
+namespace Ecotone\Tests\Messaging\Unit\Conversion;
 
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -9,7 +9,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MediaTypeTest
- * @package Test\Ecotone\Messaging\Unit\Conversion
+ * @package Ecotone\Tests\Messaging\Unit\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MediaTypeTest extends TestCase

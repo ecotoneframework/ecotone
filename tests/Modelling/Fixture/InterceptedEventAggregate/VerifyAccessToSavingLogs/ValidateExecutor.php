@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs;
+namespace Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs;
 
 #[\Attribute]
 class ValidateExecutor

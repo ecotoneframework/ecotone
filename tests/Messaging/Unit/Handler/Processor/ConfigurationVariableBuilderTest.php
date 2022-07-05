@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Processor;
 
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -12,7 +12,7 @@ use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
-use Test\Ecotone\Messaging\Fixture\Service\CallableService;
+use Ecotone\Tests\Messaging\Fixture\Service\CallableService;
 
 class ConfigurationVariableBuilderTest extends TestCase
 {

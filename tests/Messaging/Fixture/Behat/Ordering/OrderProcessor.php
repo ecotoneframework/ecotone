@@ -1,13 +1,13 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\Ordering;
+namespace Ecotone\Tests\Messaging\Fixture\Behat\Ordering;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class OrderProcessor
- * @package Test\Ecotone\Messaging\Fixture\Behat\Ordering
+ * @package Ecotone\Tests\Messaging\Fixture\Behat\Ordering
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OrderProcessor

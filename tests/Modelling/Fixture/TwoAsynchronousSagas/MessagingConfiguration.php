@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas;
+namespace Ecotone\Tests\Modelling\Fixture\TwoAsynchronousSagas;
 
 use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
+namespace Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Conversion\MediaType;

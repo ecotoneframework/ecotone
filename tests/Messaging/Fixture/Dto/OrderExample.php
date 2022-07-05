@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Dto;
+namespace Ecotone\Tests\Messaging\Fixture\Dto;
 
-use Test\Ecotone\Messaging\Fixture\Dto\WithCustomer\Customer;
+use Ecotone\Tests\Messaging\Fixture\Dto\WithCustomer\Customer;
 
 /**
  * Class Order
- * @package Test\Ecotone\Messaging\Fixture\Dto
+ * @package Ecotone\Tests\Messaging\Fixture\Dto
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OrderExample

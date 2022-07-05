@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
+namespace Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor;
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 /**
  * Class CalculatingService
- * @package Test\Ecotone\Messaging\Fixture\Service
+ * @package Ecotone\Tests\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SummingInterceptorExample

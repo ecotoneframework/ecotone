@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Unit;
+namespace Ecotone\Tests\Modelling\Unit;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -25,23 +25,23 @@ use Ecotone\Modelling\SaveAggregateService;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\StandardRepository;
 use PHPUnit\Framework\TestCase;
-use Test\Ecotone\Modelling\Fixture\Blog\Article;
-use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\MultiplyAmountCommand;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderWithManualVersioning;
-use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\NoIdDefinedAfterCallingFactoryExample;
-use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
-use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodWithParameters;
-use Test\Ecotone\Modelling\Fixture\Ticket\StartTicketCommand;
-use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
-use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
+use Ecotone\Tests\Modelling\Fixture\Blog\Article;
+use Ecotone\Tests\Modelling\Fixture\Blog\PublishArticleCommand;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\MultiplyAmountCommand;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\Order;
+use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\OrderWithManualVersioning;
+use Ecotone\Tests\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\NoIdDefinedAfterCallingFactoryExample;
+use Ecotone\Tests\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
+use Ecotone\Tests\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodWithParameters;
+use Ecotone\Tests\Modelling\Fixture\Ticket\StartTicketCommand;
+use Ecotone\Tests\Modelling\Fixture\Ticket\Ticket;
+use Ecotone\Tests\Modelling\Fixture\Ticket\TicketWasStartedEvent;
 
 /**
  * Class ServiceCallToAggregateAdapterTest
- * @package Test\Ecotone\Modelling
+ * @package Ecotone\Tests\Modelling
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SaveAggregateServiceBuilderTest extends TestCase

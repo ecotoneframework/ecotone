@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\Blog;
+namespace Ecotone\Tests\Modelling\Fixture\Blog;
 
 /**
  * Class PublishArticleWithoutAuthorCommand
- * @package Test\Ecotone\Modelling\Fixture\Blog
+ * @package Ecotone\Tests\Modelling\Fixture\Blog
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PublishArticleWithTitleOnlyCommand

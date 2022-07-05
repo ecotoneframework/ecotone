@@ -6,7 +6,7 @@
  * Time: 09:28
  */
 
-namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler;
+namespace Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;

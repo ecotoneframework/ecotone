@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
+namespace Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate;
 
 class IncreaseAmountCommand
 {

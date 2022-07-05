@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\Ticket;
+namespace Ecotone\Tests\Modelling\Fixture\Ticket;
 
 
 class TicketWasStartedEvent

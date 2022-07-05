@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Handler;
+namespace Ecotone\Tests\Messaging\Fixture\Handler;
 
 use Psr\Http\Message\ResponseInterface;
 use Ecotone\Messaging\Message;
@@ -11,7 +11,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class DumbMessageHandler
- * @package Test\Ecotone\Messaging\Http
+ * @package Ecotone\Tests\Messaging\Http
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReplyViaHeadersMessageHandler implements MessageHandler

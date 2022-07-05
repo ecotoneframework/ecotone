@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\Renter;
+namespace Ecotone\Tests\Modelling\Fixture\Renter;
 
 /**
  * Class CreateAppointmentCommand
- * @package Test\Ecotone\Modelling\Fixture\Renter
+ * @package Ecotone\Tests\Modelling\Fixture\Renter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CreateAppointmentCommand

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
+namespace Ecotone\Tests\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 
 #[\Attribute]
 class AddMetadata

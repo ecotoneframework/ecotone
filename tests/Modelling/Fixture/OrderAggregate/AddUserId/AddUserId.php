@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId;
+namespace Ecotone\Tests\Modelling\Fixture\OrderAggregate\AddUserId;
 
 #[\Attribute]
 class AddUserId {}

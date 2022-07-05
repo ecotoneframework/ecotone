@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Gateway;
 
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersConverter;
@@ -9,11 +9,11 @@ use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Ecotone\Tests\Messaging\Unit\MessagingTest;
 
 /**
  * Class GatewayHeaderArrayBuilderTest
- * @package Test\Ecotone\Messaging\Unit\Handler\Gateway
+ * @package Ecotone\Tests\Messaging\Unit\Handler\Gateway
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayHeaderArrayBuilderTest extends MessagingTest

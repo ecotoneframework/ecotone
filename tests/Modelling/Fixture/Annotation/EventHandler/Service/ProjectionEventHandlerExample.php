@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service;
+namespace Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Service;
 
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\Messaging\Attribute\MessageEndpoint;

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\TwoSagas;
+namespace Ecotone\Tests\Modelling\Fixture\TwoSagas;
 
 
 class OrderWasPlaced

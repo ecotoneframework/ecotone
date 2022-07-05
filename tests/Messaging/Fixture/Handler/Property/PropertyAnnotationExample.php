@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
+namespace Ecotone\Tests\Messaging\Fixture\Handler\Property;
 
 #[\Attribute]
 class PropertyAnnotationExample

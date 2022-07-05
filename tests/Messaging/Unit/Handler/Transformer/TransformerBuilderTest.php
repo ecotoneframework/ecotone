@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Transformer;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Transformer;
 
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -19,14 +19,14 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceWithoutReturnValue;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceWithReturnValue;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Service\CalculatingService;
+use Ecotone\Tests\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
+use Ecotone\Tests\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Ecotone\Tests\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
+use Ecotone\Tests\Messaging\Fixture\Service\ServiceWithoutReturnValue;
+use Ecotone\Tests\Messaging\Fixture\Service\ServiceWithReturnValue;
+use Ecotone\Tests\Messaging\Unit\MessagingTest;
 
 /**
  * Class TransformerBuilder

@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
+namespace Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor;
 
 use Ecotone\Messaging\Attribute\Interceptor\After;
 use Ecotone\Messaging\Attribute\Interceptor\Before;

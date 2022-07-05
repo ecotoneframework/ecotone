@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Gateway;
 
-use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
+use Ecotone\Tests\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
+use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -17,7 +17,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class MultipleMethodGatewayBuilder
- * @package Test\Ecotone\Messaging\Unit\Handler\Gateway
+ * @package Ecotone\Tests\Messaging\Unit\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class CombinedGatewayBuilderTest extends TestCase

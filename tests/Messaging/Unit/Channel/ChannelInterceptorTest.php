@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Channel;
+namespace Ecotone\Tests\Messaging\Unit\Channel;
 
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
@@ -9,11 +9,11 @@ use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\PollableChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
+use Ecotone\Tests\Messaging\Fixture\Handler\ExceptionMessageHandler;
 
 /**
  * Class ChannelInterceptorTest
- * @package Test\Ecotone\Messaging\Unit\Channel
+ * @package Ecotone\Tests\Messaging\Unit\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ChannelInterceptorTest extends TestCase

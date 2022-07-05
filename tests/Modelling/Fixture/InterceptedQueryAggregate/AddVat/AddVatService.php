@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddVat;
+namespace Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\AddVat;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\ServiceActivator;

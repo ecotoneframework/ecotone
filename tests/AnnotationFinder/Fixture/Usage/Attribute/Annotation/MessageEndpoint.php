@@ -1,5 +1,5 @@
 <?php
-namespace Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation;
+namespace Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation;
 
 #[\Attribute]
 class MessageEndpoint

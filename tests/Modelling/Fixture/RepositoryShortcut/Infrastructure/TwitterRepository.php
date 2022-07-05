@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\RepositoryShortcut\Infrastructure;
+namespace Ecotone\Tests\Modelling\Fixture\RepositoryShortcut\Infrastructure;
 
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\InMemoryStandardRepository;

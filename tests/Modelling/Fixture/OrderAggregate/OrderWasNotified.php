@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
+namespace Ecotone\Tests\Modelling\Fixture\OrderAggregate;
 
 class OrderWasNotified
 {

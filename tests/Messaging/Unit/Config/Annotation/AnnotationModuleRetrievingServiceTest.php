@@ -1,24 +1,24 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Unit\Config\Annotation;
+namespace Ecotone\Tests\Messaging\Unit\Config\Annotation;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
-use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithConstructorParameters;
-use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithMethodParameters;
-use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\StdClassExtensionApplicationContext;
-use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
-use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionObject;
+use Ecotone\Tests\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithConstructorParameters;
+use Ecotone\Tests\Messaging\Fixture\Annotation\ApplicationContext\ApplicationContextWithMethodParameters;
+use Ecotone\Tests\Messaging\Fixture\Annotation\ApplicationContext\StdClassExtensionApplicationContext;
+use Ecotone\Tests\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
+use Ecotone\Tests\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionObject;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionWithVariableConfiguration;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Ecotone\Tests\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionWithVariableConfiguration;
+use Ecotone\Tests\Messaging\Unit\MessagingTest;
 
 /**
  * Class AnnotationModuleConfigurationRetrievingServiceTest
- * @package Test\Ecotone\Messaging\Unit\Config\Annotation
+ * @package Ecotone\Tests\Messaging\Unit\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AnnotationModuleRetrievingServiceTest extends MessagingTest

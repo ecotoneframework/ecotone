@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler;
+namespace Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler;
 
 /**
  * Class SomeQuery
- * @package Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler
+ * @package Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SomeQuery

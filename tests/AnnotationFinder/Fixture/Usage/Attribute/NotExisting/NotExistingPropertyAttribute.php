@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\NotExisting;
+namespace Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\NotExisting;
 
 
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeGatewayExample;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeGatewayExample;
+use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
 
 class NotExistingPropertyAttribute
 {

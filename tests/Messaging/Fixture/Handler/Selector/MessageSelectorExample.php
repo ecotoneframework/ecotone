@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Handler\Selector;
+namespace Ecotone\Tests\Messaging\Fixture\Handler\Selector;
 
 use Ecotone\Messaging\Message;
 
 /**
  * Class TrueMessageSelector
- * @package Test\Ecotone\Messaging\Fixture\Handler\Selector
+ * @package Ecotone\Tests\Messaging\Fixture\Handler\Selector
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MessageSelectorExample

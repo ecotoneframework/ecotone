@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange;
+namespace Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange;
 
 #[\Attribute]
 class ExchangeProductForPrice

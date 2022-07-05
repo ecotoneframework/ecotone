@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\MessageConverter;
+namespace Ecotone\Tests\Messaging\Unit\MessageConverter;
 
 use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -14,7 +14,7 @@ use stdClass;
 
 /**
  * Class DefaultHeaderMapperTest
- * @package Test\Ecotone\Messaging\Unit\Endpoint
+ * @package Ecotone\Tests\Messaging\Unit\Endpoint
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DefaultHeaderMapperTest extends TestCase

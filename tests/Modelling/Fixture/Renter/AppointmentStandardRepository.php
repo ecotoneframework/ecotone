@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Modelling\Fixture\Renter;
+namespace Ecotone\Tests\Modelling\Fixture\Renter;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\Repository;

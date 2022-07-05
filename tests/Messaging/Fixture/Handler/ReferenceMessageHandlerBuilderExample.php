@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Handler;
+namespace Ecotone\Tests\Messaging\Fixture\Handler;
 use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
@@ -13,7 +13,7 @@ use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class ModuleMessageHandlerBuilder
- * @package Test\Ecotone\Messaging\Fixture\Handler
+ * @package Ecotone\Tests\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Annotation\Async;
+namespace Ecotone\Tests\Messaging\Fixture\Annotation\Async;
 
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\MessageEndpoint;

@@ -1,20 +1,20 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Filter;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Filter;
 
 use Ecotone\Messaging\Handler\Filter\MessageFilterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\InvalidMessageHeaderException;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
-use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
+use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Ecotone\Tests\Messaging\Unit\MessagingTest;
 
 /**
  * Class MessageFilterBuilderTest

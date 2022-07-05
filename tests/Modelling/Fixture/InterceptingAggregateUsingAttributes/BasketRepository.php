@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
+namespace Ecotone\Tests\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\InMemoryStandardRepository;

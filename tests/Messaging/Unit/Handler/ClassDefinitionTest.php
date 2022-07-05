@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Handler;
+namespace Ecotone\Tests\Messaging\Unit\Handler;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Ecotone\Messaging\Config\Annotation\AutoloadFileNamespaceParser;
@@ -11,27 +11,27 @@ use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ClassPropertyDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\CollectionOfClassesFromDifferentNamespaceUsingGroupAlias;
-use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\Details\Description;
-use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\Details\ProductName;
-use Test\Ecotone\Messaging\Fixture\Conversion\InCorrectArrayDocblock;
-use Test\Ecotone\Messaging\Fixture\Conversion\PrivateRocketDetails\PrivateDetails;
-use Test\Ecotone\Messaging\Fixture\Conversion\Product;
-use Test\Ecotone\Messaging\Fixture\Conversion\PublicRocketDetails\PublicDetails;
-use Test\Ecotone\Messaging\Fixture\Conversion\Rocket;
-use Test\Ecotone\Messaging\Fixture\Conversion\User;
-use Test\Ecotone\Messaging\Fixture\Handler\Property\ArrayTypeWithDocblockProperty;
-use Test\Ecotone\Messaging\Fixture\Handler\Property\ArrayTypeWithInlineDocblockProperty;
-use Test\Ecotone\Messaging\Fixture\Handler\Property\DifferentTypeAndDocblockProperty;
-use Test\Ecotone\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
-use Test\Ecotone\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
-use Test\Ecotone\Messaging\Fixture\Handler\Property\OrderPropertyExample;
-use Test\Ecotone\Messaging\Fixture\Handler\Property\OrderWithTraits;
-use Test\Ecotone\Messaging\Fixture\Handler\Property\PropertyAnnotationExample;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Grouping\CollectionOfClassesFromDifferentNamespaceUsingGroupAlias;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Grouping\Details\Description;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Grouping\Details\ProductName;
+use Ecotone\Tests\Messaging\Fixture\Conversion\InCorrectArrayDocblock;
+use Ecotone\Tests\Messaging\Fixture\Conversion\PrivateRocketDetails\PrivateDetails;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Product;
+use Ecotone\Tests\Messaging\Fixture\Conversion\PublicRocketDetails\PublicDetails;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Rocket;
+use Ecotone\Tests\Messaging\Fixture\Conversion\User;
+use Ecotone\Tests\Messaging\Fixture\Handler\Property\ArrayTypeWithDocblockProperty;
+use Ecotone\Tests\Messaging\Fixture\Handler\Property\ArrayTypeWithInlineDocblockProperty;
+use Ecotone\Tests\Messaging\Fixture\Handler\Property\DifferentTypeAndDocblockProperty;
+use Ecotone\Tests\Messaging\Fixture\Handler\Property\ExtendedOrderPropertyExample;
+use Ecotone\Tests\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
+use Ecotone\Tests\Messaging\Fixture\Handler\Property\OrderPropertyExample;
+use Ecotone\Tests\Messaging\Fixture\Handler\Property\OrderWithTraits;
+use Ecotone\Tests\Messaging\Fixture\Handler\Property\PropertyAnnotationExample;
 
 /**
  * Class ClassDefinitionTest
- * @package Test\Ecotone\Messaging\Unit\Handler
+ * @package Ecotone\Tests\Messaging\Unit\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ClassDefinitionTest extends TestCase
@@ -190,7 +190,7 @@ class ClassDefinitionTest extends TestCase
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate("owners", TypeDescriptor::create("array<Test\Ecotone\Messaging\Fixture\Conversion\Admin>"), false, false, []),
+            ClassPropertyDefinition::createPrivate("owners", TypeDescriptor::create("array<Ecotone\Tests\Messaging\Fixture\Conversion\Admin>"), false, false, []),
             $classDefinition->getProperty("owners")
         );
     }

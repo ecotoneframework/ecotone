@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Processor;
 
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ClassReference;
@@ -11,17 +11,17 @@ use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeOne;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeTwo;
-use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\AspectWithoutMethodInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\BaseInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
-use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeOne;
+use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeTwo;
+use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\AspectWithoutMethodInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\BaseInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\CallMultipleUnorderedArgumentsInvocationInterceptorExample;
+use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample;
 
 /**
  * Class PointcutTest
- * @package Test\Ecotone\Messaging\Unit\Handler\Processor
+ * @package Ecotone\Tests\Messaging\Unit\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PointcutTest extends TestCase
@@ -100,7 +100,7 @@ class PointcutTest extends TestCase
     public function test_intercepting_namespace_suffix()
     {
         $this->itShouldCut(
-            "Test\Ecotone\Messaging\Fixture\Handler\Processor\*",
+            "Ecotone\Tests\Messaging\Fixture\Handler\Processor\*",
             InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
     }
@@ -116,7 +116,7 @@ class PointcutTest extends TestCase
     public function test_intercepting_namespace_in_the_middle()
     {
         $this->itShouldCut(
-            "Test\Ecotone\Messaging\Fixture\*\Interceptor\MethodInterceptorWithoutAspectExample",
+            "Ecotone\Tests\Messaging\Fixture\*\Interceptor\MethodInterceptorWithoutAspectExample",
             InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
         );
     }

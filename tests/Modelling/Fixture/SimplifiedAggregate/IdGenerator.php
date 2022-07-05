@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\SimplifiedAggregate;
+namespace Ecotone\Tests\Modelling\Fixture\SimplifiedAggregate;
 
 use Ramsey\Uuid\Uuid;
 

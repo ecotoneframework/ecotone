@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
+namespace Ecotone\Tests\Messaging\Unit\Handler\Processor;
 
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
@@ -11,11 +11,11 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilde
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Test\Ecotone\Messaging\Fixture\Service\CallableService;
+use Ecotone\Tests\Messaging\Fixture\Service\CallableService;
 
 /**
  * Class AllHeadersBuilderTest
- * @package Test\Ecotone\Messaging\Unit\Handler\Processor
+ * @package Ecotone\Tests\Messaging\Unit\Handler\Processor
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AllHeadersBuilderTest extends TestCase

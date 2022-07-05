@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Endpoint;
+namespace Ecotone\Tests\Messaging\Fixture\Endpoint;
 
 use Ecotone\Messaging\Transaction\Transactional;
 

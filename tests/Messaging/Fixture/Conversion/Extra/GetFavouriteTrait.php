@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Test\Ecotone\Messaging\Fixture\Conversion\Extra;
+namespace Ecotone\Tests\Messaging\Fixture\Conversion\Extra;
 
-use Test\Ecotone\Messaging\Fixture\Conversion\Extra\PrivateDetails\GetPrivilegeTrait;
+use Ecotone\Tests\Messaging\Fixture\Conversion\Extra\PrivateDetails\GetPrivilegeTrait;
 
 /**
  * Class GetFavouriteTrait

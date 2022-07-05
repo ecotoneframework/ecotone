@@ -1,10 +1,10 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Fixture\Handler\Splitter;
+namespace Ecotone\Tests\Messaging\Fixture\Handler\Splitter;
 
 /**
  * Class WrongSplittingService
- * @package Test\Ecotone\Messaging\Fixture\Handler\Splitter
+ * @package Ecotone\Tests\Messaging\Fixture\Handler\Splitter
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class WrongSplittingService

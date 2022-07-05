@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Unit\Support;
+namespace Ecotone\Tests\Messaging\Unit\Support;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Ecotone\Tests\Messaging\Unit\MessagingTest;
 
 /**
  * Class MessageBuilderTest

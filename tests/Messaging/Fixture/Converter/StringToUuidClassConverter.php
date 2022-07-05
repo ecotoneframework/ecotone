@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Fixture\Converter;
+namespace Ecotone\Tests\Messaging\Fixture\Converter;
 
 use Ecotone\Messaging\Handler\Type;
 use Ramsey\Uuid\Uuid;

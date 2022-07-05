@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\Ecotone\Messaging\Builder\Handler;
+namespace Ecotone\Tests\Messaging\Builder\Handler;
 
 use Ecotone\Messaging\Handler\InterfaceParameter;
 
 /**
  * Class InterfaceParameterTestCaseBuilder
- * @package Test\Ecotone\Messaging\Builder\Handler
+ * @package Ecotone\Tests\Messaging\Builder\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterfaceParameterTestCaseBuilder

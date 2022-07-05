@@ -1,12 +1,12 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
+namespace Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate;
 use Ecotone\Modelling\Attribute\TargetAggregateVersion;
 use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Class MultiplyAmountCommand
- * @package Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate
+ * @package Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MultiplyAmountCommand

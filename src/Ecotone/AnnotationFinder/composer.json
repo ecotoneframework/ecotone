@@ -1,0 +1,26 @@
+{
+    "name": "ecotone/annotation-finder",
+    "description": "Resolves Ecotone annotations.",
+    "homepage": "https://docs.ecotone.tech",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dariusz Gafka",
+            "email": "dgafka.mail@gmail.com"
+        }
+    ],
+    "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Ecotone\\AnnotationFinder\\": ""
+        }
+    },
+    "require": {
+        "php": "^8.0"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

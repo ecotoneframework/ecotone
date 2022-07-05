@@ -1,0 +1,29 @@
+{
+    "name": "ecotone/messaging",
+    "description": "A messaging implementation for Ecotone.",
+    "homepage": "https://docs.ecotone.tech",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dariusz Gafka",
+            "email": "dgafka.mail@gmail.com"
+        }
+    ],
+    "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Ecotone\\Messaging\\": ""
+        }
+    },
+    "require": {
+        "friendsofphp/proxy-manager-lts": "^1.0.12",
+        "php": "^8.0",
+        "psr/log": "^1.0|^2.0|^3.0",
+        "ramsey/uuid": "^4.0"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

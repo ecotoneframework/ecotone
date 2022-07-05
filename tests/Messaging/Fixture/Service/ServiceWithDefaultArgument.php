@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Service;
+namespace Tests\Ecotone\Messaging\Fixture\Service;
 
 class ServiceWithDefaultArgument
 {

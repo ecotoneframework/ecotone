@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Tests\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Attribute\MediaTypeConverter;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
@@ -11,12 +11,12 @@ use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Converter\ExampleMediaTypeConverter;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleMediaTypeConverter;
 
 /**
  * Class ConverterModuleTest
- * @package Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration
+ * @package Tests\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ConverterModuleTest extends AnnotationConfigurationTest

@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Conversion\Extra;
+namespace Tests\Ecotone\Messaging\Fixture\Conversion\Extra;
 
-use Ecotone\Tests\Messaging\Fixture\Conversion\User;
+use Tests\Ecotone\Messaging\Fixture\Conversion\User;
 
 /**
  * Trait GetUserTrait

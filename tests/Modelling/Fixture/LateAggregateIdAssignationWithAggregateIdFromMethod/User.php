@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod;
+namespace Tests\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;

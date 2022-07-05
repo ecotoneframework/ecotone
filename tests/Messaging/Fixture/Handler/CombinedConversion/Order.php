@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\CombinedConversion;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\CombinedConversion;
 
 class Order implements OrderInterface
 {

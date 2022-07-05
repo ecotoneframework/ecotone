@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Conversion;
+namespace Tests\Ecotone\Messaging\Fixture\Conversion;
 
 /**
  * Class OnlineShop
- * @package Ecotone\Tests\Messaging\Fixture\Conversion
+ * @package Tests\Ecotone\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OnlineShop extends GamesShop implements Shop

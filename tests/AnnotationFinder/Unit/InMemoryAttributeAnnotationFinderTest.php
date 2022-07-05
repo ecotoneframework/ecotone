@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\AnnotationFinder\Unit;
+namespace Tests\Ecotone\AnnotationFinder\Unit;
 
 
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
@@ -10,12 +10,12 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use PHPUnit\Framework\TestCase;
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\ApplicationContext;
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndpoint;
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeGatewayExample;
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\SplitterOnMethod\SplitterOnMethodExample;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\ApplicationContext;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndpoint;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeGatewayExample;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\SplitterOnMethod\SplitterOnMethodExample;
 
 class InMemoryAttributeAnnotationFinderTest extends TestCase
 {

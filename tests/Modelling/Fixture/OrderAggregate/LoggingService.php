@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Modelling\Fixture\OrderAggregate;
+namespace Tests\Ecotone\Modelling\Fixture\OrderAggregate;
 
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\MessageEndpoint;

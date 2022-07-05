@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Conversion;
+namespace Tests\Ecotone\Messaging\Fixture\Conversion;
 
 
-use Ecotone\Tests\Messaging\Fixture\Conversion\Admin;
+use Tests\Ecotone\Messaging\Fixture\Conversion\Admin;
 
 class Product
 {

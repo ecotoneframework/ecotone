@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\Calculating;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\Calculating;
 
 #[\Attribute]
 class BeforeMultiplyCalculation

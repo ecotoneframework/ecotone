@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\RepositoryShortcut;
+namespace Tests\Ecotone\Modelling\Fixture\RepositoryShortcut;
 
 use Ecotone\Modelling\Attribute\Repository;
 

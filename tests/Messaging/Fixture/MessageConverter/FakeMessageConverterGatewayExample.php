@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\MessageConverter;
+namespace Tests\Ecotone\Messaging\Fixture\MessageConverter;
 
 use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\MessageEndpoint;

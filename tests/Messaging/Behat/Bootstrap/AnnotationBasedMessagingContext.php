@@ -1,10 +1,9 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Behat\Bootstrap;
+namespace Tests\Ecotone\Messaging\Behat\Bootstrap;
 
 use Behat\Behat\Context\Context;
-use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -23,55 +22,55 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use ReflectionException;
-use Ecotone\Tests\Messaging\Fixture\Behat\Calculating\Calculator;
-use Ecotone\Tests\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
-use Ecotone\Tests\Messaging\Fixture\Behat\Calculating\InboundCalculation;
-use Ecotone\Tests\Messaging\Fixture\Behat\Calculating\ResultService;
-use Ecotone\Tests\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\ErrorReceiver;
-use Ecotone\Tests\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderGateway;
-use Ecotone\Tests\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderService;
-use Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample;
-use Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGateway\InterceptorExample;
-use Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler;
-use Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\CalculateGatewayExampleWithMessages;
-use Ecotone\Tests\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledExample;
-use Ecotone\Tests\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledGateway;
-use Ecotone\Tests\Messaging\Fixture\Behat\Presend\CoinGateway;
-use Ecotone\Tests\Messaging\Fixture\Behat\Presend\MultiplyCoins;
-use Ecotone\Tests\Messaging\Fixture\Behat\Presend\Shop;
-use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
-use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
-use Ecotone\Tests\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
-use Ecotone\Tests\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
-use Ecotone\Tests\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\JobRepository;
-use Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\AddExecutorId\AddExecutorId;
-use Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\AddNotificationTimestamp\AddNotificationTimestamp;
-use Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\LoggerRepository;
-use Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\NotificationService;
-use Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions;
-use Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin\AddFranchiseMargin;
-use Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\AddVat\AddVatService;
-use Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ProductExchanger;
-use Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\ShopRepository;
-use Ecotone\Tests\Modelling\Fixture\InterceptingAggregate\AddCurrentUserId;
-use Ecotone\Tests\Modelling\Fixture\InterceptingAggregate\BasketRepository;
-use Ecotone\Tests\Modelling\Fixture\InterceptingAggregateUsingAttributes\AddMetadataService;
-use Ecotone\Tests\Modelling\Fixture\LateAggregateIdAssignation\UserRepository;
-use Ecotone\Tests\Modelling\Fixture\MultipleHandlersAtSameMethod\Basket;
-use Ecotone\Tests\Modelling\Fixture\NamedEvent\GuestBookRepository;
-use Ecotone\Tests\Modelling\Fixture\NamedEvent\GuestViewer;
-use Ecotone\Tests\Modelling\Fixture\Order\PlaceOrder;
-use Ecotone\Tests\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
-use Ecotone\Tests\Modelling\Fixture\OrderAggregate\LoggingService;
-use Ecotone\Tests\Modelling\Fixture\OrderAggregate\OrderErrorHandler;
-use Ecotone\Tests\Modelling\Fixture\OrderAggregate\OrderRepository;
-use Ecotone\Tests\Modelling\Fixture\Renter\AppointmentStandardRepository;
-use Ecotone\Tests\Modelling\Fixture\Renter\CreateAppointmentCommand;
-use Ecotone\Tests\Modelling\Fixture\Renter\RentCalendar;
-use Ecotone\Tests\Modelling\Fixture\RepositoryShortcut\Infrastructure\TwitterRepository;
-use Ecotone\Tests\Modelling\Fixture\SimplifiedAggregate\IdGenerator;
-use Ecotone\Tests\Modelling\Fixture\SimplifiedAggregate\SimplifiedAggregateRepository;
-use Ecotone\Tests\Modelling\Fixture\TwoSagas\TwoSagasRepository;
+use Tests\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
+use Tests\Ecotone\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
+use Tests\Ecotone\Messaging\Fixture\Behat\Calculating\InboundCalculation;
+use Tests\Ecotone\Messaging\Fixture\Behat\Calculating\ResultService;
+use Tests\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\ErrorReceiver;
+use Tests\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderGateway;
+use Tests\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderService;
+use Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample;
+use Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\InterceptorExample;
+use Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler;
+use Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\CalculateGatewayExampleWithMessages;
+use Tests\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledExample;
+use Tests\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledGateway;
+use Tests\Ecotone\Messaging\Fixture\Behat\Presend\CoinGateway;
+use Tests\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
+use Tests\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
+use Tests\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
+use Tests\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
+use Tests\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
+use Tests\Ecotone\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
+use Tests\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\JobRepository;
+use Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\AddExecutorId\AddExecutorId;
+use Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\AddNotificationTimestamp\AddNotificationTimestamp;
+use Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\LoggerRepository;
+use Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\NotificationService;
+use Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions;
+use Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin\AddFranchiseMargin;
+use Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddVat\AddVatService;
+use Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ProductExchanger;
+use Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ShopRepository;
+use Tests\Ecotone\Modelling\Fixture\InterceptingAggregate\AddCurrentUserId;
+use Tests\Ecotone\Modelling\Fixture\InterceptingAggregate\BasketRepository;
+use Tests\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\AddMetadataService;
+use Tests\Ecotone\Modelling\Fixture\LateAggregateIdAssignation\UserRepository;
+use Tests\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod\Basket;
+use Tests\Ecotone\Modelling\Fixture\NamedEvent\GuestBookRepository;
+use Tests\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
+use Tests\Ecotone\Modelling\Fixture\Order\PlaceOrder;
+use Tests\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
+use Tests\Ecotone\Modelling\Fixture\OrderAggregate\LoggingService;
+use Tests\Ecotone\Modelling\Fixture\OrderAggregate\OrderErrorHandler;
+use Tests\Ecotone\Modelling\Fixture\OrderAggregate\OrderRepository;
+use Tests\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
+use Tests\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
+use Tests\Ecotone\Modelling\Fixture\Renter\RentCalendar;
+use Tests\Ecotone\Modelling\Fixture\RepositoryShortcut\Infrastructure\TwitterRepository;
+use Tests\Ecotone\Modelling\Fixture\SimplifiedAggregate\IdGenerator;
+use Tests\Ecotone\Modelling\Fixture\SimplifiedAggregate\SimplifiedAggregateRepository;
+use Tests\Ecotone\Modelling\Fixture\TwoSagas\TwoSagasRepository;
 
 class AnnotationBasedMessagingContext extends TestCase implements Context
 {
@@ -82,7 +81,6 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     /**
      * @Given I active messaging for namespace :namespace
      * @param string $namespace
-     * @throws AnnotationException
      * @throws ConfigurationException
      * @throws MessagingException
      * @throws InvalidArgumentException
@@ -91,8 +89,9 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     public function iActiveMessagingForNamespace(string $namespace)
     {
         self::$loadedNamespaces = [$namespace];
+
         switch ($namespace) {
-            case "Ecotone\Tests\Modelling\Fixture\Renter":
+            case "Tests\Ecotone\Modelling\Fixture\Renter":
                 {
                     $objects = [
                         RentCalendar::class => new RentCalendar(),
@@ -100,7 +99,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate":
+            case "Tests\Ecotone\Modelling\Fixture\CommandHandler\Aggregate":
                 {
                     $objects = [
                         OrderNotificator::class => new OrderNotificator(),
@@ -108,7 +107,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Messaging\Fixture\Behat\ErrorHandling":
+            case "Tests\Ecotone\Messaging\Fixture\Behat\ErrorHandling":
                 {
                     $objects = [
                         ErrorReceiver::class => new ErrorReceiver(),
@@ -116,7 +115,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGateway":
+            case "Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGateway":
                 {
                     $objects = [
                         InterceptorExample::class => new InterceptorExample(),
@@ -124,30 +123,30 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Messaging\Fixture\Behat\InterceptedGateway":
+            case "Tests\Ecotone\Messaging\Fixture\Behat\InterceptedGateway":
                 {
                     $objects = [
-                        \Ecotone\Tests\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample::class => new \Ecotone\Tests\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample(),
-                        \Ecotone\Tests\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler::class => new \Ecotone\Tests\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler()
+                        \Tests\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample::class => new \Tests\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample(),
+                        \Tests\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler::class => new \Tests\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler()
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGatewayWithMessages":
+            case "Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages":
                 {
                     $objects = [
-                        \Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample::class => new \Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample(),
-                        \Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::class => new \Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler()
+                        \Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample::class => new \Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample(),
+                        \Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::class => new \Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler()
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Modelling\Fixture\Order":
+            case "Tests\Ecotone\Modelling\Fixture\Order":
                 {
                     $objects = [
-                        \Ecotone\Tests\Modelling\Fixture\Order\OrderService::class => new \Ecotone\Tests\Modelling\Fixture\Order\OrderService()
+                        \Tests\Ecotone\Modelling\Fixture\Order\OrderService::class => new \Tests\Ecotone\Modelling\Fixture\Order\OrderService()
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Modelling\Fixture\OrderAggregate":
+            case "Tests\Ecotone\Modelling\Fixture\OrderAggregate":
                 {
                     $objects = [
                         OrderRepository::class => OrderRepository::createEmpty(),
@@ -157,7 +156,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Modelling\Fixture\NamedEvent":
+            case "Tests\Ecotone\Modelling\Fixture\NamedEvent":
                 {
                     $objects = [
                         new GuestViewer(),
@@ -165,7 +164,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Messaging\Fixture\Behat\Presend":
+            case "Tests\Ecotone\Messaging\Fixture\Behat\Presend":
                 {
                     $objects = [
                         MultiplyCoins::class => new MultiplyCoins(),
@@ -174,7 +173,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Messaging\Fixture\Behat\InterceptedScheduled":
+            case "Tests\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled":
                 {
                     $objects = [
                         InterceptedScheduledExample::class => new InterceptedScheduledExample(),
@@ -182,7 +181,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate":
+            case "Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate":
                 {
                     $objects = [
                         ProductExchanger::class => new ProductExchanger(),
@@ -192,7 +191,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate":
+            case "Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate":
                 {
                     $objects = [
                         LoggerRepository::class => new LoggerRepository(),
@@ -203,32 +202,32 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate":
+            case "Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate":
                 {
                     $objects = [
-                        \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\LoggerRepository::class => new \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\LoggerRepository(),
-                        \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\NotificationService::class => new \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\NotificationService(),
-                        \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions::class => new \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions(),
-                        \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp\AddNotificationTimestamp::class => new \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp\AddNotificationTimestamp(),
-                        \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId::class => new \Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId()
+                        \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\LoggerRepository::class => new \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\LoggerRepository(),
+                        \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\NotificationService::class => new \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\NotificationService(),
+                        \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions::class => new \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions(),
+                        \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp\AddNotificationTimestamp::class => new \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp\AddNotificationTimestamp(),
+                        \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId::class => new \Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId()
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Modelling\Fixture\MetadataPropagating":
+            case "Tests\Ecotone\Modelling\Fixture\MetadataPropagating":
                 {
                     $objects = [
-                        new \Ecotone\Tests\Modelling\Fixture\MetadataPropagating\OrderService()
+                        new \Tests\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()
                     ];
                     break;
                 }
-            case "Ecotone\Tests\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints":
+            case "Tests\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints":
             {
                 $objects = [
-                    new \Ecotone\Tests\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints\OrderService()
+                    new \Tests\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints\OrderService()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\InterceptingAggregate":
+            case "Tests\Ecotone\Modelling\Fixture\InterceptingAggregate":
             {
                 $objects = [
                     new AddCurrentUserId(),
@@ -236,15 +235,15 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\InterceptingAggregateUsingAttributes":
+            case "Tests\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes":
             {
                 $objects = [
                     new AddMetadataService(),
-                    \Ecotone\Tests\Modelling\Fixture\InterceptingAggregateUsingAttributes\BasketRepository::createEmpty()
+                    \Tests\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\BasketRepository::createEmpty()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Messaging\Fixture\Behat\Calculating":
+            case "Tests\Ecotone\Messaging\Fixture\Behat\Calculating":
             {
                 $objects = [
                     InboundCalculation::class => new InboundCalculation(),
@@ -253,35 +252,35 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\DistributedCommandHandler":
+            case "Tests\Ecotone\Modelling\Fixture\DistributedCommandHandler":
             {
                 $objects = [
                     new ShoppingCenter()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\DistributedEventHandler":
+            case "Tests\Ecotone\Modelling\Fixture\DistributedEventHandler":
             {
                 $objects = [
                     new ShoppingRecord()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\MultipleHandlersAtSameMethod":
+            case "Tests\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod":
             {
                 $objects = [
                     new Basket()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder":
+            case "Tests\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder":
             {
                 $objects = [
                     new JobRepository()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\SimplifiedAggregate":
+            case "Tests\Ecotone\Modelling\Fixture\SimplifiedAggregate":
             {
                 $objects = [
                     new IdGenerator(),
@@ -289,52 +288,52 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\TwoSagas":
+            case "Tests\Ecotone\Modelling\Fixture\TwoSagas":
             {
                 $objects = [
                     TwoSagasRepository::createEmpty()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\TwoAsynchronousSagas":
+            case "Tests\Ecotone\Modelling\Fixture\TwoAsynchronousSagas":
             {
                 $objects = [
-                    \Ecotone\Tests\Modelling\Fixture\TwoAsynchronousSagas\TwoSagasRepository::createEmpty()
+                    \Tests\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\TwoSagasRepository::createEmpty()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\RepositoryShortcut":
+            case "Tests\Ecotone\Modelling\Fixture\RepositoryShortcut":
             {
                 $objects = [
                     new TwitterRepository()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut":
+            case "Tests\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut":
             {
                 $objects = [
-                    new \Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut\Infrastructure\TwitterRepository()
+                    new \Tests\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\Infrastructure\TwitterRepository()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\LateAggregateIdAssignation":
+            case "Tests\Ecotone\Modelling\Fixture\LateAggregateIdAssignation":
             {
                 $objects = [
                     new UserRepository()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod":
+            case "Tests\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod":
             {
                 $objects = [
-                    new \Ecotone\Tests\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\UserRepository()
+                    new \Tests\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\UserRepository()
                 ];
                 break;
             }
-            case "Ecotone\Tests\Modelling\Fixture\AggregateIdFromMethod":
+            case "Tests\Ecotone\Modelling\Fixture\AggregateIdFromMethod":
             {
                 $objects = [
-                    new \Ecotone\Tests\Modelling\Fixture\AggregateIdFromMethod\UserRepository()
+                    new \Tests\Ecotone\Modelling\Fixture\AggregateIdFromMethod\UserRepository()
                 ];
                 break;
             }

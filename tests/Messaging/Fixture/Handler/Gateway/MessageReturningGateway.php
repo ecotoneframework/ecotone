@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Gateway;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Gateway;
 
 
 use Ecotone\Messaging\Message;

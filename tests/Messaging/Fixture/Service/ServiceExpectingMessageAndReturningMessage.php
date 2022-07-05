@@ -1,13 +1,13 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Service;
+namespace Tests\Ecotone\Messaging\Fixture\Service;
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class ServiceExpectingMessageAndReturningMessage
- * @package Ecotone\Tests\Messaging\Fixture\Service
+ * @package Tests\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceExpectingMessageAndReturningMessage

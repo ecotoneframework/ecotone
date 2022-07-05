@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\TwoAsynchronousSagas;
+namespace Tests\Ecotone\Modelling\Fixture\TwoAsynchronousSagas;
 
 
 class OrderWasPlaced

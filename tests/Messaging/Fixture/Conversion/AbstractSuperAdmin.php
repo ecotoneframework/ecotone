@@ -1,12 +1,12 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Conversion;
+namespace Tests\Ecotone\Messaging\Fixture\Conversion;
 
-use Ecotone\Tests\Messaging\Fixture\Conversion\TwoStepPassword as AdminPassword;
+use Tests\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword as AdminPassword;
 
 /**
  * Class AbstractSuperAdmin
- * @package Ecotone\Tests\Messaging\Fixture\Conversion
+ * @package Tests\Ecotone\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 abstract class AbstractSuperAdmin implements Admin, Email

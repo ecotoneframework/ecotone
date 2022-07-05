@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\Handler;
+namespace Tests\Ecotone\Modelling\Fixture\Handler;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\CommandHandler;

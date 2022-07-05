@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller;
+namespace Tests\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller;
 
 use Ecotone\Messaging\Attribute\ServiceActivator;
 

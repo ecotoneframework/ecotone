@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Aggregate;
+namespace Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\EventHandler;

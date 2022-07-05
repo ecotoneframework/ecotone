@@ -6,7 +6,7 @@
  * Time: 09:50
  */
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Transformer;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Transformer;
 
 
 class StdClassTransformer

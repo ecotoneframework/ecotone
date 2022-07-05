@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Transformer;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Transformer;
 
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -24,14 +24,14 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Tests\Messaging\Fixture\Conversion\FakeConverterService;
-use Ecotone\Tests\Messaging\Fixture\Dto\OrderExample;
-use Ecotone\Tests\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Fixture\Conversion\FakeConverterService;
+use Tests\Ecotone\Messaging\Fixture\Dto\OrderExample;
+use Tests\Ecotone\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class PayloadEnricherBuilderTest
- * @package Ecotone\Tests\Messaging\Unit\Handler\Transformer
+ * @package Tests\Ecotone\Messaging\Unit\Handler\Transformer
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EnricherBuilderTest extends MessagingTest

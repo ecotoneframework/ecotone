@@ -1,11 +1,11 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSavingLogs;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSavingLogs;
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\Logger;
+use Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\Logger;
 
 class HasEnoughPermissions
 {

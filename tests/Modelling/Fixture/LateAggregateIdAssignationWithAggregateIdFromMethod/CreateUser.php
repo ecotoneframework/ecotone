@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod;
+namespace Tests\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod;
 
 class CreateUser
 {

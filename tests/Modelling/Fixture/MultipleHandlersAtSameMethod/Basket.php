@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\MultipleHandlersAtSameMethod;
+namespace Tests\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\MetadataPropagating;
+namespace Tests\Ecotone\Modelling\Fixture\MetadataPropagating;
 
 
 use Ecotone\Messaging\Conversion\MediaType;

@@ -1,12 +1,12 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\Ordering;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\Ordering;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class OrderConfirmation
- * @package Ecotone\Tests\Messaging\Fixture\Behat\Ordering
+ * @package Tests\Ecotone\Messaging\Fixture\Behat\Ordering
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OrderConfirmation

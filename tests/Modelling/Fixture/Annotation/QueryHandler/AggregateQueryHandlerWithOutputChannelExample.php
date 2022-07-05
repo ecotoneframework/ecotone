@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler;
+namespace Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;

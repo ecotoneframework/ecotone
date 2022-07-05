@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\DistributedEventHandler;
+namespace Tests\Ecotone\Modelling\Fixture\DistributedEventHandler;
 
 
 use Ecotone\Modelling\Attribute\CommandHandler;

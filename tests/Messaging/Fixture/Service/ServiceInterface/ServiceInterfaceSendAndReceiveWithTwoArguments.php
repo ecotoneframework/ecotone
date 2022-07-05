@@ -1,10 +1,10 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface;
+namespace Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface;
 
 /**
  * Interface ServiceInterfaceSendAndReceiveWithTwoArguments
- * @package Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface
+ * @package Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ServiceInterfaceSendAndReceiveWithTwoArguments

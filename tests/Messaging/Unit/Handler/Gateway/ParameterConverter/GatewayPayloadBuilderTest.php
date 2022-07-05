@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Gateway\ParameterConverter;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Gateway\ParameterConverter;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;

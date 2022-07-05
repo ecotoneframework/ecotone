@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Service;
+namespace Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\CommandHandler;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Logger;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Logger;
 
 use Psr\Log\LoggerInterface;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -14,12 +14,12 @@ use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithLogger\ServiceActivatorWithLoggerExample;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithLogger\ServiceActivatorWithLoggerExample;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class LoggingHandlerBuilderTest
- * @package Ecotone\Tests\Messaging\Unit\Handler\Logger
+ * @package Tests\Ecotone\Messaging\Unit\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LoggingHandlerBuilderTest extends MessagingTest

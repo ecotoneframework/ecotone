@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\QueryHandlerAggregate;
+namespace Tests\Ecotone\Modelling\Fixture\QueryHandlerAggregate;
 
 
 class SmallBox implements Box

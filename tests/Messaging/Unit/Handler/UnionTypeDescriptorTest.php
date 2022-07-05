@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace Ecotone\Tests\Messaging\Unit\Handler;
+namespace Tests\Ecotone\Messaging\Unit\Handler;
 
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Handler\UnionTypeDescriptor;

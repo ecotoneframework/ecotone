@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Property\Extra;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Property\Extra;
 
 
 class ExtraObject

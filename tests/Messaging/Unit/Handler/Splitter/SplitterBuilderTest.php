@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Splitter;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Splitter;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Tests\Messaging\Fixture\Handler\Splitter\ServiceSplittingArrayPayload;
-use Ecotone\Tests\Messaging\Fixture\Handler\Splitter\WrongSplittingService;
+use Tests\Ecotone\Messaging\Fixture\Handler\Splitter\ServiceSplittingArrayPayload;
+use Tests\Ecotone\Messaging\Fixture\Handler\Splitter\WrongSplittingService;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
@@ -14,7 +14,7 @@ use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class SplitterBuilderTest

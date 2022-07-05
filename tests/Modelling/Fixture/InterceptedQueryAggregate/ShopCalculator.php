@@ -1,14 +1,14 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\WithAggregateEvents;
-use Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin\AddFranchise;
-use Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ExchangeProductForPrice;
+use Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin\AddFranchise;
+use Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ExchangeProductForPrice;
 
 #[Aggregate]
 class ShopCalculator

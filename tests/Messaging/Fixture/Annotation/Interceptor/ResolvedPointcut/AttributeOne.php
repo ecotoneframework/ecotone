@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut;
+namespace Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut;
 
 #[\Attribute]
 class AttributeOne

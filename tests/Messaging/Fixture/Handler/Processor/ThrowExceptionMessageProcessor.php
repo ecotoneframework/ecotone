@@ -1,13 +1,13 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Processor;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Processor;
 
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Message;
 
 /**
  * Class ThrowExceptionMessageProcessor
- * @package Ecotone\Tests\Messaging\Fixture\Handler\Processor
+ * @package Tests\Ecotone\Messaging\Fixture\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ThrowExceptionMessageProcessor implements MessageProcessor

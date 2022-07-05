@@ -1,8 +1,8 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\TwoSagas;
+namespace Tests\Ecotone\Modelling\Fixture\TwoSagas;
 
-use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
+use Tests\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 
 #[\Ecotone\Modelling\Attribute\Repository]
 class TwoSagasRepository extends InMemoryStandardRepository

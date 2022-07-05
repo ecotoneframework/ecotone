@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Unit\MessageHandling;
+namespace Tests\Ecotone\Modelling\Unit\MessageHandling;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributedMessageHandler;

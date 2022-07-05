@@ -1,10 +1,10 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface;
+namespace Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface;
 
 /**
  * Interface ServiceInterface
- * @package Ecotone\Tests\Messaging\Fixture\Service
+ * @package Tests\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ServiceInterfaceWithUnknownReturnType

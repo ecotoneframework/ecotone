@@ -1,20 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Conversion;
+namespace Tests\Ecotone\Messaging\Unit\Conversion;
 
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
 
 /**
  * Class ReferenceServiceConverterBuilderTest
- * @package Ecotone\Tests\Messaging\Unit\Conversion
+ * @package Tests\Ecotone\Messaging\Unit\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ReferenceServiceConverterBuilderTest extends TestCase

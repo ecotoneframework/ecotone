@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Conversion;
+namespace Tests\Ecotone\Messaging\Fixture\Conversion;
 
 use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
-use Ecotone\Tests\Messaging\Fixture\Conversion\Extra\Favourite;
-use Ecotone\Tests\Messaging\Fixture\Conversion\Extra\Permission as AdminPermission;
+use Tests\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite;
+use Tests\Ecotone\Messaging\Fixture\Conversion\Extra\Permission as AdminPermission;
 
 /**
  * Interface Order
- * @package Ecotone\Tests\Messaging\Fixture\Conversion
+ * @package Tests\Ecotone\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface User
@@ -24,7 +24,7 @@ interface User
     public function changeDetails(?\stdClass $details) : void;
 
     /**
-     * @param  array<Ecotone\Tests\Messaging\Fixture\Conversion\Extra\Favourite> $favourites
+     * @param  array<Tests\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite> $favourites
      */
     public function changeFavourites(array $favourites) : void;
 
@@ -91,7 +91,7 @@ interface User
      */
     public function getStaticArray() : array;
 
-    public function returnFullUser() : \Ecotone\Tests\Messaging\Fixture\Conversion\User;
+    public function returnFullUser() : \Tests\Ecotone\Messaging\Fixture\Conversion\User;
 
 
     public function returnFromGlobalNamespace() : \stdClass;

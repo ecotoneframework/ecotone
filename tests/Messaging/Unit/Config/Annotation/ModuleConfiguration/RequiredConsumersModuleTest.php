@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Tests\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Attribute\Scheduled;
@@ -15,13 +15,13 @@ use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Consumer\ExampleConsumer;
-use Ecotone\Tests\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
-use Ecotone\Tests\Messaging\Fixture\Handler\DataReturningService;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Consumer\ExampleConsumer;
+use Tests\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
+use Tests\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 
 /**
  * Class ConverterModuleTest
- * @package Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration
+ * @package Tests\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class RequiredConsumersModuleTest extends AnnotationConfigurationTest

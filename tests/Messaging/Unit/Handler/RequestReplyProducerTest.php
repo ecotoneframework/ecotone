@@ -1,12 +1,12 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit\Handler;
+namespace Tests\Ecotone\Messaging\Unit\Handler;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Tests\Messaging\Fixture\Handler\NoReplyMessageProducer;
-use Ecotone\Tests\Messaging\Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
-use Ecotone\Tests\Messaging\Fixture\Handler\FakeReplyMessageProducer;
+use Tests\Ecotone\Messaging\Fixture\Handler\NoReplyMessageProducer;
+use Tests\Ecotone\Messaging\Fixture\Handler\Processor\ThrowExceptionMessageProcessor;
+use Tests\Ecotone\Messaging\Fixture\Handler\FakeReplyMessageProducer;
 use Prophecy\Argument;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -20,7 +20,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class RequestReplyProducerTest

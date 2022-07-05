@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Tests\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
 use Ecotone\Messaging\Attribute\Endpoint\Delayed;
@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Class EndpointHeadersInterceptorTest
- * @package Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration
+ * @package Tests\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EndpointHeadersInterceptorTest extends TestCase

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Processor;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Processor;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -16,13 +16,13 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
-use Ecotone\Tests\Messaging\Fixture\Service\CallableService;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceWithDefaultArgument;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceWithUuidArgument;
+use Tests\Ecotone\Messaging\Fixture\Service\CallableService;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceWithDefaultArgument;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceWithUuidArgument;
 
 /**
  * Class HeaderBuilderTest
- * @package Ecotone\Tests\Messaging\Unit\Handler\Processor
+ * @package Tests\Ecotone\Messaging\Unit\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class HeaderBuilderTest extends TestCase

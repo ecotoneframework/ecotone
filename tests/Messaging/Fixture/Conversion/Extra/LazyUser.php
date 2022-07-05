@@ -1,13 +1,13 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Conversion\Extra;
+namespace Tests\Ecotone\Messaging\Fixture\Conversion\Extra;
 
-use Ecotone\Tests\Messaging\Fixture\Conversion\Admin;
-use Ecotone\Tests\Messaging\Fixture\Conversion\BlackListedUser;
+use Tests\Ecotone\Messaging\Fixture\Conversion\Admin;
+use Tests\Ecotone\Messaging\Fixture\Conversion\BlackListedUser;
 
 /**
  * Class LazyAdmin
- * @package Ecotone\Tests\Messaging\Fixture\Conversion\Extra
+ * @package Tests\Ecotone\Messaging\Fixture\Conversion\Extra
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LazyUser implements BlackListedUser

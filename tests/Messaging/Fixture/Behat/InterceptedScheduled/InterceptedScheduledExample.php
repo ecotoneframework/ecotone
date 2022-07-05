@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\InterceptedScheduled;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled;
 
 use Ecotone\Messaging\Attribute\Interceptor\Before;
 use Ecotone\Messaging\Attribute\Interceptor\Presend;

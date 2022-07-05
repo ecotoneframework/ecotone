@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler;
+namespace Tests\Ecotone\Messaging\Fixture\Handler;
 
 
 class ExampleService

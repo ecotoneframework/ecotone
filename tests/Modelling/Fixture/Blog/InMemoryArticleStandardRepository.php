@@ -1,12 +1,12 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\Blog;
+namespace Tests\Ecotone\Modelling\Fixture\Blog;
 use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\StandardRepository;
 
 /**
  * Class InMemoryArticleRepository
- * @package Ecotone\Tests\Modelling\Fixture\Blog
+ * @package Tests\Ecotone\Modelling\Fixture\Blog
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InMemoryArticleStandardRepository implements StandardRepository

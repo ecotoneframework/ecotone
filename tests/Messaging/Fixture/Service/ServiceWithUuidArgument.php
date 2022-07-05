@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Service;
+namespace Tests\Ecotone\Messaging\Fixture\Service;
 
 use Ecotone\Messaging\Support\Assert;
 use Ramsey\Uuid\UuidInterface;

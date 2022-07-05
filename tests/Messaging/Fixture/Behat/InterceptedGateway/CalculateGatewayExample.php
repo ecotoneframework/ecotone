@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\InterceptedGateway;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\InterceptedGateway;
 
 use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\MessageEndpoint;

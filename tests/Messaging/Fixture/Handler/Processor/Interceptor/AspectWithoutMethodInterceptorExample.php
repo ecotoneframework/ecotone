@@ -1,12 +1,12 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 
 /**
  * Class AspectWithoutMethodInterceptorExample
- * @package Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor
+ * @package Tests\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class AspectWithoutMethodInterceptorExample

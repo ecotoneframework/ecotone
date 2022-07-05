@@ -1,10 +1,10 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\Blog;
+namespace Tests\Ecotone\Modelling\Fixture\Blog;
 
 /**
  * Class ChangeArticleContentCommand
- * @package Ecotone\Tests\Modelling\Fixture\Blog
+ * @package Tests\Ecotone\Modelling\Fixture\Blog
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ChangeArticleContentCommand

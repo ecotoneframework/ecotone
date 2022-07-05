@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface;
+namespace Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface;
 
 /**
  * Interface ServiceInterfaceCalculatingService

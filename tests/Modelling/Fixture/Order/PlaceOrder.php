@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\Order;
+namespace Tests\Ecotone\Modelling\Fixture\Order;
 
 
 class PlaceOrder

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Scheduling;
+namespace Tests\Ecotone\Messaging\Fixture\Scheduling;
 
 use Ecotone\Messaging\Scheduling\TaskExecutor;
 
 /**
  * Class StubTaskExecutor
- * @package Ecotone\Tests\Messaging\Fixture\Scheduling
+ * @package Tests\Ecotone\Messaging\Fixture\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class StubTaskExecutor implements TaskExecutor

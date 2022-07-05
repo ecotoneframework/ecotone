@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation;
+namespace Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation;
 
 class EndpointAnnotationExample
 {

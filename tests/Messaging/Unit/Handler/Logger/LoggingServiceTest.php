@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Logger;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Logger;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -21,7 +21,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class LoggingServiceTest
- * @package Ecotone\Tests\Messaging\Unit\Handler\Logger
+ * @package Tests\Ecotone\Messaging\Unit\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LoggingServiceTest extends TestCase

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Processor;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Processor;
 
 use PHPUnit\Framework\Assert;
 use Ecotone\Messaging\Attribute\MessageEndpoint;

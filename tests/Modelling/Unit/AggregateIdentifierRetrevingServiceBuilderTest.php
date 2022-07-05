@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Unit;
+namespace Tests\Ecotone\Modelling\Unit;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -20,17 +20,17 @@ use Ecotone\Modelling\LoadAggregateMode;
 use Ecotone\Modelling\LoadAggregateServiceBuilder;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use PHPUnit\Framework\TestCase;
-use Ecotone\Tests\Modelling\Fixture\Blog\Article;
-use Ecotone\Tests\Modelling\Fixture\Blog\ChangeArticleContentCommand;
-use Ecotone\Tests\Modelling\Fixture\Blog\PublishArticleCommand;
-use Ecotone\Tests\Modelling\Fixture\Blog\RepublishArticleCommand;
-use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
-use Ecotone\Tests\Modelling\Fixture\Handler\ReplyViaHeadersMessageHandler;
-use Ecotone\Tests\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
-use Ecotone\Tests\Modelling\Fixture\InterceptingAggregate\Basket;
-use Ecotone\Tests\Modelling\Fixture\NoIdentifierAggregate\Product;
-use Ecotone\Tests\Modelling\Fixture\Saga\OrderFulfilment;
-use Ecotone\Tests\Modelling\Fixture\Saga\PaymentWasDoneEvent;
+use Tests\Ecotone\Modelling\Fixture\Blog\Article;
+use Tests\Ecotone\Modelling\Fixture\Blog\ChangeArticleContentCommand;
+use Tests\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
+use Tests\Ecotone\Modelling\Fixture\Blog\RepublishArticleCommand;
+use Tests\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
+use Tests\Ecotone\Modelling\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Tests\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
+use Tests\Ecotone\Modelling\Fixture\InterceptingAggregate\Basket;
+use Tests\Ecotone\Modelling\Fixture\NoIdentifierAggregate\Product;
+use Tests\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
+use Tests\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 
 class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
 {

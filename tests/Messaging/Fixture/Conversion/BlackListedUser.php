@@ -1,10 +1,10 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Conversion;
+namespace Tests\Ecotone\Messaging\Fixture\Conversion;
 
 /**
  * Interface BlackListedUser
- * @package Ecotone\Tests\Messaging\Fixture\Conversion
+ * @package Tests\Ecotone\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface BlackListedUser

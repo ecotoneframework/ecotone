@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Unit;
+namespace Tests\Ecotone\Modelling\Unit;
 
 use Ecotone\Modelling\AggregateId;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;

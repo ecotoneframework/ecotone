@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler;
+namespace Tests\Ecotone\Messaging\Fixture\Handler;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
@@ -13,7 +13,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class DumbGatewayBuilder
- * @package Ecotone\Tests\Messaging\Fixture\Handler
+ * @package Tests\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DumbGatewayBuilder implements GatewayBuilder

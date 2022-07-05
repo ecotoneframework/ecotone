@@ -1,12 +1,12 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate;
+namespace Tests\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
 use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Class ChangeShippingAddressCommand
- * @package Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate
+ * @package Tests\Ecotone\Modelling\Fixture\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ChangeShippingAddressCommand implements RegisterWithShipping

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Behat\Bootstrap;
+namespace Tests\Ecotone\Messaging\Behat\Bootstrap;
 
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
@@ -26,14 +26,14 @@ use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Tests\Messaging\Fixture\Behat\Booking\BookingService;
-use Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample;
-use Ecotone\Tests\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledGateway;
-use Ecotone\Tests\Messaging\Fixture\Behat\Ordering\Order;
-use Ecotone\Tests\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
-use Ecotone\Tests\Messaging\Fixture\Behat\Ordering\OrderingService;
-use Ecotone\Tests\Messaging\Fixture\Behat\Shopping\BookWasReserved;
-use Ecotone\Tests\Messaging\Fixture\Behat\Shopping\ShoppingService;
+use Tests\Ecotone\Messaging\Fixture\Behat\Booking\BookingService;
+use Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample;
+use Tests\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledGateway;
+use Tests\Ecotone\Messaging\Fixture\Behat\Ordering\Order;
+use Tests\Ecotone\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
+use Tests\Ecotone\Messaging\Fixture\Behat\Ordering\OrderingService;
+use Tests\Ecotone\Messaging\Fixture\Behat\Shopping\BookWasReserved;
+use Tests\Ecotone\Messaging\Fixture\Behat\Shopping\ShoppingService;
 
 /**
  * Defines application features from the specific context.

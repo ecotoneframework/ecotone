@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptingAggregateUsingAttributes;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 
 use Ecotone\Messaging\Attribute\Parameter\Headers;
 use Ecotone\Modelling\Attribute\Aggregate;

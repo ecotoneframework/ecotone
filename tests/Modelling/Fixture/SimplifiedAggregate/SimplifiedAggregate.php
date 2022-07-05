@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\SimplifiedAggregate;
+namespace Tests\Ecotone\Modelling\Fixture\SimplifiedAggregate;
 
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Modelling\Attribute\Aggregate;

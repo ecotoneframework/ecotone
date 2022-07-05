@@ -1,14 +1,14 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\AddExecutorId;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\AddExecutorId;
 
 use Ecotone\Messaging\Attribute\Interceptor\Before;
 use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate\Logger;
+use Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\Logger;
 
 class AddExecutorId
 {

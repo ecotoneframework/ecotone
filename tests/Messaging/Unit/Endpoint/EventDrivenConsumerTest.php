@@ -1,13 +1,13 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit\Endpoint;
+namespace Tests\Ecotone\Messaging\Unit\Endpoint;
 
-use Ecotone\Tests\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Tests\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\MessageDispatchingException;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumer;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class EventDrivenConsumerTest

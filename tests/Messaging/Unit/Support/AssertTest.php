@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit\Support;
+namespace Tests\Ecotone\Messaging\Unit\Support;
 
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Message;

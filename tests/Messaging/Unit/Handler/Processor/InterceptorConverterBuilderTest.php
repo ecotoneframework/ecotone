@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Processor;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Attribute\ClassReference;
@@ -20,14 +20,14 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Messaging\Transaction\Transactional;
-use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\CallWithUnorderedClassInvocationInterceptorExample;
-use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
-use Ecotone\Tests\Messaging\Fixture\Service\CallableService;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceWithoutReturnValue;
+use Tests\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithUnorderedClassInvocationInterceptorExample;
+use Tests\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
+use Tests\Ecotone\Messaging\Fixture\Service\CallableService;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 
 /**
  * Class InterceptorConverterBuilderTest
- * @package Ecotone\Tests\Messaging\Unit\Handler\Processor
+ * @package Tests\Ecotone\Messaging\Unit\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InterceptorConverterBuilderTest extends TestCase

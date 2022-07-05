@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder;
+namespace Tests\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder;
 
 
 class StartJob

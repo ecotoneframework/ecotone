@@ -1,13 +1,13 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Channel;
+namespace Tests\Ecotone\Messaging\Fixture\Channel;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 
 /**
  * Class DumbChannelInterceptor
- * @package Ecotone\Tests\Messaging\Fixture\Channel
+ * @package Tests\Ecotone\Messaging\Fixture\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DumbChannelInterceptor implements ChannelInterceptor

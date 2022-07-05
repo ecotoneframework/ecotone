@@ -4,8 +4,8 @@
 namespace IncorrectAttribute\TestingNamespace;
 
 
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\ApplicationContext;
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\Extension;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\ApplicationContext;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\Extension;
 
 #[ApplicationContext]
 class CorrectNamespace

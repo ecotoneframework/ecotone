@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
+namespace Tests\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
 
 
 use Ecotone\Messaging\Attribute\Asynchronous;

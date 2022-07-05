@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler;
+namespace Tests\Ecotone\Messaging\Fixture\Handler;
 
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;

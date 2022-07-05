@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
 use Ecotone\Messaging\Transaction\Transactional;
 

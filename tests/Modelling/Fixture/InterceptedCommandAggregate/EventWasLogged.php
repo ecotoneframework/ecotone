@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate;
 
 
 class EventWasLogged

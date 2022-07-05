@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Unit\Config;
+namespace Tests\Ecotone\Modelling\Unit\Config;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\AnnotationFinder;
@@ -31,44 +31,44 @@ use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagato
 use Ecotone\Modelling\QueryBus;
 use ReflectionException;
 use stdClass;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithDoubledActionMethod;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithDoubledFactoryMethod;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithFactoryMethod;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Aggregate\ServiceCommandHandlerWithInputChannelName;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Aggregate\ServiceCommandHandlerWithInputChannelNameAndIgnoreMessage;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithClass;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelName;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelNameAndObject;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoInputChannelName;
-use Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithUnionType;
-use Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithClass;
-use Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithListenToRegex;
-use Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\EventHandlerForUnionType;
-use Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Service\ProjectionEventHandlerExample;
-use Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithClass;
-use Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenTo;
-use Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenToAndObject;
-use Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenToToRegex;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithClass;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannel;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannelAndIgnoreMessage;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlersWithAllowedNotUniqueClass;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlersWithAllowedNotUniqueClassAndInputChannels;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlersWithNotUniqueClass;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithClass;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannel;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndIgnoreMessage;
-use Ecotone\Tests\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndObject;
-use Ecotone\Tests\Modelling\Fixture\Handler\ServiceWithCommandAndQueryHandlersUnderSameClass;
-use Ecotone\Tests\Modelling\Fixture\Handler\ServiceWithCommandAndQueryHandlersUnderSameName;
-use Ecotone\Tests\Modelling\Fixture\Order\OrderWasPlaced;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithDoubledActionMethod;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithDoubledFactoryMethod;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithFactoryMethod;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\ServiceCommandHandlerWithInputChannelName;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\ServiceCommandHandlerWithInputChannelNameAndIgnoreMessage;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithClass;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelName;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\AggregateCommandHandlerWithInputChannelNameAndObject;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithNoInputChannelName;
+use Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHandlerWithUnionType;
+use Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithClass;
+use Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithListenToRegex;
+use Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\EventHandlerForUnionType;
+use Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ProjectionEventHandlerExample;
+use Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithClass;
+use Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenTo;
+use Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenToAndObject;
+use Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenToToRegex;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithClass;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannel;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate\AggregateQueryHandlerWithInputChannelAndIgnoreMessage;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlersWithAllowedNotUniqueClass;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlersWithAllowedNotUniqueClassAndInputChannels;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlersWithNotUniqueClass;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithClass;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannel;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndIgnoreMessage;
+use Tests\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndObject;
+use Tests\Ecotone\Modelling\Fixture\Handler\ServiceWithCommandAndQueryHandlersUnderSameClass;
+use Tests\Ecotone\Modelling\Fixture\Handler\ServiceWithCommandAndQueryHandlersUnderSameName;
+use Tests\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 
 /**
  * Class AggregateMessageRouterModuleTest
- * @package Ecotone\Tests\Modelling\Config
+ * @package Tests\Ecotone\Modelling\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class BusRoutingModuleTest extends MessagingTest
@@ -398,7 +398,7 @@ class BusRoutingModuleTest extends MessagingTest
     {
         $annotatedClasses = [EventHandlerForUnionType::class];
 
-        $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class . "|" . \Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . "|" . \Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]], [stdClass::class => [stdClass::class . "|" . \Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . "|" . \Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]]);
+        $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class . "|" . \Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . "|" . \Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]], [stdClass::class => [stdClass::class . "|" . \Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . "|" . \Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]]);
     }
 
     public function test_registering_aggregate_event_handler()

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptingAggregateUsingAttributes;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Attribute\Interceptor\Before;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Processor;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -10,12 +10,12 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\ConverterBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Tests\Messaging\Fixture\Service\CallableService;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Fixture\Service\CallableService;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class PayloadBuilder
- * @package Ecotone\Tests\Messaging\Fixture\Handler\Processor
+ * @package Tests\Ecotone\Messaging\Fixture\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PayloadBuilderTest extends MessagingTest

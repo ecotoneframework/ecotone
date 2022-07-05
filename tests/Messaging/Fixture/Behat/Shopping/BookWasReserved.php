@@ -1,10 +1,10 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\Shopping;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\Shopping;
 
 /**
  * Class BookWasReserved
- * @package Ecotone\Tests\Messaging\Fixture\Behat\Shopping
+ * @package Tests\Ecotone\Messaging\Fixture\Behat\Shopping
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class BookWasReserved

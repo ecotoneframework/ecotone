@@ -1,9 +1,9 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit\Support;
+namespace Tests\Ecotone\Messaging\Unit\Support;
 use Ecotone\Messaging\Support\GenericMessage;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 
 /**

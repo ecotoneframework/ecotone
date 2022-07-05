@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Conversion\Grouping;
+namespace Tests\Ecotone\Messaging\Fixture\Conversion\Grouping;
 
-use Ecotone\Tests\Messaging\Fixture\Conversion\Grouping\Details\{Description, ProductName as Product};
+use Tests\Ecotone\Messaging\Fixture\Conversion\Grouping\Details\{Description, ProductName as Product};
 
 class CollectionOfClassesFromDifferentNamespaceUsingGroupAlias
 {

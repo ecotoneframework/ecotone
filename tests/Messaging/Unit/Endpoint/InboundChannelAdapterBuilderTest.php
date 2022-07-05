@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Endpoint;
+namespace Tests\Ecotone\Messaging\Unit\Endpoint;
 
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -17,16 +17,16 @@ use Ecotone\Messaging\Transaction\Null\NullTransaction;
 use Ecotone\Messaging\Transaction\Null\NullTransactionFactory;
 use Ecotone\Messaging\Transaction\Transactional;
 use Ecotone\Messaging\Transaction\TransactionInterceptor;
-use Ecotone\Tests\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
-use Ecotone\Tests\Messaging\Fixture\Endpoint\ConsumerStoppingService;
-use Ecotone\Tests\Messaging\Fixture\Handler\ExceptionalMessageHandler;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceExpectingNoArguments;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
+use Tests\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
+use Tests\Ecotone\Messaging\Fixture\Handler\ExceptionalMessageHandler;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceExpectingNoArguments;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class InboundChannelAdapterBuilderTest
- * @package Ecotone\Tests\Messaging\Unit\Endpoint
+ * @package Tests\Ecotone\Messaging\Unit\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class InboundChannelAdapterBuilderTest extends MessagingTest

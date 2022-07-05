@@ -1,13 +1,13 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit\Handler;
+namespace Tests\Ecotone\Messaging\Unit\Handler;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 
 /**
  * Class SymfonyExpressionEvaluationAdapterTest
- * @package Ecotone\Tests\Messaging\Unit\Handler
+ * @package Tests\Ecotone\Messaging\Unit\Handler
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SymfonyExpressionEvaluationAdapterTest extends TestCase

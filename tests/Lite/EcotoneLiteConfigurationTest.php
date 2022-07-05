@@ -1,20 +1,20 @@
 <?php
 
 
-namespace Ecotone\Tests\Lite;
+namespace Tests\Ecotone\Lite;
 
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use Ecotone\Tests\Messaging\Fixture\Behat\Presend\CoinGateway;
-use Ecotone\Tests\Messaging\Fixture\Behat\Presend\MultiplyCoins;
-use Ecotone\Tests\Messaging\Fixture\Behat\Presend\Shop;
+use Tests\Ecotone\Messaging\Fixture\Behat\Presend\CoinGateway;
+use Tests\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
+use Tests\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
 
 /**
  * Class EcotoneLiteConfigurationTest
- * @package Ecotone\Tests\Lite
+ * @package Tests\Ecotone\Lite
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class EcotoneLiteConfigurationTest extends TestCase
@@ -35,7 +35,7 @@ class EcotoneLiteConfigurationTest extends TestCase
             new MultiplyCoins(), new Shop()
         ]);
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
-                                ->withNamespaces(["Ecotone\Tests\Messaging\Fixture\Behat\Presend"]);
+                                ->withNamespaces(["Tests\Ecotone\Messaging\Fixture\Behat\Presend"]);
         $configuration = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . "/../../", $container, $serviceConfiguration, [], false);
 
         $this->assertEquals(

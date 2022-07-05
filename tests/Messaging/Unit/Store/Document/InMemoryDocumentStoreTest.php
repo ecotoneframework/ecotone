@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Dbal\Store\Document;
+namespace Tests\Ecotone\Dbal\Store\Document;
 
 use Ecotone\Messaging\Store\Document\DocumentException;
 use Ecotone\Messaging\Store\Document\DocumentStore;

@@ -1,12 +1,12 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp;
 
 use Ecotone\Messaging\Attribute\Interceptor\After;
 use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\Logger;
+use Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 
 class AddNotificationTimestamp
 {

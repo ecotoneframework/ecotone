@@ -1,10 +1,10 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Dto\WithCustomer;
+namespace Tests\Ecotone\Messaging\Fixture\Dto\WithCustomer;
 
 /**
  * Class Customer
- * @package Ecotone\Tests\Messaging\Fixture\Dto\WithCustomer
+ * @package Tests\Ecotone\Messaging\Fixture\Dto\WithCustomer
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class Customer

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\AggregateIdFromMethod;
+namespace Tests\Ecotone\Modelling\Fixture\AggregateIdFromMethod;
 
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\StandardRepository;

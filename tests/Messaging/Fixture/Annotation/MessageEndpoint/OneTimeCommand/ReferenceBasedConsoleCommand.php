@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand;
+namespace Tests\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand;
 
 
 use Ecotone\Messaging\Attribute\ClassReference;

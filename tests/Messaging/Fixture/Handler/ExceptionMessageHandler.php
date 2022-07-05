@@ -1,13 +1,13 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler;
+namespace Tests\Ecotone\Messaging\Fixture\Handler;
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class ExceptionMessageHandler
- * @package Ecotone\Tests\Messaging\Fixture\Handler
+ * @package Tests\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ExceptionMessageHandler implements MessageHandler

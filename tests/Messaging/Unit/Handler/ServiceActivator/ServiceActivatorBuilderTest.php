@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\ServiceActivator;
+namespace Tests\Ecotone\Messaging\Unit\Handler\ServiceActivator;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -13,12 +13,12 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference
 use Ecotone\Messaging\Handler\ServiceActivator\PassThroughService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Ecotone\Tests\Messaging\Fixture\Service\CalculatingService;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceReturningMessage;
-use Ecotone\Tests\Messaging\Fixture\Service\StaticallyCalledService;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Tests\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceReturningMessage;
+use Tests\Ecotone\Messaging\Fixture\Service\StaticallyCalledService;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class ServiceActivatorBuilderTest

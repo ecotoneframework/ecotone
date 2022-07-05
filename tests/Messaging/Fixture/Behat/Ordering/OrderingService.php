@@ -1,11 +1,11 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\Ordering;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\Ordering;
 use Ecotone\Messaging\Future;
 
 /**
  * Interface OrderingService
- * @package Ecotone\Tests\Messaging\Fixture\Behat\Ordering
+ * @package Tests\Ecotone\Messaging\Fixture\Behat\Ordering
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface OrderingService

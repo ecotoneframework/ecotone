@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGateway;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGateway;
 
 use Ecotone\Messaging\Attribute\ClassReference;
 use Ecotone\Messaging\Attribute\Interceptor\After;

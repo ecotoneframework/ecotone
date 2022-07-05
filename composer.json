@@ -22,10 +22,10 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Ecotone\\Tests\\": "tests",
             "IncorrectAttribute\\": [
                 "tests\\AnnotationFinder\\Fixture\\Usage\\Attribute\\TestingNamespace\\IncorrectAttribute\\TestingNamespace"
-            ]
+            ],
+            "Tests\\Ecotone\\": "tests"
         }
     },
     "require": {

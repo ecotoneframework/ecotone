@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin;
 
 #[\Attribute]
 class AddFranchise

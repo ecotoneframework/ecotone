@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Property;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Property;
 
 use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Messaging\Transaction\Transactional;
@@ -8,7 +8,7 @@ use stdClass as SomeClass;
 
 /**
  * Class OrderPropertyExample
- * @package Ecotone\Tests\Messaging\Fixture\Handler\Property
+ * @package Tests\Ecotone\Messaging\Fixture\Handler\Property
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class OrderPropertyExample

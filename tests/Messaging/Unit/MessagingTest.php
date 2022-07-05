@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit;
+namespace Tests\Ecotone\Messaging\Unit;
 
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\Calculating;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\Calculating;
 
 use Ecotone\Messaging\Attribute\ClassReference;
 use Ecotone\Messaging\Attribute\Interceptor\After;

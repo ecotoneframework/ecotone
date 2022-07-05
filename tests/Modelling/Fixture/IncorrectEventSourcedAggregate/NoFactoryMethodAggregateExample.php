@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\IncorrectEventSourcedAggregate;
+namespace Tests\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;

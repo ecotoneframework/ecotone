@@ -1,10 +1,10 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
-use Ecotone\Tests\Messaging\Fixture\Handler\Processor\StubCallSavingService;
+use Tests\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
 
 class CallWithInterceptedObjectInterceptorExample extends BaseInterceptorExample
 {

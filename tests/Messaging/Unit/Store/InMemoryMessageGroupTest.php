@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit\Store;
+namespace Tests\Ecotone\Messaging\Unit\Store;
 
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;

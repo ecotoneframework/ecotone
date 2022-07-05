@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\Annotation\EventHandler\Service;
+namespace Tests\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\Aggregate;

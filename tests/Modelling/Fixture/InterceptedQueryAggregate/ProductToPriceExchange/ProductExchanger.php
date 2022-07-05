@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange;
 
 use Ecotone\Messaging\Attribute\Interceptor\Before;
 use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;

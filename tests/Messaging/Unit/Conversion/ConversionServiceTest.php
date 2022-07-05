@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Conversion;
+namespace Tests\Ecotone\Messaging\Unit\Conversion;
 
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -16,7 +16,7 @@ use stdClass;
 
 /**
  * Class ConversionServiceTest
- * @package Ecotone\Tests\Messaging\Unit\Conversion
+ * @package Tests\Ecotone\Messaging\Unit\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ConversionServiceTest extends TestCase

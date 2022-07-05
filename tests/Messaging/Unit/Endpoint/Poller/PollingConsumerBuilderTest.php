@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Endpoint\Poller;
+namespace Tests\Ecotone\Messaging\Unit\Endpoint\Poller;
 
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -16,14 +16,14 @@ use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Tests\Messaging\Fixture\Endpoint\ConsumerStoppingService;
-use Ecotone\Tests\Messaging\Fixture\Endpoint\ConsumerThrowingExceptionService;
-use Ecotone\Tests\Messaging\Fixture\Handler\DataReturningService;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
+use Tests\Ecotone\Messaging\Fixture\Endpoint\ConsumerThrowingExceptionService;
+use Tests\Ecotone\Messaging\Fixture\Handler\DataReturningService;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class PollingConsumerBuilderTest
- * @package Ecotone\Tests\Messaging\Unit\Endpoint
+ * @package Tests\Ecotone\Messaging\Unit\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class PollingConsumerBuilderTest extends MessagingTest

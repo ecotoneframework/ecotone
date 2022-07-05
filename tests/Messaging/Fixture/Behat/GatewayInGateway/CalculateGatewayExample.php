@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\GatewayInGateway;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\GatewayInGateway;
 
 use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\MessageEndpoint;

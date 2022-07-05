@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Annotation\ModuleConfiguration;
+namespace Tests\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration;
 
 use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
 use Ecotone\Messaging\Attribute\ServiceContext;

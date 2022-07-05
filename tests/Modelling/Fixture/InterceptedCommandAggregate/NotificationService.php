@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\InterceptedCommandAggregate;
+namespace Tests\Ecotone\Modelling\Fixture\InterceptedCommandAggregate;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\ServiceActivator;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Gateway;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Gateway;
 
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
@@ -47,35 +47,35 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use RuntimeException;
 use stdClass;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Converter\ExampleStdClassConverter;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Converter\ExceptionalConverter;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\ServiceWithSingleArgumentDefinedByConverter;
-use Ecotone\Tests\Messaging\Fixture\Handler\DataReturningService;
-use Ecotone\Tests\Messaging\Fixture\Handler\ExceptionMessageHandler;
-use Ecotone\Tests\Messaging\Fixture\Handler\Gateway\MessageReturningGateway;
-use Ecotone\Tests\Messaging\Fixture\Handler\Gateway\MixedReturningGateway;
-use Ecotone\Tests\Messaging\Fixture\Handler\Gateway\StringReturningGateway;
-use Ecotone\Tests\Messaging\Fixture\Handler\Gateway\UuidReturningGateway;
-use Ecotone\Tests\Messaging\Fixture\Handler\NoReturnMessageHandler;
-use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayClassAndMethodExample;
-use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayClassExample;
-use Ecotone\Tests\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayMethodExample;
-use Ecotone\Tests\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
-use Ecotone\Tests\Messaging\Fixture\Handler\StatefulHandler;
-use Ecotone\Tests\Messaging\Fixture\MessageConverter\FakeMessageConverter;
-use Ecotone\Tests\Messaging\Fixture\MessageConverter\FakeMessageConverterGatewayExample;
-use Ecotone\Tests\Messaging\Fixture\Service\CalculatingService;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyStdClass;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceive;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceWithFutureReceive;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceReceivingMessageAndReturningMessage;
-use Ecotone\Tests\Messaging\Unit\MessagingTest;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleStdClassConverter;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Converter\ExceptionalConverter;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Tests\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\ServiceWithSingleArgumentDefinedByConverter;
+use Tests\Ecotone\Messaging\Fixture\Handler\DataReturningService;
+use Tests\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
+use Tests\Ecotone\Messaging\Fixture\Handler\Gateway\MessageReturningGateway;
+use Tests\Ecotone\Messaging\Fixture\Handler\Gateway\MixedReturningGateway;
+use Tests\Ecotone\Messaging\Fixture\Handler\Gateway\StringReturningGateway;
+use Tests\Ecotone\Messaging\Fixture\Handler\Gateway\UuidReturningGateway;
+use Tests\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
+use Tests\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayClassAndMethodExample;
+use Tests\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayClassExample;
+use Tests\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorOnGatewayMethodExample;
+use Tests\Ecotone\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
+use Tests\Ecotone\Messaging\Fixture\Handler\StatefulHandler;
+use Tests\Ecotone\Messaging\Fixture\MessageConverter\FakeMessageConverter;
+use Tests\Ecotone\Messaging\Fixture\MessageConverter\FakeMessageConverterGatewayExample;
+use Tests\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnly;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyStdClass;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendAndReceive;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceWithFutureReceive;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceReceivingMessageAndReturningMessage;
+use Tests\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class GatewayProxyBuilderTest

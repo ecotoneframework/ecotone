@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Splitter;
+namespace Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Splitter;
 
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndpoint;
-use Ecotone\Tests\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndpoint;
+use Tests\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
 
 #[MessageEndpoint]
 class SplitterExample

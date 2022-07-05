@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate;
+namespace Tests\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\EventHandler;

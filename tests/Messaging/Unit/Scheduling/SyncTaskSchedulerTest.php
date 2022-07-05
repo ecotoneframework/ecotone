@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Scheduling;
+namespace Tests\Ecotone\Messaging\Unit\Scheduling;
 
-use Ecotone\Tests\Messaging\Fixture\Scheduling\StubTaskExecutor;
+use Tests\Ecotone\Messaging\Fixture\Scheduling\StubTaskExecutor;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\StubUTCClock;
@@ -12,7 +12,7 @@ use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
 
 /**
  * Class SyncTaskSchedulerTest
- * @package Ecotone\Tests\Messaging\Unit\Scheduling
+ * @package Tests\Ecotone\Messaging\Unit\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SyncTaskSchedulerTest extends TestCase

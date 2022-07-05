@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\OrderAggregate;
+namespace Tests\Ecotone\Modelling\Fixture\OrderAggregate;
 
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Modelling\Attribute\Aggregate;
@@ -9,8 +9,8 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\WithAggregateEvents;
-use Ecotone\Tests\Modelling\Fixture\Order\OrderWasPlaced;
-use Ecotone\Tests\Modelling\Fixture\Order\PlaceOrder;
+use Tests\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
+use Tests\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 
 #[Asynchronous("orders")]
 #[Aggregate]

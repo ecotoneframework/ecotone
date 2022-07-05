@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Annotation\ApplicationContext;
+namespace Tests\Ecotone\Messaging\Fixture\Annotation\ApplicationContext;
 
+use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\Messaging\Attribute\ServiceContext;
 
 class ApplicationContextWithConstructorParameters

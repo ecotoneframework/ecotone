@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut;
+namespace Tests\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut;
 
 use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\Parameter\Payload;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Tests\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
@@ -11,12 +11,12 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaders
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\BookStoreGatewayExample;
-use Ecotone\Tests\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
+use Tests\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\BookStoreGatewayExample;
+use Tests\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
 
 /**
  * Class AnnotationTransformerConfigurationTest
- * @package Ecotone\Tests\Messaging\Unit\Config\Annotation\Annotation
+ * @package Tests\Ecotone\Messaging\Unit\Config\Annotation\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class GatewayModuleTest extends AnnotationConfigurationTest

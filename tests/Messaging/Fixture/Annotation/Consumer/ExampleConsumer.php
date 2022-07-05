@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Annotation\Consumer;
+namespace Tests\Ecotone\Messaging\Fixture\Annotation\Consumer;
 
 use Ecotone\Messaging\Attribute\MessageConsumer;
 use Ecotone\Messaging\Attribute\MessageEndpoint;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Handler;
+namespace Tests\Ecotone\Messaging\Unit\Handler;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
@@ -13,12 +13,12 @@ use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
-use Ecotone\Tests\Messaging\Fixture\Dto\OrderExample;
-use Ecotone\Tests\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
+use Tests\Ecotone\Messaging\Fixture\Dto\OrderExample;
+use Tests\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 
 /**
  * Class TypeDescriptorTest
- * @package Ecotone\Tests\Messaging\Unit\Handler
+ * @package Tests\Ecotone\Messaging\Unit\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class TypeDescriptorTest extends TestCase

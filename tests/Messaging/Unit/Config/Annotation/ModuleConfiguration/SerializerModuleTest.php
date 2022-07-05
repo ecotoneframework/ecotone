@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+namespace Tests\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
@@ -19,12 +19,12 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use ReflectionException;
 use stdClass;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Converter\ExampleSingleConverterService;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleSingleConverterService;
 
 /**
  * Class ConverterModuleTest
- * @package Ecotone\Tests\Messaging\Unit\Config\Annotation\ModuleConfiguration
+ * @package Tests\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SerializerModuleTest extends AnnotationConfigurationTest

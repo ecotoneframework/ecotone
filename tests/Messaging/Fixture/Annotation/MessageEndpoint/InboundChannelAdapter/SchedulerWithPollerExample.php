@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter;
+namespace Tests\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter;
 
 use Ecotone\Messaging\Attribute\Poller;
 use Ecotone\Messaging\Attribute\Scheduled;

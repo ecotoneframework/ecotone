@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Annotation\MessageEndpoint\Splitter;
+namespace Tests\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Splitter;
 use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Messaging\Attribute\Splitter;

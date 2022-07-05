@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor;
+namespace Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor;
 
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;

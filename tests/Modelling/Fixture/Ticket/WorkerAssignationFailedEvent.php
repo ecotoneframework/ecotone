@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\Ticket;
+namespace Tests\Ecotone\Modelling\Fixture\Ticket;
 
 
 class WorkerAssignationFailedEvent

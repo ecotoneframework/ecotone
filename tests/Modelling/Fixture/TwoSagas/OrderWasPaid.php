@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\TwoSagas;
+namespace Tests\Ecotone\Modelling\Fixture\TwoSagas;
 
 
 class OrderWasPaid

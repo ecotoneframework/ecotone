@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Processor;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
@@ -12,17 +12,17 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConve
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeOne;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorWithServicesExample;
-use Ecotone\Tests\Messaging\Fixture\Behat\Calculating\Calculator;
-use Ecotone\Tests\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
-use Ecotone\Tests\Messaging\Fixture\Service\CalculatingService;
-use Ecotone\Tests\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeOne;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorWithServicesExample;
+use Tests\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
+use Tests\Ecotone\Messaging\Fixture\Behat\Calculating\CalculatorInterceptor;
+use Tests\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Tests\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 
 /**
  * Class MethodInterceptorTest
- * @package Ecotone\Tests\Messaging\Unit\Handler\Processor
+ * @package Tests\Ecotone\Messaging\Unit\Handler\Processor
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class MethodInterceptorTest extends TestCase

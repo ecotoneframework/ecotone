@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Fixture\Handler\Property;
+namespace Tests\Ecotone\Messaging\Fixture\Handler\Property;
 
-use Ecotone\Tests\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
+use Tests\Ecotone\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
 
 class ArrayTypeWithInlineDocblockProperty
 {

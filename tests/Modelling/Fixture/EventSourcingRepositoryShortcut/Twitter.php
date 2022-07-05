@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Modelling\Fixture\EventSourcingRepositoryShortcut;
+namespace Tests\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;

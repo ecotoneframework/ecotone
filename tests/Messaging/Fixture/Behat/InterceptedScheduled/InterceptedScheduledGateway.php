@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Tests\Messaging\Fixture\Behat\InterceptedScheduled;
+namespace Tests\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled;
 
 use Ecotone\Messaging\Attribute\MessageGateway;
 

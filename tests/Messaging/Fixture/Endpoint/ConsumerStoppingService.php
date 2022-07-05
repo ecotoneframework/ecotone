@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Endpoint;
+namespace Tests\Ecotone\Messaging\Fixture\Endpoint;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 
 /**
  * Class InboundChannelAdapterStoppingService
- * @package Ecotone\Tests\Messaging\Fixture\Endpoint
+ * @package Tests\Ecotone\Messaging\Fixture\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ConsumerStoppingService

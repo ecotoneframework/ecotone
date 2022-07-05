@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Processor;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Processor;
 
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -12,10 +12,10 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderConverter;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeOne;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeThree;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeTwo;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeOne;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeThree;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeTwo;
 
 class AroundInterceptorReferenceTest extends TestCase
 {

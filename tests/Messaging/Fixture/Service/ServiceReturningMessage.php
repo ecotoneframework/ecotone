@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Fixture\Service;
+namespace Tests\Ecotone\Messaging\Fixture\Service;
 use Ecotone\Messaging\Message;
 
 /**
  * Class ServiceReturningMessage
- * @package Ecotone\Tests\Messaging\Fixture\Service
+ * @package Tests\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ServiceReturningMessage

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Chain;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Chain;
 
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
@@ -11,17 +11,17 @@ use Ecotone\Messaging\Conversion\ReferenceServiceConverter;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Tests\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
-use Ecotone\Tests\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
-use Ecotone\Tests\Messaging\Fixture\Handler\CombinedConversion\Order;
-use Ecotone\Tests\Messaging\Fixture\Handler\CombinedConversion\OrderConverter;
-use Ecotone\Tests\Messaging\Fixture\Handler\CombinedConversion\OrderIdIncreaser;
-use Ecotone\Tests\Messaging\Fixture\Handler\CombinedConversion\OrderNamePrefixer;
-use Ecotone\Tests\Messaging\Fixture\Handler\CombinedConversion\OrderReceiver;
-use Ecotone\Tests\Messaging\Fixture\Handler\Transformer\PassThroughTransformer;
-use Ecotone\Tests\Messaging\Fixture\Handler\Transformer\StdClassTransformer;
-use Ecotone\Tests\Messaging\Fixture\Handler\Transformer\StringTransformer;
-use Ecotone\Tests\Messaging\Fixture\Service\CalculatingService;
+use Tests\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Tests\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
+use Tests\Ecotone\Messaging\Fixture\Handler\CombinedConversion\Order;
+use Tests\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderConverter;
+use Tests\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderIdIncreaser;
+use Tests\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderNamePrefixer;
+use Tests\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderReceiver;
+use Tests\Ecotone\Messaging\Fixture\Handler\Transformer\PassThroughTransformer;
+use Tests\Ecotone\Messaging\Fixture\Handler\Transformer\StdClassTransformer;
+use Tests\Ecotone\Messaging\Fixture\Handler\Transformer\StringTransformer;
+use Tests\Ecotone\Messaging\Fixture\Service\CalculatingService;
 use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -41,7 +41,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class ChainMessageHandlerBuilderTest
- * @package Ecotone\Tests\Messaging\Unit\Handler\Chain
+ * @package Tests\Ecotone\Messaging\Unit\Handler\Chain
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ChainMessageHandlerBuilderTest extends TestCase

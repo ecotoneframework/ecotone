@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Fixture\Saga;
+namespace Tests\Ecotone\Modelling\Fixture\Saga;
 
 
 class PaymentWasDoneEvent

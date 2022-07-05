@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Ecotone\Tests\Messaging\Unit\Handler\Logger;
+namespace Tests\Ecotone\Messaging\Unit\Handler\Logger;
 
 use Psr\Log\LoggerInterface;
 
 /**
  * Class LoggerExample
- * @package Ecotone\Tests\Messaging\Unit\Handler\Logger
+ * @package Tests\Ecotone\Messaging\Unit\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class LoggerExample implements LoggerInterface

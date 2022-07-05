@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ecotone\Tests\Modelling\Unit;
+namespace Tests\Ecotone\Modelling\Unit;
 
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
@@ -9,15 +9,15 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\RepositoryStorage;
 use PHPUnit\Framework\TestCase;
-use Ecotone\Tests\Modelling\Fixture\Blog\Article;
-use Ecotone\Tests\Modelling\Fixture\Blog\InMemoryArticleStandardRepository;
-use Ecotone\Tests\Modelling\Fixture\Blog\PublishArticleCommand;
-use Ecotone\Tests\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
-use Ecotone\Tests\Modelling\Fixture\Order\PlaceOrder;
-use Ecotone\Tests\Modelling\Fixture\OrderAggregate\Order;
-use Ecotone\Tests\Modelling\Fixture\Renter\Appointment;
-use Ecotone\Tests\Modelling\Fixture\Renter\AppointmentRepositoryBuilder;
-use Ecotone\Tests\Modelling\Fixture\Renter\AppointmentStandardRepository;
+use Tests\Ecotone\Modelling\Fixture\Blog\Article;
+use Tests\Ecotone\Modelling\Fixture\Blog\InMemoryArticleStandardRepository;
+use Tests\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
+use Tests\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
+use Tests\Ecotone\Modelling\Fixture\Order\PlaceOrder;
+use Tests\Ecotone\Modelling\Fixture\OrderAggregate\Order;
+use Tests\Ecotone\Modelling\Fixture\Renter\Appointment;
+use Tests\Ecotone\Modelling\Fixture\Renter\AppointmentRepositoryBuilder;
+use Tests\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 
 class RepositoryStorageTest extends TestCase
 {

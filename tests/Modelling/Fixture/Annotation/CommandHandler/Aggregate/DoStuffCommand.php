@@ -6,11 +6,11 @@
  * Time: 17:14
  */
 
-namespace Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Aggregate;
+namespace Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate;
 
 /**
  * Class DoStuffCommand
- * @package Ecotone\Tests\Modelling\Fixture\Annotation\CommandHandler\Aggregate
+ * @package Tests\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class DoStuffCommand

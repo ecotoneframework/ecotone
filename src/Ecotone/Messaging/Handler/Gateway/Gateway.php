@@ -27,7 +27,7 @@ use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\QueryBus;
-use Ecotone\Tests\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\Job;
+use Tests\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\Job;
 use Throwable;
 
 /**

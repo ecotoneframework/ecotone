@@ -7,7 +7,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
  * Class SymfonyExpressionEvaluationAdapter
- * @package Ecotone\Tests\Messaging\Handler\Enricher
+ * @package Tests\Ecotone\Messaging\Handler\Enricher
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService

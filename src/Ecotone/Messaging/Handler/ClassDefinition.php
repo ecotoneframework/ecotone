@@ -10,8 +10,8 @@ use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Tests\Messaging\Fixture\Behat\Calculating\BeforeMultiplyCalculation;
-use Ecotone\Tests\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId;
+use Tests\Ecotone\Messaging\Fixture\Behat\Calculating\BeforeMultiplyCalculation;
+use Tests\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId;
 
 /**
  * Class ClassDefinition

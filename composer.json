@@ -49,5 +49,10 @@
         "ecotone/modelling": "self.version"
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.32.2-dev"
+        }
+    }
 }

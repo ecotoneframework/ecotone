@@ -257,7 +257,13 @@ class FileSystemAnnotationFinder implements AnnotationFinder
     private function init(string $rootProjectDir, array $namespacesToUse, string $catalogToLoad, AutoloadNamespaceParser $autoloadNamespaceParser)
     {
         $classes      = [];
-        $composerPath = rtrim(realpath($rootProjectDir), "/") . "/composer.json";
+        $rootProjectDir = realpath(rtrim($rootProjectDir, "/"));
+
+        while (realpath($rootProjectDir) !== false && !file_exists($rootProjectDir . DIRECTORY_SEPARATOR . "/vendor/autoload.php")) {
+            $rootProjectDir = $rootProjectDir . DIRECTORY_SEPARATOR . "..";
+        }
+
+        $composerPath = $rootProjectDir . DIRECTORY_SEPARATOR . "composer.json";;
         if ($catalogToLoad && !file_exists($composerPath)) {
             throw new InvalidArgumentException("Ecotone requires psr-4 or psr-0 compatible autoload. Can't load src, composer.json not found in {$composerPath}");
         }

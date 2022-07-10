@@ -22,12 +22,12 @@
 >
   <coverage processUncoveredFiles="true">
     <include>
-      <directory suffix=".php">./packages/**/*</directory>
+      <directory suffix=".php">./src/**/*</directory>
     </include>
   </coverage>
   <testsuites>
-    <testsuite name="Core testse">
-      <directory>packages/Core/tests</directory>
+    <testsuite name="Unit Tests">
+      <directory>tests</directory>
     </testsuite>
   </testsuites>
 </phpunit>

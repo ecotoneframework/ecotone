@@ -4,5 +4,9 @@ bin/
 tests/coverage
 !tests/coverage/.gitkeep
 file
+**/file
 .phpunit.result.cache
+**/.phpunit.result.cache
 composer.lock
+.htaccess
+cache

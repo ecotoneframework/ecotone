@@ -1,15 +1,67 @@
-version: "3"
+version: "3.8"
 
 services:
   app:
-    image: simplycodedsoftware/php:8.0
+    image: simplycodedsoftware/php:8.1
     volumes:
       - "$PWD:/data/app"
-    user: 1000:1000
     working_dir: "/data/app"
     command: sleep 99999
     networks:
       - default
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # 172.17.0.1
+    environment:
+      COMPOSER_HOME: /data/app
+      COMPOSE_HTTP_TIMEOUT: 9999
+      RABBIT_HOST: "rabbitmq"
+      DATABASE_DSN: pgsql://ecotone:secret@database:5432/ecotone
+  app_8_0:
+    image: simplycodedsoftware/php:8.0
+    volumes:
+      - "$PWD:/data/app"
+    working_dir: "/data/app"
+    command: sleep 99999
+    networks:
+      - default
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # 172.17.0.1
+    environment:
+      COMPOSER_HOME: /data/app
+      COMPOSE_HTTP_TIMEOUT: 9999
+      RABBIT_HOST: "rabbitmq"
+      DATABASE_DSN: pgsql://ecotone:secret@database:5432/ecotone
+  database:
+    image: postgres:12.1
+    networks:
+      - default
+    environment:
+      POSTGRES_USER: "ecotone"
+      POSTGRES_PASSWORD: "secret"
+    ports:
+      - "5432:5432"
+  database-mysql:
+    image: mysql:8.0
+    networks:
+      - default
+    environment:
+      MYSQL_ROOT_PASSWORD: "secret"
+      MYSQL_USER: "ecotone"
+      MYSQL_PASSWORD: "secret"
+      MYSQL_DATABASE: "ecotone"
+    ports:
+      - "3306:3306"
+  rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - default
+    ports:
+      - "15672:15672"
 networks:
   default:
     external:

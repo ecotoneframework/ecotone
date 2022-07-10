@@ -1,5 +1,5 @@
 <p align="left"><a href="https://ecotone.tech" target="_blank">
-    <img src="https://github.com/ecotoneframework/ecotone/blob/master/ecotone_small.png?raw=true">
+    <img src="https://github.com/ecotoneframework/ecotone/blob/main/ecotone_small.png?raw=true">
 </a></p>
 
 ![Github Actions](https://github.com/ecotoneFramework/ecotone/actions/workflows/php.yml/badge.svg)

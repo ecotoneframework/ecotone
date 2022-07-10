@@ -26,8 +26,11 @@
     </include>
   </coverage>
   <testsuites>
-    <testsuite name="Core testse">
+    <testsuite name="Core tests">
       <directory>packages/Core/tests</directory>
+    </testsuite>
+    <testsuite name="Dbal tests">
+      <directory>packages/Dbal/tests</directory>
     </testsuite>
   </testsuites>
 </phpunit>

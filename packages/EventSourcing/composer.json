@@ -1,0 +1,53 @@
+{
+  "name": "ecotone/pdo-event-sourcing",
+  "license": "MIT",
+  "homepage": "https://docs.ecotone.tech/",
+  "type": "library",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "authors": [
+    {
+      "name": "Dariusz Gafka",
+      "email": "dgafka.mail@gmail.com"
+    }
+  ],
+  "keywords": [
+    "dbal",
+    "ecotone"
+  ],
+  "description": "Extends Ecotone with Event Sourcing using Prooph PDO Event Store",
+  "autoload": {
+    "psr-4": {
+      "Ecotone\\EventSourcing\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\Ecotone\\EventSourcing\\": ["tests"]
+    }
+  },
+  "require": {
+    "ecotone/dbal": "2.0.0-dev",
+    "prooph/pdo-event-store": "^1.13"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5",
+    "behat/behat": "^3.10",
+    "doctrine/persistence": "^1.3|^2.0",
+    "phpstan/phpstan": "^1.8"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.32.2-dev"
+    }
+  },
+  "scripts": {
+    "tests": [
+      "vendor/bin/behat",
+      "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/behat",
+      "vendor/bin/phpunit",
+      "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/phpunit",
+      "vendor/bin/phpstan"
+    ]
+  }
+}

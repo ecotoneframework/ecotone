@@ -21,9 +21,7 @@
   "autoload-dev": {
     "psr-4": {
       "Test\\Ecotone\\": "tests",
-      "IncorrectAttribute\\": [
-        "tests\\AnnotationFinder\\Fixture\\Usage\\Attribute\\TestingNamespace\\IncorrectAttribute\\TestingNamespace"
-      ]
+      "IncorrectAttribute\\": "tests/AnnotationFinder/Fixture/Usage/Attribute/TestingNamespace/IncorrectAttribute/TestingNamespace"
     }
   },
   "require": {
@@ -33,10 +31,9 @@
     "friendsofphp/proxy-manager-lts": "^1.0.12"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.5.10",
+    "phpunit/phpunit": "^9.5",
     "behat/behat": "^3.10",
-    "php-coveralls/php-coveralls": "^2.5",
-    "phpstan/phpstan": "^1.7",
+    "phpstan/phpstan": "^1.8",
     "symfony/expression-language": "^6.0"
   }
 }

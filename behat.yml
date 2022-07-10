@@ -4,6 +4,18 @@ default:
     formatters:
         pretty: true
     suites:
-      default:
-          paths:    [ packages/Core/tests/Messaging/Behat/features, packages/Core/tests/Modelling/Behat/features ]
-          contexts: [ Test\Ecotone\Messaging\Behat\Bootstrap\DomainContext, Test\Ecotone\Modelling\Behat\Bootstrap\DomainContext, Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext ]
+      core:
+          paths:
+            - packages/Core/tests/Messaging/Behat/features
+            - packages/Core/tests/Modelling/Behat/features
+            - packages/Dbal/tests/Behat/features
+          contexts:
+            - Test\Ecotone\Messaging\Behat\Bootstrap\DomainContext
+            - Test\Ecotone\Modelling\Behat\Bootstrap\DomainContext
+            - Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext
+            - Test\Ecotone\Dbal\Behat\Bootstrap\DomainContext
+      dbal:
+          paths:
+            - packages/Dbal/tests/Behat/features
+          contexts:
+            - Test\Ecotone\Dbal\Behat\Bootstrap\DomainContext

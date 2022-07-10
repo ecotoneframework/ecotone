@@ -13,40 +13,114 @@
     "description": "Ecotone is Service Bus Implementation, which enables message driven architecture with DDD, CQRS, Event Sourcing in PHP",
     "autoload": {
         "psr-4": {
-            "Ecotone\\": "packages",
+            "Ecotone\\": [
+                "packages",
+                "packages/Core/src"
+            ],
+            "Ecotone\\Amqp\\": "packages/Amqp/src",
             "Ecotone\\AnnotationFinder\\": "packages/Core/src/AnnotationFinder/",
+            "Ecotone\\Dbal\\": [
+                "packages/Core/src/Dbal/",
+                "packages/Dbal/src"
+            ],
+            "Ecotone\\Enqueue\\": [
+                "packages/Core/src/Enqueue/",
+                "packages/Enqueue/src"
+            ],
+            "Ecotone\\EventSourcing\\": "packages/EventSourcing/src",
+            "Ecotone\\JMSConverter\\": "packages/JmsConverter/src",
+            "Ecotone\\Laravel\\": "packages/Laravel/src",
             "Ecotone\\Lite\\": "packages/Core/src/Lite/",
             "Ecotone\\Messaging\\": "packages/Core/src/Messaging/",
-            "Ecotone\\Modelling\\": "packages/Core/src/Modelling/"
+            "Ecotone\\Modelling\\": "packages/Core/src/Modelling/",
+            "Ecotone\\SymfonyBundle\\": "packages/Symfony/SymfonyBundle",
+            "Ecotone\\SymfonyBundle\\DepedencyInjection\\": "packages/Symfony/DepedencyInjection"
         }
     },
     "autoload-dev": {
         "psr-4": {
+            "Behat\\Bootstrap\\": "packages/Symfony/tests/Behat/Bootstrap",
+            "Ecotone\\SymfonyBundle\\App\\": "packages/Symfony/App",
+            "Fixture\\": "packages/Symfony/tests/Fixture",
             "IncorrectAttribute\\": [
-                "packages\\Core\\tests\\AnnotationFinder\\Fixture\\Usage\\Attribute\\TestingNamespace\\IncorrectAttribute\\TestingNamespace"
+                "packages/Core/tests/AnnotationFinder/Fixture/Usage/Attribute/TestingNamespace/IncorrectAttribute/TestingNamespace",
+                "packages\\Core\\tests\\AnnotationFinder\\Fixture\\Usage\\Attribute\\TestingNamespace\\IncorrectAttribute\\TestingNamespace",
+                "tests\\AnnotationFinder\\Fixture\\Usage\\Attribute\\TestingNamespace\\IncorrectAttribute\\TestingNamespace"
             ],
-            "Test\\Ecotone\\": "packages\\Core\\tests"
+            "Test\\": "packages/Symfony/tests/phpunit",
+            "Test\\Ecotone\\": [
+                "packages/Core/tests",
+                "packages/Enqueue/tests",
+                "packages\\Core\\tests"
+            ],
+            "Test\\Ecotone\\Amqp\\": [
+                "packages/Amqp/tests"
+            ],
+            "Test\\Ecotone\\Dbal\\": [
+                "packages/Dbal/tests"
+            ],
+            "Test\\Ecotone\\EventSourcing\\": [
+                "packages/EventSourcing/tests"
+            ],
+            "Test\\Ecotone\\JMSConverter\\": [
+                "packages/JmsConverter/tests"
+            ],
+            "Test\\Ecotone\\Laravel\\": "packages/Laravel/tests",
+            "Tests\\Ecotone\\": "tests"
         }
     },
     "require": {
+        "doctrine/dbal": "^3.1",
+        "ecotone/ecotone": "2.0.0-dev",
+        "enqueue/amqp-ext": "^0.10.4",
+        "enqueue/dbal": "^0.10.0",
+        "enqueue/dsn": "*",
+        "enqueue/enqueue": "^0.10.0",
+        "ext-amqp": "*",
         "friendsofphp/proxy-manager-lts": "^1.0.12",
+        "jms/serializer": "^3.17",
+        "laminas/laminas-zendframework-bridge": "^1.0.0",
+        "laravel/framework": "^9.0",
         "php": "^8.0",
+        "prooph/pdo-event-store": "^1.13",
         "psr/log": "^1.0|^2.0|^3.0",
-        "ramsey/uuid": "^4.0"
+        "queue-interop/queue-interop": "*",
+        "ramsey/uuid": "^4.0",
+        "symfony/cache": "^5.4|^6.1",
+        "symfony/console": ">=4.0",
+        "symfony/framework-bundle": ">=4.0"
     },
     "require-dev": {
         "behat/behat": "^3.10",
+        "doctrine/annotations": "^1.13",
+        "doctrine/cache": "^1.0.0",
+        "doctrine/orm": "^2.0|^3.0",
+        "doctrine/persistence": "^1.3|^2.0",
+        "friends-of-behat/symfony-extension": "^2.1",
+        "guzzlehttp/psr7": "^2.0",
+        "orchestra/testbench": "^7.6",
         "php-coveralls/php-coveralls": "^2.5",
-        "phpstan/phpstan": "^1.7",
+        "phpstan/phpstan": "^1.8",
         "phpunit/phpunit": "^9.5",
         "symfony/expression-language": "^6.0",
         "symplify/monorepo-builder": "^11.0"
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ecotone\\Laravel\\EcotoneProvider"
+            ]
+        }
+    },
     "replace": {
-        "ecotone/annotation-finder": "self.version",
-        "ecotone/lite": "self.version",
-        "ecotone/messaging": "self.version",
-        "ecotone/modelling": "self.version"
+        "ecotone/amqp": "self.version",
+        "ecotone/core": "self.version",
+        "ecotone/dbal": "self.version",
+        "ecotone/enqueue": "self.version",
+        "ecotone/jms-converter": "self.version",
+        "ecotone/laravel": "self.version",
+        "ecotone/pdo-event-sourcing": "self.version",
+        "ecotone/symfony-bundle": "self.version"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

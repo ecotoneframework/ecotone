@@ -1,0 +1,20 @@
+default:
+    extensions:
+      Behat\Symfony2Extension:
+        kernel:
+          class: "Ecotone\\SymfonyBundle\\App\\Kernel"
+    translation:
+        locale: en
+    formatters:
+        pretty: true
+    suites:
+      default:
+          autoload:
+              '': "%paths.base%/app/autoload.php"
+          paths:    [ tests/Behat/features ]
+          type: symfony_bundle
+          bundle: EcotoneSymfonyBundle
+          contexts:
+            - Behat\Bootstrap\DomainContext:
+                  carService: "@Fixture\\Car\\CarService"
+

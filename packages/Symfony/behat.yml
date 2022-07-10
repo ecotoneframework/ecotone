@@ -1,0 +1,18 @@
+default:
+    extensions:
+      FriendsOfBehat\SymfonyExtension:
+        bootstrap: ~
+        kernel:
+          class: Ecotone\SymfonyBundle\App\Kernel
+          environment: ~
+          debug: ~
+    translation:
+        locale: en
+    formatters:
+        pretty: true
+    suites:
+      default:
+          paths:    [ tests/Behat/features ]
+          contexts:
+            - Behat\Bootstrap\DomainContext:
+

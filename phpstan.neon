@@ -2,3 +2,5 @@ parameters:
 	level: 1
 	paths:
 		- packages/Core/src
+		- packages/Enqueue/src
+		- packages/Dbal/src

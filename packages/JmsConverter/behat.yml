@@ -1,0 +1,9 @@
+default:
+    translation:
+        locale: en
+    formatters:
+        pretty: true
+    suites:
+      default:
+          paths:    [ tests/Amqp/Behat/features ]
+          contexts: [ Test\Ecotone\Amqp\Behat\Bootstrap\DomainContext ]

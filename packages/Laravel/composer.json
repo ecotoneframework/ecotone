@@ -1,0 +1,56 @@
+{
+  "name": "ecotone/laravel",
+  "minimum-stability": "dev",
+  "homepage": "https://docs.ecotone.tech/",
+  "prefer-stable": true,
+  "license": "MIT",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Dariusz Gafka",
+      "email": "dgafka.mail@gmail.com"
+    }
+  ],
+  "keywords": [
+    "ddd",
+    "cqrs",
+    "messaging",
+    "eip",
+    "distributed architecture",
+    "ecotone",
+    "ddd and cqrs on top of eip"
+  ],
+  "description": "Laravel integration for Ecotone",
+  "autoload": {
+    "psr-4": {
+      "Ecotone\\Laravel\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\Ecotone\\Laravel\\": "tests"
+    }
+  },
+  "require": {
+    "php": "^8.0",
+    "ecotone/core": "2.0.0-dev",
+    "laravel/framework": "^9.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5",
+    "behat/behat": "^3.10",
+    "guzzlehttp/psr7": "^2.0",
+    "phpstan/phpstan": "^1.8",
+    "orchestra/testbench": "^7.6"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Ecotone\\Laravel\\EcotoneProvider"
+      ]
+    },
+    "branch-alias": {
+      "dev-master": "1.32.2-dev"
+    }
+  }
+}

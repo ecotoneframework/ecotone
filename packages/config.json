@@ -1,0 +1,36 @@
+{
+    "repositories": [
+      {
+        "type": "path",
+        "url": "../Amqp"
+      },
+      {
+        "type": "path",
+        "url": "../Core"
+      },
+      {
+        "type": "path",
+        "url": "../Dbal"
+      },
+      {
+        "type": "path",
+        "url": "../Enqueue"
+      },
+      {
+        "type": "path",
+        "url": "../EventSourcing"
+      },
+      {
+        "type": "path",
+        "url": "../JmsConverter"
+      },
+      {
+        "type": "path",
+        "url": "../Laravel"
+      },
+      {
+        "type": "path",
+        "url": "../Symfony"
+      }
+    ]
+}

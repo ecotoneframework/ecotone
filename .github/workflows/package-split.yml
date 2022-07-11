@@ -26,11 +26,6 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: List
-        run: |
-          ls
-          ls bin
-
       - name: Get Packages
         id: get_json
         run: echo "::set-output name=json::$(php ./bin/get-packages)"

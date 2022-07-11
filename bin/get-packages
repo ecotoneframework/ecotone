@@ -46,4 +46,4 @@ foreach ($directories as $directory) {
     ];
 }
 
-echo json_encode($jsonArray, JSON_PRETTY_PRINT);
+echo json_encode($jsonArray);

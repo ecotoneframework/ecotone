@@ -28,7 +28,7 @@ jobs:
 
       - name: Get Packages
         id: get_json
-        run: echo "::set-output name=json::$(bin/get-packages)"
+        run: echo "::set-output name=json::$(php ./bin/get-packages)"
 
       - name: Output Packages
         run: echo "${{ steps.get_json.outputs.json }}"

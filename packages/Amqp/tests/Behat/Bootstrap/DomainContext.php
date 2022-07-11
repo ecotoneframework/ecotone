@@ -62,28 +62,28 @@ class DomainContext extends TestCase implements Context
                         new \Test\Ecotone\Amqp\Fixture\FailureTransaction\OrderService(),
                     ];
                 }
-            break;
+                break;
             case "Test\Ecotone\Amqp\Fixture\SuccessTransaction":
                 {
                     $objects = [
                         new \Test\Ecotone\Amqp\Fixture\SuccessTransaction\OrderService(),
                     ];
                 }
-            break;
+                break;
             case "Test\Ecotone\Amqp\Fixture\Shop":
                 {
                     $objects = [
                         new ShoppingCart(),
                     ];
                 }
-            break;
+                break;
             case "Test\Ecotone\Amqp\Fixture\ErrorChannel":
                 {
                     $objects = [
                         new \Test\Ecotone\Amqp\Fixture\ErrorChannel\OrderService(),
                     ];
                 }
-            break;
+                break;
             case "Test\Ecotone\Amqp\Fixture\DeadLetter":
                 {
                     $objects = [

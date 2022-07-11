@@ -1,7 +1,7 @@
 <?php
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Ordering;
-use Ramsey\Uuid\Uuid;
+
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -29,7 +29,7 @@ class OrderConfirmation
      * @param Order $order
      * @return OrderConfirmation
      */
-    public static function fromOrder(Order $order) : self
+    public static function fromOrder(Order $order): self
     {
         return new self($order->getOrderId());
     }
@@ -38,7 +38,7 @@ class OrderConfirmation
      * @param UuidInterface $orderId
      * @return OrderConfirmation
      */
-    public static function createFromUuid(UuidInterface $orderId) : self
+    public static function createFromUuid(UuidInterface $orderId): self
     {
         return new self($orderId->toString());
     }

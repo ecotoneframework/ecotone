@@ -1,16 +1,14 @@
 <?php
 
-
 namespace Test\Ecotone\JMSConverter\Fixture\Configuration\ClassToClass;
 
 use Ecotone\Messaging\Attribute\Converter;
-use Ecotone\Messaging\Attribute\MessageEndpoint;
+use stdClass;
 
 class ClassToClassConverter
 {
     #[Converter]
-    public function convert(\stdClass $stdClass) : \stdClass
+    public function convert(stdClass $stdClass): stdClass
     {
-
     }
 }

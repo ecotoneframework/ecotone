@@ -10,7 +10,7 @@ use Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Receiver\TicketServiceReceiv
 
 class UserService
 {
-    const CHANGE_BILLING_DETAILS = "changeBillingDetails";
+    public const CHANGE_BILLING_DETAILS = 'changeBillingDetails';
 
     #[CommandHandler(self::CHANGE_BILLING_DETAILS)]
     public function changeBillingDetails(#[Reference] DistributedBus $commandBus)
@@ -18,7 +18,7 @@ class UserService
         $commandBus->sendCommand(
             TicketServiceMessagingConfiguration::SERVICE_NAME,
             TicketServiceReceiver::CREATE_TICKET_ENDPOINT,
-            "User changed billing address"
+            'User changed billing address'
         );
     }
 }

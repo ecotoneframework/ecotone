@@ -4,7 +4,6 @@ namespace Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod;
 
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\StandardRepository;
-use Ramsey\Uuid\Uuid;
 
 #[Repository]
 class UserRepository implements StandardRepository

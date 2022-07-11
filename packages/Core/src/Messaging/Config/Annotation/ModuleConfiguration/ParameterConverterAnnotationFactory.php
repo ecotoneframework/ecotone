@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
@@ -20,7 +21,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class ParameterConverterAnnotationFactory
@@ -77,24 +77,24 @@ class ParameterConverterAnnotationFactory
                         $interfaceParameter->getName(),
                         $annotation->getHeaderName(),
                         $annotation->getExpression(),
-                        !$interfaceParameter->doesAllowNulls()
+                        ! $interfaceParameter->doesAllowNulls()
                     );
-                } else if ($interfaceParameter->doesAllowNulls()) {
+                } elseif ($interfaceParameter->doesAllowNulls()) {
                     return HeaderBuilder::createOptional($interfaceParameter->getName(), $annotation->getHeaderName());
                 } else {
                     return HeaderBuilder::create($interfaceParameter->getName(), $annotation->getHeaderName());
                 }
-            } else if ($annotation instanceof Payload) {
+            } elseif ($annotation instanceof Payload) {
                 if ($annotation->expression) {
                     return PayloadExpressionBuilder::create($interfaceParameter->getName(), $annotation->getExpression());
                 } else {
                     return PayloadBuilder::create($interfaceParameter->getName());
                 }
-            } else if ($annotation instanceof Reference) {
+            } elseif ($annotation instanceof Reference) {
                 return ReferenceBuilder::create($interfaceParameter->getName(), $annotation->getReferenceName() ? $annotation->getReferenceName() : $interfaceParameter->getTypeHint());
-            } else if ($annotation instanceof Headers) {
+            } elseif ($annotation instanceof Headers) {
                 return AllHeadersBuilder::createWith($interfaceParameter->getName());
-            }else if ($annotation instanceof ConfigurationVariable) {
+            } elseif ($annotation instanceof ConfigurationVariable) {
                 return ConfigurationVariableBuilder::createFrom($annotation->getName(), $interfaceParameter);
             }
         }

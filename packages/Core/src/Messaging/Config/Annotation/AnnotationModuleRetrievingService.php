@@ -1,12 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
 use Ecotone\Messaging\Attribute\ServiceContext;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Module;
 use Ecotone\Messaging\Config\ModuleRetrievingService;
@@ -57,7 +58,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
                 $annotationRegistration->getClassName(),
                 $annotationRegistration->getMethodName()
             );
-            if ($reflectionClass->hasMethod("__construct") && $reflectionClass->getMethod("__construct")->getParameters()) {
+            if ($reflectionClass->hasMethod('__construct') && $reflectionClass->getMethod('__construct')->getParameters()) {
                 throw ConfigurationException::create("{$annotationRegistration} should not contains any constructor parameters");
             }
             $newInstance = $reflectionClass->newInstance();
@@ -75,9 +76,9 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
                 $parameters[] = ConfigurationVariableBuilder::createFrom($variableName, $interfaceParameter);
             }
             $methodInvoker = MethodInvoker::createWith($interfaceToCall, $newInstance, $parameters, InMemoryReferenceSearchService::createWith([ConfigurationVariableService::REFERENCE_NAME => $this->variableConfigurationService]));
-            $extensionObjectToResolve = $methodInvoker->processMessage(MessageBuilder::withPayload("stub")->build());
+            $extensionObjectToResolve = $methodInvoker->processMessage(MessageBuilder::withPayload('stub')->build());
 
-            if (!is_array($extensionObjectToResolve)) {
+            if (! is_array($extensionObjectToResolve)) {
                 Assert::isObject($extensionObjectToResolve, "Incorrect configuration given in {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()}. Configuration returned by ServiceContext must be object or array of objects.");
 
                 $extensionObjects[] = $extensionObjectToResolve;

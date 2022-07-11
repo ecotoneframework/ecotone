@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling\CronIntegration;
 
+use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
 
 /**
@@ -44,7 +46,7 @@ class MonthField extends AbstractField
     /**
      * @inheritDoc
      *
-     * @param \DateTime|\DateTimeImmutable $date
+     * @param DateTime|DateTimeImmutable $date
      */
     public function increment(DateTimeInterface &$date, $invert = false, $parts = null): FieldInterface
     {

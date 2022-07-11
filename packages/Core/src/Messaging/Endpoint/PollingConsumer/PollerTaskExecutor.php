@@ -1,15 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
-use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Scheduling\TaskExecutor;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Throwable;
 
 /**
  * Class PollingConsumerTaskExecutor
@@ -36,7 +36,7 @@ class PollerTaskExecutor implements TaskExecutor
     {
         try {
             $message = $this->pollableChannel->receive();
-        }catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             throw new ConnectionException("Can't pool message from {$this->pollableChannelName} error happened.", 0, $exception);
         }
 

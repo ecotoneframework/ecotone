@@ -4,6 +4,7 @@ namespace Test\Ecotone\Messaging\Fixture\Handler;
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
+use InvalidArgumentException;
 
 /**
  * Class ExceptionMessageHandler
@@ -12,7 +13,7 @@ use Ecotone\Messaging\MessageHandler;
  */
 class ExceptionMessageHandler implements MessageHandler
 {
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -22,7 +23,7 @@ class ExceptionMessageHandler implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        throw new \InvalidArgumentException("testing exception");
+        throw new InvalidArgumentException('testing exception');
     }
 
     public function __toString()

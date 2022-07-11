@@ -1,11 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollOrThrow;
 
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
@@ -52,7 +51,8 @@ class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumer
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
 
         return PollOrThrowExceptionConsumer::create($messageHandlerBuilder->getEndpointId(), $pollableChannel, $messageHandlerBuilder->build(
-            $channelResolver, $referenceSearchService
+            $channelResolver,
+            $referenceSearchService
         ));
     }
 }

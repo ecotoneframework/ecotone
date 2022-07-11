@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Modelling;
 
 /**
@@ -12,7 +11,7 @@ interface EventSourcedRepository
 {
     public function canHandle(string $aggregateClassName): bool;
 
-    public function findBy(string $aggregateClassName, array $identifiers) : EventStream;
+    public function findBy(string $aggregateClassName, array $identifiers): EventStream;
 
     /**
      * @param int $versionBeforeHandling expected version before command handling, 0 in case there was no aggregate

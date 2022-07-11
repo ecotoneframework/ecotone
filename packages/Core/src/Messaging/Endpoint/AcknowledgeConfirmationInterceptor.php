@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
@@ -19,11 +19,13 @@ use Throwable;
  */
 class AcknowledgeConfirmationInterceptor
 {
-    private function __construct(private bool $shouldStopOnError){}
-
-    public static function createAroundInterceptor(PollingMetadata $pollingMetadata) : AroundInterceptorReference
+    private function __construct(private bool $shouldStopOnError)
     {
-        return AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new self($pollingMetadata->isStoppedOnError()), "ack", Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, "");
+    }
+
+    public static function createAroundInterceptor(PollingMetadata $pollingMetadata): AroundInterceptorReference
+    {
+        return AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new self($pollingMetadata->isStoppedOnError()), 'ack', Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, '');
     }
 
     /**
@@ -35,7 +37,7 @@ class AcknowledgeConfirmationInterceptor
      */
     public function ack(MethodInvocation $methodInvocation, Message $message)
     {
-        if (!$message->getHeaders()->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
+        if (! $message->getHeaders()->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
             return $methodInvocation->proceed();
         }
 

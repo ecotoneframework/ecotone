@@ -4,13 +4,10 @@ namespace Ecotone\Dbal\Deduplication;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Dbal\Configuration\DbalConfiguration;
-use Ecotone\Dbal\DbalReconnectableConnectionFactory;
-use Ecotone\Enqueue\CachedConnectionFactory;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -21,7 +18,7 @@ use Enqueue\Dbal\DbalConnectionFactory;
 #[ModuleAnnotation]
 class DeduplicationModule implements AnnotationModule
 {
-    const REMOVE_MESSAGE_AFTER_7_DAYS = 1000 * 60 * 60 * 24 * 7;
+    public const REMOVE_MESSAGE_AFTER_7_DAYS = 1000 * 60 * 60 * 24 * 7;
 
     private function __construct()
     {
@@ -44,7 +41,7 @@ class DeduplicationModule implements AnnotationModule
         $connectionFactory     = DbalConnectionFactory::class;
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof DbalConfiguration) {
-                if (!$extensionObject->isDeduplicatedEnabled()) {
+                if (! $extensionObject->isDeduplicatedEnabled()) {
                     return;
                 }
 
@@ -53,7 +50,7 @@ class DeduplicationModule implements AnnotationModule
             }
         }
 
-        if (!$isDeduplicatedEnabled) {
+        if (! $isDeduplicatedEnabled) {
             return;
         }
 
@@ -65,7 +62,7 @@ class DeduplicationModule implements AnnotationModule
                         new EpochBasedClock(),
                         self::REMOVE_MESSAGE_AFTER_7_DAYS
                     ),
-                    "deduplicate",
+                    'deduplicate',
                     Precedence::DATABASE_TRANSACTION_PRECEDENCE + 100,
                     AsynchronousRunningEndpoint::class
                 )

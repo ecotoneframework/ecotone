@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler\Chain;
-
 
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -19,25 +17,25 @@ class OutputChannelKeeperBuilder extends InputOutputMessageHandlerBuilder
 
     public function __construct(string $keptChannelName)
     {
-        $this->keeperGateway = GatewayProxyBuilder::create("", KeeperGateway::class, "execute", $keptChannelName);
+        $this->keeperGateway = GatewayProxyBuilder::create('', KeeperGateway::class, 'execute', $keptChannelName);
     }
 
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(OutputChannelKeeper::class, "keep");
+        return $interfaceToCallRegistry->getFor(OutputChannelKeeper::class, 'keep');
     }
 
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         return ServiceActivatorBuilder::createWithDirectReference(
             new OutputChannelKeeper($this->keeperGateway->buildWithoutProxyObject($referenceSearchService, $channelResolver)),
-            "keep"
+            'keep'
         )->build($channelResolver, $referenceSearchService);
     }
 
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [$interfaceToCallRegistry->getFor(OutputChannelKeeper::class, "keep")];
+        return [$interfaceToCallRegistry->getFor(OutputChannelKeeper::class, 'keep')];
     }
 
     public function getRequiredReferenceNames(): array

@@ -17,5 +17,5 @@ interface TransactionFactory
      * @param Message $requestMessage
      * @return Transaction
      */
-    public function begin(Message $requestMessage) : Transaction;
+    public function begin(Message $requestMessage): Transaction;
 }

@@ -16,5 +16,5 @@ interface ServiceReceivingMessageAndReturningMessage
      *
      * @return Message
      */
-    public function execute(Message $message) : Message;
+    public function execute(Message $message): Message;
 }

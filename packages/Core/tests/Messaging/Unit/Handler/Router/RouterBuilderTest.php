@@ -1,11 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Router;
 
-use Test\Ecotone\Messaging\Fixture\Router\MultipleChannelRouter;
-use Test\Ecotone\Messaging\Fixture\Router\Order;
-use Test\Ecotone\Messaging\Fixture\Router\SingleChannelRouter;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -15,32 +13,39 @@ use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Exception;
+use stdClass;
+use Test\Ecotone\Messaging\Fixture\Router\MultipleChannelRouter;
+use Test\Ecotone\Messaging\Fixture\Router\Order;
+use Test\Ecotone\Messaging\Fixture\Router\SingleChannelRouter;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class RouterBuilderTest
  * @package Ecotone\Messaging\Handler\Router
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class RouterBuilderTest extends MessagingTest
 {
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_message_to_single_channel()
     {
         $chanelName = 'buyChannel';
         $targetChannel = QueueChannel::create();
-        $objectToInvokeReference = "service-a";
+        $objectToInvokeReference = 'service-a';
 
         $router = RouterBuilder::create($objectToInvokeReference, 'pick')
                     ->build(
                         InMemoryChannelResolver::createFromAssociativeArray([
-                            $chanelName => $targetChannel
+                            $chanelName => $targetChannel,
                         ]),
                         InMemoryReferenceSearchService::createWith([
-                            $objectToInvokeReference => SingleChannelRouter::createWithChosenChannelName($chanelName)
+                            $objectToInvokeReference => SingleChannelRouter::createWithChosenChannelName($chanelName),
                         ])
                     );
 
@@ -53,7 +58,7 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_message_to_multiple_channels()
@@ -61,18 +66,18 @@ class RouterBuilderTest extends MessagingTest
         $targetChannel1 = QueueChannel::create();
         $targetChannel2 = QueueChannel::create();
 
-        $objectToInvokeReference = "service-a";
+        $objectToInvokeReference = 'service-a';
         $router = RouterBuilder::create($objectToInvokeReference, 'pick')
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     'channel1' => $targetChannel1,
-                    'channel2' => $targetChannel2
+                    'channel2' => $targetChannel2,
                 ]),
                 InMemoryReferenceSearchService::createWith([
                     $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([
                         'channel1',
-                        'channel2'
-                    ])
+                        'channel2',
+                    ]),
                 ])
             );
 
@@ -86,17 +91,17 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_resolution_is_required()
     {
-        $objectToInvokeReference = "service-a";
+        $objectToInvokeReference = 'service-a';
         $router = RouterBuilder::create($objectToInvokeReference, 'pick')
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([]),
                 InMemoryReferenceSearchService::createWith([
-                    $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([])
+                    $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([]),
                 ])
             );
 
@@ -109,18 +114,18 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_if_no_resolution_required_not_throwing_exception_when_no_resolution()
     {
-        $objectToInvokeReference = "service-a";
-        $router = RouterBuilder::create( $objectToInvokeReference, 'pick')
+        $objectToInvokeReference = 'service-a';
+        $router = RouterBuilder::create($objectToInvokeReference, 'pick')
             ->setResolutionRequired(false)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([]),
                 InMemoryReferenceSearchService::createWith([
-                    $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([])
+                    $objectToInvokeReference => MultipleChannelRouter::createWithChosenChannelName([]),
                 ])
             );
 
@@ -133,29 +138,29 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_with_payload_type()
     {
         $targetChannel1 = QueueChannel::create();
         $targetChannel2 = QueueChannel::create();
-        $inputChannelName = "input";
+        $inputChannelName = 'input';
 
         $router = RouterBuilder::createPayloadTypeRouter([
-            \stdClass::class => 'channel1',
-            Order::class => 'channel2'
+            stdClass::class => 'channel1',
+            Order::class => 'channel2',
         ])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     'channel1' => $targetChannel1,
                     'channel2' => $targetChannel2,
-                    $inputChannelName => DirectChannel::create()
+                    $inputChannelName => DirectChannel::create(),
                 ]),
                 InMemoryReferenceSearchService::createEmpty()
             );
 
-        $message = MessageBuilder::withPayload(new \stdClass())
+        $message = MessageBuilder::withPayload(new stdClass())
             ->build();
 
         $router->handle($message);
@@ -164,7 +169,7 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_to_default_when_not_hit()
@@ -173,17 +178,17 @@ class RouterBuilderTest extends MessagingTest
 
         $defaultResolutionChannel = 'default';
         $router                   = RouterBuilder::createPayloadTypeRouter([
-            Order::class => 'channel2'
+            Order::class => 'channel2',
         ])
             ->withDefaultResolutionChannel($defaultResolutionChannel)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
-                    $defaultResolutionChannel => $targetChannel
+                    $defaultResolutionChannel => $targetChannel,
                 ]),
                 InMemoryReferenceSearchService::createEmpty()
             );
 
-        $message = MessageBuilder::withPayload(new \stdClass())
+        $message = MessageBuilder::withPayload(new stdClass())
             ->build();
 
         $router->handle($message);
@@ -192,24 +197,24 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_by_payload_type_without_mapping()
     {
         $targetChannel = QueueChannel::create();
-        $inputChannelName = "input";
+        $inputChannelName = 'input';
 
         $router = RouterBuilder::createPayloadTypeRouterByClassName()
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
-                    \stdClass::class => $targetChannel,
-                    $inputChannelName => DirectChannel::create()
+                    stdClass::class => $targetChannel,
+                    $inputChannelName => DirectChannel::create(),
                 ]),
                 InMemoryReferenceSearchService::createEmpty()
             );
 
-        $message = MessageBuilder::withPayload(new \stdClass())
+        $message = MessageBuilder::withPayload(new stdClass())
             ->build();
 
         $router->handle($message);
@@ -218,7 +223,7 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_routing_with_header_value()
@@ -229,12 +234,12 @@ class RouterBuilderTest extends MessagingTest
 
         $router = RouterBuilder::createHeaderMappingRouter($headerName, [
             'private' => 'channel1',
-            'public' => 'channel2'
+            'public' => 'channel2',
         ])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     'channel1' => $targetChannel1,
-                    'channel2' => $targetChannel2
+                    'channel2' => $targetChannel2,
                 ]),
                 InMemoryReferenceSearchService::createEmpty()
             );
@@ -249,7 +254,7 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_throwing_exception_if_payload_is_not_object()
@@ -260,7 +265,7 @@ class RouterBuilderTest extends MessagingTest
                 InMemoryReferenceSearchService::createEmpty()
             );
 
-        $message = MessageBuilder::withPayload("some")
+        $message = MessageBuilder::withPayload('some')
             ->build();
 
         $this->expectException(InvalidArgumentException::class);
@@ -270,23 +275,23 @@ class RouterBuilderTest extends MessagingTest
 
     /**
      * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_recipient_list_router()
     {
         $channel1 = QueueChannel::create();
         $channel2 = QueueChannel::create();
 
-        $router           = RouterBuilder::createRecipientListRouter(["channel1", "channel2"])
+        $router           = RouterBuilder::createRecipientListRouter(['channel1', 'channel2'])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
-                    "channel1" => $channel1,
-                    "channel2" => $channel2
+                    'channel1' => $channel1,
+                    'channel2' => $channel2,
                 ]),
                 InMemoryReferenceSearchService::createEmpty()
             );
 
-        $message = MessageBuilder::withPayload("some")->build();
+        $message = MessageBuilder::withPayload('some')->build();
 
         $router->handle($message);
 
@@ -295,7 +300,7 @@ class RouterBuilderTest extends MessagingTest
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_applying_sequence_to_recipient_list()
@@ -303,17 +308,17 @@ class RouterBuilderTest extends MessagingTest
         $channel1 = QueueChannel::create();
         $channel2 = QueueChannel::create();
 
-        $router           = RouterBuilder::createRecipientListRouter(["channel1", "channel2"])
+        $router           = RouterBuilder::createRecipientListRouter(['channel1', 'channel2'])
             ->withApplySequence(true)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
-                    "channel1" => $channel1,
-                    "channel2" => $channel2
+                    'channel1' => $channel1,
+                    'channel2' => $channel2,
                 ]),
                 InMemoryReferenceSearchService::createEmpty()
             );
 
-        $message = MessageBuilder::withPayload("some")->build();
+        $message = MessageBuilder::withPayload('some')->build();
 
         $router->handle($message);
 
@@ -328,13 +333,13 @@ class RouterBuilderTest extends MessagingTest
     public function test_converting_to_string()
     {
         $inputChannelName = 'inputChannel';
-        $endpointName = "someName";
+        $endpointName = 'someName';
 
         $this->assertEquals(
-            RouterBuilder::create("ref-name", "method-name")
+            RouterBuilder::create('ref-name', 'method-name')
                 ->withInputChannelName($inputChannelName)
                 ->withEndpointId($endpointName),
-            sprintf("Router for input channel `%s` with name `%s`", $inputChannelName, $endpointName)
+            sprintf('Router for input channel `%s` with name `%s`', $inputChannelName, $endpointName)
         );
     }
 }

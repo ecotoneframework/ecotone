@@ -40,7 +40,7 @@ class EventDrivenChannelInterceptorAdapter extends SendingInterceptorAdapter imp
      */
     protected function initialize(MessageChannel $messageChannel): void
     {
-        Assert::isSubclassOf($messageChannel, SubscribableChannel::class, "Event driven interceptor expects subscribable channel");
+        Assert::isSubclassOf($messageChannel, SubscribableChannel::class, 'Event driven interceptor expects subscribable channel');
 
         $this->messageChannel = $messageChannel;
     }

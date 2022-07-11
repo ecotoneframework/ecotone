@@ -1,14 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorBuilder;
-use Ecotone\Messaging\Handler\Enricher\HeaderSetterBuilder;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
-use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
@@ -40,7 +39,7 @@ class EnrichHeaderWithValueBuilder implements PropertyEditorBuilder
      * @param mixed $value
      * @return self
      */
-    public static function create(string $name, $value) : self
+    public static function create(string $name, $value): self
     {
         return new self($name, $value);
     }
@@ -51,7 +50,7 @@ class EnrichHeaderWithValueBuilder implements PropertyEditorBuilder
     public function build(ReferenceSearchService $referenceSearchService): PropertyEditor
     {
         return EnrichHeaderWithValuePropertyEditor::create(
-            PropertyEditorAccessor::createWithMapping($referenceSearchService, ""),
+            PropertyEditorAccessor::createWithMapping($referenceSearchService, ''),
             PropertyPath::createWith($this->name),
             $this->value
         );

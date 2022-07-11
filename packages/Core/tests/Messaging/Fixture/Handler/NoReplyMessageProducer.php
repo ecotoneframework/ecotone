@@ -14,7 +14,7 @@ class NoReplyMessageProducer implements MessageProcessor
 {
     private $wasCalled = false;
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -25,10 +25,9 @@ class NoReplyMessageProducer implements MessageProcessor
     public function processMessage(Message $message)
     {
         $this->wasCalled = true;
-        return null;
     }
 
-    public function wasCalled() : bool
+    public function wasCalled(): bool
     {
         return $this->wasCalled;
     }

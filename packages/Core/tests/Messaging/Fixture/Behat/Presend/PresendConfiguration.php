@@ -12,10 +12,10 @@ class PresendConfiguration
     public function shopBuyConfiguration()
     {
         return [
-            SimpleMessageChannelBuilder::createQueueChannel("shop"),
-            PollingMetadata::create("shop")
+            SimpleMessageChannelBuilder::createQueueChannel('shop'),
+            PollingMetadata::create('shop')
                 ->setExecutionAmountLimit(1)
-                ->setHandledMessageLimit(1)
+                ->setHandledMessageLimit(1),
         ];
     }
 }

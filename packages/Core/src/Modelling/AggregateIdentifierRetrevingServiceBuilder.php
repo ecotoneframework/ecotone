@@ -43,7 +43,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
         $this->initialize($interfaceToCallRegistry, $aggregateClassName, $messageClassNameToConvertTo, $metadataIdentifierMapping);
     }
 
-    public static function createWith(ClassDefinition $aggregateClassName, array $metadataIdentifierMapping, ?ClassDefinition $messageClassNameToConvertTo, InterfaceToCallRegistry $interfaceToCallRegistry) : self
+    public static function createWith(ClassDefinition $aggregateClassName, array $metadataIdentifierMapping, ?ClassDefinition $messageClassNameToConvertTo, InterfaceToCallRegistry $interfaceToCallRegistry): self
     {
         return new self($aggregateClassName, $metadataIdentifierMapping, $messageClassNameToConvertTo, $interfaceToCallRegistry);
     }
@@ -56,10 +56,12 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
         /** @var ConversionService $conversionService */
         $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
 
-        Assert::isSubclassOf($conversionService, ConversionService::class, "Have you forgot to register " . ConversionService::REFERENCE_NAME . "?");
+        Assert::isSubclassOf($conversionService, ConversionService::class, 'Have you forgot to register ' . ConversionService::REFERENCE_NAME . '?');
 
         return ServiceActivatorBuilder::createWithDirectReference(
-            new AggregateIdentifierRetrevingService($this->aggregateClassName->getClassType()->toString(), $conversionService, new PropertyReaderAccessor(), $this->typeToConvertTo, $this->metadataIdentifierMapping, $this->payloadIdentifierMapping), "convert")
+            new AggregateIdentifierRetrevingService($this->aggregateClassName->getClassType()->toString(), $conversionService, new PropertyReaderAccessor(), $this->typeToConvertTo, $this->metadataIdentifierMapping, $this->payloadIdentifierMapping),
+            'convert'
+        )
                     ->withOutputMessageChannel($this->getOutputMessageChannelName())
                     ->build($channelResolver, $referenceSearchService);
     }
@@ -69,7 +71,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return [$interfaceToCallRegistry->getFor(AggregateIdentifierRetrevingService::class, "convert")];
+        return [$interfaceToCallRegistry->getFor(AggregateIdentifierRetrevingService::class, 'convert')];
     }
 
     /**
@@ -77,7 +79,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(AggregateIdentifierRetrevingService::class, "convert");
+        return $interfaceToCallRegistry->getFor(AggregateIdentifierRetrevingService::class, 'convert');
     }
 
     /**
@@ -139,7 +141,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
         }
 
         foreach ($metadataIdentifierMapping as $propertyName => $mappingName) {
-            if (!$this->hasAccordingIdentifier($interfaceToCallRegistry, $aggregateClassDefinition, $propertyName)) {
+            if (! $this->hasAccordingIdentifier($interfaceToCallRegistry, $aggregateClassDefinition, $propertyName)) {
                 throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifier {$propertyName} for metadata identifier mapping.");
             }
         }
@@ -163,7 +165,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
         }
 
         foreach ($this->metadataIdentifierMapping as $identifierName => $mapping) {
-            if (!in_array($identifierName, array_keys($aggregatePayloadIdentifiersMapping))) {
+            if (! in_array($identifierName, array_keys($aggregatePayloadIdentifiersMapping))) {
                 throw ConfigurationException::create("Aggregate {$aggregateClassDefinition} for {$handledMessageClassNameDefinition} has metadata mapping for non existing identifier key {$identifierName}. It should be {\"aggregateId\":\"metadataIdKey\"}?");
             }
         }
@@ -179,7 +181,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
 
                 if (is_null($handledMessageClassNameDefinition) && is_null($mappingKey)) {
                     $aggregatePayloadIdentifiersMapping[$aggregateIdentifierName] = $aggregateIdentifierName;
-                } else if (is_null($mappingKey) && !$this->hasIdentifierMappingInMetadata($metadataIdentifierMapping, $aggregateIdentifierName)) {
+                } elseif (is_null($mappingKey) && ! $this->hasIdentifierMappingInMetadata($metadataIdentifierMapping, $aggregateIdentifierName)) {
                     throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` in {$handledMessageClassNameDefinition} for {$aggregateClassDefinition}. Have you forgot to mark #[TargetAggregateIdentifier]?");
                 } else {
                     $aggregatePayloadIdentifiersMapping[$aggregateIdentifierName] = $mappingKey;

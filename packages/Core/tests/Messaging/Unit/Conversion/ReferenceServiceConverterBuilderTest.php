@@ -1,21 +1,25 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Conversion;
 
-use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
-use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
 
 /**
  * Class ReferenceServiceConverterBuilderTest
  * @package Test\Ecotone\Messaging\Unit\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class ReferenceServiceConverterBuilderTest extends TestCase
 {
@@ -25,23 +29,23 @@ class ReferenceServiceConverterBuilderTest extends TestCase
      */
     public function test_converting_using_reference_service()
     {
-        $sourceType = TypeDescriptor::create("array<string>");
+        $sourceType = TypeDescriptor::create('array<string>');
         $targetType = TypeDescriptor::create("array<\stdClass>");
         $referenceService = ReferenceServiceConverterBuilder::create(
             ExampleConverterService::class,
-            "convert",
+            'convert',
             $sourceType,
             $targetType
         )->build(
             InMemoryReferenceSearchService::createWith([
-                ExampleConverterService::class => new ExampleConverterService()
+                ExampleConverterService::class => new ExampleConverterService(),
             ])
         );
 
         $this->assertEquals(
-            [new \stdClass()],
+            [new stdClass()],
             $referenceService->convert(
-                ["some"],
+                ['some'],
                 $sourceType,
                 MediaType::createApplicationXPHP(),
                 $targetType,
@@ -60,12 +64,12 @@ class ReferenceServiceConverterBuilderTest extends TestCase
 
         ReferenceServiceConverterBuilder::create(
             ServiceExpectingTwoArguments::class,
-            "withReturnValue",
-            TypeDescriptor::create("array<string>"),
+            'withReturnValue',
+            TypeDescriptor::create('array<string>'),
             TypeDescriptor::create("array<\stdClass>")
         )->build(
             InMemoryReferenceSearchService::createWith([
-                ServiceExpectingTwoArguments::class => ServiceExpectingTwoArguments::create()
+                ServiceExpectingTwoArguments::class => ServiceExpectingTwoArguments::create(),
             ])
         );
     }
@@ -76,8 +80,8 @@ class ReferenceServiceConverterBuilderTest extends TestCase
 
         ReferenceServiceConverterBuilder::create(
             ServiceExpectingTwoArguments::class,
-            "withReturnValue",
-            TypeDescriptor::create("array|array<string>"),
+            'withReturnValue',
+            TypeDescriptor::create('array|array<string>'),
             TypeDescriptor::create("array<\stdClass>")
         );
     }
@@ -88,8 +92,8 @@ class ReferenceServiceConverterBuilderTest extends TestCase
 
         ReferenceServiceConverterBuilder::create(
             ServiceExpectingTwoArguments::class,
-            "withReturnValue",
-            TypeDescriptor::create("array<string>"),
+            'withReturnValue',
+            TypeDescriptor::create('array<string>'),
             TypeDescriptor::create("array|array<\stdClass>")
         );
     }

@@ -2,9 +2,10 @@
 
 namespace Ecotone\Amqp\Transaction;
 
+use Attribute;
 use Enqueue\AmqpExt\AmqpConnectionFactory;
 
-#[\Attribute]
+#[Attribute]
 class AmqpTransaction
 {
     public $connectionReferenceNames = [AmqpConnectionFactory::class];

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
@@ -33,7 +34,7 @@ abstract class BaseInterceptorExample
         $this->valueToReturn = $valueToReturn;
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new static(null);
     }
@@ -42,7 +43,7 @@ abstract class BaseInterceptorExample
      * @param array $toReplace
      * @return static
      */
-    public static function createWithArgumentsToReplace(array $toReplace) : self
+    public static function createWithArgumentsToReplace(array $toReplace): self
     {
         $self = self::create();
         $self->argumentsToReplace = $toReplace;
@@ -54,7 +55,7 @@ abstract class BaseInterceptorExample
      * @param $valueToReturn
      * @return static
      */
-    public static function createWithReturnType($valueToReturn) : self
+    public static function createWithReturnType($valueToReturn): self
     {
         return new static($valueToReturn);
     }
@@ -62,12 +63,12 @@ abstract class BaseInterceptorExample
     /**
      * @return bool
      */
-    public function wasCalled() : bool
+    public function wasCalled(): bool
     {
         return $this->wasCalled;
     }
 
-    protected function markAsCalled() : void
+    protected function markAsCalled(): void
     {
         $this->wasCalled = true;
     }

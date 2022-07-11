@@ -1,11 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Amqp;
 
 use Interop\Amqp\AmqpTopic as EnqueueExchange;
-use Interop\Amqp\AmqpTopic;
-use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class AmqpExchange
@@ -37,7 +36,7 @@ class AmqpExchange
         $this->enqueueExchange->setType($exchangeType);
     }
 
-    public function isHeadersExchange() : bool
+    public function isHeadersExchange(): bool
     {
         return $this->enqueueExchange->getType() === EnqueueExchange::TYPE_HEADERS;
     }
@@ -48,7 +47,7 @@ class AmqpExchange
      * @param bool $isDurable
      * @return self
      */
-    public function withDurability(bool $isDurable) : self
+    public function withDurability(bool $isDurable): self
     {
         $this->withDurability = $isDurable;
 
@@ -60,7 +59,7 @@ class AmqpExchange
      *
      * @return AmqpExchange
      */
-    public function withAutoDeletion() : self
+    public function withAutoDeletion(): self
     {
         $this->enqueueExchange->addFlag(EnqueueExchange::FLAG_AUTODELETE);
 
@@ -74,7 +73,7 @@ class AmqpExchange
      * @param $value
      * @return AmqpExchange
      */
-    public function withArgument(string $name, $value) : self
+    public function withArgument(string $name, $value): self
     {
         $this->enqueueExchange->setArgument($name, $value);
 
@@ -84,7 +83,7 @@ class AmqpExchange
     /**
      * @return string
      */
-    public function getExchangeName() : string
+    public function getExchangeName(): string
     {
         return $this->enqueueExchange->getTopicName();
     }
@@ -92,7 +91,7 @@ class AmqpExchange
     /**
      * @return EnqueueExchange
      */
-    public function toEnqueueExchange() : EnqueueExchange
+    public function toEnqueueExchange(): EnqueueExchange
     {
         $amqpTopic = clone $this->enqueueExchange;
 
@@ -108,7 +107,7 @@ class AmqpExchange
      * @return AmqpExchange
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createDirectExchange(string $exchangeName) : self
+    public static function createDirectExchange(string $exchangeName): self
     {
         return new self($exchangeName, EnqueueExchange::TYPE_DIRECT);
     }
@@ -118,7 +117,7 @@ class AmqpExchange
      * @return AmqpExchange
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createFanoutExchange(string $exchangeName) : self
+    public static function createFanoutExchange(string $exchangeName): self
     {
         return new self($exchangeName, EnqueueExchange::TYPE_FANOUT);
     }
@@ -128,7 +127,7 @@ class AmqpExchange
      * @return AmqpExchange
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createTopicExchange(string $exchangeName) : self
+    public static function createTopicExchange(string $exchangeName): self
     {
         return new self($exchangeName, EnqueueExchange::TYPE_TOPIC);
     }
@@ -138,7 +137,7 @@ class AmqpExchange
      * @return AmqpExchange
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createHeadersExchange(string $exchangeName) : self
+    public static function createHeadersExchange(string $exchangeName): self
     {
         return new self($exchangeName, EnqueueExchange::TYPE_HEADERS);
     }

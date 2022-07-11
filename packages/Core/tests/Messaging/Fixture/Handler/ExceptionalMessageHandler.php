@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
+
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
+use RuntimeException;
 
 /**
  * Class ExceptionalMessageHandler
@@ -16,7 +19,7 @@ class ExceptionalMessageHandler implements MessageHandler
     {
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -26,7 +29,7 @@ class ExceptionalMessageHandler implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        throw new \RuntimeException("test error, should be caught");
+        throw new RuntimeException('test error, should be caught');
     }
 
     public function __toString()

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
@@ -10,9 +9,8 @@ use stdClass;
 #[Aggregate]
 class AggregateEventHandlerWithListenToRegex
 {
-    #[EventHandler("order.*")]
-    public function execute(\stdClass $class): void
+    #[EventHandler('order.*')]
+    public function execute(stdClass $class): void
     {
-
     }
 }

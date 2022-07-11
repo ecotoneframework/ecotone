@@ -12,7 +12,7 @@ class ProjectionConfiguration
     {
         return [
             EventSourcingConfiguration::createWithDefaults()
-                ->withLoadBatchSize(1)
+                ->withLoadBatchSize(1),
         ];
     }
 }

@@ -1,6 +1,6 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
@@ -22,7 +22,7 @@ class NullConsumerLifecycle implements ConsumerLifecycle
         $this->isRunning = $isRunning;
     }
 
-    public static function createRunning() : self
+    public static function createRunning(): self
     {
         return new self(true);
     }
@@ -30,7 +30,7 @@ class NullConsumerLifecycle implements ConsumerLifecycle
     /**
      * @return NullConsumerLifecycle
      */
-    public static function createStopped() : self
+    public static function createStopped(): self
     {
         return new self(false);
     }
@@ -72,6 +72,6 @@ class NullConsumerLifecycle implements ConsumerLifecycle
      */
     public function getConsumerName(): string
     {
-        return "null";
+        return 'null';
     }
 }

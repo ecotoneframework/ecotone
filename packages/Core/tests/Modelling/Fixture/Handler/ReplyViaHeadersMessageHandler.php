@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Handler;
 
-use Psr\Http\Message\ResponseInterface;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHandler;
@@ -34,7 +33,7 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
         $this->replyData = $replyData;
     }
 
-    public static function create($replyData) : self
+    public static function create($replyData): self
     {
         return new self($replyData);
     }
@@ -49,7 +48,7 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
         if ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
             /** @var MessageChannel $replyChannel */
             $replyChannel = $message->getHeaders()->getReplyChannel();
-            if (!is_null($this->replyData)) {
+            if (! is_null($this->replyData)) {
                 if ($this->replyData instanceof Message) {
                     $replyChannel->send($this->replyData);
                     return;
@@ -60,7 +59,7 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
         }
     }
 
-    public function getReceivedMessage() : ?Message
+    public function getReceivedMessage(): ?Message
     {
         return $this->message;
     }

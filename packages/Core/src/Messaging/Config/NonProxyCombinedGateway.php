@@ -1,9 +1,7 @@
 <?php
 
-
 namespace Ecotone\Messaging\Config;
 
-use Ecotone\Messaging\Handler\Gateway\Gateway;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Support\Assert;
 
@@ -30,7 +28,7 @@ class NonProxyCombinedGateway
     /**
      * @param NonProxyGateway[] $methodGateways
      */
-    public static function createWith(string $referenceName, array $methodGateways) : self
+    public static function createWith(string $referenceName, array $methodGateways): self
     {
         return new self($referenceName, $methodGateways);
     }
@@ -38,7 +36,7 @@ class NonProxyCombinedGateway
     /**
      * @return string
      */
-    public function getReferenceName() : string
+    public function getReferenceName(): string
     {
         return $this->referenceName;
     }
@@ -47,7 +45,7 @@ class NonProxyCombinedGateway
      * @param string $referenceName
      * @return bool
      */
-    public function hasReferenceName(string $referenceName) : bool
+    public function hasReferenceName(string $referenceName): bool
     {
         return $this->referenceName == $referenceName;
     }

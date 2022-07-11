@@ -9,16 +9,15 @@ namespace Ecotone\Messaging\Support;
  */
 class Assert
 {
-
     /**
      * @param bool $toCheck
      * @param string $message
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function isTrue(bool $toCheck, string $message) : void
+    public static function isTrue(bool $toCheck, string $message): void
     {
-        if (!$toCheck) {
+        if (! $toCheck) {
             throw InvalidArgumentException::create($message);
         }
     }
@@ -29,7 +28,7 @@ class Assert
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function isFalse(bool $toCheck, string $message) : void
+    public static function isFalse(bool $toCheck, string $message): void
     {
         if ($toCheck) {
             throw InvalidArgumentException::create($message);
@@ -41,21 +40,21 @@ class Assert
      * @param string $exceptionMessage
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function notNullAndEmpty($valueToCheck, string $exceptionMessage) : void
+    public static function notNullAndEmpty($valueToCheck, string $exceptionMessage): void
     {
-        if (!$valueToCheck) {
+        if (! $valueToCheck) {
             throw InvalidArgumentException::create($exceptionMessage);
         }
     }
 
-    public static function keyExists(array $array, $requiredKey, string $exceptionMessage) : void
+    public static function keyExists(array $array, $requiredKey, string $exceptionMessage): void
     {
-        if (!isset($array[$requiredKey])) {
+        if (! isset($array[$requiredKey])) {
             throw InvalidArgumentException::create($exceptionMessage);
         }
     }
 
-    public static function keyNotExists(array $array, $key, string $exceptionMessage) : void
+    public static function keyNotExists(array $array, $key, string $exceptionMessage): void
     {
         if (isset($array[$key])) {
             throw InvalidArgumentException::create($exceptionMessage);
@@ -68,16 +67,16 @@ class Assert
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function notNull($valueToCheck, string $exceptionMessage) : void
+    public static function notNull($valueToCheck, string $exceptionMessage): void
     {
         if (is_null($valueToCheck)) {
             throw InvalidArgumentException::create($exceptionMessage);
         }
     }
 
-    public static function null($valueToCheck, string $exceptionMessage) : void
+    public static function null($valueToCheck, string $exceptionMessage): void
     {
-        if (!is_null($valueToCheck)) {
+        if (! is_null($valueToCheck)) {
             throw InvalidArgumentException::create($exceptionMessage);
         }
     }
@@ -87,10 +86,10 @@ class Assert
      * @param string $className
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function allInstanceOfType(array $arrayToCheck, string $className) : void
+    public static function allInstanceOfType(array $arrayToCheck, string $className): void
     {
         foreach ($arrayToCheck as $classToCompare) {
-            Assert::isSubclassOf($classToCompare, $className, "");
+            Assert::isSubclassOf($classToCompare, $className, '');
         }
     }
 
@@ -100,10 +99,10 @@ class Assert
      * @param string $message
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function isSubclassOf($objectToCheck, string $className, string $message) : void
+    public static function isSubclassOf($objectToCheck, string $className, string $message): void
     {
         $classToCheck = get_class($objectToCheck);
-        if ($classToCheck !== $className && !is_subclass_of($objectToCheck, $className)) {
+        if ($classToCheck !== $className && ! is_subclass_of($objectToCheck, $className)) {
             throw InvalidArgumentException::create("{$message}. Passed argument should be of type {$className} and got {$classToCheck}.");
         }
     }
@@ -113,9 +112,9 @@ class Assert
      * @param string $message
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function isInterface(string $interfaceToCheck, string $message) : void
+    public static function isInterface(string $interfaceToCheck, string $message): void
     {
-        if (!interface_exists($interfaceToCheck)) {
+        if (! interface_exists($interfaceToCheck)) {
             throw InvalidArgumentException::create($message);
         }
     }
@@ -125,16 +124,16 @@ class Assert
      * @param string $exceptionMessage
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function isObject($valueToCheck, string $exceptionMessage) : void
+    public static function isObject($valueToCheck, string $exceptionMessage): void
     {
-        if (!is_object($valueToCheck)) {
+        if (! is_object($valueToCheck)) {
             throw InvalidArgumentException::create($exceptionMessage);
         }
     }
 
-    public static function isIterable($valueToCheck, string $exceptionMessage) : void
+    public static function isIterable($valueToCheck, string $exceptionMessage): void
     {
-        if (!is_iterable($valueToCheck)) {
+        if (! is_iterable($valueToCheck)) {
             throw InvalidArgumentException::create($exceptionMessage);
         }
     }

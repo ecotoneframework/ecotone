@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler\Bridge;
 
 use Ecotone\Messaging\Message;
@@ -12,7 +11,7 @@ use Ecotone\Messaging\Message;
  */
 class Bridge
 {
-    public function handle(Message $message) : Message
+    public function handle(Message $message): Message
     {
         return $message;
     }

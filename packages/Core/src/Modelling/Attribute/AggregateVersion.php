@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Modelling\Attribute;
 
-#[\Attribute(\Attribute::TARGET_PROPERTY|\Attribute::TARGET_PARAMETER)]
+use Attribute;
+
+#[Attribute(Attribute::TARGET_PROPERTY|Attribute::TARGET_PARAMETER)]
 class AggregateVersion
 {
     private bool $autoIncrease;

@@ -1,6 +1,7 @@
 <?php
 
 namespace Test\Ecotone\Messaging\Fixture\Router;
+
 use Ecotone\Messaging\Message;
 
 /**
@@ -24,12 +25,12 @@ class MultipleChannelRouter
         $this->channelNamesToPick = $channelNameToPick;
     }
 
-    public static function createWithChosenChannelName(array $chanelNames) : self
+    public static function createWithChosenChannelName(array $chanelNames): self
     {
         return new self($chanelNames);
     }
 
-    public function pick(Message $message) : array
+    public function pick(Message $message): array
     {
         return $this->channelNamesToPick;
     }

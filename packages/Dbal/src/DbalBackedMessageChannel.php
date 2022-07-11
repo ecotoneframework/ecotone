@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Dbal;
-
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\PollableChannel;

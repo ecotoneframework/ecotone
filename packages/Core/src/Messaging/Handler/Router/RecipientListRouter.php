@@ -1,6 +1,7 @@
 <?php
 
 namespace Ecotone\Messaging\Handler\Router;
+
 use Ecotone\Messaging\Message;
 
 /**

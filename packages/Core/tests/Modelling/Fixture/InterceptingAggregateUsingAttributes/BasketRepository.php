@@ -8,5 +8,4 @@ use Ecotone\Modelling\InMemoryStandardRepository;
 #[Repository]
 class BasketRepository extends InMemoryStandardRepository
 {
-
 }

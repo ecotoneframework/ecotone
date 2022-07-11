@@ -9,5 +9,5 @@ namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
  */
 interface ServiceInterfaceReceiveOnlyWithNull
 {
-    public function sendMail() : ?string;
+    public function sendMail(): ?string;
 }

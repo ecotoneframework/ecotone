@@ -8,14 +8,14 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class MessagingConfiguration
 {
-    const ASYNCHRONOUS_CHANNEL = "asynchronous_channel";
+    public const ASYNCHRONOUS_CHANNEL = 'asynchronous_channel';
 
     #[ServiceContext]
     public function polling()
     {
         return [
             PollingMetadata::create(self::ASYNCHRONOUS_CHANNEL)
-                ->withTestingSetup()
+                ->withTestingSetup(),
         ];
     }
 

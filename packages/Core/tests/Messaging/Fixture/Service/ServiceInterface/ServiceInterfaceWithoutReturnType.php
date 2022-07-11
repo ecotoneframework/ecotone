@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
 
 /**

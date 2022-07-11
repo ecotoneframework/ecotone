@@ -1,12 +1,12 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
-
 
 class ProjectionEventHandlerConfiguration
 {
-    public function __construct(private string $className, private string $methodName, private string $synchronousRequestChannelName, private string $asynchronousRequestChannelName) {}
+    public function __construct(private string $className, private string $methodName, private string $synchronousRequestChannelName, private string $asynchronousRequestChannelName)
+    {
+    }
 
     public function getClassName(): string
     {

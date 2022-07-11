@@ -9,7 +9,7 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Shopping;
  */
 class ToReservationRequestTransformer
 {
-    public function transform(string $bookName) : ReserveRequest
+    public function transform(string $bookName): ReserveRequest
     {
         return new ReserveRequest($bookName);
     }

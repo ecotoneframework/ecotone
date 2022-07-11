@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Messaging\Config\Annotation;
-
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
@@ -22,7 +20,7 @@ class AnnotatedDefinitionReference
         return $annotatedDefinition->getClassName();
     }
 
-    public static function getReferenceForClassName(AnnotationFinder $annotationRegistrationServiceFinder, string $className) : string
+    public static function getReferenceForClassName(AnnotationFinder $annotationRegistrationServiceFinder, string $className): string
     {
         $reference = $className;
 

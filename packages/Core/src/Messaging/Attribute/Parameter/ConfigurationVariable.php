@@ -1,14 +1,15 @@
 <?php
 
-
 namespace Ecotone\Messaging\Attribute\Parameter;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class ConfigurationVariable
 {
     private string $name;
 
-    public function __construct(string $name = "")
+    public function __construct(string $name = '')
     {
         $this->name = $name;
     }

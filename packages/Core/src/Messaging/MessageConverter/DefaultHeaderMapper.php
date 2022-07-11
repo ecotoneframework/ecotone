@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\MessageConverter;
 
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Recoverability\ErrorContext;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -15,8 +15,8 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
  */
 class DefaultHeaderMapper implements HeaderMapper
 {
-    const DEFAULT_HEADER_CONVERSION_MEDIA_TYPE = MediaType::APPLICATION_JSON;
-    const CONVERTED_HEADERS_TO_DIFFERENT_FORMAT = "ecotone.convertedKeys";
+    public const DEFAULT_HEADER_CONVERSION_MEDIA_TYPE = MediaType::APPLICATION_JSON;
+    public const CONVERTED_HEADERS_TO_DIFFERENT_FORMAT = 'ecotone.convertedKeys';
 
     /**
      * @var string[]
@@ -47,7 +47,7 @@ class DefaultHeaderMapper implements HeaderMapper
      * @param array $fromMessageHeadersMapping
      * @return DefaultHeaderMapper
      */
-    public static function createWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, ConversionService $conversionService) : self
+    public static function createWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, ConversionService $conversionService): self
     {
         return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, false, $conversionService);
     }
@@ -57,7 +57,7 @@ class DefaultHeaderMapper implements HeaderMapper
      * @param array $fromMessageHeadersMapping
      * @return DefaultHeaderMapper
      */
-    public static function createCaseInsensitiveHeadersWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, ConversionService $conversionService) : self
+    public static function createCaseInsensitiveHeadersWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, ConversionService $conversionService): self
     {
         return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, true, $conversionService);
     }
@@ -65,15 +65,15 @@ class DefaultHeaderMapper implements HeaderMapper
     /**
      * @return DefaultHeaderMapper
      */
-    public static function createAllHeadersMapping(ConversionService $conversionService) : self
+    public static function createAllHeadersMapping(ConversionService $conversionService): self
     {
-        return new self(["*"], ["*"], false, $conversionService);
+        return new self(['*'], ['*'], false, $conversionService);
     }
 
     /**
      * @return DefaultHeaderMapper
      */
-    public static function createNoMapping(ConversionService $conversionService) : self
+    public static function createNoMapping(ConversionService $conversionService): self
     {
         return new self([], [], false, $conversionService);
     }
@@ -137,7 +137,7 @@ class DefaultHeaderMapper implements HeaderMapper
      * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function isScalarType($headerValue) : bool
+    private function isScalarType($headerValue): bool
     {
         return (TypeDescriptor::createFromVariable($headerValue))->isScalar();
     }
@@ -147,17 +147,17 @@ class DefaultHeaderMapper implements HeaderMapper
      * @param bool $caseInsensitiveHeaderNames
      * @return array
      */
-    private function prepareRegex(array $mappedHeaders, bool $caseInsensitiveHeaderNames) : array
+    private function prepareRegex(array $mappedHeaders, bool $caseInsensitiveHeaderNames): array
     {
         $finalMappingHeaders = [];
         foreach ($mappedHeaders as $targetHeader) {
             $transformedHeader = $targetHeader;
-            $transformedHeader = str_replace(".", "\.", $transformedHeader);
-            $transformedHeader = str_replace("*", ".*", $transformedHeader);
+            $transformedHeader = str_replace('.', "\.", $transformedHeader);
+            $transformedHeader = str_replace('*', '.*', $transformedHeader);
 
             if (is_array($transformedHeader)) {
                 $finalMappingHeaders[] = $this->prepareRegex($transformedHeader, $caseInsensitiveHeaderNames);
-            }else {
+            } else {
                 $finalMappingHeaders[] = trim($caseInsensitiveHeaderNames ? strtolower($transformedHeader) : $transformedHeader);
             }
         }
@@ -165,17 +165,17 @@ class DefaultHeaderMapper implements HeaderMapper
         return $finalMappingHeaders;
     }
 
-    private function convertToStoreableFormat(string $mappedHeader, mixed $value, array $convertedHeaders) : array
+    private function convertToStoreableFormat(string $mappedHeader, mixed $value, array $convertedHeaders): array
     {
         if ($this->isScalarType($value)) {
             $convertedHeaders[$mappedHeader] = $value;
-        } else if (
-        $this->conversionService->canConvert(
-            TypeDescriptor::createFromVariable($value),
-            MediaType::createApplicationXPHP(),
-            TypeDescriptor::createStringType(),
-            MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
-        )
+        } elseif (
+            $this->conversionService->canConvert(
+                TypeDescriptor::createFromVariable($value),
+                MediaType::createApplicationXPHP(),
+                TypeDescriptor::createStringType(),
+                MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
+            )
         ) {
             $convertedHeaders[$mappedHeader] =  $this->conversionService->convert(
                 $value,
@@ -184,7 +184,7 @@ class DefaultHeaderMapper implements HeaderMapper
                 TypeDescriptor::createStringType(),
                 MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
             );
-        } else if (
+        } elseif (
             $this->conversionService->canConvert(
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),

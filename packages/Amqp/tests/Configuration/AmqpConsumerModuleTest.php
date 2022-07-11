@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Amqp\Configuration;
 
 use Doctrine\Common\Annotations\AnnotationException;
@@ -8,7 +7,6 @@ use Ecotone\Amqp\AmqpInboundChannelAdapterBuilder;
 use Ecotone\Amqp\Configuration\AmqpConsumerModule;
 use Ecotone\Amqp\Configuration\AmqpMessageConsumerConfiguration;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
@@ -21,13 +19,14 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
-use Test\Ecotone\Amqp\Fixture\AmqpConsumer\AmqpConsumerConfigurationExample;
 use Test\Ecotone\Amqp\Fixture\AmqpConsumer\AmqpConsumerExample;
 
 /**
  * Class AmqpConsumerModuleTest
  * @package Test\Ecotone\Amqp\Configuration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class AmqpConsumerModuleTest extends TestCase
 {
@@ -35,31 +34,32 @@ class AmqpConsumerModuleTest extends TestCase
     {
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
-                ->registerConsumer(AmqpInboundChannelAdapterBuilder::createWith(
-                    "someId",
-                    "someQueue",
-                    "someId",
-                    "amqpConnection"
-                )
-                    ->withHeaderMapper("ecotone.*")
+                ->registerConsumer(
+                    AmqpInboundChannelAdapterBuilder::createWith(
+                        'someId',
+                        'someQueue',
+                        'someId',
+                        'amqpConnection'
+                    )
+                    ->withHeaderMapper('ecotone.*')
                     ->withReceiveTimeout(1)
                 )
                 ->registerMessageHandler(
-                    ServiceActivatorBuilder::create("amqpConsumer", "handle")
-                        ->withEndpointId("someId.target")
-                        ->withInputChannelName("someId")
+                    ServiceActivatorBuilder::create('amqpConsumer', 'handle')
+                        ->withEndpointId('someId.target')
+                        ->withInputChannelName('someId')
                         ->withMethodParameterConverters([
-                            PayloadBuilder::create("object")
+                            PayloadBuilder::create('object'),
                         ])
                 ),
             $this->prepareConfiguration(
                 [
-                    AmqpConsumerExample::class
+                    AmqpConsumerExample::class,
                 ],
                 [
-                    AmqpMessageConsumerConfiguration::create("someId", "someQueue", "amqpConnection")
+                    AmqpMessageConsumerConfiguration::create('someId', 'someQueue', 'amqpConnection')
                         ->withReceiveTimeoutInMilliseconds(1)
-                        ->withHeaderMapper("ecotone.*")
+                        ->withHeaderMapper('ecotone.*'),
                 ]
             )
         );

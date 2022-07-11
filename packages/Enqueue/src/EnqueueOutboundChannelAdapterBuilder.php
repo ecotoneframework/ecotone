@@ -1,22 +1,19 @@
 <?php
 
-
 namespace Ecotone\Enqueue;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
-use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 abstract class EnqueueOutboundChannelAdapterBuilder implements MessageHandlerBuilder
 {
-    const         DEFAULT_AUTO_DECLARE = true;
-    const DEFAULT_TIME_TO_LIVE = null;
-    const DEFAULT_DELIVERY_DELAY = null;
-    const DEFAULT_PRIORITY = null;
+    public const         DEFAULT_AUTO_DECLARE = true;
+    public const DEFAULT_TIME_TO_LIVE = null;
+    public const DEFAULT_DELIVERY_DELAY = null;
+    public const DEFAULT_PRIORITY = null;
 
     /**
      * @var string
@@ -25,7 +22,7 @@ abstract class EnqueueOutboundChannelAdapterBuilder implements MessageHandlerBui
     /**
      * @var string
      */
-    protected $inputChannelName = "";
+    protected $inputChannelName = '';
     protected array $headerMapper = [];
     /**
      * @var bool
@@ -108,7 +105,7 @@ abstract class EnqueueOutboundChannelAdapterBuilder implements MessageHandlerBui
      */
     public function withHeaderMapper(string $headerMapper): self
     {
-        $this->headerMapper = explode(",", $headerMapper);
+        $this->headerMapper = explode(',', $headerMapper);
 
         return $this;
     }
@@ -171,7 +168,7 @@ abstract class EnqueueOutboundChannelAdapterBuilder implements MessageHandlerBui
 
     public function __toString()
     {
-        return "Outbound Adapter for channel " . $this->inputChannelName;
+        return 'Outbound Adapter for channel ' . $this->inputChannelName;
     }
 
     protected function initialize(string $connectionReferenceName): void

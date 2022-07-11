@@ -2,22 +2,16 @@
 
 namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
-use Exception;
-use PHPUnit\Framework\Assert;
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
-use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
@@ -26,9 +20,10 @@ use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\MessagingException;
+use Exception;
+use PHPUnit\Framework\Assert;
+use Ramsey\Uuid\Uuid;
 use Test\Ecotone\Messaging\Fixture\Behat\Booking\BookingService;
-use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample;
-use Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled\InterceptedScheduledGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\Order;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderConfirmation;
 use Test\Ecotone\Messaging\Fixture\Behat\Ordering\OrderingService;
@@ -55,13 +50,13 @@ class DomainContext implements Context
     public function iRegisterAs(string $channelName, string $type)
     {
         switch ($type) {
-            case "Direct Channel":
+            case 'Direct Channel':
                 {
                     $this->getMessagingSystemConfiguration()
                         ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, DirectChannel::create()));
                     break;
                 }
-            case "Pollable Channel":
+            case 'Pollable Channel':
                 {
                     $this->getMessagingSystemConfiguration()
                         ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, QueueChannel::create()));
@@ -252,7 +247,7 @@ class DomainContext implements Context
 
         $bookWasReserved = $gateway->reserve($bookName);
 
-        Assert::assertInstanceOf(BookWasReserved::class, $bookWasReserved, "Book must be reserved");
+        Assert::assertInstanceOf(BookWasReserved::class, $bookWasReserved, 'Book must be reserved');
     }
 
     /**
@@ -308,7 +303,7 @@ class DomainContext implements Context
 
         try {
             $gateway->processOrder(Order::create($orderId, $productName));
-            Assert::assertTrue(false, "Expect exception got none");
+            Assert::assertTrue(false, 'Expect exception got none');
         } catch (Exception $e) {
         }
     }
@@ -328,7 +323,7 @@ class DomainContext implements Context
     {
         try {
             $this->future->resolve();
-            Assert::assertTrue(false, "Expect exception got none");
+            Assert::assertTrue(false, 'Expect exception got none');
         } catch (MessageHandlingException $e) {
         }
     }
@@ -377,11 +372,11 @@ class DomainContext implements Context
     {
         try {
             $this->handlesMessage($consumerName);
-        }catch (\Exception $e) {
+        } catch (Exception $e) {
             return;
         }
 
-        Assert::assertTrue(false,"Exception was not thrown");
+        Assert::assertTrue(false, 'Exception was not thrown');
     }
 
     /**

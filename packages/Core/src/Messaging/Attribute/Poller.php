@@ -1,11 +1,11 @@
 <?php
 
-
 namespace Ecotone\Messaging\Attribute;
 
+use Attribute;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 
-#[\Attribute]
+#[Attribute]
 class Poller
 {
     private string $cron;
@@ -31,7 +31,7 @@ class Poller
      */
     private int $executionTimeLimitInMilliseconds;
 
-    public function __construct(string $cron = "", string $errorChannelName = "", int $fixedRateInMilliseconds = PollingMetadata::DEFAULT_FIXED_RATE, int $initialDelayInMilliseconds = PollingMetadata::DEFAULT_INITIAL_DELAY, int $memoryLimitInMegabytes = PollingMetadata::DEFAULT_MEMORY_LIMIT_MEGABYTES, int $handledMessageLimit = PollingMetadata::DEFAULT_HANDLED_MESSAGE_LIMIT, int $executionTimeLimitInMilliseconds  = PollingMetadata::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS)
+    public function __construct(string $cron = '', string $errorChannelName = '', int $fixedRateInMilliseconds = PollingMetadata::DEFAULT_FIXED_RATE, int $initialDelayInMilliseconds = PollingMetadata::DEFAULT_INITIAL_DELAY, int $memoryLimitInMegabytes = PollingMetadata::DEFAULT_MEMORY_LIMIT_MEGABYTES, int $handledMessageLimit = PollingMetadata::DEFAULT_HANDLED_MESSAGE_LIMIT, int $executionTimeLimitInMilliseconds  = PollingMetadata::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS)
     {
         $this->cron                             = $cron;
         $this->errorChannelName                 = $errorChannelName;

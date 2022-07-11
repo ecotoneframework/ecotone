@@ -36,9 +36,9 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
      * @param MessageHandler $messageHandler
      * @return PollOrThrowExceptionConsumer
      */
-    public static function createWithoutName(PollableChannel $pollableChannel, MessageHandler $messageHandler) : self
+    public static function createWithoutName(PollableChannel $pollableChannel, MessageHandler $messageHandler): self
     {
-        return new self("some random name", $pollableChannel, $messageHandler);
+        return new self('some random name', $pollableChannel, $messageHandler);
     }
 
     /**
@@ -47,7 +47,7 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
      * @param MessageHandler $messageHandler
      * @return PollOrThrowExceptionConsumer
      */
-    public static function create(string $consumerName, PollableChannel $pollableChannel, MessageHandler $messageHandler) : self
+    public static function create(string $consumerName, PollableChannel $pollableChannel, MessageHandler $messageHandler): self
     {
         return new self($consumerName, $pollableChannel, $messageHandler);
     }
@@ -59,7 +59,7 @@ class PollOrThrowExceptionConsumer implements ConsumerLifecycle
     {
         $message = $this->pollableChannel->receive();
         if (is_null($message)) {
-            throw MessageDeliveryException::create("Message was not delivered to " . self::class);
+            throw MessageDeliveryException::create('Message was not delivered to ' . self::class);
         }
 
         $this->messageHandler->handle($message);

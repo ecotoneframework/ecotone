@@ -1,12 +1,11 @@
 <?php
 
-
 namespace Ecotone\Modelling\MessageHandling\MetadataPropagator;
-
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
+use Throwable;
 
 class MessageHeadersPropagator
 {
@@ -28,7 +27,7 @@ class MessageHeadersPropagator
         try {
             $reply = $methodInvocation->proceed();
             array_shift($this->currentlyPropagatedHeaders);
-        }catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             array_shift($this->currentlyPropagatedHeaders);
 
             throw $exception;
@@ -37,12 +36,12 @@ class MessageHeadersPropagator
         return $reply;
     }
 
-    public function propagateHeaders(array $headers) : array
+    public function propagateHeaders(array $headers): array
     {
         return array_merge($this->getLastHeaders(), $headers);
     }
 
-    public function getLastHeaders() : array
+    public function getLastHeaders(): array
     {
         $headers = end($this->currentlyPropagatedHeaders);
 

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Amqp\Fixture\FailureTransactionWithFatalError;
 
 use Ecotone\Messaging\Attribute\MessageGateway;

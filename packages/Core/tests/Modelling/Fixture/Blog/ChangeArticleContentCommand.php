@@ -41,7 +41,7 @@ class ChangeArticleContentCommand
      * @param string $content
      * @return self
      */
-    public static function createWith(string $author, string $title, string $content) : self
+    public static function createWith(string $author, string $title, string $content): self
     {
         return new self($author, $title, $content);
     }

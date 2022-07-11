@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler\Logger;
 
 use Psr\Log\AbstractLogger;
@@ -15,7 +14,7 @@ class EchoLogger extends AbstractLogger
     /**
      * @inheritDoc
      */
-    public function log($level, $message, array $context = array()): void
+    public function log($level, $message, array $context = []): void
     {
         echo "{$level}: {$message}\n";
     }

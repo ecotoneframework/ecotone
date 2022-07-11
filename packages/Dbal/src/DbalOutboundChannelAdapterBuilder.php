@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Dbal;
-
 
 use Ecotone\Enqueue\CachedConnectionFactory;
 use Ecotone\Enqueue\EnqueueOutboundChannelAdapterBuilder;

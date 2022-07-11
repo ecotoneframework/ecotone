@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Amqp;
-
 
 class AmqpPublisherConnectionFactory extends AmqpConsumerConnectionFactory
 {

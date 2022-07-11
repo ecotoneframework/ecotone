@@ -2,8 +2,8 @@
 
 namespace Ecotone\Messaging\Store;
 
-use Ramsey\Uuid\UuidInterface;
 use Ecotone\Messaging\Message;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Interface MessageStore - used in single message scenarios
@@ -17,23 +17,23 @@ interface MessageStore
      *
      * @param Message $message
      */
-    public function addSingleMessage(Message $message) : void;
+    public function addSingleMessage(Message $message): void;
 
     /**
      * Removes group containing single message
      *
      * @param UuidInterface $messageId
      */
-    public function removeSingleMessage(UuidInterface $messageId) : void;
+    public function removeSingleMessage(UuidInterface $messageId): void;
 
     /**
      * @param UuidInterface $messageId
      * @return Message|null
      */
-    public function getSingleMessage(UuidInterface $messageId) : ?Message;
+    public function getSingleMessage(UuidInterface $messageId): ?Message;
 
     /**
      * @return int
      */
-    public function getSingleMessagesCount() : int;
+    public function getSingleMessagesCount(): int;
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
@@ -17,7 +18,7 @@ interface ReferenceSearchService
      * @return object
      * @throws ReferenceNotFoundException if service with passed reference was not found
      */
-    public function get(string $referenceName) : object;
+    public function get(string $referenceName): object;
 
-    public function has(string $referenceName) : bool;
+    public function has(string $referenceName): bool;
 }

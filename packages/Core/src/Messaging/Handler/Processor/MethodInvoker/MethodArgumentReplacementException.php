@@ -1,6 +1,6 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
@@ -11,5 +11,4 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
  */
 class MethodArgumentReplacementException extends MethodInvocationException
 {
-
 }

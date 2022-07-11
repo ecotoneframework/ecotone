@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Amqp\Fixture\Shop;
 
 use Ecotone\Amqp\AmqpQueue;
@@ -12,8 +11,8 @@ use Ecotone\Messaging\MessagePublisher;
 
 class MessagingConfiguration
 {
-    const CONSUMER_ID    = "addToCart";
-    const SHOPPING_QUEUE = "shopping";
+    public const CONSUMER_ID    = 'addToCart';
+    public const SHOPPING_QUEUE = 'shopping';
 
     #[ServiceContext]
     public function registerPublisher()
@@ -31,7 +30,7 @@ class MessagingConfiguration
             AmqpMessageConsumerConfiguration::create(self::CONSUMER_ID, self::SHOPPING_QUEUE)
                 ->withReceiveTimeoutInMilliseconds(1),
             PollingMetadata::create(self::CONSUMER_ID)
-                ->setExecutionTimeLimitInMilliseconds(1)
+                ->setExecutionTimeLimitInMilliseconds(1),
         ];
     }
 }

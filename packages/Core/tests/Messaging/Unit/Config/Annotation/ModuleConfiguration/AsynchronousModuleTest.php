@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -24,6 +24,8 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncQueryHandlerExample;
  * Class ConverterModuleTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class AsynchronousModuleTest extends AnnotationConfigurationTest
 {
@@ -45,7 +47,7 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
-                ->registerAsynchronousEndpoint("asyncChannel", "asyncServiceActivator"),
+                ->registerAsynchronousEndpoint('asyncChannel', 'asyncServiceActivator'),
             $configuration
         );
     }
@@ -68,8 +70,8 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
-                ->registerAsynchronousEndpoint("asyncChannel1", "asyncServiceActivator1")
-                ->registerAsynchronousEndpoint("asyncChannel2", "asyncServiceActivator2"),
+                ->registerAsynchronousEndpoint('asyncChannel1', 'asyncServiceActivator1')
+                ->registerAsynchronousEndpoint('asyncChannel2', 'asyncServiceActivator2'),
             $configuration
         );
     }
@@ -86,7 +88,7 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
 
         $this->assertEquals(
             $this->createMessagingSystemConfiguration()
-                ->registerAsynchronousEndpoint("asyncChannel", "asyncEvent"),
+                ->registerAsynchronousEndpoint('asyncChannel', 'asyncEvent'),
             $configuration
         );
     }

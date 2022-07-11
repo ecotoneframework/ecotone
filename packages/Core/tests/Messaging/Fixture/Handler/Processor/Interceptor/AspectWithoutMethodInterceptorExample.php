@@ -12,8 +12,7 @@ use Ecotone\Messaging\Attribute\Interceptor\Around;
 class AspectWithoutMethodInterceptorExample
 {
     #[Around]
-    public function doSomething() : void
+    public function doSomething(): void
     {
-
     }
 }

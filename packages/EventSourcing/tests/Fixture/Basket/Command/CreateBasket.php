@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\EventSourcing\Fixture\Basket\Command;
 
 class CreateBasket

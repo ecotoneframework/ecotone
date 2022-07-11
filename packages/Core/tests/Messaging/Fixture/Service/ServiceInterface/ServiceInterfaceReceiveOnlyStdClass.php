@@ -2,6 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
 
+use stdClass;
+
 /**
  * Interface ServiceInterface
  * @package Test\Ecotone\Messaging\Fixture\Service
@@ -9,5 +11,5 @@ namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
  */
 interface ServiceInterfaceReceiveOnlyStdClass
 {
-    public function sendMail() : \stdClass;
+    public function sendMail(): stdClass;
 }

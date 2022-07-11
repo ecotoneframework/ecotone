@@ -1,35 +1,31 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId;
 
 use Ecotone\Messaging\Attribute\Interceptor\Before;
-use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
-use Ecotone\Messaging\Attribute\MessageEndpoint;
-use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 
 class AddExecutorId
 {
-    private string $executorId = "";
+    private string $executorId = '';
 
-    #[CommandHandler("changeExecutorId")]
-    public function addExecutorId(string $executorId) : void
+    #[CommandHandler('changeExecutorId')]
+    public function addExecutorId(string $executorId): void
     {
         $this->executorId = $executorId;
     }
 
     #[Before(pointcut: Logger::class)]
-    public function add(array $payload) : array
+    public function add(array $payload): array
     {
-        if (isset($payload["executorId"])) {
+        if (isset($payload['executorId'])) {
             return $payload;
         }
 
         return array_merge(
             $payload,
-            ["executorId" => $this->executorId]
+            ['executorId' => $this->executorId]
         );
     }
 }

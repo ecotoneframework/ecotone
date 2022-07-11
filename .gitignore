@@ -9,4 +9,5 @@ file
 **/.phpunit.result.cache
 composer.lock
 .htaccess
+.php-cs-fixer.cache
 cache

@@ -5,7 +5,6 @@ namespace Ecotone\Modelling;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
-use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -15,12 +14,10 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
-use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 
@@ -92,13 +89,13 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $this->aggregateVersionProperty             = $aggregateVersionPropertyName;
 
         if ($this->isEventSourced) {
-            Assert::isTrue((bool)$this->aggregateVersionProperty, "{$interfaceToCall->getInterfaceName()} is event sourced aggregate. Event Sourced aggregates are required to define version property. Make use of " . WithAggregateVersioning::class . " or implement your own.");
+            Assert::isTrue((bool)$this->aggregateVersionProperty, "{$interfaceToCall->getInterfaceName()} is event sourced aggregate. Event Sourced aggregates are required to define version property. Make use of " . WithAggregateVersioning::class . ' or implement your own.');
         }
 
         $this->interfaceToCall = $interfaceToCall;
         $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutor::createFor($aggregateClassDefinition, $this->isEventSourced, $interfaceToCallRegistry);
         $isFactoryMethod = $this->interfaceToCall->isStaticallyCalled();
-        if (!$this->isEventSourced && $isFactoryMethod) {
+        if (! $this->isEventSourced && $isFactoryMethod) {
             Assert::isTrue($this->interfaceToCall->getReturnType()->isClassNotInterface(), "Factory method {$this->interfaceToCall} for standard aggregate should return object. Did you wanted to register Event Sourced Aggregate?");
         }
     }
@@ -143,7 +140,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     {
         $handler = ServiceActivatorBuilder::createWithDirectReference(
             new CallAggregateService($this->interfaceToCall, $this->isEventSourced, $channelResolver, $this->methodParameterConverterBuilders, $this->orderedAroundInterceptors, $referenceSearchService, new PropertyReaderAccessor(), PropertyEditorAccessor::create($referenceSearchService), $this->isCommandHandler, $this->interfaceToCall->isStaticallyCalled(), $this->eventSourcingHandlerExecutor, $this->aggregateVersionProperty, $this->isAggregateVersionAutomaticallyIncreased, $this->aggregateMethodWithEvents),
-            "call"
+            'call'
         )
             ->withPassThroughMessageOnVoidInterface($this->isVoidMethod)
             ->withOutputMessageChannel($this->outputMessageChannelName);
@@ -168,7 +165,7 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     {
         return [
             $interfaceToCallRegistry->getFor($this->interfaceToCall->getInterfaceName(), $this->interfaceToCall->getMethodName()),
-            $interfaceToCallRegistry->getFor(CallAggregateService::class, "call")
+            $interfaceToCallRegistry->getFor(CallAggregateService::class, 'call'),
         ];
     }
 
@@ -182,6 +179,6 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
 
     public function __toString()
     {
-        return sprintf("Aggregate Handler - %s with name `%s` for input channel `%s`", (string)$this->interfaceToCall, $this->getEndpointId(), $this->getInputMessageChannelName());
+        return sprintf('Aggregate Handler - %s with name `%s` for input channel `%s`', (string)$this->interfaceToCall, $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 }

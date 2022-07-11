@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class AddFranchise
 {
-
 }

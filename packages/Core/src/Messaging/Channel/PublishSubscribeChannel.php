@@ -2,7 +2,6 @@
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Messaging\Channel\Dispatcher\BroadcastingDispatcher;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\SubscribableChannel;
@@ -26,7 +25,7 @@ class PublishSubscribeChannel implements SubscribableChannel
     /**
      * @return PublishSubscribeChannel
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -68,6 +67,6 @@ class PublishSubscribeChannel implements SubscribableChannel
 
     public function __toString()
     {
-        return "publish subscribe channel";
+        return 'publish subscribe channel';
     }
 }

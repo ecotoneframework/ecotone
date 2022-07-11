@@ -1,17 +1,15 @@
 <?php
 
-
 namespace Ecotone\Dbal\Configuration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Dbal\DbalOutboundChannelAdapterBuilder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -50,7 +48,7 @@ class DbalPublisherModule implements AnnotationModule
 
         /** @var DbalMessagePublisherConfiguration $dbalPublisher */
         foreach ($extensionObjects as $dbalPublisher) {
-            if (!($dbalPublisher instanceof DbalMessagePublisherConfiguration)) {
+            if (! ($dbalPublisher instanceof DbalMessagePublisherConfiguration)) {
                 return;
             }
 
@@ -63,46 +61,46 @@ class DbalPublisherModule implements AnnotationModule
 
             $configuration = $configuration
                 ->registerGatewayBuilder(
-                    GatewayProxyBuilder::create($dbalPublisher->getReferenceName(), MessagePublisher::class, "send", $dbalPublisher->getReferenceName())
+                    GatewayProxyBuilder::create($dbalPublisher->getReferenceName(), MessagePublisher::class, 'send', $dbalPublisher->getReferenceName())
                         ->withParameterConverters(
                             [
-                                GatewayPayloadBuilder::create("data"),
-                                GatewayHeaderBuilder::create("sourceMediaType", MessageHeaders::CONTENT_TYPE)
+                                GatewayPayloadBuilder::create('data'),
+                                GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
                             ]
                         )
                 )
                 ->registerGatewayBuilder(
-                    GatewayProxyBuilder::create($dbalPublisher->getReferenceName(), MessagePublisher::class, "sendWithMetadata", $dbalPublisher->getReferenceName())
+                    GatewayProxyBuilder::create($dbalPublisher->getReferenceName(), MessagePublisher::class, 'sendWithMetadata', $dbalPublisher->getReferenceName())
                         ->withParameterConverters(
                             [
-                                GatewayPayloadBuilder::create("data"),
-                                GatewayHeadersBuilder::create("metadata"),
-                                GatewayHeaderBuilder::create("sourceMediaType", MessageHeaders::CONTENT_TYPE)
+                                GatewayPayloadBuilder::create('data'),
+                                GatewayHeadersBuilder::create('metadata'),
+                                GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
                             ]
                         )
                 )
                 ->registerGatewayBuilder(
-                    GatewayProxyBuilder::create($dbalPublisher->getReferenceName(), MessagePublisher::class, "convertAndSend", $dbalPublisher->getReferenceName())
+                    GatewayProxyBuilder::create($dbalPublisher->getReferenceName(), MessagePublisher::class, 'convertAndSend', $dbalPublisher->getReferenceName())
                         ->withParameterConverters(
                             [
-                                GatewayPayloadBuilder::create("data"),
-                                GatewayHeaderValueBuilder::create(MessageHeaders::CONTENT_TYPE, MediaType::APPLICATION_X_PHP)
+                                GatewayPayloadBuilder::create('data'),
+                                GatewayHeaderValueBuilder::create(MessageHeaders::CONTENT_TYPE, MediaType::APPLICATION_X_PHP),
                             ]
                         )
                 )
                 ->registerGatewayBuilder(
-                    GatewayProxyBuilder::create($dbalPublisher->getReferenceName(), MessagePublisher::class, "convertAndSendWithMetadata", $dbalPublisher->getReferenceName())
+                    GatewayProxyBuilder::create($dbalPublisher->getReferenceName(), MessagePublisher::class, 'convertAndSendWithMetadata', $dbalPublisher->getReferenceName())
                         ->withParameterConverters(
                             [
-                                GatewayPayloadBuilder::create("data"),
-                                GatewayHeadersBuilder::create("metadata"),
-                                GatewayHeaderValueBuilder::create(MessageHeaders::CONTENT_TYPE, MediaType::APPLICATION_X_PHP)
+                                GatewayPayloadBuilder::create('data'),
+                                GatewayHeadersBuilder::create('metadata'),
+                                GatewayHeaderValueBuilder::create(MessageHeaders::CONTENT_TYPE, MediaType::APPLICATION_X_PHP),
                             ]
                         )
                 )
                 ->registerMessageHandler(
                     DbalOutboundChannelAdapterBuilder::create($dbalPublisher->getQueueName(), $dbalPublisher->getConnectionReference())
-                        ->withEndpointId($dbalPublisher->getReferenceName() . ".handler")
+                        ->withEndpointId($dbalPublisher->getReferenceName() . '.handler')
                         ->withInputChannelName($dbalPublisher->getReferenceName())
                         ->withAutoDeclareOnSend($dbalPublisher->isAutoDeclareQueueOnSend())
                         ->withHeaderMapper($dbalPublisher->getHeaderMapper())

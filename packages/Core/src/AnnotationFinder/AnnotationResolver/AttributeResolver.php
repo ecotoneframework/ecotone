@@ -5,6 +5,10 @@ namespace Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\AnnotationFinder\TypeResolver;
+use ReflectionAttribute;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionProperty;
 
 class AttributeResolver implements AnnotationResolver
 {
@@ -14,10 +18,10 @@ class AttributeResolver implements AnnotationResolver
     public function getAnnotationsForMethod(string $className, string $methodName): array
     {
         try {
-            $reflectionMethod = TypeResolver::getMethodOwnerClass(new \ReflectionClass($className), $methodName)->getMethod($methodName);
+            $reflectionMethod = TypeResolver::getMethodOwnerClass(new ReflectionClass($className), $methodName)->getMethod($methodName);
 
-            return array_reduce($reflectionMethod->getAttributes(), function(array $carry, \ReflectionAttribute $attribute) {
-                if (!class_exists($attribute->getName())) {
+            return array_reduce($reflectionMethod->getAttributes(), function (array $carry, ReflectionAttribute $attribute) {
+                if (! class_exists($attribute->getName())) {
                     return $carry;
                 }
 
@@ -25,7 +29,7 @@ class AttributeResolver implements AnnotationResolver
 
                 return $carry;
             }, []);
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             throw ConfigurationException::create("Class {$className} with method {$methodName} does not exists or got annotation configured wrong: " . $e->getMessage());
         }
     }
@@ -35,8 +39,8 @@ class AttributeResolver implements AnnotationResolver
      */
     public function getAnnotationsForClass(string $className): array
     {
-        return array_reduce((new \ReflectionClass($className))->getAttributes(), function(array $carry, \ReflectionAttribute $attribute) {
-            if (!class_exists($attribute->getName())) {
+        return array_reduce((new ReflectionClass($className))->getAttributes(), function (array $carry, ReflectionAttribute $attribute) {
+            if (! class_exists($attribute->getName())) {
                 return $carry;
             }
 
@@ -51,7 +55,7 @@ class AttributeResolver implements AnnotationResolver
      */
     public function getAnnotationsForProperty(string $className, string $propertyName): array
     {
-        $reflectionClass = new \ReflectionClass($className);
+        $reflectionClass = new ReflectionClass($className);
         $parentClass = $reflectionClass;
 
         do {
@@ -60,8 +64,8 @@ class AttributeResolver implements AnnotationResolver
                     continue;
                 }
 
-                return array_reduce((new \ReflectionProperty($className, $propertyName))->getAttributes(), function(array $carry, \ReflectionAttribute $attribute) {
-                    if (!class_exists($attribute->getName())) {
+                return array_reduce((new ReflectionProperty($className, $propertyName))->getAttributes(), function (array $carry, ReflectionAttribute $attribute) {
+                    if (! class_exists($attribute->getName())) {
                         return $carry;
                     }
 
@@ -70,7 +74,7 @@ class AttributeResolver implements AnnotationResolver
                     return $carry;
                 }, []);
             }
-        }while($parentClass = $parentClass->getParentClass());
+        } while ($parentClass = $parentClass->getParentClass());
 
         throw ConfigurationException::create("Can't resolve property {$propertyName} for class {$className}");
     }

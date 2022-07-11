@@ -12,7 +12,7 @@ interface Message
     /**
      * @return MessageHeaders
      */
-    public function getHeaders() : MessageHeaders;
+    public function getHeaders(): MessageHeaders;
 
     /**
      * @return mixed

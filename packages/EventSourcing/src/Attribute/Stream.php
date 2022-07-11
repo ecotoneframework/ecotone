@@ -1,11 +1,11 @@
 <?php
 
-
 namespace Ecotone\EventSourcing\Attribute;
 
+use Attribute;
 use Ecotone\Messaging\Support\Assert;
 
-#[\Attribute(\Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_CLASS)]
 class Stream
 {
     private string $name;

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\Saga;
-
 
 class PaymentWasDoneEvent
 {
@@ -10,7 +8,7 @@ class PaymentWasDoneEvent
     {
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }

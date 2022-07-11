@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Amqp;
 
-use Interop\Amqp\AmqpConnectionFactory;
 use Enqueue\AmqpExt\AmqpConnectionFactory as AmqpLibConnection;
+use Interop\Amqp\AmqpConnectionFactory;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -13,16 +13,16 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class AmqpMessagingTest extends TestCase
 {
-    const RABBITMQ_HOST = 'localhost';
+    public const RABBITMQ_HOST = 'localhost';
 
-    const RABBITMQ_USER = 'guest';
+    public const RABBITMQ_USER = 'guest';
 
-    const RABBITMQ_PASSWORD = 'guest';
+    public const RABBITMQ_PASSWORD = 'guest';
 
     /**
      * @return AmqpConnectionFactory
      */
-    public function getCachedConnectionFactory() : AmqpConnectionFactory
+    public function getCachedConnectionFactory(): AmqpConnectionFactory
     {
         return $this->getRabbitConnectionFactory();
     }
@@ -30,9 +30,9 @@ abstract class AmqpMessagingTest extends TestCase
     /**
      * @return AmqpConnectionFactory
      */
-    public function getRabbitConnectionFactory() : AmqpConnectionFactory
+    public function getRabbitConnectionFactory(): AmqpConnectionFactory
     {
-        $host = getenv("RABBIT_HOST") ? getenv("RABBIT_HOST") : "localhost";
+        $host = getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : 'localhost';
         $config = "amqp://{$host}:5672";
 
         return new AmqpLibConnection($config);

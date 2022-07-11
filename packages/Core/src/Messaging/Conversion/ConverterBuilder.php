@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
@@ -16,10 +17,10 @@ interface ConverterBuilder
      * @param ReferenceSearchService $referenceSearchService
      * @return Converter
      */
-    public function build(ReferenceSearchService $referenceSearchService) : Converter;
+    public function build(ReferenceSearchService $referenceSearchService): Converter;
 
     /**
      * @return string[]
      */
-    public function getRequiredReferences() : array;
+    public function getRequiredReferences(): array;
 }

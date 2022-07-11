@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
@@ -13,5 +14,5 @@ interface Clock
     /**
      * @return integer Milliseconds since Epoch
      */
-    public function unixTimeInMilliseconds() : int;
+    public function unixTimeInMilliseconds(): int;
 }

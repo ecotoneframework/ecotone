@@ -64,7 +64,7 @@ class InMemoryStandardRepository implements StandardRepository
     public function findBy(string $aggregateClassName, array $identifiers): ?object
     {
         $aggregateId = $this->getAggregateId($identifiers);
-        if (!$aggregateId || !isset($this->aggregates[$aggregateClassName][$aggregateId])) {
+        if (! $aggregateId || ! isset($this->aggregates[$aggregateClassName][$aggregateId])) {
             return null;
         }
 
@@ -78,6 +78,6 @@ class InMemoryStandardRepository implements StandardRepository
      */
     private function getAggregateId(array $identifiers)
     {
-        return !empty($identifiers) ? array_shift($identifiers) : null;
+        return ! empty($identifiers) ? array_shift($identifiers) : null;
     }
 }

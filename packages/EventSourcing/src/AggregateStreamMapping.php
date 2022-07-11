@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
-
 
 class AggregateStreamMapping
 {
@@ -13,12 +11,12 @@ class AggregateStreamMapping
         $this->aggregateToStreamMapping = $aggregateToStreamMapping;
     }
 
-    public static function createEmpty() : static
+    public static function createEmpty(): static
     {
         return new self([]);
     }
 
-    public static function createWith(array $aggregateToStreamMapping) : static
+    public static function createWith(array $aggregateToStreamMapping): static
     {
         return new self($aggregateToStreamMapping);
     }

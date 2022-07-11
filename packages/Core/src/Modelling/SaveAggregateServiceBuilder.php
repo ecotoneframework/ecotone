@@ -125,21 +125,21 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->aggregateRepositoryReferenceNames
             );
 
-        $objectEventBus = GatewayProxyBuilder::create("", EventBus::class, "publish", BusModule::EVENT_CHANNEL_NAME_BY_OBJECT)
+        $objectEventBus = GatewayProxyBuilder::create('', EventBus::class, 'publish', BusModule::EVENT_CHANNEL_NAME_BY_OBJECT)
             ->withParameterConverters(
                 [
-                    GatewayPayloadBuilder::create("event"),
-                    GatewayHeadersBuilder::create("metadata")
+                    GatewayPayloadBuilder::create('event'),
+                    GatewayHeadersBuilder::create('metadata'),
                 ]
             )
             ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
 
-        $namedEventBus = GatewayProxyBuilder::create("", EventBus::class, "publishWithRouting", BusModule::EVENT_CHANNEL_NAME_BY_NAME)
+        $namedEventBus = GatewayProxyBuilder::create('', EventBus::class, 'publishWithRouting', BusModule::EVENT_CHANNEL_NAME_BY_NAME)
             ->withParameterConverters([
-                GatewayPayloadBuilder::create("event"),
-                GatewayHeadersBuilder::create("metadata"),
-                GatewayHeaderBuilder::create("routingKey", BusModule::EVENT_CHANNEL_NAME_BY_NAME),
-                GatewayHeaderBuilder::create("eventMediaType", MessageHeaders::CONTENT_TYPE)
+                GatewayPayloadBuilder::create('event'),
+                GatewayHeadersBuilder::create('metadata'),
+                GatewayHeaderBuilder::create('routingKey', BusModule::EVENT_CHANNEL_NAME_BY_NAME),
+                GatewayHeaderBuilder::create('eventMediaType', MessageHeaders::CONTENT_TYPE),
             ])
             ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
 
@@ -162,7 +162,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->aggregateClassesToSnapshot,
                 $this->aggregateClassesToSnapshot == [] ? InMemoryDocumentStore::createEmpty() : $referenceSearchService->get($this->documentStoreReference)
             ),
-            "save"
+            'save'
         )
             ->withOutputMessageChannel($this->outputMessageChannelName)
             ->build($channelResolver, $referenceSearchService);
@@ -175,8 +175,8 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     {
         return [
             $interfaceToCallRegistry->getFor($this->interfaceToCall->getInterfaceName(), $this->interfaceToCall->getMethodName()),
-            $interfaceToCallRegistry->getFor(CallAggregateService::class, "call"),
-            $interfaceToCallRegistry->getFor(SaveAggregateService::class, "save")
+            $interfaceToCallRegistry->getFor(CallAggregateService::class, 'call'),
+            $interfaceToCallRegistry->getFor(SaveAggregateService::class, 'save'),
         ];
     }
 
@@ -185,12 +185,12 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(SaveAggregateService::class, "save");
+        return $interfaceToCallRegistry->getFor(SaveAggregateService::class, 'save');
     }
 
     public function __toString()
     {
-        return sprintf("Aggregate Handler - %s with name `%s` for input channel `%s`", (string)$this->interfaceToCall, $this->getEndpointId(), $this->getInputMessageChannelName());
+        return sprintf('Aggregate Handler - %s with name `%s` for input channel `%s`', (string)$this->interfaceToCall, $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 
     private function initialize(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry): void
@@ -211,8 +211,8 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $aggregateMethodWithEvents = $method;
             }
             if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierGetMethodAttribute)) {
-                if (!$methodToCheck->hasNoParameters()) {
-                    throw NoCorrectIdentifierDefinedException::create($interfaceToCall . " should not have any parameters.");
+                if (! $methodToCheck->hasNoParameters()) {
+                    throw NoCorrectIdentifierDefinedException::create($interfaceToCall . ' should not have any parameters.');
                 }
 
                 /** @var AggregateIdentifierMethod $attribute */

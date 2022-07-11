@@ -1,15 +1,11 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
-
 
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 use Prooph\EventStore\Pdo\Projection\GapDetection;
 use Prooph\EventStore\Pdo\Projection\PdoEventStoreReadModelProjector;
-use Prooph\EventStore\Projection\ReadModel;
-use Prooph\EventStore\Projection\ReadModelProjector;
 
 final class ProjectionSetupConfiguration
 {
@@ -26,12 +22,11 @@ final class ProjectionSetupConfiguration
         private bool $withAllStreams,
         private array $streamNames,
         private array $categories
-    )
-    {
+    ) {
         $this->projectionOptions = [
             PdoEventStoreReadModelProjector::OPTION_GAP_DETECTION => new GapDetection(),
-//            PdoEventStoreReadModelProjector::DEFAULT_LOCK_TIMEOUT_MS => 0,
-//            PdoEventStoreReadModelProjector::OPTION_UPDATE_LOCK_THRESHOLD => 0
+            //            PdoEventStoreReadModelProjector::DEFAULT_LOCK_TIMEOUT_MS => 0,
+            //            PdoEventStoreReadModelProjector::OPTION_UPDATE_LOCK_THRESHOLD => 0
         ];
     }
 
@@ -60,7 +55,7 @@ final class ProjectionSetupConfiguration
         return new static($projectionName, $projectionLifeCycleConfiguration, $eventStoreReferenceName,true, [], []);
     }
 
-    public function withKeepingStateBetweenEvents(bool $keepState) : static
+    public function withKeepingStateBetweenEvents(bool $keepState): static
     {
         $this->keepStateBetweenEvents = $keepState;
 
@@ -72,7 +67,7 @@ final class ProjectionSetupConfiguration
         return $this->keepStateBetweenEvents;
     }
 
-    public function withProjectionEventHandler(string $eventName, string $className, string $methodName, string $synchronousEventHandlerRequestChannel, string $asynchronousEventHandlerRequestChannel) : static
+    public function withProjectionEventHandler(string $eventName, string $className, string $methodName, string $synchronousEventHandlerRequestChannel, string $asynchronousEventHandlerRequestChannel): static
     {
         Assert::keyNotExists($this->projectionEventHandlers, $eventName, "Projection {$this->projectionName} has incorrect configuration. Can't register event handler twice for the same event {$eventName}");
 
@@ -86,7 +81,7 @@ final class ProjectionSetupConfiguration
         return $this->eventStoreReferenceName;
     }
 
-    public function withOptions(array $options) : static
+    public function withOptions(array $options): static
     {
         $this->projectionOptions = $options;
 
@@ -132,7 +127,7 @@ final class ProjectionSetupConfiguration
      * If projection is running in asynchronous mode, this channel allows to send
      * a message to trigger it to perform specific action
      */
-    public function getTriggeringChannelName() : string
+    public function getTriggeringChannelName(): string
     {
         if ($this->getProjectionEventHandlers()) {
             /** @var ProjectionEventHandlerConfiguration $first */
@@ -144,7 +139,7 @@ final class ProjectionSetupConfiguration
         return NullableMessageChannel::CHANNEL_NAME;
     }
 
-    public function getInitializationChannelName() : string
+    public function getInitializationChannelName(): string
     {
         return $this->projectionLifeCycleConfiguration->getInitializationRequestChannel() ?? NullableMessageChannel::CHANNEL_NAME;
     }

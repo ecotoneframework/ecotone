@@ -1,13 +1,9 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
 
-use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Conversion\ArrayToJson\ArrayToJsonConverter;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -19,10 +15,18 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
+use function json_encode;
+
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use Ramsey\Uuid\Uuid;
+
 /**
  * Class LoggingServiceTest
  * @package Test\Ecotone\Messaging\Unit\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class LoggingServiceTest extends TestCase
 {
@@ -32,12 +36,12 @@ class LoggingServiceTest extends TestCase
                     ->getMockBuilder(LoggerInterface::class)
                     ->getMock();
 
-        $payload = "someData";
+        $payload = 'someData';
         $message = MessageBuilder::withPayload($payload)->build();
 
         $logger
             ->expects($this->once())
-            ->method("debug")
+            ->method('debug')
             ->with($payload);
 
         $loggingService = new LoggingService(AutoCollectionConversionService::createEmpty(), $logger);
@@ -48,7 +52,7 @@ class LoggingServiceTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        LoggingLevel::create("bla", false);
+        LoggingLevel::create('bla', false);
     }
 
     public function test_serializing_payload_if_is_not_primitive()
@@ -57,16 +61,16 @@ class LoggingServiceTest extends TestCase
             ->getMockBuilder(LoggerInterface::class)
             ->getMock();
 
-        $payload = ["some"];
+        $payload = ['some'];
         $message = MessageBuilder::withPayload($payload)->build();
 
         $logger
             ->expects($this->once())
-            ->method("debug")
+            ->method('debug')
             ->with(serialize($payload));
 
         $loggingService = new LoggingService(AutoCollectionConversionService::createWith([
-            new SerializingConverter()
+            new SerializingConverter(),
         ]), $logger);
         $loggingService->log(LoggingLevel::createDebug(), $message);
     }
@@ -82,7 +86,7 @@ class LoggingServiceTest extends TestCase
 
         $logger
             ->expects($this->once())
-            ->method("debug")
+            ->method('debug')
             ->with($payload->toString());
 
         $loggingService = new LoggingService(AutoCollectionConversionService::createEmpty(), $logger);
@@ -95,18 +99,18 @@ class LoggingServiceTest extends TestCase
             ->getMockBuilder(LoggerInterface::class)
             ->getMock();
 
-        $payload = ["some"];
+        $payload = ['some'];
         $message = MessageBuilder::withPayload($payload)
                     ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY))
                     ->build();
 
         $logger
             ->expects($this->once())
-            ->method("debug")
-            ->with(\json_encode($payload));
+            ->method('debug')
+            ->with(json_encode($payload));
 
         $loggingService = new LoggingService(AutoCollectionConversionService::createWith([
-            new ArrayToJsonConverter()
+            new ArrayToJsonConverter(),
         ]), $logger);
         $loggingService->log(LoggingLevel::createDebug(), $message);
     }
@@ -117,17 +121,17 @@ class LoggingServiceTest extends TestCase
             ->getMockBuilder(LoggerInterface::class)
             ->getMock();
 
-        $payload = "some";
+        $payload = 'some';
         $message = MessageBuilder::withPayload($payload)->build();
 
         $logger
             ->expects($this->once())
-            ->method("debug")
+            ->method('debug')
             ->with($payload, [
-                "headers" => \json_encode([
-                    "id" => $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
-                    "timestamp" => $message->getHeaders()->get(MessageHeaders::TIMESTAMP)
-                ])
+                'headers' => json_encode([
+                    'id' => $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
+                    'timestamp' => $message->getHeaders()->get(MessageHeaders::TIMESTAMP),
+                ]),
             ]);
 
         $loggingService = new LoggingService(AutoCollectionConversionService::createEmpty(), $logger);

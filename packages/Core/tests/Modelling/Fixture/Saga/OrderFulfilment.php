@@ -4,7 +4,6 @@ namespace Test\Ecotone\Modelling\Fixture\Saga;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
-use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
 
 #[Aggregate]
@@ -25,22 +24,22 @@ class OrderFulfilment
     private function __construct(string $orderId)
     {
         $this->orderId  = $orderId;
-        $this->status = "new";
+        $this->status = 'new';
     }
 
     #[EventHandler]
-    public static function createWith(string $orderId) : self
+    public static function createWith(string $orderId): self
     {
         return new self($orderId);
     }
 
     #[EventHandler]
-    public function finishOrder(PaymentWasDoneEvent $event) : void
+    public function finishOrder(PaymentWasDoneEvent $event): void
     {
-        $this->status = "done";
+        $this->status = 'done';
     }
 
-    public function getId() : string
+    public function getId(): string
     {
         return $this->orderId;
     }

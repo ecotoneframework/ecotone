@@ -1,10 +1,7 @@
 <?php
 
-
 namespace Ecotone\Modelling;
 
-
-use Ecotone\Modelling\Event;
 use Ecotone\Messaging\Support\Assert;
 
 final class EventStream
@@ -16,7 +13,7 @@ final class EventStream
     private function __construct(int $aggregateVersion, array $events)
     {
         foreach ($events as $event) {
-            Assert::isTrue($event instanceof Event || $event instanceof SnapshotEvent, "Event is not type of Event or SnapshotEvent" . get_class($event));
+            Assert::isTrue($event instanceof Event || $event instanceof SnapshotEvent, 'Event is not type of Event or SnapshotEvent' . get_class($event));
         }
 
         $this->aggregateVersion = $aggregateVersion;
@@ -28,12 +25,12 @@ final class EventStream
      * @param Event[]|SnapshotEvent[] $events
      * @return static
      */
-    public static function createWith(int $aggregateVersion, array $events) : static
+    public static function createWith(int $aggregateVersion, array $events): static
     {
         return new static($aggregateVersion, $events);
     }
 
-    public static function createEmpty() : static
+    public static function createEmpty(): static
     {
         return new static(0, []);
     }

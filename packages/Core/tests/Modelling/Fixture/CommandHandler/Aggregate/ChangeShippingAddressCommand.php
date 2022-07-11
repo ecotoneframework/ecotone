@@ -35,7 +35,7 @@ class ChangeShippingAddressCommand implements RegisterWithShipping
         $this->shippingAddress = $shippingAddress;
     }
 
-    public static function create(string $orderId, int $version, string $shippingAddress) : self
+    public static function create(string $orderId, int $version, string $shippingAddress): self
     {
         return new self($orderId, $version, $shippingAddress);
     }

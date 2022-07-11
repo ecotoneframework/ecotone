@@ -3,7 +3,6 @@
 namespace Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod;
 
 use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
 use Ecotone\Modelling\Attribute\CommandHandler;
 
@@ -14,7 +13,7 @@ class User
 
     public $name;
 
-    #[CommandHandler("user.create")]
+    #[CommandHandler('user.create')]
     public static function create(CreateUser $command): self
     {
         $self = new self();
@@ -23,7 +22,7 @@ class User
         return $self;
     }
 
-    #[AggregateIdentifierMethod("id")]
+    #[AggregateIdentifierMethod('id')]
     public function getIdentifier()
     {
         return $this->internalId;

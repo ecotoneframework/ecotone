@@ -8,9 +8,7 @@ use Ecotone\Dbal\DbalTransaction\DbalTransaction;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ConsoleCommand;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Attribute\PollableEndpoint;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -40,18 +38,18 @@ class ObjectManagerModule implements AnnotationModule
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $connectionFactories = [DbalConnectionFactory::class];
-        $pointcut            = "(" . DbalTransaction::class . ")";
+        $pointcut            = '(' . DbalTransaction::class . ')';
 
         $dbalConfiguration = $this->getDbalConfiguration($extensionObjects);
 
         if ($dbalConfiguration->isTransactionOnCommandBus()) {
-            $pointcut .= "||(" . CommandBus::class . ")";
+            $pointcut .= '||(' . CommandBus::class . ')';
         }
         if ($dbalConfiguration->isTransactionOnConsoleCommands()) {
-            $pointcut .= "||(" . ConsoleCommand::class . ")";
+            $pointcut .= '||(' . ConsoleCommand::class . ')';
         }
         if ($dbalConfiguration->isClearObjectManagerOnAsynchronousEndpoints()) {
-            $pointcut .= "||(" . AsynchronousRunningEndpoint::class . ")";
+            $pointcut .= '||(' . AsynchronousRunningEndpoint::class . ')';
         }
 
         if ($dbalConfiguration->getDefaultConnectionReferenceNames()) {
@@ -63,7 +61,7 @@ class ObjectManagerModule implements AnnotationModule
             ->registerAroundMethodInterceptor(
                 AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     new ObjectManagerInterceptor($connectionFactories),
-                    "transactional",
+                    'transactional',
                     Precedence::DATABASE_TRANSACTION_PRECEDENCE + 1,
                     $pointcut
                 )

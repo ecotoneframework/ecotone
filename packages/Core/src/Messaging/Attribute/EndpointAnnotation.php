@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Attribute;
@@ -12,9 +13,9 @@ use Ecotone\Messaging\Config\ConfigurationException;
  */
 abstract class EndpointAnnotation extends IdentifiedAnnotation
 {
-    private string $inputChannelName = "";
+    private string $inputChannelName = '';
 
-    public function __construct(string $inputChannelName = "", string $endpointId = "")
+    public function __construct(string $inputChannelName = '', string $endpointId = '')
     {
         if ($inputChannelName && $endpointId && ($inputChannelName === $endpointId)) {
             throw ConfigurationException::create("endpointId should not equals inputChannelName for endpoint with id: `{$inputChannelName}`");

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
-
 
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Enqueue\Dbal\DbalConnectionFactory;
@@ -33,17 +31,17 @@ class EventSourcingConfiguration extends BaseEventSourcingConfiguration
         $this->connectionReferenceName = $connectionReferenceName;
     }
 
-    public static function create(string $connectionReferenceName = DbalConnectionFactory::class, string $eventStoreReferenceName = EventStore::class, string $projectManagerReferenceName = ProjectionManager::class) : static
+    public static function create(string $connectionReferenceName = DbalConnectionFactory::class, string $eventStoreReferenceName = EventStore::class, string $projectManagerReferenceName = ProjectionManager::class): static
     {
         return new self($connectionReferenceName, $eventStoreReferenceName, $projectManagerReferenceName);
     }
 
-    public static function createWithDefaults() : static
+    public static function createWithDefaults(): static
     {
         return new self();
     }
 
-    public static function createInMemory() : static
+    public static function createInMemory(): static
     {
         $eventSourcingConfiguration = new self();
         $eventSourcingConfiguration->isInMemory = true;
@@ -103,35 +101,35 @@ class EventSourcingConfiguration extends BaseEventSourcingConfiguration
         return $this->inMemoryProjectionManager;
     }
 
-    public function withInitializeEventStoreOnStart(bool $isInitializedOnStartup) : static
+    public function withInitializeEventStoreOnStart(bool $isInitializedOnStartup): static
     {
         $this->initializeEventStoreOnStart = $isInitializedOnStartup;
 
         return $this;
     }
 
-    public function withLoadBatchSize(int $loadBatchSize) : static
+    public function withLoadBatchSize(int $loadBatchSize): static
     {
         $this->loadBatchSize = $loadBatchSize;
 
         return $this;
     }
 
-    public function withWriteLockStrategy(bool $enableWriteLockStrategy) : static
+    public function withWriteLockStrategy(bool $enableWriteLockStrategy): static
     {
         $this->enableWriteLockStrategy = $enableWriteLockStrategy;
 
         return $this;
     }
 
-    public function withEventStreamTableName(string $eventStreamTableName) : static
+    public function withEventStreamTableName(string $eventStreamTableName): static
     {
         $this->eventStreamTableName = $eventStreamTableName;
 
         return $this;
     }
 
-    public function withProjectionsTableName(string $projectionsTableName) : static
+    public function withProjectionsTableName(string $projectionsTableName): static
     {
         $this->projectionsTable = $projectionsTableName;
 
@@ -143,17 +141,17 @@ class EventSourcingConfiguration extends BaseEventSourcingConfiguration
         return $this->initializeEventStoreOnStart;
     }
 
-    public function isUsingSingleStreamStrategy() : bool
+    public function isUsingSingleStreamStrategy(): bool
     {
         return $this->getPersistenceStrategy() === LazyProophEventStore::SINGLE_STREAM_PERSISTENCE;
     }
 
-    public function isUsingAggregateStreamStrategy() : bool
+    public function isUsingAggregateStreamStrategy(): bool
     {
         return $this->getPersistenceStrategy() === LazyProophEventStore::AGGREGATE_STREAM_PERSISTENCE;
     }
 
-    public function isUsingSimpleStreamStrategy() : bool
+    public function isUsingSimpleStreamStrategy(): bool
     {
         return $this->getPersistenceStrategy() === LazyProophEventStore::SIMPLE_STREAM_PERSISTENCE;
     }

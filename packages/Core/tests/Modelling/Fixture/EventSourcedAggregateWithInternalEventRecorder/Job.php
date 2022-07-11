@@ -1,9 +1,7 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder;
 
-use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
@@ -23,7 +21,7 @@ class Job
     private bool $isInProgress;
 
     #[CommandHandler]
-    public static function start(StartJob $command) : self
+    public static function start(StartJob $command): self
     {
         $self = new static();
         $self->recordThat(JobWasStarted::recordWith($command->getId()));
@@ -32,26 +30,26 @@ class Job
     }
 
     #[CommandHandler]
-    public function finish(FinishJob $command) : void
+    public function finish(FinishJob $command): void
     {
         $this->recordThat(JobWasFinished::recordWith($command->getId()));
     }
 
-    #[QueryHandler("job.isInProgress")]
-    public function isInProgress() : bool
+    #[QueryHandler('job.isInProgress')]
+    public function isInProgress(): bool
     {
         return $this->isInProgress;
     }
 
     #[EventSourcingHandler]
-    public function whenJobWasStarted(JobWasStarted $event) : void
+    public function whenJobWasStarted(JobWasStarted $event): void
     {
         $this->id = $event->getId();
         $this->isInProgress = true;
     }
 
     #[EventSourcingHandler]
-    public function whenJobWasFinished(JobWasFinished $event) : void
+    public function whenJobWasFinished(JobWasFinished $event): void
     {
         $this->isInProgress = false;
     }

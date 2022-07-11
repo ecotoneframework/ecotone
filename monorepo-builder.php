@@ -19,6 +19,7 @@ return static function (MBConfig $containerConfigurator): void {
 
         ComposerJsonSection::REQUIRE_DEV => [
             "behat/behat" => "^3.10",
+            "friendsofphp/php-cs-fixer" => "^3.9",
             "php-coveralls/php-coveralls" => "^2.5",
             "phpstan/phpstan" => "^1.8",
             "phpunit/phpunit" => "^9.5",

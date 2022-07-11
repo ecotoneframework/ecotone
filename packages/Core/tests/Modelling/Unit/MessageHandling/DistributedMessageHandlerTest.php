@@ -9,18 +9,22 @@ use Ecotone\Modelling\StorageCommandBus;
 use Ecotone\Modelling\StorageEventBus;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ */
 class DistributedMessageHandlerTest extends TestCase
 {
     public function test_distribute_event()
     {
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
-        $distributedMessageHandler = new DistributedMessageHandler(["order.was_placed"], []);
+        $distributedMessageHandler = new DistributedMessageHandler(['order.was_placed'], []);
 
         $distributedMessageHandler->handle(
-            "some", ["token" => 1],
-            "event",
-            "order.was_placed",
+            'some',
+            ['token' => 1],
+            'event',
+            'order.was_placed',
             MediaType::TEXT_PLAIN,
             $commandBus,
             $eventBus
@@ -28,7 +32,7 @@ class DistributedMessageHandlerTest extends TestCase
 
         $this->assertEquals(
             [[
-                "order.was_placed", "some", MediaType::TEXT_PLAIN, ["token" => 1]
+                'order.was_placed', 'some', MediaType::TEXT_PLAIN, ['token' => 1],
             ]],
             $eventBus->getCalls()
         );
@@ -41,9 +45,10 @@ class DistributedMessageHandlerTest extends TestCase
         $distributedMessageHandler = new DistributedMessageHandler([], []);
 
         $distributedMessageHandler->handle(
-            "some", ["token" => 1],
-            "event",
-            "order.was_placed",
+            'some',
+            ['token' => 1],
+            'event',
+            'order.was_placed',
             MediaType::TEXT_PLAIN,
             $commandBus,
             $eventBus
@@ -59,12 +64,13 @@ class DistributedMessageHandlerTest extends TestCase
     {
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
-        $distributedMessageHandler = new DistributedMessageHandler([], ["order.place_order"]);
+        $distributedMessageHandler = new DistributedMessageHandler([], ['order.place_order']);
 
         $distributedMessageHandler->handle(
-            "some", ["token" => 1],
-            "command",
-            "order.place_order",
+            'some',
+            ['token' => 1],
+            'command',
+            'order.place_order',
             MediaType::TEXT_PLAIN,
             $commandBus,
             $eventBus
@@ -72,7 +78,7 @@ class DistributedMessageHandlerTest extends TestCase
 
         $this->assertEquals(
             [[
-                "order.place_order", "some", MediaType::TEXT_PLAIN, ["token" => 1]
+                'order.place_order', 'some', MediaType::TEXT_PLAIN, ['token' => 1],
             ]],
             $commandBus->getCalls()
         );
@@ -87,9 +93,10 @@ class DistributedMessageHandlerTest extends TestCase
         $distributedMessageHandler = new DistributedMessageHandler([], []);
 
         $distributedMessageHandler->handle(
-            "some", ["token" => 1],
-            "command",
-            "order.place_order",
+            'some',
+            ['token' => 1],
+            'command',
+            'order.place_order',
             MediaType::TEXT_PLAIN,
             $commandBus,
             $eventBus

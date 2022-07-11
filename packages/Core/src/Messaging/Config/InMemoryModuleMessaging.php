@@ -1,6 +1,7 @@
 <?php
 
 namespace Ecotone\Messaging\Config;
+
 use Ecotone\Messaging\Support\Assert;
 
 /**
@@ -31,7 +32,7 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
      * @return InMemoryModuleMessaging
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([], []);
     }
@@ -42,7 +43,7 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
      * @return InMemoryModuleMessaging
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createWith(array $moduleConfigurations, array $moduleExtensions) : self
+    public static function createWith(array $moduleConfigurations, array $moduleExtensions): self
     {
         return new self($moduleConfigurations, $moduleExtensions);
     }

@@ -2,11 +2,10 @@
 
 namespace Test\Ecotone\Messaging\Unit;
 
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageCompareService;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Support\MessageCompareService;
 
 /**
  * Class MessagingTest
@@ -15,23 +14,23 @@ use Ecotone\Messaging\Support\MessageCompareService;
  */
 abstract class MessagingTest extends TestCase
 {
-    const FIXTURE_DIR = __DIR__ . '/../Fixture';
+    public const FIXTURE_DIR = __DIR__ . '/../Fixture';
 
-    const ROOT_DIR = self::FIXTURE_DIR . '/../../..';
+    public const ROOT_DIR = self::FIXTURE_DIR . '/../../..';
 
-    public function assertMessages(Message $message, Message $toCompareWith) : void
+    public function assertMessages(Message $message, Message $toCompareWith): void
     {
-        if (!MessageCompareService::areSameMessagesIgnoringIdAndTimestamp($message, $toCompareWith)) {
+        if (! MessageCompareService::areSameMessagesIgnoringIdAndTimestamp($message, $toCompareWith)) {
             $this->assertEquals($message, $toCompareWith);
-        }else {
+        } else {
             $this->assertTrue(true);
         }
     }
 
-    public function assertMultipleMessages(array $messages, array $messagesToCompareWith) : void
+    public function assertMultipleMessages(array $messages, array $messagesToCompareWith): void
     {
         $messagesAmount = count($messages);
-        Assert::assertCount($messagesAmount, $messagesToCompareWith, "Amount of messages is different");
+        Assert::assertCount($messagesAmount, $messagesToCompareWith, 'Amount of messages is different');
 
         for ($i = 0; $i < $messagesAmount; $i++) {
             $this->assertMessages($messages[$i], $messagesToCompareWith[$i]);

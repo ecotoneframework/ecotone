@@ -4,11 +4,12 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActiv
 
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Attribute\ServiceActivator;
+use stdClass;
 
 class ServiceWithSingleArgumentDefinedByConverter
 {
-    #[ServiceActivator("requestChannel")]
-    public function receive(#[Reference] \stdClass $data)
+    #[ServiceActivator('requestChannel')]
+    public function receive(#[Reference] stdClass $data)
     {
         return $data;
     }

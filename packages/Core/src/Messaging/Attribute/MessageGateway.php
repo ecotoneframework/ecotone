@@ -1,13 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Attribute;
 
-use Doctrine\Common\Annotations\Annotation\Required;
-use Doctrine\Common\Annotations\Annotation\Target;
+use Attribute;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD)]
 class MessageGateway
 {
     private string $requestChannel;
@@ -16,7 +16,7 @@ class MessageGateway
     private array $requiredInterceptorNames;
     private ?string $replyContentType;
 
-    public function __construct(string $requestChannel, string $errorChannel = "", int $replyTimeoutInMilliseconds = GatewayProxyBuilder::DEFAULT_REPLY_MILLISECONDS_TIMEOUT, array $requiredInterceptorNames = [], ?string $replyContentType = null)
+    public function __construct(string $requestChannel, string $errorChannel = '', int $replyTimeoutInMilliseconds = GatewayProxyBuilder::DEFAULT_REPLY_MILLISECONDS_TIMEOUT, array $requiredInterceptorNames = [], ?string $replyContentType = null)
     {
         $this->requestChannel             = $requestChannel;
         $this->errorChannel               = $errorChannel;

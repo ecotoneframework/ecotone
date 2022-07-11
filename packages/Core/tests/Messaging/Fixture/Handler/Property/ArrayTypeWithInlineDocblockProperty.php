@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
 
 use Test\Ecotone\Messaging\Fixture\Handler\Property\Extra\ExtraObject;

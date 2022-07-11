@@ -2,8 +2,8 @@
 
 namespace Ecotone\Messaging\Handler;
 
-
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Class TypeDescriptor
@@ -17,7 +17,7 @@ interface Type
      * @return bool
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function isCompatibleWith(Type $toCompare): bool;
 
@@ -36,12 +36,12 @@ interface Type
     /**
      * @return bool
      */
-    public function isCompoundType() : bool;
+    public function isCompoundType(): bool;
 
     /**
      * @return bool
      */
-    public function isResource() : bool;
+    public function isResource(): bool;
 
     /**
      * @return bool
@@ -85,7 +85,7 @@ interface Type
      */
     public function isClassOrInterface(): bool;
 
-    public function isClassNotInterface() : bool;
+    public function isClassNotInterface(): bool;
 
     /**
      * @return bool
@@ -114,7 +114,7 @@ interface Type
     /**
      * @return bool
      */
-    public function isUnionType() : bool;
+    public function isUnionType(): bool;
 
     /**
      * @return string

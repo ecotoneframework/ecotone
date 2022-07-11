@@ -3,10 +3,8 @@
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Converter;
 
 use Ecotone\Messaging\Attribute\MediaTypeConverter;
-use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 #[MediaTypeConverter]

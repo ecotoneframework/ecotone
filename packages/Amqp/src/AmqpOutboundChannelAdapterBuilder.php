@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Amqp;
@@ -11,8 +12,6 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageHandler;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Enqueue\AmqpExt\AmqpConnectionFactory;
 
 class AmqpOutboundChannelAdapterBuilder extends EnqueueOutboundChannelAdapterBuilder
@@ -20,7 +19,7 @@ class AmqpOutboundChannelAdapterBuilder extends EnqueueOutboundChannelAdapterBui
     private const DEFAULT_PERSISTENT_MODE = true;
 
     private string $amqpConnectionFactoryReferenceName;
-    private string $defaultRoutingKey = "";
+    private string $defaultRoutingKey = '';
     private ?string $routingKeyFromHeader = null;
     private ?string $exchangeFromHeader = null;
     private string $exchangeName;
@@ -41,7 +40,7 @@ class AmqpOutboundChannelAdapterBuilder extends EnqueueOutboundChannelAdapterBui
 
     public static function createForDefaultExchange(string $amqpConnectionFactoryReferenceName): self
     {
-        return new self("", $amqpConnectionFactoryReferenceName);
+        return new self('', $amqpConnectionFactoryReferenceName);
     }
 
     /**
@@ -68,7 +67,7 @@ class AmqpOutboundChannelAdapterBuilder extends EnqueueOutboundChannelAdapterBui
         return $this;
     }
 
-    public function withStaticHeadersToEnrich(array $headers) : self
+    public function withStaticHeadersToEnrich(array $headers): self
     {
         $this->staticHeadersToAdd = $headers;
 

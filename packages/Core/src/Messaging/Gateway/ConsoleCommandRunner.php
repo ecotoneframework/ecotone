@@ -10,5 +10,5 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\Me
 interface ConsoleCommandRunner
 {
     #[MessageGateway(MessagingCommandsModule::ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR)]
-    public function execute(#[Header(MessagingCommandsModule::ECOTONE_CONSOLE_COMMAND_NAME)] $commandName, #[Payload] $parameters) : mixed;
+    public function execute(#[Header(MessagingCommandsModule::ECOTONE_CONSOLE_COMMAND_NAME)] $commandName, #[Payload] $parameters): mixed;
 }

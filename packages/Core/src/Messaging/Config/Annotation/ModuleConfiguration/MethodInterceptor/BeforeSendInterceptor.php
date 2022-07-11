@@ -1,14 +1,14 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
 
 use Ecotone\Messaging\Channel\ChannelInterceptor;
-use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
+use Throwable;
 
 /**
  * Class BeforeSendInterceptor
@@ -46,7 +46,7 @@ class BeforeSendInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
+    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
     {
     }
 
@@ -69,8 +69,7 @@ class BeforeSendInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
+    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
     {
     }
-
 }

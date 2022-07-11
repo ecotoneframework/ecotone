@@ -1,12 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor;
 
-
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -43,7 +42,7 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
     /**
      * @inheritDoc
      */
-    public function processMessage(Message $message): ?\Ecotone\Messaging\Message
+    public function processMessage(Message $message): ?Message
     {
         $result = $this->messageProcessor->processMessage($message);
 
@@ -66,14 +65,14 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
                     break;
                 }
             }
-            if (!$foundUnionType) {
+            if (! $foundUnionType) {
                 foreach ($returnType->getUnionTypes() as $type) {
                     if ($type->isCompatibleWith($returnValueType)) {
                         if ($type->isCollection()) {
                             $collectionOf = $type->resolveGenericTypes();
                             $firstKey = array_key_first($result);
-                            if (count($collectionOf) === 1 && !is_null($firstKey)) {
-                                if (!$collectionOf[0]->isCompatibleWith(TypeDescriptor::createFromVariable($result[$firstKey]))) {
+                            if (count($collectionOf) === 1 && ! is_null($firstKey)) {
+                                if (! $collectionOf[0]->isCompatibleWith(TypeDescriptor::createFromVariable($result[$firstKey]))) {
                                     continue;
                                 }
                             }
@@ -96,7 +95,7 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return (string)$this->messageProcessor;
     }

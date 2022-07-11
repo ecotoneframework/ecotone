@@ -15,7 +15,7 @@ class DirectMessageSplitter
     /**
      * @param Message $message
      */
-    public function split(Message $message) : array
+    public function split(Message $message): array
     {
         return $message->getPayload();
     }

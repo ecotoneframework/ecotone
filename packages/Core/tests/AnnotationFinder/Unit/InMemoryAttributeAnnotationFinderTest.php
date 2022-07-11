@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\AnnotationFinder\Unit;
-
 
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedMethod;
@@ -10,13 +8,15 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use PHPUnit\Framework\TestCase;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\ApplicationContext;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndpoint;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeGatewayExample;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\SplitterOnMethod\SplitterOnMethodExample;
 
+/**
+ * @internal
+ */
 class InMemoryAttributeAnnotationFinderTest extends TestCase
 {
     public function getAnnotationResolver(): AnnotationResolver
@@ -34,10 +34,10 @@ class InMemoryAttributeAnnotationFinderTest extends TestCase
                     $messageEndpoint,
                     $gatewayAnnotation,
                     GatewayWithReplyChannelExample::class,
-                    "buy",
+                    'buy',
                     [$messageEndpoint],
                     [$gatewayAnnotation]
-                )
+                ),
             ],
             $this->createAnnotationRegistrationService([GatewayWithReplyChannelExample::class])
                 ->findCombined(MessageEndpoint::class, SomeGatewayExample::class)
@@ -50,10 +50,10 @@ class InMemoryAttributeAnnotationFinderTest extends TestCase
 
         $this->assertEquals(
             [
-                $gatewayAnnotation
+                $gatewayAnnotation,
             ],
             $this->createAnnotationRegistrationService([GatewayWithReplyChannelExample::class])
-                ->getAnnotationsForMethod(GatewayWithReplyChannelExample::class, "buy")
+                ->getAnnotationsForMethod(GatewayWithReplyChannelExample::class, 'buy')
         );
     }
 
@@ -61,7 +61,7 @@ class InMemoryAttributeAnnotationFinderTest extends TestCase
     {
         $this->assertEquals(
             [
-                new MessageEndpoint()
+                new MessageEndpoint(),
             ],
             $this->createAnnotationRegistrationService([GatewayWithReplyChannelExample::class])
                 ->getAnnotationsForClass(GatewayWithReplyChannelExample::class)
@@ -72,7 +72,7 @@ class InMemoryAttributeAnnotationFinderTest extends TestCase
     {
         $this->assertEquals(
             [
-                GatewayWithReplyChannelExample::class
+                GatewayWithReplyChannelExample::class,
             ],
             $this->createAnnotationRegistrationService([GatewayWithReplyChannelExample::class])
                 ->findAnnotatedClasses(MessageEndpoint::class)
@@ -88,10 +88,10 @@ class InMemoryAttributeAnnotationFinderTest extends TestCase
                 AnnotatedMethod::create(
                     $annotation,
                     SplitterOnMethodExample::class,
-                    "split",
+                    'split',
                     [],
                     [$annotation]
-                )
+                ),
             ],
             $this->createAnnotationRegistrationService([SplitterOnMethodExample::class])
                 ->findAnnotatedMethods(SomeHandlerAnnotation::class)

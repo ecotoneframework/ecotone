@@ -1,8 +1,10 @@
 <?php
 
-
 namespace Ecotone\Messaging\Attribute;
 
-#[\Attribute(\Attribute::TARGET_PARAMETER)]
+use Attribute;
+
+#[Attribute(Attribute::TARGET_PARAMETER)]
 class ConsoleParameterOption
-{}
+{
+}

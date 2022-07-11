@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
@@ -53,7 +54,7 @@ class GatewayPayloadExpressionBuilder implements GatewayParameterConverterBuilde
     {
         /** @var ExpressionEvaluationService $expressionService */
         $expressionService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
-        Assert::isSubclassOf($expressionService, ExpressionEvaluationService::class, "You're using expression converter parameter, so you must define reference service " . ExpressionEvaluationService::REFERENCE . " in your registry container, which is subclass of " . ExpressionEvaluationService::class);
+        Assert::isSubclassOf($expressionService, ExpressionEvaluationService::class, "You're using expression converter parameter, so you must define reference service " . ExpressionEvaluationService::REFERENCE . ' in your registry container, which is subclass of ' . ExpressionEvaluationService::class);
 
         return new GatewayPayloadExpressionConverter(
             $referenceSearchService,

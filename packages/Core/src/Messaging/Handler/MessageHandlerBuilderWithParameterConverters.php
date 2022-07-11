@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
@@ -19,5 +20,5 @@ interface MessageHandlerBuilderWithParameterConverters extends MessageHandlerBui
     /**
      * @return ParameterConverterBuilder[]
      */
-    public function getParameterConverters() : array;
+    public function getParameterConverters(): array;
 }

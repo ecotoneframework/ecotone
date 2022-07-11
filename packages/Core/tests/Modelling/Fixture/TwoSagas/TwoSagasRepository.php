@@ -7,5 +7,4 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepo
 #[\Ecotone\Modelling\Attribute\Repository]
 class TwoSagasRepository extends InMemoryStandardRepository
 {
-
 }

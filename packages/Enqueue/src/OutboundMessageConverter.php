@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Enqueue;
-
 
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -59,8 +57,8 @@ class OutboundMessageConverter
 
         $enqueueMessagePayload = $convertedMessage->getPayload();
         $mediaType             = $convertedMessage->getHeaders()->hasContentType() ? $convertedMessage->getHeaders()->getContentType() : null;
-        if (!is_string($enqueueMessagePayload)) {
-            if (!$convertedMessage->getHeaders()->hasContentType()) {
+        if (! is_string($enqueueMessagePayload)) {
+            if (! $convertedMessage->getHeaders()->hasContentType()) {
                 throw new InvalidArgumentException("Can't send outside of application. Payload has incorrect type, that can't be converted: " . TypeDescriptor::createFromVariable($enqueueMessagePayload)->toString());
             }
 
@@ -87,7 +85,7 @@ class OutboundMessageConverter
                 );
             } else {
                 throw new InvalidArgumentException(
-                    "Can't send message to external channel. Payload has incorrect non-convertable type or converter is missing for: 
+                    "Can't send message to external channel. Payload has incorrect non-convertable type or converter is missing for:
                  From {$sourceMediaType}:{$sourceType} to {$defaultConversionMediaType}:{$targetType}"
                 );
             }

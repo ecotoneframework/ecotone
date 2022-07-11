@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Dbal\Configuration;
-
 
 use Ecotone\Dbal\DbalOutboundChannelAdapterBuilder;
 use Enqueue\Dbal\DbalConnectionFactory;
@@ -28,7 +26,7 @@ class DbalMessagePublisherConfiguration
     /**
      * @var string
      */
-    private $headerMapper = "";
+    private $headerMapper = '';
     /**
      * @var string
      */
@@ -80,7 +78,7 @@ class DbalMessagePublisherConfiguration
      *
      * @return DbalMessagePublisherConfiguration
      */
-    public function withHeaderMapper(string $headerMapper) : DbalMessagePublisherConfiguration
+    public function withHeaderMapper(string $headerMapper): DbalMessagePublisherConfiguration
     {
         $this->headerMapper = $headerMapper;
 

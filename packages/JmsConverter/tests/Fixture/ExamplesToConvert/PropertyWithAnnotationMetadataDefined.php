@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\JMSConverter\Fixture\ExamplesToConvert;
 
 use JMS\Serializer\Annotation as Serializer;

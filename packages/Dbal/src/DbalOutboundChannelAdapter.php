@@ -1,11 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
+declare(strict_types=1);
 
 namespace Ecotone\Dbal;
 
-
 use Ecotone\Enqueue\CachedConnectionFactory;
-use Ecotone\Enqueue\OutboundMessage;
 use Ecotone\Enqueue\OutboundMessageConverter;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
@@ -51,7 +50,7 @@ class DbalOutboundChannelAdapter implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        if ($this->autoDeclare && !$this->initialized) {
+        if ($this->autoDeclare && ! $this->initialized) {
             /** @var DbalContext $context */
             $context = $this->connectionFactory->createContext();
 

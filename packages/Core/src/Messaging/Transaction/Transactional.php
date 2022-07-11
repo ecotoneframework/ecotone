@@ -1,11 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Transaction;
 
+use Attribute;
 use Ecotone\Messaging\Attribute\WithRequiredReferenceNameList;
 
-#[\Attribute]
+#[Attribute]
 class Transactional implements WithRequiredReferenceNameList
 {
     private const FACTORY_REFERENCE_NAME_LIST = 'factoryReferenceNameList';
@@ -23,7 +25,7 @@ class Transactional implements WithRequiredReferenceNameList
      * @param string[] $factoryReferenceNameList
      * @return Transactional
      */
-    public static function createWith(array $factoryReferenceNameList) : self
+    public static function createWith(array $factoryReferenceNameList): self
     {
         return new self($factoryReferenceNameList);
     }

@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class NoExternalConfigurationModule

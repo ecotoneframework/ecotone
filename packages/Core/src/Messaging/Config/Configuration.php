@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
@@ -13,12 +14,10 @@ use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
-
 
 /**
  * Class Configuration
@@ -38,7 +37,7 @@ interface Configuration
      *
      * @return Configuration
      */
-    public function registerDefaultChannelFor(MessageChannelBuilder $messageChannelBuilder) : Configuration;
+    public function registerDefaultChannelFor(MessageChannelBuilder $messageChannelBuilder): Configuration;
 
     /**
      * @param MessageHandlerBuilder $messageHandlerBuilder
@@ -56,14 +55,14 @@ interface Configuration
      * @param ChannelInterceptorBuilder $channelInterceptorBuilder
      * @return Configuration
      */
-    public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder) : Configuration;
+    public function registerChannelInterceptor(ChannelInterceptorBuilder $channelInterceptorBuilder): Configuration;
 
     /**
      * @param string $asynchronousChannelName
      * @param string $targetEndpointId
      * @return Configuration
      */
-    public function registerAsynchronousEndpoint(string $asynchronousChannelName, string $targetEndpointId) : Configuration;
+    public function registerAsynchronousEndpoint(string $asynchronousChannelName, string $targetEndpointId): Configuration;
 
     /**
      * @param MethodInterceptor $methodInterceptor
@@ -81,7 +80,7 @@ interface Configuration
      * @param \Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference $aroundInterceptorReference
      * @return Configuration
      */
-    public function registerAroundMethodInterceptor(AroundInterceptorReference $aroundInterceptorReference) : Configuration;
+    public function registerAroundMethodInterceptor(AroundInterceptorReference $aroundInterceptorReference): Configuration;
 
     /**
      * @param MethodInterceptor $methodInterceptor
@@ -95,31 +94,31 @@ interface Configuration
      */
     public function requireReferences(array $referenceNames): Configuration;
 
-    public function requireConsumer(string $endpointId) : Configuration;
+    public function requireConsumer(string $endpointId): Configuration;
 
     /**
      * @param ChannelAdapterConsumerBuilder $consumerBuilder
      *
      * @return Configuration
      */
-    public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder) : Configuration;
+    public function registerConsumer(ChannelAdapterConsumerBuilder $consumerBuilder): Configuration;
 
     /**
      * @param MessageHandlerConsumerBuilder $consumerFactory
      * @return Configuration
      */
-    public function registerConsumerFactory(MessageHandlerConsumerBuilder $consumerFactory) : Configuration;
+    public function registerConsumerFactory(MessageHandlerConsumerBuilder $consumerFactory): Configuration;
 
     /**
      * @param GatewayBuilder $gatewayBuilder
      * @return Configuration
      */
-    public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder) : Configuration;
+    public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder): Configuration;
 
     /**
      * @return string[]
      */
-    public function getRequiredReferences() : array;
+    public function getRequiredReferences(): array;
 
     /**
      * @return string[]
@@ -130,42 +129,42 @@ interface Configuration
      * @param InterfaceToCall[] $relatedInterfaces
      * @return Configuration
      */
-    public function registerRelatedInterfaces(array $relatedInterfaces) : Configuration;
+    public function registerRelatedInterfaces(array $relatedInterfaces): Configuration;
 
     /**
      * @return GatewayProxyBuilder[]
      */
-    public function getRegisteredGateways() : array;
+    public function getRegisteredGateways(): array;
 
     /**
      * @return ConsoleCommandConfiguration[]
      */
-    public function getRegisteredConsoleCommands() : array;
+    public function getRegisteredConsoleCommands(): array;
 
-    public function registerConsoleCommand(ConsoleCommandConfiguration $consoleCommandConfiguration) : Configuration;
+    public function registerConsoleCommand(ConsoleCommandConfiguration $consoleCommandConfiguration): Configuration;
 
     /**
      * @param Type $interfaceName
      * @return Configuration
      */
-    public function registerInternalGateway(Type $interfaceName) : Configuration;
+    public function registerInternalGateway(Type $interfaceName): Configuration;
 
     /**
      * @return bool
      */
-    public function isLazyLoaded() : bool;
+    public function isLazyLoaded(): bool;
 
     /**
      * @param ConverterBuilder $converterBuilder
      * @return Configuration
      */
-    public function registerConverter(ConverterBuilder $converterBuilder) : Configuration;
+    public function registerConverter(ConverterBuilder $converterBuilder): Configuration;
 
     /**
      * @param string $referenceName
      * @return Configuration
      */
-    public function registerMessageConverter(string $referenceName) : Configuration;
+    public function registerMessageConverter(string $referenceName): Configuration;
 
     /**
      * @param ReferenceSearchService $externalReferenceSearchService

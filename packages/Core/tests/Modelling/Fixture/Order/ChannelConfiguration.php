@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\Order;
 
 use Ecotone\Messaging\Attribute\ServiceContext;
@@ -10,13 +9,13 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 class ChannelConfiguration
 {
     #[ServiceContext]
-    public function registerAsyncChannel() : array
+    public function registerAsyncChannel(): array
     {
         return [
-            SimpleMessageChannelBuilder::createQueueChannel("orders"),
-            PollingMetadata::create("orders")
+            SimpleMessageChannelBuilder::createQueueChannel('orders'),
+            PollingMetadata::create('orders')
                 ->setExecutionTimeLimitInMilliseconds(1)
-                ->setHandledMessageLimit(1)
+                ->setHandledMessageLimit(1),
         ];
     }
 }

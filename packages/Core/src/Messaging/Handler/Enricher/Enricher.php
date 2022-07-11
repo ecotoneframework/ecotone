@@ -2,14 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Enricher;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class Enricher
@@ -41,6 +36,6 @@ class Enricher implements MessageHandler
 
     public function __toString()
     {
-        return "Enricher - " . $this->replyProducer;
+        return 'Enricher - ' . $this->replyProducer;
     }
 }

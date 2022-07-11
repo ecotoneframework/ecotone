@@ -50,7 +50,7 @@ class MethodArgument
      * @param InterfaceParameter $interfaceParameterToCompare
      * @return bool
      */
-    public function hasEqualTypeAs(InterfaceParameter $interfaceParameterToCompare) : bool
+    public function hasEqualTypeAs(InterfaceParameter $interfaceParameterToCompare): bool
     {
         return $this->getInterfaceParameter()->hasEqualTypeAs($interfaceParameterToCompare);
     }
@@ -67,7 +67,7 @@ class MethodArgument
      * @param mixed $value
      * @return MethodArgument
      */
-    public function replaceValue($value) : self
+    public function replaceValue($value): self
     {
         return self::createWith($this->getInterfaceParameter(), $value);
     }

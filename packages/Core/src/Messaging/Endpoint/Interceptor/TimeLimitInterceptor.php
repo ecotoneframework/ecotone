@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
+use Throwable;
 
 /**
  * Class LimitConsumedMessagesExtension
@@ -61,7 +63,7 @@ class TimeLimitInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function shouldBeThrown(\Throwable $exception) : bool
+    public function shouldBeThrown(Throwable $exception): bool
     {
         return false;
     }

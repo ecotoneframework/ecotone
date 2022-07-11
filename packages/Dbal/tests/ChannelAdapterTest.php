@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Dbal;
-
 
 use Ecotone\Dbal\DbalInboundChannelAdapterBuilder;
 use Ecotone\Dbal\DbalOutboundChannelAdapterBuilder;
@@ -14,6 +12,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Enqueue\Dbal\DbalConnectionFactory;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * @internal
+ */
 class ChannelAdapterTest extends DbalMessagingTest
 {
     public function test_sending_and_receiving_message()
@@ -31,7 +32,7 @@ class ChannelAdapterTest extends DbalMessagingTest
             ->withReceiveTimeout($timeoutInMilliseconds)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
-                    $requestChannelName => $requestChannel
+                    $requestChannelName => $requestChannel,
                 ]),
                 InMemoryReferenceSearchService::createWith([DbalConnectionFactory::class => $this->getConnectionFactory()]),
                 PollingMetadata::create(Uuid::uuid4()->toString())
@@ -44,14 +45,14 @@ class ChannelAdapterTest extends DbalMessagingTest
                                         InMemoryReferenceSearchService::createWith([DbalConnectionFactory::class => $this->getConnectionFactory()])
                                     );
 
-        $payload = "some";
+        $payload = 'some';
         $outbountChannelAdapter->handle(MessageBuilder::withPayload($payload)->build());
 
         $receivedMessage = $this->receiveMessage($inboundChannelAdapter, $requestChannel);
-        $this->assertNotNull($receivedMessage, "Not received message");
+        $this->assertNotNull($receivedMessage, 'Not received message');
         $this->assertEquals($payload, $receivedMessage->getPayload());
 
-        $this->assertNull($this->receiveMessage($inboundChannelAdapter, $requestChannel), "Received message twice instead of one");
+        $this->assertNull($this->receiveMessage($inboundChannelAdapter, $requestChannel), 'Received message twice instead of one');
     }
 
     /**

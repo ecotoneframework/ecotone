@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
@@ -107,7 +108,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
 
     public static function getSynchronousChannelName(string $originalInputChannelName): string
     {
-        return $originalInputChannelName . ".async";
+        return $originalInputChannelName . '.async';
     }
 
     /**

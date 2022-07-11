@@ -2,8 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class PropertyAnnotationExample
 {
-
 }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\AnnotationFinder\FileSystem;
-
 
 class InMemoryAutoloadNamespaceParser implements AutoloadNamespaceParser
 {
@@ -21,12 +19,12 @@ class InMemoryAutoloadNamespaceParser implements AutoloadNamespaceParser
         $this->parsedPaths = $parsedPaths;
     }
 
-    public static function createWith(array $parsedNamespaces, array $parsedPaths) : self
+    public static function createWith(array $parsedNamespaces, array $parsedPaths): self
     {
         return new self($parsedNamespaces, $parsedPaths);
     }
 
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([], []);
     }

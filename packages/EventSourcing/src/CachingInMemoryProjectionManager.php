@@ -1,8 +1,9 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Ecotone\EventSourcing;
 
-use Prooph\EventStore\Exception\ProjectionNotFound;
 use Prooph\EventStore\Projection\InMemoryProjectionManager;
 use Prooph\EventStore\Projection\ProjectionStatus;
 use Prooph\EventStore\Projection\Projector;
@@ -17,7 +18,9 @@ class CachingInMemoryProjectionManager implements \Prooph\EventStore\Projection\
      */
     private array $readModelProjections = [];
 
-    public function __construct(private InMemoryProjectionManager $inMemoryProjectionManager) {}
+    public function __construct(private InMemoryProjectionManager $inMemoryProjectionManager)
+    {
+    }
 
     public function createQuery(): Query
     {
@@ -26,14 +29,14 @@ class CachingInMemoryProjectionManager implements \Prooph\EventStore\Projection\
 
     public function createProjection(string $name, array $options = []): Projector
     {
-        $options["sleep"] = 1;
+        $options['sleep'] = 1;
 
         return $this->inMemoryProjectionManager->createProjection($name, $options);
     }
 
     public function createReadModelProjection(string $name, ReadModel $readModel, array $options = []): ReadModelProjector
     {
-        $options["sleep"] = 1;
+        $options['sleep'] = 1;
 
         if (isset($this->readModelProjections[$name])) {
             return $this->readModelProjections[$name];
@@ -84,5 +87,4 @@ class CachingInMemoryProjectionManager implements \Prooph\EventStore\Projection\
     {
         return $this->inMemoryProjectionManager->fetchProjectionState($name);
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
@@ -29,8 +30,8 @@ class AroundMethodInterceptor
 
     private function __construct(object $referenceToCall, InterfaceToCall $interfaceToCall, ReferenceSearchService $referenceSearchService, array $parameterConverters)
     {
-        if ($interfaceToCall->canReturnValue() && !$this->hasMethodInvocationParameter($interfaceToCall)) {
-            throw InvalidArgumentException::create("Trying to register {$interfaceToCall} as Around Advice which can return value, but doesn't control invocation using " . MethodInvocation::class . ". Have you wanted to register Before/After Advice or forgot to type hint MethodInvocation?");
+        if ($interfaceToCall->canReturnValue() && ! $this->hasMethodInvocationParameter($interfaceToCall)) {
+            throw InvalidArgumentException::create("Trying to register {$interfaceToCall} as Around Advice which can return value, but doesn't control invocation using " . MethodInvocation::class . '. Have you wanted to register Before/After Advice or forgot to type hint MethodInvocation?');
         }
 
         $this->referenceToCall            = $referenceToCall;
@@ -129,7 +130,7 @@ class AroundMethodInterceptor
                 $resolvedArgument = $requestMessage->getHeaders()->headers();
             }
 
-            if (is_null($resolvedArgument) && !$parameter->doesAllowNulls()) {
+            if (is_null($resolvedArgument) && ! $parameter->doesAllowNulls()) {
                 throw MethodInvocationException::create("{$this->interceptorInterfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`. It can be that the value is null in this scenario (for example type hinting for Aggregate, when calling Aggregate Factory Method), however the interface does not allow for nulls.");
             }
 
@@ -141,7 +142,7 @@ class AroundMethodInterceptor
             $argumentsToCallInterceptor
         );
 
-        if (!$hasMethodInvocation) {
+        if (! $hasMethodInvocation) {
             return $methodInvocation->proceed();
         }
 

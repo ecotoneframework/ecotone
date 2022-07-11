@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
-use Psr\Log\LoggerInterface;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
@@ -12,6 +11,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
@@ -47,7 +47,7 @@ class LoggingService
         $payload = $this->convertPayloadToScalarType($message);
 
         if ($loggingLevel->isFullMessageLog()) {
-            $this->logger->{$loggingLevel->getLevel()}($payload, ["headers" => (string)$message->getHeaders()]);
+            $this->logger->{$loggingLevel->getLevel()}($payload, ['headers' => (string)$message->getHeaders()]);
             return;
         }
 
@@ -64,10 +64,10 @@ class LoggingService
      */
     public function logException(LoggingLevel $loggingLevel, Throwable $exception, Message $message): void
     {
-        $context = ["payload" => $this->convertPayloadToScalarType($message), "exception" => $exception];
+        $context = ['payload' => $this->convertPayloadToScalarType($message), 'exception' => $exception];
 
         if ($loggingLevel->isFullMessageLog()) {
-            $context = array_merge(["headers" => (string)$message->getHeaders()], $context);
+            $context = array_merge(['headers' => (string)$message->getHeaders()], $context);
         }
 
         $this->logger->{$loggingLevel->getLevel()}($exception->getMessage(), $context);
@@ -86,9 +86,9 @@ class LoggingService
         $sourceMediaType = $message->getHeaders()->hasContentType() ? $message->getHeaders()->getContentType() : MediaType::createApplicationXPHP();
         $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($message->getPayload());
 
-        if (is_object($data) && method_exists($data, "__toString")) {
+        if (is_object($data) && method_exists($data, '__toString')) {
             $data = (string)$data;
-        } else if (!TypeDescriptor::createFromVariable($data)->isScalar()) {
+        } elseif (! TypeDescriptor::createFromVariable($data)->isScalar()) {
             if ($this->conversionService->canConvert($sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson())) {
                 $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson());
             } else {

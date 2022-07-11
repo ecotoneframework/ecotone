@@ -19,7 +19,7 @@ class IncreaseAmountCommand
         $this->amount = $amount;
     }
 
-    public static function createWith(string $aggregateId, int $amount) : self
+    public static function createWith(string $aggregateId, int $amount): self
     {
         return new self($aggregateId, $amount);
     }

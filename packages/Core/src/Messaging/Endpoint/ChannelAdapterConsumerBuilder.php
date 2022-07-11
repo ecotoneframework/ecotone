@@ -1,13 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
-use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
@@ -21,12 +19,12 @@ interface ChannelAdapterConsumerBuilder extends ConsumerLifecycleBuilder, Interc
     /**
      * @return string
      */
-    public function getEndpointId() : string;
+    public function getEndpointId(): string;
 
     /**
      * @return string[]
      */
-    public function getRequiredReferences() : array;
+    public function getRequiredReferences(): array;
 
     /**
      * @param MethodInterceptor $methodInterceptor
@@ -48,5 +46,5 @@ interface ChannelAdapterConsumerBuilder extends ConsumerLifecycleBuilder, Interc
      * @param PollingMetadata $pollingMetadata
      * @return ConsumerLifecycle
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata) : ConsumerLifecycle;
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle;
 }

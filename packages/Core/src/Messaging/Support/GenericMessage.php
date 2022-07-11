@@ -1,10 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Support;
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
+
+use function json_decode;
+use function json_encode;
 
 /**
  * Class GenericMessage
@@ -34,7 +38,7 @@ final class GenericMessage implements Message
             throw InvalidArgumentException::create("Payload of Generic Message can not be another message for {$payload}");
         }
         if (is_null($payload)) {
-            throw InvalidArgumentException::create("Trying to create message with null payload. Message must always contain payload");
+            throw InvalidArgumentException::create('Trying to create message with null payload. Message must always contain payload');
         }
 
         $this->payload = $payload;
@@ -54,7 +58,7 @@ final class GenericMessage implements Message
      * @param MessageHeaders $messageHeaders
      * @return GenericMessage|static
      */
-    public static function create($payload, MessageHeaders $messageHeaders) : self
+    public static function create($payload, MessageHeaders $messageHeaders): self
     {
         return new static($payload, $messageHeaders);
     }
@@ -88,9 +92,9 @@ final class GenericMessage implements Message
 
     public function __toString()
     {
-        return \json_encode([
-            "payload" => $this->payload,
-            "headers" => \json_decode((string)$this->getHeaders(), true)
+        return json_encode([
+            'payload' => $this->payload,
+            'headers' => json_decode((string)$this->getHeaders(), true),
         ]);
     }
 }

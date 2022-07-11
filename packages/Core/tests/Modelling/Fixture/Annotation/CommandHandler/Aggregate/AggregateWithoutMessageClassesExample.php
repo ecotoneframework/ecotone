@@ -1,12 +1,12 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use stdClass;
 
 #[Aggregate]
 class AggregateWithoutMessageClassesExample
@@ -15,8 +15,8 @@ class AggregateWithoutMessageClassesExample
     private string $id;
     private $something;
 
-    #[CommandHandler("createAggregate")]
-    public static function createWithData(array $command) : self
+    #[CommandHandler('createAggregate')]
+    public static function createWithData(array $command): self
     {
         $aggregateWithoutMessageClassesExample = new self();
         $aggregateWithoutMessageClassesExample->id =  $command['id'];
@@ -24,8 +24,8 @@ class AggregateWithoutMessageClassesExample
         return $aggregateWithoutMessageClassesExample;
     }
 
-    #[CommandHandler("createAggregate")]
-    public static function create() : self
+    #[CommandHandler('createAggregate')]
+    public static function create(): self
     {
         $aggregateWithoutMessageClassesExample = new self();
         $aggregateWithoutMessageClassesExample->id =  1;
@@ -33,31 +33,31 @@ class AggregateWithoutMessageClassesExample
         return $aggregateWithoutMessageClassesExample;
     }
 
-    #[CommandHandler("doSomething")]
-    public function doSomething() : void
+    #[CommandHandler('doSomething')]
+    public function doSomething(): void
     {
         $this->something = true;
     }
 
-    #[CommandHandler("doSomethingWithData")]
-    public function doSomethingWithData(array $data) : void
+    #[CommandHandler('doSomethingWithData')]
+    public function doSomethingWithData(array $data): void
     {
         $this->something = $data;
     }
 
-    #[CommandHandler("doSomething")]
-    public function doSomethingWithReference(\stdClass $class) : void
+    #[CommandHandler('doSomething')]
+    public function doSomethingWithReference(stdClass $class): void
     {
         $this->something = true;
     }
 
-    #[QueryHandler("querySomething")]
+    #[QueryHandler('querySomething')]
     public function querySomething()
     {
         return true;
     }
 
-    #[QueryHandler("querySomethingWithData")]
+    #[QueryHandler('querySomethingWithData')]
     public function querySomethingWithData(array $data)
     {
         return $data;

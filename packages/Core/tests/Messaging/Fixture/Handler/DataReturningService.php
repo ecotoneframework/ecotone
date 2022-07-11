@@ -8,6 +8,7 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\MessageBuilder;
+use InvalidArgumentException;
 
 class DataReturningService
 {
@@ -40,7 +41,7 @@ class DataReturningService
 
     public static function createExceptionalServiceActivator(): MessageHandler
     {
-        return (ServiceActivatorBuilder::createWithDirectReference(new self("", false, [], true), "handle"))->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        return (ServiceActivatorBuilder::createWithDirectReference(new self('', false, [], true), 'handle'))->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
     }
 
     public static function createServiceActivatorWithReturnMessage($payload, array $headers): MessageHandler
@@ -50,23 +51,23 @@ class DataReturningService
 
     public static function createServiceActivatorBuilder($dataToReturn): ServiceActivatorBuilder
     {
-        return ServiceActivatorBuilder::createWithDirectReference(new self($dataToReturn, false, [], false), "handle");
+        return ServiceActivatorBuilder::createWithDirectReference(new self($dataToReturn, false, [], false), 'handle');
     }
 
     public static function createExceptionalServiceActivatorBuilder(): ServiceActivatorBuilder
     {
-        return (ServiceActivatorBuilder::createWithDirectReference(new self("", false, [], true), "handle"));
+        return (ServiceActivatorBuilder::createWithDirectReference(new self('', false, [], true), 'handle'));
     }
 
     public static function createServiceActivatorBuilderWithReturnMessage($payload, array $headers): ServiceActivatorBuilder
     {
-        return ServiceActivatorBuilder::createWithDirectReference(new self($payload, true, $headers, false), "handle");
+        return ServiceActivatorBuilder::createWithDirectReference(new self($payload, true, $headers, false), 'handle');
     }
 
     public function handle(Message $message)
     {
         if ($this->throwException) {
-            throw new \InvalidArgumentException("error during handling");
+            throw new InvalidArgumentException('error during handling');
         }
 
         if ($this->asAMessage) {

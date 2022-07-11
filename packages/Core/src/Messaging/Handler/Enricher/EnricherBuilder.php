@@ -1,11 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
 
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
@@ -13,13 +12,13 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class PayloadEnricherBuilder
@@ -68,7 +67,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
      *
      * @return EnricherBuilder
      */
-    public function withRequestMessageChannel(string $requestChannelName) : self
+    public function withRequestMessageChannel(string $requestChannelName): self
     {
         $this->requestChannelName = $requestChannelName;
 
@@ -80,7 +79,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
      *
      * @return EnricherBuilder
      */
-    public function withRequestPayloadExpression(string $requestPayloadExpression) : self
+    public function withRequestPayloadExpression(string $requestPayloadExpression): self
     {
         $this->requestPayloadExpression = $requestPayloadExpression;
 
@@ -93,7 +92,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
      *
      * @return EnricherBuilder
      */
-    public function withRequestHeader(string $headerName, string $value) : self
+    public function withRequestHeader(string $headerName, string $value): self
     {
         $this->requestHeaders[$headerName] = $value;
 
@@ -104,7 +103,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
      * @param array $headers
      * @return EnricherBuilder
      */
-    public function withRequestHeaders(array $headers) : self
+    public function withRequestHeaders(array $headers): self
     {
         foreach ($headers as $headerName => $value) {
             $this->withRequestHeader($headerName, $value);
@@ -124,11 +123,11 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * @inheritDoc
      */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [
-            $interfaceToCallRegistry->getFor(InternalEnrichingService::class, "enrich"),
-            $interfaceToCallRegistry->getFor(EnrichGateway::class, "execute")
+            $interfaceToCallRegistry->getFor(InternalEnrichingService::class, 'enrich'),
+            $interfaceToCallRegistry->getFor(EnrichGateway::class, 'execute'),
         ];
     }
 
@@ -137,7 +136,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(InternalEnrichingService::class, "enrich");
+        return $interfaceToCallRegistry->getFor(InternalEnrichingService::class, 'enrich');
     }
 
     /**
@@ -157,7 +156,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
         $gateway = null;
         if ($this->requestChannelName) {
             /** @var EnrichGateway $gateway */
-                $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichGateway::class, "execute", $this->requestChannelName)
+            $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichGateway::class, 'execute', $this->requestChannelName)
                         ->build($referenceSearchService, $channelResolver);
         }
 
@@ -178,7 +177,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
             RequestReplyProducer::createRequestAndReply(
                 $this->outputMessageChannelName,
                 MethodInvoker::createWith(
-                    $interfaceToCallRegistry->getFor($internalEnrichingService, "enrich"),
+                    $interfaceToCallRegistry->getFor($internalEnrichingService, 'enrich'),
                     $internalEnrichingService,
                     [],
                     $referenceSearchService,

@@ -11,18 +11,18 @@ class ServiceExpectingThreeArguments
 {
     private $wasCalled = false;
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
 
-    public function withReturnValue(string $name, string $surname, int $age) : string
+    public function withReturnValue(string $name, string $surname, int $age): string
     {
         $this->wasCalled = true;
         return $name . $surname . $age;
     }
 
-    public function withoutReturnValue(string $name, string $surname, int $age) : void
+    public function withoutReturnValue(string $name, string $surname, int $age): void
     {
         $this->wasCalled = true;
     }

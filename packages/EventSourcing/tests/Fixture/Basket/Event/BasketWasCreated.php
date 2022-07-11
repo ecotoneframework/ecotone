@@ -7,7 +7,7 @@ use Ecotone\Modelling\Attribute\NamedEvent;
 #[NamedEvent(self::EVENT_NAME)]
 class BasketWasCreated
 {
-    public const EVENT_NAME = "basket.was_created";
+    public const EVENT_NAME = 'basket.was_created';
 
     private string $id;
 

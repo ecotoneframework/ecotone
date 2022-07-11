@@ -6,13 +6,17 @@ use Ecotone\Modelling\AggregateId;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use stdClass;
 
+/**
+ * @internal
+ */
 class AggregateIdTest extends TestCase
 {
     public function test_resolving_scalar_type()
     {
-        $this->assertEquals(123, AggregateId::resolve(\stdClass::class, 123));
-        $this->assertEquals("someId", AggregateId::resolve(\stdClass::class,"someId"));
+        $this->assertEquals(123, AggregateId::resolve(stdClass::class, 123));
+        $this->assertEquals('someId', AggregateId::resolve(stdClass::class, 'someId'));
     }
 
     public function test_resolving_object_with_to_string_method()
@@ -24,13 +28,13 @@ class AggregateIdTest extends TestCase
     {
         $this->expectException(NoCorrectIdentifierDefinedException::class);
 
-        AggregateId::resolve(\stdClass::class,new \stdClass());
+        AggregateId::resolve(stdClass::class, new stdClass());
     }
 
     public function test_throwing_exception_if_aggregate_id_is_array()
     {
         $this->expectException(NoCorrectIdentifierDefinedException::class);
 
-        AggregateId::resolve(\stdClass::class, ["johny"]);
+        AggregateId::resolve(stdClass::class, ['johny']);
     }
 }

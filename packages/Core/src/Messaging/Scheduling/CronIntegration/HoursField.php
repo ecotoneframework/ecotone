@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling\CronIntegration;
 
+use function count;
+
+use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
 
@@ -33,7 +37,7 @@ class HoursField extends AbstractField
     /**
      * {@inheritdoc}
      *
-     * @param \DateTime|\DateTimeImmutable $date
+     * @param DateTime|DateTimeImmutable $date
      * @param string|null                  $parts
      */
     public function increment(DateTimeInterface &$date, $invert = false, $parts = null): FieldInterface
@@ -58,11 +62,11 @@ class HoursField extends AbstractField
         }
 
         $current_hour = $date->format('H');
-        $position = $invert ? \count($hours) - 1 : 0;
-        $countHours = \count($hours);
+        $position = $invert ? count($hours) - 1 : 0;
+        $countHours = count($hours);
         if ($countHours > 1) {
             for ($i = 0; $i < $countHours - 1; ++$i) {
-                if ((!$invert && $current_hour >= $hours[$i] && $current_hour < $hours[$i + 1]) ||
+                if ((! $invert && $current_hour >= $hours[$i] && $current_hour < $hours[$i + 1]) ||
                     ($invert && $current_hour > $hours[$i] && $current_hour <= $hours[$i + 1])) {
                     $position = $invert ? $i : $i + 1;
 
@@ -72,7 +76,7 @@ class HoursField extends AbstractField
         }
 
         $hour = (int) $hours[$position];
-        if ((!$invert && (int) $date->format('H') >= $hour) || ($invert && (int) $date->format('H') <= $hour)) {
+        if ((! $invert && (int) $date->format('H') >= $hour) || ($invert && (int) $date->format('H') <= $hour)) {
             $date = $date->modify(($invert ? '-' : '+') . '1 day');
             $date = $date->setTime($invert ? 23 : 0, $invert ? 59 : 0);
         } else {

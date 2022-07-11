@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -27,7 +26,7 @@ class AllHeadersBuilder implements ParameterConverterBuilder
      *
      * @return AllHeadersBuilder
      */
-    public static function createWith(string $parameterName) : self
+    public static function createWith(string $parameterName): self
     {
         return new self($parameterName);
     }

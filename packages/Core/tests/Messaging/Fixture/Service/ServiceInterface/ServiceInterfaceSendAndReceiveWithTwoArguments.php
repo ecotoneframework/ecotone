@@ -9,5 +9,5 @@ namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
  */
 interface ServiceInterfaceSendAndReceiveWithTwoArguments
 {
-    public function sendMail(string $personId, string $content) : string;
+    public function sendMail(string $personId, string $content): string;
 }

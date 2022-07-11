@@ -1,11 +1,10 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -30,15 +29,15 @@ abstract class InterceptedMessageHandlerConsumerBuilder implements MessageHandle
             $this->addAroundInterceptor(
                 AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $interceptor,
-                    "postSend",
+                    'postSend',
                     Precedence::ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE,
-                    ""
+                    ''
                 )
             );
         }
         $consumerLifeCycle = $this->buildAdapter($channelResolver, $referenceSearchService, $messageHandlerBuilder, $pollingMetadata);
 
-        if (!$interceptors) {
+        if (! $interceptors) {
             return $consumerLifeCycle;
         }
 
@@ -52,5 +51,5 @@ abstract class InterceptedMessageHandlerConsumerBuilder implements MessageHandle
      * @param PollingMetadata $pollingMetadata
      * @return ConsumerLifecycle
      */
-    protected abstract function buildAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle;
+    abstract protected function buildAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle;
 }

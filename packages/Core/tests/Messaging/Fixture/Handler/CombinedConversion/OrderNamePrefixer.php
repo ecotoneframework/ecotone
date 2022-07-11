@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion;
 
 /**
@@ -20,7 +19,7 @@ class OrderNamePrefixer
         $this->prefix = $prefix;
     }
 
-    public function transform(array $order) : array
+    public function transform(array $order): array
     {
         $order['name'] = $this->prefix . $order['name'];
 

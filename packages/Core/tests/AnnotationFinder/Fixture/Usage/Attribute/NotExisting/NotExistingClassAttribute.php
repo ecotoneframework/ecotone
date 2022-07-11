@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\NotExisting;
 
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
@@ -11,6 +10,5 @@ class NotExistingClassAttribute
     #[SomeHandlerAnnotation]
     public function test()
     {
-
     }
 }

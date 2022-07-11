@@ -2,12 +2,10 @@
 
 namespace Ecotone\EventSourcing;
 
-use Ecotone\Messaging\Support\Assert;
-
 class ProjectionRunningConfiguration
 {
-    private const EVENT_DRIVEN = "event-driven";
-    private const POLLING      = "polling";
+    private const EVENT_DRIVEN = 'event-driven';
+    private const POLLING      = 'polling';
 
     private function __construct(
         private string $projectionName,
@@ -19,14 +17,15 @@ class ProjectionRunningConfiguration
         private int $projectionLockTimeout = 1000,
         private int $updateLockTimeoutAfter = 0,
         private bool $isTestingSetup = false
-    ) {}
+    ) {
+    }
 
     public static function createEventDriven(string $projectionName): static
     {
         return new self($projectionName, self::EVENT_DRIVEN);
     }
 
-    public static function createPolling(string $projectionName) : static
+    public static function createPolling(string $projectionName): static
     {
         return new self($projectionName, self::POLLING);
     }
@@ -130,7 +129,7 @@ class ProjectionRunningConfiguration
         return $this->isTestingSetup;
     }
 
-    public function withTestingSetup() : static
+    public function withTestingSetup(): static
     {
         return $this
                 ->withWaitBeforeCallingESWhenNoEventsFound(0)

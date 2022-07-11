@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class ExampleTestAnnotation
 {
-
 }

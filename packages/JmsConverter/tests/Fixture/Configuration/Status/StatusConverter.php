@@ -1,10 +1,8 @@
 <?php
 
-
 namespace Test\Ecotone\JMSConverter\Fixture\Configuration\Status;
 
 use Ecotone\Messaging\Attribute\Converter;
-use Ecotone\Messaging\Attribute\ConverterClass;
 
 class StatusConverter
 {

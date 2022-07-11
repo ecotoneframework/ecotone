@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Amqp\Configuration;
 
 use Ecotone\Amqp\AmqpInboundChannelAdapterBuilder;
@@ -9,12 +8,10 @@ use Ecotone\Messaging\Attribute\MessageConsumer;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
@@ -60,7 +57,7 @@ class AmqpConsumerModule implements AnnotationModule
 
             $endpointId = $amqpConsumerAnnotation->getEndpointId();
             $serviceActivators[$endpointId] = ServiceActivatorBuilder::create($reference, $amqpConsumer->getMethodName())
-                ->withEndpointId($endpointId . ".target")
+                ->withEndpointId($endpointId . '.target')
                 ->withInputChannelName($endpointId)
                 ->withMethodParameterConverters($annotationParameterBuilder->createParameterWithDefaults(
                     $interfaceToCallRegistry->getFor($amqpConsumer->getClassName(), $amqpConsumer->getMethodName()),
@@ -94,7 +91,7 @@ class AmqpConsumerModule implements AnnotationModule
 
             $configuration->registerConsumer($inboundChannelAdapter);
 
-            if (!array_key_exists($extensionObject->getEndpointId(), $this->serviceActivators)) {
+            if (! array_key_exists($extensionObject->getEndpointId(), $this->serviceActivators)) {
                 throw ConfigurationException::create("Lack of Consumer defined under endpoint id {$extensionObject->getEndpointId()}");
             }
 

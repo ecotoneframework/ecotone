@@ -3,11 +3,12 @@
 namespace Test\Ecotone\Modelling\Behat\Bootstrap;
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\TableNode;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\DistributionEntrypoint;
+use Exception;
+use InvalidArgumentException;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext;
@@ -22,7 +23,6 @@ use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorde
 use Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\TwitWasCreated;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 use Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignation\CreateUser;
-use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\AddGuest;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\RegisterBook;
@@ -36,6 +36,8 @@ use Test\Ecotone\Modelling\Fixture\TwoSagas\Shipment;
 
 /**
  * Defines application features from the specific context.
+ *
+ * @internal
  */
 class DomainContext extends TestCase implements Context
 {
@@ -100,7 +102,7 @@ class DomainContext extends TestCase implements Context
     public function thereShouldNotificationAwaitingNotification(int $numberOfNotifications)
     {
         $this->assertCount($numberOfNotifications, AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
-            "getOrderNotifications",
+            'getOrderNotifications',
             []
         ));
     }
@@ -111,8 +113,8 @@ class DomainContext extends TestCase implements Context
     public function iRegisterShopWithMargin(int $margin)
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "shop.register",
-            ["shopId" => 1, "margin" => $margin],
+            'shop.register',
+            ['shopId' => 1, 'margin' => $margin],
             MediaType::APPLICATION_X_PHP_ARRAY
         );
     }
@@ -125,8 +127,8 @@ class DomainContext extends TestCase implements Context
         $this->assertEquals(
             $expectedPrice,
             AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
-                "shop.calculatePrice",
-                ["shopId" => 1, "productType" => $productType]
+                'shop.calculatePrice',
+                ['shopId' => 1, 'productType' => $productType]
             )
         );
     }
@@ -137,7 +139,7 @@ class DomainContext extends TestCase implements Context
     public function currentTimeIs(string $currentTime)
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "changeCurrentTime",
+            'changeCurrentTime',
             $currentTime
         );
     }
@@ -148,10 +150,10 @@ class DomainContext extends TestCase implements Context
     public function iSendLogWithInformation(string $logData)
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "log",
+            'log',
             [
-                "loggerId" => 1,
-                "data" => $logData
+                'loggerId' => 1,
+                'data' => $logData,
             ]
         );
     }
@@ -162,7 +164,7 @@ class DomainContext extends TestCase implements Context
     public function currentUserIs(string $currentUser)
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "changeExecutorId",
+            'changeExecutorId',
             $currentUser
         );
     }
@@ -174,11 +176,11 @@ class DomainContext extends TestCase implements Context
     {
         Assert::assertEquals(
             [
-                "event" => new EventWasLogged(["data" => $expectedLogData, "executorId" => $userId, "loggerId" => 1]),
-                "happenedAt" => $expectedTime
+                'event' => new EventWasLogged(['data' => $expectedLogData, 'executorId' => $userId, 'loggerId' => 1]),
+                'happenedAt' => $expectedTime,
             ],
             AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
-                "getLastLog",
+                'getLastLog',
                 []
             )
         );
@@ -192,11 +194,11 @@ class DomainContext extends TestCase implements Context
         $exception = false;
         try {
             $this->iSendLogWithInformation($logInfo);
-        }catch (\InvalidArgumentException $exception) {
+        } catch (InvalidArgumentException $exception) {
             $exception = true;
         }
 
-        Assert::assertTrue($exception, "User was allowed to store logs on someones else stream");
+        Assert::assertTrue($exception, 'User was allowed to store logs on someones else stream');
     }
 
     /**
@@ -205,10 +207,10 @@ class DomainContext extends TestCase implements Context
     public function iNotifyAboutOrderWithInformation(string $logData)
     {
         AnnotationBasedMessagingContext::getEventBus()->publishWithRouting(
-            "order.was_created",
+            'order.was_created',
             [
-                "loggerId" => 1,
-                "data" => $logData
+                'loggerId' => 1,
+                'data' => $logData,
             ]
         );
     }
@@ -221,11 +223,11 @@ class DomainContext extends TestCase implements Context
         $exception = false;
         try {
             $this->iNotifyAboutOrderWithInformation($logData);
-        }catch (\InvalidArgumentException $exception) {
+        } catch (InvalidArgumentException $exception) {
             $exception = true;
         }
 
-        Assert::assertTrue($exception, "User was allowed to store logs on someones else stream");
+        Assert::assertTrue($exception, 'User was allowed to store logs on someones else stream');
     }
 
     /**
@@ -234,7 +236,7 @@ class DomainContext extends TestCase implements Context
     public function iPlaceOrderWithMetadata(string $headerName, $value)
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "placeOrder",
+            'placeOrder',
             [],
             MediaType::APPLICATION_X_PHP_ARRAY,
             [$headerName => $value]
@@ -247,7 +249,7 @@ class DomainContext extends TestCase implements Context
     public function iPlaceOrderWithNoAdditionalMetadata()
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "placeOrder",
+            'placeOrder',
             [],
             MediaType::APPLICATION_X_PHP_ARRAY
         );
@@ -260,7 +262,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $value,
-            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("getNotificationHeaders", [])[$headerName]
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting('getNotificationHeaders', [])[$headerName]
         );
     }
 
@@ -270,8 +272,8 @@ class DomainContext extends TestCase implements Context
     public function thereShouldBeNotificationWithoutAdditionalMetadata()
     {
         $this->assertArrayNotHasKey(
-            "token",
-            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("getNotificationHeaders", [])
+            'token',
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting('getNotificationHeaders', [])
         );
     }
 
@@ -281,7 +283,7 @@ class DomainContext extends TestCase implements Context
     public function iOverrideHeaderWith(string $headerName, $value)
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "setCustomNotificationHeaders",
+            'setCustomNotificationHeaders',
             [],
             MediaType::APPLICATION_X_PHP_ARRAY,
             [$headerName => $value]
@@ -295,12 +297,13 @@ class DomainContext extends TestCase implements Context
     {
         try {
             AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-                "failAction",
+                'failAction',
                 [],
                 MediaType::APPLICATION_X_PHP_ARRAY,
                 [$headerName => $headerValue]
             );
-        }catch (\Exception $exception) {}
+        } catch (Exception $exception) {
+        }
     }
 
     /**
@@ -309,7 +312,7 @@ class DomainContext extends TestCase implements Context
     public function currentUserId(string $userId)
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "addCurrentUserId",
+            'addCurrentUserId',
             $userId
         );
     }
@@ -322,9 +325,9 @@ class DomainContext extends TestCase implements Context
         $this->assertContains(
             $item,
             AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
-                "basket.get",
+                'basket.get',
                 [
-                    "item" => $item
+                    'item' => $item,
                 ]
             )
         );
@@ -336,9 +339,9 @@ class DomainContext extends TestCase implements Context
     public function iAddToBasket(string $item)
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "basket.add",
+            'basket.add',
             [
-                "item" => $item
+                'item' => $item,
             ],
             MediaType::APPLICATION_X_PHP_ARRAY
         );
@@ -350,7 +353,11 @@ class DomainContext extends TestCase implements Context
     public function iDoingDistributedOrder(string $order)
     {
         AnnotationBasedMessagingContext::getGateway(DistributionEntrypoint::class)->distribute(
-            $order, [], "command", ShoppingCenter::SHOPPING_BUY, MediaType::TEXT_PLAIN
+            $order,
+            [],
+            'command',
+            ShoppingCenter::SHOPPING_BUY,
+            MediaType::TEXT_PLAIN
         );
     }
 
@@ -360,7 +367,8 @@ class DomainContext extends TestCase implements Context
     public function thereShouldBeGoodOrdered(int $amount)
     {
         $this->assertEquals($amount, AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
-            ShoppingCenter::COUNT_BOUGHT_GOODS, []
+            ShoppingCenter::COUNT_BOUGHT_GOODS,
+            []
         ));
     }
 
@@ -370,7 +378,11 @@ class DomainContext extends TestCase implements Context
     public function wasOrder(string $order)
     {
         AnnotationBasedMessagingContext::getGateway(DistributionEntrypoint::class)->distribute(
-            $order, [], "event", ShoppingRecord::ORDER_WAS_MADE, MediaType::TEXT_PLAIN
+            $order,
+            [],
+            'event',
+            ShoppingRecord::ORDER_WAS_MADE,
+            MediaType::TEXT_PLAIN
         );
     }
 
@@ -379,7 +391,7 @@ class DomainContext extends TestCase implements Context
      */
     public function basketMetadataShouldContainsMetadata(TableNode $table)
     {
-        $result = AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("basket.get", []);
+        $result = AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting('basket.get', []);
         foreach ($table->getHash() as $node) {
             $this->assertEquals($node['value'], $result[$node['name']]);
         }
@@ -391,7 +403,7 @@ class DomainContext extends TestCase implements Context
     public function iRemoveLastItemFromBasket()
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
-            "basket.removeLast",
+            'basket.removeLast',
             [],
             MediaType::APPLICATION_X_PHP_ARRAY
         );
@@ -411,9 +423,9 @@ class DomainContext extends TestCase implements Context
     public function jobWithIdOfShouldBe(int $id, string $status)
     {
         $this->assertEquals(
-            $status == "in progress",
-            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("job.isInProgress", [
-                "id" => $id
+            $status == 'in progress',
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting('job.isInProgress', [
+                'id' => $id,
             ])
         );
     }
@@ -448,7 +460,7 @@ class DomainContext extends TestCase implements Context
     public function viewGuestListOfBookThen(string $bookId, TableNode $table)
     {
         $this->assertEquals(
-            array_map(fn(array $data) => $data[0], $table->getRows()),
+            array_map(fn (array $data) => $data[0], $table->getRows()),
             AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(GuestViewer::BOOK_GET_GUESTS, $bookId)
         );
     }
@@ -469,7 +481,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $status,
-            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(Bookkeeping::GET_BOOKING_STATUS, ["orderId" => $orderId])
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(Bookkeeping::GET_BOOKING_STATUS, ['orderId' => $orderId])
         );
     }
 
@@ -480,7 +492,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $status,
-            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(Shipment::GET_SHIPMENT_STATUS, ["orderId" => $orderId])
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(Shipment::GET_SHIPMENT_STATUS, ['orderId' => $orderId])
         );
     }
 
@@ -498,7 +510,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iRegisterCreateAggregate()
     {
-        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("aggregate.create");
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting('aggregate.create');
     }
 
     /**
@@ -506,7 +518,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iEnableAggregate()
     {
-        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("aggregate.enable", ["id" => 1]);
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting('aggregate.enable', ['id' => 1]);
     }
 
     /**
@@ -514,7 +526,7 @@ class DomainContext extends TestCase implements Context
      */
     public function itShouldBeEnabled()
     {
-        Assert::assertTrue(AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("aggregate.isEnabled", ["id" => 1]));
+        Assert::assertTrue(AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting('aggregate.isEnabled', ['id' => 1]));
     }
 
     /**
@@ -540,7 +552,7 @@ class DomainContext extends TestCase implements Context
 
         if ($isStatefulAggregate) {
             $twitterRepository->save(new Twitter($id, $content));
-        }else {
+        } else {
             $twitterRepository->save($id, 0, [new TwitWasCreated($id, $content)]);
         }
     }
@@ -577,7 +589,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iCreateUserThenIdShouldBeAssigned()
     {
-        $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("user.create", new CreateUser("Johny"));
+        $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting('user.create', new CreateUser('Johny'));
 
         Assert::assertNotNull($result);
     }
@@ -597,7 +609,7 @@ class DomainContext extends TestCase implements Context
     {
         Assert::assertEquals(
             $name,
-            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting("user.getName", metadata: [AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => $id])
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting('user.getName', metadata: [AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => $id])
         );
     }
 
@@ -606,7 +618,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iCreateUserThenIdShouldBeAssignedFromPublicMethod()
     {
-        $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting("user.create", new \Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\CreateUser("Johny"));
+        $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting('user.create', new \Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\CreateUser('Johny'));
 
         Assert::assertNotNull($result);
     }

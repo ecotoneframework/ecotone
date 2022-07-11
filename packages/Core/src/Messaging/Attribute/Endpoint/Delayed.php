@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Attribute\Endpoint;
 
-#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
+use Attribute;
+
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 class Delayed
 {
     private int $time;

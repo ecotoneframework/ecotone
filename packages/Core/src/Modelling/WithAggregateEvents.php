@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Modelling;
 
 use Ecotone\Modelling\Attribute\AggregateEvents;
@@ -14,9 +13,9 @@ trait WithAggregateEvents
 {
     private ?array $recordedEvents = null;
 
-    public function recordThat(object $event) : void
+    public function recordThat(object $event): void
     {
-        if (!$this->recordedEvents) {
+        if (! $this->recordedEvents) {
             $this->recordedEvents = [];
         }
 
@@ -24,9 +23,9 @@ trait WithAggregateEvents
     }
 
     #[AggregateEvents]
-    public function getRecordedEvents() : array
+    public function getRecordedEvents(): array
     {
-        if (!$this->recordedEvents) {
+        if (! $this->recordedEvents) {
             return [];
         }
 

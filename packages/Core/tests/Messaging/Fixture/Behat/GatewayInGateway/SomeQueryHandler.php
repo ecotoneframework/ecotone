@@ -1,23 +1,21 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway;
 
-use Ecotone\Messaging\Attribute\MessageEndpoint;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\QueryBus;
 
 class SomeQueryHandler
 {
-    const SUM = "sum";
-    const MULTIPLY = "multiply";
-    const SUM_AND_MULTIPLY = "sumAndMultiply";
-    const CALCULATE = "calculate";
+    public const SUM = 'sum';
+    public const MULTIPLY = 'multiply';
+    public const SUM_AND_MULTIPLY = 'sumAndMultiply';
+    public const CALCULATE = 'calculate';
 
     #[QueryHandler(SomeQueryHandler::CALCULATE)]
-    public function calculate(int $sum, QueryBus $queryBus) : int
+    public function calculate(int $sum, QueryBus $queryBus): int
     {
         return $this->callQueryBus(self::SUM_AND_MULTIPLY, $queryBus, $sum);
     }

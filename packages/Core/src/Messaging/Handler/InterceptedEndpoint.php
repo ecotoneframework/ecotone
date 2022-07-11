@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
@@ -22,7 +23,7 @@ interface InterceptedEndpoint
      * @param InterfaceToCallRegistry $interfaceToCallRegistry
      * @return InterfaceToCall
      */
-    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry) : InterfaceToCall;
+    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall;
 
     /**
      * @param object[] $endpointAnnotations
@@ -41,12 +42,12 @@ interface InterceptedEndpoint
      * @param InterfaceToCallRegistry $interfaceToCallRegistry
      * @return InterfaceToCall[]
      */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable;
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable;
 
     /**
      * @return string[]
      */
-    public function getRequiredInterceptorNames() : iterable;
+    public function getRequiredInterceptorNames(): iterable;
 
     /**
      * @param string[] $interceptorNames

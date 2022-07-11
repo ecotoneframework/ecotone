@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\EventSourcing\Config\InboundChannelAdapter;
-
 
 use Ecotone\EventSourcing\ProjectionLifeCycleConfiguration;
 use Ecotone\EventSourcing\ProjectionRunningConfiguration;
@@ -15,15 +13,16 @@ class ProophReadModel implements ReadModel
         private MessagingEntrypoint $messagingEntrypoint,
         private ProjectionLifeCycleConfiguration $projectionLifeCycleConfiguration,
         private ProjectionRunningConfiguration $projectionRunningConfiguration
-    ) {}
+    ) {
+    }
 
     public function init(): void
     {
-        if (!$this->projectionLifeCycleConfiguration->getInitializationRequestChannel()) {
+        if (! $this->projectionLifeCycleConfiguration->getInitializationRequestChannel()) {
             return;
         }
 
-        if (!$this->projectionRunningConfiguration->isInitializedOnStartup()) {
+        if (! $this->projectionRunningConfiguration->isInitializedOnStartup()) {
             return;
         }
 
@@ -37,7 +36,7 @@ class ProophReadModel implements ReadModel
 
     public function reset(): void
     {
-        if (!$this->projectionLifeCycleConfiguration->getResetRequestChannel()) {
+        if (! $this->projectionLifeCycleConfiguration->getResetRequestChannel()) {
             return;
         }
 
@@ -46,7 +45,7 @@ class ProophReadModel implements ReadModel
 
     public function delete(): void
     {
-        if (!$this->projectionLifeCycleConfiguration->getDeleteRequestChannel()) {
+        if (! $this->projectionLifeCycleConfiguration->getDeleteRequestChannel()) {
             return;
         }
 
@@ -55,11 +54,9 @@ class ProophReadModel implements ReadModel
 
     public function stack(string $operation, ...$args): void
     {
-        return;
     }
 
     public function persist(): void
     {
-        return;
     }
 }

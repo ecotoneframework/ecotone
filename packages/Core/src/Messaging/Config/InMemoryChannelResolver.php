@@ -33,7 +33,7 @@ class InMemoryChannelResolver implements ChannelResolver
      * @return InMemoryChannelResolver
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function create(array $namedMessageChannels) : self
+    public static function create(array $namedMessageChannels): self
     {
         return new self($namedMessageChannels);
     }
@@ -43,12 +43,12 @@ class InMemoryChannelResolver implements ChannelResolver
      * @return InMemoryChannelResolver
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createFromAssociativeArray(array $resolvableChannelsArray) : self
+    public static function createFromAssociativeArray(array $resolvableChannelsArray): self
     {
         $resolvableChannels = [];
 
         foreach ($resolvableChannelsArray as $channelName => $messageChannel) {
-            Assert::isSubclassOf($messageChannel, MessageChannel::class, "Expected Message Channel got " . get_class($messageChannel));
+            Assert::isSubclassOf($messageChannel, MessageChannel::class, 'Expected Message Channel got ' . get_class($messageChannel));
 
             $resolvableChannels[] = NamedMessageChannel::create($channelName, $messageChannel);
         }
@@ -62,7 +62,7 @@ class InMemoryChannelResolver implements ChannelResolver
      * @return InMemoryChannelResolver
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createWithChannelResolver(ChannelResolver $channelResolver, array $associativeAdditionalChannels) : self
+    public static function createWithChannelResolver(ChannelResolver $channelResolver, array $associativeAdditionalChannels): self
     {
         $self = self::createFromAssociativeArray($associativeAdditionalChannels);
         $self->withExternalChannelResolver($channelResolver);
@@ -74,7 +74,7 @@ class InMemoryChannelResolver implements ChannelResolver
      * @return InMemoryChannelResolver
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([]);
     }
@@ -119,7 +119,7 @@ class InMemoryChannelResolver implements ChannelResolver
      * @param array|NamedMessageChannel[] $namedMessageChannels
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function initialize($namedMessageChannels) : void
+    private function initialize($namedMessageChannels): void
     {
         Assert::allInstanceOfType($namedMessageChannels, NamedMessageChannel::class);
 
@@ -134,7 +134,7 @@ class InMemoryChannelResolver implements ChannelResolver
     /**
      * @param ChannelResolver $channelResolver
      */
-    private function withExternalChannelResolver(ChannelResolver $channelResolver) : void
+    private function withExternalChannelResolver(ChannelResolver $channelResolver): void
     {
         $this->externalChannelResolver = $channelResolver;
     }

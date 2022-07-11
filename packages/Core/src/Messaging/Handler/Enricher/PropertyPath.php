@@ -3,7 +3,6 @@
 namespace Ecotone\Messaging\Handler\Enricher;
 
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class PropertyPath
@@ -29,12 +28,12 @@ class PropertyPath
      *
      * @return PropertyPath
      */
-    public static function createWith(string $path) : self
+    public static function createWith(string $path): self
     {
         return new self($path);
     }
 
-    public function getPath() : ?string
+    public function getPath(): ?string
     {
         return $this->path;
     }
@@ -42,7 +41,7 @@ class PropertyPath
     /**
      * @return string|null
      */
-    public function getCurrentAccessProperty() : ?string
+    public function getCurrentAccessProperty(): ?string
     {
         return $this->getNextAccessProperty(false);
     }
@@ -50,7 +49,7 @@ class PropertyPath
     /**
      * @return PropertyPath|null
      */
-    public function cutCurrentAccessProperty() : ?PropertyPath
+    public function cutCurrentAccessProperty(): ?PropertyPath
     {
         $currentAccessProperty = $this->getNextAccessProperty(true);
 
@@ -60,7 +59,7 @@ class PropertyPath
 
         $path = substr($this->getPath(), strlen($currentAccessProperty));
 
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 
@@ -72,11 +71,11 @@ class PropertyPath
      *
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function initialize(string $path) : void
+    private function initialize(string $path): void
     {
         Assert::notNullAndEmpty($path, "Path for Property path can't be empty");
 
-        $path = str_replace(["'", "\""], "", $path);
+        $path = str_replace(["'", '"'], '', $path);
 
         $this->path = $path;
     }
@@ -96,7 +95,7 @@ class PropertyPath
      */
     private function hasAnyMatches($matches): bool
     {
-        return !empty($matches);
+        return ! empty($matches);
     }
 
     /**

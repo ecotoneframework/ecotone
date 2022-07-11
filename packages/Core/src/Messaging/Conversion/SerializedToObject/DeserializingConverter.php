@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion\SerializedToObject;
+
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**

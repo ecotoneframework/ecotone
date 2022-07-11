@@ -1,11 +1,12 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
+use Throwable;
 
 /**
  * Class SignalInterceptor
@@ -28,8 +29,8 @@ class SignalInterceptor implements ConsumerInterceptor
      */
     public function onStartup(): void
     {
-        if (!extension_loaded('pcntl')) {
-            throw ConfigurationException::create("pcntl extension need to be loaded in order to catch system signals");
+        if (! extension_loaded('pcntl')) {
+            throw ConfigurationException::create('pcntl extension need to be loaded in order to catch system signals');
         }
 
         pcntl_async_signals(true);
@@ -64,7 +65,7 @@ class SignalInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function shouldBeThrown(\Throwable $exception) : bool
+    public function shouldBeThrown(Throwable $exception): bool
     {
         return false;
     }

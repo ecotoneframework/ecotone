@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Filter;
 
-use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -59,15 +59,15 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public static function createBoolHeaderFilter(string $headerName, ?bool $defaultResultWhenHeaderIsMissing = null): self
     {
-        return new self(new BoolHeaderBasedFilter($headerName, $defaultResultWhenHeaderIsMissing), "filter");
+        return new self(new BoolHeaderBasedFilter($headerName, $defaultResultWhenHeaderIsMissing), 'filter');
     }
 
     /**
      * @inheritDoc
      */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        $messageFilter = $interfaceToCallRegistry->getFor(MessageFilter::class, "handle");
+        $messageFilter = $interfaceToCallRegistry->getFor(MessageFilter::class, 'handle');
 
         return is_string($this->referenceNameOrObject)
                     ? [$interfaceToCallRegistry->getForReferenceName($this->referenceNameOrObject, $this->methodName), $messageFilter]
@@ -143,7 +143,7 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
 
         /** @var InterfaceToCall $interfaceToCall */
         $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($messageSelector, $this->methodName);
-        if (!$interfaceToCall->hasReturnValueBoolean()) {
+        if (! $interfaceToCall->hasReturnValueBoolean()) {
             $class = get_class($messageSelector);
             throw InvalidArgumentException::create("Object with reference {$class} should return bool for method {$this->methodName} while using Message Filter");
         }
@@ -166,8 +166,8 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
                 $discardChannel,
                 $this->throwExceptionOnDiscard
             ),
-            "handle"
-            )
+            'handle'
+        )
             ->withInputChannelName($this->inputMessageChannelName)
             ->withOutputMessageChannel($this->outputMessageChannelName);
 
@@ -175,7 +175,7 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     }
 
 
-    private function initialize() : void
+    private function initialize(): void
     {
         if (is_string($this->referenceNameOrObject)) {
             $this->requiredReferences[] = $this->referenceNameOrObject;
@@ -187,6 +187,6 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function __toString()
     {
-        return sprintf("Message filter - %s:%s with name `%s` for input channel `%s`", $this->referenceNameOrObject, $this->methodName, $this->getEndpointId(), $this->inputMessageChannelName);
+        return sprintf('Message filter - %s:%s with name `%s` for input channel `%s`', $this->referenceNameOrObject, $this->methodName, $this->getEndpointId(), $this->inputMessageChannelName);
     }
 }

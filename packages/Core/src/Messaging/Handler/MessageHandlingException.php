@@ -4,7 +4,7 @@ namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\ErrorMessage;
+use Throwable;
 
 /**
  * Class MessageHandlingException
@@ -14,11 +14,11 @@ use Ecotone\Messaging\Support\ErrorMessage;
 final class MessageHandlingException extends MessagingException
 {
     /**
-     * @param \Throwable $cause
+     * @param Throwable $cause
      * @param Message $originalMessage
      * @return MessageHandlingException|static
      */
-    public static function fromOtherException(\Throwable $cause, Message $originalMessage) : \Ecotone\Messaging\MessagingException
+    public static function fromOtherException(Throwable $cause, Message $originalMessage): MessagingException
     {
         $messageHandlingException = self::createWithFailedMessage($cause->getMessage(), $originalMessage);
 

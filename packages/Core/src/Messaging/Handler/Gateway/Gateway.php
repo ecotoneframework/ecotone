@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
@@ -26,8 +27,6 @@ use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Modelling\QueryBus;
-use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\Job;
 use Throwable;
 
 /**
@@ -78,13 +77,20 @@ class Gateway implements NonProxyGateway
      * @param object[] $endpointAnnotations
      */
     public function __construct(
-        InterfaceToCall $interfaceToCall, MethodCallToMessageConverter $methodCallToMessageConverter,
-        array $messageConverters, MessageChannel $requestChannel,
-        ?PollableChannel $replyChannel, ?MessageChannel $errorChannel, int $replyMilliSecondsTimeout,
-        ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver,
-        iterable $aroundInterceptors, iterable $sortedBeforeInterceptors, iterable $sortedAfterInterceptors, iterable $endpointAnnotations
-    )
-    {
+        InterfaceToCall $interfaceToCall,
+        MethodCallToMessageConverter $methodCallToMessageConverter,
+        array $messageConverters,
+        MessageChannel $requestChannel,
+        ?PollableChannel $replyChannel,
+        ?MessageChannel $errorChannel,
+        int $replyMilliSecondsTimeout,
+        ReferenceSearchService $referenceSearchService,
+        ChannelResolver $channelResolver,
+        iterable $aroundInterceptors,
+        iterable $sortedBeforeInterceptors,
+        iterable $sortedAfterInterceptors,
+        iterable $endpointAnnotations
+    ) {
         $this->methodCallToMessageConverter = $methodCallToMessageConverter;
         $this->messageConverters = $messageConverters;
         $this->interfaceToCall = $interfaceToCall;
@@ -117,10 +123,10 @@ class Gateway implements NonProxyGateway
             $countArguments = count($parameters);
             for ($index = 0; $index < $countArguments; $index++) {
                 $parameter = $parameters[$index];
-                if (!array_key_exists($index, $methodArgumentValues) && $parameter->hasDefaultValue()) {
+                if (! array_key_exists($index, $methodArgumentValues) && $parameter->hasDefaultValue()) {
                     $methodValue = $parameter->getDefaultValue();
                 } else {
-                    if (!array_key_exists($index, $methodArgumentValues)) {
+                    if (! array_key_exists($index, $methodArgumentValues)) {
                         throw InvalidArgumentException::create("Missing argument {$parameter->getName()} for calling {$this->interfaceToCall}");
                     }
                     $methodValue = $methodArgumentValues[$index];
@@ -175,8 +181,6 @@ class Gateway implements NonProxyGateway
 
             return $reply->getPayload();
         }
-
-        return null;
     }
 
 
@@ -190,7 +194,7 @@ class Gateway implements NonProxyGateway
             $this->replyMilliSecondsTimeout
         );
 
-        $gatewayInternalHandler = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, "handle")
+        $gatewayInternalHandler = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, 'handle')
             ->withWrappingResultInMessage(false)
             ->withPossibilityToReplaceArgumentsInAroundInterceptors(false)
             ->withEndpointAnnotations($this->endpointAnnotations);
@@ -202,7 +206,7 @@ class Gateway implements NonProxyGateway
                 $replyContentType,
                 $this->messageConverters,
             ),
-            "convert",
+            'convert',
             Precedence::GATEWAY_REPLY_CONVERSION_PRECEDENCE,
             $this->interfaceToCall->getInterfaceName()
         );

@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Store;
 
-use Ramsey\Uuid\UuidInterface;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * Class SimpleMessageStore
@@ -30,7 +30,7 @@ final class SimpleMessageStore implements MessageStore, MessageGroupStore
     /**
      * @return SimpleMessageStore
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([], []);
     }

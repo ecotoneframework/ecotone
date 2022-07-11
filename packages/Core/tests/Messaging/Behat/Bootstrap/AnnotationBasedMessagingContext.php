@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
 use Behat\Behat\Context\Context;
@@ -30,7 +29,6 @@ use Test\Ecotone\Messaging\Fixture\Behat\Calculating\ResultService;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\ErrorReceiver;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderService;
-use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\InterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\SomeQueryHandler;
 use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\CalculateGatewayExampleWithMessages;
@@ -73,6 +71,9 @@ use Test\Ecotone\Modelling\Fixture\SimplifiedAggregate\IdGenerator;
 use Test\Ecotone\Modelling\Fixture\SimplifiedAggregate\SimplifiedAggregateRepository;
 use Test\Ecotone\Modelling\Fixture\TwoSagas\TwoSagasRepository;
 
+/**
+ * @internal
+ */
 class AnnotationBasedMessagingContext extends TestCase implements Context
 {
     private static ?\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem;
@@ -96,7 +97,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         RentCalendar::class => new RentCalendar(),
-                        AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty()
+                        AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty(),
                     ];
                     break;
                 }
@@ -104,7 +105,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         OrderNotificator::class => new OrderNotificator(),
-                        InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()
+                        InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty(),
                     ];
                     break;
                 }
@@ -112,7 +113,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         ErrorReceiver::class => new ErrorReceiver(),
-                        OrderService::class => new OrderService()
+                        OrderService::class => new OrderService(),
                     ];
                     break;
                 }
@@ -120,7 +121,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         InterceptorExample::class => new InterceptorExample(),
-                        SomeQueryHandler::class => new SomeQueryHandler()
+                        SomeQueryHandler::class => new SomeQueryHandler(),
                     ];
                     break;
                 }
@@ -128,7 +129,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample::class => new \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\InterceptorExample(),
-                        \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler::class => new \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler()
+                        \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler::class => new \Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\SomeQueryHandler(),
                     ];
                     break;
                 }
@@ -136,14 +137,14 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample::class => new \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\InterceptorExample(),
-                        \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::class => new \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler()
+                        \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler::class => new \Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\SomeQueryHandler(),
                     ];
                     break;
                 }
             case "Test\Ecotone\Modelling\Fixture\Order":
                 {
                     $objects = [
-                        \Test\Ecotone\Modelling\Fixture\Order\OrderService::class => new \Test\Ecotone\Modelling\Fixture\Order\OrderService()
+                        \Test\Ecotone\Modelling\Fixture\Order\OrderService::class => new \Test\Ecotone\Modelling\Fixture\Order\OrderService(),
                     ];
                     break;
                 }
@@ -153,7 +154,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                         OrderRepository::class => OrderRepository::createEmpty(),
                         AddUserIdService::class => new AddUserIdService(),
                         OrderErrorHandler::class => new OrderErrorHandler(),
-                        LoggingService::class => new LoggingService()
+                        LoggingService::class => new LoggingService(),
                     ];
                     break;
                 }
@@ -161,7 +162,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         new GuestViewer(),
-                        GuestBookRepository::createEmpty()
+                        GuestBookRepository::createEmpty(),
                     ];
                     break;
                 }
@@ -170,7 +171,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     $objects = [
                         MultiplyCoins::class => new MultiplyCoins(),
                         Shop::class => new Shop(),
-                        LoggingService::class => new LoggingService()
+                        LoggingService::class => new LoggingService(),
                     ];
                     break;
                 }
@@ -178,7 +179,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         InterceptedScheduledExample::class => new InterceptedScheduledExample(),
-                        LoggingService::class => new LoggingService()
+                        LoggingService::class => new LoggingService(),
                     ];
                     break;
                 }
@@ -188,7 +189,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                         ProductExchanger::class => new ProductExchanger(),
                         AddVatService::class => new AddVatService(),
                         AddFranchiseMargin::class => new AddFranchiseMargin(),
-                        ShopRepository::class => ShopRepository::createEmpty()
+                        ShopRepository::class => ShopRepository::createEmpty(),
                     ];
                     break;
                 }
@@ -199,7 +200,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                         NotificationService::class => new NotificationService(),
                         HasEnoughPermissions::class => new HasEnoughPermissions(),
                         AddNotificationTimestamp::class => new AddNotificationTimestamp(),
-                        AddExecutorId::class => new AddExecutorId()
+                        AddExecutorId::class => new AddExecutorId(),
                     ];
                     break;
                 }
@@ -210,152 +211,152 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                         \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\NotificationService::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\NotificationService(),
                         \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs\HasEnoughPermissions(),
                         \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp\AddNotificationTimestamp::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddNotificationTimestamp\AddNotificationTimestamp(),
-                        \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId()
+                        \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId::class => new \Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId(),
                     ];
                     break;
                 }
             case "Test\Ecotone\Modelling\Fixture\MetadataPropagating":
                 {
                     $objects = [
-                        new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()
+                        new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService(),
                     ];
                     break;
                 }
             case "Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints":
-            {
-                $objects = [
-                    new \Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints\OrderService()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new \Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints\OrderService(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\InterceptingAggregate":
-            {
-                $objects = [
-                    new AddCurrentUserId(),
-                    BasketRepository::createEmpty()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new AddCurrentUserId(),
+                        BasketRepository::createEmpty(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes":
-            {
-                $objects = [
-                    new AddMetadataService(),
-                    \Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\BasketRepository::createEmpty()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new AddMetadataService(),
+                        \Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes\BasketRepository::createEmpty(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Messaging\Fixture\Behat\Calculating":
-            {
-                $objects = [
-                    InboundCalculation::class => new InboundCalculation(),
-                    ResultService::class => new ResultService(),
-                    CalculatorInterceptor::class => new CalculatorInterceptor()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        InboundCalculation::class => new InboundCalculation(),
+                        ResultService::class => new ResultService(),
+                        CalculatorInterceptor::class => new CalculatorInterceptor(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\DistributedCommandHandler":
-            {
-                $objects = [
-                    new ShoppingCenter()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new ShoppingCenter(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\DistributedEventHandler":
-            {
-                $objects = [
-                    new ShoppingRecord()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new ShoppingRecord(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod":
-            {
-                $objects = [
-                    new Basket()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new Basket(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder":
-            {
-                $objects = [
-                    new JobRepository()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new JobRepository(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\SimplifiedAggregate":
-            {
-                $objects = [
-                    new IdGenerator(),
-                    SimplifiedAggregateRepository::class => SimplifiedAggregateRepository::createEmpty()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new IdGenerator(),
+                        SimplifiedAggregateRepository::class => SimplifiedAggregateRepository::createEmpty(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\TwoSagas":
-            {
-                $objects = [
-                    TwoSagasRepository::createEmpty()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        TwoSagasRepository::createEmpty(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas":
-            {
-                $objects = [
-                    \Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\TwoSagasRepository::createEmpty()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        \Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas\TwoSagasRepository::createEmpty(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\RepositoryShortcut":
-            {
-                $objects = [
-                    new TwitterRepository()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new TwitterRepository(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut":
-            {
-                $objects = [
-                    new \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\Infrastructure\TwitterRepository()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new \Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut\Infrastructure\TwitterRepository(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignation":
-            {
-                $objects = [
-                    new UserRepository()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new UserRepository(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod":
-            {
-                $objects = [
-                    new \Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\UserRepository()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new \Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\UserRepository(),
+                    ];
+                    break;
+                }
             case "Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod":
-            {
-                $objects = [
-                    new \Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod\UserRepository()
-                ];
-                break;
-            }
+                {
+                    $objects = [
+                        new \Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod\UserRepository(),
+                    ];
+                    break;
+                }
             default:
-            {
-                throw new \InvalidArgumentException("Namespace not registered ". $namespace);
-            }
+                {
+                    throw new \InvalidArgumentException('Namespace not registered '. $namespace);
+                }
         }
 
-        $objects["logger"] = new NullLogger();
-        $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "ecotone_testing_behat_cache";
+        $objects['logger'] = new NullLogger();
+        $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ecotone_testing_behat_cache';
 
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
-            ->withEnvironment("prod")
+            ->withEnvironment('prod')
             ->withCacheDirectoryPath($cacheDirectoryPath)
             ->withFailFast(false)
             ->withNamespaces([$namespace]);
 
         MessagingSystemConfiguration::cleanCache($applicationConfiguration->getCacheDirectoryPath());
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
-            __DIR__ . "/../../../../",
+            __DIR__ . '/../../../../',
             InMemoryPSRContainer::createFromObjects($objects),
             $applicationConfiguration,
             [],
@@ -388,10 +389,10 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     public function theResultShouldBe(int $amount)
     {
         /** @var PollableChannel $resultChannel */
-        $resultChannel = self::$messagingSystem->getMessageChannelByName("resultChannel");
+        $resultChannel = self::$messagingSystem->getMessageChannelByName('resultChannel');
 
         $message = $resultChannel->receive();
-        Assert::assertNotNull($message, "Result was never received");
+        Assert::assertNotNull($message, 'Result was never received');
         Assert::assertEquals($amount, $message->getPayload());
     }
 
@@ -413,7 +414,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iCalculateUsingInboundChannelAdapter()
     {
-        self::$messagingSystem->run("inboundCalculator");
+        self::$messagingSystem->run('inboundCalculator');
     }
 
     /**
@@ -459,7 +460,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function calendarShouldContainEventWithAppointmentId(int $appointmentId)
     {
-        Assert::assertTrue(self::getQueryBus()->sendWithRouting("doesCalendarContainAppointments", $appointmentId));
+        Assert::assertTrue(self::getQueryBus()->sendWithRouting('doesCalendarContainAppointments', $appointmentId));
     }
 
     /**
@@ -538,7 +539,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     {
         $this->assertEquals(
             [],
-            $this->getQueryBus()->sendWithRouting("order.getOrders", [])
+            $this->getQueryBus()->sendWithRouting('order.getOrders', [])
         );
     }
 
@@ -557,7 +558,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     {
         $this->assertEquals(
             [new PlaceOrder($order)],
-            $this->getQueryBus()->sendWithRouting("order.getOrders", [])
+            $this->getQueryBus()->sendWithRouting('order.getOrders', [])
         );
     }
 
@@ -566,7 +567,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function iOrderProduct(string $order)
     {
-        return $this->getCommandBus()->sendWithRouting("order.register", new PlaceOrder($order));
+        return $this->getCommandBus()->sendWithRouting('order.register', new PlaceOrder($order));
     }
 
 
@@ -575,7 +576,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function thereShouldBeOrder(string $orderName)
     {
-        Assert::assertNotNull($this->getQueryBus()->sendWithRouting("order.getOrder", ["orderId" => $orderName]));
+        Assert::assertNotNull($this->getQueryBus()->sendWithRouting('order.getOrder', ['orderId' => $orderName]));
     }
 
     /**
@@ -585,12 +586,12 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     {
         $aggregateFound = true;
         try {
-            $this->getQueryBus()->sendWithRouting("order.getOrder", ["orderId" => $orderName]);
-        }catch (AggregateNotFoundException $exception) {
+            $this->getQueryBus()->sendWithRouting('order.getOrder', ['orderId' => $orderName]);
+        } catch (AggregateNotFoundException $exception) {
             $aggregateFound = false;
         }
 
-        Assert::assertFalse($aggregateFound, "Aggregate was found but should not");
+        Assert::assertFalse($aggregateFound, 'Aggregate was found but should not');
     }
 
     /**
@@ -598,7 +599,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function notificationListShouldBeEmpty()
     {
-        Assert::assertEmpty($this->getQueryBus()->sendWithRouting("order.getNotifiedOrders", []));
+        Assert::assertEmpty($this->getQueryBus()->sendWithRouting('order.getNotifiedOrders', []));
     }
 
     /**
@@ -608,7 +609,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
     {
         $this->assertEquals(
             [$orderName],
-            $this->getQueryBus()->sendWithRouting("order.getNotifiedOrders", [])
+            $this->getQueryBus()->sendWithRouting('order.getNotifiedOrders', [])
         );
     }
 
@@ -617,7 +618,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function noNotificationFor(string $orderName)
     {
-        $this->assertEquals(0, $this->getQueryBus()->sendWithRouting("order.wasNotified", ["orderId" => $orderName]));
+        $this->assertEquals(0, $this->getQueryBus()->sendWithRouting('order.wasNotified', ['orderId' => $orderName]));
     }
 
     /**
@@ -625,7 +626,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function thereShouldBeNotificationAboutTime(string $orderName, int $number)
     {
-        $this->assertEquals($number, $this->getQueryBus()->sendWithRouting("order.wasNotified", ["orderId" => $orderName]));
+        $this->assertEquals($number, $this->getQueryBus()->sendWithRouting('order.wasNotified', ['orderId' => $orderName]));
     }
 
     /**
@@ -633,7 +634,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
      */
     public function logsCountBe(int $count)
     {
-        $this->assertEquals($count, count($this->getQueryBus()->sendWithRouting("getLogs", [])));
+        $this->assertEquals($count, count($this->getQueryBus()->sendWithRouting('getLogs', [])));
     }
 
     /**

@@ -1,14 +1,10 @@
 <?php
 
-
 namespace Ecotone\SymfonyBundle\DepedencyInjection;
 
-
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
 use Ecotone\Messaging\Config\ConsoleCommandParameter;
 use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -39,11 +35,11 @@ class MessagingEntrypointCommand extends Command
     {
         foreach ($this->parameters as $parameter) {
             if ($parameter->isOption()) {
-                $this->addOption($parameter->getName(), null, InputOption::VALUE_OPTIONAL, "", $parameter->getDefaultValue());
-            }else {
+                $this->addOption($parameter->getName(), null, InputOption::VALUE_OPTIONAL, '', $parameter->getDefaultValue());
+            } else {
                 if ($parameter->hasDefaultValue()) {
-                    $this->addArgument($parameter->getName(), InputArgument::OPTIONAL, "", $parameter->getDefaultValue());
-                }else {
+                    $this->addArgument($parameter->getName(), InputArgument::OPTIONAL, '', $parameter->getDefaultValue());
+                } else {
                     $this->addArgument($parameter->getName(), InputArgument::REQUIRED);
                 }
             }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
 use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
@@ -11,5 +10,5 @@ interface IgnoreDocblockClassLevel
     /**
      * @return dsadasdsadosakd
      */
-    public function doSomething() : array;
+    public function doSomething(): array;
 }

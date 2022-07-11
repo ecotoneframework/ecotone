@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Amqp\Transaction;
-
 
 use Ecotone\Amqp\Configuration\AmqpConfiguration;
 use Ecotone\AnnotationFinder\AnnotationFinder;
@@ -12,7 +10,6 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Precedence;
@@ -50,15 +47,15 @@ class AmqpTransactionConfiguration implements AnnotationModule
 
         $isTransactionWrapperEnabled = false;
         if ($amqpConfiguration->isTransactionOnAsynchronousEndpoints()) {
-            $pointcut .= "||" . AsynchronousRunningEndpoint::class;
+            $pointcut .= '||' . AsynchronousRunningEndpoint::class;
             $isTransactionWrapperEnabled = true;
         }
         if ($amqpConfiguration->isTransactionOnCommandBus()) {
-            $pointcut .= "||" . CommandBus::class . "";
+            $pointcut .= '||' . CommandBus::class . '';
             $isTransactionWrapperEnabled = true;
         }
         if ($amqpConfiguration->isTransactionOnConsoleCommands()) {
-            $pointcut .= "||" . ConsoleCommand::class . "";
+            $pointcut .= '||' . ConsoleCommand::class . '';
             $isTransactionWrapperEnabled = true;
         }
         if ($amqpConfiguration->getDefaultConnectionReferenceNames()) {
@@ -73,7 +70,7 @@ class AmqpTransactionConfiguration implements AnnotationModule
             ->registerAroundMethodInterceptor(
                 AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     new AmqpTransactionInterceptor($connectionFactories),
-                    "transactional",
+                    'transactional',
                     Precedence::DATABASE_TRANSACTION_PRECEDENCE - 1,
                     $pointcut
                 )

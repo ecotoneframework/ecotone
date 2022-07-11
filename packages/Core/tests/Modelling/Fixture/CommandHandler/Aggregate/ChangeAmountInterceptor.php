@@ -29,7 +29,7 @@ class ChangeAmountInterceptor
      *
      * @return ChangeAmountInterceptor
      */
-    public static function create(int $newAmount) : self
+    public static function create(int $newAmount): self
     {
         return new self($newAmount);
     }
@@ -37,7 +37,7 @@ class ChangeAmountInterceptor
     /**
      * @return int
      */
-    public function change() : int
+    public function change(): int
     {
         return $this->newAmount;
     }

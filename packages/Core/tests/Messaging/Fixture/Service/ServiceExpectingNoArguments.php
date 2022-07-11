@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
@@ -23,34 +24,34 @@ class ServiceExpectingNoArguments
         $this->returnValue = $returnValue;
     }
 
-    public static function createWithReturnValue(string $returnValue) : self
+    public static function createWithReturnValue(string $returnValue): self
     {
         return new self($returnValue);
     }
 
-    public static function create() : self
+    public static function create(): self
     {
-        return new self("test");
+        return new self('test');
     }
 
-    public function withReturnValue() : string
+    public function withReturnValue(): string
     {
         $this->wasCalled = true;
 
         return $this->returnValue;
     }
 
-    public function withoutReturnValue() : void
+    public function withoutReturnValue(): void
     {
         $this->wasCalled = true;
     }
 
-    public function withNullReturnValue() : ?string
+    public function withNullReturnValue(): ?string
     {
         return null;
     }
 
-    public function withArrayReturnValue() : array
+    public function withArrayReturnValue(): array
     {
         return [];
     }

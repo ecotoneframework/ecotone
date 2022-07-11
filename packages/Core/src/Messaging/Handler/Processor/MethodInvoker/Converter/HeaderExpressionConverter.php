@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
@@ -61,16 +62,16 @@ class HeaderExpressionConverter implements ParameterConverter
      */
     public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
     {
-        if ($this->isRequired && !$message->getHeaders()->containsKey($this->headerName)) {
+        if ($this->isRequired && ! $message->getHeaders()->containsKey($this->headerName)) {
             throw InvalidArgumentException::create("Header with key {$this->headerName} does not exists for Header Parameter Converter");
         }
 
         return $this->expressionEvaluationService->evaluate(
             $this->expression,
             [
-                "value" => $message->getHeaders()->containsKey($this->headerName) ? $message->getHeaders()->get($this->headerName) : null,
-                "headers" => $message->getHeaders()->headers(),
-                "payload" => $message->getPayload()
+                'value' => $message->getHeaders()->containsKey($this->headerName) ? $message->getHeaders()->get($this->headerName) : null,
+                'headers' => $message->getHeaders()->headers(),
+                'payload' => $message->getPayload(),
             ],
             $this->referenceSearchService
         );

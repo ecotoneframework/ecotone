@@ -1,20 +1,17 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Async;
 
 use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventHandler;
+use stdClass;
 
-#[Asynchronous("asyncChannel")]
+#[Asynchronous('asyncChannel')]
 class AsyncCommandHandlerWithoutIdExample
 {
-    #[Asynchronous("asyncChannel")]
+    #[Asynchronous('asyncChannel')]
     #[CommandHandler]
-    public function doSomething(\stdClass $event) : void
+    public function doSomething(stdClass $event): void
     {
-
     }
 }

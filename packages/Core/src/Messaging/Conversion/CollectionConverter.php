@@ -1,8 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
-use Ecotone\Messaging\Handler\Type;
+
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -27,7 +28,7 @@ class CollectionConverter implements Converter
      * @param Converter $converterForSingleType
      * @return CollectionConverter
      */
-    public static function createForConverter(Converter $converterForSingleType) : self
+    public static function createForConverter(Converter $converterForSingleType): self
     {
         return new self($converterForSingleType);
     }
@@ -59,7 +60,10 @@ class CollectionConverter implements Converter
         return $sourceType->isCollection() && $targetType->isCollection()
             && $sourceType->isSingleTypeCollection() && $targetType->isSingleTypeCollection()
             && $this->converterForSingleType->matches(
-                $sourceType->resolveGenericTypes()[0], $sourceMediaType, $targetType->resolveGenericTypes()[0], $targetMediaType
+                $sourceType->resolveGenericTypes()[0],
+                $sourceMediaType,
+                $targetType->resolveGenericTypes()[0],
+                $targetMediaType
             );
     }
 }

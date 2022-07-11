@@ -11,12 +11,10 @@ class ServiceActivatorInterceptorWithServicesExample
     #[Before(2)]
     public function doSomethingBefore(string $name, array $metadata, stdClass $stdClass): void
     {
-
     }
 
     #[After(2)]
     public function doSomethingAfter(string $name, stdClass $stdClass): void
     {
-
     }
 }

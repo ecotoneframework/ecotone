@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Enqueue;
-
 
 use Interop\Queue\ConnectionFactory;
 use Interop\Queue\Consumer;
@@ -30,7 +28,7 @@ class CachedConnectionFactory implements ConnectionFactory
 
     public static function createFor(ReconnectableConnectionFactory $reconnectableConnectionFactory)
     {
-        if (!isset(self::$instances[$reconnectableConnectionFactory->getConnectionInstanceId()])) {
+        if (! isset(self::$instances[$reconnectableConnectionFactory->getConnectionInstanceId()])) {
             self::$instances[$reconnectableConnectionFactory->getConnectionInstanceId()] = new self($reconnectableConnectionFactory);
         }
 
@@ -39,19 +37,19 @@ class CachedConnectionFactory implements ConnectionFactory
 
     public function createContext(): Context
     {
-        if (!$this->cachedContext || $this->connectionFactory->isDisconnected($this->cachedContext)) {
+        if (! $this->cachedContext || $this->connectionFactory->isDisconnected($this->cachedContext)) {
             $this->cachedContext = $this->connectionFactory->createContext();
         }
 
         return $this->cachedContext;
     }
 
-    public function getConsumer(Destination $destination) : Consumer
+    public function getConsumer(Destination $destination): Consumer
     {
         return $this->createContext()->createConsumer($destination);
     }
 
-    public function getProducer() : Producer
+    public function getProducer(): Producer
     {
         return $this->createContext()->createProducer();
     }

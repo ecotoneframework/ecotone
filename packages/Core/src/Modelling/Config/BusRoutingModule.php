@@ -36,7 +36,7 @@ use ReflectionMethod;
 #[ModuleAnnotation]
 class BusRoutingModule implements AnnotationModule
 {
-    const MODULE_NAME = self::class;
+    public const MODULE_NAME = self::class;
 
     private BusRouterBuilder $commandBusByObject;
     private BusRouterBuilder $queryBusByObject;
@@ -84,7 +84,7 @@ class BusRoutingModule implements AnnotationModule
             if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
                 continue;
             }
-            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) && !$registration->hasClassAnnotation(Distributed::class))) {
+            if ($hasToBeDistributed && (! $registration->hasMethodAnnotation(Distributed::class) && ! $registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
@@ -102,7 +102,7 @@ class BusRoutingModule implements AnnotationModule
             if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
                 continue;
             }
-            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) && !$registration->hasClassAnnotation(Distributed::class))) {
+            if ($hasToBeDistributed && (! $registration->hasMethodAnnotation(Distributed::class) && ! $registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
@@ -123,7 +123,7 @@ class BusRoutingModule implements AnnotationModule
     {
         $namedCommandHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, CommandHandler::class) as $registration) {
-            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) && !$registration->hasClassAnnotation(Distributed::class))) {
+            if ($hasToBeDistributed && (! $registration->hasMethodAnnotation(Distributed::class) && ! $registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
@@ -138,7 +138,7 @@ class BusRoutingModule implements AnnotationModule
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }
-            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) && !$registration->hasClassAnnotation(Distributed::class))) {
+            if ($hasToBeDistributed && (! $registration->hasMethodAnnotation(Distributed::class) && ! $registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
@@ -223,7 +223,7 @@ class BusRoutingModule implements AnnotationModule
             if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
                 continue;
             }
-            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) || !$registration->hasClassAnnotation(Distributed::class))) {
+            if ($hasToBeDistributed && (! $registration->hasMethodAnnotation(Distributed::class) || ! $registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
@@ -243,14 +243,14 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            if ($hasToBeDistributed && (!$registration->hasMethodAnnotation(Distributed::class) || !$registration->hasClassAnnotation(Distributed::class))) {
+            if ($hasToBeDistributed && (! $registration->hasMethodAnnotation(Distributed::class) || ! $registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
             $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration, $interfaceToCallRegistry);
             $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
             foreach ($classChannels as $classChannel) {
-                if (!EventBusRouter::isRegexBasedRoute($namedMessageChannelFor)) {
+                if (! EventBusRouter::isRegexBasedRoute($namedMessageChannelFor)) {
                     $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
                     $objectEventHandlers[$classChannel]   = array_unique($objectEventHandlers[$classChannel]);
                 }
@@ -269,7 +269,7 @@ class BusRoutingModule implements AnnotationModule
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }
-            if ($hasToBeDistributed && !$registration->hasMethodAnnotation(Distributed::class)) {
+            if ($hasToBeDistributed && ! $registration->hasMethodAnnotation(Distributed::class)) {
                 continue;
             }
 
@@ -278,14 +278,14 @@ class BusRoutingModule implements AnnotationModule
             if ($annotation->getListenTo()) {
                 $namedEventHandlers[$chanelName][] = $chanelName;
                 $namedEventHandlers[$chanelName]   = array_unique($namedEventHandlers[$chanelName]);
-            }else {
+            } else {
                 $type = TypeDescriptor::create($chanelName);
                 if ($type->isUnionType()) {
                     foreach ($type->getUnionTypes() as $type) {
                         $namedEventHandlers[$type->toString()][] = $chanelName;
                         $namedEventHandlers[$type->toString()]   = array_unique($namedEventHandlers[$type->toString()]);
                     }
-                }else {
+                } else {
                     $namedEventHandlers[$chanelName][] = $chanelName;
                     $namedEventHandlers[$chanelName]   = array_unique($namedEventHandlers[$chanelName]);
                 }
@@ -296,7 +296,7 @@ class BusRoutingModule implements AnnotationModule
             if (EventBusRouter::isRegexBasedRoute($channelName)) {
                 throw ConfigurationException::create("Can not registered regex listen to channel for aggregates in {$registration}");
             }
-            if ($hasToBeDistributed && !$registration->hasMethodAnnotation(Distributed::class)) {
+            if ($hasToBeDistributed && ! $registration->hasMethodAnnotation(Distributed::class)) {
                 continue;
             }
 
@@ -309,7 +309,7 @@ class BusRoutingModule implements AnnotationModule
 
     private static function isForTheSameAggregate(array $aggregateMethodUsage, $uniqueChannelName, string $oppositeMethodType, AnnotatedFinding $registration): bool
     {
-        return !isset($aggregateMethodUsage[$uniqueChannelName][$oppositeMethodType])
+        return ! isset($aggregateMethodUsage[$uniqueChannelName][$oppositeMethodType])
             || $aggregateMethodUsage[$uniqueChannelName][$oppositeMethodType]->getClassName() === $registration->getClassName();
     }
 
@@ -323,7 +323,7 @@ class BusRoutingModule implements AnnotationModule
         $notUniqueHandlerAnnotation = TypeDescriptor::create(NotUniqueHandler::class);
         $aggregateAnnotation        = TypeDescriptor::create(Aggregate::class);
         foreach ($uniqueChannels as $uniqueChannelName => $registrations) {
-            $combinedRegistrationNames = "";
+            $combinedRegistrationNames = '';
             $registrationsToVerify     = [];
             $aggregateMethodUsage      = [];
             foreach ($registrations as $registration) {
@@ -333,9 +333,9 @@ class BusRoutingModule implements AnnotationModule
 
                 if ($registration->hasClassAnnotation($aggregateAnnotation)) {
                     $isStatic           = (new ReflectionMethod($registration->getClassName(), $registration->getMethodName()))->isStatic();
-                    $methodType         = $isStatic ? "factory" : "action";
-                    $oppositeMethodType = $isStatic ? "action" : "factory";
-                    if (!isset($aggregateMethodUsage[$uniqueChannelName][$methodType])) {
+                    $methodType         = $isStatic ? 'factory' : 'action';
+                    $oppositeMethodType = $isStatic ? 'action' : 'factory';
+                    if (! isset($aggregateMethodUsage[$uniqueChannelName][$methodType])) {
                         $aggregateMethodUsage[$uniqueChannelName][$methodType] = $registration;
                         if (self::isForTheSameAggregate($aggregateMethodUsage, $uniqueChannelName, $oppositeMethodType, $registration)) {
                             continue;
@@ -369,23 +369,23 @@ class BusRoutingModule implements AnnotationModule
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     MessageHeadersPropagator::class,
-                    $interfaceToCallRegistry->getFor(MessageHeadersPropagator::class, "propagateHeaders"),
-                    TransformerBuilder::createWithDirectObject($this->messageHeadersPropagator, "propagateHeaders")
+                    $interfaceToCallRegistry->getFor(MessageHeadersPropagator::class, 'propagateHeaders'),
+                    TransformerBuilder::createWithDirectObject($this->messageHeadersPropagator, 'propagateHeaders')
                         ->withMethodParameterConverters(
                             [
-                                AllHeadersBuilder::createWith("headers")
+                                AllHeadersBuilder::createWith('headers'),
                             ]
                         ),
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
-                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class . "||" . MessagingEntrypointWithHeadersPropagation::class
+                    CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class
                 )
             )
             ->registerAroundMethodInterceptor(
                 AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $this->messageHeadersPropagator,
-                    "storeHeaders",
+                    'storeHeaders',
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                    CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class . "||" . MessagingEntrypointWithHeadersPropagation::class
+                    CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class
                 )
             )
             ->registerMessageHandler($this->commandBusByObject)

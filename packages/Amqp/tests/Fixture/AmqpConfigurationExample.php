@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Amqp\Fixture;
 
 use Ecotone\Messaging\SubscribableChannel;
@@ -15,5 +14,5 @@ interface AmqpConfigurationExample
     /**
      * @return SubscribableChannel
      */
-    public function test() : SubscribableChannel;
+    public function test(): SubscribableChannel;
 }

@@ -10,12 +10,12 @@ final class AggregateTypeMapping
     {
     }
 
-    public static function createEmpty() : static
+    public static function createEmpty(): static
     {
         return new self([]);
     }
 
-    public static function createWith(array $aggregateTypeMapping) : static
+    public static function createWith(array $aggregateTypeMapping): static
     {
         return new self($aggregateTypeMapping);
     }

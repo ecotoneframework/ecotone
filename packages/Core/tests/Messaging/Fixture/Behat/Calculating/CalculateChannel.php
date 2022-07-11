@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
 use Ecotone\Messaging\Attribute\ServiceContext;
@@ -12,7 +11,7 @@ class CalculateChannel
     public function configuration(): array
     {
         return [
-            SimpleMessageChannelBuilder::createQueueChannel("resultChannel")
+            SimpleMessageChannelBuilder::createQueueChannel('resultChannel'),
         ];
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
@@ -31,7 +32,7 @@ class MessageConverter implements ParameterConverter
      * @param string $parameterName
      * @return MessageConverter
      */
-    public static function create(string $parameterName) : self
+    public static function create(string $parameterName): self
     {
         return new self($parameterName);
     }
@@ -39,7 +40,7 @@ class MessageConverter implements ParameterConverter
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations): \Ecotone\Messaging\Message
+    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations): Message
     {
         return $message;
     }

@@ -12,6 +12,7 @@ use Ecotone\AnnotationFinder\FileSystem\AutoloadFileNamespaceParser;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\AnnotationFinder\FileSystem\InMemoryAutoloadNamespaceParser;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\EndpointAnnotationExample;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\Extension;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndpoint;
@@ -28,13 +29,16 @@ use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\NotExisting\NotExistin
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\NotExisting\NotExistingMethodAttribute;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\NotExisting\NotExistingPropertyAttribute;
 
+/**
+ * @internal
+ */
 class FileSystemAttributeAnnotationFinderTest extends TestCase
 {
-    const ROOT_DIR = __DIR__ . '/../../../';
+    public const ROOT_DIR = __DIR__ . '/../../../';
 
     public function getAnnotationNamespacePrefix(): string
     {
-        return "Test\\Ecotone\\AnnotationFinder\\Fixture\\Usage\\Attribute";
+        return 'Test\\Ecotone\\AnnotationFinder\\Fixture\\Usage\\Attribute';
     }
 
     public function getAnnotationResolver(): AnnotationResolver
@@ -52,19 +56,19 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
                     $messageEndpoint,
                     $gatewayAnnotation,
                     GatewayWithReplyChannelExample::class,
-                    "buy",
+                    'buy',
                     [$messageEndpoint],
                     [$gatewayAnnotation]
-                )
+                ),
             ],
-            $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\MessageEndpoint\\Gateway\\FileSystem", "prod")
+            $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem', 'prod')
                 ->findCombined(MessageEndpoint::class, SomeGatewayExample::class)
         );
     }
 
     public function test_retrieving_all_classes_with_annotation()
     {
-        $classes = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix(), "prod")->findAnnotatedClasses(System::class);
+        $classes = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix(), 'prod')->findAnnotatedClasses(System::class);
 
         $this->assertNotEmpty($classes, "File system class locator didn't find application context");
     }
@@ -75,10 +79,10 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
 
         $this->assertEquals(
             [
-                $gatewayAnnotation
+                $gatewayAnnotation,
             ],
-            $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\MessageEndpoint\Gateway\FileSystem", "prod")
-                ->getAnnotationsForMethod(GatewayWithReplyChannelExample::class, "buy")
+            $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\MessageEndpoint\Gateway\FileSystem", 'prod')
+                ->getAnnotationsForMethod(GatewayWithReplyChannelExample::class, 'buy')
         );
     }
 
@@ -86,9 +90,9 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
     {
         $this->assertEquals(
             [
-                new MessageEndpoint()
+                new MessageEndpoint(),
             ],
-            $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\MessageEndpoint\Gateway\FileSystem", "prod")
+            $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\MessageEndpoint\Gateway\FileSystem", 'prod')
                 ->getAnnotationsForClass(GatewayWithReplyChannelExample::class)
         );
     }
@@ -96,11 +100,11 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
 
     public function test_retrieving_for_specific_environment()
     {
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\Environment", "dev");
-        $devEnvironment                          = new Environment(["dev"]);
-        $prodDevEnvironment                      = new Environment(["prod", "dev"]);
-        $prodEnvironment                         = new Environment(["prod"]);
-        $allEnvironment                          = new Environment(["dev", "prod", "test"]);
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\Environment', 'dev');
+        $devEnvironment                          = new Environment(['dev']);
+        $prodDevEnvironment                      = new Environment(['prod', 'dev']);
+        $prodEnvironment                         = new Environment(['prod']);
+        $allEnvironment                          = new Environment(['dev', 'prod', 'test']);
         $methodAnnotation                        = new Extension();
         $System                      = new System();
 
@@ -110,7 +114,7 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
                     $System,
                     $methodAnnotation,
                     SystemContextWithMethodEnvironmentExample::class,
-                    "configSingleEnvironment",
+                    'configSingleEnvironment',
                     [$System, $prodDevEnvironment],
                     [$methodAnnotation, $devEnvironment]
                 ),
@@ -118,38 +122,38 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
                     $System,
                     $methodAnnotation,
                     SystemContextWithMethodMultipleEnvironmentsExample::class,
-                    "configMultipleEnvironments",
+                    'configMultipleEnvironments',
                     [$System],
                     [$methodAnnotation, $allEnvironment]
-                )
+                ),
             ],
             $fileSystemAnnotationRegistrationService->findCombined(System::class, Extension::class)
         );
 
 
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\Environment", "test");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\Environment', 'test');
         $this->assertEquals(
             [
                 AnnotatedDefinition::create(
                     $System,
                     $methodAnnotation,
                     SystemContextWithMethodMultipleEnvironmentsExample::class,
-                    "configMultipleEnvironments",
+                    'configMultipleEnvironments',
                     [$System],
                     [$methodAnnotation, $allEnvironment]
-                )
+                ),
             ],
             $fileSystemAnnotationRegistrationService->findCombined(System::class, Extension::class)
         );
 
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\Environment", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\Environment', 'prod');
         $this->assertEquals(
             [
                 AnnotatedDefinition::create(
                     $System,
                     $methodAnnotation,
                     SystemContextWithClassEnvironment::class,
-                    "someAction",
+                    'someAction',
                     [$System, $prodEnvironment],
                     [$methodAnnotation]
                 ),
@@ -157,10 +161,10 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
                     $System,
                     $methodAnnotation,
                     SystemContextWithMethodMultipleEnvironmentsExample::class,
-                    "configMultipleEnvironments",
+                    'configMultipleEnvironments',
                     [$System],
                     [$methodAnnotation, $allEnvironment]
-                )
+                ),
             ],
             $fileSystemAnnotationRegistrationService->findCombined(System::class, Extension::class)
         );
@@ -170,7 +174,7 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
     {
         $annotation = new SomeHandlerAnnotation();
 
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\MessageEndpoint\\Splitter", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Splitter', 'prod');
 
         $annotationForClass = new MessageEndpoint();
         $this->assertEquals(
@@ -179,10 +183,10 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
                     $annotationForClass,
                     $annotation,
                     SplitterExample::class,
-                    "split",
+                    'split',
                     [$annotationForClass],
                     [$annotation]
-                )
+                ),
             ],
             $fileSystemAnnotationRegistrationService->findCombined(MessageEndpoint::class, EndpointAnnotationExample::class)
         );
@@ -192,17 +196,17 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
     {
         $annotation = new SomeHandlerAnnotation();
 
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\MessageEndpoint\\SplitterOnMethod", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\SplitterOnMethod', 'prod');
 
         $this->assertEquals(
             [
                 AnnotatedMethod::create(
                     $annotation,
                     SplitterOnMethodExample::class,
-                    "split",
+                    'split',
                     [],
                     [$annotation]
-                )
+                ),
             ],
             $fileSystemAnnotationRegistrationService->findAnnotatedMethods(SomeHandlerAnnotation::class)
         );
@@ -211,17 +215,17 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
     public function test_ignoring_custom_not_found_annotations_on_class()
     {
         $annotation = new SomeHandlerAnnotation();
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\NotExisting", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\NotExisting', 'prod');
 
         $this->assertEquals(
             [
                 AnnotatedMethod::create(
                     $annotation,
                     NotExistingClassAttribute::class,
-                    "test",
+                    'test',
                     [],
                     [$annotation]
-                )
+                ),
             ],
             $fileSystemAnnotationRegistrationService->findAnnotatedMethods(SomeHandlerAnnotation::class)
         );
@@ -230,17 +234,17 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
     public function test_ignoring_custom_not_found_annotations_on_method()
     {
         $annotation = new SomeGatewayExample();
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\NotExisting", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\NotExisting', 'prod');
 
         $this->assertEquals(
             [
                 AnnotatedMethod::create(
                     $annotation,
                     NotExistingMethodAttribute::class,
-                    "test",
+                    'test',
                     [],
                     [$annotation]
-                )
+                ),
             ],
             $fileSystemAnnotationRegistrationService->findAnnotatedMethods(SomeGatewayExample::class)
         );
@@ -248,27 +252,27 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
 
     public function test_ignoring_custom_not_found_annotations_on_property()
     {
-        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . "\\NotExisting", "prod");
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\NotExisting', 'prod');
 
         $this->assertEquals(
             [],
-            $fileSystemAnnotationRegistrationService->getAnnotationsForProperty(NotExistingPropertyAttribute::class, "some")
+            $fileSystemAnnotationRegistrationService->getAnnotationsForProperty(NotExistingPropertyAttribute::class, 'some')
         );
     }
 
     public function test_throwing_exception_if_class_is_registed_under_incorrect_namespace()
     {
-        $this->expectException(\ReflectionException::class);
+        $this->expectException(ReflectionException::class);
 
         new FileSystemAnnotationFinder(
             $this->getAnnotationResolver(),
             new AutoloadFileNamespaceParser(),
             self::ROOT_DIR,
             [
-                "IncorrectAttribute"
+                'IncorrectAttribute',
             ],
-            "test",
-            ""
+            'test',
+            ''
         );
     }
 
@@ -279,10 +283,10 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
             new AutoloadFileNamespaceParser(),
             self::ROOT_DIR,
             [
-                "TestingNamespace"
+                'TestingNamespace',
             ],
-            "test",
-            ""
+            'test',
+            ''
         );
 
         $this->assertTrue(true);
@@ -295,10 +299,10 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
             new AutoloadFileNamespaceParser(),
             self::ROOT_DIR,
             [
-                "IncorrectAttribute\Testing"
+                "IncorrectAttribute\Testing",
             ],
-            "test",
-            ""
+            'test',
+            ''
         );
 
         $this->assertTrue(true);
@@ -313,8 +317,8 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
             InMemoryAutoloadNamespaceParser::createEmpty(),
             self::ROOT_DIR,
             [],
-            "test",
-            "src"
+            'test',
+            'src'
         );
     }
 
@@ -327,8 +331,8 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
             InMemoryAutoloadNamespaceParser::createEmpty(),
             self::ROOT_DIR,
             [FileSystemAnnotationFinder::FRAMEWORK_NAMESPACE],
-            "test",
-            "src"
+            'test',
+            'src'
         );
     }
 
@@ -339,10 +343,10 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
             new AutoloadFileNamespaceParser(),
             self::ROOT_DIR,
             [
-                $namespace
+                $namespace,
             ],
             $environmentName,
-            ""
+            ''
         );
 
         return $fileSystemAnnotationRegistrationService;

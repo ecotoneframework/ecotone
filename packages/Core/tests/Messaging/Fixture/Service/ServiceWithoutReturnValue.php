@@ -17,12 +17,12 @@ class ServiceWithoutReturnValue implements CallableService
      */
     private $wasCalled = false;
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
 
-    public function setName(string $name) : void
+    public function setName(string $name): void
     {
         $this->wasCalled = true;
     }
@@ -38,18 +38,15 @@ class ServiceWithoutReturnValue implements CallableService
     /**
      * @param InterfaceToCall $interfaceToCall
      */
-    public function callWithInterfaceToCall(InterfaceToCall $interfaceToCall) : void
+    public function callWithInterfaceToCall(InterfaceToCall $interfaceToCall): void
     {
-
     }
 
-    public function callWithAnnotation(Transactional $transactional) : void
+    public function callWithAnnotation(Transactional $transactional): void
     {
-
     }
 
-    public function callWithNullableAnnotation(?Transactional $transactional) : void
+    public function callWithNullableAnnotation(?Transactional $transactional): void
     {
-
     }
 }

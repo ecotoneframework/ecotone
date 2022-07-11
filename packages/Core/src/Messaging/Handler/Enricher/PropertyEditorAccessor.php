@@ -1,12 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
+
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * Class PayloadPropertySetter
@@ -52,9 +56,9 @@ class PropertyEditorAccessor
      * @return PropertyEditorAccessor
      * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
      */
-    public static function create(ReferenceSearchService $referenceSearchService) : self
+    public static function create(ReferenceSearchService $referenceSearchService): self
     {
-        return self::createWithMapping($referenceSearchService, "");
+        return self::createWithMapping($referenceSearchService, '');
     }
 
     /**
@@ -66,7 +70,7 @@ class PropertyEditorAccessor
      * @param null|Message $replyMessage
      * @return mixed enriched data
      * @throws EnrichException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function enrichDataWith(PropertyPath $propertyNamePath, $dataToEnrich, $dataToEnrichWith, Message $requestMessage, ?Message $replyMessage)
@@ -74,7 +78,7 @@ class PropertyEditorAccessor
         $propertyName = $propertyNamePath->getPath();
 
         if (preg_match("#^(\[\*\])#", $propertyName)) {
-            $propertyToBeChanged = $this->cutOutCurrentAccessPropertyName($propertyNamePath, "[*]");
+            $propertyToBeChanged = $this->cutOutCurrentAccessPropertyName($propertyNamePath, '[*]');
             $newPayload = $dataToEnrich;
             foreach ($dataToEnrich as $propertyKey => $context) {
                 Assert::isIterable($dataToEnrichWith, "Data provided to enrich {$propertyNamePath->getPath()} is not iterable. Can't perform enriching.");
@@ -88,7 +92,7 @@ class PropertyEditorAccessor
                     };
                 }
 
-                if (!$enriched) {
+                if (! $enriched) {
                     throw InvalidArgumentException::createWithFailedMessage("Can't enrich message {$requestMessage}. Can't find mapped data for {$propertyKey} in {$replyMessage}", $requestMessage);
                 }
             }
@@ -105,19 +109,19 @@ class PropertyEditorAccessor
 
             if ($accessPropertyName !== $propertyNamePath->getPath()) {
                 $extractedPropertyName = $this->cutOutCurrentAccessPropertyName($propertyNamePath, $accessPropertyName);
-                if ($extractedPropertyName->getPath() === "[]") {
+                if ($extractedPropertyName->getPath() === '[]') {
                     $dataToEnrichWithAsArray = $dataToEnrich[$propertyName];
-                    if (!is_array($dataToEnrichWithAsArray)) {
+                    if (! is_array($dataToEnrichWithAsArray)) {
                         throw EnrichException::createWithFailedMessage("Can't enrich message {$requestMessage}. Enriched element {$accessPropertyName} should be array.", $requestMessage);
                     }
 
                     $dataToEnrichWithAsArray[] = $dataToEnrichWith;
                     $dataToEnrichWith = $dataToEnrichWithAsArray;
-                }else {
+                } else {
                     $dataToEnrichWith = $this->enrichDataWith($extractedPropertyName, $dataToEnrich[$propertyName], $dataToEnrichWith, $requestMessage, $replyMessage);
                 }
             }
-        }else {
+        } else {
             /** worker[name] */
             preg_match('#\b([^\[\]]*)\[[a-zA-Z0-9]*\]#', $propertyNamePath->getPath(), $startingWithPropertyName);
 
@@ -138,7 +142,7 @@ class PropertyEditorAccessor
         }
 
         if (is_object($dataToEnrich)) {
-            $setterMethod = "set" . ucfirst($propertyName);
+            $setterMethod = 'set' . ucfirst($propertyName);
 
             if (method_exists($dataToEnrich, $setterMethod)) {
                 $dataToEnrich->{$setterMethod}($dataToEnrichWith);
@@ -146,9 +150,9 @@ class PropertyEditorAccessor
                 return $dataToEnrich;
             }
 
-            $objectReflection = new \ReflectionClass($dataToEnrich);
+            $objectReflection = new ReflectionClass($dataToEnrich);
 
-            if (!$objectReflection->hasProperty($propertyName)) {
+            if (! $objectReflection->hasProperty($propertyName)) {
                 throw EnrichException::create("Object for enriching has no property named {$propertyName}");
             }
 
@@ -168,7 +172,7 @@ class PropertyEditorAccessor
      */
     private function hasAnyMatches($matches): bool
     {
-        return !empty($matches);
+        return ! empty($matches);
     }
 
     /**
@@ -177,7 +181,7 @@ class PropertyEditorAccessor
      *
      * @return PropertyPath
      */
-    private function cutOutCurrentAccessPropertyName(PropertyPath $propertyName, string $accessPropertyName) : PropertyPath
+    private function cutOutCurrentAccessPropertyName(PropertyPath $propertyName, string $accessPropertyName): PropertyPath
     {
         return PropertyPath::createWith(substr($propertyName->getPath(), strlen($accessPropertyName), strlen($propertyName->getPath())));
     }
@@ -194,14 +198,14 @@ class PropertyEditorAccessor
         return $this->expressionEvaluationService->evaluate(
             $this->mappingExpression,
             [
-                "payload" => $replyMessage ? $replyMessage->getPayload() : null,
-                "headers" => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
-                "request" => [
-                    "payload" => $requestMessage->getPayload(),
-                    "headers" => $requestMessage->getHeaders()
+                'payload' => $replyMessage ? $replyMessage->getPayload() : null,
+                'headers' => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
+                'request' => [
+                    'payload' => $requestMessage->getPayload(),
+                    'headers' => $requestMessage->getHeaders(),
                 ],
-                "requestContext" => $context,
-                "replyContext" => $replyElement
+                'requestContext' => $context,
+                'replyContext' => $replyElement,
             ],
             $this->referenceSearchService
         );

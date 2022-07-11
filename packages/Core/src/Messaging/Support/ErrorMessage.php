@@ -2,7 +2,6 @@
 
 namespace Ecotone\Messaging\Support;
 
-use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
@@ -32,7 +31,7 @@ final class ErrorMessage implements Message
      * @param MessagingException $messagingException
      * @return ErrorMessage
      */
-    public static function create(MessagingException $messagingException) : self
+    public static function create(MessagingException $messagingException): self
     {
         return new self($messagingException, $messagingException->getFailedMessage() ? $messagingException->getFailedMessage()->getHeaders() : MessageHeaders::createEmpty());
     }
@@ -48,7 +47,7 @@ final class ErrorMessage implements Message
     /**
      * @inheritDoc
      */
-    public function getPayload(): \Ecotone\Messaging\MessagingException
+    public function getPayload(): MessagingException
     {
         return $this->messagingException;
     }

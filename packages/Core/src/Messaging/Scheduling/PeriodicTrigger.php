@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
@@ -29,7 +30,7 @@ class PeriodicTrigger implements Trigger
      * @param int $initialDelayInMilliseconds
      * @return PeriodicTrigger
      */
-    public static function create(int $fixedRateInMilliseconds, int $initialDelayInMilliseconds) : self
+    public static function create(int $fixedRateInMilliseconds, int $initialDelayInMilliseconds): self
     {
         return new self($fixedRateInMilliseconds, $initialDelayInMilliseconds);
     }

@@ -6,6 +6,6 @@ use Ecotone\Messaging\Attribute\MessageGateway;
 
 interface InterceptedScheduledGateway
 {
-    #[MessageGateway("getRequestedData")]
-    public function getInterceptedData() : int;
+    #[MessageGateway('getRequestedData')]
+    public function getInterceptedData(): int;
 }

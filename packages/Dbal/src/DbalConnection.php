@@ -11,7 +11,9 @@ use Enqueue\Dbal\ManagerRegistryConnectionFactory;
 
 class DbalConnection implements ManagerRegistry
 {
-    private function __construct(private ?Connection $connection, private ?EntityManagerInterface $entityManager = null) {}
+    private function __construct(private ?Connection $connection, private ?EntityManagerInterface $entityManager = null)
+    {
+    }
 
     public static function fromConnectionFactory(DbalConnectionFactory $dbalConnectionFactory): ManagerRegistryConnectionFactory
     {
@@ -30,12 +32,12 @@ class DbalConnection implements ManagerRegistry
 
     public static function createForManagerRegistry(ManagerRegistry $managerRegistry, string $connectionName): ManagerRegistryConnectionFactory
     {
-        return new ManagerRegistryConnectionFactory($managerRegistry, ["connection_name" => $connectionName]);
+        return new ManagerRegistryConnectionFactory($managerRegistry, ['connection_name' => $connectionName]);
     }
 
     public function getDefaultConnectionName()
     {
-        return "default";
+        return 'default';
     }
 
     public function getConnection($name = null)
@@ -50,12 +52,12 @@ class DbalConnection implements ManagerRegistry
 
     public function getConnectionNames()
     {
-        return ["default"];
+        return ['default'];
     }
 
     public function getDefaultManagerName()
     {
-        return "default";
+        return 'default';
     }
 
     public function getManager($name = null)
@@ -77,12 +79,12 @@ class DbalConnection implements ManagerRegistry
 
     public function getAliasNamespace($alias)
     {
-        throw InvalidArgumentException::create("Method not supported");
+        throw InvalidArgumentException::create('Method not supported');
     }
 
     public function getManagerNames()
     {
-        return ["default"];
+        return ['default'];
     }
 
     public function getRepository($persistentObject, $persistentManagerName = null)

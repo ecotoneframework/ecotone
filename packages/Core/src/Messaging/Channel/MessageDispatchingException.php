@@ -8,7 +8,6 @@
 
 namespace Ecotone\Messaging\Channel;
 
-
 use Ecotone\Messaging\MessagingException;
 
 class MessageDispatchingException extends MessagingException

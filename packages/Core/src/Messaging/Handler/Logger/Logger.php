@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler\Logger;
-
 
 abstract class Logger
 {

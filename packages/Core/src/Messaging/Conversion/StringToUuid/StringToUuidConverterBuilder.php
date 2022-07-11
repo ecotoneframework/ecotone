@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion\StringToUuid;
+
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;

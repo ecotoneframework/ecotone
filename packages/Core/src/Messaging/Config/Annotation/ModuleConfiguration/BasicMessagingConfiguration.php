@@ -8,7 +8,6 @@ use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\BeforeSend\BeforeSendGateway;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -36,7 +35,6 @@ use Ecotone\Messaging\Handler\Chain\ChainForwardPublisher;
 use Ecotone\Messaging\Handler\Enricher\EnrichGateway;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
@@ -64,22 +62,22 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ChannelInterceptorBuilder) {
                 $configuration->registerChannelInterceptor($extensionObject);
-            } else if ($extensionObject instanceof MessageHandlerBuilder) {
+            } elseif ($extensionObject instanceof MessageHandlerBuilder) {
                 $configuration->registerMessageHandler($extensionObject);
-            } else if ($extensionObject instanceof MessageChannelBuilder) {
+            } elseif ($extensionObject instanceof MessageChannelBuilder) {
                 $configuration->registerMessageChannel($extensionObject);
-            } else if ($extensionObject instanceof GatewayBuilder) {
+            } elseif ($extensionObject instanceof GatewayBuilder) {
                 $configuration->registerGatewayBuilder($extensionObject);
-            } else if ($extensionObject instanceof ChannelAdapterConsumerBuilder) {
+            } elseif ($extensionObject instanceof ChannelAdapterConsumerBuilder) {
                 $configuration->registerConsumer($extensionObject);
-            } else if ($extensionObject instanceof PollingMetadata) {
+            } elseif ($extensionObject instanceof PollingMetadata) {
                 $configuration->registerPollingMetadata($extensionObject);
             }
         }
 
         if ($configuration->isLazyLoaded()) {
             $configuration->registerConsumerFactory(new LazyEventDrivenConsumerBuilder());
-        }else {
+        } else {
             $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         }
         $configuration->registerConsumerFactory(new PollingConsumerBuilder());
@@ -92,18 +90,18 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
         $configuration->registerConverter(new DeserializingConverterBuilder());
 
         $configuration->registerRelatedInterfaces([
-            $interfaceToCallRegistry->getFor(LimitConsumedMessagesInterceptor::class, "postSend"),
-            $interfaceToCallRegistry->getFor(ConnectionExceptionRetryInterceptor::class, "postSend"),
-            $interfaceToCallRegistry->getFor(LimitExecutionAmountInterceptor::class, "postSend"),
-            $interfaceToCallRegistry->getFor(LimitMemoryUsageInterceptor::class, "postSend"),
-            $interfaceToCallRegistry->getFor(SignalInterceptor::class, "postSend"),
-            $interfaceToCallRegistry->getFor(TimeLimitInterceptor::class, "postSend"),
-            $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, "forward"),
-            $interfaceToCallRegistry->getFor(BeforeSendGateway::class, "execute"),
-            $interfaceToCallRegistry->getFor(AcknowledgeConfirmationInterceptor::class, "ack"),
-            $interfaceToCallRegistry->getFor(InboundGatewayEntrypoint::class, "executeEntrypoint"),
-            $interfaceToCallRegistry->getFor(InboundChannelAdapterEntrypoint::class, "executeEntrypoint"),
-            $interfaceToCallRegistry->getFor(LoggingInterceptor::class, "logException")
+            $interfaceToCallRegistry->getFor(LimitConsumedMessagesInterceptor::class, 'postSend'),
+            $interfaceToCallRegistry->getFor(ConnectionExceptionRetryInterceptor::class, 'postSend'),
+            $interfaceToCallRegistry->getFor(LimitExecutionAmountInterceptor::class, 'postSend'),
+            $interfaceToCallRegistry->getFor(LimitMemoryUsageInterceptor::class, 'postSend'),
+            $interfaceToCallRegistry->getFor(SignalInterceptor::class, 'postSend'),
+            $interfaceToCallRegistry->getFor(TimeLimitInterceptor::class, 'postSend'),
+            $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, 'forward'),
+            $interfaceToCallRegistry->getFor(BeforeSendGateway::class, 'execute'),
+            $interfaceToCallRegistry->getFor(AcknowledgeConfirmationInterceptor::class, 'ack'),
+            $interfaceToCallRegistry->getFor(InboundGatewayEntrypoint::class, 'executeEntrypoint'),
+            $interfaceToCallRegistry->getFor(InboundChannelAdapterEntrypoint::class, 'executeEntrypoint'),
+            $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logException'),
         ]);
         $configuration
             ->registerInternalGateway(TypeDescriptor::create(InboundGatewayEntrypoint::class))
@@ -142,7 +140,7 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
     {
         return [
             RequiredReference::create(ExpressionEvaluationService::REFERENCE),
-            RequiredReference::create(InterfaceToCallRegistry::REFERENCE_NAME)
+            RequiredReference::create(InterfaceToCallRegistry::REFERENCE_NAME),
         ];
     }
 }

@@ -1,23 +1,19 @@
 <?php
 
-
 namespace Ecotone\JMSConverter\Configuration;
-
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\JMSConverter\JMSConverterBuilder;
 use Ecotone\JMSConverter\JMSConverterConfiguration;
 use Ecotone\JMSConverter\JMSHandlerAdapter;
 use Ecotone\Messaging\Attribute\Converter;
-use Ecotone\Messaging\Attribute\ConverterClass;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
@@ -55,7 +51,7 @@ class JMSConverterConfigurationModule extends NoExternalConfigurationModule impl
 
             foreach ($fromTypes as $fromType) {
                 foreach ($toTypes as $toType) {
-                    if (!$fromType->isClassOrInterface() && !$toType->isClassOrInterface()) {
+                    if (! $fromType->isClassOrInterface() && ! $toType->isClassOrInterface()) {
                         continue;
                     }
                     if ($fromType->isClassOrInterface() && $toType->isClassOrInterface()) {

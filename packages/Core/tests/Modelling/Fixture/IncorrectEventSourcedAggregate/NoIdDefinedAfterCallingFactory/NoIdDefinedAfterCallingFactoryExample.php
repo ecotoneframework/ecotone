@@ -1,14 +1,12 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory;
 
-
-use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use stdClass;
 
 #[EventSourcingAggregate]
 class NoIdDefinedAfterCallingFactoryExample
@@ -17,13 +15,13 @@ class NoIdDefinedAfterCallingFactoryExample
     private $id;
 
     #[CommandHandler]
-    public static function create(CreateNoIdDefinedAggregate $command) : array
+    public static function create(CreateNoIdDefinedAggregate $command): array
     {
-        return [new \stdClass()];
+        return [new stdClass()];
     }
 
     #[AggregateFactory]
-    public static function factory(array $events) : self
+    public static function factory(array $events): self
     {
         return new self();
     }

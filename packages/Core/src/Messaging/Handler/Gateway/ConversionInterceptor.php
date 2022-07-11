@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
@@ -24,15 +25,16 @@ class ConversionInterceptor
         private InterfaceToCall $interfaceToCall,
         private ?MediaType $replyContentType,
         private array $messageConverters
-    ) {}
+    ) {
+    }
 
     public function convert(MethodInvocation $methodInvocation)
     {
         /** @var Message $result */
         $result = $methodInvocation->proceed();
 
-        if (is_null($result) || !$this->interfaceToCall->canReturnValue()) {
-            return null;
+        if (is_null($result) || ! $this->interfaceToCall->canReturnValue()) {
+            return;
         }
 
         foreach ($this->messageConverters as $messageConverter) {
@@ -61,8 +63,8 @@ class ConversionInterceptor
             }
         }
 
-        if (!$this->replyContentType) {
-            if (!$this->interfaceToCall->getReturnType()->isMessage() && !$sourceType->isCompatibleWith($this->interfaceToCall->getReturnType())) {
+        if (! $this->replyContentType) {
+            if (! $this->interfaceToCall->getReturnType()->isMessage() && ! $sourceType->isCompatibleWith($this->interfaceToCall->getReturnType())) {
                 if ($this->conversionService->canConvert($sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHP())) {
                     return $this->conversionService->convert($data, $sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHP());
                 }
@@ -79,9 +81,9 @@ class ConversionInterceptor
             return $result->getPayload();
         }
 
-        if (!$sourceMediaType->isCompatibleWith($this->replyContentType) || ($this->replyContentType->hasTypeParameter() && $this->replyContentType->getTypeParameter()->isIterable())) {
+        if (! $sourceMediaType->isCompatibleWith($this->replyContentType) || ($this->replyContentType->hasTypeParameter() && $this->replyContentType->getTypeParameter()->isIterable())) {
             $targetType = $this->replyContentType->hasTypeParameter() ? $this->replyContentType->getTypeParameter() : TypeDescriptor::createAnythingType();
-            if (!$this->conversionService->canConvert(
+            if (! $this->conversionService->canConvert(
                 $sourceType,
                 $sourceMediaType,
                 $targetType,

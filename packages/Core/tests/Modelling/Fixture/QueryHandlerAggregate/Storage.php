@@ -13,9 +13,11 @@ class Storage
      * @param SmallBox[] $smallBoxes
      * @param BigBox[] $bigBoxes
      */
-    private function __construct(#[AggregateIdentifier] private string $storageId, private array $smallBoxes, private array $bigBoxes) {}
+    private function __construct(#[AggregateIdentifier] private string $storageId, private array $smallBoxes, private array $bigBoxes)
+    {
+    }
 
-    public static function create(CreateStorage $command) : self
+    public static function create(CreateStorage $command): self
     {
         return new self(
             $command->getStorageId(),
@@ -27,8 +29,8 @@ class Storage
     /**
      * @return SmallBox[]
      */
-    #[QueryHandler("storage.getSmallBoxes")]
-    public function getSmallBoxes() : array
+    #[QueryHandler('storage.getSmallBoxes')]
+    public function getSmallBoxes(): array
     {
         return $this->smallBoxes;
     }
@@ -36,7 +38,7 @@ class Storage
     /**
      * @return Box[]
      */
-    public function getBoxes() : array
+    public function getBoxes(): array
     {
         return array_merge($this->smallBoxes, $this->bigBoxes);
     }
@@ -44,7 +46,7 @@ class Storage
     /**
      * @return Box[]|BigBox[]
      */
-    public function getBigBoxes() : array
+    public function getBigBoxes(): array
     {
         return $this->bigBoxes;
     }

@@ -18,7 +18,7 @@ class Bookshop
      * @param ReserveRequest $reservationRequest
      * @return BookWasReserved
      */
-    public function reserve(ReserveRequest $reservationRequest) : BookWasReserved
+    public function reserve(ReserveRequest $reservationRequest): BookWasReserved
     {
         $this->reservationRequests[] = $reservationRequest;
 

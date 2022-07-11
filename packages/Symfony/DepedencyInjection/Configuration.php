@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\SymfonyBundle\DepedencyInjection;
-
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -17,37 +15,37 @@ class Configuration implements ConfigurationInterface
         return $treeBuilder
             ->getRootNode()
                 ->children()
-                    ->scalarNode("serviceName")
+                    ->scalarNode('serviceName')
                         ->defaultNull()
                     ->end()
 
-                    ->booleanNode("failFast")
+                    ->booleanNode('failFast')
                     ->defaultTrue()
                     ->end()
 
-                    ->booleanNode("loadSrcNamespaces")
+                    ->booleanNode('loadSrcNamespaces')
                     ->defaultTrue()
                     ->end()
 
-                    ->scalarNode("defaultSerializationMediaType")
+                    ->scalarNode('defaultSerializationMediaType')
                     ->defaultNull()
                     ->end()
 
-                    ->scalarNode("defaultErrorChannel")
+                    ->scalarNode('defaultErrorChannel')
                     ->defaultNull()
                     ->end()
 
 
-                    ->arrayNode("namespaces")
+                    ->arrayNode('namespaces')
                         ->scalarPrototype()
                         ->end()
                     ->end()
 
-                    ->integerNode("defaultMemoryLimit")
+                    ->integerNode('defaultMemoryLimit')
                     ->defaultNull()
                     ->end()
 
-                    ->arrayNode("defaultConnectionExceptionRetry")
+                    ->arrayNode('defaultConnectionExceptionRetry')
                         ->children()
                             ->integerNode('initialDelay')
                             ->isRequired()

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
@@ -24,6 +25,7 @@ use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Exception;
 
 /**
  * Class InboundChannelAdapterBuilder
@@ -44,11 +46,11 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      * @param string $requestChannelName
      * @param string $referenceName
      * @param string $methodName
-     * @throws \Exception
+     * @throws Exception
      */
     private function __construct(string $requestChannelName, string $referenceName, string $methodName)
     {
-        $this->gatewayExecutor = GatewayProxyBuilder::create($referenceName, InboundGatewayEntrypoint::class, "executeEntrypoint", $requestChannelName);
+        $this->gatewayExecutor = GatewayProxyBuilder::create($referenceName, InboundGatewayEntrypoint::class, 'executeEntrypoint', $requestChannelName);
         $this->referenceName = $referenceName;
         $this->methodName = $methodName;
         $this->requestChannelName = $requestChannelName;
@@ -59,9 +61,9 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      * @param string $referenceName
      * @param string $methodName
      * @return InboundChannelAdapterBuilder
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function create(string $requestChannelName, string $referenceName, string $methodName) : self
+    public static function create(string $requestChannelName, string $referenceName, string $methodName): self
     {
         return new self($requestChannelName, $referenceName, $methodName);
     }
@@ -71,11 +73,11 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      * @param $objectToInvoke
      * @param string $methodName
      * @return InboundChannelAdapterBuilder
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function createWithDirectObject(string $requestChannelName, $objectToInvoke, string $methodName) : self
+    public static function createWithDirectObject(string $requestChannelName, $objectToInvoke, string $methodName): self
     {
-        $self = new self($requestChannelName, "", $methodName);
+        $self = new self($requestChannelName, '', $methodName);
         $self->directObject = $objectToInvoke;
 
         return $self;
@@ -101,7 +103,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      * @param string $endpointId
      * @return InboundChannelAdapterBuilder
      */
-    public function withEndpointId(string $endpointId) : self
+    public function withEndpointId(string $endpointId): self
     {
         $this->endpointId = $endpointId;
 
@@ -143,7 +145,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      */
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
-        return array_merge([$interfaceToCallRegistry->getFor(InboundChannelAdapterEntrypoint::class, "executeEntrypoint")], $this->gatewayExecutor->resolveRelatedInterfaces($interfaceToCallRegistry));
+        return array_merge([$interfaceToCallRegistry->getFor(InboundChannelAdapterEntrypoint::class, 'executeEntrypoint')], $this->gatewayExecutor->resolveRelatedInterfaces($interfaceToCallRegistry));
     }
 
     /**
@@ -216,7 +218,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         }
         $this->gatewayExecutor->withEndpointAnnotations($registeredAnnotations);
 
-        if (!$interfaceToCall->hasNoParameters()) {
+        if (! $interfaceToCall->hasNoParameters()) {
             throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not have any parameters");
         }
 
@@ -227,7 +229,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
             }
 
             $referenceService = new PassThroughService($referenceService, $methodName);
-            $methodName = "execute";
+            $methodName = 'execute';
         }
 
         $gateway = $this->gatewayExecutor

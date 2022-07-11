@@ -38,7 +38,7 @@ class CarService
     /**
      * @param int $amount
      */
-    public function increaseSpeed(int $amount) : void
+    public function increaseSpeed(int $amount): void
     {
         $this->increaseSpeedGateway->increaseSpeed($amount);
     }
@@ -46,12 +46,12 @@ class CarService
     /**
      * @return int
      */
-    public function getSpeed() : int
+    public function getSpeed(): int
     {
         return $this->getSpeedGateway->getSpeed();
     }
 
-    public function stop() : void
+    public function stop(): void
     {
         $this->stopGateway->stop();
     }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\Order;
-
 
 class PlaceOrder
 {

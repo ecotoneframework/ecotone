@@ -44,7 +44,7 @@ class Customer
      *
      * @return Customer
      */
-    public static function create(string $username, string $phoneNumber, string $password) : self
+    public static function create(string $username, string $phoneNumber, string $password): self
     {
         return new self($username, $phoneNumber, $password);
     }
@@ -54,9 +54,9 @@ class Customer
      *
      * @return Customer
      */
-    public static function createWithUsernameOnly(string $username) : self
+    public static function createWithUsernameOnly(string $username): self
     {
-        return new self($username, "", "");
+        return new self($username, '', '');
     }
 
     /**

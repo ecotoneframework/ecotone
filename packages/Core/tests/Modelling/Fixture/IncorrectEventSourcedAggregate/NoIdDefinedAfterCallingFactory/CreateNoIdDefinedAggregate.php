@@ -7,5 +7,4 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 #[EventSourcingAggregate]
 class CreateNoIdDefinedAggregate
 {
-
 }

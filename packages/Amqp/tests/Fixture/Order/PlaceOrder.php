@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Amqp\Fixture\Order;
-
 
 class PlaceOrder
 {

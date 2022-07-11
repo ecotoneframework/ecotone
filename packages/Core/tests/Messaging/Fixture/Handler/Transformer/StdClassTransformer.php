@@ -8,11 +8,12 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Transformer;
 
+use stdClass;
 
 class StdClassTransformer
 {
-    public function transform() : \stdClass
+    public function transform(): stdClass
     {
-        return new \stdClass();
+        return new stdClass();
     }
 }

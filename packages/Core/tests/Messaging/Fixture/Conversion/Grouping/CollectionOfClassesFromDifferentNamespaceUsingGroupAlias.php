@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Conversion\Grouping;
 
 use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\Details\{Description, ProductName as Product};

@@ -4,7 +4,6 @@ namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Handler\Gateway\GatewayProxyConfiguration;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\MessagingException;
@@ -30,19 +29,19 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     private function __construct(array $objectsToResolve, ?ReferenceSearchService $referenceSearchService, bool $withDefaults)
     {
         if ($withDefaults) {
-            if (!array_key_exists(ExpressionEvaluationService::REFERENCE, $objectsToResolve)) {
+            if (! array_key_exists(ExpressionEvaluationService::REFERENCE, $objectsToResolve)) {
                 $objectsToResolve[ExpressionEvaluationService::REFERENCE] = SymfonyExpressionEvaluationAdapter::create();
             }
-            if (!array_key_exists(InterfaceToCallRegistry::REFERENCE_NAME, $objectsToResolve)) {
+            if (! array_key_exists(InterfaceToCallRegistry::REFERENCE_NAME, $objectsToResolve)) {
                 $objectsToResolve[InterfaceToCallRegistry::REFERENCE_NAME] = InterfaceToCallRegistry::createEmpty();
             }
-            if (!array_key_exists(ConversionService::REFERENCE_NAME, $objectsToResolve)) {
+            if (! array_key_exists(ConversionService::REFERENCE_NAME, $objectsToResolve)) {
                 $objectsToResolve[ConversionService::REFERENCE_NAME] = AutoCollectionConversionService::createEmpty();
             }
-            if (!array_key_exists(ProxyFactory::REFERENCE_NAME, $objectsToResolve)) {
+            if (! array_key_exists(ProxyFactory::REFERENCE_NAME, $objectsToResolve)) {
                 $objectsToResolve[ProxyFactory::REFERENCE_NAME] = ProxyFactory::createNoCache();
             }
-            if (!array_key_exists(LoggingHandlerBuilder::LOGGER_REFERENCE, $objectsToResolve) && (!$referenceSearchService || !$referenceSearchService->has(LoggingHandlerBuilder::LOGGER_REFERENCE))) {
+            if (! array_key_exists(LoggingHandlerBuilder::LOGGER_REFERENCE, $objectsToResolve) && (! $referenceSearchService || ! $referenceSearchService->has(LoggingHandlerBuilder::LOGGER_REFERENCE))) {
                 $objectsToResolve[LoggingHandlerBuilder::LOGGER_REFERENCE] = new NullLogger();
             }
         }
@@ -133,7 +132,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     private function initialize(array $objects): void
     {
         foreach ($objects as $object) {
-            Assert::isObject($object, "Passed reference is not an object");
+            Assert::isObject($object, 'Passed reference is not an object');
         }
 
         $this->objectsToResolve = $objects;

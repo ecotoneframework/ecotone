@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
@@ -23,5 +24,5 @@ interface PropertyEditor
     /**
      * @return bool
      */
-    public function isPayloadSetter() : bool;
+    public function isPayloadSetter(): bool;
 }

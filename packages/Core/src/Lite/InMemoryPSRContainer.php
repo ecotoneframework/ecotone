@@ -1,10 +1,8 @@
 <?php
 
-
 namespace Ecotone\Lite;
 
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
-use Psr\Container\ContainerInterface;
 
 /**
  * Class InMemoryPSRContainer
@@ -28,7 +26,7 @@ class InMemoryPSRContainer implements GatewayAwareContainer
      * @param object[] $objects
      * @return InMemoryPSRContainer
      */
-    public static function createFromAssociativeArray(array $objects) : self
+    public static function createFromAssociativeArray(array $objects): self
     {
         return new self($objects);
     }
@@ -37,7 +35,7 @@ class InMemoryPSRContainer implements GatewayAwareContainer
      * @param array $objects
      * @return InMemoryPSRContainer
      */
-    public static function createFromObjects(array $objects) : self
+    public static function createFromObjects(array $objects): self
     {
         $map = [];
         foreach ($objects as $key => $object) {
@@ -50,7 +48,7 @@ class InMemoryPSRContainer implements GatewayAwareContainer
     /**
      * @return InMemoryPSRContainer
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return self::createFromAssociativeArray([]);
     }
@@ -65,7 +63,7 @@ class InMemoryPSRContainer implements GatewayAwareContainer
      */
     public function get($id)
     {
-        if (!isset($this->objects[$id])) {
+        if (! isset($this->objects[$id])) {
             throw ReferenceNotFoundException::create("Reference with id {$id} was not found");
         }
 

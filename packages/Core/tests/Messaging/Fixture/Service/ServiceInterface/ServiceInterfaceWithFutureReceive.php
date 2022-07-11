@@ -14,5 +14,5 @@ interface ServiceInterfaceWithFutureReceive
     /**
      * @return Future
      */
-    public function someLongRunningWork() : Future;
+    public function someLongRunningWork(): Future;
 }

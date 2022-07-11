@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Amqp;
@@ -80,7 +81,7 @@ class AmqpOutboundChannelAdapter implements MessageHandler
         if ($this->exchangeFromHeaderName) {
             $exchangeName = $message->getHeaders()->containsKey($this->exchangeFromHeaderName) ? $message->getHeaders()->get($this->exchangeFromHeaderName) : $this->exchangeName;
         }
-        if (!$this->initialized && $this->autoDeclare) {
+        if (! $this->initialized && $this->autoDeclare) {
             $this->amqpAdmin->declareExchangeWithQueuesAndBindings($exchangeName, $this->connectionFactory->createContext());
             $this->initialized = true;
         }
@@ -98,7 +99,7 @@ class AmqpOutboundChannelAdapter implements MessageHandler
             $messageToSend->setContentType($outboundMessage->getContentType());
         }
 
-        if (!is_null($routingKey) && $routingKey !== "") {
+        if (! is_null($routingKey) && $routingKey !== '') {
             $messageToSend->setRoutingKey($routingKey);
         }
 

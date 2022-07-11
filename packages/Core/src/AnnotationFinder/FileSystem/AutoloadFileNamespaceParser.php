@@ -1,6 +1,6 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\AnnotationFinder\FileSystem;
 
@@ -16,38 +16,38 @@ class AutoloadFileNamespaceParser implements AutoloadNamespaceParser
      * @param string $catalogToLoad
      * @return array
      */
-    public function getNamespacesForGivenCatalog(array $autoloadData, string $catalogToLoad) : array
+    public function getNamespacesForGivenCatalog(array $autoloadData, string $catalogToLoad): array
     {
         $namespaces = [];
         if (isset($autoloadData['psr-4'])) {
             foreach ($autoloadData['psr-4'] as $autoloadNamespace => $paths) {
-                if (!is_array($paths)) {
+                if (! is_array($paths)) {
                     $paths = [$paths];
                 }
 
                 foreach ($paths as $path) {
                     if (substr($path, 0, strlen($catalogToLoad)) === $catalogToLoad) {
-                        $namespaces[] = ltrim(rtrim($autoloadNamespace, "\\"), "\\");
+                        $namespaces[] = ltrim(rtrim($autoloadNamespace, '\\'), '\\');
                     }
                 }
             }
         }
         if (isset($autoloadData['psr-0'])) {
             foreach ($autoloadData['psr-0'] as $autoloadNamespace => $paths) {
-                if (!is_array($paths)) {
+                if (! is_array($paths)) {
                     $paths = [$paths];
                 }
 
                 foreach ($paths as $path) {
                     if (substr($path, 0, strlen($catalogToLoad)) === $catalogToLoad) {
-                        $namespaces[] = ltrim(rtrim($autoloadNamespace, "\\"), "\\");
+                        $namespaces[] = ltrim(rtrim($autoloadNamespace, '\\'), '\\');
                     }
                 }
             }
         }
 
-        return array_unique(array_filter($namespaces, function(string $namespace){
-            return trim($namespace) !== "";
+        return array_unique(array_filter($namespaces, function (string $namespace) {
+            return trim($namespace) !== '';
         }));
     }
 
@@ -58,22 +58,22 @@ class AutoloadFileNamespaceParser implements AutoloadNamespaceParser
      * @param bool $autoloadPsr4
      * @return array
      */
-    public function getFor(array $requiredNamespaces, array $autoload, bool $autoloadPsr4) : array
+    public function getFor(array $requiredNamespaces, array $autoload, bool $autoloadPsr4): array
     {
         $paths = [];
         foreach ($requiredNamespaces as $requiredNamespace) {
-            $requiredNamespace = trim($requiredNamespace, "\\");
-            $requiredNamespaceSplit = explode("\\", $requiredNamespace);
+            $requiredNamespace = trim($requiredNamespace, '\\');
+            $requiredNamespaceSplit = explode('\\', $requiredNamespace);
 
             foreach ($autoload as $namespace => $namespacePaths) {
-                $namespace = trim($namespace, "\\");
+                $namespace = trim($namespace, '\\');
                 foreach ($namespacePaths as $namespacePath) {
-                    $suffixPath = $namespacePath . "\\";
-                    $namespaceSplit = explode("\\", $namespace);
+                    $suffixPath = $namespacePath . '\\';
+                    $namespaceSplit = explode('\\', $namespace);
                     $isPartOfRequiredNamespace = true;
                     foreach ($requiredNamespaceSplit as $index => $requiredNamespacePart) {
-                        if (!isset($namespaceSplit[$index])) {
-                            $suffixPath .= $requiredNamespacePart . "\\";
+                        if (! isset($namespaceSplit[$index])) {
+                            $suffixPath .= $requiredNamespacePart . '\\';
                             continue;
                         }
 
@@ -81,15 +81,15 @@ class AutoloadFileNamespaceParser implements AutoloadNamespaceParser
                             $isPartOfRequiredNamespace = false;
                         }
                     }
-                    if (!$isPartOfRequiredNamespace) {
+                    if (! $isPartOfRequiredNamespace) {
                         continue;
                     }
 
-                    if (!$autoloadPsr4) {
-                        $suffixPath = $namespacePath . "\\" . $namespace;
+                    if (! $autoloadPsr4) {
+                        $suffixPath = $namespacePath . '\\' . $namespace;
                     }
 
-                    $paths[] = str_replace("\\", "/", rtrim($suffixPath, "\\"));
+                    $paths[] = str_replace('\\', '/', rtrim($suffixPath, '\\'));
                 }
             }
         }

@@ -14,27 +14,25 @@ use Ecotone\Messaging\Store\Document\DocumentException;
 use Ecotone\Messaging\Store\Document\DocumentNotFound;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Enqueue\Dbal\DbalContext;
-use Interop\Queue\Exception\Exception;
 
 final class DbalDocumentStore implements DocumentStore
 {
-    const ECOTONE_DOCUMENT_STORE = "ecotone_document_store";
+    public const ECOTONE_DOCUMENT_STORE = 'ecotone_document_store';
 
     public function __construct(private CachedConnectionFactory $cachedConnectionFactory, private bool $initialize, private ConversionService $conversionService)
     {
-
     }
 
     public function dropCollection(string $collectionName): void
     {
-        if (!$this->doesTableExists()) {
+        if (! $this->doesTableExists()) {
             return;
         }
 
         $this->getConnection()->delete(
             $this->getTableName(),
             [
-                'collection' => $collectionName
+                'collection' => $collectionName,
             ]
         );
     }
@@ -52,21 +50,21 @@ final class DbalDocumentStore implements DocumentStore
                     'collection' => $collectionName,
                     'document_id' => $documentId,
                     'document_type' => $type->toString(),
-                    'document' => $this->convertToJSONDocument($type, $document)
+                    'document' => $this->convertToJSONDocument($type, $document),
                 ],
                 [
                     'collection' => Types::STRING,
                     'document_id' => Types::STRING,
                     'document_type' => Types::STRING,
-                    'document' => Types::TEXT
+                    'document' => Types::TEXT,
                 ]
             );
-        }catch (DriverException $driverException) {
-            throw DocumentException::createFromPreviousException(sprintf("Document with id %s can not be added to collection %s. The cause: %s", $documentId, $collectionName, $driverException->getMessage()), $driverException);
+        } catch (DriverException $driverException) {
+            throw DocumentException::createFromPreviousException(sprintf('Document with id %s can not be added to collection %s. The cause: %s', $documentId, $collectionName, $driverException->getMessage()), $driverException);
         }
 
         if (1 !== $rowsAffected) {
-            throw DocumentNotFound::create(sprintf("There was a problem inserting document with id %s to collection %s. Dbal did not confirm that the record was inserted.", $documentId, $collectionName));
+            throw DocumentNotFound::create(sprintf('There was a problem inserting document with id %s to collection %s. Dbal did not confirm that the record was inserted.', $documentId, $collectionName));
         }
     }
 
@@ -77,7 +75,7 @@ final class DbalDocumentStore implements DocumentStore
         $rowsAffected = $this->updateDocumentInternally($document, $documentId, $collectionName);
 
         if (1 !== $rowsAffected) {
-            throw DocumentNotFound::create(sprintf("There is no document with id %s in collection %s to update.", $documentId, $collectionName));
+            throw DocumentNotFound::create(sprintf('There is no document with id %s in collection %s to update.', $documentId, $collectionName));
         }
     }
 
@@ -94,27 +92,27 @@ final class DbalDocumentStore implements DocumentStore
 
     public function deleteDocument(string $collectionName, string $documentId): void
     {
-        if (!$this->doesTableExists()) {
+        if (! $this->doesTableExists()) {
             return;
         }
 
         $this->getConnection()->delete(
             $this->getTableName(),
             [
-                'document_id' => $documentId
+                'document_id' => $documentId,
             ]
         );
     }
 
     public function getAllDocuments(string $collectionName): array
     {
-        if (!$this->doesTableExists()) {
+        if (! $this->doesTableExists()) {
             return [];
         }
 
         $select = $this->getDocumentsFor($collectionName)
             ->fetchAllAssociative();
-        
+
         $documents = [];
         foreach ($select as $documentRecord) {
             $documents[] = $this->convertFromJSONDocument($documentRecord);
@@ -128,7 +126,7 @@ final class DbalDocumentStore implements DocumentStore
         $document = $this->findDocument($collectionName, $documentId);
 
         if (is_null($document)) {
-            throw DocumentNotFound::create(sprintf("Document with id %s does not exists in Collection %s", $documentId, $collectionName));
+            throw DocumentNotFound::create(sprintf('Document with id %s does not exists in Collection %s', $documentId, $collectionName));
         }
 
         return $document;
@@ -136,7 +134,7 @@ final class DbalDocumentStore implements DocumentStore
 
     public function findDocument(string $collectionName, string $documentId): array|object|string|null
     {
-        if (!$this->doesTableExists()) {
+        if (! $this->doesTableExists()) {
             return null;
         }
 
@@ -146,7 +144,7 @@ final class DbalDocumentStore implements DocumentStore
             ->setMaxResults(1)
             ->fetchAllAssociative();
 
-        if (!$select) {
+        if (! $select) {
             return null;
         }
         $select = $select[0];
@@ -156,7 +154,7 @@ final class DbalDocumentStore implements DocumentStore
 
     public function countDocuments(string $collectionName): int
     {
-        if (!$this->doesTableExists()) {
+        if (! $this->doesTableExists()) {
             return 0;
         }
 
@@ -182,7 +180,7 @@ final class DbalDocumentStore implements DocumentStore
 
     private function createDataBaseTable(): void
     {
-        if (!$this->initialize) {
+        if (! $this->initialize) {
             return;
         }
 
@@ -215,18 +213,18 @@ final class DbalDocumentStore implements DocumentStore
 
     private function doesTableExists(): bool
     {
-        if (!$this->initialize) {
+        if (! $this->initialize) {
             return true;
         }
 
-        $this->initialize = !$this->getConnection()->getSchemaManager()->tablesExist([$this->getTableName()]);
+        $this->initialize = ! $this->getConnection()->getSchemaManager()->tablesExist([$this->getTableName()]);
 
-        return !$this->initialize;
+        return ! $this->initialize;
     }
 
     private function convertToJSONDocument(TypeDescriptor $type, object|array|string $document): mixed
     {
-        if (!$type->isString()) {
+        if (! $type->isString()) {
             $document = $this->conversionService->convert(
                 $document,
                 $type,
@@ -247,21 +245,21 @@ final class DbalDocumentStore implements DocumentStore
                 $this->getTableName(),
                 [
                     'document_type' => $type->toString(),
-                    'document' => $this->convertToJSONDocument($type, $document)
+                    'document' => $this->convertToJSONDocument($type, $document),
                 ],
                 [
                     'document_id' => $documentId,
-                    'collection' => $collectionName
+                    'collection' => $collectionName,
                 ],
                 [
                     'collection' => Types::STRING,
                     'document_id' => Types::STRING,
                     'document_type' => Types::STRING,
-                    'document' => Types::STRING
+                    'document' => Types::STRING,
                 ]
             );
         } catch (DriverException $driverException) {
-            throw DocumentException::createFromPreviousException(sprintf("Document with id %s can not be updated in collection %s", $documentId, $collectionName), $driverException);
+            throw DocumentException::createFromPreviousException(sprintf('Document with id %s can not be updated in collection %s', $documentId, $collectionName), $driverException);
         }
 
         return $rowsAffected;

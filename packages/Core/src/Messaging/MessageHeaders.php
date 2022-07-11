@@ -2,9 +2,12 @@
 
 namespace Ecotone\Messaging;
 
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+
+use function json_encode;
+
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class MessageHeaders
@@ -16,83 +19,83 @@ class MessageHeaders
     /**
      * An identifier for this message instance. Changes each time a message is mutated.
      */
-    const MESSAGE_ID = 'id';
+    public const MESSAGE_ID = 'id';
     /**
      * Used to correlate two or more messages.
      */
-    const MESSAGE_CORRELATION_ID = 'correlationId';
+    public const MESSAGE_CORRELATION_ID = 'correlationId';
     /**
      * Used to point parent message
      */
-    const CAUSATION_MESSAGE_ID = 'parentId';
+    public const CAUSATION_MESSAGE_ID = 'parentId';
     /**
      * content-type values are parsed as media types, e.g., application/json or text/plain;charset=UTF-8
      */
-    const CONTENT_TYPE = 'contentType';
+    public const CONTENT_TYPE = 'contentType';
     /**
      * Type of object under payload
      */
-    const TYPE_ID = "__TypeId__";
+    public const TYPE_ID = '__TypeId__';
     /**
      * Encoding of payload body
      */
-    const CONTENT_ENCODING = 'contentEncoding';
+    public const CONTENT_ENCODING = 'contentEncoding';
     /**
      * The time the message was created. Changes each time a message is mutated.
      */
-    const TIMESTAMP = 'timestamp';
+    public const TIMESTAMP = 'timestamp';
     /**
      * List of channels comma separated, where to is next endpoint
      */
-    const ROUTING_SLIP = "routingSlip";
+    public const ROUTING_SLIP = 'routingSlip';
     /**
      * A channel to which errors will be sent. It must represent a name from registry of a class implementing MessageChannel
      */
-    const REPLY_CHANNEL = 'replyChannel';
+    public const REPLY_CHANNEL = 'replyChannel';
     /**
      * A channel to which errors will be sent. It must represent a name from registry of a class implementing MessageChannel
      */
-    const ERROR_CHANNEL = 'errorChannel';
+    public const ERROR_CHANNEL = 'errorChannel';
     /**
      * Usually a sequence number with a group of messages with a SEQUENCE_SIZE
      */
-    const SEQUENCE_NUMBER = 'sequenceNumber';
+    public const SEQUENCE_NUMBER = 'sequenceNumber';
     /**
      * The number of messages within a group of correlated messages.
      */
-    const SEQUENCE_SIZE = 'sequenceSize';
+    public const SEQUENCE_SIZE = 'sequenceSize';
     /**
      * Message priority; for example within a PriorityChannel
      */
-    const PRIORITY = 'priority';
+    public const PRIORITY = 'priority';
     /**
      * True if a message was detected as a duplicate by an idempotent receiver interceptor
      */
-    const DUPLICATE_MESSAGE = 'duplicateMessage';
+    public const DUPLICATE_MESSAGE = 'duplicateMessage';
     /**
      * Time to live of message in milliseconds
      */
-    const TIME_TO_LIVE = "timeToLive";
+    public const TIME_TO_LIVE = 'timeToLive';
     /**
      * Delivery delay in milliseconds
      */
-    const DELIVERY_DELAY = "deliveryDelay";
+    public const DELIVERY_DELAY = 'deliveryDelay';
     /**
      * Informs under which key acknowledge callback is stored for this consumer message
      */
-    const CONSUMER_ACK_HEADER_LOCATION = "consumerAcknowledgeCallbackHeader";
+    public const CONSUMER_ACK_HEADER_LOCATION = 'consumerAcknowledgeCallbackHeader';
     /**
      * Consumer which started flow
      */
-    const CONSUMER_ENDPOINT_ID = "consumerEndpointId";
+    public const CONSUMER_ENDPOINT_ID = 'consumerEndpointId';
     /**
      * Consumed channel name
      */
-    const POLLED_CHANNEL_NAME = "polledChannelName";
+    public const POLLED_CHANNEL_NAME = 'polledChannelName';
     /**
      * Expected content type of reply
      */
-    const REPLY_CONTENT_TYPE = "replyContentType";
+    public const REPLY_CONTENT_TYPE = 'replyContentType';
 
     private ?array $headers;
 
@@ -109,7 +112,7 @@ class MessageHeaders
     /**
      * @return MessageHeaders|static
      */
-    final public static function createEmpty() : self
+    final public static function createEmpty(): self
     {
         return static::createMessageHeadersWith([]);
     }
@@ -118,17 +121,17 @@ class MessageHeaders
      * @param array|string[] $headers
      * @return MessageHeaders|static
      */
-    final public static function create(array $headers) : self
+    final public static function create(array $headers): self
     {
         return static::createMessageHeadersWith($headers);
     }
 
-    final public function headers() : ?array
+    final public function headers(): ?array
     {
         return $this->headers;
     }
 
-    public static function getFrameworksHeaderNames() : array
+    public static function getFrameworksHeaderNames(): array
     {
         return [
             self::MESSAGE_ID,
@@ -149,7 +152,7 @@ class MessageHeaders
             self::DELIVERY_DELAY,
             self::POLLED_CHANNEL_NAME,
             self::REPLY_CONTENT_TYPE,
-            self::CONSUMER_ENDPOINT_ID
+            self::CONSUMER_ENDPOINT_ID,
         ];
     }
 
@@ -158,12 +161,12 @@ class MessageHeaders
      *
      * @return array
      */
-    final public function findByRegex(string $headerRegex) : array
+    final public function findByRegex(string $headerRegex): array
     {
         $foundHeaders = [];
-        $headerRegex = str_replace(".", "\.", $headerRegex);
-        $headerRegex = str_replace("*", ".*", $headerRegex);
-        $headerRegex = "#" . $headerRegex . "#";
+        $headerRegex = str_replace('.', "\.", $headerRegex);
+        $headerRegex = str_replace('*', '.*', $headerRegex);
+        $headerRegex = '#' . $headerRegex . '#';
 
         foreach ($this->headers as $key => $value) {
             if (preg_match($headerRegex, $key)) {
@@ -178,7 +181,7 @@ class MessageHeaders
      * @param string $headerName
      * @return bool
      */
-    final public function containsKey(string $headerName) : bool
+    final public function containsKey(string $headerName): bool
     {
         return array_key_exists($headerName, $this->headers);
     }
@@ -187,7 +190,7 @@ class MessageHeaders
      * @param mixed $value
      * @return bool
      */
-    final public function containsValue($value) : bool
+    final public function containsValue($value): bool
     {
         return in_array($value, $this->headers);
     }
@@ -199,7 +202,7 @@ class MessageHeaders
      */
     final public function get(string $headerName)
     {
-        if (!$this->containsKey($headerName)) {
+        if (! $this->containsKey($headerName)) {
             throw MessageHeaderDoesNotExistsException::create("Header with name {$headerName} does not exists");
         }
 
@@ -209,7 +212,7 @@ class MessageHeaders
     /**
      * @return int
      */
-    final public function size() : int
+    final public function size(): int
     {
         return count($this->headers());
     }
@@ -218,7 +221,7 @@ class MessageHeaders
      * @param MessageHeaders $messageHeaders
      * @return bool
      */
-    final public function equals(MessageHeaders $messageHeaders) : bool
+    final public function equals(MessageHeaders $messageHeaders): bool
     {
         return $this == $messageHeaders;
     }
@@ -243,7 +246,7 @@ class MessageHeaders
      * @param string $messageId
      * @return bool
      */
-    final public function hasMessageId(string $messageId) : bool
+    final public function hasMessageId(string $messageId): bool
     {
         return $this->get(self::MESSAGE_ID) === $messageId;
     }
@@ -252,7 +255,7 @@ class MessageHeaders
      * @param string $headerName
      * @param $headerValue
      */
-    final protected function changeHeader(string $headerName, $headerValue) : void
+    final protected function changeHeader(string $headerName, $headerValue): void
     {
         $this->headers[$headerName] = $headerValue;
     }
@@ -260,7 +263,7 @@ class MessageHeaders
     /**
      * @return bool
      */
-    public function hasContentType() : bool
+    public function hasContentType(): bool
     {
         return $this->containsKey(self::CONTENT_TYPE);
     }
@@ -269,7 +272,7 @@ class MessageHeaders
      * @return string
      * @throws MessagingException
      */
-    public function getMessageId() : string
+    public function getMessageId(): string
     {
         return $this->get(MessageHeaders::MESSAGE_ID);
     }
@@ -278,7 +281,7 @@ class MessageHeaders
      * @return int
      * @throws MessagingException
      */
-    public function getTimestamp() : int
+    public function getTimestamp(): int
     {
         return $this->get(MessageHeaders::TIMESTAMP);
     }
@@ -288,7 +291,7 @@ class MessageHeaders
      * @throws MessagingException
      * @throws Support\InvalidArgumentException
      */
-    public function getContentType() : MediaType
+    public function getContentType(): MediaType
     {
         return MediaType::parseMediaType($this->get(self::CONTENT_TYPE));
     }
@@ -297,11 +300,11 @@ class MessageHeaders
      * @param array|string[] $headers
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function initialize(array $headers) : void
+    private function initialize(array $headers): void
     {
         foreach ($headers as $headerName => $headerValue) {
             if (is_null($headerName) || $headerName === '') {
-                throw InvalidMessageHeaderException::create("Passed empty header name");
+                throw InvalidMessageHeaderException::create('Passed empty header name');
             }
         }
 
@@ -318,7 +321,7 @@ class MessageHeaders
         return new static(array_merge(
             [
                 self::MESSAGE_ID => Uuid::uuid4()->toString(),
-                self::TIMESTAMP => (int)round(microtime(true))
+                self::TIMESTAMP => (int)round(microtime(true)),
             ],
             $headers
         ));
@@ -331,7 +334,7 @@ class MessageHeaders
      */
     public function __toString()
     {
-        return \json_encode($this->convertToScalarsIfPossible($this->headers));
+        return json_encode($this->convertToScalarsIfPossible($this->headers));
     }
 
     /**
@@ -340,7 +343,7 @@ class MessageHeaders
      * @throws Handler\TypeDefinitionException
      * @throws MessagingException
      */
-    private function convertToScalarsIfPossible(iterable $dataToConvert) : array
+    private function convertToScalarsIfPossible(iterable $dataToConvert): array
     {
         $data = [];
 
@@ -352,7 +355,7 @@ class MessageHeaders
 
             if (is_iterable($header)) {
                 $data[$headerName] = $this->convertToScalarsIfPossible($header);
-            }else if (is_object($header) && method_exists($header, "__toString")) {
+            } elseif (is_object($header) && method_exists($header, '__toString')) {
                 $data[$headerName] = (string)$header;
             }
         }

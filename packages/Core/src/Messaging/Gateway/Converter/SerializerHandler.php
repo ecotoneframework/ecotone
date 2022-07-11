@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Gateway\Converter;
@@ -9,8 +10,8 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 
 class SerializerHandler
 {
-    const MEDIA_TYPE = "ecotone.serializer.media_type";
-    const TARGET_TYPE = "ecotone.serializer.target_type";
+    public const MEDIA_TYPE = 'ecotone.serializer.media_type';
+    public const TARGET_TYPE = 'ecotone.serializer.target_type';
 
     private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
 

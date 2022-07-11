@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -55,12 +56,12 @@ class EnrichHeaderWithExpressionPropertyEditor implements PropertyEditor
         $dataToEnrich = $this->expressionEvaluationService->evaluate(
             $evaluateAgainst,
             [
-                "payload" => $replyMessage ? $replyMessage->getPayload() : null,
-                "headers" => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
-                "request" => [
-                    "payload" => $enrichMessage->getPayload(),
-                    "headers" => $enrichMessage->getHeaders()
-                ]
+                'payload' => $replyMessage ? $replyMessage->getPayload() : null,
+                'headers' => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
+                'request' => [
+                    'payload' => $enrichMessage->getPayload(),
+                    'headers' => $enrichMessage->getHeaders(),
+                ],
             ],
             $this->referenceSearchService
         );
@@ -82,6 +83,6 @@ class EnrichHeaderWithExpressionPropertyEditor implements PropertyEditor
      */
     private function canNullExpressionBeUsed(?Message $replyMessage): bool
     {
-        return $this->nullResultExpression && !$replyMessage;
+        return $this->nullResultExpression && ! $replyMessage;
     }
 }

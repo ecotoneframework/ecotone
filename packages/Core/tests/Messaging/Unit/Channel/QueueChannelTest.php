@@ -2,14 +2,16 @@
 
 namespace Test\Ecotone\Messaging\Unit\Channel;
 
-use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class QueueChannelTest
  * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class QueueChannelTest extends TestCase
 {

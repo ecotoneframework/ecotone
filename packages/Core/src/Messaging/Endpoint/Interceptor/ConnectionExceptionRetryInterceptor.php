@@ -1,13 +1,13 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
-use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
+use Throwable;
 
 class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
 {
@@ -38,14 +38,14 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function shouldBeThrown(\Throwable $exception): bool
+    public function shouldBeThrown(Throwable $exception): bool
     {
-        if (!($exception instanceof ConnectionException)) {
+        if (! ($exception instanceof ConnectionException)) {
             return true;
         }
 
         $this->currentNumberOfRetries++;
-        if (!$this->retryTemplate || !$this->retryTemplate->canBeCalledNextTime($this->currentNumberOfRetries)) {
+        if (! $this->retryTemplate || ! $this->retryTemplate->canBeCalledNextTime($this->currentNumberOfRetries)) {
             return true;
         }
 
@@ -57,7 +57,7 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
      */
     public function preRun(): void
     {
-        if (!$this->retryTemplate) {
+        if (! $this->retryTemplate) {
             return;
         }
 

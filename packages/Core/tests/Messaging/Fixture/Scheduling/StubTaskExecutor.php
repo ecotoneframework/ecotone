@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Scheduling;
@@ -25,7 +26,7 @@ class StubTaskExecutor implements TaskExecutor
     {
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -39,7 +40,7 @@ class StubTaskExecutor implements TaskExecutor
     /**
      * @return bool
      */
-    public function wasCalled() : bool
+    public function wasCalled(): bool
     {
         return $this->wasCalled;
     }

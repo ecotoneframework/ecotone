@@ -10,7 +10,7 @@ final class TicketListUpdatedConverter
     public function toArray(TicketListUpdated $event): array
     {
         return [
-            "ticketId" => $event->ticketId
+            'ticketId' => $event->ticketId,
         ];
     }
 

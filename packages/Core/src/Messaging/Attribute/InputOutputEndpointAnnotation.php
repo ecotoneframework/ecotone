@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Attribute;
@@ -8,7 +9,7 @@ abstract class InputOutputEndpointAnnotation extends EndpointAnnotation
     private string $outputChannelName;
     private array $requiredInterceptorNames;
 
-    public function __construct(string $inputChannelName = "", string $endpointId = "", string $outputChannelName = "", array $requiredInterceptorNames = [])
+    public function __construct(string $inputChannelName = '', string $endpointId = '', string $outputChannelName = '', array $requiredInterceptorNames = [])
     {
         parent::__construct($inputChannelName, $endpointId);
 

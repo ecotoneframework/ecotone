@@ -1,11 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Handler\MethodArgument;
-use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -41,7 +40,7 @@ class MethodCall
      * @return MethodCall
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createWith(array $methodArguments, bool $canReplaceArguments) : self
+    public static function createWith(array $methodArguments, bool $canReplaceArguments): self
     {
         return new self($methodArguments, $canReplaceArguments);
     }
@@ -51,9 +50,9 @@ class MethodCall
      * @param mixed $value
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function replaceArgument(string $parameterName, $value) : void
+    public function replaceArgument(string $parameterName, $value): void
     {
-        if (!$this->canReplaceArguments) {
+        if (! $this->canReplaceArguments) {
             throw InvalidArgumentException::create("Gateways, Inbound Adapters, Pollable Consumers can't replace arguments in Around Interceptors");
         }
 
@@ -69,7 +68,7 @@ class MethodCall
     /**
      * @return MethodArgument[]|iterable
      */
-    public function getMethodArguments() : iterable
+    public function getMethodArguments(): iterable
     {
         return $this->methodArguments;
     }
@@ -77,9 +76,9 @@ class MethodCall
     /**
      * @return array
      */
-    public function getMethodArgumentValues() : array
+    public function getMethodArgumentValues(): array
     {
-        return array_map(function (MethodArgument $argument){
+        return array_map(function (MethodArgument $argument) {
             return $argument->value();
         }, $this->methodArguments);
     }

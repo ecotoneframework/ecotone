@@ -8,6 +8,5 @@ class ArticleWasPublished
 {
     public function __construct(public UuidInterface $articleId, public string $content)
     {
-
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
@@ -15,5 +16,5 @@ interface Trigger
      * @param TriggerContext $triggerContext
      * @return int 	Milliseconds since Epoch
      */
-    public function nextExecutionTime(Clock $clock, TriggerContext $triggerContext) : int;
+    public function nextExecutionTime(Clock $clock, TriggerContext $triggerContext): int;
 }

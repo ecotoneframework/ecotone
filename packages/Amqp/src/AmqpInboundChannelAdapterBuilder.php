@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Amqp;
@@ -92,8 +93,8 @@ class AmqpInboundChannelAdapterBuilder extends EnqueueInboundChannelAdapterBuild
             true,
             $this->queueName,
             $this->receiveTimeoutInMilliseconds,
-            new InboundMessageConverter($this->getEndpointId(),$this->acknowledgeMode, AmqpHeader::HEADER_ACKNOWLEDGE, $headerMapper),
-            !$this->withAckInterceptor
+            new InboundMessageConverter($this->getEndpointId(), $this->acknowledgeMode, AmqpHeader::HEADER_ACKNOWLEDGE, $headerMapper),
+            ! $this->withAckInterceptor
         );
         return $inboundChannelAdapter;
     }

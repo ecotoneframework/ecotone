@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
@@ -20,7 +21,7 @@ interface MessageHandlerConsumerBuilder
      */
     public function isSupporting(MessageHandlerBuilder $messageHandlerBuilder, MessageChannelBuilder $relatedMessageChannel): bool;
 
-    public function isPollingConsumer() : bool;
+    public function isPollingConsumer(): bool;
 
     /**
      * @param ChannelResolver $channelResolver

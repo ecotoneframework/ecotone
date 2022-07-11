@@ -1,9 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Builder\Handler;
 
 use Ecotone\Messaging\Handler\InterfaceParameter;
+use ReflectionException;
+use ReflectionParameter;
 
 /**
  * Class InterfaceParameterTestCaseBuilder
@@ -17,25 +20,25 @@ class InterfaceParameterTestCaseBuilder
      */
     private function __construct()
     {
-
     }
 
     /**
      * @return InterfaceParameterTestCaseBuilder
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
 
     /**
      * @return InterfaceParameter
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function build() : InterfaceParameter
+    public function build(): InterfaceParameter
     {
         return InterfaceParameter::createNullable(
-            new \ReflectionParameter(function ($x){}, "x")
+            new ReflectionParameter(function ($x) {
+            }, 'x')
         );
     }
 }

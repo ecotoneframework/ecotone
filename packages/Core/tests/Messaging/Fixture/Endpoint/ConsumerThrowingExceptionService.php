@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Endpoint;
+
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use RuntimeException;
 
 /**
  * Class InboundChannelAdapterStoppingService
@@ -28,25 +31,25 @@ class ConsumerThrowingExceptionService
     /**
      * @return self
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
 
-    public function execute() : void
+    public function execute(): void
     {
         $this->called++;
         if ($this->consumerLifecycle) {
             $this->consumerLifecycle->stop();
         }
 
-        throw new \RuntimeException("Test error. This should be caught");
+        throw new RuntimeException('Test error. This should be caught');
     }
 
     /**
      * @param ConsumerLifecycle $consumerLifecycle
      */
-    public function setConsumerLifecycle(ConsumerLifecycle $consumerLifecycle) : void
+    public function setConsumerLifecycle(ConsumerLifecycle $consumerLifecycle): void
     {
         $this->consumerLifecycle = $consumerLifecycle;
     }

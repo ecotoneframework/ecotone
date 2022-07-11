@@ -2,11 +2,10 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor;
 
-use PHPUnit\Framework\Assert;
-use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
+use stdClass;
 
 class StubCallSavingService
 {
@@ -33,7 +32,7 @@ class StubCallSavingService
         $this->valueToReturn = $valueToReturn;
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self(null);
     }
@@ -42,7 +41,7 @@ class StubCallSavingService
      * @param array $toReplace
      * @return StubCallSavingService
      */
-    public static function createWithArgumentsToReplace(array $toReplace) : self
+    public static function createWithArgumentsToReplace(array $toReplace): self
     {
         $self = self::create();
         $self->argumentsToReplace = $toReplace;
@@ -54,7 +53,7 @@ class StubCallSavingService
      * @param $valueToReturn
      * @return StubCallSavingService
      */
-    public static function createWithReturnType($valueToReturn) : self
+    public static function createWithReturnType($valueToReturn): self
     {
         return new self($valueToReturn);
     }
@@ -68,33 +67,33 @@ class StubCallSavingService
     }
 
     /**
-     * @param \stdClass $stdClass
+     * @param stdClass $stdClass
      */
-    public function callWithStdClassArgument(\stdClass $stdClass) : void
+    public function callWithStdClassArgument(stdClass $stdClass): void
     {
         $this->wasCalled = true;
     }
 
     /**
-     * @param \stdClass $some
+     * @param stdClass $some
      * @param int $number
      */
-    public function callWithStdClassAndIntArgument(\stdClass $some, int $number) : void
+    public function callWithStdClassAndIntArgument(stdClass $some, int $number): void
     {
         $this->wasCalled = true;
     }
 
     /**
-     * @param \stdClass $some
+     * @param stdClass $some
      * @param int[]|iterable $numbers
      * @param string[]|array $strings
      */
-    public function callWithMultipleArguments(\stdClass $some, iterable $numbers, array $strings) : void
+    public function callWithMultipleArguments(stdClass $some, iterable $numbers, array $strings): void
     {
         $this->wasCalled = true;
     }
 
-    public function callNoArgumentsAndReturnType() : void
+    public function callNoArgumentsAndReturnType(): void
     {
         $this->wasCalled = true;
     }
@@ -108,10 +107,10 @@ class StubCallSavingService
 
     /**
      * @param MethodInvocation $methodInvocation
-     * @param \stdClass $stdClass
+     * @param stdClass $stdClass
      * @return mixed
      */
-    public function callWithStdClassInvocationArgument(MethodInvocation $methodInvocation, \stdClass $stdClass)
+    public function callWithStdClassInvocationArgument(MethodInvocation $methodInvocation, stdClass $stdClass)
     {
         return $methodInvocation->proceed();
     }
@@ -122,35 +121,31 @@ class StubCallSavingService
         return $methodInvocation->proceed();
     }
 
-    public function sum(MethodInvocation $methodInvocation, int $amount) : int
+    public function sum(MethodInvocation $methodInvocation, int $amount): int
     {
-
     }
 
-    public function multiply(MethodInvocation $methodInvocation, int $amount) : int
+    public function multiply(MethodInvocation $methodInvocation, int $amount): int
     {
-
     }
 
-    #[ServiceActivator("some")]
-    public function methodWithAnnotation() : void
+    #[ServiceActivator('some')]
+    public function methodWithAnnotation(): void
     {
-
     }
 
-    #[ServiceActivator("some")]
-    public function methodWithAnnotationWithReturnType(Message $message) : Message
+    #[ServiceActivator('some')]
+    public function methodWithAnnotationWithReturnType(Message $message): Message
     {
         return $message;
     }
 
-    public function callWithMessage(Message $message) : void
+    public function callWithMessage(Message $message): void
     {
-
     }
 
 
-    public function callWithMessageReturnType(Message $message) : Message
+    public function callWithMessageReturnType(Message $message): Message
     {
         return $message;
     }
@@ -158,7 +153,7 @@ class StubCallSavingService
     /**
      * @return bool
      */
-    public function wasCalled() : bool
+    public function wasCalled(): bool
     {
         return $this->wasCalled;
     }

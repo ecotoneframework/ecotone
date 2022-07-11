@@ -7,7 +7,7 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 
 class GuestViewer
 {
-    const BOOK_GET_GUESTS = "book.getGuests";
+    public const BOOK_GET_GUESTS = 'book.getGuests';
     private array $guests = [];
 
     #[EventHandler(GuestWasAddedToBook::EVENT_NAME)]
@@ -17,7 +17,7 @@ class GuestViewer
     }
 
     #[QueryHandler(self::BOOK_GET_GUESTS)]
-    public function getGuests(string $bookId) : array
+    public function getGuests(string $bookId): array
     {
         return $this->guests[$bookId] ?? [];
     }

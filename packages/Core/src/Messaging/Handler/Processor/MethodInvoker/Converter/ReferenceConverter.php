@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
@@ -44,7 +45,7 @@ class ReferenceConverter implements ParameterConverter
      * @return ReferenceConverter
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function create(ReferenceSearchService $referenceSearchService, string $parameterName, string $serviceReference) : self
+    public static function create(ReferenceSearchService $referenceSearchService, string $parameterName, string $serviceReference): self
     {
         return new self(
             $referenceSearchService,
@@ -73,13 +74,13 @@ class ReferenceConverter implements ParameterConverter
      * @param object|null $serviceReference
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function initialize($serviceReference) : void
+    private function initialize($serviceReference): void
     {
-        if (!$serviceReference) {
+        if (! $serviceReference) {
             return;
         }
 
-        Assert::isObject($serviceReference, "Reference must be object for " . self::class);
+        Assert::isObject($serviceReference, 'Reference must be object for ' . self::class);
 
         $this->referenceService = $serviceReference;
     }

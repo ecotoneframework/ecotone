@@ -1,13 +1,9 @@
 <?php
 
-
 namespace Ecotone\EventSourcing\Config;
 
 use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionExecutor;
-use Ecotone\Messaging\Channel\ChannelInterceptor;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
 
 class ProjectionFlowController
 {
@@ -20,7 +16,7 @@ class ProjectionFlowController
 
     public function preSend(Message $message): ?Message
     {
-        if ($this->requireContinuesPolling && !$this->isPolling($message)) {
+        if ($this->requireContinuesPolling && ! $this->isPolling($message)) {
             return null;
         }
 

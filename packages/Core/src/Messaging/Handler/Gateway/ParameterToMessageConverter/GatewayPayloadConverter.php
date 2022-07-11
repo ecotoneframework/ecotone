@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
@@ -8,7 +9,6 @@ use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -34,7 +34,7 @@ class GatewayPayloadConverter implements GatewayParameterConverter
      * @param string $parameterName
      * @return GatewayPayloadConverter
      */
-    public static function create(string $parameterName) : self
+    public static function create(string $parameterName): self
     {
         return new self($parameterName);
     }
@@ -52,11 +52,11 @@ class GatewayPayloadConverter implements GatewayParameterConverter
      */
     public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
-        Assert::notNull($methodArgument, "Gateway header converter can only be called with method argument");
+        Assert::notNull($methodArgument, 'Gateway header converter can only be called with method argument');
 
         if ($methodArgument->getInterfaceParameter()->getTypeDescriptor()->isUnionType() || $methodArgument->getInterfaceParameter()->getTypeDescriptor()->isCompoundObjectType() || $methodArgument->getInterfaceParameter()->getTypeDescriptor()->isAnything()) {
             $type = TypeDescriptor::createFromVariable($methodArgument->value())->getTypeHint();
-        }else {
+        } else {
             $type = $methodArgument->getInterfaceParameter()->getTypeHint();
         }
 

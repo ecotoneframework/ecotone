@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
 
 /**
@@ -14,5 +13,5 @@ interface ServiceInterfaceCalculatingService
      * @param int $startingAmount
      * @return int
      */
-    public function calculate(int $startingAmount) : int;
+    public function calculate(int $startingAmount): int;
 }

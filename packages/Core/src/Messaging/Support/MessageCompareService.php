@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Support;
@@ -13,7 +14,7 @@ use Ecotone\Messaging\MessageHeaders;
  */
 class MessageCompareService
 {
-    public static function areSameMessagesIgnoringIdAndTimestamp(Message $message, Message $toCompareWith) : bool
+    public static function areSameMessagesIgnoringIdAndTimestamp(Message $message, Message $toCompareWith): bool
     {
         if ($message->getPayload() != $toCompareWith->getPayload()) {
             return false;

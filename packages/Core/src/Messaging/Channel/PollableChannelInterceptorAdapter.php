@@ -6,6 +6,7 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
+use Throwable;
 
 /**
  * Class PollableChannelInterceptorAdapter
@@ -24,7 +25,7 @@ class PollableChannelInterceptorAdapter extends SendingInterceptorAdapter implem
      */
     protected function initialize(MessageChannel $messageChannel): void
     {
-        Assert::isSubclassOf($messageChannel, PollableChannel::class, "Pollable interceptor expects pollable channel");
+        Assert::isSubclassOf($messageChannel, PollableChannel::class, 'Pollable interceptor expects pollable channel');
 
         $this->messageChannel = $messageChannel;
     }
@@ -48,10 +49,10 @@ class PollableChannelInterceptorAdapter extends SendingInterceptorAdapter implem
     /**
      * @param int|null $timeout
      */
-    private function receiveFor(?int $timeout): ?\Ecotone\Messaging\Message
+    private function receiveFor(?int $timeout): ?Message
     {
         foreach ($this->sortedChannelInterceptors as $channelInterceptor) {
-            if (!$channelInterceptor->preReceive($this->messageChannel)) {
+            if (! $channelInterceptor->preReceive($this->messageChannel)) {
                 return null;
             }
         }
@@ -59,10 +60,10 @@ class PollableChannelInterceptorAdapter extends SendingInterceptorAdapter implem
         try {
             if (is_null($timeout)) {
                 $message = $this->messageChannel->receive();
-            }else {
+            } else {
                 $message = $this->messageChannel->receiveWithTimeout($timeout);
             }
-        }catch (\Throwable $e) {
+        } catch (Throwable $e) {
             foreach ($this->sortedChannelInterceptors as $channelInterceptor) {
                 $channelInterceptor->afterReceiveCompletion(null, $this->messageChannel, $e);
             }

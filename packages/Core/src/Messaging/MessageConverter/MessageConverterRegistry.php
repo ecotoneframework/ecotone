@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\MessageConverter;
@@ -31,7 +32,7 @@ class MessageConverterRegistry
      * @return MessageConverterRegistry
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createWith(iterable $messageConverters) : self
+    public static function createWith(iterable $messageConverters): self
     {
         Assert::allInstanceOfType($messageConverters, MessageConverter::class);
 
@@ -41,7 +42,7 @@ class MessageConverterRegistry
     /**
      * @return MessageConverter[]
      */
-    public function getMessageConverters() : array
+    public function getMessageConverters(): array
     {
         return $this->messageConverters;
     }

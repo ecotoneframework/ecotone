@@ -23,7 +23,7 @@ class Order
         $this->number = $number;
     }
 
-    public static function create(string $number) : self
+    public static function create(string $number): self
     {
         return new self($number);
     }

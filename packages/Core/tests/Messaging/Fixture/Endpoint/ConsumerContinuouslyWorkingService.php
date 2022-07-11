@@ -1,11 +1,10 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Endpoint;
 
 use Ecotone\Messaging\Transaction\Transactional;
 
-#[Transactional(["transactionFactory1"])]
+#[Transactional(['transactionFactory1'])]
 class ConsumerContinuouslyWorkingService
 {
     private $receivedPayload;
@@ -17,7 +16,7 @@ class ConsumerContinuouslyWorkingService
         $this->returnData = $returnData;
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self(null);
     }
@@ -33,7 +32,7 @@ class ConsumerContinuouslyWorkingService
         return $this->returnData;
     }
 
-    #[Transactional(["transactionFactory2"])]
+    #[Transactional(['transactionFactory2'])]
     public function executeReturnWithInterceptor()
     {
         return $this->returnData;

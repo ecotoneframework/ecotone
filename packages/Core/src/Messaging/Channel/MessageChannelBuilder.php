@@ -17,23 +17,23 @@ interface MessageChannelBuilder
     /**
      * @return string
      */
-    public function getMessageChannelName() : string;
+    public function getMessageChannelName(): string;
 
     /**
      * @return bool
      */
-    public function isPollable() : bool;
+    public function isPollable(): bool;
 
     /**
      * @param ReferenceSearchService $referenceSearchService
      * @return MessageChannel
      */
-    public function build(ReferenceSearchService $referenceSearchService) : MessageChannel;
+    public function build(ReferenceSearchService $referenceSearchService): MessageChannel;
 
     /**
      * @return string[] empty string means no required reference name exists
      */
-    public function getRequiredReferenceNames() : array;
+    public function getRequiredReferenceNames(): array;
 
     /**
      * @param InterfaceToCallRegistry $interfaceToCallRegistry

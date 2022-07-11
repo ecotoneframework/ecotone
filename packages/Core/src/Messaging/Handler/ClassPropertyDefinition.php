@@ -11,9 +11,9 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 final class ClassPropertyDefinition
 {
-    private const PUBLIC_VISIBILITY = "public";
-    private const PROTECTED_VISIBILITY = "protected";
-    private const PRIVATE_VISIBILITY = "private";
+    private const PUBLIC_VISIBILITY = 'public';
+    private const PROTECTED_VISIBILITY = 'protected';
+    private const PRIVATE_VISIBILITY = 'private';
 
     private string $name;
     private \Ecotone\Messaging\Handler\Type $type;
@@ -52,7 +52,7 @@ final class ClassPropertyDefinition
      * @param iterable $annotations
      * @return ClassPropertyDefinition
      */
-    public static function createPublic(string $name, Type $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
+    public static function createPublic(string $name, Type $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations): self
     {
         return new self($name, $typeDescriptor, $isNullable, self::PUBLIC_VISIBILITY, $isStatic, $annotations);
     }
@@ -65,7 +65,7 @@ final class ClassPropertyDefinition
      * @param iterable $annotations
      * @return ClassPropertyDefinition
      */
-    public static function createProtected(string $name, Type $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
+    public static function createProtected(string $name, Type $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations): self
     {
         return new self($name, $typeDescriptor, $isNullable, self::PROTECTED_VISIBILITY, $isStatic, $annotations);
     }
@@ -78,13 +78,13 @@ final class ClassPropertyDefinition
      * @param iterable $annotations
      * @return ClassPropertyDefinition
      */
-    public static function createPrivate(string $name, Type $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations) : self
+    public static function createPrivate(string $name, Type $typeDescriptor, bool $isNullable, bool $isStatic, iterable $annotations): self
     {
         return new self($name, $typeDescriptor, $isNullable, self::PRIVATE_VISIBILITY, $isStatic, $annotations);
     }
 
 
-    public function hasAnnotation(Type $annotationClass) : bool
+    public function hasAnnotation(Type $annotationClass): bool
     {
         foreach ($this->annotations as $annotation) {
             if (TypeDescriptor::createFromVariable($annotation)->equals($annotationClass)) {
@@ -95,7 +95,7 @@ final class ClassPropertyDefinition
         return false;
     }
 
-    public function getAnnotation(Type $annotationClass) : object
+    public function getAnnotation(Type $annotationClass): object
     {
         foreach ($this->annotations as $annotation) {
             if (TypeDescriptor::createFromVariable($annotation)->equals($annotationClass)) {
@@ -126,7 +126,7 @@ final class ClassPropertyDefinition
      * @param string $name
      * @return bool
      */
-    public function hasName(string $name) : bool
+    public function hasName(string $name): bool
     {
         return $this->name == $name;
     }
@@ -134,7 +134,7 @@ final class ClassPropertyDefinition
     /**
      * @return object[]
      */
-    public function getAnnotations() : iterable
+    public function getAnnotations(): iterable
     {
         return $this->annotations;
     }
@@ -142,7 +142,7 @@ final class ClassPropertyDefinition
     /**
      * @return bool
      */
-    public function isNullable() : bool
+    public function isNullable(): bool
     {
         return $this->isNullable;
     }
@@ -150,7 +150,7 @@ final class ClassPropertyDefinition
     /**
      * @return bool
      */
-    public function isStatic() : bool
+    public function isStatic(): bool
     {
         return $this->isStatic;
     }
@@ -158,7 +158,7 @@ final class ClassPropertyDefinition
     /**
      * @return bool
      */
-    public function isPrivate() : bool
+    public function isPrivate(): bool
     {
         return $this->visibility === self::PRIVATE_VISIBILITY;
     }
@@ -166,7 +166,7 @@ final class ClassPropertyDefinition
     /**
      * @return bool
      */
-    public function isPublic() : bool
+    public function isPublic(): bool
     {
         return $this->visibility === self::PUBLIC_VISIBILITY;
     }
@@ -174,7 +174,7 @@ final class ClassPropertyDefinition
     /**
      * @return bool
      */
-    public function isProtected() : bool
+    public function isProtected(): bool
     {
         return $this->visibility === self::PROTECTED_VISIBILITY;
     }

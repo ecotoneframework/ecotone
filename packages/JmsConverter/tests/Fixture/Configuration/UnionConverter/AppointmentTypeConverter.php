@@ -17,7 +17,7 @@ class AppointmentTypeConverter
     {
         if ($status === StandardAppointmentType::STANDARD) {
             return new StandardAppointmentType();
-        }else {
+        } else {
             return new TrialAppointmentType();
         }
     }

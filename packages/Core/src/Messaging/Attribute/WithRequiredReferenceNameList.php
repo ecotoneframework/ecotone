@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Attribute;
@@ -13,5 +14,5 @@ interface WithRequiredReferenceNameList
     /**
      * @return string[]
      */
-    public function getRequiredReferenceNameList() : iterable;
+    public function getRequiredReferenceNameList(): iterable;
 }

@@ -1,11 +1,6 @@
 <?php
 
 namespace Ecotone\Messaging\Config;
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class GatewayReference
@@ -33,7 +28,7 @@ class GatewayReference
      * @param object $gateway
      * @return GatewayReference
      */
-    public static function createWith(string $referenceName, object $gateway) : self
+    public static function createWith(string $referenceName, object $gateway): self
     {
         return new self($referenceName, $gateway);
     }
@@ -41,7 +36,7 @@ class GatewayReference
     /**
      * @return string
      */
-    public function getReferenceName() : string
+    public function getReferenceName(): string
     {
         return $this->referenceName;
     }
@@ -50,7 +45,7 @@ class GatewayReference
      * @param string $referenceName
      * @return bool
      */
-    public function hasReferenceName(string $referenceName) : bool
+    public function hasReferenceName(string $referenceName): bool
     {
         return $this->referenceName == $referenceName;
     }

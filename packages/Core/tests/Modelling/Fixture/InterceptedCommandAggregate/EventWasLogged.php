@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate;
-
 
 class EventWasLogged
 {
@@ -12,8 +10,8 @@ class EventWasLogged
 
     public function __construct(array $data)
     {
-        $this->loggerId = $data["loggerId"];
-        unset($data["loggerId"]);
+        $this->loggerId = $data['loggerId'];
+        unset($data['loggerId']);
         $this->data     = $data;
     }
 

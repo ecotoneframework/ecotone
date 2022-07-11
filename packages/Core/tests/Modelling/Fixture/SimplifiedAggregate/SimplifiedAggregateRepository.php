@@ -8,5 +8,4 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepo
 #[Repository]
 class SimplifiedAggregateRepository extends InMemoryStandardRepository
 {
-
 }

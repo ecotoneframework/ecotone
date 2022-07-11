@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext;
@@ -15,13 +16,13 @@ use stdClass;
 
 class ApplicationContextExample
 {
-    const HTTP_INPUT_CHANNEL  = "httpEntry";
-    const HTTP_OUTPUT_CHANNEL = "httpOutput";
+    public const HTTP_INPUT_CHANNEL  = 'httpEntry';
+    public const HTTP_OUTPUT_CHANNEL = 'httpOutput';
 
     #[ServiceContext]
     public function gateway(): GatewayBuilder
     {
-        return GatewayProxyBuilder::create("some-ref", GatewayExample::class, "doSomething", self::HTTP_INPUT_CHANNEL);
+        return GatewayProxyBuilder::create('some-ref', GatewayExample::class, 'doSomething', self::HTTP_INPUT_CHANNEL);
     }
 
     #[ServiceContext]
@@ -35,18 +36,18 @@ class ApplicationContextExample
     {
         return TransformerBuilder::createHeaderEnricher(
             [
-                "token" => "abcedfg"
+                'token' => 'abcedfg',
             ]
         )
             ->withInputChannelName(self::HTTP_INPUT_CHANNEL)
             ->withOutputMessageChannel(self::HTTP_OUTPUT_CHANNEL)
-            ->withEndpointId("some-id");
+            ->withEndpointId('some-id');
     }
 
     #[ServiceContext]
     public function withChannelInterceptors()
     {
-        return SimpleChannelInterceptorBuilder::create(self::HTTP_INPUT_CHANNEL, "ref");
+        return SimpleChannelInterceptorBuilder::create(self::HTTP_INPUT_CHANNEL, 'ref');
     }
 
     #[ServiceContext]

@@ -11,17 +11,15 @@ use Test\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword as AdminPassword;
  */
 abstract class AbstractSuperAdmin implements Admin, Email
 {
-    public function getInformation() : self
+    public function getInformation(): self
     {
-
     }
 
     /**
      * @param AdminPassword $password
      * @return AdminPassword
      */
-    public function getPassword(AdminPassword $password) : AdminPassword
+    public function getPassword(AdminPassword $password): AdminPassword
     {
-
     }
 }

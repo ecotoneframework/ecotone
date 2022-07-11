@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Amqp\Fixture\ErrorChannel;
@@ -12,8 +13,8 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 class ErrorConfigurationContext
 {
-    const INPUT_CHANNEL = "correctOrders";
-    const ERROR_CHANNEL = "errorChannel";
+    public const INPUT_CHANNEL = 'correctOrders';
+    public const ERROR_CHANNEL = 'errorChannel';
 
 
     #[ServiceContext]
@@ -21,7 +22,7 @@ class ErrorConfigurationContext
     {
         return [
             AmqpBackedMessageChannelBuilder::create(self::INPUT_CHANNEL)
-                ->withReceiveTimeout(1)
+                ->withReceiveTimeout(1),
         ];
     }
 
@@ -42,7 +43,7 @@ class ErrorConfigurationContext
             PollingMetadata::create(self::INPUT_CHANNEL)
                 ->setExecutionTimeLimitInMilliseconds(3000)
                 ->setHandledMessageLimit(1)
-                ->setErrorChannelName(self::ERROR_CHANNEL)
+                ->setErrorChannelName(self::ERROR_CHANNEL),
         ];
     }
 
@@ -52,7 +53,7 @@ class ErrorConfigurationContext
         return [
             AmqpConfiguration::createWithDefaults()
                 ->withTransactionOnAsynchronousEndpoints(true)
-                ->withTransactionOnCommandBus(true)
+                ->withTransactionOnCommandBus(true),
         ];
     }
 }

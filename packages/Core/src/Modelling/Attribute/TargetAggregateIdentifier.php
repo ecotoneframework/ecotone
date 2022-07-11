@@ -2,12 +2,14 @@
 
 namespace Ecotone\Modelling\Attribute;
 
-#[\Attribute(\Attribute::TARGET_PROPERTY)]
+use Attribute;
+
+#[Attribute(Attribute::TARGET_PROPERTY)]
 class TargetAggregateIdentifier
 {
-    public string $identifierName = "";
+    public string $identifierName = '';
 
-    public function __construct(string $identifierName = "")
+    public function __construct(string $identifierName = '')
     {
         $this->identifierName = $identifierName;
     }

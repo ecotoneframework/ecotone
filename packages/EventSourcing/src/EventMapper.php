@@ -1,11 +1,7 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
 
-
-use DateTimeImmutable;
-use DateTimeZone;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Event;
 use Prooph\Common\Messaging\Message;
@@ -23,12 +19,12 @@ class EventMapper implements MessageFactory
         $this->nameToEventMapping = $nameToEventMapping;
     }
 
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
-        return new self([],[]);
+        return new self([], []);
     }
 
-    public static function createWith(array $eventToNameMapping, array $nameToEventMapping) : static
+    public static function createWith(array $eventToNameMapping, array $nameToEventMapping): static
     {
         return new self($eventToNameMapping, $nameToEventMapping);
     }
@@ -46,7 +42,7 @@ class EventMapper implements MessageFactory
         );
     }
 
-    public function mapNameToEventType(string $name) : string
+    public function mapNameToEventType(string $name): string
     {
         if ($name === TypeDescriptor::ARRAY) {
             return TypeDescriptor::ARRAY;

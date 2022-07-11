@@ -1,6 +1,6 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
@@ -14,6 +14,7 @@ use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Throwable;
 
 /**
  * Class LoggingInterceptor
@@ -66,7 +67,7 @@ class LoggingInterceptor
      * @throws InvalidArgumentException
      * @throws MessagingException
      * @throws TypeDefinitionException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function logException(MethodInvocation $methodInvocation, Message $message, LogError $log, ReferenceSearchService $referenceSearchService)
     {
@@ -77,7 +78,7 @@ class LoggingInterceptor
 
         try {
             $returnValue = $methodInvocation->proceed();
-        }catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $loggingService->logException(LoggingLevel::create($log->logLevel, $log->logFullMessage), $exception, $message);
 
             throw $exception;

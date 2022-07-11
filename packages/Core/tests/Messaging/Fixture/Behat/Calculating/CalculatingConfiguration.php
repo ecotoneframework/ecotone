@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
@@ -11,7 +12,7 @@ class CalculatingConfiguration
     #[ServiceContext]
     public function registerMetadata()
     {
-        return PollingMetadata::create("inboundCalculator")
+        return PollingMetadata::create('inboundCalculator')
             ->setHandledMessageLimit(1);
     }
 }

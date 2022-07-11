@@ -4,9 +4,6 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Test\Ecotone\Messaging\Fixture\Configuration\DumbModuleRetrievingService;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Test\Ecotone\Messaging\Unit\MessagingTest;

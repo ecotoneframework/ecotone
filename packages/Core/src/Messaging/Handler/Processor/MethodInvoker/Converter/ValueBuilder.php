@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
+
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -38,7 +40,7 @@ class ValueBuilder implements ParameterConverterBuilder
      *
      * @return self
      */
-    public static function create(string $parameterName, $staticValue) : self
+    public static function create(string $parameterName, $staticValue): self
     {
         return new self($parameterName, $staticValue);
     }

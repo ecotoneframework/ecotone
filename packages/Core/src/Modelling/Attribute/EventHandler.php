@@ -2,13 +2,10 @@
 
 namespace Ecotone\Modelling\Attribute;
 
-use Doctrine\Common\Annotations\Annotation\Target;
-use Ecotone\Messaging\Attribute\EndpointAnnotation;
+use Attribute;
 use Ecotone\Messaging\Attribute\IdentifiedAnnotation;
-use Ecotone\Messaging\Config\ConfigurationException;
-use Ramsey\Uuid\Uuid;
 
-#[\Attribute(\Attribute::TARGET_METHOD|\Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
 class EventHandler extends IdentifiedAnnotation
 {
     public string $listenTo;
@@ -20,7 +17,7 @@ class EventHandler extends IdentifiedAnnotation
     /**
      * @param string $listenTo Registers event handler to listen from defined inputs | e.g. from single - "ecotone.modelling.created" | e.g. from multiple - "ecotone.modelling.*"
      */
-    public function __construct(string $listenTo = "", string $endpointId = "", string $outputChannelName = "", bool $dropMessageOnNotFound = false, array $identifierMetadataMapping = [], array $requiredInterceptorNames = [])
+    public function __construct(string $listenTo = '', string $endpointId = '', string $outputChannelName = '', bool $dropMessageOnNotFound = false, array $identifierMetadataMapping = [], array $requiredInterceptorNames = [])
     {
         parent::__construct($endpointId);
 

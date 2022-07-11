@@ -1,17 +1,15 @@
 <?php
 
-
 namespace Test\Ecotone\Amqp\Fixture\FailureTransactionWithFatalError;
 
 use Ecotone\Amqp\AmqpBackedMessageChannelBuilder;
 use Ecotone\Amqp\Configuration\AmqpConfiguration;
 use Ecotone\Messaging\Attribute\ServiceContext;
-use Ecotone\Messaging\Attribute\Extension;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class ChannelConfiguration
 {
-    const QUEUE_NAME = "placeOrder";
+    public const QUEUE_NAME = 'placeOrder';
 
     #[ServiceContext]
     public function registerCommandChannel(): array
@@ -24,8 +22,7 @@ class ChannelConfiguration
                 ->setExecutionTimeLimitInMilliseconds(1),
             AmqpConfiguration::createWithDefaults()
                 ->withTransactionOnAsynchronousEndpoints(true)
-                ->withTransactionOnCommandBus(true)
+                ->withTransactionOnCommandBus(true),
         ];
     }
-
 }

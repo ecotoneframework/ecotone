@@ -6,7 +6,7 @@ use Ecotone\Messaging\Store\Document\DocumentStore;
 
 class BaseEventSourcingConfiguration
 {
-    const DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD = 100;
+    public const DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD = 100;
 
     private array $snapshotsAggregateClasses = [];
     private int $snapshotTriggerThreshold = self::DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD;

@@ -2,6 +2,9 @@
 
 namespace Ecotone\AnnotationFinder;
 
+use ReflectionClass;
+use ReflectionMethod;
+
 /**
  * Class TypeResolver
  * @package Ecotone\Messaging\Handler
@@ -18,7 +21,7 @@ class TypeResolver
         return new self();
     }
 
-    public static function getMethodOwnerClass(\ReflectionClass $analyzedClass, string $methodName) : \ReflectionClass
+    public static function getMethodOwnerClass(ReflectionClass $analyzedClass, string $methodName): ReflectionClass
     {
         $methodReflection = $analyzedClass->getMethod($methodName);
         $declaringClass = self::getMethodDeclaringClass($analyzedClass, $methodReflection->getName());
@@ -26,7 +29,7 @@ class TypeResolver
             return self::getMethodOwnerClass($declaringClass, $methodName);
         }
         foreach ($analyzedClass->getTraits() as $trait) {
-            if ($trait->hasMethod($methodReflection->getName()) && !self::wasTraitOverwritten($methodReflection, $trait)) {
+            if ($trait->hasMethod($methodReflection->getName()) && ! self::wasTraitOverwritten($methodReflection, $trait)) {
                 return self::getMethodOwnerClass($trait, $methodName);
             }
         }
@@ -34,12 +37,12 @@ class TypeResolver
         return $analyzedClass;
     }
 
-    private static function getMethodDeclaringClass(\ReflectionClass $analyzedClass, string $methodName): \ReflectionClass
+    private static function getMethodDeclaringClass(ReflectionClass $analyzedClass, string $methodName): ReflectionClass
     {
         return $analyzedClass->getMethod($methodName)->getDeclaringClass();
     }
 
-    private static function wasTraitOverwritten(\ReflectionMethod $methodReflection, \ReflectionClass $trait): bool
+    private static function wasTraitOverwritten(ReflectionMethod $methodReflection, ReflectionClass $trait): bool
     {
         return $methodReflection->getFileName() !== $trait->getMethod($methodReflection->getName())->getFileName();
     }

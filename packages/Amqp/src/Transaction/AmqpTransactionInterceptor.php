@@ -1,13 +1,13 @@
 <?php
 
-
 namespace Ecotone\Amqp\Transaction;
 
+use AMQPChannel;
 use Ecotone\Amqp\AmqpPublisherConnectionFactory;
 use Ecotone\Enqueue\CachedConnectionFactory;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Enqueue\AmqpLib\AmqpContext;
+use Throwable;
 
 /**
  * https://www.rabbitmq.com/blog/2011/02/10/introducing-publisher-confirms/
@@ -29,9 +29,10 @@ class AmqpTransactionInterceptor
     }
 
     public function transactional(MethodInvocation $methodInvocation, ?AmqpTransaction $amqpTransaction, ReferenceSearchService $referenceSearchService)
-    {;
+    {
+        ;
         /** @var CachedConnectionFactory[] $connectionFactories */
-        $connectionFactories = array_map(function(string $connectionReferenceName) use ($referenceSearchService) {
+        $connectionFactories = array_map(function (string $connectionReferenceName) use ($referenceSearchService) {
             return CachedConnectionFactory::createFor(new AmqpPublisherConnectionFactory($referenceSearchService->get($connectionReferenceName)));
         }, $amqpTransaction ? $amqpTransaction->connectionReferenceNames : $this->connectionReferenceNames);
 
@@ -50,17 +51,20 @@ class AmqpTransactionInterceptor
                 foreach ($connectionFactories as $connectionFactory) {
                     $connectionFactory->createContext()->getExtChannel()->commitTransaction();
                 }
-            }catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 foreach ($connectionFactories as $connectionFactory) {
-                    /** @var \AMQPChannel $extChannel */
+                    /** @var AMQPChannel $extChannel */
                     $extChannel = $connectionFactory->createContext()->getExtChannel();
-                    try{$extChannel->rollbackTransaction();}catch(\Throwable){}
+                    try {
+                        $extChannel->rollbackTransaction();
+                    } catch (\Throwable) {
+                    }
                     $extChannel->close(); // Has to be closed in amqp_lib, as if channel is trarnsactional does not allow for sending outside of transaction
                 }
 
                 throw $exception;
             }
-        }catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $this->isRunningTransaction = false;
 
             throw $exception;

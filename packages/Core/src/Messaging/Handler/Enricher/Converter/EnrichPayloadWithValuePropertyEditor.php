@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Message;
 
@@ -44,7 +45,7 @@ class EnrichPayloadWithValuePropertyEditor implements PropertyEditor
      *
      * @return self
      */
-    public static function createWith(PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, $value) : self
+    public static function createWith(PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, $value): self
     {
         return new self($dataSetter, $propertyPath, $value);
     }

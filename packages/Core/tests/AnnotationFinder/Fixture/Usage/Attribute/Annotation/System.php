@@ -2,8 +2,9 @@
 
 namespace Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class System
 {
-
 }

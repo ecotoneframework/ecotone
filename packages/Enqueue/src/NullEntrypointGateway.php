@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Enqueue;
 
 use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
@@ -11,13 +10,12 @@ class NullEntrypointGateway implements InboundChannelAdapterEntrypoint
     {
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
 
-    public function executeEntrypoint($data) : void
+    public function executeEntrypoint($data): void
     {
-        return;
     }
 }

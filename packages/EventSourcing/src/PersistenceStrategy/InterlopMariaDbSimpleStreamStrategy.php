@@ -2,12 +2,14 @@
 
 namespace Ecotone\EventSourcing\PersistenceStrategy;
 
+use Iterator;
 use Prooph\Common\Messaging\MessageConverter;
 use Prooph\EventStore\Pdo\DefaultMessageConverter;
 use Prooph\EventStore\Pdo\PersistenceStrategy\MariaDbPersistenceStrategy;
 use Prooph\EventStore\Pdo\Util\Json;
 use Prooph\EventStore\StreamName;
-use Iterator;
+
+use function sha1;
 
 /**
  * Using Normal Simple Stream Strategy is using different index name.
@@ -32,19 +34,19 @@ final class InterlopMariaDbSimpleStreamStrategy implements MariaDbPersistenceStr
     public function createSchema(string $tableName): array
     {
         $statement = <<<EOT
-CREATE TABLE `$tableName` (
-    `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
-    `event_id` CHAR(36) COLLATE utf8mb4_bin NOT NULL,
-    `event_name` VARCHAR(100) COLLATE utf8mb4_bin NOT NULL,
-    `payload` LONGTEXT NOT NULL,
-    `metadata` LONGTEXT NOT NULL,
-    `created_at` DATETIME(6) NOT NULL,
-    CHECK (`payload` IS NOT NULL AND JSON_VALID(`payload`)),
-    CHECK (`metadata` IS NOT NULL AND JSON_VALID(`metadata`)),
-    PRIMARY KEY (`no`),
-    UNIQUE KEY `ix_query_aggregate` (`event_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-EOT;
+            CREATE TABLE `$tableName` (
+                `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
+                `event_id` CHAR(36) COLLATE utf8mb4_bin NOT NULL,
+                `event_name` VARCHAR(100) COLLATE utf8mb4_bin NOT NULL,
+                `payload` LONGTEXT NOT NULL,
+                `metadata` LONGTEXT NOT NULL,
+                `created_at` DATETIME(6) NOT NULL,
+                CHECK (`payload` IS NOT NULL AND JSON_VALID(`payload`)),
+                CHECK (`metadata` IS NOT NULL AND JSON_VALID(`metadata`)),
+                PRIMARY KEY (`no`),
+                UNIQUE KEY `ix_query_aggregate` (`event_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+            EOT;
 
         return [$statement];
     }
@@ -79,6 +81,6 @@ EOT;
 
     public function generateTableName(StreamName $streamName): string
     {
-        return '_' . \sha1($streamName->toString());
+        return '_' . sha1($streamName->toString());
     }
 }

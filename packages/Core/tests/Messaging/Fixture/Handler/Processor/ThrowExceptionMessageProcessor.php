@@ -4,6 +4,7 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Processor;
 
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Message;
+use Throwable;
 
 /**
  * Class ThrowExceptionMessageProcessor
@@ -13,16 +14,16 @@ use Ecotone\Messaging\Message;
 class ThrowExceptionMessageProcessor implements MessageProcessor
 {
     /**
-     * @var \Throwable
+     * @var Throwable
      */
     private $exception;
 
-    private function __construct(\Throwable $exception)
+    private function __construct(Throwable $exception)
     {
         $this->exception = $exception;
     }
 
-    public static function create(\Throwable $exception) : self
+    public static function create(Throwable $exception): self
     {
         return new self($exception);
     }
@@ -38,7 +39,7 @@ class ThrowExceptionMessageProcessor implements MessageProcessor
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return self::class;
     }

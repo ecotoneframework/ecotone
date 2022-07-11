@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
@@ -27,32 +28,32 @@ interface MethodInvocation
     /**
      * @return string
      */
-    public function getInterceptedClassName() : string;
+    public function getInterceptedClassName(): string;
 
     /**
      * @return string
      */
-    public function getInterceptedMethodName() : string;
+    public function getInterceptedMethodName(): string;
 
     /**
      * @return InterfaceToCall
      */
-    public function getInterceptedInterface() : InterfaceToCall;
+    public function getInterceptedInterface(): InterfaceToCall;
 
     /**
      * @return object[]
      */
-    public function getEndpointAnnotations() : iterable;
+    public function getEndpointAnnotations(): iterable;
 
     /**
      * @return array
      */
-    public function getArguments() : array;
+    public function getArguments(): array;
 
     /**
      * @param string $parameterName
      * @param mixed $value
      * @return void
      */
-    public function replaceArgument(string $parameterName, $value) : void;
+    public function replaceArgument(string $parameterName, $value): void;
 }

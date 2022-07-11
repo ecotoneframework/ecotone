@@ -2,14 +2,14 @@
 
 namespace Ecotone\EventSourcing\Attribute;
 
+use Attribute;
 use Ecotone\EventSourcing\ProjectionManager;
 
-#[\Attribute]
+#[Attribute]
 final class ProjectionStateGateway
 {
     public function __construct(private string $projectionName, private string $projectioManagerReference = ProjectionManager::class)
     {
-
     }
 
     public function getProjectionName(): string

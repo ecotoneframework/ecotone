@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use ArrayIterator;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -17,7 +19,7 @@ class MethodInvokerChainProcessor implements MethodInvocation
     private MethodCall $methodCall;
     private MethodInvoker $methodInvoker;
     /**
-     * @var \ArrayIterator|AroundMethodInterceptor[]
+     * @var ArrayIterator|AroundMethodInterceptor[]
      */
     private iterable $aroundMethodInterceptors;
     /**
@@ -38,7 +40,7 @@ class MethodInvokerChainProcessor implements MethodInvocation
     {
         $this->methodCall = $methodCall;
         $this->methodInvoker = $methodInvoker;
-        $this->aroundMethodInterceptors = new \ArrayIterator($aroundMethodInterceptors);
+        $this->aroundMethodInterceptors = new ArrayIterator($aroundMethodInterceptors);
         $this->objectToInvokeOn = $objectToInvokeOn;
         $this->interceptedInterfaceToCall = $interceptedInterfaceToCall;
         $this->requestMessage = $requestMessage;
@@ -55,7 +57,7 @@ class MethodInvokerChainProcessor implements MethodInvocation
         $aroundMethodInterceptor = $this->aroundMethodInterceptors->current();
         $this->aroundMethodInterceptors->next();
 
-        if (!$aroundMethodInterceptor) {
+        if (! $aroundMethodInterceptor) {
             return call_user_func_array([$this->objectToInvokeOn, $this->interceptedInterfaceToCall->getMethodName()], $this->methodCall->getMethodArgumentValues());
         }
 
@@ -71,7 +73,7 @@ class MethodInvokerChainProcessor implements MethodInvocation
      */
     public function replaceArgument(string $parameterName, $value): void
     {
-        if (!$this->methodCall->hasMethodArgumentWithName($parameterName)) {
+        if (! $this->methodCall->hasMethodArgumentWithName($parameterName)) {
             throw InvalidArgumentException::create("Can't replace argument with parameter name {$parameterName}. This parameter does not exists for {$this->getInterceptedInterface()}");
         }
 
@@ -113,7 +115,7 @@ class MethodInvokerChainProcessor implements MethodInvocation
     /**
      * @inheritdoc
      */
-    public function getInterceptedInterface() : InterfaceToCall
+    public function getInterceptedInterface(): InterfaceToCall
     {
         return $this->interceptedInterfaceToCall;
     }

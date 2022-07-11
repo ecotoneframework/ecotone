@@ -6,9 +6,8 @@ use Ecotone\Messaging\Attribute\ConsoleCommand;
 
 class DefaultParametersOneTimeCommandExample
 {
-    #[ConsoleCommand("doSomething")]
-    public function execute(string $name, string $surname = "cash") : void
+    #[ConsoleCommand('doSomething')]
+    public function execute(string $name, string $surname = 'cash'): void
     {
-
     }
 }

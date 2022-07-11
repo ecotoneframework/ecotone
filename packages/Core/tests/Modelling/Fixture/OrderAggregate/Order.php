@@ -12,7 +12,7 @@ use Ecotone\Modelling\WithAggregateEvents;
 use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 
-#[Asynchronous("orders")]
+#[Asynchronous('orders')]
 #[Aggregate]
 class Order
 {
@@ -29,27 +29,27 @@ class Order
         $this->recordThat(new OrderWasPlaced($orderId));
     }
 
-    #[CommandHandler("order.register", "orderReceiver")]
-    public static function register(PlaceOrder $placeOrder) : self
+    #[CommandHandler('order.register', 'orderReceiver')]
+    public static function register(PlaceOrder $placeOrder): self
     {
         return new self($placeOrder->getOrderId());
     }
 
-    #[EventHandler(endpointId:"orderPlaced")]
-    public function notify(OrderWasPlaced $order) : void
+    #[EventHandler(endpointId:'orderPlaced')]
+    public function notify(OrderWasPlaced $order): void
     {
         $this->isNotifiedCount++;
         $this->recordThat(new OrderWasNotified($this->orderId));
     }
 
-    #[QueryHandler("order.getOrder")]
-    public function getRegisteredOrder() : string
+    #[QueryHandler('order.getOrder')]
+    public function getRegisteredOrder(): string
     {
         return $this->orderId;
     }
 
-    #[QueryHandler("order.wasNotified")]
-    public function getIsNotifiedCount() : int
+    #[QueryHandler('order.wasNotified')]
+    public function getIsNotifiedCount(): int
     {
         return $this->isNotifiedCount;
     }

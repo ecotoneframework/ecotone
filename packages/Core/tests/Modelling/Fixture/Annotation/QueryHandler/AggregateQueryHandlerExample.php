@@ -18,14 +18,13 @@ class AggregateQueryHandlerExample
     #[AggregateIdentifier]
     private string $id;
 
-    #[QueryHandler(endpointId: "some-id")]
-    public function doStuff(SomeQuery $query) : SomeResult
+    #[QueryHandler(endpointId: 'some-id')]
+    public function doStuff(SomeQuery $query): SomeResult
     {
         return new SomeResult();
     }
 
-    public function doAnotherAction(SomeQuery $query) : SomeResult
+    public function doAnotherAction(SomeQuery $query): SomeResult
     {
-
     }
 }

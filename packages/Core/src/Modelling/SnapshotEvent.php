@@ -8,7 +8,9 @@ namespace Ecotone\Modelling;
  */
 final class SnapshotEvent
 {
-    public function __construct(private object $aggregate) {}
+    public function __construct(private object $aggregate)
+    {
+    }
 
     public function getAggregate(): object
     {

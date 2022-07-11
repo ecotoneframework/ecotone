@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion;
-
 
 interface OrderInterface
 {

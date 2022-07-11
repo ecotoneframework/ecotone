@@ -11,7 +11,7 @@ class BigBox implements Box
         $this->boxId = $boxId;
     }
 
-    public static function create(string $boxId) : static
+    public static function create(string $boxId): static
     {
         return new self($boxId);
     }

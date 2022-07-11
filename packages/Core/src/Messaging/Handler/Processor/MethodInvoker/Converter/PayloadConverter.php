@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
@@ -30,7 +31,7 @@ class PayloadConverter implements ParameterConverter
     /**
      * @param string $parameterName
      */
-    public static function create(string $parameterName): \Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter
+    public static function create(string $parameterName): PayloadConverter
     {
         return new self($parameterName);
     }

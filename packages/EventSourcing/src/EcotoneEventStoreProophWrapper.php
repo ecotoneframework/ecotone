@@ -1,12 +1,10 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
 
 use ArrayIterator;
 use DateTimeImmutable;
 use DateTimeZone;
-use Doctrine\DBAL\Driver\PDOConnection;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -75,7 +73,7 @@ class EcotoneEventStoreProophWrapper implements EventStore
             if ($eventToConvert instanceof Event) {
                 $payload = $eventToConvert->getPayload();
                 $metadata = $eventToConvert->getMetadata();
-            }else {
+            } else {
                 $payload = $eventToConvert;
                 $metadata = [];
                 $eventToConvert = Event::create($payload);
@@ -83,7 +81,7 @@ class EcotoneEventStoreProophWrapper implements EventStore
 
             $proophEvents[] = new ProophMessage(
                 array_key_exists(MessageHeaders::MESSAGE_ID, $metadata) ? Uuid::fromString($metadata[MessageHeaders::MESSAGE_ID]) : Uuid::uuid4(),
-                array_key_exists(MessageHeaders::TIMESTAMP, $metadata) ? new DateTimeImmutable("@" . $metadata[MessageHeaders::TIMESTAMP], new DateTimeZone('UTC')) : new DateTimeImmutable("now", new DateTimeZone('UTC')),
+                array_key_exists(MessageHeaders::TIMESTAMP, $metadata) ? new DateTimeImmutable('@' . $metadata[MessageHeaders::TIMESTAMP], new DateTimeZone('UTC')) : new DateTimeImmutable('now', new DateTimeZone('UTC')),
                 is_array($payload) ? $payload : $this->conversionService->convert($payload, TypeDescriptor::createFromVariable($payload), MediaType::createApplicationXPHP(), TypeDescriptor::createArrayType(), MediaType::createApplicationXPHP()),
                 $metadata,
                 $this->eventMapper->mapEventToName($eventToConvert)
@@ -98,7 +96,7 @@ class EcotoneEventStoreProophWrapper implements EventStore
         return $this->eventStore;
     }
 
-    public function getWrappedProophEventStore() : ProophEventStore
+    public function getWrappedProophEventStore(): ProophEventStore
     {
         return $this->getWrappedEventStore()->getEventStore();
     }
@@ -126,7 +124,7 @@ class EcotoneEventStoreProophWrapper implements EventStore
     public function load(string $streamName, int $fromNumber = 1, int $count = null, MetadataMatcher $metadataMatcher = null, bool $deserialize = true): array
     {
         $streamEvents = $this->eventStore->load(new StreamName($streamName), $fromNumber, $count, $metadataMatcher);
-        if (!$streamEvents->valid()) {
+        if (! $streamEvents->valid()) {
             $streamEvents = new ArrayIterator([]);
         }
 
@@ -162,7 +160,7 @@ class EcotoneEventStoreProophWrapper implements EventStore
     public function loadReverse(string $streamName, int $fromNumber = null, int $count = null, MetadataMatcher $metadataMatcher = null, bool $deserialize = true): array
     {
         $streamEvents = $this->eventStore->loadReverse(new StreamName($streamName), $fromNumber, $count, $metadataMatcher);
-        if (!$streamEvents->valid()) {
+        if (! $streamEvents->valid()) {
             $streamEvents = new ArrayIterator([]);
         }
 

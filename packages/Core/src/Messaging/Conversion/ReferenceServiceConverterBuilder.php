@@ -1,15 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use ReflectionMethod;
 
 /**
  * Class ReferenceConverterBuilder
@@ -48,7 +47,7 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
      * @param Type $targetType
      * @return ReferenceServiceConverterBuilder
      */
-    public static function create(string $referenceName, string $method, Type $sourceType, Type $targetType) : self
+    public static function create(string $referenceName, string $method, Type $sourceType, Type $targetType): self
     {
         return new self($referenceName, $method, $sourceType, $targetType);
     }
@@ -60,7 +59,7 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
     {
         $object = $referenceSearchService->get($this->referenceName);
 
-        $reflectionMethod = new \ReflectionMethod($object, $this->methodName);
+        $reflectionMethod = new ReflectionMethod($object, $this->methodName);
 
         if (count($reflectionMethod->getParameters()) !== 1) {
             throw InvalidArgumentException::create("Converter should have only single parameter: {$reflectionMethod}");

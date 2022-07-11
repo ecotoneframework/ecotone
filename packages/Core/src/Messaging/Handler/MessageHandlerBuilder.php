@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 use Ecotone\Messaging\MessageHandler;
 
 /**
@@ -18,7 +18,7 @@ interface MessageHandlerBuilder
      * @param ReferenceSearchService $referenceSearchService
      * @return MessageHandler
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler;
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler;
 
     /**
      * It returns, internal reference objects that will be called during handling method
@@ -26,7 +26,7 @@ interface MessageHandlerBuilder
      * @param InterfaceToCallRegistry $interfaceToCallRegistry
      * @return InterfaceToCall[]
      */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable;
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable;
 
     /**
      * @param string $inputChannelName
@@ -38,7 +38,7 @@ interface MessageHandlerBuilder
     /**
      * @return string|null
      */
-    public function getEndpointId() : ?string;
+    public function getEndpointId(): ?string;
 
     /**
      * @param string $endpointId
@@ -50,10 +50,10 @@ interface MessageHandlerBuilder
     /**
      * @return string
      */
-    public function getInputMessageChannelName() : string;
+    public function getInputMessageChannelName(): string;
 
     /**
      * @return string[] empty string means no required reference name exists
      */
-    public function getRequiredReferenceNames() : array;
+    public function getRequiredReferenceNames(): array;
 }

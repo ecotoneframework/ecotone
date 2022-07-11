@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
+
 use Ecotone\Messaging\Message;
 
 /**
@@ -29,13 +31,12 @@ class ServiceReturningMessage
      * @param Message $messageToReturn
      * @return ServiceReturningMessage
      */
-    public static function createWith(Message $messageToReturn) : self
+    public static function createWith(Message $messageToReturn): self
     {
         return new self($messageToReturn);
     }
 
-    /**
-     */
+
     public function get()
     {
         return $this->messageToReturn;

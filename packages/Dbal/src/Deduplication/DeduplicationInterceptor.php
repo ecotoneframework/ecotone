@@ -1,11 +1,9 @@
 <?php
 
-
 namespace Ecotone\Dbal\Deduplication;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Ecotone\Dbal\DbalReconnectableConnectionFactory;
 use Ecotone\Enqueue\CachedConnectionFactory;
@@ -40,7 +38,7 @@ class DeduplicationInterceptor
     {
         $connectionFactory = CachedConnectionFactory::createFor(new DbalReconnectableConnectionFactory($referenceSearchService->get($this->connectionReferenceName)));
 
-        if (!$this->isInitialized) {
+        if (! $this->isInitialized) {
             $this->createDataBaseTable($connectionFactory);
             $this->isInitialized = true;
         }
@@ -60,7 +58,7 @@ class DeduplicationInterceptor
             ->fetch();
 
         if ($select) {
-            return null;
+            return;
         }
 
         $result = $methodInvocation->proceed();
@@ -79,19 +77,19 @@ class DeduplicationInterceptor
             ->execute();
     }
 
-    private function insertHandledMessage(ConnectionFactory $connectionFactory, array $headers) : void
+    private function insertHandledMessage(ConnectionFactory $connectionFactory, array $headers): void
     {
         $rowsAffected = $this->getConnection($connectionFactory)->insert(
             $this->getTableName(),
             [
                 'message_id' => $headers[MessageHeaders::MESSAGE_ID],
                 'handled_at' => $this->clock->unixTimeInMilliseconds(),
-                'consumer_endpoint_id' => $headers[MessageHeaders::CONSUMER_ENDPOINT_ID]
+                'consumer_endpoint_id' => $headers[MessageHeaders::CONSUMER_ENDPOINT_ID],
             ],
             [
                 'id' => Types::TEXT,
                 'handled_at' => Types::BIGINT,
-                'consumer_endpoint_id' => Types::TEXT
+                'consumer_endpoint_id' => Types::TEXT,
             ]
         );
 
@@ -102,7 +100,7 @@ class DeduplicationInterceptor
 
     private function getTableName(): string
     {
-        return "ecotone_outbox";
+        return 'ecotone_outbox';
     }
 
     private function createDataBaseTable(ConnectionFactory $connectionFactory): void

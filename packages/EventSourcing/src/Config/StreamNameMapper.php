@@ -12,7 +12,7 @@ final class StreamNameMapper
     public function map(Message $message): Message
     {
         return MessageBuilder::fromMessage($message)
-                ->setHeader("ecotone.eventSourcing.eventStore.streamName", LazyProophProjectionManager::getProjectionStreamName(
+                ->setHeader('ecotone.eventSourcing.eventStore.streamName', LazyProophProjectionManager::getProjectionStreamName(
                     $message->getHeaders()->get(ProjectionExecutor::PROJECTION_NAME)
                 ))->build();
     }

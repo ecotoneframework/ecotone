@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
+use Throwable;
 
 /**
  * Class AbstractChannelInterceptor
@@ -31,7 +33,7 @@ abstract class AbstractChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
+    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
     {
     }
 
@@ -54,7 +56,7 @@ abstract class AbstractChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
+    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
     {
     }
 }

@@ -1,9 +1,10 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class AfterMultiplyCalculation
 {
     /**
@@ -15,6 +16,4 @@ class AfterMultiplyCalculation
     {
         $this->amount = $amount;
     }
-
-
 }

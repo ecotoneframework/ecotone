@@ -2,26 +2,28 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use Closure;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use stdClass;
 
 class StubMethodInvocation implements MethodInvocation
 {
     private int $calledTimes = 0;
-    private \Closure $functionToCall;
+    private Closure $functionToCall;
 
-    private function __construct(\Closure $functionToCall)
+    private function __construct(Closure $functionToCall)
     {
         $this->functionToCall = $functionToCall;
     }
 
-    public static function createEndingImmediately() : self
+    public static function createEndingImmediately(): self
     {
-        return new self(function(){});
+        return new self(function () {
+        });
     }
 
-    public static function createWithCalledFunction(\Closure $functionToCall)
+    public static function createWithCalledFunction(Closure $functionToCall)
     {
-
     }
 
     public function getCalledTimes(): int
@@ -38,7 +40,7 @@ class StubMethodInvocation implements MethodInvocation
 
     public function getObjectToInvokeOn()
     {
-        return new \stdClass();
+        return new stdClass();
     }
 
     public function getInterceptedClassName(): string
@@ -48,12 +50,12 @@ class StubMethodInvocation implements MethodInvocation
 
     public function getInterceptedMethodName(): string
     {
-        return "getInterceptedInterface";
+        return 'getInterceptedInterface';
     }
 
     public function getInterceptedInterface(): InterfaceToCall
     {
-        return InterfaceToCall::create(self::class, "getInterceptedInterface");
+        return InterfaceToCall::create(self::class, 'getInterceptedInterface');
     }
 
     public function getEndpointAnnotations(): iterable
@@ -68,6 +70,5 @@ class StubMethodInvocation implements MethodInvocation
 
     public function replaceArgument(string $parameterName, $value): void
     {
-        return;
     }
 }

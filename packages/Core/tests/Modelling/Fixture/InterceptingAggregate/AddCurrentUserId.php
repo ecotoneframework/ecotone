@@ -10,20 +10,20 @@ class AddCurrentUserId
 {
     private ?string $userId = null;
 
-    #[CommandHandler("addCurrentUserId")]
-    public function setCurrentUserId(string $userId) : void
+    #[CommandHandler('addCurrentUserId')]
+    public function setCurrentUserId(string $userId): void
     {
         $this->userId = $userId;
     }
 
     #[Before(pointcut: Basket::class)]
-    public function addCurrentUserId(array $payload) : array
+    public function addCurrentUserId(array $payload): array
     {
-        return array_merge($payload, ["userId" => $this->userId]);
+        return array_merge($payload, ['userId' => $this->userId]);
     }
 
     #[Around(pointcut: Basket::class)]
-    public function logAction(?Basket $basket) : void
+    public function logAction(?Basket $basket): void
     {
         $logged = true;
 //        do some logging

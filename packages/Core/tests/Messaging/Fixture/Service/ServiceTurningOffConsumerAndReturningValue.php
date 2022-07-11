@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
@@ -30,7 +31,7 @@ class ServiceTurningOffConsumerAndReturningValue
         $this->data = $data;
     }
 
-    public static function create($data) : self
+    public static function create($data): self
     {
         return new self($data);
     }
@@ -48,7 +49,7 @@ class ServiceTurningOffConsumerAndReturningValue
     /**
      * @param ConsumerLifecycle $consumerLifecycle
      */
-    public function setConsumer(ConsumerLifecycle $consumerLifecycle) : void
+    public function setConsumer(ConsumerLifecycle $consumerLifecycle): void
     {
         $this->consumer = $consumerLifecycle;
     }

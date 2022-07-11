@@ -23,7 +23,7 @@ class CommandWithoutAggregateIdentifier
         $this->orderId = $orderId;
     }
 
-    public static function create(?string $orderId) : self
+    public static function create(?string $orderId): self
     {
         return new self($orderId);
     }

@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Support;
+
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
@@ -30,7 +32,7 @@ final class HeaderAccessor
     /**
      * @return array
      */
-    public function headers() : array
+    public function headers(): array
     {
         return $this->headers;
     }
@@ -38,7 +40,7 @@ final class HeaderAccessor
     /**
      * @return HeaderAccessor
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self([]);
     }
@@ -47,7 +49,7 @@ final class HeaderAccessor
      * @param string $headerName
      * @return bool
      */
-    public function hasHeader(string $headerName) : bool
+    public function hasHeader(string $headerName): bool
     {
         return array_key_exists($headerName, $this->headers);
     }
@@ -59,7 +61,7 @@ final class HeaderAccessor
      */
     public function getHeader(string $headerName)
     {
-        if (!$this->hasHeader($headerName)) {
+        if (! $this->hasHeader($headerName)) {
             throw MessageHeaderDoesNotExistsException::create("Header with name {$headerName} does not exists");
         }
 
@@ -70,7 +72,7 @@ final class HeaderAccessor
      * @param string $headerName
      * @param mixed $headerValue
      */
-    public function setHeader(string $headerName, $headerValue) : void
+    public function setHeader(string $headerName, $headerValue): void
     {
         if (is_null($headerValue)) {
             $this->removeHeader($headerName);
@@ -84,7 +86,7 @@ final class HeaderAccessor
     /**
      * @param string $headerName
      */
-    public function removeHeader(string $headerName) : void
+    public function removeHeader(string $headerName): void
     {
         unset($this->headers[$headerName]);
     }
@@ -93,7 +95,7 @@ final class HeaderAccessor
      * @param string $headerName
      * @param mixed $headerValue
      */
-    public function setHeaderIfAbsent(string $headerName, $headerValue) : void
+    public function setHeaderIfAbsent(string $headerName, $headerValue): void
     {
         if ($this->hasHeader($headerName)) {
             return;
@@ -106,7 +108,7 @@ final class HeaderAccessor
      * @param MessageHeaders $messageHeaders
      * @return HeaderAccessor
      */
-    public static function createFrom(MessageHeaders $messageHeaders) : self
+    public static function createFrom(MessageHeaders $messageHeaders): self
     {
         return new self($messageHeaders->headers());
     }

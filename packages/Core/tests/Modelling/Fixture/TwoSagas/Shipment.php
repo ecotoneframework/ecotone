@@ -1,17 +1,17 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\TwoSagas;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use InvalidArgumentException;
 
 #[Aggregate]
 class Shipment
 {
-    const GET_SHIPMENT_STATUS = "getShipmentStatus";
+    public const GET_SHIPMENT_STATUS = 'getShipmentStatus';
     #[AggregateIdentifier]
     private string $orderId;
     private string $status;
@@ -19,32 +19,32 @@ class Shipment
     private function __construct(string $orderId)
     {
         $this->orderId  = $orderId;
-        $this->status = "awaitingPayment";
+        $this->status = 'awaitingPayment';
     }
 
     #[EventHandler]
-    public static function createWith(OrderWasPlaced $event) : self
+    public static function createWith(OrderWasPlaced $event): self
     {
         return new self($event->getOrderId());
     }
 
     #[EventHandler]
-    public function when(OrderWasPaid $event) : void
+    public function when(OrderWasPaid $event): void
     {
-        if ($this->status === "shipped") {
-            throw new \InvalidArgumentException("Trying to ship second time");
+        if ($this->status === 'shipped') {
+            throw new InvalidArgumentException('Trying to ship second time');
         }
 
-        $this->status = "shipped";
+        $this->status = 'shipped';
     }
 
     #[QueryHandler(self::GET_SHIPMENT_STATUS)]
-    public function getStatus() : string
+    public function getStatus(): string
     {
         return $this->status;
     }
 
-    public function getId() : string
+    public function getId(): string
     {
         return $this->orderId;
     }

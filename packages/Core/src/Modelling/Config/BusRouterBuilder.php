@@ -10,10 +10,8 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
-use Ecotone\Modelling\QueryBus;
+use Exception;
 
 /**
  * Class BusRouterBuilder
@@ -35,7 +33,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
     /**
      * @param string[]  $channelNamesRouting
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function __construct(MessageHeadersPropagator $messageHeadersPropagator, string $endpointId, string $inputChannelName, array $channelNamesRouting, string $type)
     {
@@ -50,16 +48,16 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @param string[] $channelNamesRouting
      *
      * @return BusRouterBuilder
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function createEventBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
+    public static function createEventBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
-            BusModule::EVENT_CHANNEL_NAME_BY_OBJECT . ".endpoint",
+            BusModule::EVENT_CHANNEL_NAME_BY_OBJECT . '.endpoint',
             BusModule::EVENT_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
-            "eventByObject"
+            'eventByObject'
         );
     }
 
@@ -67,16 +65,16 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @param string[] $channelNamesRouting
      *
      * @return BusRouterBuilder
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function createEventBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
+    public static function createEventBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
-            BusModule::EVENT_CHANNEL_NAME_BY_NAME . ".endpoint",
+            BusModule::EVENT_CHANNEL_NAME_BY_NAME . '.endpoint',
             BusModule::EVENT_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
-            "eventByName"
+            'eventByName'
         );
     }
 
@@ -84,16 +82,16 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @param string[] $channelNamesRouting
      *
      * @return BusRouterBuilder
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function createCommandBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
+    public static function createCommandBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
-            BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT . ".endpoint",
+            BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT . '.endpoint',
             BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
-            "commandByObject"
+            'commandByObject'
         );
     }
 
@@ -101,16 +99,16 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @param string[] $channelNamesRouting
      *
      * @return BusRouterBuilder
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function createCommandBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
+    public static function createCommandBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
-            BusModule::COMMAND_CHANNEL_NAME_BY_NAME . ".endpoint",
+            BusModule::COMMAND_CHANNEL_NAME_BY_NAME . '.endpoint',
             BusModule::COMMAND_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
-            "commandByName"
+            'commandByName'
         );
     }
 
@@ -118,16 +116,16 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @param string[] $channelNamesRouting
      *
      * @return BusRouterBuilder
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function createQueryBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
+    public static function createQueryBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
-            BusModule::QUERY_CHANNEL_NAME_BY_OBJECT . ".endpoint",
+            BusModule::QUERY_CHANNEL_NAME_BY_OBJECT . '.endpoint',
             BusModule::QUERY_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
-            "queryByObject"
+            'queryByObject'
         );
     }
 
@@ -135,16 +133,16 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @param string[] $channelNamesRouting
      *
      * @return BusRouterBuilder
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function createQueryBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting) : self
+    public static function createQueryBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
-            BusModule::QUERY_CHANNEL_NAME_BY_NAME . ".endpoint",
+            BusModule::QUERY_CHANNEL_NAME_BY_NAME . '.endpoint',
             BusModule::QUERY_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
-            "queryByName"
+            'queryByName'
         );
     }
 
@@ -154,53 +152,53 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         switch ($this->type) {
-            case "eventByObject": {
+            case 'eventByObject': {
                 return RouterBuilder::createRouterFromObject(
                     new EventBusRouter($this->channelNamesRouting),
-                    "routeByObject"
+                    'routeByObject'
                 )   ->setResolutionRequired(false)
                     ->build($channelResolver, $referenceSearchService);
             }
-            case "eventByName": {
+            case 'eventByName': {
                 return RouterBuilder::createRouterFromObject(
                     new EventBusRouter($this->channelNamesRouting),
-                    "routeByName"
+                    'routeByName'
                 )
                     ->setResolutionRequired(false)
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional("routedName", BusModule::EVENT_CHANNEL_NAME_BY_NAME)
+                        HeaderBuilder::createOptional('routedName', BusModule::EVENT_CHANNEL_NAME_BY_NAME),
                     ])
                     ->build($channelResolver, $referenceSearchService);
             }
-            case "commandByObject": {
+            case 'commandByObject': {
                 return RouterBuilder::createRouterFromObject(
                     new CommandBusRouter($this->channelNamesRouting),
-                    "routeByObject"
+                    'routeByObject'
                 )->build($channelResolver, $referenceSearchService);
             }
-            case "commandByName": {
+            case 'commandByName': {
                 return RouterBuilder::createRouterFromObject(
                     new CommandBusRouter($this->channelNamesRouting),
-                    "routeByName"
+                    'routeByName'
                 )
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional("name", BusModule::COMMAND_CHANNEL_NAME_BY_NAME)
+                        HeaderBuilder::createOptional('name', BusModule::COMMAND_CHANNEL_NAME_BY_NAME),
                     ])
                     ->build($channelResolver, $referenceSearchService);
             }
-            case "queryByObject": {
+            case 'queryByObject': {
                 return RouterBuilder::createRouterFromObject(
                     new QueryBusRouter($this->channelNamesRouting),
-                    "routeByObject"
+                    'routeByObject'
                 )->build($channelResolver, $referenceSearchService);
             }
-            case "queryByName": {
+            case 'queryByName': {
                 return RouterBuilder::createRouterFromObject(
                     new QueryBusRouter($this->channelNamesRouting),
-                    "routeByName"
+                    'routeByName'
                 )
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional("name", BusModule::QUERY_CHANNEL_NAME_BY_NAME)
+                        HeaderBuilder::createOptional('name', BusModule::QUERY_CHANNEL_NAME_BY_NAME),
                     ])
                     ->build($channelResolver, $referenceSearchService);
             }
@@ -215,12 +213,12 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [
-            $interfaceToCallRegistry->getFor(QueryBusRouter::class, "routeByName"),
-            $interfaceToCallRegistry->getFor(QueryBusRouter::class, "routeByObject"),
-            $interfaceToCallRegistry->getFor(CommandBusRouter::class, "routeByName"),
-            $interfaceToCallRegistry->getFor(CommandBusRouter::class, "routeByObject"),
-            $interfaceToCallRegistry->getFor(EventBusRouter::class, "routeByName"),
-            $interfaceToCallRegistry->getFor(EventBusRouter::class, "routeByObject"),
+            $interfaceToCallRegistry->getFor(QueryBusRouter::class, 'routeByName'),
+            $interfaceToCallRegistry->getFor(QueryBusRouter::class, 'routeByObject'),
+            $interfaceToCallRegistry->getFor(CommandBusRouter::class, 'routeByName'),
+            $interfaceToCallRegistry->getFor(CommandBusRouter::class, 'routeByObject'),
+            $interfaceToCallRegistry->getFor(EventBusRouter::class, 'routeByName'),
+            $interfaceToCallRegistry->getFor(EventBusRouter::class, 'routeByObject'),
         ];
     }
 

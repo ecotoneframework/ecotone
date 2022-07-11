@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -17,9 +17,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
@@ -29,11 +27,6 @@ use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\SubscribableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use ProxyManager\Configuration;
-use ProxyManager\Factory\LazyLoadingValueHolderFactory;
-use ProxyManager\Factory\RemoteObject\AdapterInterface;
-use ProxyManager\Factory\RemoteObjectFactory;
-use ReflectionException;
 
 /**
  * Class GatewayProxySpec
@@ -42,7 +35,7 @@ use ReflectionException;
  */
 class GatewayProxyBuilder implements GatewayBuilder
 {
-    const DEFAULT_REPLY_MILLISECONDS_TIMEOUT = -1;
+    public const DEFAULT_REPLY_MILLISECONDS_TIMEOUT = -1;
 
     private string $referenceName;
     private string $interfaceName;
@@ -127,7 +120,7 @@ class GatewayProxyBuilder implements GatewayBuilder
         return $this;
     }
 
-    public function withReplyContentType(string $contentType) : self
+    public function withReplyContentType(string $contentType): self
     {
         $this->replyContentType = MediaType::parseMediaType($contentType)->toString();
 
@@ -160,7 +153,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param bool $withLazyBuild
      * @return GatewayProxyBuilder
      */
-    public function withLazyBuild(bool $withLazyBuild): \Ecotone\Messaging\Handler\Gateway\GatewayBuilder
+    public function withLazyBuild(bool $withLazyBuild): GatewayBuilder
     {
         $this->withLazyBuild = $withLazyBuild;
 
@@ -222,7 +215,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param string[] $messageConverterReferenceNames
      * @return GatewayProxyBuilder
      */
-    public function withMessageConverters(array $messageConverterReferenceNames): \Ecotone\Messaging\Handler\Gateway\GatewayBuilder
+    public function withMessageConverters(array $messageConverterReferenceNames): GatewayBuilder
     {
         $this->messageConverterReferenceNames = $messageConverterReferenceNames;
         foreach ($messageConverterReferenceNames as $messageConverterReferenceName) {
@@ -256,7 +249,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): \Ecotone\Messaging\Handler\Gateway\GatewayBuilder
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): GatewayBuilder
     {
         $this->beforeInterceptors[] = $methodInterceptor;
 
@@ -267,7 +260,7 @@ class GatewayProxyBuilder implements GatewayBuilder
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): \Ecotone\Messaging\Handler\Gateway\GatewayBuilder
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): GatewayBuilder
     {
         $this->afterInterceptors[] = $methodInterceptor;
 
@@ -280,10 +273,10 @@ class GatewayProxyBuilder implements GatewayBuilder
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         $resolvedInterfaces = [
-            $interfaceToCallRegistry->getFor(GatewayInternalHandler::class, "handle"),
-            $interfaceToCallRegistry->getFor(ErrorChannelInterceptor::class, "handle"),
-            $interfaceToCallRegistry->getFor(ConversionInterceptor::class, "convert"),
-            $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName)
+            $interfaceToCallRegistry->getFor(GatewayInternalHandler::class, 'handle'),
+            $interfaceToCallRegistry->getFor(ErrorChannelInterceptor::class, 'handle'),
+            $interfaceToCallRegistry->getFor(ConversionInterceptor::class, 'convert'),
+            $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName),
         ];
 
         foreach ($this->aroundInterceptors as $aroundInterceptor) {
@@ -341,12 +334,12 @@ class GatewayProxyBuilder implements GatewayBuilder
         $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);
 
         if ($this->withLazyBuild) {
-            $buildCallback = function() use ($referenceSearchService, $channelResolver) {
+            $buildCallback = function () use ($referenceSearchService, $channelResolver) {
                 return $this->buildWithoutProxyObject($referenceSearchService, $channelResolver);
             };
-        }else {
+        } else {
             $gateway = $this->buildWithoutProxyObject($referenceSearchService, $channelResolver);
-            $buildCallback = function() use ($gateway) {
+            $buildCallback = function () use ($gateway) {
                 return $gateway;
             };
         }
@@ -354,7 +347,7 @@ class GatewayProxyBuilder implements GatewayBuilder
         return $proxyFactory->createProxyClass($this->interfaceName, $buildCallback);
     }
 
-    public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver) : NonProxyGateway
+    public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): NonProxyGateway
     {
         $this->validateInterceptorsCorrectness($referenceSearchService);
         Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName} which is not correct interface");
@@ -365,31 +358,31 @@ class GatewayProxyBuilder implements GatewayBuilder
         $requestChannel = $channelResolver->resolve($this->requestChannelName);
         $interfaceToCall = $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName);
 
-        if (!($interfaceToCall->canItReturnNull() || $interfaceToCall->hasReturnTypeVoid())) {
+        if (! ($interfaceToCall->canItReturnNull() || $interfaceToCall->hasReturnTypeVoid())) {
             /** @var DirectChannel $requestChannel */
-            Assert::isSubclassOf($requestChannel, SubscribableChannel::class, "Gateway request channel should not be pollable if expected return type is not nullable");
+            Assert::isSubclassOf($requestChannel, SubscribableChannel::class, 'Gateway request channel should not be pollable if expected return type is not nullable');
         }
 
-        if (!$interfaceToCall->canItReturnNull() && $this->errorChannelName && !$interfaceToCall->hasReturnTypeVoid()) {
+        if (! $interfaceToCall->canItReturnNull() && $this->errorChannelName && ! $interfaceToCall->hasReturnTypeVoid()) {
             throw InvalidArgumentException::create("Gateway {$interfaceToCall} with error channel must allow nullable return type");
         }
 
         if ($replyChannel) {
             /** @var PollableChannel $replyChannel */
-            Assert::isSubclassOf($replyChannel, PollableChannel::class, "Reply channel must be pollable");
+            Assert::isSubclassOf($replyChannel, PollableChannel::class, 'Reply channel must be pollable');
         }
         $errorChannel = $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null;
         $aroundInterceptors = $this->aroundInterceptors;
         if ($errorChannel) {
             $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                 new ErrorChannelInterceptor($errorChannel),
-                "handle",
+                'handle',
                 Precedence::ERROR_CHANNEL_PRECEDENCE,
                 $this->interfaceName
             );
         }
 
-        if (!$interfaceToCall->canReturnValue() && $this->replyChannelName) {
+        if (! $interfaceToCall->canReturnValue() && $this->replyChannelName) {
             throw InvalidArgumentException::create("Can't set reply channel for {$interfaceToCall}");
         }
 
@@ -397,10 +390,10 @@ class GatewayProxyBuilder implements GatewayBuilder
         if ($this->replyContentType) {
             $methodArgumentConverters[] = GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $this->replyContentType)->build($referenceSearchService);
         }
-        if ($interfaceToCall->hasFirstParameter() && !$this->hasConverterFor($interfaceToCall->getFirstParameter())) {
+        if ($interfaceToCall->hasFirstParameter() && ! $this->hasConverterFor($interfaceToCall->getFirstParameter())) {
             $methodArgumentConverters[] = GatewayPayloadBuilder::create($interfaceToCall->getFirstParameter()->getName())->build($referenceSearchService);
         }
-        if ($interfaceToCall->hasSecondParameter() && !$this->hasConverterFor($interfaceToCall->getSecondParameter())) {
+        if ($interfaceToCall->hasSecondParameter() && ! $this->hasConverterFor($interfaceToCall->getSecondParameter())) {
             if ($interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()) {
                 $methodArgumentConverters[] = GatewayHeadersBuilder::create($interfaceToCall->getSecondParameter()->getName())->build($referenceSearchService);
             }
@@ -431,7 +424,8 @@ class GatewayProxyBuilder implements GatewayBuilder
         return new Gateway(
             $interfaceToCall,
             new MethodCallToMessageConverter(
-                $interfaceToCall, $methodArgumentConverters
+                $interfaceToCall,
+                $methodArgumentConverters
             ),
             $messageConverters,
             $requestChannel,
@@ -493,7 +487,7 @@ class GatewayProxyBuilder implements GatewayBuilder
 
     public function __toString()
     {
-        return sprintf("Gateway - %s:%s with reference name `%s` for request channel `%s`", $this->interfaceName, $this->methodName, $this->referenceName, $this->requestChannelName);
+        return sprintf('Gateway - %s:%s with reference name `%s` for request channel `%s`', $this->interfaceName, $this->methodName, $this->referenceName, $this->requestChannelName);
     }
 
     private function hasConverterFor(\Ecotone\Messaging\Handler\InterfaceParameter $parameter): bool

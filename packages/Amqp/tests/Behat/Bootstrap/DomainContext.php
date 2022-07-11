@@ -2,45 +2,35 @@
 
 namespace Test\Ecotone\Amqp\Behat\Bootstrap;
 
-use Behat\Gherkin\Node\TableNode;
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
-use Doctrine\Common\Annotations\AnnotationException;
+use Behat\Gherkin\Node\TableNode;
 use Ecotone\Amqp\Distribution\AmqpDistributionModule;
-use Ecotone\Amqp\Publisher\AmqpMessagePublisherConfiguration;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\QueryBus;
 use Enqueue\AmqpExt\AmqpConnectionFactory;
 use Interop\Amqp\Impl\AmqpQueue;
-use PHPUnit\Framework\Assert;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use ReflectionException;
 use Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Publisher\UserService;
 use Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Receiver\TicketServiceMessagingConfiguration;
 use Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Receiver\TicketServiceReceiver;
 use Test\Ecotone\Amqp\Fixture\ErrorChannel\ErrorConfigurationContext;
 use Test\Ecotone\Amqp\Fixture\FailureTransactionWithFatalError\ChannelConfiguration;
 use Test\Ecotone\Amqp\Fixture\Order\OrderService;
-use Test\Ecotone\Amqp\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Amqp\Fixture\Shop\MessagingConfiguration;
 use Test\Ecotone\Amqp\Fixture\Shop\ShoppingCart;
-use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
-use Test\Ecotone\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderErrorHandler;
 
 /**
  * Defines application features from the specific context.
+ *
+ * @internal
  */
 class DomainContext extends TestCase implements Context
 {
@@ -55,68 +45,68 @@ class DomainContext extends TestCase implements Context
      */
     public function iActiveMessagingForNamespace(string $namespace)
     {
-        $host = getenv("RABBIT_HOST") ? getenv("RABBIT_HOST") : "localhost";
+        $host = getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : 'localhost';
 
         switch ($namespace) {
             case "Test\Ecotone\Amqp\Fixture\Order":
                 {
                     $objects = [
                         new OrderService(),
-                        new OrderErrorHandler()
+                        new OrderErrorHandler(),
                     ];
                     break;
                 }
             case "Test\Ecotone\Amqp\Fixture\FailureTransaction":
                 {
                     $objects = [
-                        new \Test\Ecotone\Amqp\Fixture\FailureTransaction\OrderService()
+                        new \Test\Ecotone\Amqp\Fixture\FailureTransaction\OrderService(),
                     ];
                 }
-                break;
+            break;
             case "Test\Ecotone\Amqp\Fixture\SuccessTransaction":
                 {
                     $objects = [
-                        new \Test\Ecotone\Amqp\Fixture\SuccessTransaction\OrderService()
+                        new \Test\Ecotone\Amqp\Fixture\SuccessTransaction\OrderService(),
                     ];
                 }
-                break;
+            break;
             case "Test\Ecotone\Amqp\Fixture\Shop":
                 {
                     $objects = [
-                        new ShoppingCart()
+                        new ShoppingCart(),
                     ];
                 }
-                break;
+            break;
             case "Test\Ecotone\Amqp\Fixture\ErrorChannel":
                 {
                     $objects = [
-                        new \Test\Ecotone\Amqp\Fixture\ErrorChannel\OrderService()
+                        new \Test\Ecotone\Amqp\Fixture\ErrorChannel\OrderService(),
                     ];
                 }
-                break;
+            break;
             case "Test\Ecotone\Amqp\Fixture\DeadLetter":
                 {
                     $objects = [
-                        new \Test\Ecotone\Amqp\Fixture\DeadLetter\OrderService()
+                        new \Test\Ecotone\Amqp\Fixture\DeadLetter\OrderService(),
                     ];
                     break;
                 }
             case "Test\Ecotone\Amqp\Fixture\FailureTransactionWithFatalError":
                 {
                     $objects = [
-                        new \Test\Ecotone\Amqp\Fixture\FailureTransactionWithFatalError\OrderService()
+                        new \Test\Ecotone\Amqp\Fixture\FailureTransactionWithFatalError\OrderService(),
                     ];
                     break;
                 }
         }
 
-        $amqpConnectionFactory = new AmqpConnectionFactory(["dsn" => "amqp://{$host}:5672"]);
+        $amqpConnectionFactory = new AmqpConnectionFactory(['dsn' => "amqp://{$host}:5672"]);
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
             ->withNamespaces([$namespace])
             ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString());
         MessagingSystemConfiguration::cleanCache($serviceConfiguration->getCacheDirectoryPath());
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
-            __DIR__ . "/../../../../",
+            __DIR__ . '/../../../../',
             InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
             $serviceConfiguration,
             [],
@@ -133,7 +123,7 @@ class DomainContext extends TestCase implements Context
         $amqpConnectionFactory->createContext()->deleteQueue(new AmqpQueue(\Test\Ecotone\Amqp\Fixture\DeadLetter\ErrorConfigurationContext::DEAD_LETTER_CHANNEL));
         $amqpConnectionFactory->createContext()->deleteQueue(new AmqpQueue(TicketServiceMessagingConfiguration::SERVICE_NAME));
         $amqpConnectionFactory->createContext()->deleteQueue(new AmqpQueue(AmqpDistributionModule::CHANNEL_PREFIX . \Test\Ecotone\Amqp\Fixture\DistributedDeadLetter\Receiver\TicketServiceMessagingConfiguration::SERVICE_NAME));
-        $amqpConnectionFactory->createContext()->deleteQueue(new AmqpQueue("ecotone_1_delay"));
+        $amqpConnectionFactory->createContext()->deleteQueue(new AmqpQueue('ecotone_1_delay'));
     }
 
     /**
@@ -144,58 +134,58 @@ class DomainContext extends TestCase implements Context
         $services = $table->getHash();
 
         foreach ($services as $service) {
-            $namespace = $service["namespace"];
-            $serviceName                          = $service["name"];
-            $host = getenv("RABBIT_HOST") ? getenv("RABBIT_HOST") : "localhost";
+            $namespace = $service['namespace'];
+            $serviceName                          = $service['name'];
+            $host = getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : 'localhost';
 
             switch ($namespace) {
                 case "Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Publisher":
                     {
-                    $objects = [
-                        new UserService()
-                    ];
-                    break;
-                }
+                        $objects = [
+                            new UserService(),
+                        ];
+                        break;
+                    }
                 case "Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Receiver":
                     {
-                    $objects = [
-                        new TicketServiceReceiver()
-                    ];
-                    break;
-                }
+                        $objects = [
+                            new TicketServiceReceiver(),
+                        ];
+                        break;
+                    }
                 case "Test\Ecotone\Amqp\Fixture\DistributedEventBus\Publisher":
                     {
                         $objects = [
-                            new \Test\Ecotone\Amqp\Fixture\DistributedEventBus\Publisher\UserService()
+                            new \Test\Ecotone\Amqp\Fixture\DistributedEventBus\Publisher\UserService(),
                         ];
                         break;
                     }
                 case "Test\Ecotone\Amqp\Fixture\DistributedEventBus\Receiver":
                     {
                         $objects = [
-                            new \Test\Ecotone\Amqp\Fixture\DistributedEventBus\Receiver\TicketServiceReceiver()
+                            new \Test\Ecotone\Amqp\Fixture\DistributedEventBus\Receiver\TicketServiceReceiver(),
                         ];
                         break;
                     }
                 case "Test\Ecotone\Amqp\Fixture\DistributedDeadLetter\Publisher":
                     {
                         $objects = [
-                            new \Test\Ecotone\Amqp\Fixture\DistributedDeadLetter\Publisher\UserService()
+                            new \Test\Ecotone\Amqp\Fixture\DistributedDeadLetter\Publisher\UserService(),
                         ];
                         break;
                     }
                 case "Test\Ecotone\Amqp\Fixture\DistributedDeadLetter\Receiver":
                     {
                         $objects = [
-                            new \Test\Ecotone\Amqp\Fixture\DistributedDeadLetter\Receiver\TicketServiceReceiver()
+                            new \Test\Ecotone\Amqp\Fixture\DistributedDeadLetter\Receiver\TicketServiceReceiver(),
                         ];
                         break;
                     }
             }
 
-            $amqpConnectionFactory         = new AmqpConnectionFactory(["dsn" => "amqp://{$host}:5672"]);
+            $amqpConnectionFactory         = new AmqpConnectionFactory(['dsn' => "amqp://{$host}:5672"]);
             self::$messagingSystems[$serviceName] = EcotoneLiteConfiguration::createWithConfiguration(
-                __DIR__ . "/../../../../",
+                __DIR__ . '/../../../../',
                 InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
                 ServiceConfiguration::createWithDefaults()
                     ->withNamespaces([$namespace])
@@ -212,7 +202,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iOrder(string $order)
     {
-        return $this->getCommandBus()->sendWithRouting("order.register", $order);
+        return $this->getCommandBus()->sendWithRouting('order.register', $order);
     }
 
     private function getCommandBus(): CommandBus
@@ -236,7 +226,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             [$order],
-            $this->getQueryBus()->sendWithRouting("order.getOrders", [])
+            $this->getQueryBus()->sendWithRouting('order.getOrders', [])
         );
     }
 
@@ -252,7 +242,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             [],
-            $this->getQueryBus()->sendWithRouting("order.getOrders", [])
+            $this->getQueryBus()->sendWithRouting('order.getOrders', [])
         );
     }
 
@@ -265,8 +255,8 @@ class DomainContext extends TestCase implements Context
         $commandBus = self::$messagingSystem->getGatewayByName(CommandBus::class);
 
         try {
-            $commandBus->sendWithRouting("order.register", $order);
-        } catch (\InvalidArgumentException $e) {
+            $commandBus->sendWithRouting('order.register', $order);
+        } catch (InvalidArgumentException $e) {
         }
     }
 
@@ -278,7 +268,7 @@ class DomainContext extends TestCase implements Context
         /** @var CommandBus $commandBus */
         $commandBus = self::$messagingSystem->getGatewayByName(CommandBus::class);
 
-        $commandBus->sendWithRouting("addToBasket", $productName);
+        $commandBus->sendWithRouting('addToBasket', $productName);
     }
 
     /**
@@ -289,10 +279,10 @@ class DomainContext extends TestCase implements Context
         /** @var QueryBus $queryBus */
         $queryBus = self::$messagingSystem->getGatewayByName(QueryBus::class);
 
-       $this->assertEquals(
-           [$productName],
-           $queryBus->sendWithRouting("getShoppingCartList", [])
-       );
+        $this->assertEquals(
+            [$productName],
+            $queryBus->sendWithRouting('getShoppingCartList', [])
+        );
     }
 
     /**
@@ -302,7 +292,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $orderName,
-            $this->getQueryBus()->sendWithRouting("order.getOrder", [])
+            $this->getQueryBus()->sendWithRouting('order.getOrder', [])
         );
     }
 
@@ -312,7 +302,7 @@ class DomainContext extends TestCase implements Context
     public function thereShouldBeNoOrder(string $orderName)
     {
         $this->assertNull(
-            $this->getQueryBus()->sendWithRouting("order.getOrder", [])
+            $this->getQueryBus()->sendWithRouting('order.getOrder', [])
         );
     }
 
@@ -323,7 +313,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $amount,
-            $this->getQueryBus()->sendWithRouting("getOrderAmount", [])
+            $this->getQueryBus()->sendWithRouting('getOrderAmount', [])
         );
     }
 
@@ -334,7 +324,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $amount,
-            $this->getQueryBus()->sendWithRouting("getIncorrectOrderAmount", [])
+            $this->getQueryBus()->sendWithRouting('getIncorrectOrderAmount', [])
         );
     }
 

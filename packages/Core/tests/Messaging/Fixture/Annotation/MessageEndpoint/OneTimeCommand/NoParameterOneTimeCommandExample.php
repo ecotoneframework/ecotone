@@ -6,9 +6,8 @@ use Ecotone\Messaging\Attribute\ConsoleCommand;
 
 class NoParameterOneTimeCommandExample
 {
-    #[ConsoleCommand("doSomething")]
-    public function execute() : void
+    #[ConsoleCommand('doSomething')]
+    public function execute(): void
     {
-
     }
 }

@@ -1,11 +1,10 @@
 <?php
 
-
 namespace Test\Ecotone\Dbal\Fixture;
-
 
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use stdClass;
 
 class StubMethodInvocation implements MethodInvocation
 {
@@ -17,7 +16,7 @@ class StubMethodInvocation implements MethodInvocation
         $this->returnData = $returnData;
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -36,7 +35,7 @@ class StubMethodInvocation implements MethodInvocation
 
     public function getObjectToInvokeOn()
     {
-        return new \stdClass();
+        return new stdClass();
     }
 
     public function getInterceptedClassName(): string
@@ -46,12 +45,12 @@ class StubMethodInvocation implements MethodInvocation
 
     public function getInterceptedMethodName(): string
     {
-        return "getInterceptedInterface";
+        return 'getInterceptedInterface';
     }
 
     public function getInterceptedInterface(): InterfaceToCall
     {
-        return InterfaceToCall::create(self::class, "getInterceptedInterface");
+        return InterfaceToCall::create(self::class, 'getInterceptedInterface');
     }
 
     public function getEndpointAnnotations(): iterable
@@ -66,6 +65,5 @@ class StubMethodInvocation implements MethodInvocation
 
     public function replaceArgument(string $parameterName, $value): void
     {
-        return;
     }
 }

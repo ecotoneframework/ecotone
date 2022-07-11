@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Messaging\Endpoint;
 
 /**
@@ -14,7 +13,7 @@ class NullInboundGatewayEntrypoint implements InboundGatewayEntrypoint
     {
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }

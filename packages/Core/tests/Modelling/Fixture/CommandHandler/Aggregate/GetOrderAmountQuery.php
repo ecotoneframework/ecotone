@@ -29,7 +29,7 @@ class GetOrderAmountQuery
      *
      * @return GetOrderAmountQuery
      */
-    public static function createWith(int $orderId) : self
+    public static function createWith(int $orderId): self
     {
         return new self($orderId);
     }

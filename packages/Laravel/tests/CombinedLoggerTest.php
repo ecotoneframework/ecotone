@@ -6,6 +6,9 @@ use Ecotone\Laravel\CombinedLogger;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @internal
+ */
 class CombinedLoggerTest extends TestCase
 {
     public function test_it_proxies_logs()

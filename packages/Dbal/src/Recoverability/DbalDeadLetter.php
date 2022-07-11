@@ -1,11 +1,12 @@
-<?php declare(strict_types=1);
+<?php
 
+declare(strict_types=1);
 
 namespace Ecotone\Dbal\Recoverability;
 
+use DateTime;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\Recoverability\ErrorContext;
@@ -20,11 +21,13 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Enqueue\Dbal\DbalContext;
 use Interop\Queue\ConnectionFactory;
 use Interop\Queue\Exception\Exception;
+
+use function json_decode;
 use function json_encode;
 
 class DbalDeadLetter
 {
-    const DEFAULT_DEAD_LETTER_TABLE = "ecotone_error_messages";
+    public const DEFAULT_DEAD_LETTER_TABLE = 'ecotone_error_messages';
     private ConnectionFactory $connectionFactory;
     private bool $isInitialized = false;
     private HeaderMapper $headerMapper;
@@ -46,11 +49,11 @@ class DbalDeadLetter
             ->from($this->getTableName())
             ->setMaxResults($limit)
             ->setFirstResult($offset)
-            ->orderBy("failed_at", "DESC")
+            ->orderBy('failed_at', 'DESC')
             ->execute()
             ->fetchAll();
 
-        return array_map(function(array $message) {
+        return array_map(function (array $message) {
             return ErrorContext::fromHeaders($this->decodeHeaders($message));
         }, $messages);
     }
@@ -67,7 +70,7 @@ class DbalDeadLetter
             ->execute()
             ->fetch();
 
-        if (!$message) {
+        if (! $message) {
             throw InvalidArgumentException::create("Can not find message with id {$messageId}");
         }
 
@@ -90,7 +93,7 @@ class DbalDeadLetter
         $this->replyWithoutInitialization($messageId, $messagingEntrypoint);
     }
 
-    public function replyAll(MessagingEntrypoint $messagingEntrypoint) : void
+    public function replyAll(MessagingEntrypoint $messagingEntrypoint): void
     {
         $this->initialize();
         while ($errorContexts = $this->list(100, 0)) {
@@ -134,7 +137,7 @@ class DbalDeadLetter
                 ->removeHeaders([
                     MessageHeaders::DELIVERY_DELAY,
                     MessageHeaders::TIME_TO_LIVE,
-                    MessageHeaders::CONSUMER_ACK_HEADER_LOCATION
+                    MessageHeaders::CONSUMER_ACK_HEADER_LOCATION,
                 ])
                 ->build();
         }
@@ -148,15 +151,15 @@ class DbalDeadLetter
             $this->getTableName(),
             [
                 'message_id' => $headers[MessageHeaders::MESSAGE_ID],
-                'failed_at' =>  new \DateTime(date('Y-m-d H:i:s.u', $headers[MessageHeaders::TIMESTAMP])),
+                'failed_at' =>  new DateTime(date('Y-m-d H:i:s.u', $headers[MessageHeaders::TIMESTAMP])),
                 'payload' => $payload,
-                'headers' => \json_encode($this->headerMapper->mapFromMessageHeaders($headers), JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_IGNORE)
+                'headers' => json_encode($this->headerMapper->mapFromMessageHeaders($headers), JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_IGNORE),
             ],
             [
                 'message_id' => Types::STRING,
                 'failed_at' => Types::DATETIME_MUTABLE,
                 'payload' => Types::TEXT,
-                'headers' => Types::TEXT
+                'headers' => Types::TEXT,
             ]
         );
 
@@ -199,14 +202,14 @@ class DbalDeadLetter
         return $context->getDbalConnection();
     }
 
-    private function decodeHeaders($message) : array
+    private function decodeHeaders($message): array
     {
-        return \json_decode($message['headers'], true, 512, JSON_THROW_ON_ERROR);
+        return json_decode($message['headers'], true, 512, JSON_THROW_ON_ERROR);
     }
 
     private function initialize(): void
     {
-        if (!$this->isInitialized) {
+        if (! $this->isInitialized) {
             $this->createDataBaseTable();
             $this->isInitialized = true;
         }
@@ -222,7 +225,7 @@ class DbalDeadLetter
                     ErrorContext::EXCEPTION_CODE,
                     ErrorContext::EXCEPTION_MESSAGE,
                     ErrorContext::EXCEPTION_FILE,
-                    ErrorContext::EXCEPTION_LINE
+                    ErrorContext::EXCEPTION_LINE,
                 ]
             )
             ->setHeader(MessagingEntrypoint::ENTRYPOINT, $message->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME))

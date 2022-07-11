@@ -1,8 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Logger;
-use Psr\Log\LogLevel;
+
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
@@ -14,6 +15,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverter
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHandler;
+use Psr\Log\LogLevel;
 
 /**
  * Class LoggingHandlerBuilder
@@ -22,8 +24,8 @@ use Ecotone\Messaging\MessageHandler;
  */
 class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {
-    const LOGGER_REFERENCE = "logger";
-    const LOG_FULL_MESSAGE = false;
+    public const LOGGER_REFERENCE = 'logger';
+    public const LOG_FULL_MESSAGE = false;
 
     private string $logLevel = LogLevel::DEBUG;
     private bool $logFullMessage = self::LOG_FULL_MESSAGE;
@@ -40,18 +42,18 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
     private function __construct(bool $isBefore)
     {
         $this->isBefore = $isBefore;
-        $this->methodParameterConverters[] = MessageConverterBuilder::create("message");
+        $this->methodParameterConverters[] = MessageConverterBuilder::create('message');
     }
 
     /**
      * @return LoggingHandlerBuilder
      */
-    public static function createForBefore() : self
+    public static function createForBefore(): self
     {
         return new self(true);
     }
 
-    public static function createForAfter() : self
+    public static function createForAfter(): self
     {
         return new self(false);
     }
@@ -60,7 +62,7 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
      * @param string $logLevel
      * @return LoggingHandlerBuilder
      */
-    public function withLogLevel(string $logLevel) : self
+    public function withLogLevel(string $logLevel): self
     {
         $this->logLevel = $logLevel;
 
@@ -71,7 +73,7 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
      * @param bool $logFullMessage
      * @return LoggingHandlerBuilder
      */
-    public function withLogFullMessage(bool $logFullMessage) : self
+    public function withLogFullMessage(bool $logFullMessage): self
     {
         $this->logFullMessage = $logFullMessage;
 
@@ -120,7 +122,7 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
     /**
      * @inheritDoc
      */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [$interfaceToCallRegistry->getFor(LoggingInterceptor::class, $this->getMethodName())];
     }
@@ -146,6 +148,6 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
      */
     private function getMethodName(): string
     {
-        return $this->isBefore ? "logBefore" : "logAfter";
+        return $this->isBefore ? 'logBefore' : 'logAfter';
     }
 }

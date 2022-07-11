@@ -1,6 +1,7 @@
 <?php
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Ordering;
+
 use Ecotone\Messaging\Future;
 
 /**
@@ -14,5 +15,5 @@ interface OrderingService
      * @param Order $order
      * @return Future
      */
-    public function processOrder(Order $order) : Future;
+    public function processOrder(Order $order): Future;
 }

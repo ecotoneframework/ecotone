@@ -9,9 +9,9 @@ namespace Ecotone\Modelling;
  */
 interface AggregateMessage
 {
-    const OVERRIDE_AGGREGATE_IDENTIFIER = "aggregate.id";
-    const AGGREGATE_OBJECT = "ecotone.modelling.aggregate";
-    const AGGREGATE_OBJECT_EXISTS = "ecotone.modelling.aggregate_exists";
-    const AGGREGATE_ID     = "ecotone.modelling.aggregate.id";
-    const TARGET_VERSION   = "ecotone.modelling.aggregate.target_version";
+    public const OVERRIDE_AGGREGATE_IDENTIFIER = 'aggregate.id';
+    public const AGGREGATE_OBJECT = 'ecotone.modelling.aggregate';
+    public const AGGREGATE_OBJECT_EXISTS = 'ecotone.modelling.aggregate_exists';
+    public const AGGREGATE_ID     = 'ecotone.modelling.aggregate.id';
+    public const TARGET_VERSION   = 'ecotone.modelling.aggregate.target_version';
 }

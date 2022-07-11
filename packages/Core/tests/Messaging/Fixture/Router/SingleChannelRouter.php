@@ -25,12 +25,12 @@ class SingleChannelRouter
         $this->channelNameToPick = $channelNameToPick;
     }
 
-    public static function createWithChosenChannelName(string $chanelName) : self
+    public static function createWithChosenChannelName(string $chanelName): self
     {
         return new self($chanelName);
     }
 
-    public function pick(Message $message) : string
+    public function pick(Message $message): string
     {
         return $this->channelNameToPick;
     }

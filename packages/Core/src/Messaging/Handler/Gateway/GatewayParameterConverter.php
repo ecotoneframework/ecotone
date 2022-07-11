@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
+
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -12,8 +14,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 interface GatewayParameterConverter
 {
+    public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder;
 
-    public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder) : MessageBuilder;
-
-    public function isSupporting(?MethodArgument $methodArgument) : bool;
+    public function isSupporting(?MethodArgument $methodArgument): bool;
 }

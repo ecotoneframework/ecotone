@@ -1,9 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Ecotone\EventSourcing;
 
 use Closure;
-use Prooph\EventStore\Projection\InMemoryEventStoreReadModelProjector;
 use Prooph\EventStore\Projection\ReadModel;
 use Prooph\EventStore\Projection\ReadModelProjector;
 
@@ -12,7 +13,9 @@ class CachingInMemoryReadModelProjector implements ReadModelProjector
     private bool $isFromStreamSetup = false;
     private bool $isWhenAlreadySetup = false;
 
-    public function __construct(private ReadModelProjector $inMemoryEventStoreReadModelProjector) {}
+    public function __construct(private ReadModelProjector $inMemoryEventStoreReadModelProjector)
+    {
+    }
 
     public function init(Closure $callback): ReadModelProjector
     {

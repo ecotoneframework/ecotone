@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder;
-
 
 class JobWasStarted
 {
@@ -13,7 +11,7 @@ class JobWasStarted
         $this->id = $id;
     }
 
-    public static function recordWith(string $id) : self
+    public static function recordWith(string $id): self
     {
         return new self($id);
     }

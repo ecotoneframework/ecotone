@@ -8,7 +8,7 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 use Test\Ecotone\EventSourcing\Fixture\Basket\Basket;
 use Test\Ecotone\EventSourcing\Fixture\Basket\Event\BasketWasCreated;
 
-#[Projection("category_projection", fromCategories: Basket::BASKET_STREAM)]
+#[Projection('category_projection', fromCategories: Basket::BASKET_STREAM)]
 class FromCategoryUsingAggregatePerStreamProjection
 {
     private array $actions = [];
@@ -19,8 +19,8 @@ class FromCategoryUsingAggregatePerStreamProjection
         $this->actions[] = $event;
     }
 
-    #[QueryHandler("action_collector.getCount")]
-    public function countHappenedActions() : int
+    #[QueryHandler('action_collector.getCount')]
+    public function countHappenedActions(): int
     {
         return count($this->actions);
     }

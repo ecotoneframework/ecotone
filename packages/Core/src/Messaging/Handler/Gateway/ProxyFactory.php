@@ -1,6 +1,6 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
@@ -13,6 +13,7 @@ use ProxyManager\FileLocator\FileLocator;
 use ProxyManager\GeneratorStrategy\FileWriterGeneratorStrategy;
 use ProxyManager\Signature\ClassSignatureGenerator;
 use ProxyManager\Signature\SignatureGenerator;
+use Serializable;
 use stdClass;
 
 /**
@@ -20,9 +21,9 @@ use stdClass;
  * @package Ecotone\Messaging\Handler\Gateway
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ProxyFactory implements \Serializable
+class ProxyFactory implements Serializable
 {
-    const REFERENCE_NAME = "gatewayProxyConfiguration";
+    public const REFERENCE_NAME = 'gatewayProxyConfiguration';
 
     private ?string $cacheDirectoryPath;
 
@@ -39,7 +40,7 @@ class ProxyFactory implements \Serializable
      * @param string $cacheDirectoryPath
      * @return ProxyFactory
      */
-    public static function createWithCache(string $cacheDirectoryPath) : self
+    public static function createWithCache(string $cacheDirectoryPath): self
     {
         return new self($cacheDirectoryPath);
     }
@@ -47,7 +48,7 @@ class ProxyFactory implements \Serializable
     /**
      * @return ProxyFactory
      */
-    public static function createNoCache() : self
+    public static function createNoCache(): self
     {
         return new self(null);
     }
@@ -55,7 +56,7 @@ class ProxyFactory implements \Serializable
     /**
      * @return Configuration
      */
-    public function getConfiguration() : Configuration
+    public function getConfiguration(): Configuration
     {
         $configuration = new Configuration();
 
@@ -74,7 +75,7 @@ class ProxyFactory implements \Serializable
      */
     public function warmUpCacheFor(array $classes): void
     {
-        if (!$classes) {
+        if (! $classes) {
             return;
         }
 
@@ -89,8 +90,7 @@ class ProxyFactory implements \Serializable
                 }
             );
 
-            $factory = new RemoteObjectFactory(new class () implements AdapterInterface
-            {
+            $factory = new RemoteObjectFactory(new class () implements AdapterInterface {
                 /**
                  * @inheritDoc
                  */
@@ -110,9 +110,8 @@ class ProxyFactory implements \Serializable
      */
     public function createProxyClass(string $interfaceName, Closure $buildCallback): \ProxyManager\Proxy\RemoteObjectInterface
     {
-        $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface
-        {
-            private \Closure $buildCallback;
+        $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface {
+            private Closure $buildCallback;
 
             /**
              *  constructor.
@@ -149,7 +148,7 @@ class ProxyFactory implements \Serializable
 
     public function __serialize(): array
     {
-        return ["path" => $this->cacheDirectoryPath];
+        return ['path' => $this->cacheDirectoryPath];
     }
 
     /**
@@ -165,7 +164,7 @@ class ProxyFactory implements \Serializable
         $path  = $data['path'];
         if (is_null($path)) {
             $cache = self::createNoCache();
-        }else {
+        } else {
             $cache = self::createWithCache($path);
         }
 

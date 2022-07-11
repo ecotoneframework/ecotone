@@ -9,5 +9,4 @@ namespace Test\Ecotone\Messaging\Fixture\Conversion;
  */
 class TwoStepPassword
 {
-
 }

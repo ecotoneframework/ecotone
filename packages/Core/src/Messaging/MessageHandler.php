@@ -1,7 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging;
+
+use Exception;
 
 /**
  * Interface MessageHandler
@@ -14,7 +17,7 @@ interface MessageHandler
      * Handle given message
      *
      * @param Message $message
-     * @throws \Exception
+     * @throws Exception
      */
-    public function handle(Message $message) : void;
+    public function handle(Message $message): void;
 }

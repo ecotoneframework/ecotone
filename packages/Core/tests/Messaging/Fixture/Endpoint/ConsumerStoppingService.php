@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Endpoint;
+
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 
 /**
@@ -38,7 +40,7 @@ class ConsumerStoppingService
      * @param $returnValue
      * @return ConsumerStoppingService
      */
-    public static function create($returnValue) : self
+    public static function create($returnValue): self
     {
         return new self($returnValue);
     }
@@ -50,7 +52,7 @@ class ConsumerStoppingService
         return $this->returnValue;
     }
 
-    public function executeNoReturn($receivedPayload) : void
+    public function executeNoReturn($receivedPayload): void
     {
         $this->receivedPayload = $receivedPayload;
         $this->consumerLifecycle->stop();
@@ -59,7 +61,7 @@ class ConsumerStoppingService
     /**
      * @param ConsumerLifecycle $consumerLifecycle
      */
-    public function setConsumerLifecycle(ConsumerLifecycle $consumerLifecycle) : void
+    public function setConsumerLifecycle(ConsumerLifecycle $consumerLifecycle): void
     {
         $this->consumerLifecycle = $consumerLifecycle;
     }

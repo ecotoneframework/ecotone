@@ -1,10 +1,7 @@
 <?php
 
-
 namespace Ecotone\JMSConverter;
 
-
-use Ecotone\Messaging\Config\OptionalReference;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -42,20 +39,20 @@ class JMSConverterBuilder implements ConverterBuilder
                     $registry->registerHandler(
                         $converterHandler->getDirection(),
                         $converterHandler->getRelatedClass(),
-                        "json",
+                        'json',
                         $converterHandler->getSerializerClosure($referenceSearchService)
                     );
                     $registry->registerHandler(
                         $converterHandler->getDirection(),
                         $converterHandler->getRelatedClass(),
-                        "xml",
+                        'xml',
                         $converterHandler->getSerializerClosure($referenceSearchService)
                     );
                 }
             });
 
         if ($this->cacheDirectoryPath) {
-            $builder->setCacheDir($this->cacheDirectoryPath . DIRECTORY_SEPARATOR . "jms");
+            $builder->setCacheDir($this->cacheDirectoryPath . DIRECTORY_SEPARATOR . 'jms');
         }
 
         $builder->setDocBlockTypeResolver(true);

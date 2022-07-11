@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling\CronIntegration;
 
+use function count;
+use function in_array;
+
+use OutOfRangeException;
+
 /**
  * @codeCoverageIgnore
  */
@@ -142,21 +147,21 @@ abstract class AbstractField implements FieldInterface
         $rangeEnd = $rangeChunks[1] ?? $rangeStart;
 
         if ($rangeStart < $this->rangeStart || $rangeStart > $this->rangeEnd || $rangeStart > $rangeEnd) {
-            throw new \OutOfRangeException('Invalid range start requested');
+            throw new OutOfRangeException('Invalid range start requested');
         }
 
         if ($rangeEnd < $this->rangeStart || $rangeEnd > $this->rangeEnd || $rangeEnd < $rangeStart) {
-            throw new \OutOfRangeException('Invalid range end requested');
+            throw new OutOfRangeException('Invalid range end requested');
         }
 
         // Steps larger than the range need to wrap around and be handled slightly differently than smaller steps
         if ($step >= $this->rangeEnd) {
-            $thisRange = [$this->fullRange[$step % \count($this->fullRange)]];
+            $thisRange = [$this->fullRange[$step % count($this->fullRange)]];
         } else {
             $thisRange = range($rangeStart, $rangeEnd, (int) $step);
         }
 
-        return \in_array($dateValue, $thisRange, true);
+        return in_array($dateValue, $thisRange, true);
     }
 
     /**
@@ -184,7 +189,7 @@ abstract class AbstractField implements FieldInterface
         }
 
         if ($this->isRange($expression) || $this->isIncrementsOfRanges($expression)) {
-            if (!$this->isIncrementsOfRanges($expression)) {
+            if (! $this->isIncrementsOfRanges($expression)) {
                 [$offset, $to] = explode('-', $expression);
                 $offset = $this->convertLiterals($offset);
                 $to = $this->convertLiterals($to);
@@ -199,7 +204,7 @@ abstract class AbstractField implements FieldInterface
             }
             $offset = '*' === $offset ? $this->rangeStart : $offset;
             if ($stepSize >= $this->rangeEnd) {
-                $values = [$this->fullRange[$stepSize % \count($this->fullRange)]];
+                $values = [$this->fullRange[$stepSize % count($this->fullRange)]];
             } else {
                 for ($i = $offset; $i <= $to; $i += $stepSize) {
                     $values[] = (int) $i;
@@ -222,7 +227,7 @@ abstract class AbstractField implements FieldInterface
      */
     protected function convertLiterals(string $value): string
     {
-        if (\count($this->literals)) {
+        if (count($this->literals)) {
             $key = array_search(strtoupper($value), $this->literals, true);
             if (false !== $key) {
                 return (string) $key;
@@ -262,7 +267,7 @@ abstract class AbstractField implements FieldInterface
         // Validate each chunk of a list individually
         if (false !== strpos($value, ',')) {
             foreach (explode(',', $value) as $listItem) {
-                if (!$this->validate($listItem)) {
+                if (! $this->validate($listItem)) {
                     return false;
                 }
             }
@@ -286,7 +291,7 @@ abstract class AbstractField implements FieldInterface
             return $this->validate($chunks[0]) && $this->validate($chunks[1]);
         }
 
-        if (!is_numeric($value)) {
+        if (! is_numeric($value)) {
             return false;
         }
 
@@ -297,6 +302,6 @@ abstract class AbstractField implements FieldInterface
         // We should have a numeric by now, so coerce this into an integer
         $value = (int) $value;
 
-        return \in_array($value, $this->fullRange, true);
+        return in_array($value, $this->fullRange, true);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
@@ -7,20 +8,20 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 final class PollingMetadata
 {
-    const DEFAULT_MAX_MESSAGES_PER_POLL = 1;
+    public const DEFAULT_MAX_MESSAGES_PER_POLL = 1;
 
-    const DEFAULT_FIXED_RATE = 1000;
+    public const DEFAULT_FIXED_RATE = 1000;
 
-    const DEFAULT_INITIAL_DELAY = 0;
-    const DEFAULT_MEMORY_LIMIT_MEGABYTES = 1024;
-    const DEFAULT_HANDLED_MESSAGE_LIMIT = 0;
-    const DEFAULT_EXECUTION_LIMIT = 0;
-    const DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS = 0;
-    const DEFAULT_STOP_ON_ERROR = false;
+    public const DEFAULT_INITIAL_DELAY = 0;
+    public const DEFAULT_MEMORY_LIMIT_MEGABYTES = 1024;
+    public const DEFAULT_HANDLED_MESSAGE_LIMIT = 0;
+    public const DEFAULT_EXECUTION_LIMIT = 0;
+    public const DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS = 0;
+    public const DEFAULT_STOP_ON_ERROR = false;
 
     private string $endpointId;
-    private string $cron = "";
-    private string $errorChannelName = "";
+    private string $cron = '';
+    private string $errorChannelName = '';
     private bool $isErrorChannelEnabled = true;
     /**
      * @var int in milliseconds
@@ -37,8 +38,8 @@ final class PollingMetadata
     private int $executionTimeLimitInMilliseconds = self::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS;
     private ?\Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder $connectionRetryTemplate = null;
     private bool $withSignalInterceptors = false;
-    private string $triggerReferenceName = "";
-    private string $taskExecutorName = "";
+    private string $triggerReferenceName = '';
+    private string $taskExecutorName = '';
     private bool $stopOnError = self::DEFAULT_STOP_ON_ERROR;
 
     /**
@@ -55,7 +56,7 @@ final class PollingMetadata
      * @param string $endpointId
      * @return PollingMetadata
      */
-    public static function create(string $endpointId) : self
+    public static function create(string $endpointId): self
     {
         return new self($endpointId);
     }
@@ -72,7 +73,7 @@ final class PollingMetadata
      * @param PollingMetadata $pollingMetadata
      * @return PollingMetadata
      */
-    public static function createFrom(PollingMetadata $pollingMetadata) : self
+    public static function createFrom(PollingMetadata $pollingMetadata): self
     {
         return clone $pollingMetadata;
     }
@@ -114,27 +115,27 @@ final class PollingMetadata
         return $copy;
     }
 
-    public function applyExecutionPollingMetadata(?ExecutionPollingMetadata $executionPollingMetadata) : self
+    public function applyExecutionPollingMetadata(?ExecutionPollingMetadata $executionPollingMetadata): self
     {
-        if (!$executionPollingMetadata) {
+        if (! $executionPollingMetadata) {
             return $this;
         }
 
         $copy = $this->createCopy();
 
-        if (!is_null($executionPollingMetadata->getStopOnError())) {
+        if (! is_null($executionPollingMetadata->getStopOnError())) {
             $copy = $copy->setStopOnError($executionPollingMetadata->getStopOnError());
         }
-        if (!is_null($executionPollingMetadata->getHandledMessageLimit())) {
+        if (! is_null($executionPollingMetadata->getHandledMessageLimit())) {
             $copy = $copy->setHandledMessageLimit($executionPollingMetadata->getHandledMessageLimit());
         }
-        if (!is_null($executionPollingMetadata->getExecutionTimeLimitInMilliseconds())) {
+        if (! is_null($executionPollingMetadata->getExecutionTimeLimitInMilliseconds())) {
             $copy = $copy->setExecutionTimeLimitInMilliseconds($executionPollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
-        if (!is_null($executionPollingMetadata->getMemoryLimitInMegabytes())) {
+        if (! is_null($executionPollingMetadata->getMemoryLimitInMegabytes())) {
             $copy = $copy->setMemoryLimitInMegaBytes($executionPollingMetadata->getMemoryLimitInMegabytes());
         }
-        if (!is_null($executionPollingMetadata->getCron())) {
+        if (! is_null($executionPollingMetadata->getCron())) {
             $copy = $copy->setCron($executionPollingMetadata->getCron());
         }
 
@@ -177,7 +178,7 @@ final class PollingMetadata
         return $copy;
     }
 
-    public function setEnabledErrorChannel(bool $isErrorChannelEnabled) : PollingMetadata
+    public function setEnabledErrorChannel(bool $isErrorChannelEnabled): PollingMetadata
     {
         $copy                        = $this->createCopy();
         $copy->isErrorChannelEnabled = $isErrorChannelEnabled;
@@ -214,7 +215,7 @@ final class PollingMetadata
         return $copy;
     }
 
-    public function setConnectionRetryTemplate(RetryTemplateBuilder $retryTemplateBuilder) : PollingMetadata
+    public function setConnectionRetryTemplate(RetryTemplateBuilder $retryTemplateBuilder): PollingMetadata
     {
         $copy = $this->createCopy();
         $copy->connectionRetryTemplate = $retryTemplateBuilder;
@@ -263,7 +264,7 @@ final class PollingMetadata
      * @param int $memoryLimit
      * @return PollingMetadata
      */
-    public function setMemoryLimitInMegaBytes(int $memoryLimit) : PollingMetadata
+    public function setMemoryLimitInMegaBytes(int $memoryLimit): PollingMetadata
     {
         $copy = $this->createCopy();
         $copy->memoryLimitInMegabytes = $memoryLimit;
@@ -275,7 +276,7 @@ final class PollingMetadata
      * @param bool $withSignalInterceptors
      * @return PollingMetadata
      */
-    public function setSignalInterceptors(bool $withSignalInterceptors) : PollingMetadata
+    public function setSignalInterceptors(bool $withSignalInterceptors): PollingMetadata
     {
         $copy = $this->createCopy();
         $copy->withSignalInterceptors = $withSignalInterceptors;
@@ -332,7 +333,7 @@ final class PollingMetadata
      */
     public function getErrorChannelName(): string
     {
-        return $this->stopOnError ? "" : $this->errorChannelName;
+        return $this->stopOnError ? '' : $this->errorChannelName;
     }
 
     /**
@@ -394,7 +395,7 @@ final class PollingMetadata
     /**
      * @return PollingMetadata
      */
-    private function createCopy() : self
+    private function createCopy(): self
     {
         return clone $this;
     }

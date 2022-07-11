@@ -1,13 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Chain;
 
-use Ecotone\Messaging\Config\MessagingSystemConfiguration;
-use Ecotone\Messaging\Support\Assert;
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -17,7 +16,9 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class ChainMessageHandlerBuilder
@@ -69,8 +70,8 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         $this->requiredReferences = array_merge($this->requiredReferences, MessagingSystemConfiguration::resolveRequiredReferenceForBuilder($messageHandler));
         $outputChannelToKeep = $messageHandler->getOutputMessageChannelName();
         $messageHandler = $messageHandler
-            ->withInputChannelName("")
-            ->withOutputMessageChannel("");
+            ->withInputChannelName('')
+            ->withOutputMessageChannel('');
 
         if ($outputChannelToKeep) {
             $messageHandler = ChainMessageHandlerBuilder::create()
@@ -106,7 +107,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             throw InvalidArgumentException::create("Can't configure output message handler and output message channel for chain handler");
         }
 
-        if (count($this->chainedMessageHandlerBuilders) === 1 && !$this->outputMessageHandler) {
+        if (count($this->chainedMessageHandlerBuilders) === 1 && ! $this->outputMessageHandler) {
             $singleHandler = $this->chainedMessageHandlerBuilders[0]
                 ->withOutputMessageChannel($this->getOutputMessageChannelName());
 
@@ -133,7 +134,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
         $customChannelResolver = InMemoryChannelResolver::createWithChannelResolver($channelResolver, $bridgeChannels);
 
-        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel,  (bool)$this->outputMessageChannelName), "forward")
+        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel, (bool)$this->outputMessageChannelName), 'forward')
             ->withOutputMessageChannel($this->outputMessageChannelName);
 
         if (is_null($this->interceptedHandlerOffset)) {
@@ -197,11 +198,11 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        if (!is_null($this->interceptedHandlerOffset)) {
+        if (! is_null($this->interceptedHandlerOffset)) {
             return $this->chainedMessageHandlerBuilders[$this->interceptedHandlerOffset]->getInterceptedInterface($interfaceToCallRegistry);
         }
 
-        return $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, "forward");
+        return $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, 'forward');
     }
 
     /**

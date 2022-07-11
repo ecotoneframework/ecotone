@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
-
 
 class ProjectionLifeCycleConfiguration
 {
@@ -14,26 +12,26 @@ class ProjectionLifeCycleConfiguration
     {
     }
 
-    public static function create() : static
+    public static function create(): static
     {
         return new self();
     }
 
-    public function withInitializationRequestChannel(string $initializationRequestChannel) : static
+    public function withInitializationRequestChannel(string $initializationRequestChannel): static
     {
         $this->initializationRequestChannel = $initializationRequestChannel;
 
         return $this;
     }
 
-    public function withDeleteRequestChannel(string $deleteRequestChannel) : static
+    public function withDeleteRequestChannel(string $deleteRequestChannel): static
     {
         $this->deleteRequestChannel = $deleteRequestChannel;
 
         return $this;
     }
 
-    public function withResetRequestChannel(string $resetRequestChannel) : static
+    public function withResetRequestChannel(string $resetRequestChannel): static
     {
         $this->resetRequestChannel = $resetRequestChannel;
 

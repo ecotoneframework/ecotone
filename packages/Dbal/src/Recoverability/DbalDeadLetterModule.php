@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Dbal\Recoverability;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
@@ -10,7 +9,6 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -19,12 +17,12 @@ use Enqueue\Dbal\DbalConnectionFactory;
 #[ModuleAnnotation]
 class DbalDeadLetterModule implements AnnotationModule
 {
-    const HELP_COMMAND_NAME = "ecotone:deadletter:help";
-    const LIST_COMMAND_NAME            = "ecotone:deadletter:list";
-    const SHOW_COMMAND_NAME       = "ecotone:deadletter:show";
-    const REPLAY_COMMAND_NAME     = "ecotone:deadletter:replay";
-    const REPLAY_ALL_COMMAND_NAME = "ecotone:deadletter:replayAll";
-    const DELETE_COMMAND_NAME     = "ecotone:deadletter:delete";
+    public const HELP_COMMAND_NAME = 'ecotone:deadletter:help';
+    public const LIST_COMMAND_NAME            = 'ecotone:deadletter:list';
+    public const SHOW_COMMAND_NAME       = 'ecotone:deadletter:show';
+    public const REPLAY_COMMAND_NAME     = 'ecotone:deadletter:replay';
+    public const REPLAY_ALL_COMMAND_NAME = 'ecotone:deadletter:replayAll';
+    public const DELETE_COMMAND_NAME     = 'ecotone:deadletter:delete';
 
     /**
      * @inheritDoc
@@ -43,7 +41,7 @@ class DbalDeadLetterModule implements AnnotationModule
         $connectionFactory     = DbalConnectionFactory::class;
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof DbalConfiguration) {
-                if (!$extensionObject->isDeadLetterEnabled()) {
+                if (! $extensionObject->isDeadLetterEnabled()) {
                     return;
                 }
 
@@ -52,16 +50,16 @@ class DbalDeadLetterModule implements AnnotationModule
             }
         }
 
-        if (!$isDeadLetterEnabled) {
+        if (! $isDeadLetterEnabled) {
             return;
         }
 
-        $this->registerOneTimeCommand("list", self::LIST_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
-        $this->registerOneTimeCommand("show", self::SHOW_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
-        $this->registerOneTimeCommand("reply", self::REPLAY_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
-        $this->registerOneTimeCommand("replyAll", self::REPLAY_ALL_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
-        $this->registerOneTimeCommand("delete", self::DELETE_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
-        $this->registerOneTimeCommand("help", self::HELP_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
+        $this->registerOneTimeCommand('list', self::LIST_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
+        $this->registerOneTimeCommand('show', self::SHOW_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
+        $this->registerOneTimeCommand('reply', self::REPLAY_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
+        $this->registerOneTimeCommand('replyAll', self::REPLAY_ALL_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
+        $this->registerOneTimeCommand('delete', self::DELETE_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
+        $this->registerOneTimeCommand('help', self::HELP_COMMAND_NAME, $configuration, $interfaceToCallRegistry);
 
         $configuration
             ->registerMessageHandler(DbalDeadLetterBuilder::createStore($connectionFactory))
@@ -72,21 +70,21 @@ class DbalDeadLetterModule implements AnnotationModule
             ->registerMessageHandler(DbalDeadLetterBuilder::createReplyAll($connectionFactory))
             ->registerGatewayBuilder(
                 GatewayProxyBuilder::create(
-                DeadLetterGateway::class,
-                DeadLetterGateway::class,
-                "list",
-                DbalDeadLetterBuilder::LIST_CHANNEL
+                    DeadLetterGateway::class,
+                    DeadLetterGateway::class,
+                    'list',
+                    DbalDeadLetterBuilder::LIST_CHANNEL
                 )
                     ->withParameterConverters([
-                        GatewayHeaderBuilder::create("limit", DbalDeadLetterBuilder::LIMIT_HEADER),
-                        GatewayHeaderBuilder::create("offset", DbalDeadLetterBuilder::OFFSET_HEADER)
+                        GatewayHeaderBuilder::create('limit', DbalDeadLetterBuilder::LIMIT_HEADER),
+                        GatewayHeaderBuilder::create('offset', DbalDeadLetterBuilder::OFFSET_HEADER),
                     ])
             )
             ->registerGatewayBuilder(
                 GatewayProxyBuilder::create(
                     DeadLetterGateway::class,
                     DeadLetterGateway::class,
-                    "show",
+                    'show',
                     DbalDeadLetterBuilder::SHOW_CHANNEL
                 )
             )
@@ -94,7 +92,7 @@ class DbalDeadLetterModule implements AnnotationModule
                 GatewayProxyBuilder::create(
                     DeadLetterGateway::class,
                     DeadLetterGateway::class,
-                    "reply",
+                    'reply',
                     DbalDeadLetterBuilder::REPLAY_CHANNEL
                 )
             )
@@ -102,7 +100,7 @@ class DbalDeadLetterModule implements AnnotationModule
                 GatewayProxyBuilder::create(
                     DeadLetterGateway::class,
                     DeadLetterGateway::class,
-                    "replyAll",
+                    'replyAll',
                     DbalDeadLetterBuilder::REPLAY_ALL_CHANNEL
                 )
             )
@@ -110,7 +108,7 @@ class DbalDeadLetterModule implements AnnotationModule
                 GatewayProxyBuilder::create(
                     DeadLetterGateway::class,
                     DeadLetterGateway::class,
-                    "delete",
+                    'delete',
                     DbalDeadLetterBuilder::DELETE_CHANNEL
                 )
             );
@@ -139,8 +137,12 @@ class DbalDeadLetterModule implements AnnotationModule
 
     private function registerOneTimeCommand(string $methodName, string $commandName, Configuration $configuration, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        list($messageHandlerBuilder, $oneTimeCommandConfiguration) = ConsoleCommandModule::prepareConsoleCommandForDirectObject(
-            new DbalDeadLetterConsoleCommand(), $methodName, $commandName, true, $interfaceToCallRegistry
+        [$messageHandlerBuilder, $oneTimeCommandConfiguration] = ConsoleCommandModule::prepareConsoleCommandForDirectObject(
+            new DbalDeadLetterConsoleCommand(),
+            $methodName,
+            $commandName,
+            true,
+            $interfaceToCallRegistry
         );
         $configuration
             ->registerMessageHandler($messageHandlerBuilder)

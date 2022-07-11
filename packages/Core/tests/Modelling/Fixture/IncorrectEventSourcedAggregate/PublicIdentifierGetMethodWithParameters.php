@@ -19,8 +19,8 @@ class PublicIdentifierGetMethodWithParameters
         return [new stdClass()];
     }
 
-    #[AggregateIdentifierMethod("id")]
-    public function getId(\stdClass $param)
+    #[AggregateIdentifierMethod('id')]
+    public function getId(stdClass $param)
     {
         return $this->internalId;
     }

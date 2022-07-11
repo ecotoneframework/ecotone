@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Messaging\Config;
 
 use Ecotone\Messaging\MessagingException;
@@ -13,7 +12,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class ModuleReferenceSearchService
 {
-    public const REFERENCE_NAME = "moduleReferenceSearchService";
+    public const REFERENCE_NAME = 'moduleReferenceSearchService';
 
     /**
      * @var object[]
@@ -54,7 +53,7 @@ class ModuleReferenceSearchService
      */
     public function retrieveRequired(string $referenceName): ?object
     {
-        if (!$this->retrieve($referenceName)) {
+        if (! $this->retrieve($referenceName)) {
             throw InvalidArgumentException::create("Reference with name {$referenceName} does not exist for module reference. Wrong configuration in module.");
         }
 

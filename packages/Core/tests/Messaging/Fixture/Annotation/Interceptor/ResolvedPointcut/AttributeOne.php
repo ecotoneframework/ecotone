@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class AttributeOne
 {
-
 }

@@ -2,15 +2,17 @@
 
 namespace Test\Ecotone\Messaging\Unit\Store;
 
-use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Store\InMemoryMessageGroup;
 use Ecotone\Messaging\Support\MessageBuilder;
+use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class InMemoryMessageGroupTest
  * @package Ecotone\Messaging\Store
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class InMemoryMessageGroupTest extends TestCase
 {

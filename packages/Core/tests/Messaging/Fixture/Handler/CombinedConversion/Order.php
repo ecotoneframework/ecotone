@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion;
 
 class Order implements OrderInterface

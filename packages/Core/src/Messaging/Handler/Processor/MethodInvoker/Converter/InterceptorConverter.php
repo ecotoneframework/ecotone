@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -61,11 +60,9 @@ class InterceptorConverter implements ParameterConverter
             return $this->interceptedInterface->getClassAnnotation($relatedParameter->getTypeDescriptor());
         }
 
-        if (!$relatedParameter->doesAllowNulls()) {
+        if (! $relatedParameter->doesAllowNulls()) {
             throw MessageHandlingException::create("Can find annotation in intercepted {$this->interceptedInterface} to resolve argument {$relatedParameter->getName()} for {$interfaceToCall}. Should not parameter be nullable?");
         }
-
-        return null;
     }
 
     /**

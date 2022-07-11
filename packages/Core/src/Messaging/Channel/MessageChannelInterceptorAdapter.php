@@ -14,5 +14,5 @@ interface MessageChannelInterceptorAdapter extends MessageChannel
     /**
      * @return MessageChannel
      */
-    public function getInternalMessageChannel() : MessageChannel;
+    public function getInternalMessageChannel(): MessageChannel;
 }

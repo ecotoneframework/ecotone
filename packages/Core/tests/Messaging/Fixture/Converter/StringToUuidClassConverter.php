@@ -1,14 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Converter;
 
-use Ecotone\Messaging\Handler\Type;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ramsey\Uuid\Uuid;
 
 class StringToUuidClassConverter implements Converter
 {

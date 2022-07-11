@@ -1,14 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
@@ -51,9 +49,9 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
     /**
      * @return string
      */
-    public static abstract function getConsumerAnnotation(): string;
+    abstract public static function getConsumerAnnotation(): string;
 
-    public static abstract function createConsumerFrom(AnnotatedFinding $annotationRegistration): ConsumerLifecycleBuilder;
+    abstract public static function createConsumerFrom(AnnotatedFinding $annotationRegistration): ConsumerLifecycleBuilder;
 
     /**
      * @inheritDoc

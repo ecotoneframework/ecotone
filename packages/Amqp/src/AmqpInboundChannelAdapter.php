@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Amqp;
@@ -69,8 +70,7 @@ class AmqpInboundChannelAdapter implements TaskExecutor
         int $receiveTimeoutInMilliseconds,
         InboundMessageConverter $inboundMessageConverter,
         bool $isMessageChannel
-    )
-    {
+    ) {
         $this->connectionFactory = $cachedConnectionFactory;
         $this->inboundAmqpGateway = $inboundAmqpGateway;
         $this->declareOnStartup = $declareOnStartup;
@@ -89,11 +89,11 @@ class AmqpInboundChannelAdapter implements TaskExecutor
     {
         $message = $this->getMessage();
 
-        if (!$message) {
+        if (! $message) {
             return;
         }
 
-        Assert::isSubclassOf($message, Message::class, "Passed object to amqp inbound channel adapter is not a Message");
+        Assert::isSubclassOf($message, Message::class, 'Passed object to amqp inbound channel adapter is not a Message');
         $this->inboundAmqpGateway->executeEntrypoint($message);
     }
 
@@ -105,7 +105,7 @@ class AmqpInboundChannelAdapter implements TaskExecutor
     public function getMessage(): ?Message
     {
         try {
-            if (!$this->initialized) {
+            if (! $this->initialized) {
                 $this->amqpAdmin->declareQueueWithBindings($this->getQueueName(), $this->connectionFactory->createContext());
                 $this->initialized = true;
             }
@@ -115,7 +115,7 @@ class AmqpInboundChannelAdapter implements TaskExecutor
             /** @var AmqpMessage $amqpMessage */
             $amqpMessage = $consumer->receive($this->receiveTimeoutInMilliseconds);
 
-            if (!$amqpMessage) {
+            if (! $amqpMessage) {
                 return null;
             }
 
@@ -125,12 +125,12 @@ class AmqpInboundChannelAdapter implements TaskExecutor
             }
 
             return $messageBuilder->build();
-        }catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             if ($this->isMessageChannel) {
                 throw $exception;
             }
 
-            throw new ConnectionException("There was a problem during polling amqp channel", 0, $exception);
+            throw new ConnectionException('There was a problem during polling amqp channel', 0, $exception);
         }
     }
 

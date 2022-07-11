@@ -9,6 +9,5 @@ class ApplicationContextExamplePSR0
     #[ServiceContext]
     public function doSomething()
     {
-
     }
 }

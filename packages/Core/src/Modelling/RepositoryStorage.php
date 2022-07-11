@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Modelling;
-
 
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -33,9 +31,9 @@ class RepositoryStorage
         if (count($this->aggregateRepositoryReferenceNames) === 1) {
             /** @var EventSourcedRepository|StandardRepository|RepositoryBuilder $repository */
             $repository = $this->referenceSearchService->get($this->aggregateRepositoryReferenceNames[0]);
-            if ($this->isEventSourced($repository) && !$this->isEventSourcedAggregate) {
+            if ($this->isEventSourced($repository) && ! $this->isEventSourcedAggregate) {
                 throw InvalidArgumentException::create("There is only one repository registered. For event sourcing usage, however aggregate {$this->aggregateClassName} is not event sourced. If it should be event sourced change attribute to " . EventSourcingAggregate::class);
-            } else if (!$this->isEventSourced($repository) && $this->isEventSourcedAggregate) {
+            } elseif (! $this->isEventSourced($repository) && $this->isEventSourcedAggregate) {
                 throw InvalidArgumentException::create("There is only one repository registered. For standard aggregate usage, however aggregate {$this->aggregateClassName} is event sourced. If it should be standard change attribute to " . Aggregate::class);
             }
 
@@ -50,9 +48,9 @@ class RepositoryStorage
             $repositoryTwoIsEventSourced = $this->isEventSourced($repositoryTwo);
 
             if (
-                ($repositoryOneIsEventSourced && !$repositoryTwoIsEventSourced)
+                ($repositoryOneIsEventSourced && ! $repositoryTwoIsEventSourced)
                 ||
-                (!$repositoryOneIsEventSourced && $repositoryTwoIsEventSourced)
+                (! $repositoryOneIsEventSourced && $repositoryTwoIsEventSourced)
             ) {
                 if ($this->isEventSourcedAggregate) {
                     return $this->returnRepository($repositoryOneIsEventSourced ? $repositoryOne : $repositoryTwo);
@@ -71,20 +69,20 @@ class RepositoryStorage
             }
         }
 
-        throw InvalidArgumentException::create("There is no repository available for aggregate: " . $this->aggregateClassName);
+        throw InvalidArgumentException::create('There is no repository available for aggregate: ' . $this->aggregateClassName);
     }
 
-    private function returnRepository(EventSourcedRepository|StandardRepository|RepositoryBuilder $repository) : EventSourcedRepository|StandardRepository
+    private function returnRepository(EventSourcedRepository|StandardRepository|RepositoryBuilder $repository): EventSourcedRepository|StandardRepository
     {
         if ($repository instanceof RepositoryBuilder) {
             $repository = $repository->build($this->channelResolver, $this->referenceSearchService);
         }
 
         if ($this->isEventSourcedAggregate) {
-            Assert::isTrue($this->isEventSourced($repository), "Registered standard repository for event sourced aggregate " . $this->aggregateClassName);
+            Assert::isTrue($this->isEventSourced($repository), 'Registered standard repository for event sourced aggregate ' . $this->aggregateClassName);
         }
-        if (!$this->isEventSourcedAggregate) {
-            Assert::isTrue(!$this->isEventSourced($repository), "Registered event sourced repository for standard aggregate " . $this->aggregateClassName);
+        if (! $this->isEventSourcedAggregate) {
+            Assert::isTrue(! $this->isEventSourced($repository), 'Registered event sourced repository for standard aggregate ' . $this->aggregateClassName);
         }
 
         return $repository;

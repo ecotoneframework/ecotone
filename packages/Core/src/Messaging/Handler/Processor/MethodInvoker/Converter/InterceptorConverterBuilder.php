@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
@@ -8,7 +9,6 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class AnnotationInterceptorConverterBuilder
@@ -41,7 +41,7 @@ class InterceptorConverterBuilder implements ParameterConverterBuilder
      * @param object[] $endpointAnnotations
      * @return InterceptorConverterBuilder
      */
-    public static function create(string $parameterName, InterfaceToCall $interceptedInterface, array $endpointAnnotations) : self
+    public static function create(string $parameterName, InterfaceToCall $interceptedInterface, array $endpointAnnotations): self
     {
         return new self($parameterName, $interceptedInterface, $endpointAnnotations);
     }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Ecotone\Dbal\ObjectManager;
 
@@ -7,7 +9,9 @@ use Ecotone\Modelling\StandardRepository;
 
 class ManagerRegistryRepository implements StandardRepository
 {
-    public function __construct(private ManagerRegistry $managerRegistry, private ?array $relatedClasses) {}
+    public function __construct(private ManagerRegistry $managerRegistry, private ?array $relatedClasses)
+    {
+    }
 
     public function canHandle(string $aggregateClassName): bool
     {

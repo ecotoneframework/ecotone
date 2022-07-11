@@ -4,11 +4,8 @@ namespace Ecotone\SymfonyBundle;
 
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
-use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
-use Ecotone\SymfonyBundle\Command\ListAllAsynchronousEndpointsCommand;
-use Ecotone\SymfonyBundle\Command\RunAsynchronousEndpointCommand;
 use Ecotone\SymfonyBundle\DepedencyInjection\Compiler\ConfiguredMessagingSystemWrapper;
 use Ecotone\SymfonyBundle\DepedencyInjection\Compiler\EcotoneCompilerPass;
 use Ecotone\SymfonyBundle\DepedencyInjection\Compiler\SymfonyConfigurationVariableService;
@@ -28,9 +25,9 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class EcotoneSymfonyBundle extends Bundle
 {
-    const CONFIGURED_MESSAGING_SYSTEM                 = "configured_messaging_system";
-    const CONFIGURED_MESSAGING_SYSTEM_WRAPPER = ConfiguredMessagingSystem::class;
-    const APPLICATION_CONFIGURATION_CONTEXT   = "messaging_system_application_context";
+    public const CONFIGURED_MESSAGING_SYSTEM                 = 'configured_messaging_system';
+    public const CONFIGURED_MESSAGING_SYSTEM_WRAPPER = ConfiguredMessagingSystem::class;
+    public const APPLICATION_CONFIGURATION_CONTEXT   = 'messaging_system_application_context';
 
     public function build(ContainerBuilder $container)
     {
@@ -56,7 +53,7 @@ class EcotoneSymfonyBundle extends Bundle
      */
     private function setUpExpressionLanguage(ContainerBuilder $container): void
     {
-        $expressionLanguageAdapter = ExpressionEvaluationService::REFERENCE . "_adapter";
+        $expressionLanguageAdapter = ExpressionEvaluationService::REFERENCE . '_adapter';
         $definition = new Definition();
         $definition->setClass(ExpressionLanguage::class);
 

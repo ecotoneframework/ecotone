@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
+
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Attribute\MediaTypeConverter;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
@@ -18,6 +18,8 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleMediaTypeConverte
  * Class ConverterModuleTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class ConverterModuleTest extends AnnotationConfigurationTest
 {
@@ -35,13 +37,13 @@ class ConverterModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerConverter(
                     ReferenceServiceConverterBuilder::create(
-                        "exampleConverterService",
-                        "convert",
-                        TypeDescriptor::create("array<string>"),
+                        'exampleConverterService',
+                        'convert',
+                        TypeDescriptor::create('array<string>'),
                         TypeDescriptor::create("array<\stdClass>")
                     )
                 )
-                ->requireReferences(["exampleConverterService"]),
+                ->requireReferences(['exampleConverterService']),
             $configuration
         );
     }

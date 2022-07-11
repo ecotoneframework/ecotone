@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Amqp;
 
-use Ecotone\Messaging\Support\Assert;
 use Enqueue\AmqpTools\DelayStrategy;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpDestination;
 use Interop\Amqp\AmqpMessage;
-use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
-use Interop\Amqp\Impl\AmqpBind;
-use Interop\Queue\Exception\InvalidDestinationException;
 
 class HeadersExchangeDelayStrategy implements DelayStrategy
 {
@@ -29,23 +25,23 @@ class HeadersExchangeDelayStrategy implements DelayStrategy
         unset($properties['x-death']);
 
 
-        $afterDelayDestination = "";
+        $afterDelayDestination = '';
         if ($dest instanceof AmqpTopic) {
             $afterDelayDestination = $dest->getTopicName();
         }
 
         $delayMessage = $context->createMessage($message->getBody(), $properties, $message->getHeaders());
         $delayMessage->setRoutingKey($message->getRoutingKey());
-        $delayMessage->setProperty("ecotone_delay", $delay);
-        $delayMessage->setHeader("ecotone_delay", $delay);
+        $delayMessage->setProperty('ecotone_delay', $delay);
+        $delayMessage->setHeader('ecotone_delay', $delay);
 
-        $exchange = AmqpExchange::createHeadersExchange("ecotone_delay");
+        $exchange = AmqpExchange::createHeadersExchange('ecotone_delay');
 
-        $queue = \Ecotone\Amqp\AmqpQueue::createWith("ecotone_" . $delay . "_delay");
+        $queue = \Ecotone\Amqp\AmqpQueue::createWith('ecotone_' . $delay . '_delay');
         $queue->withArgument('x-message-ttl', $delay);
         $queue->withArgument('x-dead-letter-exchange', $afterDelayDestination);
 
-        $binding = AmqpBinding::createHeadersBinding($exchange, $queue, ["ecotone_delay" => $delay]);
+        $binding = AmqpBinding::createHeadersBinding($exchange, $queue, ['ecotone_delay' => $delay]);
 
         $enqueueExchange = $exchange->toEnqueueExchange();
         $context->declareTopic($enqueueExchange);

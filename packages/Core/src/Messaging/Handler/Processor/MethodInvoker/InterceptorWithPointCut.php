@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -18,7 +17,7 @@ interface InterceptorWithPointCut
      * @param string $name
      * @return bool
      */
-    public function hasName(string $name) : bool;
+    public function hasName(string $name): bool;
 
     /**
      * @param InterfaceToCall $interfaceToCall

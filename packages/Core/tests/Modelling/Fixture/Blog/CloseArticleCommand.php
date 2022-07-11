@@ -11,13 +11,13 @@ use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
  */
 class CloseArticleCommand
 {
-    #[TargetAggregateIdentifier("author")]
+    #[TargetAggregateIdentifier('author')]
     private $authorName;
-    #[TargetAggregateIdentifier("title")]
+    #[TargetAggregateIdentifier('title')]
     private $titleName;
-    #[TargetAggregateIdentifier("additionalUnusedIdentifier")]
+    #[TargetAggregateIdentifier('additionalUnusedIdentifier')]
     private $additionalUnusedIdentifier;
-    #[TargetAggregateIdentifier("isPublished")]
+    #[TargetAggregateIdentifier('isPublished')]
     private $isPublished;
 
     /**
@@ -36,9 +36,8 @@ class CloseArticleCommand
      * @param string $title
      * @return self
      */
-    public static function createWith(string $author, string $title) : self
+    public static function createWith(string $author, string $title): self
     {
         return new self($author, $title);
     }
-
 }

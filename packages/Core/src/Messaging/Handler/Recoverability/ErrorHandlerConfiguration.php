@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Recoverability;
@@ -16,12 +17,12 @@ class ErrorHandlerConfiguration
         $this->errorChannelName     = $errorChannelName;
     }
 
-    public static function create(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate) : self
+    public static function create(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate): self
     {
         return new self($errorChannelName, $delayedRetryTemplate->build(), null);
     }
 
-    public static function createWithDeadLetterChannel(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate, string $deadLetterChannel): \Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration
+    public static function createWithDeadLetterChannel(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate, string $deadLetterChannel): ErrorHandlerConfiguration
     {
         return new self($errorChannelName, $delayedRetryTemplate->build(), $deadLetterChannel);
     }

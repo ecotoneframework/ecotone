@@ -2,16 +2,22 @@
 
 namespace Test\Ecotone\Messaging\Unit;
 
-use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Ecotone\Messaging\MessageHeaders;
+
+use function json_encode;
+
+use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Uuid;
+use stdClass;
 
 /**
  * Class MessageHeaderTest
  * @package Ecotone\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class MessageHeadersTest extends TestCase
 {
@@ -29,7 +35,7 @@ class MessageHeadersTest extends TestCase
     public function test_creating_with_custom_headers()
     {
         $headers = [
-            'key' => 'value'
+            'key' => 'value',
         ];
         $messageHeaders = MessageHeaders::create($headers);
 
@@ -65,7 +71,7 @@ class MessageHeadersTest extends TestCase
         $errorChannel = QueueChannel::create();
         $oldMessageHeaders = MessageHeaders::create([
             MessageHeaders::REPLY_CHANNEL => $replyChannel,
-            MessageHeaders::ERROR_CHANNEL => $errorChannel
+            MessageHeaders::ERROR_CHANNEL => $errorChannel,
         ]);
 
         $this->assertEquals($replyChannel, $oldMessageHeaders->getReplyChannel());
@@ -74,52 +80,52 @@ class MessageHeadersTest extends TestCase
 
     public function test_creating_with_object_as_value()
     {
-        $messageHeader = "some";
+        $messageHeader = 'some';
         $messageHeaders = MessageHeaders::create([
-            $messageHeader => new \stdClass()
+            $messageHeader => new stdClass(),
         ]);
 
         $this->assertEquals(
             $messageHeaders->get($messageHeader),
-            new \stdClass()
+            new stdClass()
         );
     }
 
     public function test_retrieving_headers_by_regex()
     {
         $messageHeaders = MessageHeaders::create([
-            "ecotone.domain.aggregate" => "name",
-            "ecotone.domain.method" => "bla",
-            "ecotone.messaging"
+            'ecotone.domain.aggregate' => 'name',
+            'ecotone.domain.method' => 'bla',
+            'ecotone.messaging',
         ]);
 
         $this->assertEquals(
             [
-                "ecotone.domain.aggregate" => "name",
-                "ecotone.domain.method" => "bla"
+                'ecotone.domain.aggregate' => 'name',
+                'ecotone.domain.method' => 'bla',
             ],
-            $messageHeaders->findByRegex("ecotone.domain.*")
+            $messageHeaders->findByRegex('ecotone.domain.*')
         );
     }
 
     public function test_converting_to_string()
     {
         $messageHeaders = MessageHeaders::create([
-            "token" => "123",
-            "notConvertableObject" => new \stdClass(),
-            "metadata" => [
-                "x" => 1
-            ]
+            'token' => '123',
+            'notConvertableObject' => new stdClass(),
+            'metadata' => [
+                'x' => 1,
+            ],
         ]);
 
         $this->assertEquals(
-            \json_encode([
-                "id" => $messageHeaders->get(MessageHeaders::MESSAGE_ID),
-                "timestamp" => $messageHeaders->get(MessageHeaders::TIMESTAMP),
-                "token" => "123",
-                "metadata" => [
-                    "x" => 1
-                ]
+            json_encode([
+                'id' => $messageHeaders->get(MessageHeaders::MESSAGE_ID),
+                'timestamp' => $messageHeaders->get(MessageHeaders::TIMESTAMP),
+                'token' => '123',
+                'metadata' => [
+                    'x' => 1,
+                ],
             ]),
             (string)$messageHeaders
         );

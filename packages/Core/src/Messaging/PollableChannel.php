@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging;
@@ -16,7 +17,7 @@ interface PollableChannel extends MessageChannel
      *
      * @return Message|null
      */
-    public function receive() : ?Message;
+    public function receive(): ?Message;
 
     /**
      * Receive with timeout
@@ -25,5 +26,5 @@ interface PollableChannel extends MessageChannel
      * @param int $timeoutInMilliseconds
      * @return null|Message
      */
-    public function receiveWithTimeout(int $timeoutInMilliseconds) : ?Message;
+    public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message;
 }

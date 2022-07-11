@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
@@ -22,7 +23,7 @@ class SummingInterceptorExample
      * @param int $secondValueForMathOperations
      * @return CalculatingServiceInterceptorExample
      */
-    public static function create(int $secondValueForMathOperations) : self
+    public static function create(int $secondValueForMathOperations): self
     {
         $calculatingService = new self();
         $calculatingService->secondValueForMathOperations = $secondValueForMathOperations;
@@ -31,11 +32,11 @@ class SummingInterceptorExample
     }
 
     #[Around(4)]
-    public function sum(MethodInvocation $methodInvocation, int $amount) : int
+    public function sum(MethodInvocation $methodInvocation, int $amount): int
     {
         $result = $amount + $this->secondValueForMathOperations;
 
-        $methodInvocation->replaceArgument("amount", $result);
+        $methodInvocation->replaceArgument('amount', $result);
         return $methodInvocation->proceed();
     }
 }

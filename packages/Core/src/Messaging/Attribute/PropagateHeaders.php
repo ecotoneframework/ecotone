@@ -2,8 +2,9 @@
 
 namespace Ecotone\Messaging\Attribute;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 final class PropagateHeaders
 {
-
 }

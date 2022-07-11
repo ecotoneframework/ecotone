@@ -1,12 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Attribute;
 
-use Doctrine\Common\Annotations\Annotation\Required;
-use Doctrine\Common\Annotations\Annotation\Target;
+use Attribute;
 
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD)]
 class MessageConsumer
 {
     private string $endpointId;

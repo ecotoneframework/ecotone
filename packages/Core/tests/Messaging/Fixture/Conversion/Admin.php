@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
-
 use Test\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword as AdminPassword;
 
 interface Admin
@@ -21,5 +20,5 @@ interface Admin
      * @param mixed $password
      * @return mixed
      */
-    public function getPassword(AdminPassword $password) : AdminPassword;
+    public function getPassword(AdminPassword $password): AdminPassword;
 }

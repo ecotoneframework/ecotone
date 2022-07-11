@@ -1,12 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
 use Ecotone\Messaging\Attribute\Endpoint\Delayed;
-use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Messaging\Attribute\Endpoint\ExpireAfter;
+use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders\EndpointHeadersInterceptor;
 use Ecotone\Messaging\MessageHeaders;
@@ -16,6 +17,8 @@ use PHPUnit\Framework\TestCase;
  * Class EndpointHeadersInterceptorTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class EndpointHeadersInterceptorTest extends TestCase
 {
@@ -55,10 +58,10 @@ class EndpointHeadersInterceptorTest extends TestCase
     public function test_adding_header()
     {
         $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new AddHeader("token", 123);
+        $annotation = new AddHeader('token', 123);
 
         $this->assertEquals(
-            ["token" => 123],
+            ['token' => 123],
             $endpointHeadersInterceptor->addMetadata(null, null, null, $annotation, null)
         );
     }
@@ -66,10 +69,10 @@ class EndpointHeadersInterceptorTest extends TestCase
     public function test_removing_header()
     {
         $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new RemoveHeader("token");
+        $annotation = new RemoveHeader('token');
 
         $this->assertEquals(
-            ["token" => null],
+            ['token' => null],
             $endpointHeadersInterceptor->addMetadata(null, null, null, null, $annotation)
         );
     }

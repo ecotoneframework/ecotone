@@ -1,15 +1,10 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
 
-
 use DateTimeImmutable;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
-use Prooph\Common\Messaging\DomainMessage;
 use Prooph\Common\Messaging\Message;
-use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 class ProophMessage implements Message

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\Renter;
-
 
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -25,12 +23,12 @@ class AppointmentRepositoryBuilder implements RepositoryBuilder
         }
     }
 
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([]);
     }
 
-    public static function createWith(array $appointments) : self
+    public static function createWith(array $appointments): self
     {
         return new self($appointments);
     }

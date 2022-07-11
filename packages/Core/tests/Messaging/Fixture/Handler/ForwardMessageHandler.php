@@ -7,7 +7,6 @@
  */
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
-    
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
@@ -29,7 +28,7 @@ class ForwardMessageHandler implements MessageHandler
         $this->messageChannel = $messageChannel;
     }
 
-    public static function create(MessageChannel $messageChannel) : self
+    public static function create(MessageChannel $messageChannel): self
     {
         return new self($messageChannel);
     }
@@ -39,7 +38,7 @@ class ForwardMessageHandler implements MessageHandler
      */
     public function handle(Message $message): void
     {
-         $this->messageChannel->send($message);
+        $this->messageChannel->send($message);
     }
 
     public function __toString()

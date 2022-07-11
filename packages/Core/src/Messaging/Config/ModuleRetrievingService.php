@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
@@ -13,10 +14,10 @@ interface ModuleRetrievingService
     /**
      * @return Module[]
      */
-    public function findAllModuleConfigurations() : array;
+    public function findAllModuleConfigurations(): array;
 
     /**
      * @return object[]
      */
-    public function findAllExtensionObjects() : array;
+    public function findAllExtensionObjects(): array;
 }

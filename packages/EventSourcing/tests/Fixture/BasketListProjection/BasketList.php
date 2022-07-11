@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\EventSourcing\Fixture\BasketListProjection;
 
 use Ecotone\EventSourcing\Attribute\Projection;
@@ -13,23 +12,23 @@ use Test\Ecotone\EventSourcing\Fixture\Basket\Event\ProductWasAddedToBasket;
 #[Projection(self::PROJECTION_NAME, Basket::BASKET_STREAM)]
 class BasketList
 {
-    const PROJECTION_NAME = "basketList";
+    public const PROJECTION_NAME = 'basketList';
     private array $basketsList = [];
 
     #[EventHandler(BasketWasCreated::EVENT_NAME)]
-    public function addBasket(array $event) : void
+    public function addBasket(array $event): void
     {
-        $this->basketsList[$event["id"]] = [];
+        $this->basketsList[$event['id']] = [];
     }
 
     #[EventHandler(ProductWasAddedToBasket::EVENT_NAME)]
-    public function addProduct(ProductWasAddedToBasket $event) : void
+    public function addProduct(ProductWasAddedToBasket $event): void
     {
         $this->basketsList[$event->getId()][] = $event->getProductName();
     }
 
-    #[QueryHandler("getALlBaskets")]
-    public function getAllBaskets() : array
+    #[QueryHandler('getALlBaskets')]
+    public function getAllBaskets(): array
     {
         return $this->basketsList;
     }

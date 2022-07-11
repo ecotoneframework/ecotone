@@ -6,6 +6,9 @@ use Ecotone\Laravel\LaravelConfigurationVariableService;
 use Illuminate\Support\Facades\Config;
 use Orchestra\Testbench\TestCase;
 
+/**
+ * @internal
+ */
 class LaravelConfigurationVariableServiceTest extends TestCase
 {
     public function test_it_proxies_to_laravel_configuration_service()

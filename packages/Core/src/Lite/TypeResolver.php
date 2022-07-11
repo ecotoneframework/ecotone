@@ -7,8 +7,6 @@ use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Class SymfonyReferenceTypeResolver
@@ -36,7 +34,7 @@ class TypeResolver implements ReferenceTypeFromNameResolver
      */
     public function resolve(string $referenceName): Type
     {
-        if (!$this->container->has($referenceName)) {
+        if (! $this->container->has($referenceName)) {
             throw ReferenceNotFoundException::create("Reference {$referenceName} was not found");
         }
 

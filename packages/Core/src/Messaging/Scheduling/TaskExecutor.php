@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
@@ -10,5 +11,5 @@ namespace Ecotone\Messaging\Scheduling;
  */
 interface TaskExecutor
 {
-    public function execute() : void;
+    public function execute(): void;
 }

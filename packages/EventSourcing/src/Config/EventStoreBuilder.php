@@ -1,14 +1,11 @@
 <?php
 
-
 namespace Ecotone\EventSourcing\Config;
-
 
 use Ecotone\EventSourcing\EcotoneEventStoreProophWrapper;
 use Ecotone\EventSourcing\EventMapper;
 use Ecotone\EventSourcing\EventSourcingConfiguration;
 use Ecotone\EventSourcing\LazyProophEventStore;
-use Ecotone\EventSourcing\LazyProophProjectionManager;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
@@ -36,7 +33,7 @@ class EventStoreBuilder extends InputOutputMessageHandlerBuilder
     /**
      * @param ParameterConverterBuilder[] $parameterConverters
      */
-    public static function create(string $methodName, array $parameterConverters, EventSourcingConfiguration $eventSourcingConfiguration) : static
+    public static function create(string $methodName, array $parameterConverters, EventSourcingConfiguration $eventSourcingConfiguration): static
     {
         return new self($methodName, $parameterConverters, $eventSourcingConfiguration);
     }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Modelling;
-
 
 use Ecotone\Messaging\Message;
 
@@ -15,8 +13,7 @@ class FactoryActionRouter
         $this->channelName = $channelName;
     }
 
-    public function route(Message $message) : void
+    public function route(Message $message): void
     {
-
     }
 }

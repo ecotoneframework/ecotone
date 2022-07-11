@@ -8,9 +8,9 @@ use Ecotone\Modelling\Attribute\AggregateIdentifier;
 
 interface TwitterService
 {
-    #[MessageGateway("getContent")]
+    #[MessageGateway('getContent')]
     public function getContent(#[AggregateIdentifier] string $twitId): string;
 
-    #[MessageGateway("changeContent")]
+    #[MessageGateway('changeContent')]
     public function changeContent(#[AggregateIdentifier] string $twitId, #[Payload] string $content): void;
 }

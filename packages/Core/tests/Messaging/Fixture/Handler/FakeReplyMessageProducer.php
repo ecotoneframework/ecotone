@@ -22,7 +22,7 @@ class FakeReplyMessageProducer implements \Ecotone\Messaging\Handler\MessageProc
         $this->replyData = $replyData;
     }
 
-    public static function create($replyData) : self
+    public static function create($replyData): self
     {
         return new self($replyData);
     }

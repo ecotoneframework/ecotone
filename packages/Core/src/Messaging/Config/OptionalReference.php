@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Messaging\Config;
-
 
 class OptionalReference
 {
@@ -21,7 +19,7 @@ class OptionalReference
      * @param string $referenceName
      * @return RequiredReference
      */
-    public static function create(string $referenceName) : self
+    public static function create(string $referenceName): self
     {
         return new self($referenceName);
     }

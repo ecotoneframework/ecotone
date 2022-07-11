@@ -3,7 +3,6 @@
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 class CallWithReplacingArgumentsInterceptorExample extends BaseInterceptorExample

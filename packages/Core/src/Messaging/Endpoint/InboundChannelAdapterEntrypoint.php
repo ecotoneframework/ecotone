@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
@@ -15,5 +16,5 @@ interface InboundChannelAdapterEntrypoint
 {
     #[LogBefore]
     #[LogError]
-    public function executeEntrypoint($data) : void;
+    public function executeEntrypoint($data): void;
 }

@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Ecotone\EventSourcing\Config;
-
 
 use Ecotone\EventSourcing\EventSourcingConfiguration;
 use Ecotone\EventSourcing\LazyProophProjectionManager;
-use Ecotone\EventSourcing\ProjectionRunningConfiguration;
 use Ecotone\EventSourcing\ProjectionSetupConfiguration;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
@@ -28,23 +25,24 @@ class ProjectionManagerBuilder extends InputOutputMessageHandlerBuilder
         private array $parameterConverters,
         private EventSourcingConfiguration $eventSourcingConfiguration,
         private array $projectionSetupConfigurations
-    )
-    {}
+    ) {
+    }
 
     /**
      * @param ParameterConverterBuilder[] $parameterConverters
      * @param ProjectionSetupConfiguration[] $projectionSetupConfigurations
      */
     public static function create(
-        string $methodName, array $parameterConverters,
+        string $methodName,
+        array $parameterConverters,
         EventSourcingConfiguration $eventSourcingConfiguration,
         array $projectionSetupConfigurations
-    ) : static
+    ): static
     {
         return new self($methodName, $parameterConverters, $eventSourcingConfiguration, $projectionSetupConfigurations);
     }
 
-    public function getInputMessageChannelName() : string
+    public function getInputMessageChannelName(): string
     {
         return $this->getProjectionManagerActionChannel($this->eventSourcingConfiguration->getProjectManagerReferenceName(), $this->methodName);
     }

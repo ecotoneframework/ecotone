@@ -25,7 +25,6 @@ class NoReplyMessageProducer implements MessageProcessor
     public function processMessage(Message $message)
     {
         $this->wasCalled = true;
-
     }
 
     public function wasCalled(): bool

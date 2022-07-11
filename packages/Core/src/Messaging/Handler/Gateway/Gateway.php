@@ -181,8 +181,6 @@ class Gateway implements NonProxyGateway
 
             return $reply->getPayload();
         }
-
-
     }
 
 

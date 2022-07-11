@@ -106,7 +106,5 @@ class InMemoryConversionService implements ConversionService
                 return $conversion['result'];
             }
         }
-
-
     }
 }

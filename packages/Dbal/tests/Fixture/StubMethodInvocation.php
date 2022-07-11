@@ -65,6 +65,5 @@ class StubMethodInvocation implements MethodInvocation
 
     public function replaceArgument(string $parameterName, $value): void
     {
-
     }
 }

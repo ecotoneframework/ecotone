@@ -74,8 +74,6 @@ class FileSystemAnnotationFinder implements AnnotationFinder
                                 if ($annotation instanceof Environment) {
                                     return $annotation;
                                 }
-
-
                             },
                             $this->getCachedAnnotationsForClass($className)
                         )
@@ -88,8 +86,6 @@ class FileSystemAnnotationFinder implements AnnotationFinder
                                 if ($annotation instanceof Environment) {
                                     return $annotation;
                                 }
-
-
                             },
                             $this->getCachedMethodAnnotations($className, $method)
                         )

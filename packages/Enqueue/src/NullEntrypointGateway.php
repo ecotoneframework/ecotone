@@ -17,6 +17,5 @@ class NullEntrypointGateway implements InboundChannelAdapterEntrypoint
 
     public function executeEntrypoint($data): void
     {
-
     }
 }

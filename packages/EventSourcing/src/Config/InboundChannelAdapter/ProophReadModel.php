@@ -54,11 +54,9 @@ class ProophReadModel implements ReadModel
 
     public function stack(string $operation, ...$args): void
     {
-
     }
 
     public function persist(): void
     {
-
     }
 }

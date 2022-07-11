@@ -63,8 +63,6 @@ class InterceptorConverter implements ParameterConverter
         if (! $relatedParameter->doesAllowNulls()) {
             throw MessageHandlingException::create("Can find annotation in intercepted {$this->interceptedInterface} to resolve argument {$relatedParameter->getName()} for {$interfaceToCall}. Should not parameter be nullable?");
         }
-
-
     }
 
     /**

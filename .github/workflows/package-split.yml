@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: ${{fromJson(needs.provide_packages_json.outputs.matrix)}}
+        package: ${{fromJson(needs.get_packages.outputs.matrix)}}
 
     steps:
       -   uses: actions/checkout@v2

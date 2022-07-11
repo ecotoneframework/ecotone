@@ -23,7 +23,7 @@ jobs:
           export PATH="$PATH:$HOME/.composer/vendor/bin"
 
       - name: Run PHP CS Fixer
-        run: php-cs-fixer --config=.php-cs-fixer.dist.php --allow-risky=yes
+        run: php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes
 
 #  Should be reverted to when a release for 3.9 is made. It eliminates a lot of the above steps.
 #        uses: docker://oskarstark/php-cs-fixer-ga

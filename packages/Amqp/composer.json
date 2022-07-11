@@ -40,7 +40,7 @@
     "ext-amqp": "*",
     "ecotone/enqueue": "2.0.0-dev",
     "enqueue/amqp-ext": "^0.10.4",
-    "enqueue/dsn": "*",
+    "enqueue/dsn": "^0.10.4",
     "enqueue/enqueue": "^0.10.0"
   },
   "require-dev": {
